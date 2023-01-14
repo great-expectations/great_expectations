@@ -5,9 +5,6 @@ import shutil
 import pytest
 from nbformat.notebooknode import NotebookNode
 
-import great_expectations as gx
-from great_expectations import DataContext
-
 # noinspection PyProtectedMember
 from great_expectations.cli.suite import _suite_edit_workflow
 from great_expectations.core import ExpectationSuiteValidationResult
@@ -28,6 +25,7 @@ from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
+from great_expectations.util import get_context
 from great_expectations.validator.validator import Validator
 from tests.render.test_util import run_notebook
 
@@ -64,7 +62,7 @@ def data_context_v3_custom_notebooks(tmp_path):
         str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
     )
 
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -99,7 +97,7 @@ def data_context_v3_custom_bad_notebooks(tmp_path):
         str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
     )
 
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -108,7 +106,7 @@ def critical_suite_with_citations(empty_data_context) -> ExpectationSuite:
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including an BasicSuiteBuilderProfiler entry, and citations.
     """
-    context: DataContext = empty_data_context
+    context = empty_data_context
     schema: ExpectationSuiteSchema = ExpectationSuiteSchema()
     critical_suite: dict = {
         "expectation_suite_name": "critical",
@@ -186,7 +184,7 @@ def suite_with_multiple_citations(empty_data_context) -> ExpectationSuite:
 
     The most recent citation does not have batch_request
     """
-    context: DataContext = empty_data_context
+    context = empty_data_context
     schema: ExpectationSuiteSchema = ExpectationSuiteSchema()
     critical_suite: dict = {
         "expectation_suite_name": "critical",
@@ -237,7 +235,7 @@ def warning_suite(empty_data_context) -> ExpectationSuite:
     This hand made fixture has a wide range of expectations, and has a mix of
     metadata including BasicSuiteBuilderProfiler entries.
     """
-    context: DataContext = empty_data_context
+    context = empty_data_context
     schema: ExpectationSuiteSchema = ExpectationSuiteSchema()
     warning_suite: dict = {
         "expectation_suite_name": "warning",
@@ -500,7 +498,7 @@ def test_render_with_no_column_cells_without_batch_request(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\n\nimport pandas as pd\n\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.core.expectation_configuration import ExpectationConfiguration\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ExpectationSuiteIdentifier,\n)\nfrom great_expectations.exceptions import DataContextError\n\ncontext = gx.data_context.DataContext()\n\n\n# Feel free to change the name of your suite here. Renaming this will not remove the other one.\nexpectation_suite_name = "critical"\ntry:\n    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)\n    print(\n        f\'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.\'\n    )\nexcept DataContextError:\n    suite = context.create_expectation_suite(\n        expectation_suite_name=expectation_suite_name\n    )\n    print(f\'Created ExpectationSuite "{suite.expectation_suite_name}".\')',
+                "source": 'import datetime\n\nimport pandas as pd\n\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.core.expectation_configuration import ExpectationConfiguration\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ExpectationSuiteIdentifier,\n)\nfrom great_expectations.exceptions import DataContextError\n\ncontext = gx.get_context()\n\n\n# Feel free to change the name of your suite here. Renaming this will not remove the other one.\nexpectation_suite_name = "critical"\ntry:\n    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)\n    print(\n        f\'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.\'\n    )\nexcept DataContextError:\n    suite = context.create_expectation_suite(\n        expectation_suite_name=expectation_suite_name\n    )\n    print(f\'Created ExpectationSuite "{suite.expectation_suite_name}".\')',
                 "outputs": [],
             },
             {
@@ -585,7 +583,7 @@ def test_complex_suite_with_batch_request(warning_suite, empty_data_context):
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\n\nimport pandas as pd\n\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.core.batch import BatchRequest\nfrom great_expectations.checkpoint import SimpleCheckpoint\nfrom great_expectations.exceptions import DataContextError\n\ncontext = gx.data_context.DataContext()\n\n# Note that if you modify this batch request, you may save the new version as a .json file\n#  to pass in later via the --batch-request option\nbatch_request = {\n    "datasource_name": "files_datasource",\n    "data_connector_name": "files_data_connector",\n    "data_asset_name": "1k",\n}\n\n\n# Feel free to change the name of your suite here. Renaming this will not remove the other one.\nexpectation_suite_name = "warning"\ntry:\n    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)\n    print(\n        f\'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.\'\n    )\nexcept DataContextError:\n    suite = context.create_expectation_suite(\n        expectation_suite_name=expectation_suite_name\n    )\n    print(f\'Created ExpectationSuite "{suite.expectation_suite_name}".\')\n\n\nvalidator = context.get_validator(\n    batch_request=BatchRequest(**batch_request),\n    expectation_suite_name=expectation_suite_name,\n)\ncolumn_names = [f\'"{column_name}"\' for column_name in validator.columns()]\nprint(f"Columns: {\', \'.join(column_names)}.")\nvalidator.head(n_rows=5, fetch_all=False)',
+                "source": 'import datetime\n\nimport pandas as pd\n\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.core.batch import BatchRequest\nfrom great_expectations.checkpoint import SimpleCheckpoint\nfrom great_expectations.exceptions import DataContextError\n\ncontext = gx.get_context()\n\n# Note that if you modify this batch request, you may save the new version as a .json file\n#  to pass in later via the --batch-request option\nbatch_request = {\n    "datasource_name": "files_datasource",\n    "data_connector_name": "files_data_connector",\n    "data_asset_name": "1k",\n}\n\n\n# Feel free to change the name of your suite here. Renaming this will not remove the other one.\nexpectation_suite_name = "warning"\ntry:\n    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)\n    print(\n        f\'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.\'\n    )\nexcept DataContextError:\n    suite = context.create_expectation_suite(\n        expectation_suite_name=expectation_suite_name\n    )\n    print(f\'Created ExpectationSuite "{suite.expectation_suite_name}".\')\n\n\nvalidator = context.get_validator(\n    batch_request=BatchRequest(**batch_request),\n    expectation_suite_name=expectation_suite_name,\n)\ncolumn_names = [f\'"{column_name}"\' for column_name in validator.columns()]\nprint(f"Columns: {\', \'.join(column_names)}.")\nvalidator.head(n_rows=5, fetch_all=False)',
                 "outputs": [],
             },
             {
@@ -920,7 +918,7 @@ def test_notebook_execution_with_pandas_backend(
     """
     # Since we'll run the notebook, we use a context with no data docs to avoid the renderer's default
     # behavior of building and opening docs, which is not part of this test.
-    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
     uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
     expectation_suite_name: str = "warning"
@@ -1055,7 +1053,7 @@ def test_notebook_execution_with_pandas_backend(
     )
 
     # Assertions about output
-    context = DataContext(context_root_dir=root_dir)
+    context = get_context(context_root_dir=root_dir)
     validator: Validator = context.get_validator(
         batch_request=BatchRequest(**batch_request),
         expectation_suite_name=expectation_suite_name,
@@ -1118,7 +1116,7 @@ def test_notebook_execution_with_custom_notebooks(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\n\nimport pandas as pd\n\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.core.batch import BatchRequest\nfrom great_expectations.checkpoint import SimpleCheckpoint\nfrom great_expectations.exceptions import DataContextError\n\ncontext = gx.data_context.DataContext()\n\nbatch_request = {\n    "datasource_name": "files_datasource",\n    "data_connector_name": "files_data_connector",\n    "data_asset_name": "1k",\n}\n\n\n# Feel free to change the name of your suite here. Renaming this will not remove the other one.\nexpectation_suite_name = "critical"\ntry:\n    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)\n    print(\n        f\'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.\'\n    )\nexcept DataContextError:\n    suite = context.create_expectation_suite(\n        expectation_suite_name=expectation_suite_name\n    )\n    print(f\'Created ExpectationSuite "{suite.expectation_suite_name}".\')\n\n\nvalidator = context.get_validator(\n    batch_request=BatchRequest(**batch_request),\n    expectation_suite_name=expectation_suite_name,\n)\ncolumn_names = [f\'"{column_name}"\' for column_name in validator.columns()]\nprint(f"Columns: {\', \'.join(column_names)}.")\nvalidator.head(n_rows=5, fetch_all=False)',
+                "source": 'import datetime\n\nimport pandas as pd\n\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.core.batch import BatchRequest\nfrom great_expectations.checkpoint import SimpleCheckpoint\nfrom great_expectations.exceptions import DataContextError\n\ncontext = gx.get_context()\n\nbatch_request = {\n    "datasource_name": "files_datasource",\n    "data_connector_name": "files_data_connector",\n    "data_asset_name": "1k",\n}\n\n\n# Feel free to change the name of your suite here. Renaming this will not remove the other one.\nexpectation_suite_name = "critical"\ntry:\n    suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)\n    print(\n        f\'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.\'\n    )\nexcept DataContextError:\n    suite = context.create_expectation_suite(\n        expectation_suite_name=expectation_suite_name\n    )\n    print(f\'Created ExpectationSuite "{suite.expectation_suite_name}".\')\n\n\nvalidator = context.get_validator(\n    batch_request=BatchRequest(**batch_request),\n    expectation_suite_name=expectation_suite_name,\n)\ncolumn_names = [f\'"{column_name}"\' for column_name in validator.columns()]\nprint(f"Columns: {\', \'.join(column_names)}.")\nvalidator.head(n_rows=5, fetch_all=False)',
                 "outputs": [],
             },
             {
@@ -1223,9 +1221,9 @@ def test_raise_exception_quotes_or_space_with_row_condition(
     """
     # Since we'll run the notebook, we use a context with no data docs to avoid the renderer's default
     # behavior of building and opening docs, which is not part of this test.
-    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")  # noqa: F841
     expectation_suite_name: str = "warning"
 
     context.create_expectation_suite(expectation_suite_name=expectation_suite_name)

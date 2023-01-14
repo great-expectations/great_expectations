@@ -2,6 +2,7 @@ from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricFunctionTypes
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -11,7 +12,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricFunctionTypes
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     ExpectationValidationResult,
@@ -161,8 +161,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
 
         # Setting up a configuration
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         min_value = configuration.kwargs["min_value"]
         max_value = configuration.kwargs["max_value"]

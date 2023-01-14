@@ -67,7 +67,8 @@
           "only_for": [
             "pandas",
             "sqlite",
-            "mysql"
+            "mysql",
+            "trino"
           ]
         },
         {
@@ -84,6 +85,38 @@
           },
           "only_for": [
             "bigquery_v3_api"
+          ]
+        },
+        {
+          "title": "positive_test__exact_min_and_max_redshift",
+          "exact_match_out": false,
+          "in": {
+            "column": "dist1",
+            "min_value": 1.15470053837925,
+            "max_value": 1.15470053837925
+          },
+          "out": {
+            "success": true,
+            "observed_value": 1.15470053837925
+          },
+          "only_for": [
+            "redshift"
+          ]
+        },
+        {
+          "title": "positive_test__exact_min_and_max_snowflake",
+          "exact_match_out": false,
+          "in": {
+            "column": "dist1",
+            "min_value": 1.1547003940416753,
+            "max_value": 1.1547003940416753
+          },
+          "out": {
+            "success": true,
+            "observed_value": 1.1547003940416753
+          },
+          "only_for": [
+            "snowflake"
           ]
         },
         {
@@ -104,7 +137,10 @@
           "suppress_test_for": [
             "sqlite",
             "mysql",
-            "bigquery"
+            "bigquery",
+            "trino",
+            "redshift",
+            "snowflake"
           ]
         },
         {

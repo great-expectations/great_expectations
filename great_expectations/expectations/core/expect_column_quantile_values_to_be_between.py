@@ -51,7 +51,7 @@ from great_expectations.util import isclose
 from great_expectations.validator.validator import ValidationDependencies
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
@@ -248,6 +248,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
     ) -> None:
         """Ensures quantile_ranges has been provided with value_ranges."""
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         try:
             assert (
                 "quantile_ranges" in configuration.kwargs
@@ -281,7 +282,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
         )
@@ -409,7 +410,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True
         )
-        styling = runtime_configuration.get("styling")
+        _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration["kwargs"],
             ["column", "quantile_ranges", "row_condition", "condition_parser"],
@@ -577,7 +578,7 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        renderer_configuration = RendererConfiguration(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,

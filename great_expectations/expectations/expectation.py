@@ -22,6 +22,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Sequence,
     Set,
     Tuple,
     Type,
@@ -73,6 +74,7 @@ from great_expectations.exceptions import (
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
+    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import (
@@ -123,6 +125,7 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.render.renderer_configuration import MetaNotes
+    from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 logger = logging.getLogger(__name__)
 
@@ -200,6 +203,11 @@ def param_method(param_name: str) -> Callable:
     If a helper method is decorated with @param_method(param_name="<param_name>") and the param attribute does not
     exist, the method will return either the input RendererConfiguration or None depending on the declared return type.
     """
+    if not param_name:
+        # If param_name was passed as an empty string
+        raise RendererConfigurationError(
+            "Method decorated with @param_method must be passed an existing param_name."
+        )
 
     def _param_method(param_func: Callable) -> Callable:
         @functools.wraps(param_func)
@@ -309,7 +317,9 @@ class Expectation(metaclass=MetaExpectation):
         "catch_exceptions",
         "result_format",
     )
-    default_kwarg_values = {
+    default_kwarg_values: dict[
+        str, bool | str | float | RuleBasedProfilerConfig | None
+    ] = {
         "include_config": True,
         "catch_exceptions": False,
         "result_format": "BASIC",
@@ -379,18 +389,16 @@ class Expectation(metaclass=MetaExpectation):
         else:
             template_str = f"{template_str[:-2]}."
 
-        add_param_args = (
-            (
-                "expectation_type",
-                RendererValueType.STRING,
-                renderer_configuration.expectation_type,
-            ),
-            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
+        renderer_configuration.add_param(
+            name="expectation_type",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.expectation_type,
         )
-        for name, param_type, value in add_param_args:
-            renderer_configuration.add_param(
-                name=name, param_type=param_type, value=value
-            )
+        renderer_configuration.add_param(
+            name="kwargs",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.kwargs,
+        )
 
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -448,6 +456,12 @@ class Expectation(metaclass=MetaExpectation):
         Template function that contains the logic that is shared by AtomicPrescriptiveRendererType.SUMMARY and
         LegacyRendererType.PRESCRIPTIVE.
         """
+        # deprecated-v0.15.43
+        warnings.warn(
+            "The method _atomic_prescriptive_template is deprecated as of v0.15.43 and will be removed in v0.18. "
+            "Please refer to Expectation method _prescriptive_template for the latest renderer template pattern.",
+            DeprecationWarning,
+        )
         renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
@@ -475,21 +489,19 @@ class Expectation(metaclass=MetaExpectation):
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> RenderedAtomicContent:
-        (
-            template_str,
-            params_with_json_schema,
-            meta_notes,
-            _,
-        ) = cls._atomic_prescriptive_template(
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
             configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
+        renderer_configuration = cls._prescriptive_template(
+            renderer_configuration=renderer_configuration,
+        )
         value_obj = renderedAtomicValueSchema.load(
             {
-                "template": template_str,
-                "params": params_with_json_schema,
-                "meta_notes": meta_notes,
+                "template": renderer_configuration.template_str,
+                "params": renderer_configuration.params.dict(),
+                "meta_notes": renderer_configuration.meta_notes,
                 "schema": {"type": "com.superconductive.rendered.string"},
             }
         )
@@ -863,7 +875,7 @@ class Expectation(metaclass=MetaExpectation):
             query = result_dict.get("unexpected_index_query")
             query_info = CollapseContent(
                 **{
-                    "collapse_toggle_link": "Show query to retrieve all unexpected values...",
+                    "collapse_toggle_link": "To retrieve all unexpected values...",
                     "collapse": [
                         RenderedStringTemplateContent(
                             **{
@@ -926,18 +938,16 @@ class Expectation(metaclass=MetaExpectation):
         else:
             template_str = f"{template_str[:-2]}."
 
-        add_param_args = (
-            (
-                "expectation_type",
-                RendererValueType.STRING,
-                renderer_configuration.expectation_type,
-            ),
-            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
+        renderer_configuration.add_param(
+            name="expectation_type",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.expectation_type,
         )
-        for name, param_type, value in add_param_args:
-            renderer_configuration.add_param(
-                name=name, param_type=param_type, value=value
-            )
+        renderer_configuration.add_param(
+            name="kwargs",
+            param_type=RendererValueType.STRING,
+            value=renderer_configuration.kwargs,
+        )
 
         value_obj = renderedAtomicValueSchema.load(
             {
@@ -1186,7 +1196,7 @@ class Expectation(metaclass=MetaExpectation):
         if not configuration:
             configuration = deepcopy(self.configuration)
 
-        # issue warnings if necesary
+        # issue warnings if necessary
         self._warn_if_result_format_config_in_runtime_configuration(
             runtime_configuration=runtime_configuration,
         )
@@ -1219,6 +1229,7 @@ class Expectation(metaclass=MetaExpectation):
         raise_exceptions_for_backends: bool = False,
         ignore_suppress: bool = False,
         ignore_only_for: bool = False,
+        for_gallery: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
         context: Optional[AbstractDataContext] = None,
@@ -1245,11 +1256,15 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         if debug_logger is not None:
-            _debug = lambda x: debug_logger.debug(f"(run_diagnostics) {x}")
-            _error = lambda x: debug_logger.error(f"(run_diagnostics) {x}")
+            _debug = lambda x: debug_logger.debug(  # noqa: E731
+                f"(run_diagnostics) {x}"
+            )
+            _error = lambda x: debug_logger.error(  # noqa: E731
+                f"(run_diagnostics) {x}"
+            )
         else:
-            _debug = lambda x: x
-            _error = lambda x: x
+            _debug = lambda x: x  # noqa: E731
+            _error = lambda x: x  # noqa: E731
 
         library_metadata: AugmentedLibraryMetadata = (
             self._get_augmented_library_metadata()
@@ -1366,6 +1381,14 @@ class Expectation(metaclass=MetaExpectation):
             if test_result.error_diagnostics
         ]
 
+        # If run for the gallery, don't include a bunch of stuff
+        if for_gallery:
+            examples = []
+            gallery_examples = []
+            renderers = []
+            test_results = []
+            errors = []
+
         return ExpectationDiagnostics(
             library_metadata=library_metadata,
             examples=examples,
@@ -1471,8 +1494,8 @@ class Expectation(metaclass=MetaExpectation):
             top_level_suppress_test_for = example.get("suppress_test_for")
             for test in example["tests"]:
                 if (
-                    test.get("include_in_gallery") == True
-                    or return_only_gallery_examples == False
+                    test.get("include_in_gallery") == True  # noqa: E712
+                    or return_only_gallery_examples == False  # noqa: E712
                 ):
                     copied_test = deepcopy(test)
                     if top_level_only_for:
@@ -1593,33 +1616,63 @@ class Expectation(metaclass=MetaExpectation):
             return False
 
     @staticmethod
-    @param_method(param_name="value_set")
-    def _add_value_set_params(
+    def _add_array_params(
+        array_param_name: str,
+        param_prefix: str,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        value_set: List[Optional[Any]] = renderer_configuration.params.value_set.value
-        if len(value_set) > 0:
-            for idx, value in enumerate(value_set):
-                if isinstance(value, Number):
-                    param_type = RendererValueType.NUMBER
-                else:
-                    param_type = RendererValueType.STRING
-                renderer_configuration.add_param(
-                    name=f"v__{str(idx)}", param_type=param_type, value=value
-                )
-        return renderer_configuration
+        if not param_prefix:
+            raise RendererConfigurationError(
+                "Array param_prefix must be a non-empty string."
+            )
+
+        @param_method(param_name=array_param_name)
+        def _add_params(
+            renderer_configuration: RendererConfiguration,
+        ) -> RendererConfiguration:
+            array: Sequence[Optional[Any]] = getattr(
+                renderer_configuration.params, array_param_name
+            ).value
+            if array:
+                for idx, value in enumerate(array):
+                    if isinstance(value, Number):
+                        param_type = RendererValueType.NUMBER
+                    else:
+                        param_type = RendererValueType.STRING
+                    renderer_configuration.add_param(
+                        name=f"{param_prefix}{str(idx)}",
+                        param_type=param_type,
+                        value=value,
+                    )
+            return renderer_configuration
+
+        return _add_params(renderer_configuration=renderer_configuration)
 
     @staticmethod
-    @param_method(param_name="value_set")
-    def _get_value_set_string(renderer_configuration: RendererConfiguration) -> str:
-        value_set: List[Optional[Any]] = renderer_configuration.params.value_set.value
-        if len(value_set) > 0:
-            value_set_str = " ".join(
-                [f"$v__{str(idx)}" for idx in range(len(value_set))]
+    def _get_array_string(
+        array_param_name: str,
+        param_prefix: str,
+        renderer_configuration: RendererConfiguration,
+    ) -> str:
+        if not param_prefix:
+            raise RendererConfigurationError(
+                "Array param_prefix must be a non-empty string."
             )
-        else:
-            value_set_str = "[ ]"
-        return value_set_str
+
+        @param_method(param_name=array_param_name)
+        def _get_string(renderer_configuration: RendererConfiguration) -> str:
+            array: Sequence[Optional[Any]] = getattr(
+                renderer_configuration.params, array_param_name
+            ).value
+            if array:
+                array_string = " ".join(
+                    [f"${param_prefix}{str(idx)}" for idx in range(len(array))]
+                )
+            else:
+                array_string = "[ ]"
+            return array_string
+
+        return _get_string(renderer_configuration=renderer_configuration)
 
     @staticmethod
     @param_method(param_name="mostly")
@@ -1697,11 +1750,15 @@ class Expectation(metaclass=MetaExpectation):
         """Generate test results. This is an internal method for run_diagnostics."""
 
         if debug_logger is not None:
-            _debug = lambda x: debug_logger.debug(f"(_get_test_results) {x}")
-            _error = lambda x: debug_logger.error(f"(_get_test_results) {x}")
+            _debug = lambda x: debug_logger.debug(  # noqa: E731
+                f"(_get_test_results) {x}"
+            )
+            _error = lambda x: debug_logger.error(  # noqa: E731
+                f"(_get_test_results) {x}"
+            )
         else:
-            _debug = lambda x: x
-            _error = lambda x: x
+            _debug = lambda x: x  # noqa: E731
+            _error = lambda x: x  # noqa: E731
         _debug("Starting")
 
         test_results = []
@@ -1753,6 +1810,7 @@ class Expectation(metaclass=MetaExpectation):
                 expectation_type=exp_test["expectation_type"],
                 test=exp_test["test"],
                 raise_exception=False,
+                debug_logger=debug_logger,
             )
             _end = time.time()
             _duration = _end - _start
@@ -1800,7 +1858,7 @@ class Expectation(metaclass=MetaExpectation):
 
         return test_results
 
-    def _get_rendered_result_as_string(self, rendered_result) -> str:
+    def _get_rendered_result_as_string(self, rendered_result) -> str:  # noqa: C901 - 16
         """Convenience method to get rendered results as strings."""
 
         result: str = ""
@@ -1846,7 +1904,7 @@ class Expectation(metaclass=MetaExpectation):
         elif isinstance(rendered_result, int):
             result = repr(rendered_result)
 
-        elif rendered_result == None:
+        elif rendered_result is None:
             result = ""
 
         else:
@@ -2191,7 +2249,7 @@ class TableExpectation(Expectation, ABC):
 
         return True
 
-    def _validate_metric_value_between(
+    def _validate_metric_value_between(  # noqa: C901 - 21
         self,
         metric_name,
         configuration: ExpectationConfiguration,
@@ -2283,7 +2341,7 @@ representation."""
         else:
             below_max = True
 
-        success = above_min and below_max
+        success = bool(above_min and below_max)
 
         return {"success": success, "result": {"observed_value": metric_value}}
 
@@ -2411,10 +2469,10 @@ class ColumnExpectation(TableExpectation, ABC):
 
 
 class ColumnMapExpectation(TableExpectation, ABC):
-    map_metric = None
+    map_metric: Optional[str] = None
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
-    success_keys = ("mostly",)
+    success_keys: Tuple[str, ...] = ("mostly",)
     default_kwarg_values = {
         "row_condition": None,
         "condition_parser": None,  # we expect this to be explicitly set whenever a row_condition is passed
@@ -2426,7 +2484,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
     @classmethod
     def is_abstract(cls) -> bool:
-        return cls.map_metric is None or super().is_abstract()
+        return not cls.map_metric or super().is_abstract()
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
@@ -2579,7 +2637,22 @@ class ColumnMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
-        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+            metric_kwargs = get_metric_kwargs(
+                f"{self.map_metric}.unexpected_index_query",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            validation_dependencies.set_metric_configuration(
+                metric_name=f"{self.map_metric}.unexpected_index_query",
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.unexpected_index_query",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
+            )
+        if isinstance(
+            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
+        ):
             if "unexpected_index_column_names" in validation_dependencies.result_format:
                 metric_kwargs = get_metric_kwargs(
                     f"{self.map_metric}.unexpected_index_list",
@@ -3120,7 +3193,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
 
 
-def _format_map_output(
+def _format_map_output(  # noqa: C901 - 22
     result_format: dict,
     success: bool,
     element_count: Optional[int] = None,
@@ -3308,6 +3381,12 @@ def add_values_with_json_schema_from_list_in_params(
     Utility function used in _atomic_prescriptive_template() to take list values from a given params dict key,
     convert each value to a dict with JSON schema type info, then add it to params_with_json_schema (dict).
     """
+    # deprecated-v0.15.43
+    warnings.warn(
+        "The method add_values_with_json_schema_from_list_in_params is deprecated as of v0.15.43 and will be removed in "
+        "v0.18. Please refer to Expectation method _prescriptive_template for the latest renderer template pattern.",
+        DeprecationWarning,
+    )
     target_list = params.get(param_key_with_list)
     if target_list is not None and len(target_list) > 0:
         for i, v in enumerate(target_list):

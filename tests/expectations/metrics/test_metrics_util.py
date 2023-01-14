@@ -1,9 +1,11 @@
-from typing import List
+from typing import Any, Dict, List
 
+import pandas as pd
 import pytest
 from _pytest import monkeypatch
 
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.exceptions import MetricResolutionError
 
 try:
     import sqlalchemy as sa
@@ -20,6 +22,8 @@ except ImportError:
 
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.expectations.metrics.util import (
+    get_unexpected_indices_for_multiple_pandas_named_indices,
+    get_unexpected_indices_for_single_pandas_named_index,
     sql_statement_with_post_compile_to_string,
 )
 from tests.test_utils import (
@@ -61,8 +65,32 @@ def _compare_select_statement_with_converted_string(engine) -> None:
         engine=engine, select_statement=select_statement
     )
     assert returned_string == (
-        "SELECT a.id, a.data \n" "FROM a \n" "WHERE a.data = '00000000'"
+        "SELECT a.id, a.data \n" "FROM a \n" "WHERE a.data = '00000000';"
     )
+
+
+@pytest.fixture
+def unexpected_index_list_one_index_column():
+    return [
+        {"animals": "cat", "pk_1": 0},
+        {"animals": "fish", "pk_1": 1},
+        {"animals": "dog", "pk_1": 2},
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+    ]
+
+
+@pytest.fixture
+def unexpected_index_list_two_index_columns():
+    return [
+        {"animals": "cat", "pk_1": 0, "pk_2": "zero"},
+        {"animals": "fish", "pk_1": 1, "pk_2": "one"},
+        {"animals": "dog", "pk_1": 2, "pk_2": "two"},
+        {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
+        {"animals": "lion", "pk_1": 4, "pk_2": "four"},
+        {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+    ]
 
 
 @pytest.mark.unit
@@ -123,7 +151,137 @@ def test_sql_statement_conversion_to_string_bigquery(test_backends):
         assert returned_string == (
             "SELECT `a`.`id`, `a`.`data` \n"
             "FROM `a` \n"
-            "WHERE `a`.`data` = '00000000'"
+            "WHERE `a`.`data` = '00000000';"
         )
     else:
         pytest.skip(f"skipping sql statement conversion test for : bigquery")
+
+
+@pytest.mark.unit
+def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_index_columns(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_one_index_column,
+):
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1"])
+    expectation_domain_column_name: str = "animals"
+    unexpected_index_column_names: List[str] = ["pk_1"]
+
+    unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
+        domain_records_df=updated_dataframe,
+        expectation_domain_column_name=expectation_domain_column_name,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert unexpected_index_list == unexpected_index_list_one_index_column
+
+
+@pytest.mark.unit
+def test_get_unexpected_indices_for_single_pandas_named_index(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_one_index_column,
+):
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1"])
+    expectation_domain_column_name = "animals"
+    unexpected_index_column_names = [updated_dataframe.index.name]
+
+    unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
+        domain_records_df=updated_dataframe,
+        expectation_domain_column_name=expectation_domain_column_name,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert unexpected_index_list == unexpected_index_list_one_index_column
+
+
+@pytest.mark.unit
+def test_get_unexpected_indices_for_multiple_pandas_named_indices(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_two_index_columns,
+):
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
+    expectation_domain_column_name = "animals"
+    unexpected_index_column_names = list(updated_dataframe.index.names)
+
+    unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
+        domain_records_df=updated_dataframe,
+        expectation_domain_column_name=expectation_domain_column_name,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert unexpected_index_list == unexpected_index_list_two_index_columns
+
+
+@pytest.mark.unit
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_two_index_columns,
+):
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
+    expectation_domain_column_name = "animals"
+    unexpected_index_column_names = ["pk_1", "pk_2"]
+
+    unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
+        domain_records_df=updated_dataframe,
+        expectation_domain_column_name=expectation_domain_column_name,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert unexpected_index_list == unexpected_index_list_two_index_columns
+
+
+@pytest.mark.unit
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_one_column(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+    unexpected_index_list_one_index_column,
+):
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
+    expectation_domain_column_name = "animals"
+    unexpected_index_column_names = ["pk_1"]
+
+    unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
+        domain_records_df=updated_dataframe,
+        expectation_domain_column_name=expectation_domain_column_name,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert unexpected_index_list == unexpected_index_list_one_index_column
+
+
+@pytest.mark.unit
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_columns_wrong_column(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+):
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
+    expectation_domain_column_name = "animals"
+    unexpected_index_column_names = ["i_dont_exist"]
+    with pytest.raises(MetricResolutionError) as e:
+        get_unexpected_indices_for_multiple_pandas_named_indices(
+            domain_records_df=updated_dataframe,
+            expectation_domain_column_name=expectation_domain_column_name,
+            unexpected_index_column_names=unexpected_index_column_names,
+        )
+    assert e.value.message == (
+        "Error: The column i_dont_exist does not exist in the named indices. Please "
+        "check your configuration"
+    )
+
+
+@pytest.mark.unit
+def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpected_index_wrong_domain(
+    pandas_animals_dataframe_for_unexpected_rows_and_index,
+):
+    dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
+    updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
+    expectation_domain_column_name = None
+    unexpected_index_column_names = ["pk_1"]
+    with pytest.raises(MetricResolutionError) as e:
+        get_unexpected_indices_for_multiple_pandas_named_indices(
+            domain_records_df=updated_dataframe,
+            expectation_domain_column_name=expectation_domain_column_name,
+            unexpected_index_column_names=unexpected_index_column_names,
+        )
+    assert e.value.message == (
+        "Error: The domain column is currently set to None. Please check your "
+        "configuration."
+    )

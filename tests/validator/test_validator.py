@@ -7,8 +7,7 @@ from uuid import UUID
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -20,6 +19,9 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
@@ -28,6 +30,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
+from great_expectations.util import get_context
 from great_expectations.validator.validation_graph import ValidationGraph
 from great_expectations.validator.validator import Validator
 
@@ -36,7 +39,7 @@ from great_expectations.validator.validator import Validator
 def yellow_trip_pandas_data_context(
     tmp_path_factory,
     monkeypatch,
-) -> DataContext:
+) -> FileDataContext:
     """
     Provides a data context with a data_connector for a pandas datasource which can connect to three months of
     yellow trip taxi data in csv form. This data connector enables access to all three months through a BatchRequest
@@ -114,7 +117,7 @@ def yellow_trip_pandas_data_context(
         ),
     )
 
-    context = DataContext(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     return context
@@ -163,7 +166,7 @@ def test_validator_default_expectation_args__sql(
 
     print(my_validator.get_default_expectation_arguments())
 
-    with pytest.raises(ge_exceptions.InvalidDataContextKeyError):
+    with pytest.raises(gx_exceptions.InvalidDataContextKeyError):
         # expectation_suite_name is a number not str
         # noinspection PyUnusedLocal
         my_validator = context.get_validator(
@@ -190,7 +193,7 @@ def test_validator_default_expectation_args__sql(
 def test_columns(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -218,7 +221,7 @@ def test_columns(
 def test_head(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    data_context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
     batch_request: Dict[str, Union[str, Dict[str, Any]]] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -252,7 +255,7 @@ def test_head(
 def multi_batch_taxi_validator(
     yellow_trip_pandas_data_context,
 ) -> Validator:
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
 
     suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
 
@@ -274,7 +277,7 @@ def multi_batch_taxi_validator(
 def multi_batch_taxi_validator_ge_cloud_mode(
     yellow_trip_pandas_data_context,
 ) -> Validator:
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
     context._cloud_mode = True
 
     suite = ExpectationSuite(
@@ -402,7 +405,7 @@ def test_validator_can_instantiate_with_a_multi_batch_request(
 def test_validator_with_bad_batchrequest(
     yellow_trip_pandas_data_context,
 ):
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
 
     suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
 
@@ -412,9 +415,9 @@ def test_validator_with_bad_batchrequest(
         data_asset_name="i_dont_exist",
         data_connector_query={"batch_filter_parameters": {"year": "2019"}},
     )
-    with pytest.raises(ge_exceptions.InvalidBatchRequestError):
+    with pytest.raises(gx_exceptions.InvalidBatchRequestError):
         # noinspection PyUnusedLocal
-        validator_multi_batch: Validator = context.get_validator(
+        _: Validator = context.get_validator(
             batch_request=multi_batch_request, expectation_suite=suite
         )
 
@@ -565,7 +568,7 @@ def test_adding_expectation_to_validator_not_send_usage_message(
 def test_validator_load_additional_batch_to_validator(
     yellow_trip_pandas_data_context,
 ):
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
 
     suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
 
@@ -614,7 +617,7 @@ def test_validator_load_additional_batch_to_validator(
 def test_instantiate_validator_with_a_list_of_batch_requests(
     yellow_trip_pandas_data_context,
 ):
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
     suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
 
     jan_batch_request: BatchRequest = BatchRequest(
@@ -659,7 +662,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
 
     with pytest.raises(ValueError) as ve:
         # noinspection PyUnusedLocal
-        validator: Validator = context.get_validator(
+        _: Validator = context.get_validator(
             batch_request=jan_feb_batch_request,
             batch_request_list=[jan_batch_request, feb_batch_request],
             expectation_suite=suite,
@@ -882,11 +885,11 @@ def test_graph_validate_with_bad_config_catch_exceptions_false(
     )
     with pytest.raises(
         tuple(
-            [ge_exceptions.MetricResolutionError, ge_exceptions.ProfilerExecutionError]
+            [gx_exceptions.MetricResolutionError, gx_exceptions.ProfilerExecutionError]
         )
     ) as eee:
         # noinspection PyUnusedLocal
-        result = Validator(
+        _ = Validator(
             execution_engine=basic_datasource.execution_engine,
             data_context=in_memory_runtime_context,
             batches=[batch],
@@ -941,7 +944,7 @@ def test_validator_docstrings(multi_batch_taxi_validator):
 def test_validator_include_rendered_content(
     yellow_trip_pandas_data_context,
 ):
-    context: DataContext = yellow_trip_pandas_data_context
+    context = yellow_trip_pandas_data_context
     batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
         data_connector_name="monthly",
@@ -1169,13 +1172,13 @@ def test_list_available_expectation_types(
 
 
 def _context_to_validator_and_expectation_sql(
-    context: DataContext,
+    context: FileDataContext,
 ) -> Tuple[Validator, ExpectColumnValuesToBeInSet]:
     """
     Helper method used by sql tests in this suite. Takes in a Datacontext and returns a tuple of Validator and
     Expectation after building a BatchRequest and creating ExpectationSuite.
     Args:
-        context (DataContext): DataContext to use
+        context (FileDataContext): DataContext to use
     """
 
     expectation_configuration = ExpectationConfiguration(
@@ -1216,12 +1219,10 @@ def test_validator_result_format_config_from_validator(
     )
 
     with pytest.warns(UserWarning) as config_warning:
-        result: ExpectationValidationResult = (
-            validator.expect_column_values_to_be_in_set(
-                column="animals",
-                value_set=["cat", "fish", "dog"],
-                result_format=result_format_config,
-            )
+        _: ExpectationValidationResult = validator.expect_column_values_to_be_in_set(
+            column="animals",
+            value_set=["cat", "fish", "dog"],
+            result_format=result_format_config,
         )
 
     assert (
@@ -1244,7 +1245,7 @@ def test_validator_result_format_config_from_expectation(
         context=data_context_with_connection_to_animal_names_db,
     )
     with pytest.warns(UserWarning) as config_warning:
-        result: ExpectationValidationResult = expectation.validate(
+        _: ExpectationValidationResult = expectation.validate(
             validator=validator, runtime_configuration=runtime_configuration
         )
 
@@ -1252,3 +1253,337 @@ def test_validator_result_format_config_from_expectation(
         "`result_format` configured at the Validator-level will not be persisted."
         in str(config_warning.list[0].message)
     )
+
+
+@pytest.mark.integration
+def test_graph_validate_with_two_expectaions_and_first_expectation_without_additional_configuration(
+    in_memory_runtime_context, basic_datasource
+):
+    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    df = pd.DataFrame(
+        [
+            "A",
+            "B",
+            "B",
+            "C",
+            "C",
+            "C",
+            "D",
+            "D",
+            "D",
+            "D",
+            "E",
+            "E",
+            "E",
+            "E",
+            "E",
+            "F",
+            "F",
+            "F",
+            "F",
+            "F",
+            "F",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+        ],
+        columns=["var"],
+    )
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration_expect_column_values_to_be_null = (
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_null",
+            kwargs={
+                "column": "var",
+            },
+        )
+    )
+
+    expectation_configuration_expect_column_values_to_be_in_set = (
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "var",
+                "value_set": ["B", "C", "D", "F", "G", "H"],
+                "result_format": {"result_format": "COMPLETE"},
+            },
+        )
+    )
+    result = Validator(
+        execution_engine=basic_datasource.execution_engine,
+        data_context=in_memory_runtime_context,
+        batches=[batch],
+    ).graph_validate(
+        configurations=[
+            expectation_configuration_expect_column_values_to_be_null,
+            expectation_configuration_expect_column_values_to_be_in_set,
+        ]
+    )
+
+    assert result == [
+        ExpectationValidationResult(
+            success=False,
+            expectation_config=ExpectationConfiguration(
+                "expect_column_values_to_be_null",
+                kwargs={
+                    "column": "var",
+                },
+            ),
+            meta={},
+            result={
+                "element_count": 36,
+                "unexpected_count": 36,
+                "unexpected_percent": 100.0,
+                "partial_unexpected_list": [
+                    "A",
+                    "B",
+                    "B",
+                    "C",
+                    "C",
+                    "C",
+                    "D",
+                    "D",
+                    "D",
+                    "D",
+                    "E",
+                    "E",
+                    "E",
+                    "E",
+                    "E",
+                    "F",
+                    "F",
+                    "F",
+                    "F",
+                    "F",
+                ],
+            },
+            exception_info=None,
+        ),
+        ExpectationValidationResult(
+            success=False,
+            expectation_config=ExpectationConfiguration(
+                "expect_column_values_to_be_in_set",
+                kwargs={
+                    "column": "var",
+                    "value_set": ["B", "C", "D", "F", "G", "H"],
+                    "result_format": {"result_format": "COMPLETE"},
+                },
+            ),
+            meta={},
+            result={
+                "element_count": 36,
+                "unexpected_count": 6,
+                "unexpected_percent": 16.666666666666664,
+                "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 16.666666666666664,
+                "unexpected_percent_nonmissing": 16.666666666666664,
+                "partial_unexpected_index_list": [0, 10, 11, 12, 13, 14],
+                "partial_unexpected_counts": [
+                    {"value": "E", "count": 5},
+                    {"value": "A", "count": 1},
+                ],
+                "unexpected_list": ["A", "E", "E", "E", "E", "E"],
+                "unexpected_index_list": [0, 10, 11, 12, 13, 14],
+            },
+            exception_info=None,
+        ),
+    ]
+
+
+@pytest.mark.integration
+def test_graph_validate_with_two_expectaions_and_first_expectation_with_result_format_complete(
+    in_memory_runtime_context, basic_datasource
+):
+    in_memory_runtime_context.datasources["my_datasource"] = basic_datasource
+    df = pd.DataFrame(
+        [
+            "A",
+            "B",
+            "B",
+            "C",
+            "C",
+            "C",
+            "D",
+            "D",
+            "D",
+            "D",
+            "E",
+            "E",
+            "E",
+            "E",
+            "E",
+            "F",
+            "F",
+            "F",
+            "F",
+            "F",
+            "F",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "G",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+            "H",
+        ],
+        columns=["var"],
+    )
+
+    batch = basic_datasource.get_single_batch_from_batch_request(
+        RuntimeBatchRequest(
+            **{
+                "datasource_name": "my_datasource",
+                "data_connector_name": "test_runtime_data_connector",
+                "data_asset_name": "IN_MEMORY_DATA_ASSET",
+                "runtime_parameters": {
+                    "batch_data": df,
+                },
+                "batch_identifiers": {
+                    "pipeline_stage_name": 0,
+                    "airflow_run_id": 0,
+                    "custom_key_0": 0,
+                },
+            }
+        )
+    )
+
+    expectation_configuration_expect_column_values_to_be_null = (
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_null",
+            kwargs={
+                "column": "var",
+            },
+        )
+    )
+
+    expectation_configuration_expect_column_values_to_be_in_set = (
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={
+                "column": "var",
+                "value_set": ["B", "C", "D", "F", "G", "H"],
+                "result_format": {"result_format": "COMPLETE"},
+            },
+        )
+    )
+    result = Validator(
+        execution_engine=basic_datasource.execution_engine,
+        data_context=in_memory_runtime_context,
+        batches=[batch],
+    ).graph_validate(
+        configurations=[
+            expectation_configuration_expect_column_values_to_be_in_set,
+            expectation_configuration_expect_column_values_to_be_null,
+        ]
+    )
+
+    assert result == [
+        ExpectationValidationResult(
+            success=False,
+            expectation_config=ExpectationConfiguration(
+                "expect_column_values_to_be_in_set",
+                kwargs={
+                    "column": "var",
+                    "value_set": ["B", "C", "D", "F", "G", "H"],
+                    "result_format": {"result_format": "COMPLETE"},
+                },
+            ),
+            meta={},
+            result={
+                "element_count": 36,
+                "unexpected_count": 6,
+                "unexpected_percent": 16.666666666666664,
+                "partial_unexpected_list": ["A", "E", "E", "E", "E", "E"],
+                "missing_count": 0,
+                "missing_percent": 0.0,
+                "unexpected_percent_total": 16.666666666666664,
+                "unexpected_percent_nonmissing": 16.666666666666664,
+                "partial_unexpected_index_list": [0, 10, 11, 12, 13, 14],
+                "partial_unexpected_counts": [
+                    {"value": "E", "count": 5},
+                    {"value": "A", "count": 1},
+                ],
+                "unexpected_list": ["A", "E", "E", "E", "E", "E"],
+                "unexpected_index_list": [0, 10, 11, 12, 13, 14],
+            },
+            exception_info=None,
+        ),
+        ExpectationValidationResult(
+            success=False,
+            expectation_config=ExpectationConfiguration(
+                "expect_column_values_to_be_null",
+                kwargs={
+                    "column": "var",
+                },
+            ),
+            meta={},
+            result={
+                "element_count": 36,
+                "unexpected_count": 36,
+                "unexpected_percent": 100.0,
+                "partial_unexpected_list": [
+                    "A",
+                    "B",
+                    "B",
+                    "C",
+                    "C",
+                    "C",
+                    "D",
+                    "D",
+                    "D",
+                    "D",
+                    "E",
+                    "E",
+                    "E",
+                    "E",
+                    "E",
+                    "F",
+                    "F",
+                    "F",
+                    "F",
+                    "F",
+                ],
+            },
+            exception_info=None,
+        ),
+    ]

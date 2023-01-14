@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain
@@ -28,7 +28,7 @@ logger.setLevel(logging.INFO)
 
 
 class ExpectationConfigurationBuilder(ABC, Builder):
-    exclude_field_names: Set[str] = Builder.exclude_field_names | {
+    exclude_field_names: ClassVar[Set[str]] = Builder.exclude_field_names | {
         "validation_parameter_builders",
     }
 
@@ -80,6 +80,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
         """
         Args:
@@ -88,6 +89,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             parameters: Dictionary of ParameterContainer objects corresponding to all Domain objects in memory.
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             ExpectationConfiguration object.
@@ -98,6 +100,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
             parameters=parameters,
             batch_list=batch_list,
             batch_request=batch_request,
+            runtime_configuration=runtime_configuration,
         )
 
         return self._build_expectation_configuration(
@@ -111,7 +114,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> None:
         validation_parameter_builders: List[ParameterBuilder] = (
             self.validation_parameter_builders or []
@@ -126,7 +129,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
                 parameter_computation_impl=None,
                 batch_list=batch_list,
                 batch_request=batch_request,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
 
     @abstractmethod
@@ -135,6 +138,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
         pass
 

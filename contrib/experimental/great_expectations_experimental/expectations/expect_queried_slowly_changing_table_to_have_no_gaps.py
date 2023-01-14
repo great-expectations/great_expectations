@@ -72,10 +72,12 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
             threshold = self.default_kwarg_values["threshold"]
 
         metrics = convert_to_json_serializable(data=metrics)
+        holes_count: int
+        total_count: int
         holes_count, total_count = list(
             metrics.get("query.template_values")[0].values()
-        )[0]
-        error_rate = holes_count / total_count
+        )
+        error_rate = float(holes_count) / total_count
 
         return {
             "success": error_rate <= threshold,
@@ -175,6 +177,13 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                     },
                 },
             ],
+            "suppress_test_for": [
+                "mysql",
+                "mssql",
+                "postgresql",
+                "bigquery",
+                "snowflake",
+            ],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -188,7 +197,6 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                         }
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -203,14 +211,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                         "threshold": 0.1,
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
             ],
         },
     ]

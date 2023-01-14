@@ -95,9 +95,10 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
     )
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         try:
             assert "like_pattern" in configuration.kwargs, "Must provide like_pattern"
             assert isinstance(
@@ -122,11 +123,9 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         **kwargs
     ) -> None:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
+        _ = False if runtime_configuration.get("include_column_name") is False else True
+        _ = runtime_configuration.get("styling")
+        params = substitute_none_for_missing(  # noqa: F841 # unused
             configuration.kwargs,
             ["column", "mostly", "row_condition", "condition_parser"],
         )

@@ -1,32 +1,30 @@
 from __future__ import annotations
 
 import copy
-import dataclasses
 import itertools
 from datetime import datetime
-from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    Callable,
     Dict,
     List,
     NamedTuple,
     Optional,
     Sequence,
     Type,
-    Union,
     cast,
 )
 
 import pydantic
-from pydantic import Field
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import ClassVar, Literal, TypeAlias
+from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
     BatchRequestOptions,
+    BatchSortersDefinition,
     DataAsset,
     Datasource,
 )
@@ -41,17 +39,13 @@ class SQLDatasourceError(Exception):
     pass
 
 
-class BatchRequestError(Exception):
-    pass
-
-
 @pydantic_dc.dataclass(frozen=True)
 class ColumnSplitter:
     column_name: str
     method_name: str
     param_names: Sequence[str]
 
-    def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
+    def param_defaults(self, table_asset: TableAsset) -> Dict[str, List]:
         raise NotImplementedError
 
     @pydantic.validator("method_name")
@@ -86,50 +80,47 @@ class SqlYearMonthSplitter(ColumnSplitter):
         default_factory=lambda: ["year", "month"]
     )
 
-    def param_defaults(self, data_asset: DataAsset) -> Dict[str, List]:
-        """Query the database to get the years and months to split over.
+    def param_defaults(self, table_asset: TableAsset) -> Dict[str, List]:
+        """Query sql database to get the years and months to split over.
 
         Args:
-            data_asset: A TableAsset over which we want to split the data.
+            table_asset: A TableAsset over which we want to split the data.
         """
-        # This column splitter is only relevant to SQL data assets so we do some assertions
-        # to validate this.
-        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
-        assert isinstance(data_asset, TableAsset), "data_asset must be a TableAsset"
-        assert isinstance(
-            data_asset.datasource.execution_engine, SqlAlchemyExecutionEngine
+        return _query_for_year_and_month(
+            table_asset, self.column_name, _get_sql_datetime_range
         )
-        with data_asset.datasource.execution_engine.engine.connect() as conn:
-            datetimes: DatetimeRange = (
-                (
-                    _get_sqlite_datetime_range(
-                        conn,
-                        table_name=data_asset.table_name,
-                        col_name=self.column_name,
-                    )
-                )
-                if conn.dialect.name == "sqlite"
-                else (
-                    _get_sql_datetime_range(
-                        conn,
-                        table_name=data_asset.table_name,
-                        col_name=self.column_name,
-                    )
-                )
-            )
-        year: List[int] = list(range(datetimes.min.year, datetimes.max.year + 1))
-        month: List[int]
-        if datetimes.min.year == datetimes.max.year:
-            month = list(range(datetimes.min.month, datetimes.max.month + 1))
-        else:
-            month = list(range(1, 13))
-        return {"year": year, "month": month}
 
 
-# In _get_sql*, we opt to use a raw string instead of sqlalchemy.text because we don't
-# need any of the features for these queries:
-# https://docs.sqlalchemy.org/en/14/core/sqlelement.html#sqlalchemy.sql.expression.text
+def _query_for_year_and_month(
+    table_asset: TableAsset,
+    column_name: str,
+    query_datetime_range: Callable[
+        [sqlalchemy.engine.base.Connection, str, str], DatetimeRange
+    ],
+) -> Dict[str, List]:
+    # We should make an assertion about the execution_engine earlier. Right now it is assigned to
+    # after construction. We may be able to use a hook in a property setter.
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+    assert isinstance(
+        table_asset.datasource.execution_engine, SqlAlchemyExecutionEngine
+    )
+
+    with table_asset.datasource.execution_engine.engine.connect() as conn:
+        datetimes: DatetimeRange = query_datetime_range(
+            conn,
+            table_asset.table_name,
+            column_name,
+        )
+    year: List[int] = list(range(datetimes.min.year, datetimes.max.year + 1))
+    month: List[int]
+    if datetimes.min.year == datetimes.max.year:
+        month = list(range(datetimes.min.month, datetimes.max.month + 1))
+    else:
+        month = list(range(1, 13))
+    return {"year": year, "month": month}
+
+
 def _get_sql_datetime_range(
     conn: sqlalchemy.engine.base.Connection, table_name: str, col_name: str
 ) -> DatetimeRange:
@@ -138,119 +129,12 @@ def _get_sql_datetime_range(
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
 
 
-def _get_sqlite_datetime_range(
-    conn: sqlalchemy.engine.base.Connection, table_name: str, col_name: str
-) -> DatetimeRange:
-    q = f"select STRFTIME('%Y%m%d', min({col_name})), STRFTIME('%Y%m%d', max({col_name})) from {table_name}"
-    min_max_dt = [datetime.strptime(dt, "%Y%m%d") for dt in list(conn.execute(q))[0]]
-    return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
-
-
-@pydantic_dc.dataclass(frozen=True)
-class BatchSorter:
-    metadata_key: str
-    reverse: bool = False
-
-
-BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str]]
-
-
-def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
-    if len(sorters) == 0 or isinstance(sorters[0], BatchSorter):
-        # mypy gets confused here. Since BatchSortersDefinition has all elements of the
-        # same type in the list so if the first on is BatchSorter so are the others.
-        return cast(List[BatchSorter], sorters)
-    # Likewise, sorters must be List[str] here.
-    return [_batch_sorter_from_str(sorter) for sorter in cast(List[str], sorters)]
-
-
-def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
-    """Convert a list of strings to BatchSorters
-
-    Args:
-        sort_key: A batch metadata key which will be used to sort batches on a data asset.
-                  This can be prefixed with a + or - to indicate increasing or decreasing
-                  sorting. If not specified, defaults to increasing order.
-    """
-    if sort_key[0] == "-":
-        return BatchSorter(metadata_key=sort_key[1:], reverse=True)
-    elif sort_key[0] == "+":
-        return BatchSorter(metadata_key=sort_key[1:], reverse=False)
-    else:
-        return BatchSorter(metadata_key=sort_key, reverse=False)
-
-
 class TableAsset(DataAsset):
     # Instance fields
     type: Literal["table"] = "table"
     table_name: str
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
-    order_by: List[BatchSorter] = Field(default_factory=list)
-
-    @pydantic.validator("order_by", pre=True, each_item=True)
-    @classmethod
-    def _parse_order_by_sorter(
-        cls, v: Union[str, BatchSorter]
-    ) -> Union[BatchSorter, dict]:
-        if isinstance(v, str):
-            if not v:
-                raise ValueError("empty string")
-            return _batch_sorter_from_str(v)
-        return v
-
-    def get_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
-    ) -> BatchRequest:
-        """A batch request that can be used to obtain batches for this DataAsset.
-
-        Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
-                The dict structure depends on the asset type. A template of the dict can be obtained by
-                calling batch_request_options_template.
-
-        Returns:
-            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
-            get_batch_list_from_batch_request method.
-        """
-        if options is not None and not self._valid_batch_request_options(options):
-            raise BatchRequestError(
-                "Batch request options should have a subset of keys:\n"
-                f"{list(self.batch_request_options_template().keys())}\n"
-                f"but actually has the form:\n{pf(options)}\n"
-            )
-        return BatchRequest(
-            datasource_name=self._datasource.name,
-            data_asset_name=self.name,
-            options=options or {},
-        )
-
-    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(
-            set(self.batch_request_options_template().keys())
-        )
-
-    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
-        """Validates the batch_request has the correct form.
-
-        Args:
-            batch_request: A batch request object to be validated.
-        """
-        if not (
-            batch_request.datasource_name == self.datasource.name
-            and batch_request.data_asset_name == self.name
-            and self._valid_batch_request_options(batch_request.options)
-        ):
-            expect_batch_request_form = BatchRequest(
-                datasource_name=self.datasource.name,
-                data_asset_name=self.name,
-                options=self.batch_request_options_template(),
-            )
-            raise BatchRequestError(
-                "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
-            )
 
     def batch_request_options_template(
         self,
@@ -265,12 +149,6 @@ class TableAsset(DataAsset):
         if not self.column_splitter:
             return template
         return {p: None for p in self.column_splitter.param_names}
-
-    def add_sorters(self, sorters: BatchSortersDefinition) -> TableAsset:
-        # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
-        # https://docs.pydantic.dev/usage/model_config/#options
-        self.order_by = _batch_sorter_from_list(sorters)
-        return self
 
     # This asset type will support a variety of splitters
     def add_year_and_month_splitter(
@@ -344,24 +222,6 @@ class TableAsset(DataAsset):
                 )
         return batch_requests
 
-    def _sort_batches(self, batch_list: List[Batch]) -> None:
-        """Sorts batch_list in place.
-
-        Args:
-            batch_list: The list of batches to sort in place.
-        """
-        for sorter in reversed(self.order_by):
-            try:
-                batch_list.sort(
-                    key=lambda b: b.metadata[sorter.metadata_key],
-                    reverse=sorter.reverse,
-                )
-            except KeyError as e:
-                raise KeyError(
-                    f"Trying to sort {self.name} table asset batches on key {sorter.metadata_key} "
-                    "which isn't available on all batches."
-                ) from e
-
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
@@ -374,7 +234,6 @@ class TableAsset(DataAsset):
         Returns:
             A list of batches that match the options specified in the batch request.
         """
-        # We translate the batch_request into a BatchSpec to hook into GX core.
         self._validate_batch_request(batch_request)
 
         batch_list: List[Batch] = []
@@ -397,6 +256,7 @@ class TableAsset(DataAsset):
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
                     {column_splitter.column_name: request.options}
                 )
+            # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
             data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
@@ -428,7 +288,7 @@ class TableAsset(DataAsset):
                     legacy_batch_definition=batch_definition,
                 )
             )
-        self._sort_batches(batch_list)
+        self.sort_batches(batch_list)
         return batch_list
 
 
@@ -437,9 +297,9 @@ class SQLDatasource(Datasource):
 
     Args:
         name: The name of this datasource
-        connection_str: The SQLAlchemy connection string used to connect to the database.
+        connection_string: The SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
-        assets: An optional dictionary whose keys are table asset names and whose values
+        assets: An optional dictionary whose keys are TableAsset names and whose values
             are TableAsset objects.
     """
 
@@ -452,6 +312,7 @@ class SQLDatasource(Datasource):
     connection_string: str
     assets: Dict[str, TableAsset] = {}
 
+    @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the default execution engine type."""
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -478,30 +339,6 @@ class SQLDatasource(Datasource):
             name=name,
             table_name=table_name,
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
-            # see TableAsset._parse_order_by_sorter()
+            # see DataAsset._parse_order_by_sorter()
         )
-        # TODO (kilo59): custom init for `DataAsset` to accept datasource in constructor?
-        # Will most DataAssets require a `Datasource` attribute?
-        asset._datasource = self
-        self.assets[name] = asset
-        return asset
-
-    def get_asset(self, asset_name: str) -> TableAsset:
-        """Returns the TableAsset referred to by name"""
-        return super().get_asset(asset_name)  # type: ignore[return-value] # value is subclass
-
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
-        """A list of batches that match the BatchRequest.
-
-        Args:
-            batch_request: A batch request for this asset. Usually obtained by calling
-                get_batch_request on the asset.
-
-        Returns:
-            A list of batches that match the options specified in the batch request.
-        """
-        # We translate the batch_request into a BatchSpec to hook into GX core.
-        data_asset = self.get_asset(batch_request.data_asset_name)
-        return data_asset.get_batch_list_from_batch_request(batch_request)
+        return self.add_asset(asset)

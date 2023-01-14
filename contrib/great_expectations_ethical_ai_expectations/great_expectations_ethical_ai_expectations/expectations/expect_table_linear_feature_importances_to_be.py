@@ -10,6 +10,7 @@ from sklearn.inspection import permutation_importance
 from sklearn.linear_model import LinearRegression
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -18,7 +19,6 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
-    MetricDomainTypes,
     metric_value,
 )
 from great_expectations.expectations.metrics.table_metric_provider import (
@@ -157,8 +157,7 @@ class ExpectTableLinearFeatureImportancesToBe(TableExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         n_features = configuration.kwargs.get("n_features")
         columns = configuration.kwargs.get("important_columns")

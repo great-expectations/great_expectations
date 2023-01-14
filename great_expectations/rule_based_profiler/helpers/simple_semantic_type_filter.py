@@ -1,8 +1,20 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    TypeVar,
+    Union,
+)
 
-import great_expectations.exceptions as ge_exceptions
+from typing_extensions import TypeGuard
+
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
     InferredSemanticDomainType,
     SemanticDomainTypes,
@@ -15,6 +27,12 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     from great_expectations.validator.validator import Validator
+
+T = TypeVar("T")
+
+
+def _is_sequence_of(sequence: Sequence, type_: Type[T]) -> TypeGuard[Sequence[T]]:
+    return all(isinstance(x, type_) for x in sequence)
 
 
 class SimpleSemanticTypeFilter(SemanticTypeFilter):
@@ -29,16 +47,16 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
         column_names: Optional[List[str]] = None,
     ) -> None:
         self._build_table_column_name_to_inferred_semantic_domain_type_map(
-            batch_ids=batch_ids,
-            validator=validator,
-            column_names=column_names,
+            batch_ids=batch_ids,  # type: ignore[arg-type] # could be None
+            validator=validator,  # type: ignore[arg-type] # could be None
+            column_names=column_names,  # type: ignore[arg-type] # could be None
         )
 
     @property
     def table_column_name_to_inferred_semantic_domain_type_map(
         self,
     ) -> Dict[str, SemanticDomainTypes]:
-        return self._table_column_name_to_inferred_semantic_domain_type_map
+        return self._table_column_name_to_inferred_semantic_domain_type_map  # type: ignore[return-value] # could be None
 
     def parse_semantic_domain_type_argument(
         self,
@@ -60,7 +78,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             return [semantic_type for semantic_type in [semantic_types]]
 
         if isinstance(semantic_types, list):
-            if all(isinstance(semantic_type, str) for semantic_type in semantic_types):
+            if _is_sequence_of(semantic_types, str):
                 semantic_types = [
                     semantic_type.lower() for semantic_type in semantic_types
                 ]
@@ -69,10 +87,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
                     for semantic_type in semantic_types
                 ]
 
-            if all(
-                isinstance(semantic_type, SemanticDomainTypes)
-                for semantic_type in semantic_types
-            ):
+            if _is_sequence_of(semantic_types, SemanticDomainTypes):
                 return [semantic_type for semantic_type in semantic_types]
 
             raise ValueError(
@@ -121,7 +136,7 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
             )
         )
         if len(column_types_dict_list) != 1:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Error: {len(column_types_dict_list)} columns were found while obtaining semantic type \
     information.  Please ensure that the specified column name refers to exactly one column.
     """

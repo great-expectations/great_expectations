@@ -28,6 +28,7 @@ from dateutil.parser import parse
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchData,
@@ -354,6 +355,8 @@ class Validator:
         self,
         metric_configurations: List[MetricConfiguration],
         runtime_configuration: Optional[dict] = None,
+        min_graph_edges_pbar_enable: int = 0,
+        # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
@@ -363,6 +366,7 @@ class Validator:
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+            min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
@@ -370,6 +374,7 @@ class Validator:
         return self._metrics_calculator.compute_metrics(
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
+            min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
         )
 
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
@@ -380,16 +385,22 @@ class Validator:
         """
         return self._metrics_calculator.columns(domain_kwargs=domain_kwargs)
 
+    @public_api
     def head(
         self,
         n_rows: int = 5,
         domain_kwargs: Optional[Dict[str, Any]] = None,
         fetch_all: bool = False,
     ) -> pd.DataFrame:
-        """
-        Convenience method to obtain Batch first few rows.
+        """Return the first several rows or records from a Batch of data.
 
-        (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+        Args:
+            n_rows: The number of rows to return.
+            domain_kwargs: If provided, the domain for which to return records.
+            fetch_all: If True, ignore n_rows and return the entire batch.
+
+        Returns:
+            A Pandas DataFrame containing the records' data.
         """
         return self._metrics_calculator.head(
             n_rows=n_rows, domain_kwargs=domain_kwargs, fetch_all=fetch_all
@@ -515,6 +526,7 @@ class Validator:
                     expectation_kwargs=expectation_kwargs,
                     meta=meta,
                     expectation_impl=expectation_impl,
+                    runtime_configuration=basic_runtime_configuration,
                 )
             )
 
@@ -591,6 +603,7 @@ class Validator:
         expectation_kwargs: dict,
         meta: dict,
         expectation_impl: "Expectation",  # noqa: F821
+        runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
         auto: bool = expectation_kwargs.get("auto", False)
         profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
@@ -620,7 +633,7 @@ class Validator:
                 rules=None,
                 batch_list=list(self.batch_cache.values()),
                 batch_request=None,
-                recompute_existing_parameter_values=False,
+                runtime_configuration=runtime_configuration,
                 reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
             )
             expectation_configurations: List[
@@ -697,18 +710,6 @@ class Validator:
                 kwargs = {}
 
             expectation_kwargs: dict = recursively_convert_to_json_serializable(kwargs)
-
-            basic_default_expectation_args: dict = {
-                k: v
-                for k, v in self.default_expectation_args.items()
-                if k in Validator.RUNTIME_KEYS
-            }
-            basic_runtime_configuration: dict = copy.deepcopy(
-                basic_default_expectation_args
-            )
-            basic_runtime_configuration.update(
-                {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
-            )
 
             allowed_config_keys: Tuple[str] = expectation_impl.get_allowed_config_keys()
 
@@ -1041,10 +1042,12 @@ class Validator:
         result: ExpectationValidationResult
         for configuration in processed_configurations:
             try:
+                runtime_configuration_default = copy.deepcopy(runtime_configuration)
+
                 result = configuration.metrics_validate(
                     metrics=resolved_metrics,
                     execution_engine=self._execution_engine,
-                    runtime_configuration=runtime_configuration,
+                    runtime_configuration=runtime_configuration_default,
                 )
                 evrs.append(result)
             except Exception as err:

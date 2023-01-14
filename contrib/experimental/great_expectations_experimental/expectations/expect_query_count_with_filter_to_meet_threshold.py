@@ -29,7 +29,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
                 WHERE {col} = {filter}
             """
 
-    success_keys = ("query", "template_values")
+    success_keys = ("template_dict", "query")
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
@@ -45,8 +45,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         threshold = configuration["kwargs"].get("threshold")
 
         try:
@@ -76,7 +75,12 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     examples = [
         {
-            "data": {"col1": [1, 1, 1, 2, 2, 2, 2, 2]},
+            "data": [
+                {
+                    "data": {"col1": [1, 1, 1, 2, 2, 2, 2, 2]},
+                },
+            ],
+            "suppress_test_for": ["bigquery"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -87,7 +91,6 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
                         "threshold": 4,
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -98,7 +101,6 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
                         "threshold": 4,
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite", "spark"],
                 },
             ],
         },
@@ -106,9 +108,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
 
     library_metadata = {
         "tags": ["query-based"],
-        "contributors": [
-            "@CarstenFrommhold",
-        ],
+        "contributors": ["@CarstenFrommhold", "@mkopec87"],
     }
 
 

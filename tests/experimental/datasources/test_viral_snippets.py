@@ -1,10 +1,10 @@
+import difflib
 import functools
 import logging
 import pathlib
 from pprint import pformat as pf
 
 import pytest
-from pytest import TempPathFactory
 
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
@@ -12,7 +12,6 @@ pytestmark = [pytest.mark.integration]
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
-from great_expectations.experimental.datasources.interfaces import DataAsset, Datasource
 
 LOGGER = logging.getLogger(__file__)
 
@@ -36,7 +35,7 @@ def db_file() -> pathlib.Path:
 @pytest.fixture
 def zep_config_dict(db_file) -> dict:
     return {
-        "datasources": {
+        "xdatasources": {
             "my_sql_ds": {
                 "connection_string": f"sqlite:///{db_file}",
                 "name": "my_sql_ds",
@@ -53,8 +52,8 @@ def zep_config_dict(db_file) -> dict:
                             "param_names": ["year", "month"],
                         },
                         "order_by": [
-                            {"metadata_key": "year"},
-                            {"metadata_key": "month"},
+                            {"key": "year"},
+                            {"key": "month"},
                         ],
                     },
                 },
@@ -65,6 +64,7 @@ def zep_config_dict(db_file) -> dict:
 
 @pytest.fixture
 def zep_only_config(zep_config_dict: dict) -> GxConfig:
+    """Creates a ZEP `GxConfig` object and ensures it contains at least one `Datasource`"""
     zep_config = GxConfig.parse_obj(zep_config_dict)
     assert zep_config.datasources
     return zep_config
@@ -92,13 +92,21 @@ def zep_yaml_config_file(
 ) -> pathlib.Path:
     """
     Dump the provided GxConfig to a temporary path. File is removed during test teardown.
+
+    Append ZEP config to default config file
     """
-    config_file_path = file_dc_config_dir_init / FileDataContext.ZEP_YAML
+    config_file_path = file_dc_config_dir_init / FileDataContext.GX_YML
 
-    assert config_file_path.exists() is False
-
-    zep_only_config.yaml(config_file_path)
     assert config_file_path.exists() is True
+
+    with open(config_file_path, mode="a") as f_append:
+        yaml_string = "\n# ZEP\n" + zep_only_config.yaml()
+        f_append.write(yaml_string)
+
+    for ds_name in zep_only_config.datasources.keys():
+        assert ds_name in yaml_string
+
+    LOGGER.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
     return config_file_path
 
 
@@ -147,12 +155,72 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
         column="passenger_count", min_value=1, max_value=12
     )
     print(f"  results ->\n{pf(result)}")
-    assert result["success"] == True
+    assert result["success"] is True
 
 
-@pytest.mark.xfail(reason="TypeError: cannot pickle 'module' object")
-def test_save_datacontext(zep_file_context: FileDataContext):
+def test_save_project_does_not_break(zep_file_context: FileDataContext):
+    print(zep_file_context.zep_config)
+    zep_file_context._save_project_config()
+
+
+def test_variables_save_config_does_not_break(zep_file_context: FileDataContext):
+    print(zep_file_context.zep_config)
+    print(zep_file_context.variables)
     zep_file_context.variables.save_config()
+
+
+def test_save_datacontext_persists_zep_config(
+    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+):
+    config_file = file_dc_config_dir_init / FileDataContext.GX_YML
+
+    initial_yaml = config_file.read_text()
+    for ds_name in zep_only_config.datasources:
+        assert ds_name not in initial_yaml
+
+    context: FileDataContext = get_context(
+        context_root_dir=config_file.parent, cloud_mode=False
+    )
+
+    context.zep_config = zep_only_config
+    context._save_project_config()
+
+    final_yaml = config_file.read_text()
+    diff = difflib.ndiff(initial_yaml.splitlines(), final_yaml.splitlines())
+
+    print("\n".join(diff))
+
+    for ds_name in zep_only_config.datasources:
+        assert ds_name in final_yaml
+
+
+def test_add_and_save_zep_datasource(
+    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+):
+    datasource_name = "save_ds_test"
+    config_file = file_dc_config_dir_init / FileDataContext.GX_YML
+
+    initial_yaml = config_file.read_text()
+    assert datasource_name not in initial_yaml
+
+    context: FileDataContext = get_context(
+        context_root_dir=config_file.parent, cloud_mode=False
+    )
+
+    ds = context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+    )
+    context._save_project_config()
+
+    final_yaml = config_file.read_text()
+    diff = difflib.ndiff(initial_yaml.splitlines(), final_yaml.splitlines())
+
+    print("\n".join(diff))
+
+    assert datasource_name == ds.name
+    assert datasource_name in final_yaml
+    # ensure comments preserved
+    assert "# Welcome to Great Expectations!" in final_yaml
 
 
 if __name__ == "__main__":

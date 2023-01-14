@@ -54,7 +54,7 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
         compound = None
         for regex in regex_list:
             if compound is None:
-                compound = column.rlike(regex)
+                compound = ~column.rlike(regex)
             else:
                 compound = compound & ~column.rlike(regex)
 

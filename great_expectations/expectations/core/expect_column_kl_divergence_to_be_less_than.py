@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Tuple
+from typing import TYPE_CHECKING, Dict, Optional, Tuple
 
 import altair as alt
 import numpy as np
@@ -47,6 +47,9 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validator import ValidationDependencies
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -363,7 +366,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
         return validation_dependencies
 
-    def _validate(
+    def _validate(  # noqa: C901 - 29
         self,
         configuration: ExpectationConfiguration,
         metrics: Dict,
@@ -525,7 +528,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
             if "tail_weights" in partition_object:
                 partition_tail_weight_holdout = np.sum(partition_object["tail_weights"])
             else:
-                partition_tail_weight_holdout = 0
+                partition_tail_weight_holdout = 0  # noqa: F841 # unused
 
             expected_weights = np.array(partition_object["weights"]) * (
                 1 - tail_weight_holdout - internal_weight_holdout
@@ -1030,7 +1033,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
             ("threshold", RendererValueType.NUMBER),
@@ -1149,7 +1152,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True
         )
-        styling = runtime_configuration.get("styling")
+        _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
             [

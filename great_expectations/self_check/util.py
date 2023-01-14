@@ -8,7 +8,6 @@ import platform
 import random
 import re
 import string
-import threading
 import time
 import traceback
 import warnings
@@ -50,7 +49,7 @@ from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.dataset import PandasDataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.exceptions.exceptions import (
@@ -68,6 +67,10 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.profile import ColumnsExistProfiler
+from great_expectations.self_check.sqlalchemy_connection_manager import (
+    LockingConnectionCheck,
+    connection_manager,
+)
 from great_expectations.util import (
     build_in_memory_runtime_context,
     import_library_module,
@@ -75,8 +78,6 @@ from great_expectations.util import (
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Connection
-
     from great_expectations.data_context import AbstractDataContext
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -90,8 +91,6 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy as sqlalchemy
     from sqlalchemy import create_engine
-
-    # noinspection PyProtectedMember
     from sqlalchemy.engine import Engine
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
@@ -467,6 +466,24 @@ except ImportError:
 # except ImportError:
 #     teradatasqlalchemy = None
 
+try:
+    from great_expectations.dataset import SqlAlchemyDataset
+    from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
+except ImportError:
+    SqlAlchemyDataset = None  # type: ignore[misc,assignment] # could be None
+    SqlAlchemyBatchReference = None  # type: ignore[misc,assignment] # could be None
+    logger.debug(
+        "Unable to load sqlalchemy dataset; install optional sqlalchemy dependency for support."
+    )
+
+try:
+    from great_expectations.dataset import SparkDFDataset
+except ImportError:
+    SparkDFDataset = None  # type: ignore[misc,assignment] # could be None
+    logger.debug(
+        "Unable to load spark dataset; install optional spark dependency for support."
+    )
+
 import tempfile
 
 # from tests.rule_based_profiler.conftest import ATOL, RTOL
@@ -493,52 +510,6 @@ BACKEND_TO_ENGINE_NAME_DICT = {
 }
 
 BACKEND_TO_ENGINE_NAME_DICT.update({name: "sqlalchemy" for name in SQL_DIALECT_NAMES})
-
-
-class SqlAlchemyConnectionManager:
-    def __init__(self) -> None:
-        self.lock = threading.Lock()
-        self._connections: Dict[str, "Connection"] = {}
-
-    def get_engine(self, connection_string):
-        if sqlalchemy is not None:
-            with self.lock:
-                if connection_string not in self._connections:
-                    try:
-                        engine = create_engine(connection_string)
-                        conn = engine.connect()
-                        self._connections[connection_string] = conn
-                    except (ImportError, SQLAlchemyError):
-                        print(
-                            f"Unable to establish connection with {connection_string}"
-                        )
-                        raise
-                return self._connections[connection_string]
-        return None
-
-
-connection_manager = SqlAlchemyConnectionManager()
-
-
-class LockingConnectionCheck:
-    def __init__(self, sa, connection_string) -> None:
-        self.lock = threading.Lock()
-        self.sa = sa
-        self.connection_string = connection_string
-        self._is_valid = None
-
-    def is_valid(self):
-        with self.lock:
-            if self._is_valid is None:
-                try:
-                    engine = self.sa.create_engine(self.connection_string)
-                    conn = engine.connect()
-                    conn.close()
-                    self._is_valid = True
-                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
-                    print(f"{str(e)}")
-                    self._is_valid = False
-            return self._is_valid
 
 
 def get_sqlite_connection_url(sqlite_db_path):
@@ -2517,9 +2488,6 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         context=context,
                     )
             except Exception as e:
-                _error(
-                    f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} {repr(e)[:300]}"
-                )
                 # # Adding these print statements for build_gallery.py's console output
                 # print("\n\n[[ Problem calling get_test_validator_with_data ]]")
                 # print(f"expectation_type -> {expectation_type}")
@@ -2571,6 +2539,9 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         # )
                         # print(pd.DataFrame(d.get("data_alt")))
                         # print()
+                        _error(
+                            f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} from data AND data_alt {repr(e)[:300]}"
+                        )
                         parametrized_tests.append(
                             {
                                 "expectation_type": expectation_type,
@@ -2583,8 +2554,13 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         continue
                     else:
                         # print("\n[[ The alternate data worked!! ]]\n")
-                        pass
+                        _debug(
+                            f"Needed to use data_alt for backend {c}, but it worked for {expectation_type}"
+                        )
                 else:
+                    _error(
+                        f"PROBLEM with get_test_validator_with_data in backend {c} for {expectation_type} from data (no data_alt to try) {repr(e)[:300]}"
+                    )
                     parametrized_tests.append(
                         {
                             "expectation_type": expectation_type,
@@ -2796,13 +2772,16 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(validator, expectation_type, test, raise_exception=True):
+def evaluate_json_test_v3_api(
+    validator, expectation_type, test, raise_exception=True, debug_logger=None
+):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
 
     NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
         of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
 
+    :param validator: (Validator) reference to "Validator" (key object that resolves Metrics and validates Expectations)
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test
@@ -2817,8 +2796,16 @@ def evaluate_json_test_v3_api(validator, expectation_type, test, raise_exception
               - details
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :param raise_exception: (bool) If False, capture any failed AssertionError from the call to check_json_test_result and return with validation_result
+    :param debug_logger: logger instance or None
     :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
+    if debug_logger is not None:
+        _debug = lambda x: debug_logger.debug(  # noqa: E731
+            f"(evaluate_json_test_v3_api) {x}"
+        )
+    else:
+        _debug = lambda x: x  # noqa: E731
+
     expectation_suite = ExpectationSuite(
         "json_test_suite", data_context=validator._data_context
     )
@@ -2884,6 +2871,9 @@ def evaluate_json_test_v3_api(validator, expectation_type, test, raise_exception
                 data_asset=validator.execution_engine.batch_manager.active_batch_data,
             )
         except Exception as e:
+            _debug(
+                f"RESULT: {result['result']}  |  CONFIG: {result['expectation_config']}"
+            )
             if raise_exception:
                 raise
             error_message = str(e)

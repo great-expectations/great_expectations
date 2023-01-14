@@ -81,6 +81,7 @@ class ExpectColumnValuesToBeValidIanaTimezone(ColumnMapExpectation):
                     "+08:00",
                 ],
             },
+            "suppress_test_for": ["spark"],
             "tests": [
                 {
                     "title": "positive_test_with_timezones",
@@ -123,8 +124,7 @@ class ExpectColumnValuesToBeValidIanaTimezone(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

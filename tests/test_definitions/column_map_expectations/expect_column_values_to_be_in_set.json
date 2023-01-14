@@ -225,8 +225,8 @@
       "redshift": {
         "dates": "TIMESTAMP"
       },
-      "trino": {
-        "dates": "TIMESTAMP"
+      "snowflake": {
+        "dates": "TIMESTAMP_NTZ"
       }
     },
     "tests" : [
@@ -245,7 +245,7 @@
     },
     {
       "title": "basic_negative_test_case_datetime_set",
-      "suppress_test_for": ["sqlite", "bigquery"],
+      "suppress_test_for": ["sqlite", "bigquery", "spark", "trino"],
       "exact_match_out": false,
       "in": {
         "column": "dates",
@@ -256,6 +256,37 @@
         "success": false,
         "unexpected_index_list": [0],
         "unexpected_list": ["2018-01-01T00:00:00"]
+      }
+    },
+    {
+      "title": "basic_negative_test_case_datetime_set_spark",
+      "only_for": ["spark"],
+      "suppress_test_for": ["spark_v2_api"],
+      "exact_match_out": false,
+      "in": {
+        "column": "dates",
+        "value_set": ["2018-01-02", "2018-01-02 00:34:01"],
+        "parse_strings_as_datetimes": true
+      },
+      "out": {
+        "success": false,
+        "unexpected_index_list": [0],
+        "unexpected_list": ["2018-01-01"]
+      }
+    },
+    {
+      "title": "basic_negative_test_case_datetime_set_trino",
+      "only_for": ["trino"],
+      "exact_match_out": false,
+      "in": {
+        "column": "dates",
+        "value_set": ["2018-01-02", "2018-01-02 00:34:01"],
+        "parse_strings_as_datetimes": true
+      },
+      "out": {
+        "success": false,
+        "unexpected_index_list": [0],
+        "unexpected_list": ["2018-01-01"]
       }
     },
     {

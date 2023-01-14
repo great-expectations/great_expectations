@@ -105,11 +105,11 @@ with something like:
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L114
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L113
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L315
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L312
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -254,7 +254,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L95-L101
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L94-L100
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -263,7 +263,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `column.custom_max` Metric against our success keys:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L196-L231
+```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L195-L230
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -322,7 +322,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L105-L110
+```python file=../../../../examples/expectations/column_aggregate_expectation_template.py#L104-L109
 ```
 
 would become

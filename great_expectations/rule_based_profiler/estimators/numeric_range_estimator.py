@@ -94,7 +94,9 @@ class NumericRangeEstimator(ABC, SerializableDictDot):
         """
         Returns dictionary equivalent of this object.
         """
-        dict_obj: dict = self._configuration.to_dict()
+        dict_obj: dict = (
+            self._configuration.to_dict()  # type: ignore[union-attr] # could be None
+        )
         dict_obj.update({"name": self._name})
         return dict_obj
 

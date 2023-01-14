@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -18,11 +18,18 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
@@ -80,7 +87,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
     args_keys = ("column",)
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -96,68 +103,35 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("mostly", RendererValueType.NUMBER),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "mostly", "row_condition", "condition_parser"],
-        )
-        # format params
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if params["mostly"] is not None and params["mostly"] < 1.0:
-            params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                params["mostly"] * 100, precision=15, no_scientific=True
+        params = renderer_configuration.params
+
+        if params.mostly and params.mostly.value < 1.0:
+            renderer_configuration = cls._add_mostly_pct_param(
+                renderer_configuration=renderer_configuration
             )
-            # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-            if include_column_name:
-                template_str = "$column values must not be null, at least $mostly_pct % of the time."
-            else:
-                template_str = (
-                    "values must not be null, at least $mostly_pct % of the time."
-                )
+            template_str = (
+                "values must not be null, at least $mostly_pct % of the time."
+            )
         else:
-            if include_column_name:
-                template_str = "$column values must never be null."
-            else:
-                template_str = "values must never be null."
+            template_str = "values must never be null."
 
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
-            )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
+        if renderer_configuration.include_column_name:
+            template_str = f"$column {template_str}"
 
-        return template_str, params_with_json_schema, None, styling
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)

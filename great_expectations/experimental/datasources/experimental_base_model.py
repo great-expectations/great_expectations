@@ -5,13 +5,24 @@ import logging
 import pathlib
 from io import StringIO
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, List, Type, TypeVar, Union, overload
+from typing import (
+    TYPE_CHECKING,
+    AbstractSet,
+    Any,
+    Callable,
+    Mapping,
+    Type,
+    TypeVar,
+    Union,
+    overload,
+)
 
 import pydantic
 from ruamel.yaml import YAML
 
 if TYPE_CHECKING:
-    from pydantic.typing import DictStrAny
+    MappingIntStrAny = Mapping[Union[int, str], Any]
+    AbstractSetIntStr = AbstractSet[Union[int, str]]
 
 LOGGER = logging.getLogger(__name__)
 
@@ -45,7 +56,19 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         ...
 
     def yaml(
-        self, stream_or_path: Union[StringIO, pathlib.Path, None] = None, **yaml_kwargs
+        self,
+        stream_or_path: Union[StringIO, pathlib.Path, None] = None,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        by_alias: bool = False,
+        skip_defaults: Union[bool, None] = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Union[Callable[[Any], Any], None] = None,
+        models_as_dict: bool = True,
+        **yaml_kwargs,
     ) -> Union[str, pathlib.Path]:
         """
         Serialize the config object as yaml.
@@ -58,44 +81,55 @@ class ExperimentalBaseModel(pydantic.BaseModel):
 
         # pydantic json encoder has support for many more types
         # TODO: can we dump json string directly to yaml.dump?
-        intermediate_json = json.loads(self.json())
+        intermediate_json = self._json_dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+        )
         yaml.dump(intermediate_json, stream=stream_or_path, **yaml_kwargs)
 
         if isinstance(stream_or_path, pathlib.Path):
             return stream_or_path
         return stream_or_path.getvalue()
 
+    def _json_dict(
+        self,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        by_alias: bool = False,
+        skip_defaults: Union[bool, None] = None,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Union[Callable[[Any], Any], None] = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs,
+    ) -> dict:
+        """
+        JSON compatible dictionary. All complex types removed.
+        Prefer `.dict()` or `.json()`
+        """
+        return json.loads(
+            self.json(
+                include=include,
+                exclude=exclude,
+                by_alias=by_alias,
+                skip_defaults=skip_defaults,
+                exclude_unset=exclude_unset,
+                exclude_defaults=exclude_defaults,
+                exclude_none=exclude_none,
+                encoder=encoder,
+                models_as_dict=models_as_dict,
+                **dumps_kwargs,
+            )
+        )
+
     def __str__(self):
         return self.yaml()
-
-    # Workaround for https://github.com/pydantic/pydantic/issues/935
-    #
-    # Currently there is no way to output properties using pydantics builtin in json and dict
-    # methods. Our current fix does let one use the exclude/include arguments on properties,
-    # we always include them. We could fix this by changing the json and dict signatures
-    # to `def dict(self, *, include, exclude, **kwargs)` and add the implementation.
-    # See this comment for one way to do this:
-    # https://github.com/pydantic/pydantic/issues/935#issuecomment-554378904
-
-    @classmethod
-    def _get_properties(cls) -> List[str]:
-        return [
-            prop for prop in cls.__dict__ if isinstance(cls.__dict__[prop], property)
-        ]
-
-    def json(self, **kwargs) -> str:
-        """The json representation of the Model."""
-        self.__dict__.update(
-            {prop: getattr(self, prop) for prop in self._get_properties()}
-        )
-        attribs = super().json(**kwargs)
-        return attribs
-
-    def dict(self, **kwargs) -> DictStrAny:
-        """The dict representation of the Model."""
-        self.__dict__.update(
-            {prop: getattr(self, prop) for prop in self._get_properties()}
-        )
-        return super().dict(**kwargs)
-
-    # End Workaround

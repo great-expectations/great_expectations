@@ -3,12 +3,11 @@ from unittest import mock
 
 import pytest
 
-from great_expectations import DataContext
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
 from great_expectations.exceptions import DataContextError
+from great_expectations.util import get_context
 
 
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
@@ -228,7 +227,9 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
     """
     empty_directory = str(tmp_path_factory.mktemp("another_empty_project"))
     FileDataContext.create(empty_directory)
-    context = DataContext(os.path.join(empty_directory, FileDataContext.GX_DIR))
+    context = get_context(
+        context_root_dir=os.path.join(empty_directory, FileDataContext.GX_DIR)
+    )
 
     obs = context.get_docs_sites_urls(only_if_exists=False)
     assert len(obs) == 1
@@ -243,7 +244,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     empty_directory = str(tmp_path_factory.mktemp("yo_yo"))
     FileDataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
 
     context._project_config["data_docs_sites"] = {
         "my_rad_site": {
@@ -258,7 +259,7 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
     context._save_project_config()
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     context.build_data_docs()
 
     expected_path = os.path.join(
@@ -276,7 +277,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
     FileDataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
 
     context._project_config["data_docs_sites"] = {
         "my_rad_site": {
@@ -298,7 +299,7 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
     context._save_project_config()
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     context.build_data_docs()
     data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")
 
@@ -325,7 +326,7 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     empty_directory = str(tmp_path_factory.mktemp("empty"))
     FileDataContext.create(empty_directory)
     ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     config = context.get_config()
     config.data_docs_sites = {
         "local_site": {
@@ -341,7 +342,7 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     #  statefulness issues by writing to disk and re-upping a new context
     context._save_project_config()
     del context
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     data_docs_dir = os.path.join(ge_dir, "uncommitted", "data_docs")
     index_path = os.path.join(data_docs_dir, "index.html")
     assert not os.path.isfile(index_path)
@@ -352,7 +353,7 @@ def test_build_data_docs_skipping_index_does_not_build_index(
 
 
 def test_get_site_names_with_no_sites(tmpdir, basic_data_context_config):
-    context = BaseDataContext(basic_data_context_config, context_root_dir=tmpdir)
+    context = get_context(basic_data_context_config, context_root_dir=tmpdir)
     assert context.get_site_names() == []
 
 
@@ -372,5 +373,5 @@ def test_get_site_names_with_three_sites(tmpdir, basic_data_context_config):
             },
             "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
         }
-    context = BaseDataContext(basic_data_context_config, context_root_dir=tmpdir)
+    context = get_context(basic_data_context_config, context_root_dir=tmpdir)
     assert context.get_site_names() == ["site-0", "site-1", "site-2"]

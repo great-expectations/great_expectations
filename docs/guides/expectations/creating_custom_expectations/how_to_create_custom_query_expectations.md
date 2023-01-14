@@ -115,23 +115,23 @@ Now we're going to begin laying the groundwork for the functionality of your Cus
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L22
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py ExpectQueryToMatchSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L22
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py ExpectQueriedTableRowCountToBe class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L25
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py docstring"
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L25
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L116
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py print_diagnostic_checklist"
 ```
 
 with this one:
@@ -219,12 +219,12 @@ To implement your query, replace the `query` attribute of your Custom Expectatio
 
 This:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L35-L37
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py sql_query"
 ```
 
 Becomes something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L31-L34
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py query"
 ```
 
 :::warning
@@ -252,12 +252,12 @@ To connect this Metric to our Custom Expectation, we'll need to include the `met
 
 This tuple:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L30
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py metric_dependencies"
 ```
 
 Becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L28
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies"
 ```
 
 <details>
@@ -415,23 +415,23 @@ Now we're going to begin laying the groundwork for the functionality of your Cus
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L22
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py ExpectQueryToMatchSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L22
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py ExpectQueriedColumnValueFrequencyToMeetThreshold class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L25
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py docstring"
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L25
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L116
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py print_diagnostic_checklist"
 ```
 
 with this one:
@@ -519,12 +519,12 @@ To implement your query, replace the `query` attribute of your Custom Expectatio
 
 This:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L35-L37
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py sql_query"
 ```
 
 Becomes something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L31-L36
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py query"
 ```
 
 :::warning
@@ -555,12 +555,12 @@ In this case, we'll be using the `query.column` Metric, allowing us to parameter
 
 This tuple:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L30
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py metric_dependencies"
 ```
 
 Becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L28
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies"
 ```
 
 <details>
@@ -656,7 +656,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L105-L110
+```python name="tests/integration/docusaurus/expectations/examples/query_expectation_template.py library_metadata"
 ```
 
 would become

@@ -3,19 +3,20 @@ from pprint import pprint
 from typing import Callable, ContextManager
 
 import pytest
+from pydantic import ValidationError
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
+    BatchRequestError,
     BatchRequestOptions,
+    BatchSorter,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
     PostgresDatasource,
 )
 from great_expectations.experimental.datasources.sql_datasource import (
-    BatchRequestError,
-    BatchSorter,
     SqlYearMonthSplitter,
     TableAsset,
 )
@@ -33,7 +34,9 @@ _DEFAULT_TEST_MONTHS = list(range(1, 13))
 
 @contextmanager
 def _source(
-    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None], dialect: str
+    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
+    dialect: str,
+    connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
 ) -> PostgresDatasource:
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=validate_batch_spec, dialect=dialect
@@ -43,7 +46,7 @@ def _source(
         PostgresDatasource.execution_engine_override = execution_eng_cls
         yield PostgresDatasource(
             name="my_datasource",
-            connection_string="postgresql+psycopg2://postgres:@localhost/test_ci",
+            connection_string=connection_string,
         )
     finally:
         PostgresDatasource.execution_engine_override = original_override
@@ -538,14 +541,14 @@ def test_sort_batch_list_by_unknown_key(create_source):
     "order_by",
     [
         ["+year", "-month"],
-        [{"metadata_key": "year"}, {"metadata_key": "month", "reverse": True}],
+        [{"key": "year"}, {"key": "month", "reverse": True}],
     ],
 )
 def test_table_asset_sorter_parsing(order_by: list):
     """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""
     expected_sorters = [
-        BatchSorter(metadata_key="year"),
-        BatchSorter(metadata_key="month", reverse=True),
+        BatchSorter(key="year"),
+        BatchSorter(key="month", reverse=True),
     ]
 
     table_asset = TableAsset(
@@ -596,3 +599,47 @@ def test_datasource_dict_has_properties(create_source):
         source_dict = source.dict()
         pprint(source_dict)
         assert isinstance(source_dict["assets"]["my_asset"]["order_by"], list)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "connection_string",
+    [
+        "postgresql://userName:@hostname/dbName",
+        "postgresql://userName@hostname",
+        "postgresql://userName:password@hostname",
+        "postgres://userName:@hostname",
+        "postgresql+psycopg2://userName:@hostname",
+        "postgresql+pg8000://userName:@hostname",
+    ],
+)
+def test_validate_valid_postgres_connection_string(create_source, connection_string):
+    connection_string = "postgresql://userName:@hostname/dbName"
+    with create_source(
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        connection_string=connection_string,
+    ):
+        # As long as no exception is thrown we consider this a pass. Pydantic normalizes the underlying
+        # connection string so a direct str comparison isn't possible.
+        pass
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "connection_string",
+    [
+        "postgresql://",
+        "postgresql://username",
+        "postgresql://username/dbName",
+        "postgresql+invalid://",
+    ],
+)
+def test_validate_invalid_postgres_connection_string(create_source, connection_string):
+    with pytest.raises(ValidationError):
+        with create_source(
+            validate_batch_spec=lambda _: None,
+            dialect="postgresql",
+            connection_string=connection_string,
+        ):
+            pass

@@ -8,12 +8,12 @@ import pandas as pd
 import scipy.stats as stats
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -84,6 +84,12 @@ class ColumnSkew(ColumnMetricProvider):
         if abs:
             return np.abs(stats.skew(column))
         return stats.skew(column)
+
+    @column_aggregate_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, abs=False, **kwargs):
+        if abs:
+            return F.abs(F.skewness(column))
+        return F.skewness(column)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
@@ -158,31 +164,6 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
         logger.error(exception_message)
         raise pe()
 
-        #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
-    # def _spark(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         df,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column = accessor_domain_kwargs["column"]
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
-    #
     # @classmethod
     # def _get_evaluation_dependencies(
     #     cls,
@@ -300,6 +281,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     93.23978285,
                 ],  # sampled from Beta(20, 2)
             },
+            "suppress_test_for": ["sqlite", "mssql"],
             "tests": [
                 {
                     "title": "positive_test_positive_skew",
@@ -352,16 +334,6 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     "out": {"success": True, "observed_value": 0.9979514313860596},
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["mysql", "postgresql"],
-                },
-            ],
         }
     ]
 
@@ -375,6 +347,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
             "@lodeous",
             "@rexboyce",
             "@bragleg",
+            "@mkopec87",
         ],
     }
 

@@ -1,4 +1,3 @@
-import pandas
 import pandas as pd
 import pytest
 
@@ -9,19 +8,19 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.metrics import (
@@ -35,30 +34,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
-
-
-@pytest.fixture
-def spark_dataframe_for_unexpected_rows_with_index(
-    spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
-    df: pandas.DataFrame = pd.DataFrame(
-        {
-            "pk_1": [0, 1, 2, 3, 4, 5],
-            "pk_2": ["zero", "one", "two", "three", "four", "five"],
-            "animals": [
-                "cat",
-                "fish",
-                "dog",
-                "giraffe",
-                "lion",
-                "zebra",
-            ],
-        }
-    )
-    test_df: "pyspark.sql.dataframe.DataFrame" = spark_session.createDataFrame(
-        data=df
-    )  # noqa: F821
-    return test_df
 
 
 @pytest.fixture
@@ -131,6 +106,7 @@ def expected_evr_without_unexpected_rows():
             "partial_unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_count": 3,
             "unexpected_index_list": [3, 4, 5],
+            "unexpected_index_query": [3, 4, 5],
             "unexpected_list": ["giraffe", "lion", "zebra"],
             "unexpected_percent": 50.0,
             "unexpected_percent_nonmissing": 50.0,
@@ -268,7 +244,7 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}"
+        == f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}"
     )
 
     mp = ColumnMax()
@@ -305,7 +281,8 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
         metric, execution_engine=PandasExecutionEngine()
     )
     assert (
-        dependencies["unexpected_condition"].id[0] == "column_values.nonnull.condition"
+        dependencies["unexpected_condition"].id[0]
+        == f"column_values.nonnull.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
 
     metric = MetricConfiguration(
@@ -318,17 +295,18 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}"
+        == f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}"
     )
 
     metric = MetricConfiguration(
-        metric_name=f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
     assert (
-        dependencies["unexpected_condition"].id[0] == "column_values.nonnull.condition"
+        dependencies["unexpected_condition"].id[0]
+        == f"column_values.nonnull.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
 
 
@@ -340,7 +318,10 @@ def test_get_map_metric_dependencies():
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
-    assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+    assert (
+        dependencies["unexpected_condition"].id[0]
+        == f"foo.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
 
     metric = MetricConfiguration(
         metric_name="foo.unexpected_rows",
@@ -348,7 +329,10 @@ def test_get_map_metric_dependencies():
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
-    assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+    assert (
+        dependencies["unexpected_condition"].id[0]
+        == f"foo.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
 
     metric = MetricConfiguration(
         metric_name="foo.unexpected_values",
@@ -356,7 +340,10 @@ def test_get_map_metric_dependencies():
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
-    assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+    assert (
+        dependencies["unexpected_condition"].id[0]
+        == f"foo.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
 
     metric = MetricConfiguration(
         metric_name="foo.unexpected_value_counts",
@@ -364,7 +351,10 @@ def test_get_map_metric_dependencies():
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
-    assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+    assert (
+        dependencies["unexpected_condition"].id[0]
+        == f"foo.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
 
     metric = MetricConfiguration(
         metric_name="foo.unexpected_index_list",
@@ -372,7 +362,10 @@ def test_get_map_metric_dependencies():
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
-    assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+    assert (
+        dependencies["unexpected_condition"].id[0]
+        == f"foo.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
 
 
 def test_is_sqlalchemy_metric_selectable():
@@ -547,6 +540,7 @@ def test_pandas_unexpected_rows_complete_result_format(
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_index_list": [3, 4, 5],
+        "unexpected_index_query": [3, 4, 5],
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -622,6 +616,61 @@ def test_pandas_default_complete_result_format(
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
         "unexpected_index_list": [3, 4, 5],
+        "unexpected_index_query": [3, 4, 5],
+        "unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
+    }
+
+
+def test_pandas_unexpected_rows_complete_result_format_with_id_pk(
+    in_memory_runtime_context,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],
+            },
+        },
+    )
+    # result_format configuration at ExpectationConfiguration-level will emit warning
+    with pytest.warns(UserWarning):
+        result: ExpectationValidationResult = (
+            _expecation_configuration_to_validation_result_pandas(
+                expectation_configuration=expectation_configuration,
+                dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+                context=in_memory_runtime_context,
+            )
+        )
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
+        ],
+        "partial_unexpected_index_list": [
+            {"animals": "giraffe", "pk_1": 3},
+            {"animals": "lion", "pk_1": 4},
+            {"animals": "zebra", "pk_1": 5},
+        ],
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_index_column_names": ["pk_1"],
+        "unexpected_index_list": [
+            {"animals": "giraffe", "pk_1": 3},
+            {"animals": "lion", "pk_1": 4},
+            {"animals": "zebra", "pk_1": 5},
+        ],
+        "unexpected_index_query": [3, 4, 5],
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -773,60 +822,7 @@ def test_spark_single_column_complete_result_format(
     }
 
 
-def test_spark_single_column_summary_result_format(
-    in_memory_runtime_context,
-    spark_dataframe_for_unexpected_rows_with_index,
-):
-    expectation_configuration = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_be_in_set",
-        kwargs={
-            "column": "animals",
-            "value_set": ["cat", "fish", "dog"],
-            "result_format": {
-                "result_format": "SUMMARY",
-            },
-        },
-    )
-    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
-    batch_definition = BatchDefinition(
-        datasource_name="spark_datasource",
-        data_connector_name="runtime_data_connector",
-        data_asset_name="my_asset",
-        batch_identifiers=IDDict({}),
-        batch_spec_passthrough=None,
-    )
-    batch = Batch(
-        data=spark_dataframe_for_unexpected_rows_with_index,
-        batch_definition=batch_definition,
-    )
-    engine = SparkDFExecutionEngine()
-    validator = Validator(
-        execution_engine=engine,
-        data_context=in_memory_runtime_context,
-        batches=[
-            batch,
-        ],
-    )
-    result = expectation.validate(validator)
-    assert convert_to_json_serializable(result.result) == {
-        "element_count": 6,
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "partial_unexpected_counts": [
-            {"count": 1, "value": "giraffe"},
-            {"count": 1, "value": "lion"},
-            {"count": 1, "value": "zebra"},
-        ],
-        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
-        "unexpected_count": 3,
-        "unexpected_percent": 50.0,
-        "unexpected_percent_nonmissing": 50.0,
-        "unexpected_percent_total": 50.0,
-    }
-
-
-# Spark
-def test_spark_single_column_complete_result_format(
+def test_spark_single_column_complete_result_format_with_id_pk(
     in_memory_runtime_context,
     spark_dataframe_for_unexpected_rows_with_index,
 ):
@@ -837,6 +833,7 @@ def test_spark_single_column_complete_result_format(
             "value_set": ["cat", "fish", "dog"],
             "result_format": {
                 "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],
             },
         },
     )
@@ -860,7 +857,11 @@ def test_spark_single_column_complete_result_format(
             batch,
         ],
     )
-    result = expectation.validate(validator)
+
+    # result_format configuration at ExpectationConfiguration-level will emit warning
+    with pytest.warns(UserWarning):
+        result = expectation.validate(validator)
+
     assert convert_to_json_serializable(result.result) == {
         "element_count": 6,
         "missing_count": 0,
@@ -870,8 +871,21 @@ def test_spark_single_column_complete_result_format(
             {"count": 1, "value": "lion"},
             {"count": 1, "value": "zebra"},
         ],
+        "partial_unexpected_index_list": [
+            {"animals": "giraffe", "pk_1": 3},
+            {"animals": "lion", "pk_1": 4},
+            {"animals": "zebra", "pk_1": 5},
+        ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
+        "unexpected_index_column_names": ["pk_1"],
+        "unexpected_index_list": [
+            {"animals": "giraffe", "pk_1": 3},
+            {"animals": "lion", "pk_1": 4},
+            {"animals": "zebra", "pk_1": 5},
+        ],
+        "unexpected_index_query": "df.filter(F.expr((animals IS NOT NULL) AND (NOT "
+        "(animals IN (cat, fish, dog)))))",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -931,6 +945,53 @@ def test_spark_single_column_summary_result_format(
     }
 
 
+def test_spark_single_column_basic_result_format(
+    in_memory_runtime_context,
+    spark_dataframe_for_unexpected_rows_with_index,
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "BASIC",
+            },
+        },
+    )
+    expectation = ExpectColumnValuesToBeInSet(expectation_configuration)
+    batch_definition = BatchDefinition(
+        datasource_name="spark_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    batch = Batch(
+        data=spark_dataframe_for_unexpected_rows_with_index,
+        batch_definition=batch_definition,
+    )
+    engine = SparkDFExecutionEngine()
+    validator = Validator(
+        execution_engine=engine,
+        data_context=in_memory_runtime_context,
+        batches=[
+            batch,
+        ],
+    )
+    result = expectation.validate(validator)
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
+    }
+
+
 def test_sqlite_single_column_complete_result_format(
     sa,
     in_memory_runtime_context,
@@ -963,6 +1024,64 @@ def test_sqlite_single_column_complete_result_format(
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
+        "unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_percent": 50.0,
+        "unexpected_percent_nonmissing": 50.0,
+        "unexpected_percent_total": 50.0,
+    }
+
+
+def test_sqlite_single_column_complete_result_format_id_pk(
+    sa,
+    in_memory_runtime_context,
+    sqlite_table_for_unexpected_rows_with_index,
+):
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_in_set",
+        kwargs={
+            "column": "animals",
+            "value_set": ["cat", "fish", "dog"],
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["pk_1"],
+            },
+        },
+    )
+
+    # result_format configuration at ExpectationConfiguration-level will emit warning
+    with pytest.warns(UserWarning):
+        result: ExpectationValidationResult = (
+            _expecation_configuration_to_validation_result_sql(
+                expectation_configuration=expectation_configuration,
+                context=in_memory_runtime_context,
+            )
+        )
+    assert convert_to_json_serializable(result.result) == {
+        "element_count": 6,
+        "missing_count": 0,
+        "missing_percent": 0.0,
+        "partial_unexpected_counts": [
+            {"count": 1, "value": "giraffe"},
+            {"count": 1, "value": "lion"},
+            {"count": 1, "value": "zebra"},
+        ],
+        "partial_unexpected_index_list": [
+            {"animals": "giraffe", "pk_1": 3},
+            {"animals": "lion", "pk_1": 4},
+            {"animals": "zebra", "pk_1": 5},
+        ],
+        "partial_unexpected_list": ["giraffe", "lion", "zebra"],
+        "unexpected_count": 3,
+        "unexpected_index_column_names": ["pk_1"],
+        "unexpected_index_list": [
+            {"animals": "giraffe", "pk_1": 3},
+            {"animals": "lion", "pk_1": 4},
+            {"animals": "zebra", "pk_1": 5},
+        ],
+        "unexpected_index_query": "SELECT animals, pk_1 \n"
+        "FROM animal_names \n"
+        "WHERE animals IS NOT NULL AND (animals NOT IN "
+        "('cat', 'fish', 'dog'));",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,

@@ -58,7 +58,7 @@ class ExpectColumnValuesToBeValidGithubUsername(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_users": ["github", "git"],
+                "valid_users": ["github", "git", "great-expectations"],
                 "invalid_users": [
                     "RANDOM_123",
                     "memememememe",
@@ -108,8 +108,7 @@ class ExpectColumnValuesToBeValidGithubUsername(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

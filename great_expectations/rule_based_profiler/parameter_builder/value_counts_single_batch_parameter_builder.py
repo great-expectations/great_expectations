@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
 
 import numpy as np
 
@@ -34,8 +34,8 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     Compute value counts using specified metric for one Batch of data.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricSingleBatchParameterBuilder.exclude_field_names | {
         "column_value_counts_metric_single_batch_parameter_builder_config",
         "column_values_nonnull_count_metric_single_batch_parameter_builder_config",
@@ -117,7 +117,7 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.

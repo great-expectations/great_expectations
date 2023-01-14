@@ -105,7 +105,7 @@ with something like:
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../examples/expectations/table_expectation_template.py#L150
+```python file=../../../../examples/expectations/table_expectation_template.py#L149
 ```
 
 with this one:
@@ -326,7 +326,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/table_expectation_template.py#L141-L146
+```python file=../../../../examples/expectations/table_expectation_template.py#L140-L145
 ```
 
 would become

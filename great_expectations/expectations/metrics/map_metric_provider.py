@@ -1,23 +1,25 @@
 import inspect
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import numpy as np
+import pandas as pd
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import (
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricFunctionTypes,
-    MetricPartialFunctionTypes,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
@@ -34,6 +36,7 @@ from great_expectations.expectations.metrics.util import (
     Insert,
     Label,
     Select,
+    compute_unexpected_pandas_indices,
     get_dbms_compatible_column_names,
     get_sqlalchemy_source_table_and_schema,
     sql_statement_with_post_compile_to_string,
@@ -75,10 +78,12 @@ def column_function_partial(
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
             raise ValueError(
-                "PandasExecutionEngine only supports map_series for column_function_partial partial_fn_type"
+                f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
+"column_function_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -134,10 +139,12 @@ def column_function_partial(
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [MetricPartialFunctionTypes.MAP_FN]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_fn for column_function_partial partial_fn_type"
+                f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" for \
+"column_function_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -201,13 +208,15 @@ def column_function_partial(
     elif issubclass(engine, SparkDFExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [
             MetricPartialFunctionTypes.MAP_FN,
             MetricPartialFunctionTypes.WINDOW_FN,
         ]:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_fn and window_fn for column_function_partial partial_fn_type"
+                f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN}" and \
+"{MetricPartialFunctionTypes.WINDOW_FN}" for "column_function_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -268,7 +277,9 @@ def column_function_partial(
         return wrapper
 
     else:
-        raise ValueError("Unsupported engine for column_function_partial")
+        raise ValueError(
+            'Unsupported engine for "column_function_partial" metric function decorator.'
+        )
 
 
 def column_condition_partial(
@@ -299,10 +310,12 @@ def column_condition_partial(
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
             raise ValueError(
-                "PandasExecutionEngine only supports map_condition_series for column_condition_partial partial_fn_type"
+                f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_SERIES.value}" for \
+"column_condition_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -362,13 +375,15 @@ def column_condition_partial(
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [
             MetricPartialFunctionTypes.MAP_CONDITION_FN,
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_condition_fn and window_condition_fn for column_condition_partial partial_fn_type"
+                f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN}" and \
+"{MetricPartialFunctionTypes.WINDOW_CONDITION_FN}" for "column_condition_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -445,13 +460,15 @@ def column_condition_partial(
     elif issubclass(engine, SparkDFExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [
             MetricPartialFunctionTypes.MAP_CONDITION_FN,
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_condition_fn and window_condition_fn for column_condition_partial partial_fn_type"
+                f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN}" and \
+"{MetricPartialFunctionTypes.WINDOW_CONDITION_FN}" for "column_condition_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -496,7 +513,6 @@ def column_condition_partial(
                     _compute_domain_kwargs=compute_domain_kwargs,
                     _accessor_domain_kwargs=accessor_domain_kwargs,
                 )
-
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
                 )
@@ -524,7 +540,9 @@ def column_condition_partial(
 
         return wrapper
     else:
-        raise ValueError("Unsupported engine for column_condition_partial")
+        raise ValueError(
+            'Unsupported engine for "column_condition_partial" metric function decorator.'
+        )
 
 
 def column_pair_function_partial(
@@ -548,10 +566,12 @@ def column_pair_function_partial(
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
             raise ValueError(
-                "PandasExecutionEngine only supports map_series for column_pair_function_partial partial_fn_type"
+                f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
+"column_pair_function_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -610,10 +630,12 @@ def column_pair_function_partial(
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_fn for column_pair_function_partial partial_fn_type"
+                f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" for \
+"column_pair_function_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -676,10 +698,12 @@ def column_pair_function_partial(
     elif issubclass(engine, SparkDFExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_fn for column_pair_function_partial partial_fn_type"
+                f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" for \
+"column_pair_function_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -740,7 +764,9 @@ def column_pair_function_partial(
         return wrapper
 
     else:
-        raise ValueError("Unsupported engine for column_pair_function_partial")
+        raise ValueError(
+            'Unsupported engine for "column_pair_function_partial" metric function decorator.'
+        )
 
 
 def column_pair_condition_partial(
@@ -768,10 +794,12 @@ def column_pair_condition_partial(
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
             raise ValueError(
-                "PandasExecutionEngine only supports map_condition_series for column_pair_condition_partial partial_fn_type"
+                f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_SERIES.value}" for \
+"column_pair_function_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -834,13 +862,15 @@ def column_pair_condition_partial(
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [
             MetricPartialFunctionTypes.MAP_CONDITION_FN,
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_condition_fn and window_condition_fn for column_pair_condition_partial partial_fn_type"
+                f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN}" and \
+"{MetricPartialFunctionTypes.WINDOW_CONDITION_FN}" for "column_pair_condition_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -911,13 +941,15 @@ def column_pair_condition_partial(
     elif issubclass(engine, SparkDFExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [
             MetricPartialFunctionTypes.MAP_CONDITION_FN,
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_condition_fn and window_condition_fn for column_pair_condition_partial partial_fn_type"
+                f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN}" and \
+"{MetricPartialFunctionTypes.WINDOW_CONDITION_FN}" for "column_pair_condition_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -978,7 +1010,9 @@ def column_pair_condition_partial(
         return wrapper
 
     else:
-        raise ValueError("Unsupported engine for column_pair_condition_partial")
+        raise ValueError(
+            'Unsupported engine for "column_pair_condition_partial" metric function decorator.'
+        )
 
 
 def multicolumn_function_partial(
@@ -1002,10 +1036,12 @@ def multicolumn_function_partial(
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
             raise ValueError(
-                "PandasExecutionEngine only supports map_series for multicolumn_function_partial partial_fn_type"
+                f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
+"multicolumn_function_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -1057,10 +1093,12 @@ def multicolumn_function_partial(
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_fn for multicolumn_function_partial partial_fn_type"
+                f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" for \
+"multicolumn_function_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -1129,10 +1167,12 @@ def multicolumn_function_partial(
     elif issubclass(engine, SparkDFExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_FN:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_fn for multicolumn_function_partial partial_fn_type"
+                f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_FN.value}" for \
+"multicolumn_function_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -1186,7 +1226,9 @@ def multicolumn_function_partial(
         return wrapper
 
     else:
-        raise ValueError("Unsupported engine for multicolumn_function_partial")
+        raise ValueError(
+            'Unsupported engine for "multicolumn_function_partial" metric function decorator.'
+        )
 
 
 def multicolumn_condition_partial(
@@ -1214,10 +1256,12 @@ def multicolumn_condition_partial(
     if issubclass(engine, PandasExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
             raise ValueError(
-                "PandasExecutionEngine only supports map_condition_series for multicolumn_condition_partial partial_fn_type"
+                f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_SERIES.value}" for \
+"multicolumn_condition_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -1273,13 +1317,15 @@ def multicolumn_condition_partial(
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [
             MetricPartialFunctionTypes.MAP_CONDITION_FN,
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SqlAlchemyExecutionEngine only supports map_condition_fn and window_condition_fn for multicolumn_condition_partial partial_fn_type"
+                f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN}" and \
+"{MetricPartialFunctionTypes.WINDOW_CONDITION_FN}" for "multicolumn_condition_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -1346,13 +1392,15 @@ def multicolumn_condition_partial(
     elif issubclass(engine, SparkDFExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
+
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type not in [
             MetricPartialFunctionTypes.MAP_CONDITION_FN,
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
         ]:
             raise ValueError(
-                "SparkDFExecutionEngine only supports map_condition_fn and window_condition_fn for multicolumn_condition_partial partial_fn_type"
+                f"""SparkDFExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN}" and \
+"{MetricPartialFunctionTypes.WINDOW_CONDITION_FN}" for "multicolumn_condition_partial" "partial_fn_type" property."""
             )
 
         def wrapper(metric_fn: Callable):
@@ -1406,7 +1454,9 @@ def multicolumn_condition_partial(
         return wrapper
 
     else:
-        raise ValueError("Unsupported engine for multicolumn_condition_partial")
+        raise ValueError(
+            'Unsupported engine for "multicolumn_condition_partial" metric function decorator.'
+        )
 
 
 def _pandas_map_condition_unexpected_count(
@@ -1745,7 +1795,9 @@ def _pandas_map_condition_index(
     with all of the available "domain_kwargs" keys.
     """
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
+    domain_records_df: pd.DataFrame = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs
+    )
 
     if "column" in accessor_domain_kwargs:
         column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
@@ -1765,7 +1817,9 @@ def _pandas_map_condition_index(
             "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
         )
         if filter_column_isnull:
-            df = df[df[column_name].notnull()]
+            domain_records_df = domain_records_df[
+                domain_records_df[column_name].notnull()
+            ]
 
     elif "column_list" in accessor_domain_kwargs:
         column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
@@ -1776,46 +1830,82 @@ def _pandas_map_condition_index(
         )
 
     result_format = metric_value_kwargs["result_format"]
+    domain_records_df = domain_records_df[boolean_mapped_unexpected_values]
+    expectation_domain_column_name: Union[str, None] = domain_kwargs.get("column")
 
-    df = df[boolean_mapped_unexpected_values]
+    unexpected_index_list: Union[
+        List[int], List[Dict[str, Any]]
+    ] = compute_unexpected_pandas_indices(
+        domain_records_df=domain_records_df,
+        result_format=result_format,
+        execution_engine=execution_engine,
+        metrics=metrics,
+        expectation_domain_column_name=expectation_domain_column_name,
+    )
 
-    column_name: Union[str, quoted_name]
+    if result_format["result_format"] == "COMPLETE":
+        return unexpected_index_list
+    return unexpected_index_list[: result_format["partial_unexpected_count"]]
 
-    if "unexpected_index_column_names" in result_format:
-        unexpected_index_list: Optional[List[Dict[str, Any]]] = []
-        unexpected_index_column_names: List[str] = result_format[
-            "unexpected_index_column_names"
-        ]
-        # column the expectation is being run on
-        expectation_domain_column_name: str = domain_kwargs["column"]
 
-        unexpected_indices: List[int] = list(df.index)
-        for index in unexpected_indices:
-            primary_key_dict: Dict[str, Any] = {}
-            primary_key_dict[expectation_domain_column_name] = df.at[
-                index, expectation_domain_column_name
+def _pandas_map_condition_query(
+    cls,
+    execution_engine: PandasExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+) -> Optional[List[Any]]:
+    """
+    Returns query that will return all rows which do not meet an expected Expectation condition for instances
+    of ColumnMapExpectation. For Pandas, this is currently the full set of unexpected_indices.
+
+    Requires `unexpected_index_column_names` to be part of `result_format` dict to specify primary_key columns
+    to return, along with column the Expectation is run on.
+    """
+    result_format: dict = metric_value_kwargs["result_format"]
+
+    # We will not return map_condition_query if return_unexpected_index_query = False
+    return_unexpected_index_query: bool = result_format.get(
+        "return_unexpected_index_query"
+    )
+    if return_unexpected_index_query is False:
+        return
+
+    (
+        boolean_mapped_unexpected_values,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics.get("unexpected_condition")
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    domain_records_df: pd.DataFrame = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs
+    )
+    if "column" in accessor_domain_kwargs:
+        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+
+        column_name = get_dbms_compatible_column_names(
+            column_names=column_name,
+            batch_columns_list=metrics["table.columns"],
+            execution_engine=execution_engine,
+        )
+        filter_column_isnull = kwargs.get(
+            "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+        )
+        if filter_column_isnull:
+            domain_records_df = domain_records_df[
+                domain_records_df[column_name].notnull()
             ]
-            for column_name in unexpected_index_column_names:
-                column_name = get_dbms_compatible_column_names(
-                    column_names=column_name,
-                    batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
-                    error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
-                )
-                # add the actual unexpected value
-                primary_key_dict[column_name] = df.at[index, column_name]
 
-            unexpected_index_list.append(primary_key_dict)
-
-        if result_format["result_format"] == "COMPLETE":
-            return unexpected_index_list
-
-        return unexpected_index_list[: result_format["partial_unexpected_count"]]
-    else:
-        if result_format["result_format"] == "COMPLETE":
-            return list(df.index)
-
-        return list(df.index[: result_format["partial_unexpected_count"]])
+    elif "column_list" in accessor_domain_kwargs:
+        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+            "column_list"
+        ]
+        verify_column_names_exist(
+            column_names=column_list, batch_columns_list=metrics["table.columns"]
+        )
+    domain_values_df_filtered = domain_records_df[boolean_mapped_unexpected_values]
+    return domain_values_df_filtered.index.to_list()
 
 
 def _pandas_column_map_condition_value_counts(
@@ -1877,7 +1967,7 @@ def _pandas_column_map_condition_value_counts(
             pass
 
     if not value_counts:
-        raise ge_exceptions.MetricComputationError("Unable to compute value counts")
+        raise gx_exceptions.MetricComputationError("Unable to compute value counts")
 
     if result_format["result_format"] == "COMPLETE":
         return value_counts
@@ -2058,7 +2148,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
-        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=exception_message
         )
 
@@ -2382,7 +2472,7 @@ def _sqlalchemy_map_condition_rows(
         return execution_engine.engine.execute(query).fetchall()
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
-        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=exception_message
         )
 
@@ -2411,6 +2501,13 @@ def _sqlalchemy_map_condition_query(
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     result_format: dict = metric_value_kwargs["result_format"]
 
+    # We will not return map_condition_query if return_unexpected_index_query = False
+    return_unexpected_index_query: bool = result_format.get(
+        "return_unexpected_index_query"
+    )
+    if return_unexpected_index_query is False:
+        return
+
     column_selector: List[sa.Column] = [sa.column(domain_kwargs["column"])]
     all_table_columns: List[str] = metrics.get("table.columns")
     unexpected_index_column_names: List[str] = result_format.get(
@@ -2418,10 +2515,11 @@ def _sqlalchemy_map_condition_query(
     )
     for column_name in unexpected_index_column_names:
         if column_name not in all_table_columns:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '
                 f"Please check your configuration and try again."
             )
+
         column_selector.append(sa.column(column_name))
 
     unexpected_condition_query_with_selected_columns: sa.select = sa.select(
@@ -2479,10 +2577,11 @@ def _sqlalchemy_map_condition_index(
 
     for column_name in unexpected_index_column_names:
         if column_name not in all_table_columns:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '
                 f"Please check your configuration and try again."
             )
+
         column_selector.append(sa.column(column_name))
 
     expectation_domain_column_name: str = domain_kwargs["column"]
@@ -2501,7 +2600,7 @@ def _sqlalchemy_map_condition_index(
             sa.Table, sa.Select
         ] = get_sqlalchemy_selectable(domain_records_as_selectable)
 
-    # since SQL tables can be **very** large, truncate query_result values at 10, or at `partial_unexpected_count`
+    # since SQL tables can be **very** large, truncate query_result values at 20, or at `partial_unexpected_count`
     final_query: sa.select = (
         unexpected_condition_query_with_selected_columns.select_from(
             domain_records_as_selectable
@@ -2627,8 +2726,6 @@ def _spark_column_map_condition_value_counts(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics.get(
         "unexpected_condition"
     )
-    df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
             """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
@@ -2637,11 +2734,14 @@ def _spark_column_map_condition_value_counts(
         )
 
     column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
-
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
         execution_engine=execution_engine,
+    )
+
+    df: "pyspark.sql.dataframe.DataFrame" = execution_engine.get_domain_records(
+        domain_kwargs=compute_domain_kwargs
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
@@ -2686,6 +2786,122 @@ def _spark_map_condition_rows(
         return filtered.collect()
 
     return filtered.limit(result_format["partial_unexpected_count"]).collect()
+
+
+def _spark_map_condition_index(
+    cls,
+    execution_engine: SparkDFExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+) -> Union[List[Dict[str, Any]], None]:
+    """
+    Returns indices of the metric values which do not meet an expected Expectation condition for instances
+    of ColumnMapExpectation.
+
+    Requires `unexpected_index_column_names` to be part of `result_format` dict to specify primary_key columns
+    to return.
+    """
+    (
+        unexpected_condition,
+        compute_domain_kwargs,
+        accessor_domain_kwargs,
+    ) = metrics.get("unexpected_condition", (None, None, None))
+
+    if unexpected_condition is None:
+        return None
+
+    if "column" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_spark_column_map_condition_values).
+"""
+        )
+
+    domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
+    domain_column = domain_kwargs["column"]
+
+    df: "pyspark.sql.dataframe.DataFrame" = execution_engine.get_domain_records(
+        domain_kwargs=domain_kwargs
+    )
+
+    result_format = metric_value_kwargs["result_format"]
+    if not result_format.get("unexpected_index_column_names"):
+        raise gx_exceptions.MetricResolutionError(
+            "unexpected_indices cannot be returned without 'unexpected_index_column_names'. Please check your configuration."
+        )
+
+    # withColumn is required to transform window functions returned by some metrics to boolean mask
+    data = df.withColumn("__unexpected", unexpected_condition)
+    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+
+    unexpected_index_column_names: List[str] = result_format[
+        "unexpected_index_column_names"
+    ]
+    columns_to_keep: List[str] = [column for column in unexpected_index_column_names]
+    columns_to_keep.append(domain_column)
+
+    # check that column name is in row
+    for col_name in columns_to_keep:
+        if col_name not in filtered.columns:
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                f"Error: The unexpected_index_column '{col_name}' does not exist in Spark DataFrame. Please check your configuration and try again."
+            )
+
+    if result_format["result_format"] != "COMPLETE":
+        filtered.limit(result_format["partial_unexpected_count"])
+
+    for row in filtered.collect():
+        dict_to_add: dict = {}
+        for col_name in columns_to_keep:
+            dict_to_add[col_name] = row[col_name]
+        unexpected_index_list.append(dict_to_add)
+
+    return unexpected_index_list
+
+
+def _spark_map_condition_query(
+    cls,
+    execution_engine: SparkDFExecutionEngine,
+    metric_domain_kwargs: Dict,
+    metric_value_kwargs: Dict,
+    metrics: Dict[str, Any],
+    **kwargs,
+) -> Union[str, None]:
+    """
+    Returns query that will return all rows which do not meet an expected Expectation condition for instances
+    of ColumnMapExpectation.
+
+    Converts unexpected_condition into a string that can be rendered in DataDocs
+
+    Output will look like:
+
+        df.filter(F.expr( [unexpected_condition] ))
+
+    """
+    result_format: dict = metric_value_kwargs["result_format"]
+    # We will not return map_condition_query if return_unexpected_index_query = False
+    return_unexpected_index_query: bool = result_format.get(
+        "return_unexpected_index_query"
+    )
+    if return_unexpected_index_query is False:
+        return None
+
+    (
+        unexpected_condition,
+        _,
+        _,
+    ) = metrics.get("unexpected_condition", (None, None, None))
+
+    # unexpected_condition is an F.column object, meaning the str representation is wrapped in Column<> syntax.
+    # like Column<'[unexpected_expression]'>
+    unexpected_condition_as_string: str = str(unexpected_condition)
+    unexpected_condition_filtered: str = unexpected_condition_as_string.replace(
+        "Column<'(", ""
+    ).replace(")'>", "")
+    return f"df.filter(F.expr({unexpected_condition_filtered}))"
 
 
 def _spark_column_pair_map_condition_values(
@@ -2894,37 +3110,44 @@ class MapMetricProvider(MetricProvider):
     function_value_keys = tuple()
     filter_column_isnull = True
 
-    SQLALCHEMY_SELECTABLE_METRICS = {
+    SQLALCHEMY_SELECTABLE_METRICS: Set[str] = {
         "compound_columns.count",
         "compound_columns.unique",
     }
 
     @classmethod
     def _register_metric_functions(cls):
-        if not hasattr(cls, "function_metric_name") and not hasattr(
-            cls, "condition_metric_name"
+        if not (
+            hasattr(cls, "function_metric_name")
+            or hasattr(cls, "condition_metric_name")
         ):
             return
 
         for attr, candidate_metric_fn in inspect.getmembers(cls):
             if not hasattr(candidate_metric_fn, "metric_engine"):
-                # This is not a metric
+                # This is not a metric.
                 continue
+
             metric_fn_type = getattr(candidate_metric_fn, "metric_fn_type")
+            if not metric_fn_type:
+                # This is not a metric (valid metrics possess exectly one metric function).
+                return
+
             engine = candidate_metric_fn.metric_engine
             if not issubclass(engine, ExecutionEngine):
                 raise ValueError(
-                    "metric functions must be defined with an Execution Engine"
+                    "Metric functions must be defined with an ExecutionEngine as part of registration."
                 )
 
             if metric_fn_type in [
-                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
+                MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
                 MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
             ]:
                 if not hasattr(cls, "condition_metric_name"):
                     raise ValueError(
-                        "A MapMetricProvider must have a metric_condition_name to have a decorated column_condition_partial method."
+                        """A "MapMetricProvider" must have a "condition_metric_name" to have a decorated \
+"column_condition_partial" method."""
                     )
 
                 condition_provider = candidate_metric_fn
@@ -2944,7 +3167,7 @@ class MapMetricProvider(MetricProvider):
                 )
                 if issubclass(engine, PandasExecutionEngine):
                     register_metric(
-                        metric_name=f"{metric_name}.condition",
+                        metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -2968,6 +3191,15 @@ class MapMetricProvider(MetricProvider):
                         execution_engine=engine,
                         metric_class=cls,
                         metric_provider=_pandas_map_condition_index,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_index_query",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_pandas_map_condition_query,
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
@@ -3038,7 +3270,7 @@ class MapMetricProvider(MetricProvider):
                         )
                 elif issubclass(engine, SqlAlchemyExecutionEngine):
                     register_metric(
-                        metric_name=f"{metric_name}.condition",
+                        metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -3074,10 +3306,11 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
+                        # Documentation in "MetricProvider._register_metric_functions()" explains registration protocol.
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
                                 metric_name=metric_name
-                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3175,7 +3408,7 @@ class MapMetricProvider(MetricProvider):
                         )
                 elif issubclass(engine, SparkDFExecutionEngine):
                     register_metric(
-                        metric_name=f"{metric_name}.condition",
+                        metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -3192,11 +3425,30 @@ class MapMetricProvider(MetricProvider):
                         metric_provider=_spark_map_condition_rows,
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_index_list",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_spark_map_condition_index,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
+                    register_metric(
+                        metric_name=f"{metric_name}.unexpected_index_query",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=(*metric_value_keys, "result_format"),
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=_spark_map_condition_query,
+                        metric_fn_type=MetricFunctionTypes.VALUE,
+                    )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
+                        # Documentation in "MetricProvider._register_metric_functions()" explains registration protocol.
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
                                 metric_name=metric_name
-                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                                + f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3293,21 +3545,23 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
             elif metric_fn_type in [
-                MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.MAP_FN,
+                MetricPartialFunctionTypes.MAP_SERIES,
                 MetricPartialFunctionTypes.WINDOW_FN,
             ]:
                 if not hasattr(cls, "function_metric_name"):
                     raise ValueError(
-                        "A MapMetricProvider must have a function_metric_name to have a decorated column_function_partial method."
+                        """A "MapMetricProvider" must have a "function_metric_name" to have a decorated \
+"column_function_partial" method."""
                     )
+
                 map_function_provider = candidate_metric_fn
                 # noinspection PyUnresolvedReferences
                 metric_name = cls.function_metric_name
                 metric_domain_keys = cls.function_domain_keys
                 metric_value_keys = cls.function_value_keys
                 register_metric(
-                    metric_name=f"{metric_name}.map",
+                    metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                     metric_domain_keys=metric_domain_keys,
                     metric_value_keys=metric_value_keys,
                     execution_engine=engine,
@@ -3324,48 +3578,63 @@ class MapMetricProvider(MetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        metric_name = metric.metric_name
+        dependencies: Dict[str, MetricConfiguration] = {}
+
         base_metric_value_kwargs = {
             k: v for k, v in metric.metric_value_kwargs.items() if k != "result_format"
         }
-        dependencies = {}
 
-        metric_suffix = ".unexpected_count"
+        metric_name: str = metric.metric_name
+
+        metric_suffix: str = ".unexpected_count"
+
+        # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
         if metric_name.endswith(metric_suffix):
-            try:
-                _ = get_metric_provider(
-                    f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
-                    execution_engine,
-                )
-                has_aggregate_fn = True
-            except ge_exceptions.MetricProviderError:
-                has_aggregate_fn = False
+            has_aggregate_fn: bool = False
+
+            if execution_engine is not None:
+                try:
+                    _ = get_metric_provider(
+                        f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                        execution_engine,
+                    )
+                    has_aggregate_fn = True
+                except gx_exceptions.MetricProviderError:
+                    pass
+
             if has_aggregate_fn:
                 dependencies["metric_partial_fn"] = MetricConfiguration(
-                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+                    metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
             else:
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    metric_name=f"{metric_name[:-len(metric_suffix)]}.condition",
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
 
         # MapMetric uses "condition" metric to build "unexpected_count.aggregate_fn" and other listed metrics as well.
-        for metric_suffix in [
-            f".unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
-            ".unexpected_value_counts",
-            ".unexpected_index_query",
-            ".unexpected_index_list",
-            ".filtered_row_count",
-            ".unexpected_values",
-            ".unexpected_rows",
-        ]:
+        unexpected_condition_dependent_metric_name_suffixes: List[str] = list(
+            filter(
+                lambda element: metric_name.endswith(element),
+                [
+                    f".unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+                    ".unexpected_value_counts",
+                    ".unexpected_index_query",
+                    ".unexpected_index_list",
+                    ".filtered_row_count",
+                    ".unexpected_values",
+                    ".unexpected_rows",
+                ],
+            )
+        )
+        if len(unexpected_condition_dependent_metric_name_suffixes) == 1:
+            metric_suffix = unexpected_condition_dependent_metric_name_suffixes[0]
             if metric_name.endswith(metric_suffix):
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    metric_name=f"{metric_name[:-len(metric_suffix)]}.condition",
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )

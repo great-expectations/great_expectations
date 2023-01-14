@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
@@ -26,7 +26,9 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
     This DomainBuilder uses relative tolerance of specified map metric to identify domains.
     """
 
-    exclude_field_names: Set[str] = ColumnDomainBuilder.exclude_field_names | {
+    exclude_field_names: ClassVar[
+        Set[str]
+    ] = ColumnDomainBuilder.exclude_field_names | {
         "exclude_column_names",
         "include_column_name_suffixes",
         "exclude_column_name_suffixes",
@@ -66,19 +68,21 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """Return domains matching the specified tolerance limits.
 
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of domains that match the desired tolerance limits.
         """
-        batch_ids: List[str] = self.get_batch_ids(variables=variables)
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[assignment] # could None
 
-        validator: Validator = self.get_validator(variables=variables)
+        validator: Validator = self.get_validator(variables=variables)  # type: ignore[assignment] # could be None
 
         effective_column_names: List[str] = self.get_effective_column_names(
             batch_ids=batch_ids,
@@ -87,13 +91,13 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         if not (self.include_column_names and effective_column_names):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f'Error: "column_list" in {self.__class__.__name__} must not be empty.'
             )
 
         column_name: str
         semantic_types_by_column_name: Dict[str, SemanticDomainTypes] = {
-            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
+            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr] # could be None
                 column_name
             ]
             for column_name in effective_column_names

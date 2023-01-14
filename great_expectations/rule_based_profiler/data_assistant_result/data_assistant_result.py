@@ -27,7 +27,7 @@ import pandas as pd
 from IPython.display import HTML, display
 
 from great_expectations import __version__ as ge_version
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -157,7 +157,7 @@ class DataAssistantResult(SerializableDictDot):
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     @property
-    def metric_expectation_map(self) -> Dict[Union[str, Tuple[str]], str]:
+    def metric_expectation_map(self) -> Dict[Union[str, Tuple[str, ...]], str]:
         """
         A mapping is defined for which metrics to plot and their associated expectations.
         """
@@ -233,7 +233,9 @@ class DataAssistantResult(SerializableDictDot):
             "_batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
                 data=self._batch_id_to_batch_identifier_display_name_map
             ),
-            "profiler_config": self.profiler_config.to_json_dict(),
+            "profiler_config": self.profiler_config.to_json_dict()
+            if self.profiler_config
+            else None,
             "profiler_execution_time": convert_to_json_serializable(
                 data=self.profiler_execution_time
             ),
@@ -252,11 +254,15 @@ class DataAssistantResult(SerializableDictDot):
                     ),
                 }
                 for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-            ],
+            ]
+            if self.metrics_by_domain
+            else None,
             "expectation_configurations": [
                 expectation_configuration.to_json_dict()
                 for expectation_configuration in self.expectation_configurations
-            ],
+            ]
+            if self.expectation_configurations
+            else None,
             "citation": convert_to_json_serializable(data=self.citation),
         }
 
@@ -297,13 +303,11 @@ class DataAssistantResult(SerializableDictDot):
                 if key in DataAssistantResult.IN_JUPYTER_NOTEBOOK_KEYS
             }
 
-            verbose: Union[bool, str] = str(
-                os.getenv("GE_TROUBLESHOOTING", False)
-            ).lower()
-            if verbose != "true":
-                verbose = "false"
+            verbose_from_env: str = str(os.getenv("GE_TROUBLESHOOTING", False)).lower()
+            if verbose_from_env != "true":
+                verbose_from_env = "false"
 
-            verbose = json.loads(verbose)
+            verbose: bool = json.loads(verbose_from_env)
 
             auxiliary_profiler_execution_details: dict = (
                 self._get_auxiliary_profiler_execution_details(verbose=verbose)
@@ -325,12 +329,12 @@ class DataAssistantResult(SerializableDictDot):
         json_dict.update(auxiliary_profiler_execution_details)
         return json.dumps(json_dict, indent=2)
 
-    def _get_metric_expectation_map(self) -> Dict[Tuple[str], str]:
+    def _get_metric_expectation_map(self) -> Dict[Tuple[str, ...], str]:
         if not all(
             [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
             for metric_names in self.metric_expectation_map.keys()
         ):
-            raise ge_exceptions.DataAssistantResultExecutionError(
+            raise gx_exceptions.DataAssistantResultExecutionError(
                 "All metric_expectation_map keys must be of type str or tuple."
             )
 
@@ -343,8 +347,12 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:
         auxiliary_info: dict = {
-            "num_profiler_rules": len(self.profiler_config.rules),
-            "num_expectation_configurations": len(self.expectation_configurations),
+            "num_profiler_rules": len(self.profiler_config.rules)
+            if self.profiler_config and self.profiler_config.rules
+            else 0,
+            "num_expectation_configurations": len(self.expectation_configurations)
+            if self.expectation_configurations
+            else 0,
             "auto_generated_at": datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             ),
@@ -354,16 +362,21 @@ class DataAssistantResult(SerializableDictDot):
         if verbose:
             rule_name_to_rule_stats_map: Dict[str, RuleStats] = {}
 
-            rule_domains: List[Domain] = list(self.metrics_by_domain.keys())
+            rule_domains: List[Domain] = (
+                list(self.metrics_by_domain.keys()) if self.metrics_by_domain else []
+            )
 
-            rule_stats: RuleStats
+            rule_stats: RuleStats | None
             domains: List[Domain]
             domain: Domain
             domain_as_json_dict: dict
             num_domains: int
 
+            if not (self.profiler_config and self.profiler_config.rules):
+                return auxiliary_info
+
             rule_name: str
-            rule_config: RuleConfig
+            rule_config: Union[RuleConfig, dict]
             for rule_name, rule_config in self.profiler_config.rules.items():
                 domains = list(
                     filter(
@@ -385,8 +398,14 @@ class DataAssistantResult(SerializableDictDot):
                     rule_name_to_rule_stats_map[rule_name] = rule_stats
                     rule_stats.rule_domain_builder_execution_time = (
                         self.rule_domain_builder_execution_time[rule_name]
+                        if self.rule_domain_builder_execution_time
+                        else float(np.nan)
                     )
-                    rule_stats.rule_execution_time = self.rule_execution_time[rule_name]
+                    rule_stats.rule_execution_time = (
+                        self.rule_execution_time[rule_name]
+                        if self.rule_execution_time
+                        else float(np.nan)
+                    )
 
                 if num_domains > 0:
                     for domain in domains:
@@ -456,21 +475,21 @@ class DataAssistantResult(SerializableDictDot):
             persist=False,
         )
         expectation_suite.add_expectation_configurations(
-            expectation_configurations=self.expectation_configurations,
+            expectation_configurations=self.expectation_configurations
+            if self.expectation_configurations
+            else [],
             send_usage_event=False,
             match_type="domain",
             overwrite_existing=True,
         )
 
-        citation: Dict[str, Any]
-        if include_profiler_config:
-            citation = self.citation
-        else:
+        citation: Dict[str, Any] = self.citation or {}
+        if not include_profiler_config:
             key: str
             value: Any
             citation = {
                 key: value
-                for key, value in self.citation.items()
+                for key, value in citation.items()
                 if key != "profiler_config"
             }
 
@@ -790,7 +809,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         for chart in charts:
             chart_title = DataAssistantResult._get_chart_layer_title(layer=chart)
             if chart_title is None:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     "All DataAssistantResult charts must have a title."
                 )
 
@@ -3396,7 +3415,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ):
                 expectation_plot_impl = self._get_expect_domain_values_temporal_chart
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 
@@ -3435,7 +3454,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ):
                 metric_plot_impl = self._get_temporal_metrics_chart
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 
@@ -3611,7 +3630,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     self._get_interactive_expect_column_values_temporal_chart
                 )
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 
@@ -3650,7 +3669,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ):
                 plot_impl = self._get_interactive_temporal_metrics_chart
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 

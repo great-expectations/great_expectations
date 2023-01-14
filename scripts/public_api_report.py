@@ -286,6 +286,21 @@ class CodeParser:
             )
         return all_usages
 
+    def get_module_level_function_definitions(self) -> Set[Definition]:
+        """Get Definition objects only for functions defined at the module level."""
+        all_usages: Set[Definition] = set()
+        for file_contents in self.file_contents:
+            module_level_function_definitions = (
+                self._get_module_level_function_definitions_from_file_contents(
+                    file_contents=file_contents
+                )
+            )
+            all_usages |= self._build_file_usage_definitions(
+                file_contents=file_contents,
+                entity_definitions=module_level_function_definitions,
+            )
+        return all_usages
+
     def _build_file_usage_definitions(
         self,
         file_contents: FileContents,
@@ -316,6 +331,14 @@ class CodeParser:
 
         return set(all_defs)
 
+    def _get_module_level_function_definitions_from_file_contents(
+        self, file_contents: FileContents
+    ) -> Set[Union[ast.FunctionDef, ast.ClassDef, ast.AsyncFunctionDef]]:
+        """Parse FileContents to retrieve module level function definitions as ast trees."""
+        tree = ast.parse(file_contents.contents)
+        defs = self._list_module_level_function_definitions(tree=tree)
+        return set(defs)
+
     def _list_class_definitions(self, tree: ast.AST) -> List[ast.ClassDef]:
         """List class definitions from an ast tree."""
 
@@ -333,9 +356,19 @@ class CodeParser:
         """List function definitions from an ast tree."""
         function_definitions = []
         for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef) or isinstance(
-                node, ast.AsyncFunctionDef
-            ):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                function_definitions.append(node)
+
+        return function_definitions
+
+    def _list_module_level_function_definitions(
+        self, tree: ast.AST
+    ) -> List[Union[ast.FunctionDef, ast.AsyncFunctionDef]]:
+        """List function definitions that appear outside of classes."""
+
+        function_definitions = []
+        for node in ast.iter_child_nodes(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 function_definitions.append(node)
 
         return function_definitions
@@ -357,6 +390,16 @@ class PublicAPIChecker:
         for (
             definition
         ) in self.code_parser.get_all_class_method_and_function_definitions():
+            if self.is_definition_marked_public_api(definition):
+                definitions.append(definition)
+
+        return set(definitions)
+
+    def get_module_level_function_public_api_definitions(self) -> Set[Definition]:
+        """Get module level function definitions that are marked with the public api decorator."""
+        definitions: List[Definition] = []
+
+        for definition in self.code_parser.get_module_level_function_definitions():
             if self.is_definition_marked_public_api(definition):
                 definitions.append(definition)
 
@@ -409,7 +452,21 @@ class CodeReferenceFilter:
             reason="Referenced via legacy docs, will likely need to be included in the public API. Added here as an example include.",
             name="remove_expectation",
             filepath=pathlib.Path("great_expectations/core/expectation_suite.py"),
-        )
+        ),
+        IncludeExcludeDefinition(
+            reason="Part of our API, but typically we now use get_context().",
+            name="DataContext",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Part of our API, but typically we now use get_context().",
+            name="BaseDataContext",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/base_data_context.py"
+            ),
+        ),
     ]
 
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
@@ -445,6 +502,287 @@ class CodeReferenceFilter:
             filepath=pathlib.Path(
                 "great_expectations/datasource/batch_kwargs_generator/batch_kwargs_generator.py"
             ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/databricks_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/glob_reader_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/manual_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/query_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/s3_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/s3_subdir_reader_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/subdir_reader_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/batch_kwargs_generator/table_batch_kwargs_generator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="ValidationOperators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/validation_operators/types/validation_operator_result.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="ValidationOperators are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/validation_operators/validation_operators.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="ValidationActions are now run from Checkpoints: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide#manually-migrate-v2-checkpoints-to-v3-checkpoints",
+            name="run",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="CLI internal methods should not be part of the public API",
+            filepath=pathlib.Path("great_expectations/cli/datasource.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="CLI internal methods should not be part of the public API",
+            filepath=pathlib.Path("great_expectations/cli/toolkit.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for from datasource_configuration_test_utilities import is_subset",
+            name="is_subset",
+            filepath=pathlib.Path("great_expectations/core/domain.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Already captured in the Data Context",
+            name="test_yaml_config",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/config_validator/yaml_config_validator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for validator.get_metric()",
+            name="get_metric",
+            filepath=pathlib.Path(
+                "great_expectations/core/expectation_validation_result.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.get_expectation_suite()",
+            name="get_expectation_suite",
+            filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.save_expectation_suite() and validator.save_expectation_suite()",
+            name="save_expectation_suite",
+            filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for validator.validate()",
+            name="validate",
+            filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="add_checkpoint",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="create_expectation_suite",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="get_expectation_suite",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="list_checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="list_expectation_suite_names",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="save_expectation_suite",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/cloud_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Captured in AbstractDataContext",
+            name="add_store",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/file_data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/_store_backend.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/_store_backend.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/datasource_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/expectations_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/html_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/html_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/query_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/query_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python dict `.get()`",
+            name="get",
+            filepath=pathlib.Path("great_expectations/data_context/store/store.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for python `set()`",
+            name="set",
+            filepath=pathlib.Path("great_expectations/data_context/store/store.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.add_checkpoint()",
+            name="add_checkpoint",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/checkpoint_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.list_checkpoints()",
+            name="list_checkpoints",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/checkpoint_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/configuration_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/expectations_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/html_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/json_site_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path("great_expectations/data_context/store/store.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for datasource self_check",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/store/validations_store.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for yaml.dump()",
+            name="dump",
+            filepath=pathlib.Path("great_expectations/data_context/templates.py"),
         ),
     ]
 

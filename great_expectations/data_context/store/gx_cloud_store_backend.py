@@ -219,6 +219,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 params=params,
             )
             response.raise_for_status()
+            response_json: dict = response.json()
+            if (
+                isinstance(response_json["data"], list)
+                and len(response_json["data"]) == 0
+            ):
+                raise StoreBackendError(
+                    "Unable to get object in GX Cloud Store Backend: Object does not exist."
+                )
             return cast(ResponsePayload, response.json())
         except json.JSONDecodeError as jsonError:
             logger.debug(
@@ -398,7 +406,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def ge_cloud_credentials(self) -> dict:
         return self._ge_cloud_credentials
 
-    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GXCloudRESTResource, str, Optional[str]]]:  # type: ignore[override]
+    def list_keys(self, prefix: Tuple = ()) -> List[Tuple[GXCloudRESTResource, str, str]]:  # type: ignore[override]
         url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
@@ -428,7 +436,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 resource_dict: dict = resource.get("attributes", {}).get(
                     attributes_key, {}
                 )
-                resource_name: Optional[str] = resource_dict.get(name_attr)
+                resource_name: str = resource_dict.get(name_attr, "")
 
                 key = (resource_type, id, resource_name)
                 keys.append(key)
@@ -480,11 +488,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response.raise_for_status()
             return True
         except requests.HTTPError as http_exc:
-            # TODO: GG 20220819 should we raise an error here instead of returning False
-            logger.warning(
+            logger.exception(http_exc)
+            raise StoreBackendError(
                 f"Unable to delete object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
-            return False
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
             raise StoreBackendError(

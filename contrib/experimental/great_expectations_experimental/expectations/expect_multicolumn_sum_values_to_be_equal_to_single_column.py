@@ -1,14 +1,15 @@
-"""
-This is a template for creating custom MulticolumnMapExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations
-"""
-
+import functools
+import operator
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
+from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
@@ -35,8 +36,6 @@ class MulticolumnValuesSumValuesEqualToSingleColumn(MulticolumnMapMetricProvider
     )
     condition_value_keys = ()
 
-    # This method implements the core logic for the PandasExecutionEngine
-    # <snippet>
     @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_list, **kwargs):
         columns_to_sum = column_list[0:-1]
@@ -47,17 +46,20 @@ class MulticolumnValuesSumValuesEqualToSingleColumn(MulticolumnMapMetricProvider
         column_to_equal = column_list[-1]
         return sqlalchemy_columns_to_sum == column_to_equal
 
-    # </snippet>
+    @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, dataframe, **kwargs):
+        column_list = dataframe.columns
+        columns_to_sum = column_list[:-1]
+        column_to_equal = column_list[-1]
+        return functools.reduce(
+            operator.add, [F.col(column) for column in columns_to_sum]
+        ) == F.col(column_to_equal)
 
-    # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
-    # @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
-    # def _sqlalchemy(cls, column_list, **kwargs):
-    #     raise NotImplementedError
-
-    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-    # @multicolumn_condition_partial(engine=SparkDFExecutionEngine)
-    # def _spark(cls, column_list, **kwargs):
-    #     raise NotImplementedError
+    @multicolumn_condition_partial(engine=PandasExecutionEngine)
+    def _pandas(cls, dataframe, **kwargs):
+        columns_to_sum = dataframe.iloc[:, :-1]
+        column_to_equal = dataframe.iloc[:, -1]
+        return columns_to_sum.sum(axis=1, skipna=False) == column_to_equal
 
 
 # This class defines the Expectation itself
@@ -128,12 +130,6 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
                     },
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                },
-            ],
         }
     ]
 
@@ -166,8 +162,7 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:
@@ -187,7 +182,7 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
             "multi-column expectation",
             "multi-column sum values to be equal to single column",
         ],
-        "contributors": ["@AsaFLachisch"],
+        "contributors": ["@AsaFLachisch", "@mkopec87"],
     }
     # </snippet>
 

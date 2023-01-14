@@ -9,16 +9,16 @@ from great_expectations.render.renderer.renderer import Renderer
 
 def test_render():
     # noinspection PyUnusedLocal
-    with pytest.raises(NotImplementedError) as e:
+    with pytest.raises(NotImplementedError):
         Renderer().render(**{})
 
     # noinspection PyUnusedLocal
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(TypeError):
         # noinspection PyArgumentList
         Renderer().render({})
 
     # noinspection PyUnusedLocal
-    with pytest.raises(TypeError) as e:
+    with pytest.raises(TypeError):
         # noinspection PyArgumentList
         Renderer().render("wowza")
 

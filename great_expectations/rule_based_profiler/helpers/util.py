@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Un
 import numpy as np
 import scipy.stats as stats
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
@@ -111,7 +111,7 @@ def get_validator(
     else:
         num_batches: int = len(batch_list)
         if num_batches == 0:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""{__name__}.get_validator() must utilize at least one Batch ({num_batches} are available).
 """
             )
@@ -162,7 +162,7 @@ def get_batch_ids(
     if limit is not None:
         # No need to verify that type of "limit" is "integer", because static type checking already ascertains this.
         if not (0 <= limit <= num_batch_ids):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""{__name__}.get_batch_ids() allows integer limit values between 0 and {num_batch_ids} \
 ({limit} was requested).
 """
@@ -170,7 +170,7 @@ def get_batch_ids(
         batch_ids = batch_ids[-limit:]
 
     if num_batch_ids == 0:
-        raise ge_exceptions.ProfilerExecutionError(
+        raise gx_exceptions.ProfilerExecutionError(
             message=f"""{__name__}.get_batch_ids() must return at least one batch_id ({num_batch_ids} were retrieved).
 """
         )
@@ -236,7 +236,7 @@ def get_parameter_value_and_validate_return_type(
     expected_return_type: Optional[Union[type, tuple]] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Any]:
+) -> Any:
     """
     This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
     or as a fully-qualified parameter name.  In either case, it can optionally validate the type of the return value.
@@ -253,7 +253,7 @@ def get_parameter_value_and_validate_return_type(
 
     if expected_return_type is not None:
         if not isinstance(parameter_reference, expected_return_type):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{parameter_reference}" must be of type "{str(expected_return_type)}" \
 (value of type "{str(type(parameter_reference))}" was encountered).
 """
@@ -319,6 +319,7 @@ def get_parameter_value(
 def get_resolved_metrics_by_key(
     validator: Validator,
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
+    runtime_configuration: Optional[dict] = None,
 ) -> Dict[str, Dict[Tuple[str, str, str], MetricValue]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
@@ -329,6 +330,7 @@ def get_resolved_metrics_by_key(
         Dictionary of the form {
             "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
         }
+        runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
     Returns:
         Dictionary of the form {
@@ -349,6 +351,8 @@ def get_resolved_metrics_by_key(
             for key, metric_configurations_for_key in metric_configurations_by_key.items()
             for metric_configuration in metric_configurations_for_key
         ],
+        runtime_configuration=runtime_configuration,
+        min_graph_edges_pbar_enable=0,
     )
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
@@ -554,7 +558,7 @@ def get_false_positive_rate_from_rule_state(
         parameters=parameters,
     )
     if not (0.0 <= false_positive_rate <= 1.0):
-        raise ge_exceptions.ProfilerExecutionError(
+        raise gx_exceptions.ProfilerExecutionError(
             f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
 {false_positive_rate} was provided.
 """
@@ -602,7 +606,7 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
         quantile_statistic_interpolation_method
         not in RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS
     ):
-        raise ge_exceptions.ProfilerExecutionError(
+        raise gx_exceptions.ProfilerExecutionError(
             message=f"""The directive "quantile_statistic_interpolation_method" can be only one of \
 {RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS} ("{quantile_statistic_interpolation_method}" was detected).
 """
@@ -1035,7 +1039,7 @@ def get_or_create_expectation_suite(
                 expectation_suite = data_context.get_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
-            except ge_exceptions.DataContextError:
+            except gx_exceptions.DataContextError:
                 expectation_suite = data_context.create_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )

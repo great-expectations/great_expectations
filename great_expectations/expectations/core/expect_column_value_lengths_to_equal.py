@@ -22,7 +22,7 @@ from great_expectations.render.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.render.renderer_configuration import RendererParams
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 
 class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
@@ -98,8 +98,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     ) -> None:
         """Ensure value is set."""
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
         try:
             assert (
                 "value" in configuration.kwargs
@@ -118,7 +117,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
-        add_param_args = (
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("value", RendererValueType.NUMBER),
             ("mostly", RendererValueType.NUMBER),
@@ -128,7 +127,7 @@ class ExpectColumnValueLengthsToEqual(ColumnMapExpectation):
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
-        params: RendererParams = renderer_configuration.params
+        params = renderer_configuration.params
 
         if not params.value:
             template_str = "values may have any length."
