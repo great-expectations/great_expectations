@@ -1,11 +1,17 @@
-import pathlib
-from typing import Tuple
+from __future__ import annotations
 
+import pathlib
+from typing import TYPE_CHECKING
+
+import pandas as pd
 import pytest
+from pydantic import ValidationError
 
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
@@ -18,11 +24,16 @@ from great_expectations.render import (
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.interfaces import Batch
+    from great_expectations.validator.computed_metric import MetricValue
 
 
 def sql_data(
     context: AbstractDataContext,
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     db_file = (
         pathlib.Path(__file__)
         / "../../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
@@ -45,7 +56,7 @@ def sql_data(
 
 def pandas_data(
     context: AbstractDataContext,
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     csv_path = (
         pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
     ).resolve()
@@ -63,7 +74,7 @@ def pandas_data(
 @pytest.fixture(params=[sql_data, pandas_data])
 def datasource_test_data(
     empty_data_context, request
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     return request.param(empty_data_context)
 
 
@@ -220,7 +231,7 @@ def test_run_data_assistant_and_checkpoint(datasource_test_data):
 
 def multibatch_sql_data(
     context: AbstractDataContext,
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     db_file = (
         pathlib.Path(__file__)
         / "../../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata_sample_2020_all_months_combined.db"
@@ -243,7 +254,7 @@ def multibatch_sql_data(
 
 def multibatch_pandas_data(
     context: AbstractDataContext,
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     csv_path = (
         pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
     ).resolve()
@@ -261,7 +272,7 @@ def multibatch_pandas_data(
 @pytest.fixture(params=[multibatch_sql_data, multibatch_pandas_data])
 def multibatch_datasource_test_data(
     empty_data_context, request
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     return request.param(empty_data_context)
 
 
@@ -296,7 +307,7 @@ def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test
 def _configure_and_run_data_assistant(
     context: AbstractDataContext,
     batch_request: BatchRequest,
-) -> Tuple[DataAssistantResult, CheckpointResult]:
+) -> tuple[DataAssistantResult, CheckpointResult]:
     expectation_suite_name = "my_onboarding_assistant_suite"
     context.create_expectation_suite(
         expectation_suite_name=expectation_suite_name, overwrite_existing=True
@@ -336,3 +347,102 @@ def _configure_and_run_data_assistant(
     checkpoint_result = checkpoint.run()
 
     return data_assistant_result, checkpoint_result
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ["n_rows", "success"],
+    [
+        (
+            None,
+            True,
+        ),
+        (
+            3,
+            True,
+        ),
+        (
+            7,
+            True,
+        ),
+        (
+            -100,
+            True,
+        ),
+        (
+            "invalid_value",
+            False,
+        ),
+        (
+            1.5,
+            False,
+        ),
+        (
+            0,
+            True,
+        ),
+    ],
+)
+def test_batch_head(
+    datasource_test_data: tuple[
+        AbstractDataContext, Datasource, DataAsset, BatchRequest
+    ],
+    n_rows: int | str | None,
+    success: bool,
+) -> None:
+    _, datasource, _, batch_request = datasource_test_data
+    batch_list: list[Batch] = datasource.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) == 1
+    batch: Batch = batch_list[0]
+    if success:
+        head_df: pd.DataFrame
+        if n_rows is not None:
+            # if n_rows is not None we pass it to Batch.head()
+            head_df = batch.head(n_rows=n_rows)
+            assert isinstance(head_df, pd.DataFrame)
+            if n_rows >= 0:
+                assert len(head_df.index) == n_rows
+            else:
+                # for n_rows < 0, in order to confirm that all but the last n_rows are returned,
+                # we need to compute the total number of rows
+                resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
+                row_count_metric = MetricConfiguration(
+                    metric_name="table.row_count",
+                    metric_domain_kwargs={"batch_id": batch.id},
+                    metric_value_kwargs=None,
+                )
+                if isinstance(batch.data.execution_engine, SqlAlchemyExecutionEngine):
+                    row_count_partial_fn_metric = MetricConfiguration(
+                        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                        metric_domain_kwargs={"batch_id": batch.id},
+                        metric_value_kwargs=None,
+                    )
+                    resolved_metrics.update(
+                        batch.data.execution_engine.resolve_metrics(
+                            metrics_to_resolve=(row_count_partial_fn_metric,)
+                        )
+                    )
+                    row_count_metric.metric_dependencies = {
+                        "metric_partial_fn": row_count_partial_fn_metric
+                    }
+
+                resolved_metrics = batch.data.execution_engine.resolve_metrics(
+                    metrics_to_resolve=(row_count_metric,), metrics=resolved_metrics
+                )
+                row_count: int = resolved_metrics[row_count_metric.id]
+                assert len(head_df.index) == n_rows + row_count
+        else:
+            # default to 5 rows
+            head_df = batch.head()
+            assert isinstance(head_df, pd.DataFrame)
+            assert len(head_df.index) == 5
+    else:
+        with pytest.raises(ValidationError) as e:
+            batch.head(n_rows=n_rows)
+        assert str(e.value) == (
+            "1 validation error for Head\n"
+            "n_rows\n"
+            "  value is not a valid integer (type=type_error.integer)"
+        )
