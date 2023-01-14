@@ -1,6 +1,7 @@
 import inspect
 import logging
 import sys
+from collections import defaultdict
 from pprint import pformat as pf
 from typing import (
     Callable,
@@ -8,6 +9,7 @@ from typing import (
     List,
     NamedTuple,
     Sequence,
+    Set,
     Tuple,
     Type,
     Union,
@@ -16,12 +18,21 @@ from typing import (
 
 import pandas as pd
 import pydantic
+from pydantic import FilePath
 from pydantic.typing import resolve_annotations
-from typing_extensions import TypeAlias, reveal_type
+from typing_extensions import Final, TypeAlias, reveal_type
 
 logger = logging.getLogger(__file__)
 
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
+
+# sentinel values
+UNSUPPORTED_TYPE: Final = object()
+
+CAN_HANDLE: Set[str] = {"str", "int", "list", "dict", "bool", "None", "FilePath"}
+# TODO: default dict with list
+NEED_SPECIAL_HANDLING: Dict[str, List[str]] = defaultdict(list)
+FIELD_SKIPPED: Set[str] = set()
 
 
 class _FieldSpec(NamedTuple):
@@ -56,6 +67,7 @@ def _extract_io_signatures(
 def _get_default_value(
     param: inspect.Parameter,
 ) -> object:
+    # print(param.name, param.default)
     if param.default is inspect.Parameter.empty:
         default = ...
     else:
@@ -77,20 +89,30 @@ def _evaluate_annotation_str(annotation_str: str) -> Type:
     return type_
 
 
-def _get_annotation_type(param: inspect.Parameter) -> Type:
+def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     """
     https://docs.python.org/3/howto/annotations.html#manually-un-stringizing-stringized-annotations
     """
     # TODO: parse the annotation string
     annotation = param.annotation
-    print(type(annotation), annotation)
+    # print(type(annotation), annotation)
+
+    types: list = []
 
     union_parts = annotation.split(" | ")
     str_to_eval: str
-    if len(union_parts) > 1:
-        str_to_eval = f"Union[{', '.join(union_parts)}]"
+    # TODO: use eval'ed types and use subclass check
+    for type_str in union_parts:
+        if type_str in CAN_HANDLE:
+            types.append(type_str)
+        else:
+            NEED_SPECIAL_HANDLING[param.name].append(type_str)
+    if not types:
+        return UNSUPPORTED_TYPE
+    if len(types) > 1:
+        str_to_eval = f"Union[{', '.join(types)}]"
     else:
-        str_to_eval = union_parts[0]
+        str_to_eval = types[0]
     # print(f"{str_to_eval=}")
     return _evaluate_annotation_str(str_to_eval)
 
@@ -110,9 +132,14 @@ def _to_pydantic_fields(
         if no_annotation:
             logger.warning(f"`{param_name}` has no type annotation")
             continue
+        type_ = _get_annotation_type(param)
+        if type_ is UNSUPPORTED_TYPE:
+            logger.warning(f"`{param_name}` has no supported types. Field skipped")
+            FIELD_SKIPPED.add(param_name)
+            continue
 
         fields_dict[param_name] = _FieldSpec(
-            type=_get_annotation_type(param), default_value=_get_default_value(param)
+            type=type_, default_value=_get_default_value(param)
         )
 
     return fields_dict
@@ -120,23 +147,25 @@ def _to_pydantic_fields(
 
 def _create_pandas_asset_model(
     model_name: str, fields_dict: Dict[str, _FieldSpec]
-) -> pydantic.BaseModel:
+) -> Type[pydantic.BaseModel]:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
-    model = pydantic.create_model(model_name, **fields_dict)
+    model = pydantic.create_model(model_name, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
     return model
 
 
 if __name__ == "__main__":
-    io_methods = _extract_io_methods()[:]
-    print(f"  IO Methods\n{pf(io_methods)}\n")
+    io_methods = _extract_io_methods()[:2]
+    print(f"\n  IO Methods\n{pf(io_methods)}\n")
 
     io_method_sigs = _extract_io_signatures(io_methods)
-    print(f"  IO Method Signatures\n{pf(io_method_sigs)}")
+    print(f"\n  IO Method Signatures\n{pf(io_method_sigs)}")
 
     fields = _to_pydantic_fields(io_method_sigs[1])
-    print(f"  Pydantic Field Specs\n{pf(fields)}")
+    print(f"\n  Pydantic Field Specs\n{pf(fields)}")
 
     model = _create_pandas_asset_model("POCAssetModel", fields)
+    print(f"\nNEED_SPECIAL_HANDLING\n{pf(NEED_SPECIAL_HANDLING)}")
+    print(f"\nFIELD_SKIPPED\n{pf(FIELD_SKIPPED)}\n")
     print(model)
-    # model.update_forward_refs()
-    # print(model(filepath_or_buffer=__file__))
+    model.update_forward_refs(FilePath=FilePath)
+    print(model())
