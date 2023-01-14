@@ -411,9 +411,9 @@ def test_batch_head(
             # if n_rows is not None we pass it to Batch.head()
             head_df = batch.head(n_rows=n_rows)
             # the set of types returned by pd.DataFrame.head() and pyspark.sql.DataFrame.head()
-            assert isinstance(
-                head_df, (pd.DataFrame, list[pyspark_sql_Row], pyspark_sql_Row)
-            )
+            assert isinstance(head_df, (pd.DataFrame, pyspark_sql_Row, list))
+            if isinstance(head_df, list):
+                assert all(isinstance(row, pyspark_sql_Row) for row in head_df)
 
             # compute the total number of rows
             resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
