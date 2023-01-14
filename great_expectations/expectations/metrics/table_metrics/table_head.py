@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Iterator
 
 import pandas as pd
@@ -103,8 +105,9 @@ class TableHead(TableMetricProvider):
                         df = next(df_chunk_iterator)
                     else:
                         # if n_rows is negative, remove the last chunk
-                        *df_chunk_iterator, _ = df_chunk_iterator
-                        df = pd.concat(objs=df_chunk_iterator, ignore_index=True)
+                        df_chunk_list: list[pd.DataFrame]
+                        *df_chunk_list, _ = df_chunk_iterator
+                        df = pd.concat(objs=df_chunk_list, ignore_index=True)
 
             except (ValueError, NotImplementedError):
                 # it looks like MetaData that is used by pd.read_sql_table
