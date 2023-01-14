@@ -26,6 +26,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.computed_metrics.computed_metric import ComputedMetric
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.core.util import (
     AzureUrl,
     DBFSPath,
