@@ -281,7 +281,7 @@ class SparkDFDatasource(LegacyDatasource):
             )
 
         if reader_method is None:
-            reader_method = self.guess_reader_method_from_path(path_lower=path)[
+            reader_method = self.guess_reader_method_from_path(path=path)[
                 "reader_method"
             ]
 
