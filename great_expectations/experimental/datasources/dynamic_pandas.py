@@ -6,6 +6,7 @@ from pprint import pformat as pf
 from typing import (
     Callable,
     Dict,
+    Hashable,
     List,
     NamedTuple,
     Sequence,
@@ -20,7 +21,7 @@ import pandas as pd
 import pydantic
 from pydantic import FilePath
 from pydantic.typing import resolve_annotations
-from typing_extensions import Final, TypeAlias, reveal_type
+from typing_extensions import Final, Literal, TypeAlias, reveal_type
 
 logger = logging.getLogger(__file__)
 
@@ -29,8 +30,27 @@ DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 # sentinel values
 UNSUPPORTED_TYPE: Final = object()
 
-CAN_HANDLE: Set[str] = {"str", "int", "list", "dict", "bool", "None", "FilePath"}
-# TODO: default dict with list
+CAN_HANDLE: Final[Set[str]] = {
+    # builtins
+    "str",
+    "int",
+    "list",
+    "set",
+    "tuple",
+    "dict",
+    "bool",
+    "None",
+    # typing
+    "Sequence[Hashable]",
+    "Sequence[int]",
+    "Literal['infer']",
+    "Literal[False]",
+    "Literal[True]",
+    "Literal['high', 'legacy']",
+    # other
+    "FilePath",
+}
+
 NEED_SPECIAL_HANDLING: Dict[str, List[str]] = defaultdict(list)
 FIELD_SKIPPED: Set[str] = set()
 
@@ -167,5 +187,7 @@ if __name__ == "__main__":
     print(f"\nNEED_SPECIAL_HANDLING\n{pf(NEED_SPECIAL_HANDLING)}")
     print(f"\nFIELD_SKIPPED\n{pf(FIELD_SKIPPED)}\n")
     print(model)
-    model.update_forward_refs(FilePath=FilePath)
+    model.update_forward_refs(
+        FilePath=FilePath, Sequence=Sequence, Hashable=Hashable, Literal=Literal
+    )
     print(model())
