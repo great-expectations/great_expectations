@@ -147,21 +147,18 @@ class Store:
     def deserialize(self, value: Any) -> Any:
         return value
 
-    def get(self, key: DataContextKey) -> Optional[Any]:
+    def get(self, key: DataContextKey, **kwargs) -> Optional[Any]:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
 
-        if self.cloud_mode:
-            self._validate_key(key)
-            value = self._store_backend.get(self.key_to_tuple(key))
-            # TODO [Robby] MER-285: Handle non-200 http errors
-            if value:
-                value = self.ge_cloud_response_json_to_object_dict(response_json=value)
-        else:
-            self._validate_key(key)
-            value = self._store_backend.get(self.key_to_tuple(key))
+        self._validate_key(key)
+        value = self._store_backend.get(self.key_to_tuple(key), **kwargs)
 
         if value:
+            if self.cloud_mode:
+                # TODO [Robby] MER-285: Handle non-200 http errors
+                value = self.ge_cloud_response_json_to_object_dict(response_json=value)
+
             return self.deserialize(value)
 
         return None

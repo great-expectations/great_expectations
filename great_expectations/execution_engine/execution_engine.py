@@ -635,7 +635,7 @@ class ExecutionEngine(ABC):
                 )
             )
             try:
-                res = self._computed_metrics_store.get(key=key)
+                res = self._computed_metrics_store.get(key=key, **runtime_configuration)
                 resolved_metrics[metric_configuration.id] = res.value
             except gx_exceptions.InvalidKeyError as exc_ik:
                 # TODO: <Alex>ALEX</Alex>
