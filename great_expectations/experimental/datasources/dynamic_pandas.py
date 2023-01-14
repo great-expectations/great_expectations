@@ -35,9 +35,11 @@ CAN_HANDLE: Final[Set[str]] = {
     "str",
     "int",
     "list",
+    "list[str]",
     "set",
     "tuple",
     "dict",
+    "dict[str, str]",
     "bool",
     "None",
     # typing
@@ -47,12 +49,14 @@ CAN_HANDLE: Final[Set[str]] = {
     "Literal[False]",
     "Literal[True]",
     "Literal['high', 'legacy']",
+    "Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb']",
     # other
     "FilePath",
 }
 
 NEED_SPECIAL_HANDLING: Dict[str, List[str]] = defaultdict(list)
-FIELD_SKIPPED: Set[str] = set()
+FIELD_SKIPPED_UNSUPPORTED_TYPE: Set[str] = set()
+FIELD_SKIPPED_NO_ANNOTATION: Set[str] = set()
 
 
 class _FieldSpec(NamedTuple):
@@ -151,11 +155,12 @@ def _to_pydantic_fields(
         no_annotation: bool = param.annotation is inspect._empty
         if no_annotation:
             logger.warning(f"`{param_name}` has no type annotation")
+            FIELD_SKIPPED_NO_ANNOTATION.add(param_name)
             continue
         type_ = _get_annotation_type(param)
         if type_ is UNSUPPORTED_TYPE:
             logger.warning(f"`{param_name}` has no supported types. Field skipped")
-            FIELD_SKIPPED.add(param_name)
+            FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
             continue
 
         fields_dict[param_name] = _FieldSpec(
@@ -174,20 +179,26 @@ def _create_pandas_asset_model(
 
 
 if __name__ == "__main__":
-    io_methods = _extract_io_methods()[:2]
+    io_methods = _extract_io_methods()[1:]
     print(f"\n  IO Methods\n{pf(io_methods)}\n")
 
     io_method_sigs = _extract_io_signatures(io_methods)
-    print(f"\n  IO Method Signatures\n{pf(io_method_sigs)}")
+    print("\n  IO Method Signatures\n")
 
-    fields = _to_pydantic_fields(io_method_sigs[1])
-    print(f"\n  Pydantic Field Specs\n{pf(fields)}")
+    for signature in io_method_sigs:
+        print(f"{signature}\n")
+        fields = _to_pydantic_fields(signature)
+        print(f"\n  Pydantic Field Specs\n{pf(fields)}")
 
-    model = _create_pandas_asset_model("POCAssetModel", fields)
-    print(f"\nNEED_SPECIAL_HANDLING\n{pf(NEED_SPECIAL_HANDLING)}")
-    print(f"\nFIELD_SKIPPED\n{pf(FIELD_SKIPPED)}\n")
-    print(model)
-    model.update_forward_refs(
-        FilePath=FilePath, Sequence=Sequence, Hashable=Hashable, Literal=Literal
-    )
-    print(model())
+        model = _create_pandas_asset_model("POCAssetModel", fields)
+        print(f"\nNEED_SPECIAL_HANDLING\n{pf(dict(NEED_SPECIAL_HANDLING))}")
+        print(
+            f"\nFIELD_SKIPPED_UNSUPPORTED_TYPE\n{pf(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n"
+        )
+        print(f"\nFIELD_SKIPPED_NO_ANNOTATION\n{pf(FIELD_SKIPPED_NO_ANNOTATION)}\n")
+        print(model)
+        model.update_forward_refs(
+            FilePath=FilePath, Sequence=Sequence, Hashable=Hashable, Literal=Literal
+        )
+        # print(model(filepath_or_buffer=__file__))
+        print("-----------------------------------")
