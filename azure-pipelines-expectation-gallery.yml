@@ -108,7 +108,7 @@ stages:
                 "google-cloud-bigquery-storage" \
                 "cryptography==38.0.4" \
                 --editable "contrib/cli" \
-                --editable ".[dev]" \
+                --editable ".[redshift]" \
                 --constraint constraints-dev.txt
             displayName: 'Install dependencies'
 
