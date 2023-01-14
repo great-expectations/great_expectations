@@ -381,6 +381,10 @@ def _configure_and_run_data_assistant(
             0,
             True,
         ),
+        (
+            200000,
+            True,
+        ),
     ],
 )
 def test_batch_head(
@@ -402,36 +406,42 @@ def test_batch_head(
             # if n_rows is not None we pass it to Batch.head()
             head_df = batch.head(n_rows=n_rows)
             assert isinstance(head_df, pd.DataFrame)
-            if n_rows >= 0:
-                assert len(head_df.index) == n_rows
-            else:
-                # for n_rows < 0, in order to confirm that all but the last n_rows are returned,
-                # we need to compute the total number of rows
-                resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
-                row_count_metric = MetricConfiguration(
-                    metric_name="table.row_count",
+
+            # compute the total number of rows
+            resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
+            row_count_metric = MetricConfiguration(
+                metric_name="table.row_count",
+                metric_domain_kwargs={"batch_id": batch.id},
+                metric_value_kwargs=None,
+            )
+            if isinstance(batch.data.execution_engine, SqlAlchemyExecutionEngine):
+                row_count_partial_fn_metric = MetricConfiguration(
+                    metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                     metric_domain_kwargs={"batch_id": batch.id},
                     metric_value_kwargs=None,
                 )
-                if isinstance(batch.data.execution_engine, SqlAlchemyExecutionEngine):
-                    row_count_partial_fn_metric = MetricConfiguration(
-                        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
-                        metric_domain_kwargs={"batch_id": batch.id},
-                        metric_value_kwargs=None,
+                resolved_metrics.update(
+                    batch.data.execution_engine.resolve_metrics(
+                        metrics_to_resolve=(row_count_partial_fn_metric,)
                     )
-                    resolved_metrics.update(
-                        batch.data.execution_engine.resolve_metrics(
-                            metrics_to_resolve=(row_count_partial_fn_metric,)
-                        )
-                    )
-                    row_count_metric.metric_dependencies = {
-                        "metric_partial_fn": row_count_partial_fn_metric
-                    }
-
-                resolved_metrics = batch.data.execution_engine.resolve_metrics(
-                    metrics_to_resolve=(row_count_metric,), metrics=resolved_metrics
                 )
-                row_count: int = resolved_metrics[row_count_metric.id]
+                row_count_metric.metric_dependencies = {
+                    "metric_partial_fn": row_count_partial_fn_metric
+                }
+
+            resolved_metrics = batch.data.execution_engine.resolve_metrics(
+                metrics_to_resolve=(row_count_metric,), metrics=resolved_metrics
+            )
+            row_count: int = resolved_metrics[row_count_metric.id]
+
+            # if n_rows is between 0 and the total row_count, that's how many rows we expect
+            if 0 <= n_rows <= row_count:
+                assert len(head_df.index) == n_rows
+            # if n_rows is greater than the row_count, we only expect row_count rows
+            elif n_rows > row_count:
+                assert len(head_df.index) == row_count
+            # if n_rows is negative, we expect all but the final abs(n_rows)
+            else:
                 assert len(head_df.index) == n_rows + row_count
         else:
             # default to 5 rows
