@@ -1,7 +1,6 @@
 import pathlib
 from typing import Tuple
 
-import pandas as pd
 import pytest
 
 from great_expectations.checkpoint import SimpleCheckpoint

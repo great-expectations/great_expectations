@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Iterator
 
 import pandas as pd
 
@@ -91,14 +91,23 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                     )
                 else:
-                    df = next(
-                        pd.read_sql_table(
-                            table_name=getattr(selectable, "name", None),
-                            schema=getattr(selectable, "schema", None),
-                            con=execution_engine.engine,
-                            chunksize=metric_value_kwargs["n_rows"],
-                        )
+                    n_rows: int = metric_value_kwargs["n_rows"]
+                    if n_rows < 0:
+                        n_rows *= -1
+                    # passing chunksize causes the Iterator to be returned
+                    df_chunk_iterator: Iterator[pd.DataFrame] = pd.read_sql_table(
+                        table_name=getattr(selectable, "name", None),
+                        schema=getattr(selectable, "schema", None),
+                        con=execution_engine.engine,
+                        chunksize=n_rows,
                     )
+                    if metric_value_kwargs["n_rows"] > 0:
+                        df = next(df_chunk_iterator)
+                    else:
+                        # if n_rows is negative, remove the last chunk
+                        *df_chunk_iterator, _ = df_chunk_iterator
+                        df = pd.concat(objs=df_chunk_iterator, ignore_index=True)
+
             except (ValueError, NotImplementedError):
                 # it looks like MetaData that is used by pd.read_sql_table
                 # cannot work on a temp table.
