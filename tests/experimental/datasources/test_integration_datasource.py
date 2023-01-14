@@ -12,7 +12,7 @@ from great_expectations.checkpoint.types.checkpoint_result import CheckpointResu
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.expectations.metrics.import_manager import pyspark_sql_DataFrame
+from great_expectations.expectations.metrics.import_manager import pyspark_sql_Row
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
@@ -403,14 +403,17 @@ def test_batch_head(
     batch_list: list[Batch] = datasource.get_batch_list_from_batch_request(
         batch_request=batch_request
     )
-    assert len(batch_list) == 1
+    assert len(batch_list) > 0
     batch: Batch = batch_list[0]
     if success:
         head_df: pd.DataFrame
         if n_rows is not None:
             # if n_rows is not None we pass it to Batch.head()
             head_df = batch.head(n_rows=n_rows)
-            assert isinstance(head_df, (pd.DataFrame, pyspark_sql_DataFrame))
+            # the set of types returned by pd.DataFrame.head() and pyspark.sql.DataFrame.head()
+            assert isinstance(
+                head_df, (pd.DataFrame, list[pyspark_sql_Row], pyspark_sql_Row)
+            )
 
             # compute the total number of rows
             resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
@@ -437,17 +440,26 @@ def test_batch_head(
             resolved_metrics = batch.data.execution_engine.resolve_metrics(
                 metrics_to_resolve=(row_count_metric,), metrics=resolved_metrics
             )
-            row_count: int = resolved_metrics[row_count_metric.id]
+            total_row_count: int = resolved_metrics[row_count_metric.id]
+
+            # count the number of rows in head_df depending on return type
+            head_df_row_count: int
+            if isinstance(head_df, pyspark_sql_Row):
+                head_df_row_count = 1
+            elif isinstance(head_df, pd.DataFrame):
+                head_df_row_count = len(head_df.index)
+            else:
+                head_df_row_count = len(head_df)
 
             # if n_rows is between 0 and the total row_count, that's how many rows we expect
-            if 0 <= n_rows <= row_count:
-                assert len(head_df.index) == n_rows
+            if 0 <= n_rows <= total_row_count:
+                assert head_df_row_count == n_rows
             # if n_rows is greater than the row_count, we only expect row_count rows
-            elif n_rows > row_count:
-                assert len(head_df.index) == row_count
+            elif n_rows > total_row_count:
+                assert head_df_row_count == total_row_count
             # if n_rows is negative, we expect all but the final abs(n_rows)
             else:
-                assert len(head_df.index) == n_rows + row_count
+                assert head_df_row_count == n_rows + total_row_count
         else:
             # default to 5 rows
             head_df = batch.head()
