@@ -106,6 +106,10 @@ def batch(request: pytest.FixtureRequest) -> Batch:
             1.5,
             False,
         ),
+        (
+            0,
+            True,
+        ),
     ],
 )
 def test_batch_head(batch: Batch, n_rows: int | str | None, success: bool) -> None:
@@ -115,9 +119,11 @@ def test_batch_head(batch: Batch, n_rows: int | str | None, success: bool) -> No
             # if n_rows is not None we pass it to Batch.head()
             head_df = batch.head(n_rows=n_rows)
             assert isinstance(head_df, pd.DataFrame)
-            if n_rows > 0:
+            if n_rows >= 0:
                 assert len(head_df.index) == n_rows
             else:
+                # for n_rows < 0, in order to confirm that all but the last n_rows are returned,
+                # we need to compute the total number of rows
                 resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
                 row_count_metric = MetricConfiguration(
                     metric_name="table.row_count",
