@@ -208,6 +208,10 @@ class SplitDomainKwargs:
 
 
 class ExecutionEngine(ABC):
+    AGGREGATE_FN_METRIC_SUFFIX: str = (
+        f".{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}"
+    )
+
     recognized_batch_spec_defaults: Set[str] = set()
 
     def __init__(
@@ -506,23 +510,10 @@ class ExecutionEngine(ABC):
         Returns:
             Tuple with two elements: directly-computable and bundled "MetricComputationConfiguration" objects
         """
-        retrieved_metrics: Dict[
-            Tuple[str, str, str], MetricValue
-        ] = self._query_computed_metrics_store(
+        retrieved_metrics: Dict[Tuple[str, str, str], MetricValue]
+        retrieved_metrics, metrics_to_resolve = self._query_computed_metrics_store(
             metrics_to_resolve=metrics_to_resolve,
             runtime_configuration=runtime_configuration,
-        )
-
-        metric_to_resolve: MetricConfiguration
-
-        metrics_to_resolve = list(
-            filter(
-                lambda metric_to_resolve: not self._is_metric_resolved(
-                    metric_configuration=metric_to_resolve,
-                    metrics=retrieved_metrics,
-                ),
-                metrics_to_resolve,
-            )
         )
 
         metric_fn_direct_configurations: List[MetricComputationConfiguration] = []
@@ -547,6 +538,7 @@ class ExecutionEngine(ABC):
         metric_provider_kwargs: dict
         compute_domain_kwargs: dict
         accessor_domain_kwargs: dict
+        metric_to_resolve: MetricConfiguration
         for metric_to_resolve in metrics_to_resolve:
             resolved_metric_dependencies_by_metric_name = (
                 self._get_computed_metric_evaluation_dependencies_by_metric_name(
@@ -607,21 +599,24 @@ class ExecutionEngine(ABC):
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
         runtime_configuration: Optional[dict] = None,
-    ) -> Dict[Tuple[str, str, str], MetricValue]:
-        metrics_to_resolve = filter(
-            lambda element: self._is_metric_persistable(
-                metric_name=element.metric_name
+    ) -> Tuple[Dict[Tuple[str, str, str], MetricValue], Iterable[MetricConfiguration]]:
+        runtime_configuration = runtime_configuration or {}
+
+        metric_configuration: MetricConfiguration
+
+        persistable_metrics_to_retrieve: Iterable[MetricConfiguration] = filter(
+            lambda metric_configuration: self._is_metric_persistable(
+                metric_name=metric_configuration.metric_name
             ),
             metrics_to_resolve,
         )
 
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
-        metric_configuration: MetricConfiguration
         batch_id: str
         key: ComputedMetricIdentifier
         res: Any
-        for metric_configuration in metrics_to_resolve:
+        for metric_configuration in persistable_metrics_to_retrieve:
             batch_id = (
                 metric_configuration.metric_domain_kwargs.get("batch_id")
                 or self.batch_manager.active_batch_id
@@ -650,7 +645,18 @@ class ExecutionEngine(ABC):
                 )
                 # TODO: <Alex>ALEX</Alex>
 
-        return resolved_metrics
+        metric_to_resolve: MetricConfiguration
+        metrics_to_resolve = list(
+            filter(
+                lambda metric_configuration: not self._is_metric_resolved(
+                    metric_configuration=metric_configuration,
+                    metrics=resolved_metrics,
+                ),
+                metrics_to_resolve,
+            )
+        )
+
+        return resolved_metrics, metrics_to_resolve
 
     def _get_computed_metric_evaluation_dependencies_by_metric_name(
         self,
@@ -829,8 +835,9 @@ class ExecutionEngine(ABC):
         )
         return metric_fn_type == MetricFunctionTypes.VALUE
 
-    @staticmethod
+    @classmethod
     def _is_metric_resolved(
+        cls,
         metric_configuration: MetricConfiguration,
         metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
     ) -> bool:
@@ -841,10 +848,9 @@ class ExecutionEngine(ABC):
             return True
 
         metric_name: str = metric_configuration.metric_name
-        metric_suffix: str = f".{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}"
-        if metric_name.endswith(metric_suffix):
+        if metric_name.endswith(cls.AGGREGATE_FN_METRIC_SUFFIX):
             metric_id: Tuple[str, str, str] = (
-                f"{metric_name[:-len(metric_suffix)]}",
+                f"{metric_name[:-len(cls.AGGREGATE_FN_METRIC_SUFFIX)]}",
                 metric_configuration.metric_domain_kwargs_id,
                 metric_configuration.metric_value_kwargs_id,
             )
