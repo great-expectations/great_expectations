@@ -268,31 +268,32 @@ class PandasDatasource(LegacyDatasource):
 
     @staticmethod
     def guess_reader_method_from_path(path: str):
-        path_lower: str = path.lower()
-        if path_lower.endswith(".csv") or path_lower.endswith(".tsv"):
+        path = path.lower()
+        if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif (
-            path_lower.endswith(".parquet") or path_lower.endswith(".parq") or path_lower.endswith(".pqt")
+            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
         ):
             return {"reader_method": "read_parquet"}
-        elif path_lower.endswith(".xlsx") or path_lower.endswith(".xls"):
+        elif path.endswith(".xlsx") or path.endswith(".xls"):
             return {"reader_method": "read_excel"}
-        elif path_lower.endswith(".json"):
+        elif path.endswith(".json"):
             return {"reader_method": "read_json"}
-        elif path_lower.endswith(".pkl"):
+        elif path.endswith(".pkl"):
             return {"reader_method": "read_pickle"}
-        elif path_lower.endswith(".feather"):
+        elif path.endswith(".feather"):
             return {"reader_method": "read_feather"}
-        elif path_lower.endswith(".csv.gz") or path_lower.endswith(".csv.gz"):
+        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
             return {
                 "reader_method": "read_csv",
                 "reader_options": {"compression": "gzip"},
             }
-        elif path_lower.endswith(".sas7bdat") or path_lower.endswith(".xpt"):
+        elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
             return {"reader_method": "read_sas"}
 
         raise BatchKwargsError(
-            f"Unable to determine reader method from path: {path_lower}", {"path": path_lower}
+            f"Unable to determine reader method from path: {path}",
+            {"path": path},
         )
 
     def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:

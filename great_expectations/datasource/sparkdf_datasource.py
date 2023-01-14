@@ -249,16 +249,17 @@ class SparkDFDatasource(LegacyDatasource):
 
     @staticmethod
     def guess_reader_method_from_path(path: str):
-        path_lower: str = path.lower()
-        if path_lower.endswith(".csv") or path_lower.endswith(".tsv"):
+        path: str = path.lower()
+        if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "csv"}
         elif (
-            path_lower.endswith(".parquet") or path_lower.endswith(".parq") or path_lower.endswith(".pqt")
+            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
         ):
             return {"reader_method": "parquet"}
 
         raise BatchKwargsError(
-            f"Unable to determine reader method from path: {path_lower}", {"path": path_lower}
+            f"Unable to determine reader method from path: {path}",
+            {"path": path},
         )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):
