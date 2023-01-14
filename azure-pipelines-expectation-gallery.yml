@@ -107,7 +107,6 @@ stages:
               pip install \
                 "google-cloud-bigquery-storage" \
                 "cryptography==38.0.4" \
-#               --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable "contrib/cli" \
                 --editable ".[dev]" \
                 --constraint constraints-dev.txt
