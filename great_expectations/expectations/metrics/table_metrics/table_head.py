@@ -20,10 +20,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.expectations.metrics.import_manager import (
-        pyspark_sql_DataFrame,
-        pyspark_sql_Row,
-    )
+    from great_expectations.expectations.metrics.import_manager import pyspark_sql_Row
 
 
 class TableHead(TableMetricProvider):
@@ -163,13 +160,13 @@ class TableHead(TableMetricProvider):
         metric_value_kwargs: dict,
         metrics: dict[str, Any],
         runtime_configuration: dict,
-    ) -> pyspark_sql_DataFrame:
+    ) -> list[pyspark_sql_Row] | pyspark_sql_Row:
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        row_list: list[pyspark_sql_Row]
+        row_list: list[pyspark_sql_Row] | pyspark_sql_Row
         if metric_value_kwargs["fetch_all"]:
             row_list = df.collect()
         else:
             row_list = df.head(metric_value_kwargs["n_rows"])
-        return pyspark_sql_DataFrame(row_list)
+        return row_list

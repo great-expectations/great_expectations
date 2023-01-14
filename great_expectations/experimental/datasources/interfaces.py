@@ -42,10 +42,10 @@ if TYPE_CHECKING:
     from great_expectations.validator.computed_metric import MetricValue
 
 try:
-    from pyspark.sql.dataframe import DataFrame as pyspark_sql_DataFrame
+    from pyspark.sql import Row as pyspark_sql_Row
 except ImportError:
     LOGGER.debug("No spark sql dataframe module available.")
-    pyspark_sql_DataFrame = None
+    pyspark_sql_Row = None
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants returned. The keys represent dimensions one can slice the data along
@@ -418,7 +418,9 @@ class Batch(ExperimentalBaseModel):
         return values
 
     @validate_arguments
-    def head(self, n_rows: StrictInt = 5) -> Union[pd.DataFrame, pyspark_sql_DataFrame]:
+    def head(
+        self, n_rows: StrictInt = 5
+    ) -> Union[pd.DataFrame, List[pyspark_sql_Row], pyspark_sql_Row]:
         """Return the first n rows of this Batch.
 
         This method returns the first n rows for the Batch based on position.
@@ -431,7 +433,8 @@ class Batch(ExperimentalBaseModel):
             n_rows: The number of rows to return from the Batch.
 
         Returns
-            A DataFrame containing the first n rows of the Batch.
+            PandasExecutionEngine and SqlAlchemyExecutionEngine: A Pandas DataFrame containing the first n rows.
+            SparkDFExecutionEngine: If n_rows > 1, a list of pyspark.sql.Rows; if n_rows = 1, a pyspark.sql.Row.
         """
         self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
         metric = MetricConfiguration(
