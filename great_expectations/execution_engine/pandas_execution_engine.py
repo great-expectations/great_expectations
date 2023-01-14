@@ -382,7 +382,7 @@ not {batch_spec.__class__.__name__}"""
             ReaderMethod to use for the filepath
 
         """
-        path: str = path.lower()
+        path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif (

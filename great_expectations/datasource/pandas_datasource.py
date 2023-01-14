@@ -268,31 +268,31 @@ class PandasDatasource(LegacyDatasource):
 
     @staticmethod
     def guess_reader_method_from_path(path: str):
-        path: str = path.lower()
-        if path.endswith(".csv") or path.endswith(".tsv"):
+        path_lower: str = path.lower()
+        if path_lower.endswith(".csv") or path_lower.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif (
-            path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
+            path_lower.endswith(".parquet") or path_lower.endswith(".parq") or path_lower.endswith(".pqt")
         ):
             return {"reader_method": "read_parquet"}
-        elif path.endswith(".xlsx") or path.endswith(".xls"):
+        elif path_lower.endswith(".xlsx") or path_lower.endswith(".xls"):
             return {"reader_method": "read_excel"}
-        elif path.endswith(".json"):
+        elif path_lower.endswith(".json"):
             return {"reader_method": "read_json"}
-        elif path.endswith(".pkl"):
+        elif path_lower.endswith(".pkl"):
             return {"reader_method": "read_pickle"}
-        elif path.endswith(".feather"):
+        elif path_lower.endswith(".feather"):
             return {"reader_method": "read_feather"}
-        elif path.endswith(".csv.gz") or path.endswith(".csv.gz"):
+        elif path_lower.endswith(".csv.gz") or path_lower.endswith(".csv.gz"):
             return {
                 "reader_method": "read_csv",
                 "reader_options": {"compression": "gzip"},
             }
-        elif path.endswith(".sas7bdat") or path.endswith(".xpt"):
+        elif path_lower.endswith(".sas7bdat") or path_lower.endswith(".xpt"):
             return {"reader_method": "read_sas"}
 
         raise BatchKwargsError(
-            f"Unable to determine reader method from path: {path}", {"path": path}
+            f"Unable to determine reader method from path: {path_lower}", {"path": path_lower}
         )
 
     def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:

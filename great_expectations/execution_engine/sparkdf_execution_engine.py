@@ -394,7 +394,7 @@ illegal.  Please check your config."""
             A dictionary entry of format {'reader_method': reader_method}
 
         """
-        path: str = path.lower()
+        path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return "csv"
         elif (
