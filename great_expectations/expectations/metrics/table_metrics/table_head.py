@@ -57,6 +57,8 @@ class TableHead(TableMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         table_name = getattr(selectable, "name", None)
+        n_rows: int
+        df_chunk_iterator: Iterator[pd.DataFrame]
         if (
             isinstance(table_name, sa.sql.elements._anonymous_label)
             or table_name is None
@@ -69,9 +71,9 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                     )
                 else:
-                    n_rows: int = metric_value_kwargs["n_rows"]
+                    n_rows = metric_value_kwargs["n_rows"]
                     # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator: Iterator[pd.DataFrame] = pd.read_sql_query(
+                    df_chunk_iterator = pd.read_sql_query(
                         sql=selectable,
                         con=execution_engine.engine,
                         chunksize=abs(n_rows),
@@ -99,9 +101,9 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                     )
                 else:
-                    n_rows: int = metric_value_kwargs["n_rows"]
+                    n_rows = metric_value_kwargs["n_rows"]
                     # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator: Iterator[pd.DataFrame] = pd.read_sql_table(
+                    df_chunk_iterator = pd.read_sql_table(
                         table_name=getattr(selectable, "name", None),
                         schema=getattr(selectable, "schema", None),
                         con=execution_engine.engine,
