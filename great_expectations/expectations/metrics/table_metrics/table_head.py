@@ -69,13 +69,20 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                     )
                 else:
-                    df = next(
-                        pd.read_sql_query(
-                            sql=selectable,
-                            con=execution_engine.engine,
-                            chunksize=metric_value_kwargs["n_rows"],
-                        )
+                    n_rows: int = metric_value_kwargs["n_rows"]
+                    # passing chunksize causes the Iterator to be returned
+                    df_chunk_iterator: Iterator[pd.DataFrame] = pd.read_sql_query(
+                        sql=selectable,
+                        con=execution_engine.engine,
+                        chunksize=abs(n_rows),
                     )
+                    if n_rows > 0:
+                        df = next(df_chunk_iterator)
+                    else:
+                        # if n_rows is negative, remove the last chunk
+                        df_chunk_list: list[pd.DataFrame]
+                        *df_chunk_list, _ = df_chunk_iterator
+                        df = pd.concat(objs=df_chunk_list, ignore_index=True)
             except (ValueError, NotImplementedError):
                 # it looks like MetaData that is used by pd.read_sql_query
                 # cannot work on a temp table.

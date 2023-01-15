@@ -447,7 +447,7 @@ def test_batch_head(
 
             # count the number of rows in head_df depending on return type
             head_df_row_count: int
-            if isinstance(head_df, pyspark_sql_Row):
+            if pyspark_sql_Row and isinstance(head_df, pyspark_sql_Row):
                 head_df_row_count = 1
             elif isinstance(head_df, pd.DataFrame):
                 head_df_row_count = len(head_df.index)
