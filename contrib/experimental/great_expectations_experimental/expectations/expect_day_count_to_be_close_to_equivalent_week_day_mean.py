@@ -78,9 +78,9 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
         # get counts for dates
         query = (
             sa.select([sa.func.Date(column), sa.func.count()])
-            .group_by(column)
+            .group_by(sa.func.Date(column))
             .select_from(selectable)
-            .order_by(column.desc())
+            .order_by(sa.func.Date(column).desc())
             .limit(30)
         )
         results = sqlalchemy_engine.execute(query).fetchall()
@@ -177,6 +177,12 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                     },
                     "out": {"success": False},
                 },
+            ],
+            "test_backends": [
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["sqlite"],
+                }
             ],
         }
     ]
