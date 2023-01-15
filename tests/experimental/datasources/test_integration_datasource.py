@@ -390,6 +390,10 @@ def _configure_and_run_data_assistant(
             1,
             True,
         ),
+        (
+            -50000,
+            True,
+        ),
     ],
 )
 def test_batch_head(
@@ -406,7 +410,7 @@ def test_batch_head(
     assert len(batch_list) > 0
     batch: Batch = batch_list[0]
     if success:
-        df_columns = {
+        expected_columns = {
             "vendor_id",
             "pickup_datetime",
             "dropoff_datetime",
@@ -433,12 +437,12 @@ def test_batch_head(
             # the set of types returned by pd.DataFrame.head() and pyspark.sql.DataFrame.head()
             if pyspark_sql_Row and isinstance(head_df, list):
                 assert all(isinstance(row, pyspark_sql_Row) for row in head_df)
-                assert all(list(row.asDict()) == df_columns for row in head_df)
+                assert all(list(row.asDict()) == expected_columns for row in head_df)
             elif pyspark_sql_Row and isinstance(head_df, pyspark_sql_Row):
-                assert list(head_df.asDict()) == df_columns
+                assert list(head_df.asDict()) == expected_columns
             else:
                 assert isinstance(head_df, pd.DataFrame)
-                assert set(head_df.columns) == df_columns
+                assert set(head_df.columns) == expected_columns
 
             # compute the total number of rows
             resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
@@ -482,6 +486,9 @@ def test_batch_head(
             # if n_rows is greater than the total_row_count, we only expect total_row_count rows
             elif n_rows > total_row_count:
                 assert head_df_row_count == total_row_count
+            # if n_rows is negative and abs(n_rows) is larger than total_row_count we expect zero rows
+            elif n_rows < 0 and abs(n_rows) > total_row_count:
+                assert head_df_row_count == 0
             # if n_rows is negative, we expect all but the final abs(n_rows)
             else:
                 assert head_df_row_count == n_rows + total_row_count
@@ -490,7 +497,7 @@ def test_batch_head(
             head_df = batch.head()
             assert isinstance(head_df, pd.DataFrame)
             assert len(head_df.index) == 5
-            assert set(head_df.columns) == df_columns
+            assert set(head_df.columns) == expected_columns
     else:
         with pytest.raises(ValidationError) as e:
             batch.head(n_rows=n_rows)
