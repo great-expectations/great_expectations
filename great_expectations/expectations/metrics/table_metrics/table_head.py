@@ -76,13 +76,9 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                         chunksize=abs(n_rows),
                     )
-                    if n_rows > 0:
-                        df = next(df_chunk_iterator)
-                    else:
-                        # if n_rows is negative, remove the last chunk
-                        df_chunk_list: list[pd.DataFrame]
-                        *df_chunk_list, _ = df_chunk_iterator
-                        df = pd.concat(objs=df_chunk_list, ignore_index=True)
+                    df = TableHead._get_head_df_from_df_iterator(
+                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                    )
             except (ValueError, NotImplementedError):
                 # it looks like MetaData that is used by pd.read_sql_query
                 # cannot work on a temp table.
@@ -111,13 +107,9 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                         chunksize=abs(n_rows),
                     )
-                    if n_rows > 0:
-                        df = next(df_chunk_iterator)
-                    else:
-                        # if n_rows is negative, remove the last chunk
-                        df_chunk_list: list[pd.DataFrame]
-                        *df_chunk_list, _ = df_chunk_iterator
-                        df = pd.concat(objs=df_chunk_list, ignore_index=True)
+                    df = TableHead._get_head_df_from_df_iterator(
+                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                    )
 
             except (ValueError, NotImplementedError):
                 # it looks like MetaData that is used by pd.read_sql_table
@@ -157,6 +149,25 @@ class TableHead(TableMetricProvider):
 
             df = pd.read_sql(sql, con=execution_engine.engine)
 
+        return df
+
+    @staticmethod
+    def _get_head_df_from_df_iterator(
+        df_chunk_iterator: Iterator[pd.DataFrame], n_rows: int
+    ) -> pd.DataFrame:
+        if n_rows > 0:
+            df = next(df_chunk_iterator)
+        else:
+            # if n_rows is zero or negative, remove the last chunk
+            df_chunk_list: list[pd.DataFrame]
+            df_last_chunk: pd.DataFrame
+            *df_chunk_list, df_last_chunk = df_chunk_iterator
+            if df_chunk_list:
+                df = pd.concat(objs=df_chunk_list, ignore_index=True)
+            else:
+                # if n_rows is zero, the last chunk is the entire dataframe,
+                # so we truncate it to preserve the header
+                df = df_last_chunk.head(0)
         return df
 
     @metric_value(engine=SparkDFExecutionEngine)
