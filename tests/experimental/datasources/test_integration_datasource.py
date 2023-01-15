@@ -406,6 +406,26 @@ def test_batch_head(
     assert len(batch_list) > 0
     batch: Batch = batch_list[0]
     if success:
+        df_columns = {
+            "vendor_id",
+            "pickup_datetime",
+            "dropoff_datetime",
+            "passenger_count",
+            "trip_distance",
+            "rate_code_id",
+            "store_and_fwd_flag",
+            "pickup_location_id",
+            "dropoff_location_id",
+            "payment_type",
+            "fare_amount",
+            "extra",
+            "mta_tax",
+            "tip_amount",
+            "tolls_amount",
+            "improvement_surcharge",
+            "total_amount",
+            "congestion_surcharge",
+        }
         head_df: pd.DataFrame
         if n_rows is not None:
             # if n_rows is not None we pass it to Batch.head()
@@ -413,10 +433,12 @@ def test_batch_head(
             # the set of types returned by pd.DataFrame.head() and pyspark.sql.DataFrame.head()
             if pyspark_sql_Row and isinstance(head_df, list):
                 assert all(isinstance(row, pyspark_sql_Row) for row in head_df)
-            elif pyspark_sql_Row:
-                assert isinstance(head_df, (pd.DataFrame, pyspark_sql_Row))
+                assert all(list(row.asDict()) == df_columns for row in head_df)
+            elif pyspark_sql_Row and isinstance(head_df, pyspark_sql_Row):
+                assert list(head_df.asDict()) == df_columns
             else:
                 assert isinstance(head_df, pd.DataFrame)
+                assert set(head_df.columns) == df_columns
 
             # compute the total number of rows
             resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
@@ -468,6 +490,7 @@ def test_batch_head(
             head_df = batch.head()
             assert isinstance(head_df, pd.DataFrame)
             assert len(head_df.index) == 5
+            assert set(head_df.columns) == df_columns
     else:
         with pytest.raises(ValidationError) as e:
             batch.head(n_rows=n_rows)
