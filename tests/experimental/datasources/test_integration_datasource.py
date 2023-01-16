@@ -11,7 +11,10 @@ from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.metrics.import_manager import pyspark_sql_Row
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
@@ -408,28 +411,43 @@ def test_batch_head(
         batch_request=batch_request
     )
     assert len(batch_list) > 0
+
+    # arbitrarily select the first batch for testing
     batch: Batch = batch_list[0]
     if success:
-        expected_columns = {
-            "vendor_id",
-            "pickup_datetime",
-            "dropoff_datetime",
-            "passenger_count",
-            "trip_distance",
-            "rate_code_id",
-            "store_and_fwd_flag",
-            "pickup_location_id",
-            "dropoff_location_id",
-            "payment_type",
-            "fare_amount",
-            "extra",
-            "mta_tax",
-            "tip_amount",
-            "tolls_amount",
-            "improvement_surcharge",
-            "total_amount",
-            "congestion_surcharge",
+        execution_engine: ExecutionEngine = batch.data.execution_engine
+
+        # get the expected column names
+        execution_engine.batch_manager.load_batch_list(batch_list=[batch])
+
+        resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
+        table_column_types_metric = MetricConfiguration(
+            metric_name="table.column_types",
+            metric_domain_kwargs={"batch_id": batch.id},
+            metric_value_kwargs={
+                "include_nested": True,
+            },
+        )
+        resolved_metrics.update(
+            execution_engine.resolve_metrics(
+                metrics_to_resolve=(table_column_types_metric,)
+            )
+        )
+        table_columns_metric = MetricConfiguration(
+            metric_name="table.columns",
+            metric_domain_kwargs={"batch_id": batch.id},
+            metric_value_kwargs=None,
+        )
+        table_columns_metric.metric_dependencies = {
+            "table.column_types": table_column_types_metric,
         }
+        resolved_metrics.update(
+            execution_engine.resolve_metrics(
+                metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
+            )
+        )
+        expected_columns: set[str] = set(resolved_metrics[table_columns_metric.id])
+
         head_df: pd.DataFrame
         if n_rows is not None:
             # if n_rows is not None we pass it to Batch.head()
@@ -437,28 +455,27 @@ def test_batch_head(
             # the set of types returned by pd.DataFrame.head() and pyspark.sql.DataFrame.head()
             if pyspark_sql_Row and isinstance(head_df, list):
                 assert all(isinstance(row, pyspark_sql_Row) for row in head_df)
-                assert all(list(row.asDict()) == expected_columns for row in head_df)
+                assert all(set(row.asDict()) == expected_columns for row in head_df)
             elif pyspark_sql_Row and isinstance(head_df, pyspark_sql_Row):
-                assert list(head_df.asDict()) == expected_columns
+                assert set(head_df.asDict()) == expected_columns
             else:
                 assert isinstance(head_df, pd.DataFrame)
                 assert set(head_df.columns) == expected_columns
 
             # compute the total number of rows
-            resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
             row_count_metric = MetricConfiguration(
                 metric_name="table.row_count",
                 metric_domain_kwargs={"batch_id": batch.id},
                 metric_value_kwargs=None,
             )
-            if isinstance(batch.data.execution_engine, SqlAlchemyExecutionEngine):
+            if isinstance(execution_engine, SqlAlchemyExecutionEngine):
                 row_count_partial_fn_metric = MetricConfiguration(
                     metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                     metric_domain_kwargs={"batch_id": batch.id},
                     metric_value_kwargs=None,
                 )
                 resolved_metrics.update(
-                    batch.data.execution_engine.resolve_metrics(
+                    execution_engine.resolve_metrics(
                         metrics_to_resolve=(row_count_partial_fn_metric,)
                     )
                 )
@@ -466,7 +483,7 @@ def test_batch_head(
                     "metric_partial_fn": row_count_partial_fn_metric
                 }
 
-            resolved_metrics = batch.data.execution_engine.resolve_metrics(
+            resolved_metrics = execution_engine.resolve_metrics(
                 metrics_to_resolve=(row_count_metric,), metrics=resolved_metrics
             )
             total_row_count: int = resolved_metrics[row_count_metric.id]
