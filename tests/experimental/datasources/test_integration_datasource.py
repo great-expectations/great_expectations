@@ -382,6 +382,10 @@ def _configure_and_run_data_assistant(
             False,
         ),
         (
+            True,
+            False,
+        ),
+        (
             0,
             True,
         ),
