@@ -33,7 +33,6 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import Batch
-    from great_expectations.validator.computed_metric import MetricValue
 
 
 def sql_data(
