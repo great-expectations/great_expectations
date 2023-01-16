@@ -355,50 +355,61 @@ def _configure_and_run_data_assistant(
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ["n_rows", "success"],
+    ["n_rows", "fetch_all", "success"],
     [
         (
             None,
+            False,
             True,
         ),
         (
             3,
+            False,
             True,
         ),
         (
             7,
+            False,
             True,
         ),
         (
             -100,
+            False,
             True,
         ),
         (
             "invalid_value",
             False,
+            False,
         ),
         (
             1.5,
             False,
+            False,
         ),
         (
             True,
             False,
+            False,
         ),
         (
             0,
+            False,
             True,
         ),
         (
             200000,
+            False,
             True,
         ),
         (
             1,
+            False,
             True,
         ),
         (
             -50000,
+            False,
             True,
         ),
     ],
@@ -407,6 +418,7 @@ def test_batch_head(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
+    fetch_all: bool,
     n_rows: int | float | str | None,
     success: bool,
 ) -> None:
@@ -424,11 +436,29 @@ def test_batch_head(
 
         metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
 
+        # define metric for the total number of rows
+        row_count_metric = MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs={"batch_id": batch.id},
+            metric_value_kwargs=None,
+        )
+        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+            row_count_partial_fn_metric = MetricConfiguration(
+                metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                metric_domain_kwargs={"batch_id": batch.id},
+                metric_value_kwargs=None,
+            )
+            row_count_metric.metric_dependencies = {
+                "metric_partial_fn": row_count_partial_fn_metric
+            }
+
         # get the expected column names
         expected_columns: set[str] = set(metrics_calculator.columns())
 
         head_df: pd.DataFrame
-        if n_rows is not None:
+        head_df_row_count: int
+        total_row_count: int
+        if n_rows is not None and not fetch_all:
             # if n_rows is not None we pass it to Batch.head()
             head_df = batch.head(n_rows=n_rows)
             # the set of types returned by pd.DataFrame.head() and pyspark.sql.DataFrame.head()
@@ -441,28 +471,9 @@ def test_batch_head(
                 assert isinstance(head_df, pd.DataFrame)
                 assert set(head_df.columns) == expected_columns
 
-            # compute the total number of rows
-            row_count_metric = MetricConfiguration(
-                metric_name="table.row_count",
-                metric_domain_kwargs={"batch_id": batch.id},
-                metric_value_kwargs=None,
-            )
-            if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-                row_count_partial_fn_metric = MetricConfiguration(
-                    metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
-                    metric_domain_kwargs={"batch_id": batch.id},
-                    metric_value_kwargs=None,
-                )
-                row_count_metric.metric_dependencies = {
-                    "metric_partial_fn": row_count_partial_fn_metric
-                }
-
-            total_row_count: int = metrics_calculator.get_metric(
-                metric=row_count_metric
-            )
+            total_row_count = metrics_calculator.get_metric(metric=row_count_metric)
 
             # count the number of rows in head_df depending on return type
-            head_df_row_count: int
             if pyspark_sql_Row and isinstance(head_df, pyspark_sql_Row):
                 head_df_row_count = 1
             elif isinstance(head_df, pd.DataFrame):
@@ -482,6 +493,19 @@ def test_batch_head(
             # if n_rows is negative, we expect all but the final abs(n_rows)
             else:
                 assert head_df_row_count == n_rows + total_row_count
+        elif fetch_all:
+            total_row_count = metrics_calculator.get_metric(metric=row_count_metric)
+            head_df = batch.head(fetch_all=fetch_all)
+            # count the number of rows in head_df depending on return type
+            if pyspark_sql_Row and isinstance(head_df, pyspark_sql_Row):
+                head_df_row_count = 1
+            elif isinstance(head_df, pd.DataFrame):
+                head_df_row_count = len(head_df.index)
+            else:
+                head_df_row_count = len(head_df)
+            assert head_df_row_count == total_row_count
+            assert set(head_df.columns) == expected_columns
+
         else:
             # default to 5 rows
             head_df = batch.head()

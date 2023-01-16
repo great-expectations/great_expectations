@@ -19,7 +19,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictInt
+from pydantic import Field, StrictBool, StrictInt
 from pydantic import dataclasses as pydantic_dc
 from pydantic import root_validator, validate_arguments
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
@@ -419,7 +419,9 @@ class Batch(ExperimentalBaseModel):
 
     @validate_arguments
     def head(
-        self, n_rows: StrictInt = 5
+        self,
+        n_rows: StrictInt = 5,
+        fetch_all: StrictBool = False,
     ) -> Union[pd.DataFrame, List[pyspark_sql_Row], pyspark_sql_Row]:
         """Return the first n rows of this Batch.
 
@@ -440,7 +442,7 @@ class Batch(ExperimentalBaseModel):
         metric = MetricConfiguration(
             metric_name="table.head",
             metric_domain_kwargs={"batch_id": self.id},
-            metric_value_kwargs={"n_rows": n_rows, "fetch_all": False},
+            metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
         )
         resolved_metrics: dict[
             tuple[str, str, str], MetricValue
