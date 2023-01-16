@@ -416,11 +416,10 @@ def test_batch_head(
     batch: Batch = batch_list[0]
     if success:
         execution_engine: ExecutionEngine = batch.data.execution_engine
+        execution_engine.batch_manager.load_batch_list(batch_list=[batch])
+        resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
 
         # get the expected column names
-        execution_engine.batch_manager.load_batch_list(batch_list=[batch])
-
-        resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
         table_column_types_metric = MetricConfiguration(
             metric_name="table.column_types",
             metric_domain_kwargs={"batch_id": batch.id},
