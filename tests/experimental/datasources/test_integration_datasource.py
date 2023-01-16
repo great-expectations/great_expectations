@@ -29,6 +29,7 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import Batch
@@ -421,35 +422,11 @@ def test_batch_head(
     if success:
         execution_engine: ExecutionEngine = batch.data.execution_engine
         execution_engine.batch_manager.load_batch_list(batch_list=[batch])
-        resolved_metrics: dict[tuple[str, str, str], MetricValue] = {}
+
+        metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
 
         # get the expected column names
-        table_column_types_metric = MetricConfiguration(
-            metric_name="table.column_types",
-            metric_domain_kwargs={"batch_id": batch.id},
-            metric_value_kwargs={
-                "include_nested": True,
-            },
-        )
-        resolved_metrics.update(
-            execution_engine.resolve_metrics(
-                metrics_to_resolve=(table_column_types_metric,)
-            )
-        )
-        table_columns_metric = MetricConfiguration(
-            metric_name="table.columns",
-            metric_domain_kwargs={"batch_id": batch.id},
-            metric_value_kwargs=None,
-        )
-        table_columns_metric.metric_dependencies = {
-            "table.column_types": table_column_types_metric,
-        }
-        resolved_metrics.update(
-            execution_engine.resolve_metrics(
-                metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
-            )
-        )
-        expected_columns: set[str] = set(resolved_metrics[table_columns_metric.id])
+        expected_columns: set[str] = set(metrics_calculator.columns())
 
         head_df: pd.DataFrame
         if n_rows is not None:
@@ -477,19 +454,13 @@ def test_batch_head(
                     metric_domain_kwargs={"batch_id": batch.id},
                     metric_value_kwargs=None,
                 )
-                resolved_metrics.update(
-                    execution_engine.resolve_metrics(
-                        metrics_to_resolve=(row_count_partial_fn_metric,)
-                    )
-                )
                 row_count_metric.metric_dependencies = {
                     "metric_partial_fn": row_count_partial_fn_metric
                 }
 
-            resolved_metrics = execution_engine.resolve_metrics(
-                metrics_to_resolve=(row_count_metric,), metrics=resolved_metrics
+            total_row_count: int = metrics_calculator.get_metric(
+                metric=row_count_metric
             )
-            total_row_count: int = resolved_metrics[row_count_metric.id]
 
             # count the number of rows in head_df depending on return type
             head_df_row_count: int
