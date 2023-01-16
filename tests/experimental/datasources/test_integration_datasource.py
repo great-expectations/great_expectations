@@ -412,6 +412,13 @@ def _configure_and_run_data_assistant(
             False,
             True,
         ),
+        (-5, True, True),
+        (0, True, True),
+        (3, True, True),
+        (50000, True, True),
+        (-20000, True, True),
+        (None, True, True),
+        (15, "invalid_value", False),
     ],
 )
 def test_batch_head(
@@ -460,7 +467,7 @@ def test_batch_head(
         total_row_count: int
         if n_rows is not None and not fetch_all:
             # if n_rows is not None we pass it to Batch.head()
-            head_df = batch.head(n_rows=n_rows)
+            head_df = batch.head(n_rows=n_rows, fetch_all=fetch_all)
             # the set of types returned by pd.DataFrame.head() and pyspark.sql.DataFrame.head()
             if pyspark_sql_Row and isinstance(head_df, list):
                 assert all(isinstance(row, pyspark_sql_Row) for row in head_df)
@@ -495,7 +502,10 @@ def test_batch_head(
                 assert head_df_row_count == n_rows + total_row_count
         elif fetch_all:
             total_row_count = metrics_calculator.get_metric(metric=row_count_metric)
-            head_df = batch.head(fetch_all=fetch_all)
+            if n_rows:
+                head_df = batch.head(n_rows=n_rows, fetch_all=fetch_all)
+            else:
+                head_df = batch.head(fetch_all=fetch_all)
             # count the number of rows in head_df depending on return type
             if pyspark_sql_Row and isinstance(head_df, pyspark_sql_Row):
                 head_df_row_count = 1
@@ -508,15 +518,23 @@ def test_batch_head(
 
         else:
             # default to 5 rows
-            head_df = batch.head()
+            head_df = batch.head(fetch_all=fetch_all)
             assert isinstance(head_df, pd.DataFrame)
             assert len(head_df.index) == 5
             assert set(head_df.columns) == expected_columns
     else:
         with pytest.raises(ValidationError) as e:
-            batch.head(n_rows=n_rows)
-        assert str(e.value) == (
+            batch.head(n_rows=n_rows, fetch_all=fetch_all)
+        n_rows_validation_error = (
             "1 validation error for Head\n"
             "n_rows\n"
             "  value is not a valid integer (type=type_error.integer)"
         )
+        fetch_all_validation_error = (
+            "1 validation error for Head\n"
+            "fetch_all\n"
+            "  value is not a valid boolean (type=value_error.strictbool)"
+        )
+        assert n_rows_validation_error in str(
+            e.value
+        ) or fetch_all_validation_error in str(e.value)
