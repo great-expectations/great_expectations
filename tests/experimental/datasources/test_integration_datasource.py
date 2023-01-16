@@ -357,61 +357,17 @@ def _configure_and_run_data_assistant(
 @pytest.mark.parametrize(
     ["n_rows", "fetch_all", "success"],
     [
-        (
-            None,
-            False,
-            True,
-        ),
-        (
-            3,
-            False,
-            True,
-        ),
-        (
-            7,
-            False,
-            True,
-        ),
-        (
-            -100,
-            False,
-            True,
-        ),
-        (
-            "invalid_value",
-            False,
-            False,
-        ),
-        (
-            1.5,
-            False,
-            False,
-        ),
-        (
-            True,
-            False,
-            False,
-        ),
-        (
-            0,
-            False,
-            True,
-        ),
-        (
-            200000,
-            False,
-            True,
-        ),
-        (
-            1,
-            False,
-            True,
-        ),
-        (
-            -50000,
-            False,
-            True,
-        ),
+        (None, False, True),
+        (3, False, True),
+        (7, False, True),
+        (-100, False, True),
+        ("invalid_value", False, False),
+        (1.5, False, False),
+        (True, False, False),
+        (0, False, True),
+        (200000, False, True),
+        (1, False, True),
+        (-50000, False, True),
         (-5, True, True),
         (0, True, True),
         (3, True, True),
