@@ -129,7 +129,8 @@ class TableHead(TableMetricProvider):
             # we want to compile our selectable
             stmt = sa.select(["*"]).select_from(selectable)
             n_rows = metric_value_kwargs["n_rows"]
-            if metric_value_kwargs["fetch_all"]:
+            fetch_all = metric_value_kwargs["fetch_all"]
+            if fetch_all:
                 sql = stmt.compile(
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
@@ -146,14 +147,14 @@ class TableHead(TableMetricProvider):
                     sql = f"SELECT TOP {n_rows}{sql[6:]}"
             else:
                 if n_rows > 0:
-                    stmt = stmt.limit(metric_value_kwargs["n_rows"])
+                    stmt = stmt.limit(n_rows)
                 sql = stmt.compile(
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
                 )
 
             # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
-            if n_rows <= 0:
+            if n_rows <= 0 and not fetch_all:
                 df_chunk_iterator = pd.read_sql(
                     sql=sql, con=execution_engine.engine, chunksize=abs(n_rows)
                 )
