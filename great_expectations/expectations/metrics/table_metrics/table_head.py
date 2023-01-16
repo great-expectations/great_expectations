@@ -82,9 +82,9 @@ class TableHead(TableMetricProvider):
                         df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                     )
             except (ValueError, NotImplementedError):
-                # it looks like MetaData that is used by pd.read_sql_query
-                # cannot work on a temp table.
-                # If it fails, we are trying to get the data using read_sql
+                # MetaData that is used by pd.read_sql_table
+                # cannot work on a temp table with pandas < 1.4.0.
+                # If it fails, we try to get the data using read_sql.
                 df = None
             except StopIteration:
                 validator = Validator(execution_engine=execution_engine)
@@ -114,9 +114,9 @@ class TableHead(TableMetricProvider):
                     )
 
             except (ValueError, NotImplementedError):
-                # it looks like MetaData that is used by pd.read_sql_table
-                # cannot work on a temp table.
-                # If it fails, we are trying to get the data using read_sql
+                # MetaData that is used by pd.read_sql_table
+                # cannot work on a temp table with pandas < 1.4.0.
+                # If it fails, we try to get the data using read_sql.
                 df = None
             except StopIteration:
                 validator = Validator(execution_engine=execution_engine)
@@ -128,6 +128,7 @@ class TableHead(TableMetricProvider):
         if df is None:
             # we want to compile our selectable
             stmt = sa.select(["*"]).select_from(selectable)
+            n_rows = metric_value_kwargs["n_rows"]
             if metric_value_kwargs["fetch_all"]:
                 sql = stmt.compile(
                     dialect=execution_engine.engine.dialect,
@@ -141,15 +142,26 @@ class TableHead(TableMetricProvider):
                         compile_kwargs={"literal_binds": True},
                     )
                 )
-                sql = f"SELECT TOP {metric_value_kwargs['n_rows']}{sql[6:]}"
+                if n_rows > 0:
+                    sql = f"SELECT TOP {n_rows}{sql[6:]}"
             else:
-                stmt = stmt.limit(metric_value_kwargs["n_rows"])
+                if n_rows > 0:
+                    stmt = stmt.limit(metric_value_kwargs["n_rows"])
                 sql = stmt.compile(
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
                 )
 
-            df = pd.read_sql(sql, con=execution_engine.engine)
+            # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
+            if n_rows <= 0:
+                df_chunk_iterator = pd.read_sql(
+                    sql=sql, con=execution_engine.engine, chunksize=abs(n_rows)
+                )
+                df = TableHead._get_head_df_from_df_iterator(
+                    df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                )
+            else:
+                df = pd.read_sql(sql=sql, con=execution_engine.engine)
 
         return df
 
