@@ -130,20 +130,6 @@ class ExpectMulticolumnSumValuesToBeEqualToSingleColumn(MulticolumnMapExpectatio
                     },
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
-                },
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-            ],
         }
     ]
 

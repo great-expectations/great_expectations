@@ -59,6 +59,7 @@ def test_meta_not_dict_exception(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
@@ -125,6 +126,7 @@ def test_condition_not_string_exception(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
@@ -190,6 +192,7 @@ def test_default_expectation_configuration_builder_alice_null_condition_paramete
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
@@ -319,6 +322,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
@@ -386,6 +390,7 @@ def test_default_expectation_configuration_builder_alice_single_term_parameter_c
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
@@ -456,6 +461,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
@@ -527,6 +533,7 @@ def test_default_expectation_configuration_builder_alice_single_term_variable_co
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id"
@@ -598,6 +605,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
@@ -669,6 +677,7 @@ def test_default_expectation_configuration_builder_alice_two_term_and_parameter_
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
@@ -740,6 +749,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
@@ -811,6 +821,7 @@ def test_default_expectation_configuration_builder_alice_two_term_or_parameter_v
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
@@ -882,6 +893,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
@@ -953,6 +965,7 @@ def test_default_expectation_configuration_builder_alice_more_than_two_term_para
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
@@ -1024,6 +1037,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"
@@ -1095,6 +1109,7 @@ def test_default_expectation_configuration_builder_alice_parentheses_parameter_v
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_min_user_id.value[0]"

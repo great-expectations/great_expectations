@@ -1,7 +1,7 @@
 // load .env file (used while development) for loading env variables
 require('dotenv').config()
 const fetch = require('node-fetch')
-const expecS3URL = 'https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2.json'
+const expecS3URL = process.env.ALGOLIA_S3_EXPECTATIONS_URL
 const algoliasearch = require('algoliasearch')
 const client = algoliasearch(process.env.ALGOLIA_ACCOUNT, process.env.ALGOLIA_WRITE_KEY)
 const expecAlgoliaIndex = process.env.ALGOLIA_EXPECTATION_INDEX
