@@ -426,7 +426,7 @@ class Batch(ExperimentalBaseModel):
 
     @overload
     def head(
-        self, n_rows: Literal[0], fetch_all: StrictBool
+        self, n_rows: Literal[0], fetch_all: Literal[False]
     ) -> pd.DataFrame | list[pyspark_sql_Row]:
         ...
 
@@ -449,8 +449,11 @@ class Batch(ExperimentalBaseModel):
             fetch_all: If True, ignore n_rows and return the entire Batch.
 
         Returns
-            PandasExecutionEngine and SqlAlchemyExecutionEngine: A Pandas DataFrame containing the first n rows.
-            SparkDFExecutionEngine: If n_rows > 1, a list of pyspark.sql.Rows; if n_rows = 1, a pyspark.sql.Row.
+            PandasExecutionEngine and SqlAlchemyExecutionEngine:
+                - A Pandas DataFrame containing the first n rows.
+            SparkDFExecutionEngine:
+                - If n_rows != 1, a list containing the first n pyspark.sql.Rows.
+                - If n_rows = 1, a pyspark.sql.Row.
         """
         self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
         metric = MetricConfiguration(
