@@ -20,10 +20,10 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt, conint
+from pydantic import Field, StrictBool, StrictInt
 from pydantic import dataclasses as pydantic_dc
 from pydantic import root_validator, validate_arguments
-from typing_extensions import ClassVar, TypeAlias, TypeGuard
+from typing_extensions import ClassVar, Literal, TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.experimental.datasources.experimental_base_model import (
@@ -420,22 +420,14 @@ class Batch(ExperimentalBaseModel):
 
     @overload
     def head(
-        self, n_rows: None, fetch_all: StrictBool
-    ) -> Union[pd.DataFrame, List[pyspark_sql_Row], pyspark_sql_Row]:
+        self, n_rows: Literal[1], fetch_all: StrictBool
+    ) -> pd.DataFrame | pyspark_sql_Row:
         ...
 
     @overload
-    @validate_arguments
     def head(
-        self, n_rows: conint(strict=True, ge=1, le=1), fetch_all: StrictBool
-    ) -> Union[pd.DataFrame, pyspark_sql_Row]:
-        ...
-
-    @overload
-    @validate_arguments
-    def head(
-        self, n_rows: conint(strict=True, gt=1, lt=1), fetch_all: StrictBool
-    ) -> Union[pd.DataFrame, List[pyspark_sql_Row], pyspark_sql_Row]:
+        self, n_rows: Literal[0], fetch_all: StrictBool
+    ) -> pd.DataFrame | list[pyspark_sql_Row]:
         ...
 
     @validate_arguments
@@ -448,9 +440,9 @@ class Batch(ExperimentalBaseModel):
 
         This method returns the first n rows for the Batch based on position.
 
-        For negative values of n, this method returns all rows except the last n rows.
+        For negative values of n_rows, this method returns all rows except the last n rows.
 
-        If n is larger than the number of rows, this method returns all rows.
+        If n_rows is larger than the number of rows, this method returns all rows.
 
         Parameters
             n_rows: The number of rows to return from the Batch.
