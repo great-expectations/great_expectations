@@ -34,23 +34,23 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-# <snippet>
+# <snippet name="custom_map_metric_class">
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
     # </snippet>
 
     # This is the id string that will be used to reference your metric.
-    # <snippet>
+    # <snippet name="custom_map_metric_name">
     condition_metric_name = "column_values.equal_three"
     # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet>
+    # <snippet name="custom_map_pandas">
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return column == 3
         # </snippet>
 
-    # <snippet>
+    # <snippet name="custom_map_spark_definition">
     @metric_partial(
         engine=SparkDFExecutionEngine,
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
@@ -65,7 +65,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         runtime_configuration,
     ):
         # </snippet>
-        # <snippet>
+        # <snippet name="custom_map_spark_selectable">
         (
             selectable,
             compute_domain_kwargs,
@@ -77,13 +77,13 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         column_name = accessor_domain_kwargs["column"]
         column = F.col(column_name)
         # </snippet>
-        # <snippet>
+        # <snippet name="custom_map_spark_query">
         query = F.when(column == 3, F.lit(False)).otherwise(F.lit(True))
 
         return (query, compute_domain_kwargs, accessor_domain_kwargs)
         # </snippet>
 
-    # <snippet>
+    # <snippet name="custom_map_sqlalchemy">
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):
         return column.in_([3])
@@ -121,15 +121,15 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-# <snippet>
+# <snippet name="custom_map_expectation_class">
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     # </snippet>
-    # <snippet>
+    # <snippet name="custom_map_docstring">
     """Expect values in this column to equal 3."""
     # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet>
+    # <snippet name="custom_map_examples">
     examples = [
         {
             "data": {
@@ -162,7 +162,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    # <snippet>
+    # <snippet name="custom_map_map_metric">
     map_metric = "column_values.equal_three"
     # </snippet>
 
@@ -379,7 +379,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         return unexpected_table_content_block
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet>
+    # <snippet name="custom_map_library_metadata">
     library_metadata = {
         "tags": ["extremely basic math"],
         "contributors": ["@joegargery"],
@@ -388,7 +388,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet>
+    # <snippet name="custom_map_diagnostics">
     ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
 #     </snippet>
 

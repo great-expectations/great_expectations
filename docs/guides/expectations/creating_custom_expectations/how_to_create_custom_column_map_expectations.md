@@ -89,28 +89,28 @@ By convention, your <TechnicalTag tag="metric" text="Metric" /> class is defined
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L48
+```python name="map_template_expectation_class"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L125
+```python name="custom_map_expectation_class"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L49
+```python name="map_template_docstring"
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L128
+```python name="custom_map_docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L104
+```python name="map_template_diagnostics"
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L392
+```python name="custom_map_diagnostics"
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -140,7 +140,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L133-L160
+```python name="custom_map_examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -189,7 +189,7 @@ Metrics answer questions about your data posed by your Expectation, <br/> and al
 
 Your Metric function will have the `@column_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values equal 3 using the `PandasExecutionEngine`.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L48-L50
+```python name="custom_map_pandas"
 ```
 
 This is all that you need to define for now. The `ColumnMapMetricProvider` and `ColumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
@@ -213,22 +213,22 @@ Next, choose a Metric Identifier for your Metric. By convention, Metric Identifi
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L29
+```python name="map_template_metric_name"
 ```
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L43
+```python name="custom_map_metric_name"
 ```
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L57
+```python name="map_template_map_metric"
 ```
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L166
+```python name="custom_map_map_metric"
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -237,12 +237,12 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L26
+```python name="map_template_metric_class"
 ```
 
 with 
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L38
+```python name="custom_map_metric_class"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -307,12 +307,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_map_expectation_template.py#L95-L100
+```python name="map_template_library_metadata"
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L383-L386
+```python name="custom_map_library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
