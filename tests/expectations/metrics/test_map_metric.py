@@ -244,7 +244,7 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == f"column.max.{MetricNameSuffixes.AGGREGATE_FUNCTION.value}"
+        == f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}"
     )
 
     mp = ColumnMax()
@@ -295,7 +295,7 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == f"column_values.nonnull.{MetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricNameSuffixes.AGGREGATE_FUNCTION.value}"
+        == f"column_values.nonnull.{MetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}"
     )
 
     metric = MetricConfiguration(
