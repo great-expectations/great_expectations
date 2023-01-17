@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import TypedDict
@@ -182,22 +182,22 @@ class SimpleCheckpointConfigurator:
         return CheckpointConfig(**config_kwargs)
 
     @staticmethod
-    def _default_action_list() -> List[ActionDict]:
+    def _default_action_list() -> list[ActionDict]:
         return [
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
         ]
 
     def _add_update_data_docs_action(
-        self, action_list: List[ActionDict]
-    ) -> List[ActionDict]:
+        self, action_list: list[ActionDict]
+    ) -> list[ActionDict]:
         update_docs_action = copy.deepcopy(ActionDicts.UPDATE_DATA_DOCS)
         if isinstance(self.site_names, list):
             update_docs_action["action"]["site_names"] = self.site_names
         action_list.append(update_docs_action)
         return action_list
 
-    def _add_slack_action(self, action_list: List[ActionDict]) -> List[ActionDict]:
+    def _add_slack_action(self, action_list: list[ActionDict]) -> list[ActionDict]:
         """
         The underlying SlackNotificationAction and SlackRenderer default to
         including links to all sites if the key notify_with is not present. We
