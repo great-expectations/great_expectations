@@ -5,9 +5,7 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 import numpy as np
 
 from great_expectations.core.domain import Domain
-from great_expectations.core.metric_function_types import (
-    MetricDerivedFunctionTypeSuffixes,
-)
+from great_expectations.core.metric_function_types import DerivedMetricNameSuffixes
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
@@ -82,7 +80,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         """
         super().__init__(
             name=name,
-            metric_name=f"{map_metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+            metric_name=f"{map_metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
             enforce_numeric_metric=True,

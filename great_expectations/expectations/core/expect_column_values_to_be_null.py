@@ -5,9 +5,7 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.expectation_configuration import parse_result_format
-from great_expectations.core.metric_function_types import (
-    MetricDerivedFunctionTypeSuffixes,
-)
+from great_expectations.core.metric_function_types import DerivedMetricNameSuffixes
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -220,7 +218,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         )
         # We do not need this metric for a null metric
         validation_dependencies.remove_metric_configuration(
-            metric_name=f"column_values.nonnull.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+            metric_name=f"column_values.nonnull.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         )
         return validation_dependencies
 
@@ -239,7 +237,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
         )
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(
-            f"{self.map_metric}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+            f"{self.map_metric}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         )
 
         if total_count is None or total_count == 0:
@@ -257,12 +255,12 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             element_count=metrics.get("table.row_count"),
             nonnull_count=nonnull_count,
             unexpected_count=metrics.get(
-                f"{self.map_metric}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+                f"{self.map_metric}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
             ),
             unexpected_list=metrics.get(
-                f"{self.map_metric}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+                f"{self.map_metric}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
             ),
             unexpected_index_list=metrics.get(
-                f"{self.map_metric}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}"
+                f"{self.map_metric}.{DerivedMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
             ),
         )

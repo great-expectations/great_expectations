@@ -9,7 +9,7 @@ from great_expectations.core import (
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.core.metric_function_types import (
-    MetricDerivedFunctionTypeSuffixes,
+    DerivedMetricNameSuffixes,
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
 )
@@ -274,7 +274,7 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
 def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_engine):
     mp = ColumnValuesNonNull()
     metric = MetricConfiguration(
-        metric_name=f"column_values.nonnull.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.nonnull.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -287,7 +287,7 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
 
     metric = MetricConfiguration(
-        metric_name=f"column_values.nonnull.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.nonnull.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -296,11 +296,11 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == f"column_values.nonnull.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}"
+        == f"column_values.nonnull.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}"
     )
 
     metric = MetricConfiguration(
-        metric_name=f"column_values.nonnull.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_name=f"column_values.nonnull.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -314,7 +314,7 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
 def test_get_map_metric_dependencies():
     mp = ColumnMapMetricProvider()
     metric = MetricConfiguration(
-        metric_name=f"foo.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"foo.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -325,7 +325,7 @@ def test_get_map_metric_dependencies():
     )
 
     metric = MetricConfiguration(
-        metric_name=f"foo.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
+        metric_name=f"foo.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -336,7 +336,7 @@ def test_get_map_metric_dependencies():
     )
 
     metric = MetricConfiguration(
-        metric_name=f"foo.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+        metric_name=f"foo.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -347,7 +347,7 @@ def test_get_map_metric_dependencies():
     )
 
     metric = MetricConfiguration(
-        metric_name=f"foo.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
+        metric_name=f"foo.{DerivedMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -358,7 +358,7 @@ def test_get_map_metric_dependencies():
     )
 
     metric = MetricConfiguration(
-        metric_name=f"foo.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}",
+        metric_name=f"foo.{DerivedMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )

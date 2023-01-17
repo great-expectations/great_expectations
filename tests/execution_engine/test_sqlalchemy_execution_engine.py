@@ -12,7 +12,7 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
-    MetricDerivedFunctionTypeSuffixes,
+    DerivedMetricNameSuffixes,
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
 )
@@ -963,7 +963,7 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     validate_tmp_tables()
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )

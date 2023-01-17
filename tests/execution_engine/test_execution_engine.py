@@ -6,7 +6,7 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchData, BatchMarkers
 from great_expectations.core.metric_function_types import (
-    MetricDerivedFunctionTypeSuffixes,
+    DerivedMetricNameSuffixes,
     MetricPartialFunctionTypeSuffixes,
 )
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
@@ -245,7 +245,7 @@ def test_resolve_metrics_with_aggregates_and_column_map():
     ]
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.z_score.under_threshold.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.z_score.under_threshold.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )

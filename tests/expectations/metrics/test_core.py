@@ -10,7 +10,7 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch
 from great_expectations.core.metric_function_types import (
-    MetricDerivedFunctionTypeSuffixes,
+    DerivedMetricNameSuffixes,
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
 )
@@ -1692,7 +1692,7 @@ def test_map_value_set_sa(sa):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_name=f"column_values.in_set.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1704,7 +1704,7 @@ def test_map_value_set_sa(sa):
         metrics_to_resolve=(aggregate_partial,), metrics=metrics
     )
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.in_set.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1776,7 +1776,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_name=f"column_values.in_set.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={
             "column": "a",
         },
@@ -1792,7 +1792,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     )
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.in_set.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={
             "column": "a",
         },
@@ -1832,7 +1832,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_name=f"column_values.in_set.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1844,7 +1844,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     )
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.in_set.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1942,7 +1942,7 @@ def test_map_column_values_increasing_pd():
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name=f"column_values.increasing.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.increasing.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -1967,7 +1967,7 @@ def test_map_column_values_increasing_pd():
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name=f"column_values.increasing.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
+        metric_name=f"column_values.increasing.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
@@ -2044,7 +2044,7 @@ def test_map_column_values_increasing_spark(spark_session):
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name=f"column_values.increasing.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.increasing.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2060,7 +2060,7 @@ def test_map_column_values_increasing_spark(spark_session):
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name=f"column_values.increasing.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
+        metric_name=f"column_values.increasing.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
@@ -2131,7 +2131,7 @@ def test_map_column_values_decreasing_pd():
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name=f"column_values.decreasing.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.decreasing.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2156,7 +2156,7 @@ def test_map_column_values_decreasing_pd():
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name=f"column_values.decreasing.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
+        metric_name=f"column_values.decreasing.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
@@ -2233,7 +2233,7 @@ def test_map_column_values_decreasing_spark(spark_session):
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name=f"column_values.decreasing.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.decreasing.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2249,7 +2249,7 @@ def test_map_column_values_decreasing_spark(spark_session):
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name=f"column_values.decreasing.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
+        metric_name=f"column_values.decreasing.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
@@ -2293,7 +2293,7 @@ def test_map_unique_column_exists_pd():
     metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2310,7 +2310,7 @@ def test_map_unique_column_exists_pd():
     assert metrics[unexpected_count_metric.id] == 2
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
@@ -2390,7 +2390,7 @@ def test_map_unique_column_exists_sa(sa):
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2406,7 +2406,7 @@ def test_map_unique_column_exists_sa(sa):
     assert results[desired_metric.id] == 2
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
@@ -2423,7 +2423,7 @@ def test_map_unique_column_exists_sa(sa):
     assert results[desired_metric.id] == [3, 3]
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
@@ -2439,7 +2439,7 @@ def test_map_unique_column_exists_sa(sa):
     assert results[desired_metric.id] == [(3, 2)]
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
@@ -2516,7 +2516,7 @@ def test_map_unique_empty_query_sa(sa):
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2566,7 +2566,7 @@ def test_map_unique_column_exists_spark(spark_session):
 
     # unique is a *window* function so does not use the aggregate_fn version of unexpected count
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2581,7 +2581,7 @@ def test_map_unique_column_exists_spark(spark_session):
     assert results[desired_metric.id] == 2
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
@@ -2598,7 +2598,7 @@ def test_map_unique_column_exists_spark(spark_session):
     assert results[desired_metric.id] == [3, 3]
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
@@ -2615,7 +2615,7 @@ def test_map_unique_column_exists_spark(spark_session):
     assert results[desired_metric.id] == [(3, 2)]
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
+        metric_name=f"column_values.unique.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={
             "column": "a",
         },
@@ -2739,7 +2739,7 @@ def test_z_score_under_threshold_pd():
     ) == [False, False, False]
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.z_score.under_threshold.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.z_score.under_threshold.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
@@ -2846,7 +2846,7 @@ def test_z_score_under_threshold_spark(spark_session):
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column_values.z_score.under_threshold.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_name=f"column_values.z_score.under_threshold.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
@@ -2859,7 +2859,7 @@ def test_z_score_under_threshold_spark(spark_session):
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.z_score.under_threshold.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.z_score.under_threshold.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
@@ -2922,13 +2922,13 @@ def test_map_column_pairs_equal_metric_pd():
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     # First, assert Pass (no unexpected results).
@@ -3171,13 +3171,13 @@ def test_map_column_pairs_equal_metric_sa(sa):
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     # First, assert Pass (no unexpected results).
@@ -3386,13 +3386,13 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     # First, assert Pass (no unexpected results).
@@ -3610,7 +3610,7 @@ def test_map_column_pairs_greater_metric_pd():
     )
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name=f"column_pair_values.a_greater_than_b.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+        metric_name=f"column_pair_values.a_greater_than_b.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3681,7 +3681,7 @@ def test_map_column_pairs_greater_metric_sa(sa):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name=f"column_pair_values.a_greater_than_b.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+        metric_name=f"column_pair_values.a_greater_than_b.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3753,7 +3753,7 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name=f"column_pair_values.a_greater_than_b.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+        metric_name=f"column_pair_values.a_greater_than_b.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3860,7 +3860,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name=f"column_pair_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+        metric_name=f"column_pair_values.in_set.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3911,7 +3911,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name=f"column_pair_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+        metric_name=f"column_pair_values.in_set.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3984,7 +3984,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name=f"column_pair_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+        metric_name=f"column_pair_values.in_set.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -4035,7 +4035,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name=f"column_pair_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+        metric_name=f"column_pair_values.in_set.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -4192,7 +4192,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
     metrics.update(results)
 
     column_values_nonnull_count_metric = MetricConfiguration(
-        metric_name=f"column_values.null.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
+        metric_name=f"column_values.null.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -4987,13 +4987,13 @@ def test_map_multicolumn_sum_equal_pd():
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     # First, assert Pass (no unexpected results).
@@ -5199,13 +5199,13 @@ def test_map_multicolumn_sum_equal_sa(sa):
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     # First, assert Pass (no unexpected results).
@@ -5401,13 +5401,13 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     # First, assert Pass (no unexpected results).
@@ -5601,13 +5601,13 @@ def test_map_compound_columns_unique_pd():
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     # First, assert Pass (no unexpected results).
@@ -5827,13 +5827,13 @@ def test_map_compound_columns_unique_sa(sa):
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     # First, assert Pass (no unexpected results).
@@ -6042,13 +6042,13 @@ def test_map_compound_columns_unique_spark(spark_session):
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     # First, assert Pass (no unexpected results).
@@ -6238,13 +6238,13 @@ def test_map_select_column_values_unique_within_record_pd():
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     condition_metric = MetricConfiguration(
@@ -6489,13 +6489,13 @@ def test_map_select_column_values_unique_within_record_sa(sa):
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     condition_metric = MetricConfiguration(
@@ -6703,13 +6703,13 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
     unexpected_count_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
     )
     unexpected_rows_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_ROWS.value}"
     )
     unexpected_values_metric_name: str = (
-        f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
+        f"{metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_VALUES.value}"
     )
 
     condition_metric = MetricConfiguration(
