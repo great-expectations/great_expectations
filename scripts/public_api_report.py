@@ -537,8 +537,14 @@ class CodeReferenceFilter:
             name="SNSNotificationAction",
             filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="DataAssistantResult is returned from running a DataAssistant",
+            name="DataAssistantResult",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py"
+            ),
+        ),
     ]
-
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
         IncludeExcludeDefinition(
             reason="Experimental is not part of the public API",
@@ -1029,26 +1035,7 @@ class CodeReferenceFilter:
         IncludeExcludeDefinition(
             reason="to_json_dict is an internal helper method",
             name="to_json_dict",
-            filepath=pathlib.Path(
-                "great_expectations/checkpoint/types/checkpoint_result.py"
-            ),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
-            filepath=pathlib.Path("great_expectations/core/batch.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
             filepath=pathlib.Path("great_expectations/core/domain.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
-            filepath=pathlib.Path(
-                "great_expectations/core/expectation_configuration.py"
-            ),
         ),
         IncludeExcludeDefinition(
             reason="to_json_dict is an internal helper method",
@@ -1058,31 +1045,9 @@ class CodeReferenceFilter:
             ),
         ),
         IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
-            filepath=pathlib.Path("great_expectations/core/expectation_suite.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
-            filepath=pathlib.Path(
-                "great_expectations/core/expectation_validation_result.py"
-            ),
-        ),
-        IncludeExcludeDefinition(
             reason="Internal use",
             name="IDDict",
             filepath=pathlib.Path("great_expectations/core/id_dict.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
-            filepath=pathlib.Path("great_expectations/core/run_identifier.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
-            filepath=pathlib.Path("great_expectations/data_context/types/base.py"),
         ),
         IncludeExcludeDefinition(
             reason="v2 API",
@@ -1112,19 +1077,7 @@ class CodeReferenceFilter:
         IncludeExcludeDefinition(
             reason="to_json_dict is an internal helper method",
             name="to_json_dict",
-            filepath=pathlib.Path(
-                "great_expectations/execution_engine/execution_engine.py"
-            ),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
             filepath=pathlib.Path("great_expectations/expectations/row_conditions.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
-            filepath=pathlib.Path("great_expectations/render/components.py"),
         ),
         IncludeExcludeDefinition(
             reason="to_json_dict is an internal helper method",
@@ -1143,13 +1096,6 @@ class CodeReferenceFilter:
             name="to_json_dict",
             filepath=pathlib.Path(
                 "great_expectations/rule_based_profiler/config/base.py"
-            ),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
-            filepath=pathlib.Path(
-                "great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py"
             ),
         ),
         IncludeExcludeDefinition(
@@ -1204,20 +1150,6 @@ class CodeReferenceFilter:
         IncludeExcludeDefinition(
             reason="to_json_dict is an internal helper method",
             name="to_json_dict",
-            filepath=pathlib.Path(
-                "great_expectations/rule_based_profiler/rule_based_profiler.py"
-            ),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
-            filepath=pathlib.Path(
-                "great_expectations/rule_based_profiler/rule_based_profiler_result.py"
-            ),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
             filepath=pathlib.Path("great_expectations/types/attributes.py"),
         ),
         IncludeExcludeDefinition(
@@ -1234,13 +1166,6 @@ class CodeReferenceFilter:
             reason="to_json_dict is an internal helper method",
             name="to_json_dict",
             filepath=pathlib.Path("great_expectations/validator/exception_info.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="to_json_dict is an internal helper method",
-            name="to_json_dict",
-            filepath=pathlib.Path(
-                "great_expectations/validator/metric_configuration.py"
-            ),
         ),
     ]
 
