@@ -201,17 +201,30 @@ if __name__ == "__main__":
     for signature in io_method_sigs:
         print(f"{signature}\n")
         fields = _to_pydantic_fields(signature)
-        print(f"\n  Pydantic Field Specs\n{pf(fields)}")
+        # print(f"\n  Pydantic Field Specs\n{pf(fields)}")
 
         model = _create_pandas_asset_model("POCAssetModel", fields)
-        print(f"\nNEED_SPECIAL_HANDLING\n{pf(dict(NEED_SPECIAL_HANDLING))}")
-        print(
-            f"\nFIELD_SKIPPED_UNSUPPORTED_TYPE\n{pf(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n"
-        )
-        print(f"\nFIELD_SKIPPED_NO_ANNOTATION\n{pf(FIELD_SKIPPED_NO_ANNOTATION)}\n")
+        # print(f"\nNEED_SPECIAL_HANDLING\n{pf(dict(NEED_SPECIAL_HANDLING))}")
+        # print(
+        #     f"\nFIELD_SKIPPED_UNSUPPORTED_TYPE\n{pf(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n"
+        # )
+        # print(f"\nFIELD_SKIPPED_NO_ANNOTATION\n{pf(FIELD_SKIPPED_NO_ANNOTATION)}\n")
         print(model)
         model.update_forward_refs(
             FilePath=FilePath, Sequence=Sequence, Hashable=Hashable, Literal=Literal
         )
         # print(model(filepath_or_buffer=__file__))
         print("-----------------------------------")
+
+    special_handling = {
+        k: v
+        for (k, v) in NEED_SPECIAL_HANDLING.items()
+        if k in FIELD_SKIPPED_UNSUPPORTED_TYPE or k in FIELD_SKIPPED_NO_ANNOTATION
+    }
+    print(f"\nNEED_SPECIAL_HANDLING\n{pf(special_handling)}")
+    print(
+        f"\nFIELD_SKIPPED_UNSUPPORTED_TYPE: {len(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n{pf(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n"
+    )
+    print(
+        f"\nFIELD_SKIPPED_NO_ANNOTATION: {len(FIELD_SKIPPED_NO_ANNOTATION)}\n{pf(FIELD_SKIPPED_NO_ANNOTATION)}\n"
+    )
