@@ -31,9 +31,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import (
-    MetricPartialFunctionTypeSuffixes,
-)
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
@@ -7120,7 +7118,7 @@ def table_row_count_metric_config() -> MetricConfiguration:
 @pytest.fixture
 def table_row_count_aggregate_fn_metric_config() -> MetricConfiguration:
     return MetricConfiguration(
-        metric_name=f"table.row_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}",
+        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -7161,6 +7159,18 @@ def taxi_test_file():
             "test_sets",
             "taxi_yellow_tripdata_samples",
             "yellow_tripdata_sample_2019-01.csv",
+        ),
+    )
+
+
+@pytest.fixture
+def taxi_test_file_upcase():
+    return file_relative_path(
+        __file__,
+        os.path.join(
+            "test_sets",
+            "taxi_yellow_tripdata_samples_upcase",
+            "yellow_tripdata_sample_2019-01.CSV",
         ),
     )
 

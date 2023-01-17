@@ -115,7 +115,7 @@ class HistogramSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -171,7 +171,7 @@ elements.
             parameters=parameters,
             batch_list=self.batch_list,
             batch_request=self.batch_request,
-            recompute_existing_parameter_values=recompute_existing_parameter_values,
+            runtime_configuration=runtime_configuration,
         )
         # Obtain "column_values.nonnull.count" from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         column_values_nonnull_count_parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
@@ -193,7 +193,7 @@ elements.
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            recompute_existing_parameter_values=recompute_existing_parameter_values,
+            runtime_configuration=runtime_configuration,
         )
 
         # Retrieve metric values for one Batch object.

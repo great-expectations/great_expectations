@@ -1076,15 +1076,40 @@ class AbstractDataContext(ConfigPeer, ABC):
         ]
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        """List existing Checkpoint identifiers on this context.
+
+        Args:
+            None
+
+        Returns:
+            Either a list of strings or ConfigurationIdentifier depending on the environment and context type
+        """
+
         return self.checkpoint_store.list_checkpoints()
 
     def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        """List existing Profiler identifiers on this context.
+
+        Args:
+            None
+
+        Returns:
+            Either a list of strings or ConfigurationIdentifier depending on the environment and context type
+        """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
 
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
     ) -> RuleBasedProfiler:
+        """Save an existing Profiler object utilizing the context's underlying ProfilerStore.
+
+        Args:
+            profiler: The Profiler object to persist.
+
+        Returns:
+            The input profiler - may be modified with an id depending on the backing store.
+        """
         name = profiler.name
         ge_cloud_id = profiler.ge_cloud_id
         key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
@@ -1329,6 +1354,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> Checkpoint:
+        """Retrieves a given Checkpoint by either name or id.
+
+        Args:
+            name: The name of the target Checkpoint.
+            ge_cloud_id: The id associated with the target Checkpoint.
+
+        Returns:
+            The requested Checkpoint.
+
+        Raises:
+            CheckpointNotFoundError if the requested Checkpoint does not exists.
+        """
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
@@ -1347,6 +1384,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
+        """Deletes a given Checkpoint by either name or id.
+
+        Args:
+            name: The name of the target Checkpoint.
+            ge_cloud_id: The id associated with the target Checkpoint.
+
+        Raises:
+            CheckpointNotFoundError if the requested Checkpoint does not exists.
+        """
         return self.checkpoint_store.delete_checkpoint(
             name=name, ge_cloud_id=ge_cloud_id
         )
@@ -1862,6 +1908,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
     ) -> RuleBasedProfiler:
+        """
+        Constructs a Profiler, persists it utilizing the context's underlying ProfilerStore,
+        and returns it to the user for subsequent usage.
+
+        Args:
+            name: The name of the RBP instance
+            config_version: The version of the RBP (currently only 1.0 is supported)
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
+            variables: Any variables to be substituted within the rules
+
+        Returns:
+            The persisted Profiler constructed by the input arguments.
+        """
         config_data = {
             "name": name,
             "config_version": config_version,
@@ -1889,6 +1948,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
+        """Retrieves a given Profiler by either name or id.
+
+        Args:
+            name: The name of the target Profiler.
+            ge_cloud_id: The id associated with the target Profiler.
+
+        Returns:
+            The requested Profiler.
+
+        Raises:
+            ProfilerNotFoundError if the requested Profiler does not exists.
+        """
         return RuleBasedProfiler.get_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
@@ -1901,6 +1972,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
+        """Deletes a given Profiler by either name or id.
+
+        Args:
+            name: The name of the target Profiler.
+            ge_cloud_id: The id associated with the target Profiler.
+
+        Raises:
+            ProfilerNotFoundError if the requested Profiler does not exists.
+        """
         RuleBasedProfiler.delete_profiler(
             profiler_store=self.profiler_store,
             name=name,
@@ -2108,6 +2188,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return validation_operators
 
     def list_validation_operator_names(self):
+        """List the names of currently-configured Validation Operators on this context"""
         if not self.validation_operators:
             return []
 
@@ -2714,6 +2795,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def get_or_create_data_context_config(
         cls, project_config: Union[DataContextConfig, Mapping]
     ) -> DataContextConfig:
+        """Utility method to take in an input config and ensure its conversion to a rich
+        DataContextConfig. If the input is already of the appropriate type, the function
+        exits early.
+
+        Args:
+            project_config: The input config to be evaluated.
+
+        Returns:
+            An instance of DataContextConfig.
+
+        Raises:
+            ValidationError if the input config does not adhere to the required shape of a DataContextConfig.
+        """
         if isinstance(project_config, DataContextConfig):
             return project_config
         try:
