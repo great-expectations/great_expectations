@@ -48,7 +48,6 @@ exclude = [
     # number is the current number of typing errors for the excluded pattern
     'checkpoint/actions\.py',  # 18
     'checkpoint/checkpoint\.py',  # 22
-    'checkpoint/configurator\.py', # 2
     'checkpoint/types/checkpoint_result\.py',  # 34
     'checkpoint/util\.py',  # 5
     'cli/checkpoint\.py',  # 9
@@ -172,7 +171,6 @@ exclude = [
     'rule_based_profiler/rule_based_profiler\.py',  # 40
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
-    'validator/exception_info\.py', # 1
     'validator/validator\.py', # 54
 ]
 
