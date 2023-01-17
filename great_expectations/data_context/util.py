@@ -163,7 +163,7 @@ def file_relative_path(
     """
     dir_path = pathlib.Path(source_path).parent
     abs_path = dir_path.joinpath(relative_path).resolve(strict=strict)
-    return abs_path.as_posix()
+    return str(abs_path)
 
 
 def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
