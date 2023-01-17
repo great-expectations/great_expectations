@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional
 
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import TypedDict
