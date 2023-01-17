@@ -42,7 +42,12 @@ class TableHead(TableMetricProvider):
         )
         if metric_value_kwargs.get("fetch_all", cls.default_kwarg_values["fetch_all"]):
             return df
-        return df.head(metric_value_kwargs["n_rows"])
+        n_rows: int = (
+            metric_value_kwargs.get("n_rows")
+            if metric_value_kwargs.get("n_rows") is not None
+            else cls.default_kwarg_values["n_rows"]
+        )
+        return df.head(n=n_rows)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
@@ -57,7 +62,11 @@ class TableHead(TableMetricProvider):
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         table_name = getattr(selectable, "name", None)
-        n_rows: int
+        n_rows: int = (
+            metric_value_kwargs.get("n_rows")
+            if metric_value_kwargs.get("n_rows") is not None
+            else cls.default_kwarg_values["n_rows"]
+        )
         df_chunk_iterator: Iterator[pd.DataFrame]
         if (
             isinstance(table_name, sa.sql.elements._anonymous_label)
@@ -71,7 +80,6 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                     )
                 else:
-                    n_rows = metric_value_kwargs["n_rows"]
                     # passing chunksize causes the Iterator to be returned
                     df_chunk_iterator = pd.read_sql_query(
                         sql=selectable,
@@ -101,7 +109,6 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                     )
                 else:
-                    n_rows = metric_value_kwargs["n_rows"]
                     # passing chunksize causes the Iterator to be returned
                     df_chunk_iterator = pd.read_sql_table(
                         table_name=getattr(selectable, "name", None),
@@ -128,7 +135,6 @@ class TableHead(TableMetricProvider):
         if df is None:
             # we want to compile our selectable
             stmt = sa.select(["*"]).select_from(selectable)
-            n_rows = metric_value_kwargs["n_rows"]
             fetch_all = metric_value_kwargs["fetch_all"]
             if fetch_all:
                 sql = stmt.compile(
@@ -197,9 +203,14 @@ class TableHead(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        row_list: list[pyspark_sql_Row] | pyspark_sql_Row
+        rows: list[pyspark_sql_Row] | pyspark_sql_Row
         if metric_value_kwargs["fetch_all"]:
-            row_list = df.collect()
+            rows = df.collect()
         else:
-            row_list = df.head(metric_value_kwargs["n_rows"])
-        return row_list
+            n_rows: int = (
+                metric_value_kwargs.get("n_rows")
+                if metric_value_kwargs.get("n_rows") is not None
+                else cls.default_kwarg_values["n_rows"]
+            )
+            rows = df.head(n=n_rows)
+        return rows

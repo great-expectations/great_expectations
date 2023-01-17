@@ -15,11 +15,12 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    overload,
 )
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt
+from pydantic import Field, StrictBool, StrictInt, conint
 from pydantic import dataclasses as pydantic_dc
 from pydantic import root_validator, validate_arguments
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
@@ -417,10 +418,28 @@ class Batch(ExperimentalBaseModel):
         )
         return values
 
+    @overload
+    def head(
+        self, n_rows: None, fetch_all: StrictBool
+    ) -> Union[pd.DataFrame, List[pyspark_sql_Row], pyspark_sql_Row]:
+        ...
+
+    @overload
+    def head(
+        self, n_rows: conint(ge=1, le=1), fetch_all: StrictBool
+    ) -> Union[pd.DataFrame, pyspark_sql_Row]:
+        ...
+
+    @overload
+    def head(
+        self, n_rows: conint(gt=1, lt=1), fetch_all: StrictBool
+    ) -> Union[pd.DataFrame, List[pyspark_sql_Row], pyspark_sql_Row]:
+        ...
+
     @validate_arguments
     def head(
         self,
-        n_rows: StrictInt = 5,
+        n_rows: Optional[StrictInt] = None,
         fetch_all: StrictBool = False,
     ) -> Union[pd.DataFrame, List[pyspark_sql_Row], pyspark_sql_Row]:
         """Return the first n rows of this Batch.
@@ -433,6 +452,7 @@ class Batch(ExperimentalBaseModel):
 
         Parameters
             n_rows: The number of rows to return from the Batch.
+            fetch_all: If True, ignore n_rows and return the entire Batch.
 
         Returns
             PandasExecutionEngine and SqlAlchemyExecutionEngine: A Pandas DataFrame containing the first n rows.

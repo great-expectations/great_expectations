@@ -381,7 +381,7 @@ def test_batch_head(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
-    fetch_all: bool,
+    fetch_all: bool | str,
     n_rows: int | float | str | None,
     success: bool,
 ) -> None:
@@ -422,8 +422,8 @@ def test_batch_head(
         head_df_row_count: int
         total_row_count: int
         if n_rows is not None and not fetch_all:
-            # if n_rows is not None we pass it to Batch.head()
             head_df = batch.head(n_rows=n_rows, fetch_all=fetch_all)
+
             # the set of types returned by pd.DataFrame.head() and pyspark.sql.DataFrame.head()
             if pyspark_sql_Row and isinstance(head_df, list):
                 assert all(isinstance(row, pyspark_sql_Row) for row in head_df)
@@ -471,7 +471,6 @@ def test_batch_head(
                 head_df_row_count = len(head_df)
             assert head_df_row_count == total_row_count
             assert set(head_df.columns) == expected_columns
-
         else:
             # default to 5 rows
             head_df = batch.head(fetch_all=fetch_all)
