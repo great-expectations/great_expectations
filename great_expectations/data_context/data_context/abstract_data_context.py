@@ -35,6 +35,7 @@ from typing_extensions import Literal
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
+    deprecated_argument,
     deprecated_method_or_class,
     public_api,
 )
@@ -1256,6 +1257,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
     @public_api
+    @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
+    @deprecated_argument(argument_name="batches", version="0.14.0")
     def add_checkpoint(
         self,
         name: str,
