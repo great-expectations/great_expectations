@@ -467,8 +467,84 @@ class CodeReferenceFilter:
                 "great_expectations/data_context/data_context/base_data_context.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="ValidationAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="run",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="_run",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="SlackNotificationAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="PagerdutyAlertAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="MicrosoftTeamsNotificationAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="OpsgenieAlertAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="EmailAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="StoreValidationResultAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="StoreEvaluationParametersAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="StoreMetricsAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="UpdateDataDocsAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="CloudNotificationAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
+            name="SNSNotificationAction",
+            filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="DataAssistantResult is returned from running a DataAssistant",
+            name="DataAssistantResult",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/data_assistant_result/data_assistant_result.py"
+            ),
+        ),
     ]
-
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
         IncludeExcludeDefinition(
             reason="Experimental is not part of the public API",
@@ -783,6 +859,313 @@ class CodeReferenceFilter:
             reason="False match for yaml.dump()",
             name="dump",
             filepath=pathlib.Path("great_expectations/data_context/templates.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Helper method used in tests, not part of public API",
+            name="file_relative_path",
+            filepath=pathlib.Path("great_expectations/data_context/util.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_not_be_null",
+            filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_table_row_count_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/pandas_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_not_be_null",
+            filepath=pathlib.Path("great_expectations/dataset/pandas_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/sparkdf_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_not_be_null",
+            filepath=pathlib.Path("great_expectations/dataset/sparkdf_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="head",
+            filepath=pathlib.Path("great_expectations/dataset/sparkdf_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/sqlalchemy_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="expect_column_values_to_not_be_null",
+            filepath=pathlib.Path("great_expectations/dataset/sqlalchemy_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="head",
+            filepath=pathlib.Path("great_expectations/dataset/sqlalchemy_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/data_connector/data_connector.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/data_connector/runtime_data_connector.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
+            name="self_check",
+            filepath=pathlib.Path("great_expectations/datasource/new_datasource.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for dict `.update()` method.",
+            name="update",
+            filepath=pathlib.Path(
+                "great_expectations/execution_engine/execution_engine.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Included in Validator public api",
+            name="head",
+            filepath=pathlib.Path(
+                "great_expectations/execution_engine/sparkdf_execution_engine.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Currently only used in testing code, not referenced in docs.",
+            name="close",
+            filepath=pathlib.Path(
+                "great_expectations/execution_engine/sqlalchemy_execution_engine.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for Python `dict`",
+            name="dict",
+            filepath=pathlib.Path(
+                "great_expectations/render/renderer_configuration.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.get_validator()",
+            name="get_validator",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/domain_builder/domain_builder.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.get_validator()",
+            name="get_validator",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/helpers/util.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for context.get_validator()",
+            name="get_validator",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/parameter_builder/parameter_builder.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Not used directly but from Data Assistant or RuleBasedProfiler",
+            name="run",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/rule/rule.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
+            name="self_check",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/rule_based_profiler.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="read_csv",
+            filepath=pathlib.Path("great_expectations/util.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Exclude code from v2 API",
+            name="validate",
+            filepath=pathlib.Path("great_expectations/util.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Included in Validator public api",
+            name="get_metric",
+            filepath=pathlib.Path("great_expectations/validator/metrics_calculator.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Included in Validator public api",
+            name="head",
+            filepath=pathlib.Path("great_expectations/validator/metrics_calculator.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for Python `Set.add()`",
+            name="add",
+            filepath=pathlib.Path("great_expectations/validator/validation_graph.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="False match for Python dict `.update()`",
+            name="update",
+            filepath=pathlib.Path("great_expectations/validator/validation_graph.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path("great_expectations/core/domain.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path(
+                "great_expectations/core/expectation_diagnostics/expectation_diagnostics.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Internal use",
+            name="IDDict",
+            filepath=pathlib.Path("great_expectations/core/id_dict.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="v2 API",
+            name="expect_column_mean_to_be_between",
+            filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="v2 API",
+            name="expect_column_values_to_be_in_set",
+            filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="v2 API",
+            name="expect_column_values_to_be_in_set",
+            filepath=pathlib.Path("great_expectations/dataset/pandas_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="v2 API",
+            name="expect_column_values_to_be_in_set",
+            filepath=pathlib.Path("great_expectations/dataset/sparkdf_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="v2 API",
+            name="expect_column_values_to_be_in_set",
+            filepath=pathlib.Path("great_expectations/dataset/sqlalchemy_dataset.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path("great_expectations/expectations/row_conditions.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/attributed_resolved_metrics.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path("great_expectations/rule_based_profiler/builder.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/config/base.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/estimators/numeric_range_estimation_result.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/estimators/numeric_range_estimator.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/helpers/cardinality_checker.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/helpers/configuration_reconciliation.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/helpers/runtime_environment.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/parameter_container.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/rule/rule.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path("great_expectations/types/attributes.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path("great_expectations/types/base.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Internal helper method",
+            name="filter_properties_dict",
+            filepath=pathlib.Path("great_expectations/util.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="to_json_dict is an internal helper method",
+            name="to_json_dict",
+            filepath=pathlib.Path("great_expectations/validator/exception_info.py"),
         ),
     ]
 
