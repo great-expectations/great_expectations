@@ -204,7 +204,7 @@ class SimpleCheckpointConfigurator:
         are intentionally hiding this from users of SimpleCheckpoint by having a
         default of "all" that sets the configuration appropriately.
         """
-        _notify_with: str | list[str] | None = self.notify_with
+        _notify_with = self.notify_with
         if self.notify_with == "all":
             _notify_with = None
         action_list.append(
