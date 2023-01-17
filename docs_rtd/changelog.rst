@@ -2373,71 +2373,71 @@ Changelog
 
 0.13.23
 -----------------
-* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised ([#2659](https://github.com/great-expectations/great_expectations/pull/2659)) (thanks @peterdhansen)
-* [BUGFIX] fix update data docs as validation action ([#3031](https://github.com/great-expectations/great_expectations/pull/3031))
+* [BUGFIX] added expectation_config to ExpectationValidationResult when exception is raised (#2659) (thanks @peterdhansen)
+* [BUGFIX] fix update data docs as validation action (#3031)
 * [DOCS] Port over "How to configure an Expectation Store in Azure" from RTD to Docusaurus
-* [DOCS] Port over "How to host and share DataDocs on a filesystem" from RTD to Docusaurus ([#3018](https://github.com/great-expectations/great_expectations/pull/3018))
-* [DOCS] Port over "How to instantiate a Data Context w/o YML" from RTD to Docusaurus ([#3011](https://github.com/great-expectations/great_expectations/pull/3011))
-* [DOCS] Port "How to configure a Validation Result store on a filesystem" from RTD to Docusaurus ([#3025](https://github.com/great-expectations/great_expectations/pull/3025))
-* [DOCS] how to create multibatch expectations using evaluation parameters ([#3039](https://github.com/great-expectations/great_expectations/pull/3039))
-* [DOCS] Port "How to create and edit Expectations with a Profiler" from RTD to Docussaurus. ([#3048](https://github.com/great-expectations/great_expectations/pull/3048))
-* [DOCS] Port RTD adding validations data or suites to checkpoint ([#3030](https://github.com/great-expectations/great_expectations/pull/3030))
-* [DOCS] Porting "How to create and edit Expectations with instant feedback from a sample Batch of data" from RTD to Docusaurus. ([#3046](https://github.com/great-expectations/great_expectations/pull/3046))
-* [DOCS] GDOC-172/Add missing pages ([#3007](https://github.com/great-expectations/great_expectations/pull/3007))
+* [DOCS] Port over "How to host and share DataDocs on a filesystem" from RTD to Docusaurus (#3018)
+* [DOCS] Port over "How to instantiate a Data Context w/o YML" from RTD to Docusaurus (#3011)
+* [DOCS] Port "How to configure a Validation Result store on a filesystem" from RTD to Docusaurus (#3025)
+* [DOCS] how to create multibatch expectations using evaluation parameters (#3039)
+* [DOCS] Port "How to create and edit Expectations with a Profiler" from RTD to Docussaurus. (#3048)
+* [DOCS] Port RTD adding validations data or suites to checkpoint (#3030)
+* [DOCS] Porting "How to create and edit Expectations with instant feedback from a sample Batch of data" from RTD to Docusaurus. (#3046)
+* [DOCS] GDOC-172/Add missing pages (#3007)
 * [DOCS] Port over "How to configure DataContext components using test_yaml_config" from RTD to Docusaurus
 * [DOCS] Port over "How to configure a Validation Result store to Postgres" from RTD to Docusaurus
 * [DOCS] Port over "How to configure an Expectation Store in S3" from RTD to Docusaurus
 * [DOCS] Port over "How to configure an Expectation Store on a filesystem" from RTD to Docusaurus
 * [DOCS] Port over "How to configure credentials using YAML or env vars" from RTD to Docusaurus
 * [DOCS] Port over "How to configure credentials using a secrets store" from RTD to Docusaurus
-* [DOCS] Port over "How to configure validation result store in GCS" from RTD to Docusaurus ([#3019](https://github.com/great-expectations/great_expectations/pull/3019))
+* [DOCS] Port over "How to configure validation result store in GCS" from RTD to Docusaurus (#3019)
 * [DOCS] Port over "How to connect to an Athena DB" from RTD to Docusaurus
-* [DOCS] Port over "How to create a new ExpectationSuite from jsonschema" from RTD to Docusaurus ([#3017](https://github.com/great-expectations/great_expectations/pull/3017))
+* [DOCS] Port over "How to create a new ExpectationSuite from jsonschema" from RTD to Docusaurus (#3017)
 * [DOCS] Port over "How to deploy a scheduled checkpoint with cron" from RTD to Docusaurus
-* [DOCS] Port over "How to dynamically load evaluation parameters from DB" from RTD to Docusaurus ([#3052](https://github.com/great-expectations/great_expectations/pull/3052))
+* [DOCS] Port over "How to dynamically load evaluation parameters from DB" from RTD to Docusaurus (#3052)
 * [DOCS] Port over "How to host and share DataDocs on Amazon S3" from RTD to Docusaurus
-* [DOCS] Port over "How to implement custom notifications" from RTD to Docusaurus  ([#3050](https://github.com/great-expectations/great_expectations/pull/3050))
+* [DOCS] Port over "How to implement custom notifications" from RTD to Docusaurus  (#3050)
 * [DOCS] Port over "How to instantiate a DataContext on Databricks Spark cluster" from RTD to Docusaurus
-* [DOCS] Port over "How to instantiate a DataContext on an EMR Spark Cluster" from RTD to Docusaurus ([#3024](https://github.com/great-expectations/great_expectations/pull/3024))
+* [DOCS] Port over "How to instantiate a DataContext on an EMR Spark Cluster" from RTD to Docusaurus (#3024)
 * [DOCS] Port over "How to trigger Opsgenie notifications as a validation action" from RTD to Docusaurus
-* [DOCS] Update titles of metadata store docs ([#3016](https://github.com/great-expectations/great_expectations/pull/3016))
-* [DOCS] Port over "How to configure Expectation store to PostgreSQL" from RTD to Docusaurus ([#3010](https://github.com/great-expectations/great_expectations/pull/3010))
-* [DOCS] Port over "How to configure a MetricsStore" from RTD to Docusaurus ([#3009](https://github.com/great-expectations/great_expectations/pull/3009))
-* [DOCS] Port over "How to configure validation result store in Azure" from RTD to Docusaurus ([#3014](https://github.com/great-expectations/great_expectations/pull/3014))
-* [DOCS] Port over "How to host and share DataDocs on Azure" from RTD to Docusaurus  ([#3012](https://github.com/great-expectations/great_expectations/pull/3012))
-* [DOCS]Port "How to create and edit Expectations based on domain knowledge, without inspecting data directly" from RTD to Datasaurus. ([#3047](https://github.com/great-expectations/great_expectations/pull/3047))
-* [DOCS] Ported "How to configure a Validation Result store in Amazon S3" from RTD to Docusaurus. ([#3026](https://github.com/great-expectations/great_expectations/pull/3026))
-* [DOCS] how to validate without checkpoint ([#3013](https://github.com/great-expectations/great_expectations/pull/3013))
-* [DOCS] validation action data docs update (convert from RTD to DocuSaurus) ([#3015](https://github.com/great-expectations/great_expectations/pull/3015))
-* [DOCS] port of 'How to store Validation Results as a Validation Action' from RTD into Docusaurus. ([#3023](https://github.com/great-expectations/great_expectations/pull/3023))
-* [MAINTENANCE] Cleanup ([#3038](https://github.com/great-expectations/great_expectations/pull/3038))
-* [MAINTENANCE] Edits (Formatting) ([#3022](https://github.com/great-expectations/great_expectations/pull/3022))
+* [DOCS] Update titles of metadata store docs (#3016)
+* [DOCS] Port over "How to configure Expectation store to PostgreSQL" from RTD to Docusaurus (#3010)
+* [DOCS] Port over "How to configure a MetricsStore" from RTD to Docusaurus (#3009)
+* [DOCS] Port over "How to configure validation result store in Azure" from RTD to Docusaurus (#3014)
+* [DOCS] Port over "How to host and share DataDocs on Azure" from RTD to Docusaurus  (#3012)
+* [DOCS]Port "How to create and edit Expectations based on domain knowledge, without inspecting data directly" from RTD to Datasaurus. (#3047)
+* [DOCS] Ported "How to configure a Validation Result store in Amazon S3" from RTD to Docusaurus. (#3026)
+* [DOCS] how to validate without checkpoint (#3013)
+* [DOCS] validation action data docs update (convert from RTD to DocuSaurus) (#3015)
+* [DOCS] port of 'How to store Validation Results as a Validation Action' from RTD into Docusaurus. (#3023)
+* [MAINTENANCE] Cleanup (#3038)
+* [MAINTENANCE] Edits (Formatting) (#3022)
 
 
 0.13.22
 -----------------
-* [FEATURE] Port over guide for Slack notifications for validation actions ([#3005](https://github.com/great-expectations/great_expectations/pull/3005))
-* [FEATURE] bootstrap estimator  for NumericMetricRangeMultiBatchParameterBuilder ([#3001](https://github.com/great-expectations/great_expectations/pull/3001))
-* [BUGFIX] Update naming of confidence_level in integration test fixture ([#3002](https://github.com/great-expectations/great_expectations/pull/3002))
-* [BUGFIX] [batch.py] fix check for null value ([#2994](https://github.com/great-expectations/great_expectations/pull/2994)) (thanks @Mohamed Abido)
-* [BUGFIX] Fix issue where compression key was added to reader_method for read_parquet ([#2506](https://github.com/great-expectations/great_expectations/pull/2506))
-* [BUGFIX] Improve support for dates for expect_column_distinct_values_to_contain_set ([#2997](https://github.com/great-expectations/great_expectations/pull/2997)) (thanks @xaniasd)
-* [BUGFIX] Fix bug in getting non-existent parameter ([#2986](https://github.com/great-expectations/great_expectations/pull/2986))
-* [BUGFIX] Modify read_excel() to handle new optional-dependency openpyxl for pandas >= 1.3.0 ([#2989](https://github.com/great-expectations/great_expectations/pull/2989))
-* [DOCS] Getting Started - Clean Up and Integration Tests ([#2985](https://github.com/great-expectations/great_expectations/pull/2985))
-* [DOCS] Adding in url links and style ([#2999](https://github.com/great-expectations/great_expectations/pull/2999))
-* [DOCS] Adding a missing import to a documentation page ([#2983](https://github.com/great-expectations/great_expectations/pull/2983)) (thanks @rishabh-bhargava)
-* [DOCS]/GDOC-108/GDOC-143/Add in Contributing fields and updates ([#2972](https://github.com/great-expectations/great_expectations/pull/2972))
-* [DOCS] Update rule-based profiler docs ([#2987](https://github.com/great-expectations/great_expectations/pull/2987))
-* [DOCS] add image zoom plugin ([#2979](https://github.com/great-expectations/great_expectations/pull/2979))
-* [MAINTENANCE] fix lint issues for docusaurus ([#3004](https://github.com/great-expectations/great_expectations/pull/3004))
-* [Maintenance] update header to match GE.io ([#2811](https://github.com/great-expectations/great_expectations/pull/2811))
-* [MAINTENANCE] Instrument test_yaml_config() ([#2981](https://github.com/great-expectations/great_expectations/pull/2981))
-* [MAINTENANCE] Remove "mostly" from "bobster" test config ([#2996](https://github.com/great-expectations/great_expectations/pull/2996))
-* [MAINTENANCE] Update v-0.12 CLI test to reflect Pandas upgrade to version 1.3.0 ([#2995](https://github.com/great-expectations/great_expectations/pull/2995))
-* [MAINTENANCE] rephrase expectation suite meta profile comment ([#2991](https://github.com/great-expectations/great_expectations/pull/2991))
-* [MAINTENANCE] make citation cleaner in expectation suite ([#2990](https://github.com/great-expectations/great_expectations/pull/2990))
-* [MAINTENANCE] Attempt to fix Numpy and Scipy Version Requirements without additional requirements* files ([#2982](https://github.com/great-expectations/great_expectations/pull/2982))
+* [FEATURE] Port over guide for Slack notifications for validation actions (#3005)
+* [FEATURE] bootstrap estimator  for NumericMetricRangeMultiBatchParameterBuilder (#3001)
+* [BUGFIX] Update naming of confidence_level in integration test fixture (#3002)
+* [BUGFIX] [batch.py] fix check for null value (#2994) (thanks @Mohamed Abido)
+* [BUGFIX] Fix issue where compression key was added to reader_method for read_parquet (#2506)
+* [BUGFIX] Improve support for dates for expect_column_distinct_values_to_contain_set (#2997) (thanks @xaniasd)
+* [BUGFIX] Fix bug in getting non-existent parameter (#2986)
+* [BUGFIX] Modify read_excel() to handle new optional-dependency openpyxl for pandas >= 1.3.0 (#2989)
+* [DOCS] Getting Started - Clean Up and Integration Tests (#2985)
+* [DOCS] Adding in url links and style (#2999)
+* [DOCS] Adding a missing import to a documentation page (#2983) (thanks @rishabh-bhargava)
+* [DOCS]/GDOC-108/GDOC-143/Add in Contributing fields and updates (#2972)
+* [DOCS] Update rule-based profiler docs (#2987)
+* [DOCS] add image zoom plugin (#2979)
+* [MAINTENANCE] fix lint issues for docusaurus (#3004)
+* [Maintenance] update header to match GE.io (#2811)
+* [MAINTENANCE] Instrument test_yaml_config() (#2981)
+* [MAINTENANCE] Remove "mostly" from "bobster" test config (#2996)
+* [MAINTENANCE] Update v-0.12 CLI test to reflect Pandas upgrade to version 1.3.0 (#2995)
+* [MAINTENANCE] rephrase expectation suite meta profile comment (#2991)
+* [MAINTENANCE] make citation cleaner in expectation suite (#2990)
+* [MAINTENANCE] Attempt to fix Numpy and Scipy Version Requirements without additional requirements* files (#2982)
 
 0.13.21
 -----------------
@@ -2468,18 +2468,18 @@ Changelog
 * [DOCS] Update pr template and remove enhancement feature type
 * [DOCS] Remove broken links
 * [DOCS] Fix typo in SlackNotificationAction docstring
-* [BUGFIX] Update util.convert_to_json_serializable() to handle UUID type [#2805](https://github.com/great-expectations/great_expectations/pull/2805) (thanks @YFGu0618)
+* [BUGFIX] Update util.convert_to_json_serializable() to handle UUID type #2805 (thanks @YFGu0618)
 * [BUGFIX] Allow decimals without leading zero in evaluation parameter URN
-* [BUGFIX] Using cache in order not to fetch already known secrets [#2882](https://github.com/great-expectations/great_expectations/pull/2882) (thanks @Cedric-Magnan)
+* [BUGFIX] Using cache in order not to fetch already known secrets #2882 (thanks @Cedric-Magnan)
 * [BUGFIX] Fix creation of temp tables for unexpected condition
 * [BUGFIX] Docs integration tests now only run when `--docs-tests` option is specified
 * [BUGFIX] Fix instantiation of PandasExecutionEngine with custom parameters
-* [BUGFIX] Fix rendering of observed value in datadocs when the value is 0 [#2923](https://github.com/great-expectations/great_expectations/pull/2923) (thanks @shpolina)
-* [BUGFIX] Fix serialization error in DataDocs rendering [#2908](https://github.com/great-expectations/great_expectations/pull/2908) (thanks @shpolina)
+* [BUGFIX] Fix rendering of observed value in datadocs when the value is 0 #2923 (thanks @shpolina)
+* [BUGFIX] Fix serialization error in DataDocs rendering #2908 (thanks @shpolina)
 * [ENHANCEMENT] Enable instantiation of a validator with a multiple batch BatchRequest
 * [ENHANCEMENT] Adds a batch_request_list parameter to DataContext.get_validator to enable instantiation of a Validator with batches from multiple BatchRequests
 * [ENHANCEMENT] Add a Validator.load_batch method to enable loading of additional Batches to an instantiated Validator
-* [ENHANCEMENT] Experimental WIP Rule-Based Profiler for single batch workflows ([#2788](https://github.com/great-expectations/great_expectations/pull/2788))
+* [ENHANCEMENT] Experimental WIP Rule-Based Profiler for single batch workflows (#2788)
 * [ENHANCEMENT] Datasources made via the CLI notebooks now include runtime and active data connector
 * [ENHANCEMENT] InMemoryStoreBackendDefaults which is useful for testing
 * [MAINTENANCE] Improve robustness of integration test_runner
@@ -2494,7 +2494,7 @@ Changelog
 
 0.13.19
 -----------------
-* [BUGFIX] Fix packaging error breaking V3 CLI suite commands ([#2719](https://github.com/great-expectations/great_expectations/pull/2719))
+* [BUGFIX] Fix packaging error breaking V3 CLI suite commands (#2719)
 
 0.13.18
 -----------------
@@ -2508,19 +2508,19 @@ Changelog
 * [ENHANCEMENT} Update the datasource new notebook for improved data asset inference
 * [ENHANCEMENT] Update the `datasource new` notebook for improved data asset inference
 * [ENHANCEMENT] Made stylistic improvements to the `checkpoint new` notebook
-* [ENHANCEMENT] Add mode prompt to suite new and suite edit [#2706](https://github.com/great-expectations/great_expectations/pull/2706)
-* [ENHANCEMENT] Update build_gallery.py script to better-handle user-submitted Expectations failing [#2705](https://github.com/great-expectations/great_expectations/pull/2705)
-* [ENHANCEMENT] Docs + Tests for passing in reader_options to Spark [#2670](https://github.com/great-expectations/great_expectations/pull/2670)
-* [ENHANCEMENT] Adding progressbar to validator loop [#2620](https://github.com/great-expectations/great_expectations/pull/2620) (Thanks @peterdhansen!)
-* [ENHANCEMENT] Great Expectations Compatibility with SqlAlchemy 1.4 [#2641](https://github.com/great-expectations/great_expectations/pull/2641)
-* [ENHANCEMENT] Athena expect column quantile values to be between [#2544](https://github.com/great-expectations/great_expectations/pull/2544) (Thanks @RicardoPedrotti!)
-* [BUGFIX] Rename assets in SqlDataConnectors to be consistent with other DataConnectors [#2665](https://github.com/great-expectations/great_expectations/pull/2665)
+* [ENHANCEMENT] Add mode prompt to suite new and suite edit #2706
+* [ENHANCEMENT] Update build_gallery.py script to better-handle user-submitted Expectations failing #2705
+* [ENHANCEMENT] Docs + Tests for passing in reader_options to Spark #2670
+* [ENHANCEMENT] Adding progressbar to validator loop #2620 (Thanks @peterdhansen!)
+* [ENHANCEMENT] Great Expectations Compatibility with SqlAlchemy 1.4 #2641
+* [ENHANCEMENT] Athena expect column quantile values to be between #2544 (Thanks @RicardoPedrotti!)
+* [BUGFIX] Rename assets in SqlDataConnectors to be consistent with other DataConnectors #2665
 * [BUGFIX] V3 API CLI docs build now opens all built sites rather than only the last one
-* [BUGFIX] Handle limit for oracle with rownum [#2691](https://github.com/great-expectations/great_expectations/pull/2691) (Thanks @NathanFarmer!)
-* [BUGFIX] add create table logic for athena [#2668](https://github.com/great-expectations/great_expectations/pull/2668) (Thanks @kj-9!)
-* [BUGFIX] Add note for user-submitted Expectation that is not compatible with SqlAlchemy 1.4 (uszipcode) [#2677](https://github.com/great-expectations/great_expectations/pull/2677)
-* [BUGFIX] Usage stats cli payload schema [#2680](https://github.com/great-expectations/great_expectations/pull/2680)
-* [BUGFIX] Rename assets in SqlDataConnectors [#2665](https://github.com/great-expectations/great_expectations/pull/2665)
+* [BUGFIX] Handle limit for oracle with rownum #2691 (Thanks @NathanFarmer!)
+* [BUGFIX] add create table logic for athena #2668 (Thanks @kj-9!)
+* [BUGFIX] Add note for user-submitted Expectation that is not compatible with SqlAlchemy 1.4 (uszipcode) #2677
+* [BUGFIX] Usage stats cli payload schema #2680
+* [BUGFIX] Rename assets in SqlDataConnectors #2665
 * [DOCS] Update how_to_create_a_new_checkpoint.rst with description of new CLI functionality
 * [DOCS] Update Configuring Datasources documentation for V3 API CLI
 * [DOCS] Update Configuring Data Docs documentation for V3 API CLI
@@ -2529,23 +2529,23 @@ Changelog
 * [DOCS] Fix typos in "How to load a database table, view, or query result as a batch" guide and update with `create_temp_table` info
 * [DOCS] Update "How to add a Validation Operator" guide to make it clear it is only for V2 API
 * [DOCS] Update Version Migration Guide to recommend using V3 without caveats
-* [DOCS] Formatting fixes for datasource docs [#2686](https://github.com/great-expectations/great_expectations/pull/2686)
-* [DOCS] Add note about v3 API to How to use the Great Expectations command line interface (CLI) [#2675](https://github.com/great-expectations/great_expectations/pull/2675)
-* [DOCS] CLI SUITE Documentation for V3 [#2687](https://github.com/great-expectations/great_expectations/pull/2687)
-* [DOCS] how to share data docs on azure [#2589](https://github.com/great-expectations/great_expectations/pull/2589) (Thanks @benoitLebreton-perso!)
-* [DOCS] Fix typo in Core concepts/Key Ideas section [#2660](https://github.com/great-expectations/great_expectations/pull/2660) (Thanks @svenhofstede!)
-* [DOCS] typo in datasource documentation [#2654](https://github.com/great-expectations/great_expectations/pull/2654) (Thanks @Gfeuillen!)
-* [DOCS] fix grammar [#2579](https://github.com/great-expectations/great_expectations/pull/2579) (Thanks @carlsonp!)
-* [DOCS] Typo fix in Core Concepts/ Key Ideas section [#2644](https://github.com/great-expectations/great_expectations/pull/2644) (Thanks @TremaMiguel!)
-* [DOCS] Corrects wrong pypi package in Contrib Packages README [#2653](https://github.com/great-expectations/great_expectations/pull/2653) (Thanks @mielvds!)
-* [DOCS] Update dividing_data_assets_into_batches.rst [#2651](https://github.com/great-expectations/great_expectations/pull/2651) (Thanks @lhayhurst!)
-* [MAINTENANCE] Temporarily pin sqlalchemy (1.4.9) and add new CI stage [#2708](https://github.com/great-expectations/great_expectations/pull/2708)
-* [MAINTENANCE] Run CLI tests as a separate stage in Azure pipelines [#2672](https://github.com/great-expectations/great_expectations/pull/2672)
-* [MAINTENANCE] Updates to usage stats messages & tests for new CLI [#2689](https://github.com/great-expectations/great_expectations/pull/2689)
-* [MAINTENANCE] Making user configurable profile test more robust; minor cleanup [#2685](https://github.com/great-expectations/great_expectations/pull/2685)
-* [MAINTENANCE] remove cli.project.upgrade event [#2682](https://github.com/great-expectations/great_expectations/pull/2682)
-* [MAINTENANCE] column reflection fallback should introspect one table (not all tables) [#2657](https://github.com/great-expectations/great_expectations/pull/2657) (Thank you @peterdhansen!)
-* [MAINTENANCE] Refactor Tests to Use Common Libraries [#2663](https://github.com/great-expectations/great_expectations/pull/2663)
+* [DOCS] Formatting fixes for datasource docs #2686
+* [DOCS] Add note about v3 API to How to use the Great Expectations command line interface (CLI) #2675
+* [DOCS] CLI SUITE Documentation for V3 #2687
+* [DOCS] how to share data docs on azure #2589 (Thanks @benoitLebreton-perso!)
+* [DOCS] Fix typo in Core concepts/Key Ideas section #2660 (Thanks @svenhofstede!)
+* [DOCS] typo in datasource documentation #2654 (Thanks @Gfeuillen!)
+* [DOCS] fix grammar #2579 (Thanks @carlsonp!)
+* [DOCS] Typo fix in Core Concepts/ Key Ideas section #2644 (Thanks @TremaMiguel!)
+* [DOCS] Corrects wrong pypi package in Contrib Packages README #2653 (Thanks @mielvds!)
+* [DOCS] Update dividing_data_assets_into_batches.rst #2651 (Thanks @lhayhurst!)
+* [MAINTENANCE] Temporarily pin sqlalchemy (1.4.9) and add new CI stage #2708
+* [MAINTENANCE] Run CLI tests as a separate stage in Azure pipelines #2672
+* [MAINTENANCE] Updates to usage stats messages & tests for new CLI #2689
+* [MAINTENANCE] Making user configurable profile test more robust; minor cleanup #2685
+* [MAINTENANCE] remove cli.project.upgrade event #2682
+* [MAINTENANCE] column reflection fallback should introspect one table (not all tables) #2657 (Thank you @peterdhansen!)
+* [MAINTENANCE] Refactor Tests to Use Common Libraries #2663
 
 0.13.17
 -----------------
@@ -2559,197 +2559,197 @@ Changelog
 * [ENHANCEMENT] Added a new ``RuntimeBatchRequest`` class, which can be used alongside ``RuntimeDataConnector`` to specify batches at runtime with either an in-memory dataframe, path (filesystem or s3), or sql query
 * [ENHANCEMENT] Added a new ``RuntimeQueryBatchSpec`` class
 * [ENHANCEMENT] CLI store list now lists active stores
-* [BUGFIX] Fixed issue where Sorters were not being applied correctly when ``data_connector_query`` contained limit or index  [#2617](https://github.com/great-expectations/great_expectations/pull/2617)
+* [BUGFIX] Fixed issue where Sorters were not being applied correctly when ``data_connector_query`` contained limit or index  #2617
 * [DOCS] Updated docs to reflect above class name changes
 * [DOCS] Added the following docs: "How to configure sorting in Data Connectors", "How to configure a Runtime Data Connector", "How to create a Batch Request using an Active Data Connector", "How to load a database table, view, or query result as a Batch"
 * [DOCS] Updated the V3 API section of the following docs: "How to load a Pandas DataFrame as a Batch", "How to load a Spark DataFrame as a Batch",
 
 0.13.16
 -----------------
-* [ENHANCEMENT] CLI `docs list` command implemented for v3 api [#2612](https://github.com/great-expectations/great_expectations/pull/2612)
-* [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource [#2613](https://github.com/great-expectations/great_expectations/pull/2613)
-* [ENHANCEMENT] CLI `docs build` command implemented for v3 api [#2614](https://github.com/great-expectations/great_expectations/pull/2614)
-* [ENHANCEMENT] CLI `docs clean` command implemented for v3 api [#2615](https://github.com/great-expectations/great_expectations/pull/2615)
-* [ENHANCEMENT] DataContext.clean_data_docs now raises helpful errors [#2621](https://github.com/great-expectations/great_expectations/pull/2621)
-* [ENHANCEMENT] CLI `init` command implemented for v3 api [#2626](https://github.com/great-expectations/great_expectations/pull/2626)
-* [ENHANCEMENT] CLI `store list` command implemented for v3 api [#2627](https://github.com/great-expectations/great_expectations/pull/2627)
+* [ENHANCEMENT] CLI `docs list` command implemented for v3 api #2612
+* [MAINTENANCE] Add testing for overwrite_existing in sanitize_yaml_and_save_datasource #2613
+* [ENHANCEMENT] CLI `docs build` command implemented for v3 api #2614
+* [ENHANCEMENT] CLI `docs clean` command implemented for v3 api #2615
+* [ENHANCEMENT] DataContext.clean_data_docs now raises helpful errors #2621
+* [ENHANCEMENT] CLI `init` command implemented for v3 api #2626
+* [ENHANCEMENT] CLI `store list` command implemented for v3 api #2627
 
 0.13.15
 -----------------
 * [FEATURE] Added support for references to secrets stores for AWS Secrets Manager, GCP Secret Manager and Azure Key Vault in `great_expectations.yml` project config file (Thanks @Cedric-Magnan!)
-* [ENHANCEMENT] Datasource CLI functionality for v3 api and global --assume-yes flag [#2590](https://github.com/great-expectations/great_expectations/pull/2590)
+* [ENHANCEMENT] Datasource CLI functionality for v3 api and global --assume-yes flag #2590
 * [ENHANCEMENT] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
 * [ENHANCEMENT] Adding tqdm to Profiler (Thanks @peterdhansen). New library in requirements.txt
 * [ENHANCEMENT][MAINTENANCE] Use Metrics to Protect Against Wrong Column Names
-* [BUGFIX] Remove parentheses call at os.curdir in data_context.py [#2566](https://github.com/great-expectations/great_expectations/pull/2566) (thanks @henriquejsfj)
-* [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema [#2572](https://github.com/great-expectations/great_expectations/pull/2572)
-* [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint [#2549](https://github.com/great-expectations/great_expectations/pull/2549)
+* [BUGFIX] Remove parentheses call at os.curdir in data_context.py #2566 (thanks @henriquejsfj)
+* [BUGFIX] Sorter Configuration Added to DataConnectorConfig and DataConnectorConfigSchema #2572
+* [BUGFIX] Remove autosave of Checkpoints in test_yaml_config and store SimpleCheckpoint as Checkpoint #2549
 * [ENHANCE] Update UserConfigurableProfiler to increase tolerance for mostly parameter of nullity expectations
 * [BUGFIX] Populate (data) asset name in data docs for SimpleSqlalchemy datasource (Thanks @xaniasd)
 * [BUGFIX] pandas partial read_ functions not being unwrapped (Thanks @luke321321)
-* [BUGFIX] Don't stop SparkContext when running in Databricks ([#2587](https://github.com/great-expectations/great_expectations/pull/2587)) (Thanks @jarandaf)
-* [MAINTENANCE] Oracle listed twice in list of sqlalchemy dialects [#2609](https://github.com/great-expectations/great_expectations/pull/2609)
-* [FEATURE] Oracle support added to sqlalchemy datasource and dataset [#2609](https://github.com/great-expectations/great_expectations/pull/2609)
+* [BUGFIX] Don't stop SparkContext when running in Databricks (#2587) (Thanks @jarandaf)
+* [MAINTENANCE] Oracle listed twice in list of sqlalchemy dialects #2609
+* [FEATURE] Oracle support added to sqlalchemy datasource and dataset #2609
 
 0.13.14
 -----------------
-* [BUGFIX] Use temporary paths in tests [#2545](https://github.com/great-expectations/great_expectations/pull/2545)
-* [FEATURE] Allow custom data_asset_name for in-memory dataframes [#2494](https://github.com/great-expectations/great_expectations/pull/2494)
-* [ENHANCEMENT] Restore cli functionality for legacy checkpoints [#2511](https://github.com/great-expectations/great_expectations/pull/2511)
-* [BUGFIX] Can not create Azure Backend with TupleAzureBlobStoreBackend [#2513](https://github.com/great-expectations/great_expectations/pull/2513) (thanks @benoitLebreton-perso)
-* [BUGFIX] force azure to set content_type='text/html' if the file is HTML [#2539](https://github.com/great-expectations/great_expectations/pull/2539) (thanks @benoitLebreton-perso)
-* [BUGFIX] Temporarily pin SqlAlchemy to < 1.4.0 in requirements-dev-sqlalchemy.txt [#2547](https://github.com/great-expectations/great_expectations/pull/2547)
-* [DOCS] Fix documentation links generated within template [#2542](https://github.com/great-expectations/great_expectations/pull/2542) (thanks @thejasraju)
-* [MAINTENANCE] Remove deprecated automerge config [#249](https://github.com/great-expectations/great_expectations/pull/249)
+* [BUGFIX] Use temporary paths in tests #2545
+* [FEATURE] Allow custom data_asset_name for in-memory dataframes #2494
+* [ENHANCEMENT] Restore cli functionality for legacy checkpoints #2511
+* [BUGFIX] Can not create Azure Backend with TupleAzureBlobStoreBackend #2513 (thanks @benoitLebreton-perso)
+* [BUGFIX] force azure to set content_type='text/html' if the file is HTML #2539 (thanks @benoitLebreton-perso)
+* [BUGFIX] Temporarily pin SqlAlchemy to < 1.4.0 in requirements-dev-sqlalchemy.txt #2547
+* [DOCS] Fix documentation links generated within template #2542 (thanks @thejasraju)
+* [MAINTENANCE] Remove deprecated automerge config #249
 
 0.13.13
 -----------------
-* [ENHANCEMENT] Improve support for median calculation in Athena (Thanks @kuhnen!) [#2521](https://github.com/great-expectations/great_expectations/pull/2521)
-* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfiler [#2519](https://github.com/great-expectations/great_expectations/pull/2519)
-* [MAINTENANCE] Add support for spark 3 based spark_config [#2481](https://github.com/great-expectations/great_expectations/pull/2481)
+* [ENHANCEMENT] Improve support for median calculation in Athena (Thanks @kuhnen!) #2521
+* [ENHANCEMENT] Update `suite scaffold` to work with the UserConfigurableProfiler #2519
+* [MAINTENANCE] Add support for spark 3 based spark_config #2481
 
 0.13.12
 -----------------
 
-* [FEATURE] Added EmailAction as a new Validation Action (Thanks @Cedric-Magnan!) [#2479](https://github.com/great-expectations/great_expectations/pull/2479)
-* [ENHANCEMENT] CLI global options and checkpoint functionality for v3 api [#2497](https://github.com/great-expectations/great_expectations/pull/2497)
+* [FEATURE] Added EmailAction as a new Validation Action (Thanks @Cedric-Magnan!) #2479
+* [ENHANCEMENT] CLI global options and checkpoint functionality for v3 api #2497
 * [DOCS] Renamed the "old" and the "new" APIs to "V2 (Batch Kwargs) API" and "V3 (Batch Request) API" and added an article with recommendations for choosing between them
 
 0.13.11
 -----------------
 * [FEATURE] Add "table.head" metric
-* [FEATURE] Add support for BatchData as a core GE concept for all Execution Engines. [#2395](https://github.com/great-expectations/great_expectations/pull/2395)
+* [FEATURE] Add support for BatchData as a core GE concept for all Execution Engines. #2395
  * NOTE: As part of our improvements to the underlying Batch API, we have refactored BatchSpec to be part of the "core" package in Great Expectations, consistent with its role coordinating communication about Batches between the Datasource and Execution Engine abstractions.
-* [ENHANCEMENT] Explicit support for schema_name in the SqlAlchemyBatchData [#2465](https://github.com/great-expectations/great_expectations/pull/2465). Issue [#2340](https://github.com/great-expectations/great_expectations/pull/2340)
-* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API [#2224](https://github.com/great-expectations/great_expectations/pull/2224)
-* [ENHANCEMENT] Evaluation parameter runtime values rendering in data docs if arithmetic is present [#2447](https://github.com/great-expectations/great_expectations/pull/2447). Issue [#2215](https://github.com/great-expectations/great_expectations/pull/2215)
-* [ENHANCEMENT] When connecting to new Datasource, CLI prompt is consistent with rest of GE [#2434](https://github.com/great-expectations/great_expectations/pull/2434)
-* [ENHANCEMENT] Adds basic test for bad s3 paths generated from regex [#2427](https://github.com/great-expectations/great_expectations/pull/2427) (Thanks @lukedyer-peak!)
-* [ENHANCEMENT] Updated UserConfigurableProfiler date parsing error handling [#2459](https://github.com/great-expectations/great_expectations/pull/2459)
-* [ENHANCEMENT] Clarification of self_check error messages [#2304](https://github.com/great-expectations/great_expectations/pull/2304)
-* [ENHANCEMENT] Allows gzipped files and other encodings to be read from S3 [#2440](https://github.com/great-expectations/great_expectations/pull/2440) (Thanks @luke321321!)
-* [BUGFIX] `expect_column_unique_value_count_to_be_between` renderer bug (duplicate "Distinct (%)") [#2455](https://github.com/great-expectations/great_expectations/pull/2455). Issue [#2423](https://github.com/great-expectations/great_expectations/pull/2423)
-* [BUGFIX] Fix S3 Test issue by pinning `moto` version < 2.0.0 [#2470](https://github.com/great-expectations/great_expectations/pull/2470)
-* [BUGFIX] Check for datetime-parseable strings in validate_metric_value_between_configuration [#2419](https://github.com/great-expectations/great_expectations/pull/2419). Issue [#2340](https://github.com/great-expectations/great_expectations/pull/2340) (Thanks @victorwyee!)
-* [BUGFIX] `expect_compound_columns_to_be_unique` ExpectationConfig added [#2471](https://github.com/great-expectations/great_expectations/pull/2471) Issue [#2464](https://github.com/great-expectations/great_expectations/pull/2464)
-* [BUGFIX] In basic profiler, handle date parsing and overflow exceptions separately [#2431](https://github.com/great-expectations/great_expectations/pull/2431) (Thanks @peterdhansen!)
-* [BUGFIX] Fix sqlalchemy column comparisons when comparison was done between different datatypes [#2443](https://github.com/great-expectations/great_expectations/pull/2443) (Thanks @peterdhansen!)
-* [BUGFIX] Fix divide by zero error in expect_compound_columns_to_be_unique [#2454](https://github.com/great-expectations/great_expectations/pull/2454) (Thanks @jdimatteo!)
-* [DOCS] added how-to guide for user configurable profiler [#2452](https://github.com/great-expectations/great_expectations/pull/2452)
-* [DOCS] Linked videos and minor documentation addition [#2388](https://github.com/great-expectations/great_expectations/pull/2388)
-* [DOCS] Modifying getting started tutorial content to work with 0.13.8+ [#2418](https://github.com/great-expectations/great_expectations/pull/2418)
-* [DOCS] add case studies to header in docs [#2430](https://github.com/great-expectations/great_expectations/pull/2430)
-* [MAINTENANCE] Updates to Azure pipeline configurations [#2462](https://github.com/great-expectations/great_expectations/pull/2462)
-* [MAINTENANCE] Allowing the tests to run with Docker-in-Windows [#2402](https://github.com/great-expectations/great_expectations/pull/2402) (Thanks @Patechoc!)
-* [MAINTENANCE] Add support for automatically building expectations gallery metadata [#2386](https://github.com/great-expectations/great_expectations/pull/2386)
+* [ENHANCEMENT] Explicit support for schema_name in the SqlAlchemyBatchData #2465. Issue #2340
+* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API #2224
+* [ENHANCEMENT] Evaluation parameter runtime values rendering in data docs if arithmetic is present #2447. Issue #2215
+* [ENHANCEMENT] When connecting to new Datasource, CLI prompt is consistent with rest of GE #2434
+* [ENHANCEMENT] Adds basic test for bad s3 paths generated from regex #2427 (Thanks @lukedyer-peak!)
+* [ENHANCEMENT] Updated UserConfigurableProfiler date parsing error handling #2459
+* [ENHANCEMENT] Clarification of self_check error messages #2304
+* [ENHANCEMENT] Allows gzipped files and other encodings to be read from S3 #2440 (Thanks @luke321321!)
+* [BUGFIX] `expect_column_unique_value_count_to_be_between` renderer bug (duplicate "Distinct (%)") #2455. Issue #2423
+* [BUGFIX] Fix S3 Test issue by pinning `moto` version < 2.0.0 #2470
+* [BUGFIX] Check for datetime-parseable strings in validate_metric_value_between_configuration #2419. Issue #2340 (Thanks @victorwyee!)
+* [BUGFIX] `expect_compound_columns_to_be_unique` ExpectationConfig added #2471 Issue #2464
+* [BUGFIX] In basic profiler, handle date parsing and overflow exceptions separately #2431 (Thanks @peterdhansen!)
+* [BUGFIX] Fix sqlalchemy column comparisons when comparison was done between different datatypes #2443 (Thanks @peterdhansen!)
+* [BUGFIX] Fix divide by zero error in expect_compound_columns_to_be_unique #2454 (Thanks @jdimatteo!)
+* [DOCS] added how-to guide for user configurable profiler #2452
+* [DOCS] Linked videos and minor documentation addition #2388
+* [DOCS] Modifying getting started tutorial content to work with 0.13.8+ #2418
+* [DOCS] add case studies to header in docs #2430
+* [MAINTENANCE] Updates to Azure pipeline configurations #2462
+* [MAINTENANCE] Allowing the tests to run with Docker-in-Windows #2402 (Thanks @Patechoc!)
+* [MAINTENANCE] Add support for automatically building expectations gallery metadata #2386
 
 
 0.13.10
 -----------------
-* [ENHANCEMENT] Optimize tests [#2421](https://github.com/great-expectations/great_expectations/pull/2421)
-* [ENHANCEMENT] Add docstring for _invert_regex_to_data_reference_template [#2428](https://github.com/great-expectations/great_expectations/pull/2428)
-* [ENHANCEMENT] Added expectation to check if data is in alphabetical ordering [#2407](https://github.com/great-expectations/great_expectations/pull/2407) (Thanks @sethdmay!)
-* [BUGFIX] Fixed a broken docs link [#2433](https://github.com/great-expectations/great_expectations/pull/2433)
-* [BUGFIX] Missing `markown_text.j2` jinja template [#2422](https://github.com/great-expectations/great_expectations/pull/2422)
-* [BUGFIX] parse_strings_as_datetimes error with user_configurable_profiler [#2429](https://github.com/great-expectations/great_expectations/pull/2429)
-* [BUGFIX] Update `suite edit` and `suite scaffold` notebook renderers to output functional validation cells [#2432](https://github.com/great-expectations/great_expectations/pull/2432)
-* [DOCS] Update how_to_create_custom_expectations_for_pandas.rst [#2426](https://github.com/great-expectations/great_expectations/pull/2426) (Thanks @henriquejsfj!)
-* [DOCS] Correct regex escape for data connectors [#2425](https://github.com/great-expectations/great_expectations/pull/2425) (Thanks @lukedyer-peak!)
-* [CONTRIB] Expectation: Matches benfords law with 80 percent confidence interval test [#2406](https://github.com/great-expectations/great_expectations/pull/2406) (Thanks @vinodkri1!)
+* [ENHANCEMENT] Optimize tests #2421
+* [ENHANCEMENT] Add docstring for _invert_regex_to_data_reference_template #2428
+* [ENHANCEMENT] Added expectation to check if data is in alphabetical ordering #2407 (Thanks @sethdmay!)
+* [BUGFIX] Fixed a broken docs link #2433
+* [BUGFIX] Missing `markown_text.j2` jinja template #2422
+* [BUGFIX] parse_strings_as_datetimes error with user_configurable_profiler #2429
+* [BUGFIX] Update `suite edit` and `suite scaffold` notebook renderers to output functional validation cells #2432
+* [DOCS] Update how_to_create_custom_expectations_for_pandas.rst #2426 (Thanks @henriquejsfj!)
+* [DOCS] Correct regex escape for data connectors #2425 (Thanks @lukedyer-peak!)
+* [CONTRIB] Expectation: Matches benfords law with 80 percent confidence interval test #2406 (Thanks @vinodkri1!)
 
 
 0.13.9
 -----------------
-* [FEATURE] Add TupleAzureBlobStoreBackend (thanks @syahdeini) [#1975](https://github.com/great-expectations/great_expectations/pull/1975)
+* [FEATURE] Add TupleAzureBlobStoreBackend (thanks @syahdeini) #1975
 * [FEATURE] Add get_metrics interface to Modular Expectations Validator API
-* [ENHANCEMENT] Add possibility to pass boto3 configuration to TupleS3StoreBackend (Thanks for [#1691](https://github.com/great-expectations/great_expectations/pull/1691) to @mgorsk1!) [#2371](https://github.com/great-expectations/great_expectations/pull/2371)
-* [ENHANCEMENT] Removed the logic that prints the "This configuration object was built using version..." warning when current version of Great Expectations is not the same as the one used to build the suite, since it was not actionable [#2366](https://github.com/great-expectations/great_expectations/pull/2366)
+* [ENHANCEMENT] Add possibility to pass boto3 configuration to TupleS3StoreBackend (Thanks for #1691 to @mgorsk1!) #2371
+* [ENHANCEMENT] Removed the logic that prints the "This configuration object was built using version..." warning when current version of Great Expectations is not the same as the one used to build the suite, since it was not actionable #2366
 * [ENHANCEMENT] Update Validator with more informative error message
 * [BUGFIX] Ensure that batch_spec_passthrough is handled correctly by properly refactoring build_batch_spec and _generate_batch_spec_parameters_from_batch_definition for all DataConnector classes
-* [BUGFIX] Display correct unexpected_percent in DataDocs - corrects the result object from map expectations to return the same "unexpected_percent" as is used to evaluate success (excluding null values from the denominator). The old value is now returned in a key called "unexpected_percent_total" (thanks @mlondschien) [#1875](https://github.com/great-expectations/great_expectations/pull/1875)
-* [BUGFIX] Add python=3.7 argument to conda env creation (thanks @scouvreur!) [#2391](https://github.com/great-expectations/great_expectations/pull/2391)
-* [BUGFIX] Fix issue with temporary table creation in MySQL [#2389](https://github.com/great-expectations/great_expectations/pull/2389)
+* [BUGFIX] Display correct unexpected_percent in DataDocs - corrects the result object from map expectations to return the same "unexpected_percent" as is used to evaluate success (excluding null values from the denominator). The old value is now returned in a key called "unexpected_percent_total" (thanks @mlondschien) #1875
+* [BUGFIX] Add python=3.7 argument to conda env creation (thanks @scouvreur!) #2391
+* [BUGFIX] Fix issue with temporary table creation in MySQL #2389
 * [BUGFIX] Remove duplicate code in data_context.store.tuple_store_backend (Thanks @vanderGoes)
 * [BUGFIX] Fix issue where WarningAndFailureExpectationSuitesValidationOperator failing when warning suite fails
-* [DOCS] Update How to instantiate a Data Context on Databricks Spark cluster for 0.13+ [#2379](https://github.com/great-expectations/great_expectations/pull/2379)
-* [DOCS] How to load a Pandas DataFrame as a Batch [#2327](https://github.com/great-expectations/great_expectations/pull/2327)
+* [DOCS] Update How to instantiate a Data Context on Databricks Spark cluster for 0.13+ #2379
+* [DOCS] How to load a Pandas DataFrame as a Batch #2327
 * [DOCS] Added annotations for Expectations not yet ported to the new Modular Expectations API.
-* [DOCS] How to load a Spark DataFrame as a Batch [#2385](https://github.com/great-expectations/great_expectations/pull/2385)
-* [MAINTENANCE] Add checkpoint store to store backend defaults [#2378](https://github.com/great-expectations/great_expectations/pull/2378)
+* [DOCS] How to load a Spark DataFrame as a Batch #2385
+* [MAINTENANCE] Add checkpoint store to store backend defaults #2378
 
 
 0.13.8
 -----------------
-* [FEATURE] New implementation of Checkpoints that uses dedicated CheckpointStore (based on the new ConfigurationStore mechanism) [#2311](https://github.com/great-expectations/great_expectations/pull/2311), [#2338](https://github.com/great-expectations/great_expectations/pull/2338)
-* [BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract [#2334](https://github.com/great-expectations/great_expectations/pull/2334)
-* [BUGFIX] DataContext with multiple DataSources no longer scans all configurations [#2250](https://github.com/great-expectations/great_expectations/pull/2250)
+* [FEATURE] New implementation of Checkpoints that uses dedicated CheckpointStore (based on the new ConfigurationStore mechanism) #2311, #2338
+* [BUGFIX] Fix issue causing incorrect identification of partially-implemented expectations as not abstract #2334
+* [BUGFIX] DataContext with multiple DataSources no longer scans all configurations #2250
 
 
 0.13.7
 -----------------
-* [BUGFIX] Fix Local variable 'temp_table_schema_name' might be referenced before assignment bug in sqlalchemy_dataset.py [#2302](https://github.com/great-expectations/great_expectations/pull/2302)
-* [MAINTENANCE] Ensure compatibility with new pip resolver v20.3+ [#2256](https://github.com/great-expectations/great_expectations/pull/2256)
-* [ENHANCEMENT] Improvements in the how-to guide, run_diagnostics method in Expectation base class and Expectation templates to support the new rapid "dev loop" of community-contributed Expectations. [#2296](https://github.com/great-expectations/great_expectations/pull/2296)
-* [ENHANCEMENT] Improvements in the output of Expectations tests to make it more legible. [#2296](https://github.com/great-expectations/great_expectations/pull/2296)
-* [DOCS] Clarification of the instructions for using conda in the "Setting Up Your Dev Environment" doc. [#2306](https://github.com/great-expectations/great_expectations/pull/2306)
+* [BUGFIX] Fix Local variable 'temp_table_schema_name' might be referenced before assignment bug in sqlalchemy_dataset.py #2302
+* [MAINTENANCE] Ensure compatibility with new pip resolver v20.3+ #2256
+* [ENHANCEMENT] Improvements in the how-to guide, run_diagnostics method in Expectation base class and Expectation templates to support the new rapid "dev loop" of community-contributed Expectations. #2296
+* [ENHANCEMENT] Improvements in the output of Expectations tests to make it more legible. #2296
+* [DOCS] Clarification of the instructions for using conda in the "Setting Up Your Dev Environment" doc. #2306
 
 
 0.13.6
 -----------------
-* [ENHANCEMENT] Skip checks when great_expectations package did not change [#2287](https://github.com/great-expectations/great_expectations/pull/2287)
-* [ENHANCEMENT] A how-to guide, run_diagnostics method in Expectation base class and Expectation templates to support the new rapid "dev loop" of community-contributed Expectations. [#2222](https://github.com/great-expectations/great_expectations/pull/2222)
-* [BUGFIX] Fix Local variable 'query_schema' might be referenced before assignment bug in sqlalchemy_dataset.py [#2286](https://github.com/great-expectations/great_expectations/pull/2286) (Thanks @alessandrolacorte!)
-* [BUGFIX] Use correct schema to fetch table and column metadata [#2284](https://github.com/great-expectations/great_expectations/pull/2284) (Thanks @armaandhull!)
-* [BUGFIX] Updated sqlalchemy_dataset to convert numeric metrics to json_serializable up front, avoiding an issue where expectations on data immediately fail due to the conversion to/from json. [#2207](https://github.com/great-expectations/great_expectations/pull/2207)
+* [ENHANCEMENT] Skip checks when great_expectations package did not change #2287
+* [ENHANCEMENT] A how-to guide, run_diagnostics method in Expectation base class and Expectation templates to support the new rapid "dev loop" of community-contributed Expectations. #2222
+* [BUGFIX] Fix Local variable 'query_schema' might be referenced before assignment bug in sqlalchemy_dataset.py #2286 (Thanks @alessandrolacorte!)
+* [BUGFIX] Use correct schema to fetch table and column metadata #2284 (Thanks @armaandhull!)
+* [BUGFIX] Updated sqlalchemy_dataset to convert numeric metrics to json_serializable up front, avoiding an issue where expectations on data immediately fail due to the conversion to/from json. #2207
 
 
 0.13.5
 -----------------
 * [FEATURE] Add MicrosoftTeamsNotificationAction (Thanks @Antoninj!)
-* [FEATURE] New ``contrib`` package [#2264](https://github.com/great-expectations/great_expectations/pull/2264)
-* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API [#2224](https://github.com/great-expectations/great_expectations/pull/2224)
-* [ENHANCEMENT] Speed up new suite creation flow when connecting to Databases. Issue [#1670](https://github.com/great-expectations/great_expectations/pull/1670) (Thanks @armaandhull!)
-* [ENHANCEMENT] Serialize PySpark DataFrame by converting to dictionary [#2237](https://github.com/great-expectations/great_expectations/pull/2237)
-* [BUGFIX] Mask passwords in DataContext.list_datasources(). Issue [#2184](https://github.com/great-expectations/great_expectations/pull/2184)
-* [BUGFIX] Skip escaping substitution variables in escape_all_config_variables [#2243](https://github.com/great-expectations/great_expectations/pull/2243). Issue [#2196](https://github.com/great-expectations/great_expectations/pull/2196) (Thanks @
+* [FEATURE] New ``contrib`` package #2264
+* [ENHANCEMENT] Data docs can now be built skipping the index page using the python API #2224
+* [ENHANCEMENT] Speed up new suite creation flow when connecting to Databases. Issue #1670 (Thanks @armaandhull!)
+* [ENHANCEMENT] Serialize PySpark DataFrame by converting to dictionary #2237
+* [BUGFIX] Mask passwords in DataContext.list_datasources(). Issue #2184
+* [BUGFIX] Skip escaping substitution variables in escape_all_config_variables #2243. Issue #2196 (Thanks @
 varundunga!)
-* [BUGFIX] Pandas extension guessing [#2239](https://github.com/great-expectations/great_expectations/pull/2239) (Thanks @sbrugman!)
-* [BUGFIX] Replace runtime batch_data DataFrame with string [#2240](https://github.com/great-expectations/great_expectations/pull/2240)
-* [BUGFIX] Update Notebook Render Tests to Reflect Updated Python Packages [#2262](https://github.com/great-expectations/great_expectations/pull/2262)
-* [DOCS] Updated the code of conduct to mention events [#2278](https://github.com/great-expectations/great_expectations/pull/2278)
-* [DOCS] Update the diagram for batch metadata [#2161](https://github.com/great-expectations/great_expectations/pull/2161)
-* [DOCS] Update metrics.rst [#2257](https://github.com/great-expectations/great_expectations/pull/2257)
-* [MAINTENANCE] Different versions of Pandas react differently to corrupt XLS files. [#2230](https://github.com/great-expectations/great_expectations/pull/2230)
-* [MAINTENANCE] remove the obsolete TODO comments [#2229](https://github.com/great-expectations/great_expectations/pull/2229) (Thanks @beyondacm!)
-* [MAINTENANCE] Update run_id to airflow_run_id for clarity. [#2233](https://github.com/great-expectations/great_expectations/pull/2233)
+* [BUGFIX] Pandas extension guessing #2239 (Thanks @sbrugman!)
+* [BUGFIX] Replace runtime batch_data DataFrame with string #2240
+* [BUGFIX] Update Notebook Render Tests to Reflect Updated Python Packages #2262
+* [DOCS] Updated the code of conduct to mention events #2278
+* [DOCS] Update the diagram for batch metadata #2161
+* [DOCS] Update metrics.rst #2257
+* [MAINTENANCE] Different versions of Pandas react differently to corrupt XLS files. #2230
+* [MAINTENANCE] remove the obsolete TODO comments #2229 (Thanks @beyondacm!)
+* [MAINTENANCE] Update run_id to airflow_run_id for clarity. #2233
 
 
 0.13.4
 -----------------
 * [FEATURE] Implement expect_column_values_to_not_match_regex_list in Spark (Thanks @mikaylaedwards!)
 * [ENHANCEMENT] Improve support for quantile calculations in Snowflake
-* [ENHANCEMENT] DataDocs show values of Evaluation Parameters [#2165](https://github.com/great-expectations/great_expectations/pull/2165). Issue [#2010](https://github.com/great-expectations/great_expectations/pull/2010)
-* [ENHANCEMENT] Work on requirements.txt [#2052](https://github.com/great-expectations/great_expectations/pull/2052) (Thanks @shapiroj18!)
-* [ENHANCEMENT] expect_table_row_count_to_equal_other_table [#2133](https://github.com/great-expectations/great_expectations/pull/2133)
-* [ENHANCEMENT] Improved support for quantile calculations in Snowflake [#2176](https://github.com/great-expectations/great_expectations/pull/2176)
-* [ENHANCEMENT] DataDocs show values of Evaluation Parameters [#2165](https://github.com/great-expectations/great_expectations/pull/2165)
-* [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() [#2169](https://github.com/great-expectations/great_expectations/pull/2169). Issue [#2164](https://github.com/great-expectations/great_expectations/pull/2164)
-* [BUGFIX] Fixed black conflict, upgraded black, made import optional [#2183](https://github.com/great-expectations/great_expectations/pull/2183)
-* [BUGFIX] Made improvements for the treatment of decimals for database backends for lossy conversion [#2207](https://github.com/great-expectations/great_expectations/pull/2207)
-* [BUGFIX] Pass manually_initialize_store_backend_id to database store backends to mirror functionality of other backends. Issue [#2181](https://github.com/great-expectations/great_expectations/pull/2181)
-* [BUGFIX] Make glob_directive more permissive in ConfiguredAssetFilesystemDataConnector [#2197](https://github.com/great-expectations/great_expectations/pull/2197). Issue [#2193](https://github.com/great-expectations/great_expectations/pull/2193)
-* [DOCS] Added link to Youtube video on in-code contexts [#2177](https://github.com/great-expectations/great_expectations/pull/2177)
-* [DOCS] Docstrings for DataConnector and associated classes [#2172](https://github.com/great-expectations/great_expectations/pull/2172)
-* [DOCS] Custom expectations improvement [#2179](https://github.com/great-expectations/great_expectations/pull/2179)
-* [DOCS] Add a conda example to creating virtualenvs [#2189](https://github.com/great-expectations/great_expectations/pull/2189)
-* [DOCS] Fix Airflow logo URL [#2198](https://github.com/great-expectations/great_expectations/pull/2198) (Thanks @floscha!)
-* [DOCS] Update explore_expectations_in_a_notebook.rst [#2174](https://github.com/great-expectations/great_expectations/pull/2174)
-* [DOCS] Change to DOCS that describe Evaluation Parameters [#2209](https://github.com/great-expectations/great_expectations/pull/2209)
-* [MAINTENANCE] Removed mentions of show_cta_footer and added deprecation notes in usage stats [#2190](https://github.com/great-expectations/great_expectations/pull/2190). Issue [#2120](https://github.com/great-expectations/great_expectations/pull/2120)
+* [ENHANCEMENT] DataDocs show values of Evaluation Parameters #2165. Issue #2010
+* [ENHANCEMENT] Work on requirements.txt #2052 (Thanks @shapiroj18!)
+* [ENHANCEMENT] expect_table_row_count_to_equal_other_table #2133
+* [ENHANCEMENT] Improved support for quantile calculations in Snowflake #2176
+* [ENHANCEMENT] DataDocs show values of Evaluation Parameters #2165
+* [BUGFIX] Add pagination to TupleS3StoreBackend.list_keys() #2169. Issue #2164
+* [BUGFIX] Fixed black conflict, upgraded black, made import optional #2183
+* [BUGFIX] Made improvements for the treatment of decimals for database backends for lossy conversion #2207
+* [BUGFIX] Pass manually_initialize_store_backend_id to database store backends to mirror functionality of other backends. Issue #2181
+* [BUGFIX] Make glob_directive more permissive in ConfiguredAssetFilesystemDataConnector #2197. Issue #2193
+* [DOCS] Added link to Youtube video on in-code contexts #2177
+* [DOCS] Docstrings for DataConnector and associated classes #2172
+* [DOCS] Custom expectations improvement #2179
+* [DOCS] Add a conda example to creating virtualenvs #2189
+* [DOCS] Fix Airflow logo URL #2198 (Thanks @floscha!)
+* [DOCS] Update explore_expectations_in_a_notebook.rst #2174
+* [DOCS] Change to DOCS that describe Evaluation Parameters #2209
+* [MAINTENANCE] Removed mentions of show_cta_footer and added deprecation notes in usage stats #2190. Issue #2120
 
 0.13.3
 -----------------
-* [ENHANCEMENT] Updated the BigQuery Integration to create a view instead of a table (thanks @alessandrolacorte!) [#2082](https://github.com/great-expectations/great_expectations/pull/2082).
+* [ENHANCEMENT] Updated the BigQuery Integration to create a view instead of a table (thanks @alessandrolacorte!) #2082.
 * [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file
 * [ENHANCEMENT] Add support for connection_string and url in configuring DatabaseStoreBackend, bringing parity to other SQL-based objects. In the rare case of user code that instantiates a DatabaseStoreBackend without using the Great Expectations config architecture, users should ensure they are providing kwargs to init, because the init signature order has changed.
 * [ENHANCEMENT] Improved exception handling in the Slack notifications rendering logic
@@ -2762,12 +2762,12 @@ varundunga!)
 
 0.13.2
 -----------------
-* [ENHANCEMENT] Support avro format in Spark datasource (thanks @ryanaustincarlson!) [#2122](https://github.com/great-expectations/great_expectations/pull/2122)
-* [ENHANCEMENT] Made improvements to the backend for expect_column_quantile_values_to_be_between [#2127](https://github.com/great-expectations/great_expectations/pull/2127)
+* [ENHANCEMENT] Support avro format in Spark datasource (thanks @ryanaustincarlson!) #2122
+* [ENHANCEMENT] Made improvements to the backend for expect_column_quantile_values_to_be_between #2127
 * [ENHANCEMENT] Robust Representation in Configuration of Both Legacy and New Datasource
 * [ENHANCEMENT] Continuing 0.13 clean-up and improvements
-* [BUGFIX] Fix spark configuration not getting passed to the SparkSession builder (thanks @EricSteg!) [#2124](https://github.com/great-expectations/great_expectations/pull/2124)
-* [BUGFIX] Misc bugfixes and improvements to code & documentation for new in-code data context API [#2118](https://github.com/great-expectations/great_expectations/pull/2118)
+* [BUGFIX] Fix spark configuration not getting passed to the SparkSession builder (thanks @EricSteg!) #2124
+* [BUGFIX] Misc bugfixes and improvements to code & documentation for new in-code data context API #2118
 * [BUGFIX] When Introspecting a database, sql_data_connector will ignore view_names that are also system_tables
 * [BUGFIX] Made improvements for code & documentation for in-code data context
 * [BUGFIX] Fixed bug where TSQL mean on `int` columns returned incorrect result
@@ -2776,16 +2776,16 @@ varundunga!)
 
 0.13.1
 -----------------
-* [ENHANCEMENT] Improved data docs performance by ~30x for large projects and ~4x for smaller projects by changing instantiation of Jinja environment [#2100](https://github.com/great-expectations/great_expectations/pull/2100)
-* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file [#2058](https://github.com/great-expectations/great_expectations/pull/2058) (thanks @GTLangseth!)
+* [ENHANCEMENT] Improved data docs performance by ~30x for large projects and ~4x for smaller projects by changing instantiation of Jinja environment #2100
+* [ENHANCEMENT] Allow  database store backend to support specification of schema in credentials file #2058 (thanks @GTLangseth!)
 * [ENHANCEMENT] More detailed information in Datasource.self_check() diagnostic (concerning ExecutionEngine objects)
-* [ENHANCEMENT] Improve UI for in-code data contexts [#2068](https://github.com/great-expectations/great_expectations/pull/2068)
-* [ENHANCEMENT] Add a store_backend_id property to StoreBackend [#2030](https://github.com/great-expectations/great_expectations/pull/2030), [#2075](https://github.com/great-expectations/great_expectations/pull/2075)
-* [ENHANCEMENT] Use an existing expectation_store.store_backend_id to initialize an in-code DataContext [#2046](https://github.com/great-expectations/great_expectations/pull/2046), [#2075](https://github.com/great-expectations/great_expectations/pull/2075)
+* [ENHANCEMENT] Improve UI for in-code data contexts #2068
+* [ENHANCEMENT] Add a store_backend_id property to StoreBackend #2030, #2075
+* [ENHANCEMENT] Use an existing expectation_store.store_backend_id to initialize an in-code DataContext #2046, #2075
 * [BUGFIX] Corrected handling of boto3_options by PandasExecutionEngine
 * [BUGFIX] New Expectation via CLI / SQL Query no longer throws TypeError
 * [BUGFIX] Implement validator.default_expectations_arguments
-* [DOCS] Fix doc create and editing expectations [#2105](https://github.com/great-expectations/great_expectations/pull/2105) (thanks @Lee-W!)
+* [DOCS] Fix doc create and editing expectations #2105 (thanks @Lee-W!)
 * [DOCS] Updated documentation on 0.13 classes
 * [DOCS] Fixed a typo in the HOWTO guide for adding a self-managed Spark datasource
 * [DOCS] Updated documentation for new UI for in-code data contexts
@@ -2802,41 +2802,41 @@ varundunga!)
 
 0.12.10
 -----------------
-* [BUGFIX] Update requirements.txt for ruamel.yaml to >=0.16 - [#2048](https://github.com/great-expectations/great_expectations/pull/2048) (thanks @mmetzger!)
-* [BUGFIX] Added option to return scalar instead of list from query store [#2060](https://github.com/great-expectations/great_expectations/pull/2060)
-* [BUGFIX] Add missing markdown_content_block_container [#2063](https://github.com/great-expectations/great_expectations/pull/2063)
-* [BUGFIX] Fixed a divided by zero error for checkpoints on empty expectation suites [#2064](https://github.com/great-expectations/great_expectations/pull/2064)
-* [BUGFIX] Updated sort to correctly return partial unexpected results when expect_column_values_to_be_of_type has more than one unexpected type [#2074](https://github.com/great-expectations/great_expectations/pull/2074)
-* [BUGFIX] Resolve Data Docs resource identifier issues to speed up UpdateDataDocs action [#2078](https://github.com/great-expectations/great_expectations/pull/2078)
-* [DOCS] Updated contribution changelog location [#2051](https://github.com/great-expectations/great_expectations/pull/2051) (thanks @shapiroj18!)
-* [DOCS] Adding Airflow operator and Astrononomer deploy guides [#2070](https://github.com/great-expectations/great_expectations/pull/2070)
-* [DOCS] Missing image link to bigquery logo [#2071](https://github.com/great-expectations/great_expectations/pull/2071) (thanks @nelsonauner!)
+* [BUGFIX] Update requirements.txt for ruamel.yaml to >=0.16 - #2048 (thanks @mmetzger!)
+* [BUGFIX] Added option to return scalar instead of list from query store #2060
+* [BUGFIX] Add missing markdown_content_block_container #2063
+* [BUGFIX] Fixed a divided by zero error for checkpoints on empty expectation suites #2064
+* [BUGFIX] Updated sort to correctly return partial unexpected results when expect_column_values_to_be_of_type has more than one unexpected type #2074
+* [BUGFIX] Resolve Data Docs resource identifier issues to speed up UpdateDataDocs action #2078
+* [DOCS] Updated contribution changelog location #2051 (thanks @shapiroj18!)
+* [DOCS] Adding Airflow operator and Astrononomer deploy guides #2070
+* [DOCS] Missing image link to bigquery logo #2071 (thanks @nelsonauner!)
 
 0.12.9
 -----------------
-* [BUGFIX] Fixed the import of s3fs to use the optional import pattern - issue [#2053](https://github.com/great-expectations/great_expectations/pull/2053)
+* [BUGFIX] Fixed the import of s3fs to use the optional import pattern - issue #2053
 * [DOCS] Updated the title styling and added a Discuss comment article for the OpsgenieAlertAction how-to guide
 
 0.12.8
 -----------------
-* [FEATURE] Add OpsgenieAlertAction [#2012](https://github.com/great-expectations/great_expectations/pull/2012) (thanks @miike!)
-* [FEATURE] Add S3SubdirReaderBatchKwargsGenerator [#2001](https://github.com/great-expectations/great_expectations/pull/2001) (thanks @noklam)
+* [FEATURE] Add OpsgenieAlertAction #2012 (thanks @miike!)
+* [FEATURE] Add S3SubdirReaderBatchKwargsGenerator #2001 (thanks @noklam)
 * [ENHANCEMENT] Snowflake uses temp tables by default while still allowing transient tables
-* [ENHANCEMENT] Enabled use of lowercase table and column names in GE with the `use_quoted_name` key in batch_kwargs [#2023](https://github.com/great-expectations/great_expectations/pull/2023)
-* [BUGFIX] Basic suite builder profiler (suite scaffold) now skips excluded expectations [#2037](https://github.com/great-expectations/great_expectations/pull/2037)
-* [BUGFIX] Off-by-one error in linking to static images [#2036](https://github.com/great-expectations/great_expectations/pull/2036) (thanks @NimaVaziri!)
-* [BUGFIX] Improve handling of pandas NA type issue [#2029](https://github.com/great-expectations/great_expectations/pull/2029) PR [#2039](https://github.com/great-expectations/great_expectations/pull/2039) (thanks @isichei!)
-* [DOCS] Update Virtual Environment Example [#2027](https://github.com/great-expectations/great_expectations/pull/2027) (thanks @shapiroj18!)
+* [ENHANCEMENT] Enabled use of lowercase table and column names in GE with the `use_quoted_name` key in batch_kwargs #2023
+* [BUGFIX] Basic suite builder profiler (suite scaffold) now skips excluded expectations #2037
+* [BUGFIX] Off-by-one error in linking to static images #2036 (thanks @NimaVaziri!)
+* [BUGFIX] Improve handling of pandas NA type issue #2029 PR #2039 (thanks @isichei!)
+* [DOCS] Update Virtual Environment Example #2027 (thanks @shapiroj18!)
 * [DOCS] Update implemented_expectations.rst (thanks @jdimatteo!)
-* [DOCS] Update how_to_configure_a_pandas_s3_datasource.rst [#2042](https://github.com/great-expectations/great_expectations/pull/2042) (thanks @CarstenFrommhold!)
+* [DOCS] Update how_to_configure_a_pandas_s3_datasource.rst #2042 (thanks @CarstenFrommhold!)
 
 0.12.7
 -----------------
-* [ENHANCEMENT] CLI supports s3a:// or gs:// paths for Pandas Datasources (issue [#2006](https://github.com/great-expectations/great_expectations/pull/2006))
-* [ENHANCEMENT] Escape $ characters in configuration, support multiple substitutions ([#2005](https://github.com/great-expectations/great_expectations/pull/2005) & [#2015](https://github.com/great-expectations/great_expectations/pull/2015))
-* [ENHANCEMENT] Implement Skip prompt flag on datasource profile cli ([#1881](https://github.com/great-expectations/great_expectations/pull/1881) Thanks @thcidale0808!)
+* [ENHANCEMENT] CLI supports s3a:// or gs:// paths for Pandas Datasources (issue #2006)
+* [ENHANCEMENT] Escape $ characters in configuration, support multiple substitutions (#2005 & #2015)
+* [ENHANCEMENT] Implement Skip prompt flag on datasource profile cli (#1881 Thanks @thcidale0808!)
 * [BUGFIX] Fixed bug where slack messages cause stacktrace when data docs pages have issue
-* [DOCS] How to use docker images ([#1797](https://github.com/great-expectations/great_expectations/pull/1797))
+* [DOCS] How to use docker images (#1797)
 * [DOCS] Remove incorrect doc line from PagerdutyAlertAction (Thanks @niallrees!)
 * [MAINTENANCE] Update broken link (Thanks @noklam!)
 * [MAINTENANCE] Fix path for how-to guide (Thanks @gauthamzz!)
@@ -2881,7 +2881,7 @@ varundunga!)
 -----------------
 * [ENHANCEMENT] Add expect_compound_columns_to_be_unique and clarify multicolumn uniqueness
 * [ENHANCEMENT] Add expectation expect_table_columns_to_match_set
-* [ENHANCEMENT] Checkpoint run command now prints out details on each validation [#1437](https://github.com/great-expectations/great_expectations/pull/1437)
+* [ENHANCEMENT] Checkpoint run command now prints out details on each validation #1437
 * [ENHANCEMENT] Slack notifications can now display links to GCS-hosted DataDocs sites
 * [ENHANCEMENT] Public base URL can be configured for Data Docs sites
 * [ENHANCEMENT] SuiteEditNotebookRenderer.add_header class now allows usage of env variables in jinja templates (thanks @mbakunze)!
@@ -2901,7 +2901,7 @@ varundunga!)
 * [BUGFIX] Fix bug where running checkpoint fails if GCS data docs site has a prefix (thanks @sergii-tsymbal-exa)!
 * [BUGFIX] Fix bug in deleting datasource config from config file (thanks @rxmeez)!
 * [BUGFIX] clarify inclusiveness of min/max values in string rendering
-* [BUGFIX] Building data docs no longer crashes when a data asset name is an integer [#1913](https://github.com/great-expectations/great_expectations/pull/1913)
+* [BUGFIX] Building data docs no longer crashes when a data asset name is an integer #1913
 * [DOCS] Add notes on transient table creation to Snowflake guide (thanks @verhey)!
 * [DOCS] Fixed several broken links and glossary organization (thanks @JavierMonton and @sbrugman)!
 * [DOCS] Deploying Great Expectations with Google Cloud Composer (Hosted Airflow)
@@ -2923,7 +2923,7 @@ varundunga!)
 0.12.0
 -----------------
 * [BREAKING] This release includes a breaking change that *only* affects users who directly call `add_expectation`, `remove_expectation`, or `find_expectations`. (Most users do not use these APIs but add Expectations by stating them directly on Datasets). Those methods have been updated to take an ExpectationConfiguration object and `match_type` object. The change provides more flexibility in determining which expectations should be modified and allows us provide substantially improved support for two major features that we have frequently heard requested: conditional Expectations and more flexible multi-column custom expectations. See :ref:`expectation_suite_operations` and :ref:`migrating_versions` for more information.
-* [FEATURE] Add support for conditional expectations using pandas execution engine ([#1217](https://github.com/great-expectations/great_expectations/pull/1217) HUGE thanks @arsenii!)
+* [FEATURE] Add support for conditional expectations using pandas execution engine (#1217 HUGE thanks @arsenii!)
 * [FEATURE] ValidationActions can now consume and return "payload", which can be used to share information across ValidationActions
 * [FEATURE] Add support for nested columns in the PySpark expectations (thanks @bramelfrink)!
 * [FEATURE] add support for `expect_column_values_to_be_increasing` to `Spark` (thanks @mikaylaedwards)!
@@ -2934,10 +2934,10 @@ varundunga!)
 * [ENHANCEMENT] Include datetime and bool column types in descriptive documentation results
 * [ENHANCEMENT] Improve data docs page breadcrumbs to have clearer run information
 * [ENHANCEMENT] Data Docs Validation Results only shows unexpected value counts if all unexpected values are available
-* [ENHANCEMENT] Convert GE version key from great_expectations.__version__ to great_expectations_version (thanks, @cwerner!) ([#1606](https://github.com/great-expectations/great_expectations/pull/1606))
+* [ENHANCEMENT] Convert GE version key from great_expectations.__version__ to great_expectations_version (thanks, @cwerner!) (#1606)
 * [ENHANCEMENT] Add support in JSON Schema profiler for combining schema with anyOf key and creating nullability expectations
 * [BUGFIX] Add guard for checking Redshift Dialect in match_like_pattern expectation
-* [BUGFIX] Fix content_block build failure for dictionary content - (thanks @jliew!) [#1722](https://github.com/great-expectations/great_expectations/pull/1722)
+* [BUGFIX] Fix content_block build failure for dictionary content - (thanks @jliew!) #1722
 * [BUGFIX] Fix bug that was preventing env var substitution in `config_variables.yml` when not at the top level
 * [BUGFIX] Fix issue where expect_column_values_to_be_in_type_list did not work with positional type_list argument in SqlAlchemyDataset or SparkDFDataset
 * [BUGFIX] Fixes a bug that was causing exceptions to occur if user had a Data Docs config excluding a particular site section
@@ -2956,11 +2956,11 @@ varundunga!)
 * [ENHANCEMENT] Use green checkmark in Slack msgs instead of tada
 * [ENHANCEMENT] log class instantiation errors for better debugging
 * [BUGFIX] usage_statistics decorator now handles 'dry_run' flag
-* [BUGFIX] Add spark_context to DatasourceConfigSchema ([#1713](https://github.com/great-expectations/great_expectations/pull/1713)) (thanks @Dandandan)
+* [BUGFIX] Add spark_context to DatasourceConfigSchema (#1713) (thanks @Dandandan)
 * [BUGFIX] Handle case when unexpected_count list element is str
 * [DOCS] Deploying Data Docs
 * [DOCS] New how-to guide: How to instantiate a Data Context on an EMR Spark cluster
-* [DOCS] Managed Spark DF Documentation [#1729](https://github.com/great-expectations/great_expectations/pull/1729) (thanks @mgorsk1)
+* [DOCS] Managed Spark DF Documentation #1729 (thanks @mgorsk1)
 * [DOCS] Typos and clarifications (thanks @dechoma @sbrugman @rexboyce)
 
 0.11.8
@@ -2974,7 +2974,7 @@ varundunga!)
 * [BUGFIX] Fix issue where GlobReaderBatchKwargsGenerator failed with relative base_directory
 * [BUGFIX] Adding explicit requirement for "importlib-metadata" (needed for Python versions prior to Python 3.8).
 * [MAINTENANCE] Install GitHub Dependabot
-* [BUGFIX] Fix missing importlib for python 3.8 [#1651](https://github.com/great-expectations/great_expectations/pull/1651)
+* [BUGFIX] Fix missing importlib for python 3.8 #1651
 
 0.11.7
 -----------------
@@ -3020,11 +3020,11 @@ varundunga!)
 -----------------
 * [ENHANCEMENT] Removed the misleading scary "Site doesn't exist or is inaccessible" message that the CLI displayed before building Data Docs for the first time.
 * [ENHANCEMENT] Catch sqlalchemy.exc.ArgumentError and google.auth.exceptions.GoogleAuthError in SqlAlchemyDatasource __init__ and re-raise them as DatasourceInitializationError - this allows the CLI to execute its retry logic when users provide a malformed SQLAlchemy URL or attempt to connect to a BigQuery project without having proper authentication.
-* [BUGFIX] Fixed issue where the URL of the Glossary of Expectations article in the auto-generated suite edit notebook was wrong (out of date) ([#1557](https://github.com/great-expectations/great_expectations/pull/1557)).
+* [BUGFIX] Fixed issue where the URL of the Glossary of Expectations article in the auto-generated suite edit notebook was wrong (out of date) (#1557).
 * [BUGFIX] Use renderer_type to set paths in jinja templates instead of utm_medium since utm_medium is optional
 * [ENHANCEMENT] Bring in custom_views_directory in DefaultJinjaView to enable custom jinja templates stored in plugins dir
 * [BUGFIX] fixed glossary links in walkthrough modal, README, CTA button, scaffold notebook
-* [BUGFIX] Improved TupleGCSStoreBackend configurability ([#1398](https://github.com/great-expectations/great_expectations/pull/1398) [#1399](https://github.com/great-expectations/great_expectations/pull/1399))
+* [BUGFIX] Improved TupleGCSStoreBackend configurability (#1398 #1399)
 * [BUGFIX] Data Docs: switch bootstrap-table-filter-control.min.js to CDN
 * [ENHANCEMENT] BasicSuiteBuilderProfiler now rounds mostly values for readability
 * [DOCS] Add AutoAPI as the primary source for API Reference docs.
@@ -3041,7 +3041,7 @@ varundunga!)
   See :ref:`upgrading_to_0.11` for more info.
 * [BUGFIX] Fixed bug preventing GCS Data Docs sites to cleaned
 * [BUGFIX] Correct doc link in checkpoint yml
-* [BUGFIX] Fixed issue where CLI checkpoint list truncated names ([#1518](https://github.com/great-expectations/great_expectations/pull/1518))
+* [BUGFIX] Fixed issue where CLI checkpoint list truncated names (#1518)
 * [BUGFIX] Fix S3 Batch Kwargs Generator incorrect migration to new build_batch_kwargs API
 * [BUGFIX] Fix missing images in data docs walkthrough modal
 * [BUGFIX] Fix bug in checkpoints that was causing incorrect run_time to be set
@@ -3080,7 +3080,7 @@ varundunga!)
 0.10.12
 -----------------
 * [DOCS] Improved help for CLI `checkpoint` command
-* [BUGFIX] BasicSuiteBuilderProfiler could include extra expectations when only some expectations were selected ([#1422](https://github.com/great-expectations/great_expectations/pull/1422))
+* [BUGFIX] BasicSuiteBuilderProfiler could include extra expectations when only some expectations were selected (#1422)
 * [FEATURE] add support for `expect_multicolumn_values_to_be_unique` and `expect_column_pair_values_A_to_be_greater_than_B`
   to `Spark`. Thanks @WilliamWsyHK!
 * [ENHANCEMENT] Allow a dictionary of variables can be passed to the DataContext constructor to allow override
@@ -3108,11 +3108,11 @@ varundunga!)
 -----------------
 
 * DataContext.get_docs_sites_urls now raises error if non-existent site_name is specified
-* Bugfix for the CLI command `docs build` ignoring the --site_name argument ([#1378](https://github.com/great-expectations/great_expectations/pull/1378))
-* Bugfix and refactor for `datasource delete` CLI command ([#1386](https://github.com/great-expectations/great_expectations/pull/1386)) @mzjp2
-* Instantiate datasources and validate config only when datasource is used ([#1374](https://github.com/great-expectations/great_expectations/pull/1374)) @mzjp2
+* Bugfix for the CLI command `docs build` ignoring the --site_name argument (#1378)
+* Bugfix and refactor for `datasource delete` CLI command (#1386) @mzjp2
+* Instantiate datasources and validate config only when datasource is used (#1374) @mzjp2
 * suite delete changed from an optional argument to a required one
-* bugfix for uploading objects to GCP [#1393](https://github.com/great-expectations/great_expectations/pull/1393)
+* bugfix for uploading objects to GCP #1393
 * added a new usage stats event for the case when a data context is created through CLI
 * tuplefilestore backend, expectationstore backend remove_key bugs fixed
 * no url is returned on empty data_docs site
@@ -3122,12 +3122,12 @@ varundunga!)
 * added BigQuery as an option in the list of databases in the CLI
 * added special cases for handling BigQuery - table names are already qualified with schema name, so we must make sure that we do not prepend the schema name twice
 * changed the prompt for the name of the temp table in BigQuery in the CLI to hint that a fully qualified name (project.dataset.table) should be provided
-* Bugfix for: expect_column_quantile_values_to_be_between expectation throws an "unexpected keyword WITHIN" on BigQuery ([#1391](https://github.com/great-expectations/great_expectations/pull/1391))
+* Bugfix for: expect_column_quantile_values_to_be_between expectation throws an "unexpected keyword WITHIN" on BigQuery (#1391)
 
 0.10.8
 -----------------
-* added support for overriding the default jupyter command via a GE_JUPYTER_CMD environment variable ([#1347](https://github.com/great-expectations/great_expectations/pull/1347)) @nehiljain
-* Bugfix for checkpoint missing template ([#1379](https://github.com/great-expectations/great_expectations/pull/1379))
+* added support for overriding the default jupyter command via a GE_JUPYTER_CMD environment variable (#1347) @nehiljain
+* Bugfix for checkpoint missing template (#1379)
 
 0.10.7
 -----------------
@@ -3173,13 +3173,13 @@ varundunga!)
 * consolidated error handling in CLI DataContext loading
 * new cli command `suite scaffold` to speed up creation of suites
 * new cli command `suite demo` that creates an example suite
-* Update bigquery.rst `[#1330](https://github.com/great-expectations/great_expectations/pull/1330) <https://github.com/great-expectations/great_expectations/issues/1330>`_
-* Fix datetime reference in create_expectations.rst `[#1321](https://github.com/great-expectations/great_expectations/pull/1321) <https://github.com/great-expectations/great_expectations/issues/1321>`_ Thanks @jschendel !
+* Update bigquery.rst `#1330 <https://github.com/great-expectations/great_expectations/issues/1330>`_
+* Fix datetime reference in create_expectations.rst `#1321 <https://github.com/great-expectations/great_expectations/issues/1321>`_ Thanks @jschendel !
 * Update issue templates
 * CLI command experimental decorator
 * Update style_guide.rst
 * Add pull request template
-* Use pickle to generate hash for dataframes with unhashable objects. `[#1315](https://github.com/great-expectations/great_expectations/pull/1315) <https://github.com/great-expectations/great_expectations/issues/1315>`_ Thanks @shahinism !
+* Use pickle to generate hash for dataframes with unhashable objects. `#1315 <https://github.com/great-expectations/great_expectations/issues/1315>`_ Thanks @shahinism !
 * Unpin pytest
 
 0.10.3
@@ -3192,11 +3192,11 @@ varundunga!)
 * SuiteEditNotebookRenderer now lints using black
 * New SuiteScaffoldNotebookRenderer renderer to expedite suite creation
 * removed autopep8 dependency
-* bugfix: extra backslash in S3 urls if store was configured without a prefix `[#1314](https://github.com/great-expectations/great_expectations/pull/1314) <https://github.com/great-expectations/great_expectations/issues/1314>`_
+* bugfix: extra backslash in S3 urls if store was configured without a prefix `#1314 <https://github.com/great-expectations/great_expectations/issues/1314>`_
 
 0.10.1
 -----------------
-* removing bootstrap scrollspy on table of contents `[#1282](https://github.com/great-expectations/great_expectations/pull/1282) <https://github.com/great-expectations/great_expectations/issues/1282>`_
+* removing bootstrap scrollspy on table of contents `#1282 <https://github.com/great-expectations/great_expectations/issues/1282>`_
 * Silently tolerate connection timeout during usage stats reporting
 
 0.10.0
@@ -3211,15 +3211,15 @@ varundunga!)
 
 0.9.11
 -----------------
-* Add evaluation parameters support in WarningAndFailureExpectationSuitesValidationOperator `[#1284](https://github.com/great-expectations/great_expectations/pull/1284) <https://github.com/great-expectations/great_expectations/issues/1284>`_ thanks `@balexander <https://github.com/balexander>`_
-* Fix compatibility with MS SQL Server. `[#1269](https://github.com/great-expectations/great_expectations/pull/1269) <https://github.com/great-expectations/great_expectations/issues/1269>`_ thanks `@kepiej <https://github.com/kepiej>`_
-* Bug fixes for query_generator `[#1292](https://github.com/great-expectations/great_expectations/pull/1292) <https://github.com/great-expectations/great_expectations/issues/1292>`_ thanks `@ian-whitestone <https://github.com/ian-whitestone>`_
+* Add evaluation parameters support in WarningAndFailureExpectationSuitesValidationOperator `#1284 <https://github.com/great-expectations/great_expectations/issues/1284>`_ thanks `@balexander <https://github.com/balexander>`_
+* Fix compatibility with MS SQL Server. `#1269 <https://github.com/great-expectations/great_expectations/issues/1269>`_ thanks `@kepiej <https://github.com/kepiej>`_
+* Bug fixes for query_generator `#1292 <https://github.com/great-expectations/great_expectations/issues/1292>`_ thanks `@ian-whitestone <https://github.com/ian-whitestone>`_
 
 0.9.10
 -----------------
 * Data Docs: improve configurability of site_section_builders
-* TupleFilesystemStoreBackend now ignore `.ipynb_checkpoints` directories `[#1203](https://github.com/great-expectations/great_expectations/pull/1203) <https://github.com/great-expectations/great_expectations/issues/1203>`_
-* bugfix for Data Docs links encoding on S3 `[#1235](https://github.com/great-expectations/great_expectations/pull/1235) <https://github.com/great-expectations/great_expectations/issues/1235>`_
+* TupleFilesystemStoreBackend now ignore `.ipynb_checkpoints` directories `#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_
+* bugfix for Data Docs links encoding on S3 `#1235 <https://github.com/great-expectations/great_expectations/issues/1235>`_
 
 0.9.9
 -----------------
@@ -3227,7 +3227,7 @@ varundunga!)
 * Add log_level parameter to jupyter_ux.setup_notebook_logging.
 * Add experimental display_profiled_column_evrs_as_section and display_column_evrs_as_section methods, with a minor (nonbreaking) refactor to create a new _render_for_jupyter method.
 * Allow selection of site in UpdateDataDocsAction with new arg target_site_names in great_expectations.yml
-* Fix issue with regular expression support in BigQuery ([#1244](https://github.com/great-expectations/great_expectations/pull/1244))
+* Fix issue with regular expression support in BigQuery (#1244)
 
 0.9.8
 -----------------
@@ -3236,7 +3236,7 @@ varundunga!)
 * Remove the "project new" option from the command line (since it is not implemented; users can only run "init" to create a new project).
 * Update type detection for bigquery based on driver changes in pybigquery driver 0.4.14. Added a warning for users who are running an older pybigquery driver
 * added execution tests to the NotebookRenderer to mitigate codegen risks
-* Add option "persist", true by default, for SparkDFDataset to persist the DataFrame it is passed. This addresses [#1133](https://github.com/great-expectations/great_expectations/pull/1133) in a deeper way (thanks @tejsvirai for the robust debugging support and reproduction on spark).
+* Add option "persist", true by default, for SparkDFDataset to persist the DataFrame it is passed. This addresses #1133 in a deeper way (thanks @tejsvirai for the robust debugging support and reproduction on spark).
 
   * Disabling this option should *only* be done if the user has *already* externally persisted the DataFrame, or if the dataset is too large to persist but *computations are guaranteed to be stable across jobs*.
 
@@ -3247,24 +3247,24 @@ varundunga!)
 
 0.9.7
 -----------------
-* Update marshmallow dependency to >3. NOTE: as of this release, you MUST use marshamllow >3.0, which REQUIRES python 3. (`[#1187](https://github.com/great-expectations/great_expectations/pull/1187) <https://github.com/great-expectations/great_expectations/issues/1187>`_) @jcampbell
+* Update marshmallow dependency to >3. NOTE: as of this release, you MUST use marshamllow >3.0, which REQUIRES python 3. (`#1187 <https://github.com/great-expectations/great_expectations/issues/1187>`_) @jcampbell
 
   * Schema checking is now stricter for expectation suites, and data_asset_name must not be present as a top-level key in expectation suite json. It is safe to remove.
   * Similarly, datasource configuration must now adhere strictly to the required schema, including having any required credentials stored in the "credentials" dictionary.
 
-* New beta CLI command: `tap new` that generates an executable python file to expedite deployments. (`[#1193](https://github.com/great-expectations/great_expectations/pull/1193) <https://github.com/great-expectations/great_expectations/issues/1193>`_) @Aylr
+* New beta CLI command: `tap new` that generates an executable python file to expedite deployments. (`#1193 <https://github.com/great-expectations/great_expectations/issues/1193>`_) @Aylr
 * bugfix in TableBatchKwargsGenerator docs
-* Added feature maturity in README (`[#1203](https://github.com/great-expectations/great_expectations/pull/1203) <https://github.com/great-expectations/great_expectations/issues/1203>`_) @kyleaton
-* Fix failing test that should skip if postgresql not running (`[#1199](https://github.com/great-expectations/great_expectations/pull/1199) <https://github.com/great-expectations/great_expectations/issues/1199>`_) @cicdw
+* Added feature maturity in README (`#1203 <https://github.com/great-expectations/great_expectations/issues/1203>`_) @kyleaton
+* Fix failing test that should skip if postgresql not running (`#1199 <https://github.com/great-expectations/great_expectations/issues/1199>`_) @cicdw
 
 
 0.9.6
 -----------------
-* validate result dict when instantiating an ExpectationValidationResult (`[#1133](https://github.com/great-expectations/great_expectations/pull/1133) <https://github.com/great-expectations/great_expectations/issues/1133>`_)
+* validate result dict when instantiating an ExpectationValidationResult (`#1133 <https://github.com/great-expectations/great_expectations/issues/1133>`_)
 * DataDocs: Expectation Suite name on Validation Result pages now link to Expectation Suite page
 * `great_expectations init`: cli now asks user if csv has header when adding a Spark Datasource with csv file
 * Improve support for using GCP Storage Bucket as a Data Docs Site backend (thanks @hammadzz)
-* fix notebook renderer handling for expectations with no column kwarg and table not in their name (`[#1194](https://github.com/great-expectations/great_expectations/pull/1194) <https://github.com/great-expectations/great_expectations/issues/1194>`_)
+* fix notebook renderer handling for expectations with no column kwarg and table not in their name (`#1194 <https://github.com/great-expectations/great_expectations/issues/1194>`_)
 
 
 0.9.5
@@ -3292,7 +3292,7 @@ varundunga!)
 
 0.9.3
 -----------------
-* Add support for transient table creation in snowflake ([#1012](https://github.com/great-expectations/great_expectations/pull/1012))
+* Add support for transient table creation in snowflake (#1012)
 * Improve path support in TupleStoreBackend for better cross-platform compatibility
 * New features on `ExpectationSuite`
 
@@ -3304,12 +3304,12 @@ varundunga!)
 * Bugfix :: suite edit notebooks no longer blow away the existing suite while loading a batch of data
 * More robust and tested logic in `suite edit`
 * DataDocs: bugfixes and improvements for smaller viewports
-* Bugfix :: fix for bug that crashes SampleExpectationsDatasetProfiler if unexpected_percent is of type decimal.Decimal (`[#1109](https://github.com/great-expectations/great_expectations/pull/1109) <https://github.com/great-expectations/great_expectations/issues/1109>`_)
+* Bugfix :: fix for bug that crashes SampleExpectationsDatasetProfiler if unexpected_percent is of type decimal.Decimal (`#1109 <https://github.com/great-expectations/great_expectations/issues/1109>`_)
 
 
 0.9.2
 -----------------
-* Fixes [#1095](https://github.com/great-expectations/great_expectations/pull/1095)
+* Fixes #1095
 * Added a `list_expectation_suites` function to `data_context`, and a corresponding CLI function - `suite list`.
 * CI no longer enforces legacy python tests.
 
@@ -3399,7 +3399,7 @@ us on Slack for questions you don't see addressed!
 
 0.8.7
 -----------------
-* Add support for expect_column_values_to_be_of_type for BigQuery backend ([#940](https://github.com/great-expectations/great_expectations/pull/940))
+* Add support for expect_column_values_to_be_of_type for BigQuery backend (#940)
 * Add image CDN for community usage stats
 * Documentation improvements and fixes
 
@@ -3410,7 +3410,7 @@ us on Slack for questions you don't see addressed!
 * Add support for setting spark_options via SparkDFDatasource
 * Include tail_weights by default when using build_continuous_partition_object
 * Fix Redshift quantiles computation and type detection
-* Allow boto3 options to be configured ([#887](https://github.com/great-expectations/great_expectations/pull/887))
+* Allow boto3 options to be configured (#887)
 
 0.8.5
 -----------------
@@ -3566,9 +3566,9 @@ v0.7.9
   API and so supports any GE backend.
 * Fix an issue where columns with spaces in their names caused failures in some SqlAlchemyDataset and SparkDFDataset
   expectations
-* Fix an issue where generated queries including null checks failed on MSSQL ([#695](https://github.com/great-expectations/great_expectations/pull/695))
+* Fix an issue where generated queries including null checks failed on MSSQL (#695)
 * Fix an issue where evaluation parameters passed in as a set instead of a list could cause JSON serialization problems
-  for the result object ([#699](https://github.com/great-expectations/great_expectations/pull/699))
+  for the result object (#699)
 
 
 v0.7.8
@@ -3581,11 +3581,11 @@ v0.7.8
 
 * Improve handling of optional dependencies during CLI init
 * Improve documentation for create_expectations notebook
-* Fix several anachronistic documentation and docstring phrases ([#659](https://github.com/great-expectations/great_expectations/pull/659), [#660](https://github.com/great-expectations/great_expectations/pull/660), [#668](https://github.com/great-expectations/great_expectations/pull/668), [#681](https://github.com/great-expectations/great_expectations/pull/681); #thanks @StevenMMortimer)
+* Fix several anachronistic documentation and docstring phrases (#659, #660, #668, #681; #thanks @StevenMMortimer)
 * Fix data docs rendering issues:
 
-  - documentation rendering failure from unrecognized profiled column type ([#679](https://github.com/great-expectations/great_expectations/pull/679); thanks @dinedal))
-  - PY2 failure on encountering unicode ([#676](https://github.com/great-expectations/great_expectations/pull/676))
+  - documentation rendering failure from unrecognized profiled column type (#679; thanks @dinedal))
+  - PY2 failure on encountering unicode (#676)
 
 
 0.7.7
@@ -3783,42 +3783,42 @@ to top-level names.
 0.5.1
 ---------------
 * **Fix** issue where no result_format available for expect_column_values_to_be_null caused error
-* Use vectorized computation in pandas ([#443](https://github.com/great-expectations/great_expectations/pull/443), [#445](https://github.com/great-expectations/great_expectations/pull/445); thanks @RoyalTS)
+* Use vectorized computation in pandas (#443, #445; thanks @RoyalTS)
 
 
 0.5.0
 ----------------
 * Restructured class hierarchy to have a more generic DataAsset parent that maintains expectation logic separate \
   from the tabular organization of Dataset expectations
-* Added new FileDataAsset and associated expectations ([#416](https://github.com/great-expectations/great_expectations/pull/416) thanks @anhollis)
-* Added support for date/datetime type columns in some SQLAlchemy expectations ([#413](https://github.com/great-expectations/great_expectations/pull/413))
-* Added support for a multicolumn expectation, expect multicolumn values to be unique ([#408](https://github.com/great-expectations/great_expectations/pull/408))
+* Added new FileDataAsset and associated expectations (#416 thanks @anhollis)
+* Added support for date/datetime type columns in some SQLAlchemy expectations (#413)
+* Added support for a multicolumn expectation, expect multicolumn values to be unique (#408)
 * **Optimization**: You can now disable `partial_unexpected_counts` by setting the `partial_unexpected_count` value to \
-  0 in the result_format argument, and we do not compute it when it would not be returned. ([#431](https://github.com/great-expectations/great_expectations/pull/431), thanks @eugmandel)
-* **Fix**: Correct error in unexpected_percent computations for sqlalchemy when unexpected values exceed limit ([#424](https://github.com/great-expectations/great_expectations/pull/424))
-* **Fix**: Pass meta object to expectation result ([#415](https://github.com/great-expectations/great_expectations/pull/415), thanks @jseeman)
-* Add support for multicolumn expectations, with `expect_multicolumn_values_to_be_unique` as an example ([#406](https://github.com/great-expectations/great_expectations/pull/406))
-* Add dataset class to from_pandas to simplify using custom datasets ([#404](https://github.com/great-expectations/great_expectations/pull/404), thanks @jtilly)
-* Add schema support for sqlalchemy data context ([#410](https://github.com/great-expectations/great_expectations/pull/410), thanks @rahulj51)
+  0 in the result_format argument, and we do not compute it when it would not be returned. (#431, thanks @eugmandel)
+* **Fix**: Correct error in unexpected_percent computations for sqlalchemy when unexpected values exceed limit (#424)
+* **Fix**: Pass meta object to expectation result (#415, thanks @jseeman)
+* Add support for multicolumn expectations, with `expect_multicolumn_values_to_be_unique` as an example (#406)
+* Add dataset class to from_pandas to simplify using custom datasets (#404, thanks @jtilly)
+* Add schema support for sqlalchemy data context (#410, thanks @rahulj51)
 * Minor documentation, warning, and testing improvements (thanks @zdog).
 
 
 0.4.5
 ----------------
 * Add a new autoinspect API and remove default expectations.
-* Improve details for expect_table_columns_to_match_ordered_list ([#379](https://github.com/great-expectations/great_expectations/pull/379), thanks @rlshuhart)
+* Improve details for expect_table_columns_to_match_ordered_list (#379, thanks @rlshuhart)
 * Linting fixes (thanks @elsander)
 * Add support for dataset_class in from_pandas (thanks @jtilly)
 * Improve redshift compatibility by correcting faulty isnull operator (thanks @avanderm)
 * Adjust partitions to use tail_weight to improve JSON compatibility and
   support special cases of KL Divergence (thanks @anhollis)
 * Enable custom_sql datasets for databases with multiple schemas, by
-  adding a fallback for column reflection ([#387](https://github.com/great-expectations/great_expectations/pull/387), thanks @elsander)
+  adding a fallback for column reflection (#387, thanks @elsander)
 * Remove `IF NOT EXISTS` check for custom sql temporary tables, for
-  Redshift compatibility ([#372](https://github.com/great-expectations/great_expectations/pull/372), thanks @elsander)
+  Redshift compatibility (#372, thanks @elsander)
 * Allow users to pass args/kwargs for engine creation in
-  SqlAlchemyDataContext ([#369](https://github.com/great-expectations/great_expectations/pull/369), thanks @elsander)
-* Add support for custom schema in SqlAlchemyDataset ([#370](https://github.com/great-expectations/great_expectations/pull/370), thanks @elsander)
+  SqlAlchemyDataContext (#369, thanks @elsander)
+* Add support for custom schema in SqlAlchemyDataset (#370, thanks @elsander)
 * Use getfullargspec to avoid deprecation warnings.
 * Add expect_column_values_to_be_unique to SqlAlchemyDataset
 * **Fix** map expectations for categorical columns (thanks @eugmandel)
@@ -3829,8 +3829,8 @@ to top-level names.
 ----------------
 * Improve CLI help and set CLI return value to the number of unmet expectations
 * Add error handling for empty columns to SqlAlchemyDataset, and associated tests
-* **Fix** broken support for older pandas versions ([#346](https://github.com/great-expectations/great_expectations/pull/346))
-* **Fix** pandas deepcopy issue ([#342](https://github.com/great-expectations/great_expectations/pull/342))
+* **Fix** broken support for older pandas versions (#346)
+* **Fix** pandas deepcopy issue (#342)
 
 0.4.3
 -------
