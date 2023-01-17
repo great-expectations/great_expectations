@@ -67,6 +67,7 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
         date_format_string_parameter.build_parameters(
             domain=domain,
             parameters=parameters,
+            runtime_configuration=None,
         )
 
     assert (
@@ -117,6 +118,7 @@ def test_simple_date_format_parameter_builder_alice(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     # noinspection PyTypeChecker
@@ -251,6 +253,7 @@ def test_simple_date_format_parameter_builder_bobby(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (

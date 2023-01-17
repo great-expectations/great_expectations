@@ -33,7 +33,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
+    from great_expectations.alias_types import JSONValues, PathStr
 
 
 class SerializableDataContext(AbstractDataContext):
@@ -93,15 +93,10 @@ class SerializableDataContext(AbstractDataContext):
                     logger.info(
                         f"Saving {len(self.zep_config.datasources)} ZEP Datasources to {config_filepath}"
                     )
-                    yaml.dump(
-                        {
-                            **self.config.commented_map,
-                            **self.zep_config._json_dict(),
-                        },
-                        outfile,
-                    )
-                else:
-                    self.config.to_yaml(outfile)
+                    zep_json_dict: dict[str, JSONValues] = self.zep_config._json_dict()
+                    self.config._commented_map.update(zep_json_dict)
+
+                self.config.to_yaml(outfile)
         except PermissionError as e:
             logger.warning(f"Could not save project config to disk: {e}")
 
@@ -202,14 +197,14 @@ class SerializableDataContext(AbstractDataContext):
 
         gx_dir = os.path.join(project_root_dir, cls.GX_DIR)  # type: ignore[arg-type]
         os.makedirs(gx_dir, exist_ok=True)
-        cls.scaffold_directories(gx_dir)
+        cls._scaffold_directories(gx_dir)
 
         if os.path.isfile(os.path.join(gx_dir, cls.GX_YML)):
             message = f"""Warning. An existing `{cls.GX_YML}` was found here: {gx_dir}.
     - No action was taken."""
             warnings.warn(message)
         else:
-            cls.write_project_template_to_disk(gx_dir, usage_statistics_enabled)
+            cls._write_project_template_to_disk(gx_dir, usage_statistics_enabled)
 
         uncommitted_dir = os.path.join(gx_dir, cls.GX_UNCOMMITTED_DIR)
         if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
@@ -219,7 +214,7 @@ class SerializableDataContext(AbstractDataContext):
             )
             warnings.warn(message)
         else:
-            cls.write_config_variables_template_to_disk(uncommitted_dir)
+            cls._write_config_variables_template_to_disk(uncommitted_dir)
 
         return cls(context_root_dir=gx_dir, runtime_environment=runtime_environment)
 
@@ -246,14 +241,14 @@ class SerializableDataContext(AbstractDataContext):
         return os.path.isfile(config_var_path)
 
     @classmethod
-    def write_config_variables_template_to_disk(cls, uncommitted_dir: str) -> None:
+    def _write_config_variables_template_to_disk(cls, uncommitted_dir: str) -> None:
         os.makedirs(uncommitted_dir, exist_ok=True)
         config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
         with open(config_var_file, "w") as template:
             template.write(CONFIG_VARIABLES_TEMPLATE)
 
     @classmethod
-    def write_project_template_to_disk(
+    def _write_project_template_to_disk(
         cls, gx_dir: PathStr, usage_statistics_enabled: bool = True
     ) -> None:
         file_path = os.path.join(gx_dir, cls.GX_YML)
@@ -264,7 +259,7 @@ class SerializableDataContext(AbstractDataContext):
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_DISABLED)
 
     @classmethod
-    def scaffold_directories(cls, base_dir: PathStr) -> None:
+    def _scaffold_directories(cls, base_dir: PathStr) -> None:
         """Safely create GE directories for a new project."""
         os.makedirs(base_dir, exist_ok=True)
         with open(os.path.join(base_dir, ".gitignore"), "w") as f:
@@ -289,7 +284,7 @@ class SerializableDataContext(AbstractDataContext):
                     os.path.join(plugins_dir, "custom_data_docs", "styles"),
                     exist_ok=True,
                 )
-                cls.scaffold_custom_data_docs(plugins_dir)
+                cls._scaffold_custom_data_docs(plugins_dir)
             else:
                 os.makedirs(os.path.join(base_dir, directory), exist_ok=True)
 
@@ -300,7 +295,7 @@ class SerializableDataContext(AbstractDataContext):
             os.makedirs(new_directory_path, exist_ok=True)
 
     @classmethod
-    def scaffold_custom_data_docs(cls, plugins_dir: PathStr) -> None:
+    def _scaffold_custom_data_docs(cls, plugins_dir: PathStr) -> None:
         """Copy custom data docs templates"""
         styles_template = file_relative_path(
             __file__,
@@ -313,6 +308,9 @@ class SerializableDataContext(AbstractDataContext):
 
     @classmethod
     def find_context_root_dir(cls) -> str:
+        """
+        TODO
+        """
         result = None
         yml_path = None
         gx_home_environment = os.getenv("GX_HOME")
@@ -323,7 +321,7 @@ class SerializableDataContext(AbstractDataContext):
             ):
                 result = gx_home_environment
         else:
-            yml_path = cls.find_context_yml_file()
+            yml_path = cls._find_context_yml_file()
             if yml_path:
                 result = os.path.dirname(yml_path)
 
@@ -337,7 +335,10 @@ class SerializableDataContext(AbstractDataContext):
     def get_ge_config_version(
         cls, context_root_dir: Optional[PathStr] = None
     ) -> Optional[float]:
-        yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
+        """
+        TODO
+        """
+        yml_path = cls._find_context_yml_file(search_start_dir=context_root_dir)
         if yml_path is None:
             return None
 
@@ -354,6 +355,9 @@ class SerializableDataContext(AbstractDataContext):
         context_root_dir: Optional[str] = None,
         validate_config_version: bool = True,
     ) -> bool:
+        """
+        TODO
+        """
         if not isinstance(config_version, (int, float)):
             raise gx_exceptions.UnsupportedConfigVersionError(
                 "The argument `config_version` must be a number.",
@@ -373,7 +377,7 @@ class SerializableDataContext(AbstractDataContext):
                     ),
                 )
 
-        yml_path = cls.find_context_yml_file(search_start_dir=context_root_dir)
+        yml_path = cls._find_context_yml_file(search_start_dir=context_root_dir)
         if yml_path is None:
             return False
 
@@ -387,7 +391,7 @@ class SerializableDataContext(AbstractDataContext):
         return True
 
     @classmethod
-    def find_context_yml_file(
+    def _find_context_yml_file(
         cls, search_start_dir: Optional[PathStr] = None
     ) -> Optional[str]:
         """Search for the yml file starting here and moving upward."""
@@ -439,7 +443,7 @@ class SerializableDataContext(AbstractDataContext):
         )
 
     @classmethod
-    def does_project_have_a_datasource_in_config_file(cls, ge_dir: PathStr) -> bool:
+    def _does_project_have_a_datasource_in_config_file(cls, ge_dir: PathStr) -> bool:
         if not cls.does_config_exist_on_disk(ge_dir):
             return False
         return cls._does_context_have_at_least_one_datasource(ge_dir)

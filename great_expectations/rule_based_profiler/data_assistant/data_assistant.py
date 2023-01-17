@@ -8,6 +8,7 @@ from great_expectations.core.id_dict import deep_convert_properties_iterable_to_
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
+from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant_result import (
@@ -387,6 +388,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "NumericMetricRangeMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """
+            if evaluation_parameter_builder_configs is None:
+                evaluation_parameter_builder_configs = []
+
             metric_multi_batch_parameter_builder_name: Optional[str] = None
             if metric_name is None:
                 metric_name = evaluation_parameter_builder_configs[0]["metric_name"]
@@ -426,7 +430,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=name, suffix=None)
+            name = sanitize_parameter_name(name=name, suffix=None)
             return RegexPatternStringParameterBuilder(
                 name=name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -444,7 +448,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "HistogramSingleBatchParameterBuilder" class with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=name, suffix=None)
+            name = sanitize_parameter_name(name=name, suffix=None)
             return HistogramSingleBatchParameterBuilder(
                 name=name,
                 evaluation_parameter_builder_configs=None,
@@ -477,12 +481,12 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._validator = validator
 
-        if validator is None:
-            self._data_context = None
-            self._batches = None
-        else:
-            self._data_context = self._validator.data_context
-            self._batches = self._validator.batches
+        self._data_context = (
+            self._validator.data_context if self._validator is not None else None
+        )
+        self._batches: Optional[Dict[str, Union[Batch, XBatch]]] = (
+            self._validator.batches if self._validator is not None else None
+        )
 
         variables: Optional[Dict[str, Any]] = self.get_variables() or {}
         self._profiler = RuleBasedProfiler(
@@ -494,14 +498,16 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._metrics_parameter_builders_by_domain = {}
 
-        rules: Optional[List[Rule]] = self.get_rules() or []
+        rules: List[Rule] = self.get_rules() or []
 
         rule: Rule
         for rule in rules:
             self.profiler.add_rule(rule=rule)
             self._metrics_parameter_builders_by_domain[
                 Domain(
-                    domain_type=rule.domain_builder.domain_type,
+                    domain_type=rule.domain_builder.domain_type
+                    if rule.domain_builder
+                    else "",
                     rule_name=rule.name,
                 )
             ] = (
@@ -537,9 +543,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         else:
             usage_statistics_handler = self._data_context._usage_statistics_handler
 
-        batches: Dict[str, Batch] = self._batches
-        if batches is None:
-            batches = {}
+        batches: Dict[str, Union[Batch, XBatch]] = self._batches or {}
 
         data_assistant_result = DataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
@@ -679,9 +683,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
         """
-        batches: Dict[str, Batch] = self._batches
-        if batches is None:
-            batches = {}
+        batches: Dict[str, Union[Batch, XBatch]] = self._batches or {}
 
         batch_id: str
         batch: Batch
@@ -729,22 +731,15 @@ def run_profiler_on_data(
         variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
         domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
     """
-    if rules is None:
-        rules = []
-
-    rule: Rule
-    rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
-        rule.name: rule.to_json_dict() for rule in rules
-    }
     comment: str = f"""Created by effective Rule-Based Profiler of {data_assistant.__class__.__name__} with the \
 configuration included.
 """
     rule_based_profiler_result: RuleBasedProfilerResult = profiler.run(
         variables=variables,
-        rules=rules_configs,
+        rules=rules,
         batch_list=batch_list,
         batch_request=batch_request,
-        recompute_existing_parameter_values=False,
+        runtime_configuration=None,
         reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         variables_directives_list=variables_directives_list,
         domain_type_directives_list=domain_type_directives_list,
