@@ -394,6 +394,9 @@ def test_batch_head(
     # arbitrarily select the first batch for testing
     batch: Batch = batch_list[0]
     if success:
+        assert n_rows is None or isinstance(n_rows, int)
+        assert isinstance(fetch_all, bool)
+
         execution_engine: ExecutionEngine = batch.data.execution_engine
         execution_engine.batch_manager.load_batch_list(batch_list=[batch])
 

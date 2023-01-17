@@ -420,7 +420,7 @@ class Batch(ExperimentalBaseModel):
 
     @overload
     def head(
-        self, n_rows: Literal[1], fetch_all: StrictBool
+        self, n_rows: Literal[1], fetch_all: StrictBool = False
     ) -> pd.DataFrame | pyspark_sql_Row:
         ...
 
@@ -428,6 +428,12 @@ class Batch(ExperimentalBaseModel):
     def head(
         self, n_rows: Literal[0], fetch_all: Literal[False]
     ) -> pd.DataFrame | list[pyspark_sql_Row]:
+        ...
+
+    @overload
+    def head(
+        self, n_rows: Optional[StrictInt] = None, fetch_all: StrictBool = False
+    ) -> pd.DataFrame | list[pyspark_sql_Row] | pyspark_sql_Row:
         ...
 
     @validate_arguments
