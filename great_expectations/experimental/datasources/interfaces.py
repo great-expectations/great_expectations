@@ -425,14 +425,16 @@ class Batch(ExperimentalBaseModel):
         ...
 
     @overload
+    @validate_arguments
     def head(
-        self, n_rows: conint(ge=1, le=1), fetch_all: StrictBool
+        self, n_rows: conint(strict=True, ge=1, le=1), fetch_all: StrictBool
     ) -> Union[pd.DataFrame, pyspark_sql_Row]:
         ...
 
     @overload
+    @validate_arguments
     def head(
-        self, n_rows: conint(gt=1, lt=1), fetch_all: StrictBool
+        self, n_rows: conint(strict=True, gt=1, lt=1), fetch_all: StrictBool
     ) -> Union[pd.DataFrame, List[pyspark_sql_Row], pyspark_sql_Row]:
         ...
 
