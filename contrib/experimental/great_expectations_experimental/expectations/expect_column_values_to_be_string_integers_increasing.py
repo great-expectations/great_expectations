@@ -9,8 +9,8 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
+    MetricNameSuffixes,
     MetricPartialFunctionTypes,
-    MetricPartialFunctionTypeSuffixes,
 )
 from great_expectations.exceptions.exceptions import InvalidExpectationKwargsError
 from great_expectations.execution_engine import (
@@ -234,15 +234,15 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
             runtime_configuration=runtime_configuration,
         )
         metric_kwargs = get_metric_kwargs(
-            metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
+            metric_name=f"column_values.string_integers.increasing.{MetricNameSuffixes.MAP.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
 
         dependencies.set_metric_configuration(
-            metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
+            metric_name=f"column_values.string_integers.increasing.{MetricNameSuffixes.MAP.value}",
             metric_configuration=MetricConfiguration(
-                metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
+                metric_name=f"column_values.string_integers.increasing.{MetricNameSuffixes.MAP.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
@@ -259,7 +259,7 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
     ) -> ExpectationValidationResult:
 
         string_integers_increasing = metrics.get(
-            f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+            f"column_values.string_integers.increasing.{MetricNameSuffixes.MAP.value}"
         )
 
         success = all(string_integers_increasing[0])

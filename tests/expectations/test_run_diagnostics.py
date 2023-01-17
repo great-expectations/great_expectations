@@ -5,6 +5,7 @@ import pytest
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationRendererDiagnostics,
 )
+from great_expectations.core.metric_function_types import MetricNameSuffixes
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.registry import _registered_expectations
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
@@ -279,8 +280,8 @@ def test_self_check_on_an_existing_expectation():
             "custom": [],
         },
         "metrics": [
-            "column_values.nonnull.unexpected_count",
-            "column_values.match_regex.unexpected_count",
+            f"column_values.nonnull.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            f"column_values.match_regex.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
             "table.row_count",
             "column_values.match_regex.unexpected_values",
         ],

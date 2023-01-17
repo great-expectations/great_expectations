@@ -1,9 +1,7 @@
 from typing import Optional
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.metric_function_types import (
-    MetricPartialFunctionTypeSuffixes,
-)
+from great_expectations.core.metric_function_types import MetricNameSuffixes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -143,7 +141,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
 
         metrics = kwargs.get("_metrics")
         compound_columns_count_query, _, _ = metrics[
-            f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+            f"compound_columns.count.{MetricNameSuffixes.MAP.value}"
         ]
 
         # noinspection PyProtectedMember
@@ -182,12 +180,12 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
             if (
                 metric.metric_name
-                == f"compound_columns.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+                == f"compound_columns.unique.{MetricNameSuffixes.CONDITION.value}"
             ):
                 dependencies[
-                    f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+                    f"compound_columns.count.{MetricNameSuffixes.MAP.value}"
                 ] = MetricConfiguration(
-                    metric_name=f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}",
+                    metric_name=f"compound_columns.count.{MetricNameSuffixes.MAP.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=None,
                 )
