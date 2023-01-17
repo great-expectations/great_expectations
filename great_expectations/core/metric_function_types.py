@@ -48,7 +48,7 @@ class MetricPartialFunctionTypeSuffixes(enum.Enum):
     AGGREGATE_FUNCTION = "aggregate_fn"
 
 
-class DerivedMetricNameSuffixes(enum.Enum):
+class SummarizationMetricNameSuffixes(enum.Enum):
     FILTERED_ROW_COUNT = "filtered_row_count"
     UNEXPECTED_COUNT = "unexpected_count"
     UNEXPECTED_INDEX_LIST = "unexpected_index_list"

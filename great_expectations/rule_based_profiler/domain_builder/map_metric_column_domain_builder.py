@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from great_expectations.core.domain import Domain, SemanticDomainTypes
-from great_expectations.core.metric_function_types import DerivedMetricNameSuffixes
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
@@ -267,7 +269,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         metric_configurations: Dict[str, List[MetricConfiguration]] = {
             column_name: [
                 MetricConfiguration(
-                    metric_name=f"{map_metric_name}.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                    metric_name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                     metric_domain_kwargs={
                         "column": column_name,
                         "batch_id": batch_id,

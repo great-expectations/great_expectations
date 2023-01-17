@@ -6,7 +6,9 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.metric_function_types import DerivedMetricNameSuffixes
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -127,7 +129,7 @@ def test_StoreMetricsAction_column_metric(
                 {
                     "column": {
                         "provider_id": [
-                            f"expect_column_values_to_be_unique.result.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                            f"expect_column_values_to_be_unique.result.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
                         ]
                     }
                 },
@@ -180,7 +182,7 @@ def test_StoreMetricsAction_column_metric(
                 run_id=run_id,
                 data_asset_name=None,
                 expectation_suite_identifier=ExpectationSuiteIdentifier("foo"),
-                metric_name=f"expect_column_values_to_be_unique.result.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                metric_name=f"expect_column_values_to_be_unique.result.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_kwargs_id="column=provider_id",
             )
         )

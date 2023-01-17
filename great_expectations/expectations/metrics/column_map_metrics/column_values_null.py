@@ -1,7 +1,9 @@
 from typing import Optional
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.metric_function_types import DerivedMetricNameSuffixes
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -44,19 +46,19 @@ class ColumnValuesNullCount(MetricProvider):
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(*, metrics, **kwargs):
         return metrics[
-            f"column_values.nonnull.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         ]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(*, metrics, **kwargs):
         return metrics[
-            f"column_values.nonnull.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         ]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(*, metrics, **kwargs):
         return metrics[
-            f"column_values.nonnull.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         ]
 
     @classmethod
@@ -74,9 +76,9 @@ class ColumnValuesNullCount(MetricProvider):
             runtime_configuration=runtime_configuration,
         )
         dependencies[
-            f"column_values.nonnull.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         ] = MetricConfiguration(
-            metric_name=f"column_values.nonnull.{DerivedMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=metric.metric_domain_kwargs,
         )
         return dependencies
