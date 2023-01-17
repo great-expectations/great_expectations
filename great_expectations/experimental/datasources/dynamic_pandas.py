@@ -59,6 +59,11 @@ FIELD_SKIPPED_UNSUPPORTED_TYPE: Set[str] = set()
 FIELD_SKIPPED_NO_ANNOTATION: Set[str] = set()
 
 
+class _SignatureTuple(NamedTuple):
+    name: str
+    signature: inspect.Signature
+
+
 class _FieldSpec(NamedTuple):
     type: Type
     default_value: object  # ... for required value
@@ -79,12 +84,12 @@ def _extract_io_methods() -> List[Tuple[str, DataFrameFactoryFn]]:
 
 def _extract_io_signatures(
     io_methods: List[Tuple[str, DataFrameFactoryFn]]
-) -> List[inspect.Signature]:
+) -> List[_SignatureTuple]:
     signatures = []
     for name, method in io_methods:
         sig = inspect.signature(method)
         # print(f"  {name} -> {sig.return_annotation}\n{sig}\n")
-        signatures.append(sig)
+        signatures.append(_SignatureTuple(name, sig))
     return signatures
 
 
@@ -142,14 +147,14 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
 
 
 def _to_pydantic_fields(
-    signature: inspect.Signature,
+    sig_tuple: _SignatureTuple,
 ) -> Dict[str, _FieldSpec]:
     """
     Extract the parameter details in a structure that can be easily unpacked to
     `pydantic.create_model()` as field arguments
     """
     fields_dict: Dict[str, _FieldSpec] = {}
-    for param_name, param in signature.parameters.items():
+    for param_name, param in sig_tuple.signature.parameters.items():
         # print(type(param), param)
 
         no_annotation: bool = param.annotation is inspect._empty
