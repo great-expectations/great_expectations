@@ -40,21 +40,29 @@ CAN_HANDLE: Final[Set[str]] = {
     "tuple",
     "dict",
     "dict[str, str]",
+    "dict[str, list[str]]",
     "bool",
     "None",
     # typing
+    "Hashable",
     "Sequence[Hashable]",
+    "Sequence[str]",
     "Sequence[int]",
+    "Sequence[tuple[int, int]]",
     "Literal['infer']",
     "Literal[False]",
     "Literal[True]",
     "Literal['high', 'legacy']",
+    "Literal['frame', 'series']",
     "Literal['xlrd', 'openpyxl', 'odf', 'pyxlsb']",
+    "Literal[None, 'header', 'footer', 'body', 'all']",
     # other
-    "FilePath",
+    "Pattern",  # re
+    "Path",  # pathlib
+    "FilePath",  # pydantic
 }
 
-NEED_SPECIAL_HANDLING: Dict[str, List[str]] = defaultdict(list)
+NEED_SPECIAL_HANDLING: Dict[str, Set[str]] = defaultdict(set)
 FIELD_SKIPPED_UNSUPPORTED_TYPE: Set[str] = set()
 FIELD_SKIPPED_NO_ANNOTATION: Set[str] = set()
 
@@ -135,7 +143,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
         if type_str in CAN_HANDLE:
             types.append(type_str)
         else:
-            NEED_SPECIAL_HANDLING[param.name].append(type_str)
+            NEED_SPECIAL_HANDLING[param.name].add(type_str)
     if not types:
         return UNSUPPORTED_TYPE
     if len(types) > 1:
