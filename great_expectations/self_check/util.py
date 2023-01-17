@@ -8,7 +8,6 @@ import platform
 import random
 import re
 import string
-import threading
 import time
 import traceback
 import warnings
@@ -50,7 +49,7 @@ from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.dataset import PandasDataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.exceptions.exceptions import (
@@ -68,6 +67,10 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.profile import ColumnsExistProfiler
+from great_expectations.self_check.sqlalchemy_connection_manager import (
+    LockingConnectionCheck,
+    connection_manager,
+)
 from great_expectations.util import (
     build_in_memory_runtime_context,
     import_library_module,
@@ -75,8 +78,6 @@ from great_expectations.util import (
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Connection
-
     from great_expectations.data_context import AbstractDataContext
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -90,8 +91,6 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy as sqlalchemy
     from sqlalchemy import create_engine
-
-    # noinspection PyProtectedMember
     from sqlalchemy.engine import Engine
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
@@ -467,6 +466,24 @@ except ImportError:
 # except ImportError:
 #     teradatasqlalchemy = None
 
+try:
+    from great_expectations.dataset import SqlAlchemyDataset
+    from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
+except ImportError:
+    SqlAlchemyDataset = None  # type: ignore[misc,assignment] # could be None
+    SqlAlchemyBatchReference = None  # type: ignore[misc,assignment] # could be None
+    logger.debug(
+        "Unable to load sqlalchemy dataset; install optional sqlalchemy dependency for support."
+    )
+
+try:
+    from great_expectations.dataset import SparkDFDataset
+except ImportError:
+    SparkDFDataset = None  # type: ignore[misc,assignment] # could be None
+    logger.debug(
+        "Unable to load spark dataset; install optional spark dependency for support."
+    )
+
 import tempfile
 
 # from tests.rule_based_profiler.conftest import ATOL, RTOL
@@ -493,52 +510,6 @@ BACKEND_TO_ENGINE_NAME_DICT = {
 }
 
 BACKEND_TO_ENGINE_NAME_DICT.update({name: "sqlalchemy" for name in SQL_DIALECT_NAMES})
-
-
-class SqlAlchemyConnectionManager:
-    def __init__(self) -> None:
-        self.lock = threading.Lock()
-        self._connections: Dict[str, "Connection"] = {}
-
-    def get_engine(self, connection_string):
-        if sqlalchemy is not None:
-            with self.lock:
-                if connection_string not in self._connections:
-                    try:
-                        engine = create_engine(connection_string)
-                        conn = engine.connect()
-                        self._connections[connection_string] = conn
-                    except (ImportError, SQLAlchemyError):
-                        print(
-                            f"Unable to establish connection with {connection_string}"
-                        )
-                        raise
-                return self._connections[connection_string]
-        return None
-
-
-connection_manager = SqlAlchemyConnectionManager()
-
-
-class LockingConnectionCheck:
-    def __init__(self, sa, connection_string) -> None:
-        self.lock = threading.Lock()
-        self.sa = sa
-        self.connection_string = connection_string
-        self._is_valid = None
-
-    def is_valid(self):
-        with self.lock:
-            if self._is_valid is None:
-                try:
-                    engine = self.sa.create_engine(self.connection_string)
-                    conn = engine.connect()
-                    conn.close()
-                    self._is_valid = True
-                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
-                    print(f"{str(e)}")
-                    self._is_valid = False
-            return self._is_valid
 
 
 def get_sqlite_connection_url(sqlite_db_path):
@@ -2810,6 +2781,7 @@ def evaluate_json_test_v3_api(
     NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
         of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
 
+    :param validator: (Validator) reference to "Validator" (key object that resolves Metrics and validates Expectations)
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test

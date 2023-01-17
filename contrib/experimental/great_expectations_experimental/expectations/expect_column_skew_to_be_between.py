@@ -8,12 +8,12 @@ import pandas as pd
 import scipy.stats as stats
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -281,6 +281,7 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                     93.23978285,
                 ],  # sampled from Beta(20, 2)
             },
+            "suppress_test_for": ["sqlite", "mssql"],
             "tests": [
                 {
                     "title": "positive_test_positive_skew",
@@ -331,20 +332,6 @@ class ExpectColumnSkewToBeBetween(ColumnExpectation):
                         "max_value": 10,
                     },
                     "out": {"success": True, "observed_value": 0.9979514313860596},
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["mysql", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }

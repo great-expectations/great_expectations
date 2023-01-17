@@ -4,7 +4,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -166,6 +166,7 @@ def test_regex_pattern_string_parameter_builder_alice(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
@@ -246,6 +247,7 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = (
@@ -318,6 +320,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = (
@@ -404,11 +407,12 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
         domain.id: parameter_container,
     }
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as e:
         regex_pattern_string_parameter_builder.build_parameters(
             domain=domain,
             parameters=parameters,
             batch_list=[batch],
+            runtime_configuration=None,
         )
 
     assert (
@@ -461,6 +465,7 @@ def test_regex_single_candidate(
         domain=domain,
         parameters=parameters,
         batch_list=[batch],
+        runtime_configuration=None,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"
@@ -531,6 +536,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
         domain=domain,
         parameters=parameters,
         batch_list=[batch],
+        runtime_configuration=None,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"

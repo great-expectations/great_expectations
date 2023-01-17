@@ -11,12 +11,12 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -397,7 +397,7 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                             "other": -7127504315667345025,
                         },
                     },
-                    "suppress_test_for": ["sqlite"],
+                    "only_for": ["bigquery"],
                 },
                 {
                     "title": "for bigquery - negative_test_with_checksum_not_equal",
@@ -415,16 +415,7 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                             "other": -2656867619187774560,
                         },
                     },
-                    "suppress_test_for": ["sqlite"],
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    # "dialects": ['sqlite', 'bigquery',],
-                    "dialects": [
-                        "sqlite",
-                    ],
+                    "only_for": ["bigquery"],
                 },
             ],
         }
