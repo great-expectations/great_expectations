@@ -5,7 +5,9 @@ from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
-from great_expectations.core.metric_function_types import MetricNameSuffixes
+from great_expectations.core.metric_function_types import (
+    MetricDerivedFunctionTypeSuffixes,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
@@ -158,7 +160,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name=f"column_values.unique.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                metric_name=f"column_values.unique.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
                 metric_value_kwargs=None,
             )
 
@@ -169,7 +171,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name=f"column_values.nonnull.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                metric_name=f"column_values.nonnull.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
                 metric_value_kwargs=None,
             )
 
@@ -180,7 +182,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name=f"column_values.null.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                metric_name=f"column_values.null.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
                 metric_value_kwargs=None,
             )
 

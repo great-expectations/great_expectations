@@ -1,6 +1,5 @@
 import enum
 import logging
-from typing import Union
 
 logger = logging.getLogger(__name__)
 
@@ -28,17 +27,17 @@ class MetricPartialFunctionTypes(enum.Enum):
             "MAP_SERIES",
             "WINDOW_FN",
         ]:
-            return MetricNameSuffixes.MAP.value
+            return MetricPartialFunctionTypeSuffixes.MAP.value
 
         if self.name in [
             "MAP_CONDITION_FN",
             "MAP_CONDITION_SERIES",
             "WINDOW_CONDITION_FN",
         ]:
-            return MetricNameSuffixes.CONDITION.value
+            return MetricPartialFunctionTypeSuffixes.CONDITION.value
 
         if self.name == "AGGREGATE_FN":
-            return MetricNameSuffixes.AGGREGATE_FUNCTION.value
+            return MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value
 
         return ""
 
@@ -57,8 +56,3 @@ class MetricDerivedFunctionTypeSuffixes(enum.Enum):
     UNEXPECTED_ROWS = "unexpected_rows"
     UNEXPECTED_VALUE_COUNTS = "unexpected_value_counts"
     UNEXPECTED_VALUES = "unexpected_values"
-
-
-MetricNameSuffixes = Union[
-    MetricPartialFunctionTypeSuffixes, MetricDerivedFunctionTypeSuffixes
-]

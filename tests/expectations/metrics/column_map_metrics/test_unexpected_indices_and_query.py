@@ -3,7 +3,10 @@ from typing import Dict, Tuple
 import pandas as pd
 import pytest
 
-from great_expectations.core.metric_function_types import MetricNameSuffixes
+from great_expectations.core.metric_function_types import (
+    MetricDerivedFunctionTypeSuffixes,
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.exceptions import MetricResolutionError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -87,7 +90,7 @@ def _build_table_columns_and_unexpected(
 
     # unexpected_condition metric
     unexpected_condition_metric: MetricConfiguration = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricNameSuffixes.CONDITION.value}",
+        metric_name=f"column_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "animals"},
         metric_value_kwargs=metric_value_kwargs,
     )
@@ -122,7 +125,7 @@ def test_pd_unexpected_index_list_metric_without_id_pk(animal_table_df):
         metrics,
     ) = _build_table_columns_and_unexpected(engine, metric_value_kwargs)
     desired_metric = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}",
         metric_domain_kwargs={"column": "animals"},
         metric_value_kwargs=metric_value_kwargs,
     )
@@ -152,7 +155,7 @@ def test_pd_unexpected_index_list_metric_with_id_pk(
     ) = _build_table_columns_and_unexpected(engine, metric_value_kwargs_complete)
 
     unexpected_index_list: MetricConfiguration = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}",
         metric_domain_kwargs={"column": "animals"},
         metric_value_kwargs=metric_value_kwargs,
     )
@@ -186,7 +189,7 @@ def test_sa_unexpected_index_list_metric_with_id_pk(
     ) = _build_table_columns_and_unexpected(engine, metric_value_kwargs_complete)
 
     unexpected_index_list = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}",
         metric_domain_kwargs={"column": "animals"},
         metric_value_kwargs=metric_value_kwargs,
     )
@@ -226,7 +229,7 @@ def test_sa_unexpected_index_list_metric_without_id_pk(sa, animal_table_df):
     ) = _build_table_columns_and_unexpected(engine, metric_value_kwargs)
 
     unexpected_index_list = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}",
         metric_domain_kwargs={"column": "animals"},
         metric_value_kwargs=metric_value_kwargs,
     )
@@ -254,7 +257,7 @@ def test_sa_unexpected_index_query_metric_with_id_pk(
         metrics,
     ) = _build_table_columns_and_unexpected(engine, metric_value_kwargs_complete)
     unexpected_index_query: MetricConfiguration = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_QUERY.value}",
         metric_domain_kwargs={"column": "animals"},
         metric_value_kwargs=metric_value_kwargs,
     )
@@ -293,7 +296,7 @@ def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
         metrics,
     ) = _build_table_columns_and_unexpected(engine, metric_value_kwargs)
     unexpected_index_query: MetricConfiguration = MetricConfiguration(
-        metric_name=f"column_values.in_set.{MetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+        metric_name=f"column_values.in_set.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_QUERY.value}",
         metric_domain_kwargs={"column": "animals"},
         metric_value_kwargs=metric_value_kwargs,
     )

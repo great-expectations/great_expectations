@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
-from great_expectations.core.metric_function_types import MetricNameSuffixes
+from great_expectations.core.metric_function_types import (
+    MetricDerivedFunctionTypeSuffixes,
+)
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
 )
@@ -259,7 +261,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
         metric_computation_result = self.get_metrics(
-            metric_name=f"column_values.match_strftime_format.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            metric_name=f"column_values.match_strftime_format.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=match_strftime_metric_value_kwargs_list,
             limit=None,

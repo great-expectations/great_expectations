@@ -1,7 +1,9 @@
 from typing import Optional
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.metric_function_types import MetricNameSuffixes
+from great_expectations.core.metric_function_types import (
+    MetricDerivedFunctionTypeSuffixes,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -20,7 +22,7 @@ def unique_proportion(_metrics):
     total_values = _metrics.get("table.row_count")
     unique_values = _metrics.get("column.distinct_values.count")
     null_count = _metrics.get(
-        f"column_values.nonnull.{MetricNameSuffixes.UNEXPECTED_COUNT.value}"
+        f"column_values.nonnull.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
     )
 
     # Ensuring that we do not divide by 0, returning 0 if all values are nulls (we only consider non-nulls unique values)
@@ -66,9 +68,9 @@ class ColumnUniqueProportion(ColumnAggregateMetricProvider):
         )
 
         dependencies[
-            f"column_values.nonnull.{MetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            f"column_values.nonnull.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
         ] = MetricConfiguration(
-            metric_name=f"column_values.nonnull.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            metric_name=f"column_values.nonnull.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=metric.metric_domain_kwargs,
         )
 

@@ -5,7 +5,9 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.expectation_configuration import parse_result_format
-from great_expectations.core.metric_function_types import MetricNameSuffixes
+from great_expectations.core.metric_function_types import (
+    MetricDerivedFunctionTypeSuffixes,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -286,7 +288,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         )
         total_count = metrics.get("table.row_count")
         unexpected_count = metrics.get(
-            f"{self.map_metric}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            f"{self.map_metric}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
         )
 
         if total_count is None or total_count == 0:
@@ -304,12 +306,12 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             element_count=metrics.get("table.row_count"),
             nonnull_count=nonnull_count,
             unexpected_count=metrics.get(
-                f"{self.map_metric}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                f"{self.map_metric}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
             ),
             unexpected_list=metrics.get(
-                f"{self.map_metric}.{MetricNameSuffixes.UNEXPECTED_VALUES.value}"
+                f"{self.map_metric}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}"
             ),
             unexpected_index_list=metrics.get(
-                f"{self.map_metric}.{MetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
+                f"{self.map_metric}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}"
             ),
         )

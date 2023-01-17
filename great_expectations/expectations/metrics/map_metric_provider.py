@@ -10,9 +10,10 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
+    MetricDerivedFunctionTypeSuffixes,
     MetricFunctionTypes,
-    MetricNameSuffixes,
     MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
@@ -2140,7 +2141,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             sa.select(
                 [
                     unexpected_count_query.c[
-                        f"{MetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                        f"{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
                     ],
                 ]
             )
@@ -3182,7 +3183,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=metric_fn_type,
                     )
                     register_metric(
-                        metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                        metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -3191,7 +3192,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
-                        metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+                        metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -3200,7 +3201,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
-                        metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                        metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_QUERY.value}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -3209,7 +3210,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
-                        metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_ROWS.value}",
+                        metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -3219,7 +3220,7 @@ class MapMetricProvider(MetricProvider):
                     )
                     if domain_type == MetricDomainTypes.COLUMN:
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUES.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3228,7 +3229,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3238,7 +3239,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     elif domain_type == MetricDomainTypes.COLUMN_PAIR:
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUES.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3247,7 +3248,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.FILTERED_ROW_COUNT.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.FILTERED_ROW_COUNT.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3257,7 +3258,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     elif domain_type == MetricDomainTypes.MULTICOLUMN:
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUES.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3266,7 +3267,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.FILTERED_ROW_COUNT.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.FILTERED_ROW_COUNT.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3285,7 +3286,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=metric_fn_type,
                     )
                     register_metric(
-                        metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_ROWS.value}",
+                        metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -3294,7 +3295,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
-                        metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+                        metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -3303,7 +3304,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
-                        metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                        metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_QUERY.value}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -3315,7 +3316,7 @@ class MapMetricProvider(MetricProvider):
                         # Documentation in "MetricProvider._register_metric_functions()" explains registration protocol.
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
-                                metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                                metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3324,7 +3325,7 @@ class MapMetricProvider(MetricProvider):
                                 metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
                             )
                             register_metric(
-                                metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                                metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3334,7 +3335,7 @@ class MapMetricProvider(MetricProvider):
                             )
                         else:
                             register_metric(
-                                metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                                metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3346,7 +3347,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
                     ):
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
@@ -3356,7 +3357,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     if domain_type == MetricDomainTypes.COLUMN:
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUES.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3365,7 +3366,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3375,7 +3376,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     elif domain_type == MetricDomainTypes.COLUMN_PAIR:
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUES.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3384,7 +3385,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.FILTERED_ROW_COUNT.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.FILTERED_ROW_COUNT.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3394,7 +3395,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     elif domain_type == MetricDomainTypes.MULTICOLUMN:
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUES.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3403,7 +3404,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.FILTERED_ROW_COUNT.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.FILTERED_ROW_COUNT.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3422,7 +3423,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=metric_fn_type,
                     )
                     register_metric(
-                        metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_ROWS.value}",
+                        metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -3431,7 +3432,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
-                        metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+                        metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -3440,7 +3441,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     register_metric(
-                        metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                        metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_QUERY.value}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=(*metric_value_keys, "result_format"),
                         execution_engine=engine,
@@ -3452,7 +3453,7 @@ class MapMetricProvider(MetricProvider):
                         # Documentation in "MetricProvider._register_metric_functions()" explains registration protocol.
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
-                                metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                                metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3461,7 +3462,7 @@ class MapMetricProvider(MetricProvider):
                                 metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
                             )
                             register_metric(
-                                metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                                metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3471,7 +3472,7 @@ class MapMetricProvider(MetricProvider):
                             )
                         else:
                             register_metric(
-                                metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                                metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
                                 metric_domain_keys=metric_domain_keys,
                                 metric_value_keys=metric_value_keys,
                                 execution_engine=engine,
@@ -3483,7 +3484,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
                     ):
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=metric_value_keys,
                             execution_engine=engine,
@@ -3493,7 +3494,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     if domain_type == MetricDomainTypes.COLUMN:
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUES.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3502,7 +3503,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3512,7 +3513,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     elif domain_type == MetricDomainTypes.COLUMN_PAIR:
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUES.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3521,7 +3522,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.FILTERED_ROW_COUNT.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.FILTERED_ROW_COUNT.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3531,7 +3532,7 @@ class MapMetricProvider(MetricProvider):
                         )
                     elif domain_type == MetricDomainTypes.MULTICOLUMN:
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.UNEXPECTED_VALUES.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3540,7 +3541,7 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                         register_metric(
-                            metric_name=f"{metric_name}.{MetricNameSuffixes.FILTERED_ROW_COUNT.value}",
+                            metric_name=f"{metric_name}.{MetricDerivedFunctionTypeSuffixes.FILTERED_ROW_COUNT.value}",
                             metric_domain_keys=metric_domain_keys,
                             metric_value_keys=(*metric_value_keys, "result_format"),
                             execution_engine=engine,
@@ -3590,7 +3591,9 @@ class MapMetricProvider(MetricProvider):
 
         metric_name: str = metric.metric_name
 
-        metric_suffix: str = f".{MetricNameSuffixes.UNEXPECTED_COUNT.value}"
+        metric_suffix: str = (
+            f".{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}"
+        )
 
         # Documentation in "MetricProvider._register_metric_functions()" explains registration/dependency protocol.
         if metric_name.endswith(metric_suffix):
@@ -3614,7 +3617,7 @@ class MapMetricProvider(MetricProvider):
                 )
             else:
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricNameSuffixes.CONDITION.value}",
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
@@ -3624,13 +3627,13 @@ class MapMetricProvider(MetricProvider):
             filter(
                 lambda element: metric_name.endswith(element),
                 [
-                    f".{MetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
-                    f".{MetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
-                    f".{MetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    f".{MetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    f".{MetricNameSuffixes.FILTERED_ROW_COUNT.value}",
-                    f".{MetricNameSuffixes.UNEXPECTED_VALUES.value}",
-                    f".{MetricNameSuffixes.UNEXPECTED_ROWS.value}",
+                    f".{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                    f".{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
+                    f".{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                    f".{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_INDEX_LIST.value}",
+                    f".{MetricDerivedFunctionTypeSuffixes.FILTERED_ROW_COUNT.value}",
+                    f".{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_VALUES.value}",
+                    f".{MetricDerivedFunctionTypeSuffixes.UNEXPECTED_ROWS.value}",
                 ],
             )
         )
@@ -3638,7 +3641,7 @@ class MapMetricProvider(MetricProvider):
             metric_suffix = unexpected_condition_dependent_metric_name_suffixes[0]
             if metric_name.endswith(metric_suffix):
                 dependencies["unexpected_condition"] = MetricConfiguration(
-                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricNameSuffixes.CONDITION.value}",
+                    metric_name=f"{metric_name[:-len(metric_suffix)]}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=base_metric_value_kwargs,
                 )
