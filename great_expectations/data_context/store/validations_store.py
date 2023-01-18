@@ -168,7 +168,7 @@ class ValidationsStore(Store):
         if self.cloud_mode:
             return value.to_json_dict()
         return self._expectationSuiteValidationResultSchema.dumps(
-            value, indent=2, sort_keys=True
+            value.to_json_dict(), indent=2, sort_keys=True
         )
 
     def deserialize(self, value):

@@ -69,12 +69,6 @@ class ExpectColumnValuesToBeValidHTTPMethods(SetBasedColumnMapExpectation):
                     "include_in_gallery": True,
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                }
-            ],
         }
     ]
 

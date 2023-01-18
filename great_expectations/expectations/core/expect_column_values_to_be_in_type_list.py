@@ -285,7 +285,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
         ]
 
-    def _validate_pandas(
+    def _validate_pandas(  # noqa: C901 - 16
         self,
         actual_column_type,
         expected_types_list,
@@ -450,8 +450,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             column_name = configuration.kwargs.get("column")
             expected_types_list = configuration.kwargs.get("type_list")
             metric_kwargs = get_metric_kwargs(
-                configuration=configuration,
                 metric_name="table.column_types",
+                configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")

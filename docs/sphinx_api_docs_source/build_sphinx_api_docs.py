@@ -23,8 +23,10 @@ Typical usage example:
 import ast
 import importlib
 import logging
+import os
 import pathlib
 import shutil
+import urllib
 from typing import Tuple
 from urllib.parse import urlparse
 
@@ -171,6 +173,15 @@ class SphinxInvokeDocsBuilder:
 
                     external_ref.string = formatted_text
 
+                # Process internal links
+                # Note: Currently the docusaurus link checker does not work well with
+                # anchor links, so we need to make these links absolute.
+                internal_refs = doc.find_all(class_="reference internal")
+                for internal_ref in internal_refs:
+                    href = internal_ref["href"]
+                    absolute_href = self._get_base_url() + href
+                    internal_ref["href"] = absolute_href
+
                 doc_str = str(doc)
 
                 # Add front matter
@@ -192,6 +203,16 @@ class SphinxInvokeDocsBuilder:
                     fout.write(doc_str)
 
         logger.info("Created mdx files for serving with docusaurus.")
+
+    def _get_base_url(self) -> str:
+        """The base url for use in generating absolute links.
+
+        Note, this will need to be modified if we begin to nest
+        directories inside of /docs/reference/api/
+        """
+        # URL is an environment variable provided by Netlify
+        base_url = os.getenv("URL", "http://localhost:3000")
+        return f"{base_url}/docs/reference/api/"
 
     def _remove_temp_html(self) -> None:
         """Remove the Sphinx-generated temporary html files + related files."""
@@ -258,6 +279,16 @@ class SphinxInvokeDocsBuilder:
 
         class_name = self._get_entity_name(definition=definition)
         dotted_path = f"{dotted_path_prefix}.{class_name}"
+
+        # Note: shortened_dotted_paths is temporary,
+        # to be replaced with automated method using AST parsing:
+        shortened_dotted_paths = {
+            "great_expectations.data_context.data_context.abstract_data_context.AbstractDataContext": "great_expectations.data_context.AbstractDataContext",
+            "great_expectations.core.expectation_suite.ExpectationSuite": "great_expectations.core.ExpectationSuite",
+        }
+
+        if dotted_path in shortened_dotted_paths:
+            return shortened_dotted_paths[dotted_path]
 
         return dotted_path
 

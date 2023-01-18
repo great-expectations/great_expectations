@@ -967,7 +967,7 @@ def test_run_profiler_without_dynamic_args(
         rules=None,
         batch_list=None,
         batch_request=None,
-        recompute_existing_parameter_values=False,
+        runtime_configuration=None,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
             domain_builder=ReconciliationStrategy.UPDATE,
@@ -1010,7 +1010,7 @@ def test_run_profiler_with_dynamic_args(
         rules=rules,
         batch_list=None,
         batch_request=None,
-        recompute_existing_parameter_values=False,
+        runtime_configuration=None,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
             domain_builder=ReconciliationStrategy.UPDATE,

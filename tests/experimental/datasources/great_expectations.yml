@@ -24,8 +24,8 @@ xdatasources:
         name: with_sorters
         table_name: another_table
         order_by:
-          - metadata_key: year
-          - metadata_key: month
+          - key: year
+          - key: month
             reverse: true
       with_dsl_ish_sorters:
         type: table
