@@ -381,12 +381,9 @@ class _YamlConfigValidator:
         """
         print(f"\tInstantiating as a Store, since class_name is {class_name}")
         store_name: str = name or config.get("name") or "my_temp_store"
-        instantiated_class = cast(
-            Store,
-            self._data_context._build_store_from_config(
-                store_name=store_name,
-                store_config=config,
-            ),
+        instantiated_class = self._data_context._build_store_from_config(
+            store_name=store_name,
+            store_config=config,
         )
         store_name = instantiated_class.store_name or store_name
         self._data_context.config["stores"][store_name] = config
