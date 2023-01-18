@@ -11,12 +11,6 @@ class MetricFunctionTypes(enum.Enum):
     AGGREGATE_VALUE = "value"  # "aggregate_value"
 
 
-class MetricPartialFunctionTypeSuffixes(enum.Enum):
-    MAP = "map"
-    CONDITION = "condition"
-    AGGREGATE_FUNCTION = "aggregate_fn"
-
-
 class MetricPartialFunctionTypes(enum.Enum):
     MAP_FN = "map_fn"
     MAP_SERIES = "map_series"
@@ -46,3 +40,19 @@ class MetricPartialFunctionTypes(enum.Enum):
             return MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value
 
         return ""
+
+
+class MetricPartialFunctionTypeSuffixes(enum.Enum):
+    MAP = "map"
+    CONDITION = "condition"
+    AGGREGATE_FUNCTION = "aggregate_fn"
+
+
+class SummarizationMetricNameSuffixes(enum.Enum):
+    FILTERED_ROW_COUNT = "filtered_row_count"
+    UNEXPECTED_COUNT = "unexpected_count"
+    UNEXPECTED_INDEX_LIST = "unexpected_index_list"
+    UNEXPECTED_INDEX_QUERY = "unexpected_index_query"
+    UNEXPECTED_ROWS = "unexpected_rows"
+    UNEXPECTED_VALUE_COUNTS = "unexpected_value_counts"
+    UNEXPECTED_VALUES = "unexpected_values"
