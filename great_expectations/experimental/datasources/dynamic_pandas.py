@@ -13,6 +13,7 @@ from typing import (
     Set,
     Tuple,
     Type,
+    TypeVar,
     Union,
     _eval_type,
 )
@@ -183,24 +184,31 @@ def _to_pydantic_fields(
     return fields_dict
 
 
+M = TypeVar("M", bound=pydantic.BaseModel)
+
+
 def _create_pandas_asset_model(
-    model_name: str, fields_dict: Dict[str, _FieldSpec]
-) -> Type[pydantic.BaseModel]:
+    model_name: str, model_base: Type[M], fields_dict: Dict[str, _FieldSpec]
+) -> Type[M]:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
-    model = pydantic.create_model(model_name, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
+    model = pydantic.create_model(model_name, __base__=model_base, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
     return model
 
 
-def _generate_data_asset_models() -> List[Type[pydantic.BaseModel]]:
+def _generate_data_asset_models(
+    base_model_class: Type[M],
+) -> List[Type[M]]:
     io_methods = _extract_io_methods()[:]
     io_method_sigs = _extract_io_signatures(io_methods)
 
-    models: List[Type[pydantic.BaseModel]] = []
+    models: List[Type[M]] = []
     for signature_tuple in io_method_sigs:
 
         fields = _to_pydantic_fields(signature_tuple)
 
-        model = _create_pandas_asset_model(signature_tuple.name.strip("read_"), fields)
+        model = _create_pandas_asset_model(
+            signature_tuple.name.strip("read_"), base_model_class, fields
+        )
         models.append(model)
 
     return models
