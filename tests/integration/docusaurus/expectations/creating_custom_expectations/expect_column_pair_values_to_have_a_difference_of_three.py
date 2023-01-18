@@ -22,12 +22,12 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-# <snippet>
+# <snippet name="custom_column_pair_metric">
 class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
     # </snippet>
     """MetricProvider Class for Pair Values Diff Three MetricProvider"""
 
-    # <snippet>
+    # <snippet name="custom_column_pair_metric_name">
     condition_metric_name = "column_pair_values.diff_three"
     # </snippet>
     condition_domain_keys = (
@@ -35,7 +35,7 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
         "column_B",
     )
     condition_value_keys = ()
-    # <snippet>
+    # <snippet name="custom_column_pair_pandas">
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         return abs(column_A - column_B) == 3
@@ -55,18 +55,18 @@ class ColumnPairValuesDiffThree(ColumnPairMapMetricProvider):
         return row_wise_cond
 
 
-# <snippet>
+# <snippet name="custom_column_pair_expectation">
 class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
     # </snippet>
-    # <snippet>
+    # <snippet name="custom_column_pair_docstring">
     """Expect two columns to have a row-wise difference of three."""
     # </snippet>
-    # <snippet>
+    # <snippet name="custom_column_pair_map_metric">
     map_metric = "column_pair_values.diff_three"
     # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet>
+    # <snippet name="custom_column_pair_examples">
     examples = [
         {
             "data": {
@@ -131,7 +131,7 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet>
+    # <snippet name="custom_column_pair_library_metadata">
     library_metadata = {
         "tags": [
             "basic math",
@@ -143,7 +143,7 @@ class ExpectColumnPairValuesToHaveADifferenceOfThree(ColumnPairMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet>
+    # <snippet name="custom_column_pair_diagnostics">
     ExpectColumnPairValuesToHaveADifferenceOfThree().print_diagnostic_checklist()
     # </snippet>
 # Note to users: code below this line is only for integration testing -- ignore!

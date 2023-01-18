@@ -22,11 +22,11 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnPairMapExpectations, the main business logic for calculation will live in this class.
-# <snippet>
+# <snippet name="column_pair_template_metric">
 class ColumnPairValuesMatchSomeCriteria(ColumnPairMapMetricProvider):
     # </snippet>
     # This is the id string that will be used to reference your metric.
-    # <snippet>
+    # <snippet name="column_pair_template_metric_name">
     condition_metric_name = "METRIC NAME GOES HERE"
     # </snippet>
     # These point your metric at the provided keys to facilitate calculation
@@ -37,7 +37,7 @@ class ColumnPairValuesMatchSomeCriteria(ColumnPairMapMetricProvider):
     condition_value_keys = ()
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet>
+    # <snippet name="column_pair_template_pandas">
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, **kwargs):
         raise NotImplementedError
@@ -56,10 +56,10 @@ class ColumnPairValuesMatchSomeCriteria(ColumnPairMapMetricProvider):
 
 
 # This class defines the Expectation itself
-# <snippet>
+# <snippet name="column_pair_template_expectation">
 class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
     # </snippet>
-    # <snippet>
+    # <snippet name="column_pair_template_docstring">
     """TODO: Add a docstring here"""
     # </snippet>
 
@@ -69,7 +69,7 @@ class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    # <snippet>
+    # <snippet name="column_pair_template_map_metric">
     map_metric = "METRIC NAME GOES HERE"
     # </snippet>
 
@@ -113,7 +113,7 @@ class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
-    # <snippet>
+    # <snippet name="column_pair_template_library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -124,4 +124,6 @@ class ExpectColumnPairValuesToMatchSomeCriteria(ColumnPairMapExpectation):
 
 
 if __name__ == "__main__":
+    # <snippet  name="column_pair_template_diagnostics">
     ExpectColumnPairValuesToMatchSomeCriteria().print_diagnostic_checklist()
+#     </snippet>
