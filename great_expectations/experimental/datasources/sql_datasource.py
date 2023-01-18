@@ -16,6 +16,7 @@ from typing import (
 )
 
 import pydantic
+from pydantic import AnyUrl
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal
 
@@ -309,7 +310,7 @@ class SQLDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
-    connection_string: str
+    connection_string: AnyUrl
     assets: Dict[str, TableAsset] = {}
 
     @property
