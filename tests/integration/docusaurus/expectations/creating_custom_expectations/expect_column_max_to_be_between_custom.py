@@ -47,7 +47,7 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         return column.max()
 
     # </snippet>
-    # <snippet name="custom_agg_sql">
+    # <snippet name="custom_agg_sql_def">
     @metric_value(
         engine=SqlAlchemyExecutionEngine,
         metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
@@ -61,6 +61,8 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         metrics,
         runtime_configuration,
     ):
+        # </snippet>
+        # <snippet name="custom_agg_sql_selectable">
         (
             selectable,
             compute_domain_kwargs,
@@ -72,13 +74,15 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         column_name = accessor_domain_kwargs["column"]
         column = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
-
+        # </snippet>
+        # <snippet name="custom_agg_sql_query">
         query = sa.select([sa.func.max(column)]).select_from(selectable)
         result = sqlalchemy_engine.execute(query).fetchone()
 
         return result[0]
 
     # </snippet>
+
     # <snippet name="custom_agg_spark">
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _table, _column_name, **kwargs):
