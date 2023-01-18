@@ -2,9 +2,11 @@ import os
 
 import pytest
 
-import great_expectations.exceptions as gee
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.util import (
     PasswordMasker,
+    build_store_from_config,
     parse_substitution_variable,
 )
 from great_expectations.types import safe_deep_copy
@@ -12,12 +14,12 @@ from great_expectations.util import load_class
 
 
 def test_load_class_raises_error_when_module_not_found():
-    with pytest.raises(gee.PluginModuleNotFoundError):
+    with pytest.raises(gx_exceptions.PluginModuleNotFoundError):
         load_class("foo", "bar")
 
 
 def test_load_class_raises_error_when_class_not_found():
-    with pytest.raises(gee.PluginClassNotFoundError):
+    with pytest.raises(gx_exceptions.PluginClassNotFoundError):
         load_class("TotallyNotARealClass", "great_expectations.datasource")
 
 
@@ -495,3 +497,42 @@ def test_parse_substitution_variable():
     assert parse_substitution_variable("some_$tring") is None
     assert parse_substitution_variable("${SOME_$TRING}") is None
     assert parse_substitution_variable("$SOME_$TRING") == "SOME_"
+
+
+@pytest.mark.unit
+def test_build_store_from_config_success():
+    store_name = "my_new_store"
+    store_config = {
+        "module_name": "great_expectations.data_context.store",
+        "class_name": "ExpectationsStore",
+    }
+    store = build_store_from_config(
+        store_name=store_name,
+        store_config=store_config,
+    )
+    assert isinstance(store, ExpectationsStore)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "store_config,module_name",
+    [
+        pytest.param(None, "great_expectations.data_context.store", id="config_none"),
+        pytest.param(
+            {
+                "module_name": "great_expectations.data_context.store",
+                "class_name": "ExpectationsStore",
+            },
+            None,
+            id="module_name_none",
+        ),
+        pytest.param(None, None, id="config_and_module_name_both_none"),
+    ],
+)
+def test_build_store_from_config_failure(store_config: dict, module_name: str):
+    with pytest.raises(gx_exceptions.StoreConfigurationError):
+        build_store_from_config(
+            store_name="my_new_store",
+            store_config=store_config,
+            module_name=module_name,
+        )

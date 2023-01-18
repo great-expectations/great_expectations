@@ -567,7 +567,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     f"{float(CURRENT_GX_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the upgrade process."
                 )
-                built_store: Optional[Store] = self._build_store_from_config(
+                built_store: Store = self._build_store_from_config(
                     profiler_store_name,  # type: ignore[arg-type]
                     DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],  # type: ignore[index,arg-type]
                 )
@@ -1189,7 +1189,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
 
-    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
+    def add_store(self, store_name: str, store_config: dict) -> Store:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
@@ -3005,9 +3005,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             conf_file_option="usage_statistics_url",
         )
 
-    def _build_store_from_config(
-        self, store_name: str, store_config: dict
-    ) -> Optional[Store]:
+    def _build_store_from_config(self, store_name: str, store_config: dict) -> Store:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
         # the expectations_store does not yet exist by:

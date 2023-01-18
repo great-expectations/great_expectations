@@ -109,9 +109,11 @@ def build_store_from_config(
     store_config: Optional[dict] = None,
     module_name: str = "great_expectations.data_context.store",
     runtime_environment: Optional[dict] = None,
-) -> Optional["Store"]:
+) -> "Store":
     if store_config is None or module_name is None:
-        return None
+        raise gx_exceptions.StoreConfigurationError(
+            "Cannot build a store without both a store_config and a module_name"
+        )
 
     try:
         config_defaults: dict = {
