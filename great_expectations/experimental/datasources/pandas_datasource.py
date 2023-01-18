@@ -133,16 +133,16 @@ class CSVAsset(DataAsset):
             batch_request
         ):
             batch_spec = PathBatchSpec(path=str(path))
+            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+                batch_spec=batch_spec
+            )
+
             # batch_definition (along with batch_spec and markers) is only here to satisfy a
             # legacy constraint when computing usage statistics in a validator. We hope to remove
             # it in the future.
             # imports are done inline to prevent a circular dependency with core/batch.py
             from great_expectations.core import IDDict
             from great_expectations.core.batch import BatchDefinition
-
-            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
-                batch_spec=batch_spec
-            )
 
             batch_definition = BatchDefinition(
                 datasource_name=self.datasource.name,
