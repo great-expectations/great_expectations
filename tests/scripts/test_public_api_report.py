@@ -288,12 +288,12 @@ def test_get_shortest_dotted_path(monkeypatch):
 
     # This is the actual path
     assert (
-        get_shortest_dotted_path(definition)
+        get_shortest_dotted_path(definition=definition, repo_root_path=repo_root)
         != "great_expectations.core.expectation_suite.ExpectationSuite"
     )
     # This is the shortest path
     assert (
-        get_shortest_dotted_path(definition)
+        get_shortest_dotted_path(definition=definition, repo_root_path=repo_root)
         == "great_expectations.core.ExpectationSuite"
     )
 

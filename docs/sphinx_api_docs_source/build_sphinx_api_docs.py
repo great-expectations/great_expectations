@@ -279,7 +279,9 @@ class SphinxInvokeDocsBuilder:
     def _create_class_md_stub(self, definition: Definition) -> str:
         """Create the markdown stub content for a class."""
         class_name = self._get_entity_name(definition=definition)
-        dotted_import = get_shortest_dotted_path(definition=definition)
+        dotted_import = get_shortest_dotted_path(
+            definition=definition, repo_root_path=self.repo_root
+        )
         return f"""# {class_name}
 
 ```{{eval-rst}}

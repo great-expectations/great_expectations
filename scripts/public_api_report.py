@@ -374,7 +374,9 @@ class CodeParser:
         return function_definitions
 
 
-def get_shortest_dotted_path(definition: Definition) -> str:
+def get_shortest_dotted_path(
+    definition: Definition, repo_root_path: pathlib.Path
+) -> str:
     """Get the shortest dotted path to a class definition.
 
     e.g. if a class is imported in a parent __init__.py file use that
@@ -382,22 +384,30 @@ def get_shortest_dotted_path(definition: Definition) -> str:
 
     Args:
         definition: Class definition.
+        repo_root_path: Repository root path to make sure paths are relative.
 
     Returns:
         Dotted representation of shortest import path
             e.g. great_expectations.core.ExpectationSuite
     """
 
+    if definition.filepath.is_absolute():
+        relative_definition_path = definition.filepath.relative_to(repo_root_path)
+    else:
+        relative_definition_path = definition.filepath
+
     # Traverse parent folders from definition.filepath
-    shortest_path_prefix = str(".".join(definition.filepath.parts)).replace(".py", "")
+    shortest_path_prefix = str(".".join(relative_definition_path.parts)).replace(
+        ".py", ""
+    )
     shortest_path = f"{shortest_path_prefix}.{definition.name}"
 
-    path_parts = list(definition.filepath.parts)
+    path_parts = list(relative_definition_path.parts)
     while path_parts:
         # Keep traversing, shortening path if shorter path is found.
         path_parts.pop()
         # if __init__.py is found, ast parse and check for import of the class
-        init_path = pathlib.Path(*path_parts, "__init__.py")
+        init_path = repo_root_path / pathlib.Path(*path_parts, "__init__.py")
         if init_path.is_file():
 
             import_names = []
