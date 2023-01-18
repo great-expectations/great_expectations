@@ -22,17 +22,17 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-# <snippet>
+# <snippet name="custom_multicolumn_metric">
 class MulticolumnValuesMultipleThree(MulticolumnMapMetricProvider):
     # </snippet>
     """MetricProvider Class for Multicolumn Values Multiple Of Three MetricProvider"""
 
-    # <snippet>
+    # <snippet name="custom_multicolumn_metric_name">
     condition_metric_name = "multicolumn_values.multiple_three"
     # </snippet>
     condition_domain_keys = ("column_list",)
     condition_value_keys = ()
-    # <snippet>
+    # <snippet name="custom_multicolumn_pandas">
 
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
@@ -48,18 +48,18 @@ class MulticolumnValuesMultipleThree(MulticolumnMapMetricProvider):
         raise NotImplementedError
 
 
-# <snippet>
+# <snippet name="custom_multicolumn_expectation">
 class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
     # </snippet>
-    # <snippet>
+    # <snippet name="custom_multicolumn_docstring">
     """Expect a set of columns to contain multiples of three."""
     # </snippet>
-    # <snippet>
+    # <snippet name="custom_multicolumn_map_metric">
     map_metric = "multicolumn_values.multiple_three"
     # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet>
+    # <snippet name="custom_multicolumn_examples">
     examples = [
         {
             "data": {
@@ -132,7 +132,7 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
                 raise InvalidExpectationConfigurationError(str(e))
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet>
+    # <snippet name="custom_multicolumn_library_metadata">
     library_metadata = {
         "tags": [
             "basic math",
@@ -144,7 +144,7 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet>
+    # <snippet name="custom_multicolumn_diagnostics">
     ExpectMulticolumnValuesToBeMultiplesOfThree().print_diagnostic_checklist()
     # </snippet>
 # Note to users: code below this line is only for integration testing -- ignore!
