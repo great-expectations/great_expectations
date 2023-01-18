@@ -886,6 +886,9 @@ class Expectation(metaclass=MetaExpectation):
         )
         if result_dict.get("unexpected_index_query"):
             query = result_dict.get("unexpected_index_query")
+            # in Pandas case, this is a list
+            if not isinstance(query, str):
+                query = str(query)
             query_info = CollapseContent(
                 **{
                     "collapse_toggle_link": "To retrieve all unexpected values...",
