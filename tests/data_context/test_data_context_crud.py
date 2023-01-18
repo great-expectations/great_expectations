@@ -35,7 +35,9 @@ def in_memory_data_context() -> StubEphemeralDataContext:
 @pytest.mark.unit
 def test_add_store(in_memory_data_context: StubEphemeralDataContext):
     context = in_memory_data_context
+
     num_stores_before = len(context.stores)
+    num_store_configs_before = len(context.config.stores)
 
     context.add_store(
         store_name="my_new_store",
@@ -45,38 +47,43 @@ def test_add_store(in_memory_data_context: StubEphemeralDataContext):
         },
     )
 
-    assert len(context.stores) == num_stores_before + 1
+    num_stores_after = len(context.stores)
+    num_store_configs_after = len(context.config.stores)
+
+    assert num_stores_after == num_stores_before + 1
+    assert num_store_configs_after == num_store_configs_before + 1
     assert context.save_count == 1
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    "store_name,raises",
-    [
-        pytest.param(
-            "checkpoint_store",  # We know this to be a default name
-            False,
-            id="success",
-        ),
-        pytest.param(
-            "my_fake_store",
-            True,
-            id="failure",
-        ),
-    ],
-)
-def test_delete_store(
-    in_memory_data_context: StubEphemeralDataContext, store_name: str, raises: bool
-):
+def test_delete_store_success(in_memory_data_context: StubEphemeralDataContext):
     context = in_memory_data_context
-    num_stores_before = len(context.stores)
 
-    if raises:
-        with pytest.raises(StoreConfigurationError):
-            context.delete_store(store_name)
-        assert len(context.stores) == num_stores_before
-        assert context.save_count == 0
-    else:
-        context.delete_store(store_name)
-        assert len(context.stores) == num_stores_before - 1
-        assert context.save_count == 1
+    num_stores_before = len(context.stores)
+    num_store_configs_before = len(context.config.stores)
+
+    context.delete_store("checkpoint_store")  # We know this to be a default name
+
+    num_stores_after = len(context.stores)
+    num_store_configs_after = len(context.config.stores)
+
+    assert num_stores_after == num_stores_before - 1
+    assert num_store_configs_after == num_store_configs_before - 1
+    assert context.save_count == 1
+
+
+def test_delete_store_failure(in_memory_data_context: StubEphemeralDataContext):
+    context = in_memory_data_context
+
+    num_stores_before = len(context.stores)
+    num_store_configs_before = len(context.config.stores)
+
+    with pytest.raises(StoreConfigurationError):
+        context.delete_store("my_fake_store_name")
+
+    num_stores_after = len(context.stores)
+    num_store_configs_after = len(context.config.stores)
+
+    assert num_stores_after == num_stores_before
+    assert num_store_configs_after == num_store_configs_before
+    assert context.save_count == 0
