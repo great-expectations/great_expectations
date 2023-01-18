@@ -372,7 +372,7 @@ not {batch_spec.__class__.__name__}"""
 
     # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
-    def guess_reader_method_from_path(path):
+    def guess_reader_method_from_path(path: str):
         """Helper method for deciding which reader to use to read in a certain path.
 
         Args:
@@ -382,6 +382,7 @@ not {batch_spec.__class__.__name__}"""
             ReaderMethod to use for the filepath
 
         """
+        path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif (

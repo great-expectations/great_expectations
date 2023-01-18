@@ -267,7 +267,8 @@ class PandasDatasource(LegacyDatasource):
         )
 
     @staticmethod
-    def guess_reader_method_from_path(path):
+    def guess_reader_method_from_path(path: str):
+        path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif (
@@ -291,7 +292,8 @@ class PandasDatasource(LegacyDatasource):
             return {"reader_method": "read_sas"}
 
         raise BatchKwargsError(
-            f"Unable to determine reader method from path: {path}", {"path": path}
+            f"Unable to determine reader method from path: {path}",
+            {"path": path},
         )
 
     def _infer_default_options(self, reader_fn: Callable, reader_options: dict) -> dict:
