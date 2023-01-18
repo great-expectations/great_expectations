@@ -138,14 +138,8 @@ class CSVAsset(DataAsset):
             # it in the future.
             # imports are done inline to prevent a circular dependency with core/batch.py
             from great_expectations.core import IDDict
-            from great_expectations.core.batch import (
-                BatchData,
-                BatchDefinition,
-                BatchMarkers,
-            )
+            from great_expectations.core.batch import BatchDefinition
 
-            data: BatchData
-            markers: BatchMarkers
             data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
@@ -161,13 +155,9 @@ class CSVAsset(DataAsset):
             batch_metadata = copy.deepcopy(request.options)
             batch_metadata["path"] = path
 
-            # These pydantic annotations are postponed due to circular imports. This will set the annotations before we
+            # Some pydantic annotations are postponed due to circular imports. This will set the annotations before we
             # instantiate the Batch class since we can import them above.
-            Batch.update_forward_refs(
-                BatchData=BatchData,
-                BatchDefinition=BatchDefinition,
-                BatchMarkers=BatchMarkers,
-            )
+            Batch.update_forward_refs()
             batch_list.append(
                 Batch(
                     datasource=self.datasource,

@@ -444,6 +444,20 @@ class Batch(ExperimentalBaseModel):
         )
         return values
 
+    @classmethod
+    def update_forward_refs(cls):
+        from great_expectations.core.batch import (
+            BatchData,
+            BatchDefinition,
+            BatchMarkers,
+        )
+
+        super().update_forward_refs(
+            BatchData=BatchData,
+            BatchDefinition=BatchDefinition,
+            BatchMarkers=BatchMarkers,
+        )
+
     @validate_arguments
     def head(
         self,
