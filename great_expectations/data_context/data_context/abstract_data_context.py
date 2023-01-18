@@ -99,7 +99,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
-    build_store_from_config,
     instantiate_class_from_config,
     parse_substitution_variable,
 )
@@ -3027,7 +3026,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ):
             store_config["store_backend"].update({"suppress_store_backend_id": True})
 
-        new_store = build_store_from_config(
+        new_store = Store.build_store_from_config(
             store_name=store_name,
             store_config=store_config,
             module_name=module_name,
