@@ -1201,7 +1201,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         store = self._build_store_from_config(store_name, store_config)
 
-        # Both the config and the actual dict of hydrated stores need to be managed concurrently
+        # Both the config and the actual stores need to be kept in sync
         self.config.stores[store_name] = store_config
         self._stores[store_name] = store
 
@@ -1217,14 +1217,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             StoreConfigurationError if the target Store is not found.
         """
-        try:
-            # Both the config and the actual dict of hydrated stores need to be managed concurrently
-            del self.config.stores[store_name]
-            del self._stores[store_name]
-        except KeyError:
+        if store_name not in self.config.stores and store_name not in self._stores:
             raise gx_exceptions.StoreConfigurationError(
                 f'Attempted to delete a store named: "{store_name}". It is not a configured store.'
             )
+
+        # Both the config and the actual stores need to be kept in sync
+        self.config.stores.pop(store_name, None)
+        self._stores.pop(store_name, None)
+
         self._save_project_config()
 
     def list_datasources(self) -> List[dict]:
