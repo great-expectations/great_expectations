@@ -8,10 +8,13 @@ import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
 
 import pydantic
-from typing_extensions import ClassVar, Literal
+from typing_extensions import ClassVar, Literal, TypeAlias
 
 from great_expectations.alias_types import PathStr
 from great_expectations.core.batch_spec import PathBatchSpec
+from great_expectations.experimental.datasources.dynamic_pandas import (
+    _generate_data_asset_models,
+)
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
@@ -32,10 +35,7 @@ class PandasDatasourceError(Exception):
     pass
 
 
-class CSVAsset(DataAsset):
-    # Overridden inherited instance fields
-    type: Literal["csv"] = "csv"
-
+class _DataFrameAsset(DataAsset):
     # Pandas specific attrs
     path: pathlib.Path
     regex: Pattern
@@ -167,6 +167,11 @@ class CSVAsset(DataAsset):
             )
         self.sort_batches(batch_list)
         return batch_list
+
+
+_ASSET_MODELS = _generate_data_asset_models(_DataFrameAsset)
+
+CSVAsset = _ASSET_MODELS[0]
 
 
 class PandasDatasource(Datasource):
