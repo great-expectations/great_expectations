@@ -5,7 +5,17 @@ import logging
 import os
 import pathlib
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    List,
+    Optional,
+    Pattern,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import pydantic
 from typing_extensions import ClassVar, Literal, TypeAlias
@@ -171,7 +181,7 @@ class _DataFrameAsset(DataAsset):
 
 _ASSET_MODELS = _generate_data_asset_models(_DataFrameAsset)
 
-CSVAsset = _ASSET_MODELS[0]
+CSVAsset: Type[_DataFrameAsset] = _ASSET_MODELS[0]
 
 
 class PandasDatasource(Datasource):
@@ -181,7 +191,7 @@ class PandasDatasource(Datasource):
     # instance attrs
     type: Literal["pandas"] = "pandas"
     name: str
-    assets: Dict[str, CSVAsset] = {}
+    assets: Dict[str, CSVAsset] = {}  # type: ignore[valid-type]
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
@@ -198,7 +208,7 @@ class PandasDatasource(Datasource):
         data_path: PathStr,
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> CSVAsset:
+    ) -> CSVAsset:  # type: ignore[valid-type]
         """Adds a csv asset to this pandas datasource
 
         Args:
@@ -206,7 +216,7 @@ class PandasDatasource(Datasource):
             data_path: Path to directory with csv files
             regex: regex pattern that matches csv filenames that is used to label the batches
         """
-        asset = CSVAsset(
+        asset = CSVAsset(  # type: ignore[call-arg] # type has a default??
             name=name,
             path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
