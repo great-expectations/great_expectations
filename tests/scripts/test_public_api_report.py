@@ -14,7 +14,6 @@ from scripts.public_api_report import (
     PublicAPIChecker,
     PublicAPIReport,
     _get_import_names,
-    _parse_file_to_ast_tree,
     get_shortest_dotted_path,
 )
 
