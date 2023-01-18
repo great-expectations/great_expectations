@@ -9,20 +9,29 @@ from great_expectations.expectations.set_based_column_map_expectation import (
 )
 
 
-# <snippet>
 # This class defines the Expectation itself
+# <snippet name="set_template_expectation">
 class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
+    # </snippet>
+    # <snippet name="set_template_docstring">
     """TODO: Add a docstring here"""
+    # </snippet>
 
     # These values will be used to configure the metric created by your expectation
+    # <snippet name="set_template_set">
     set_ = []
 
     set_camel_name = "SetName"
+    # </snippet>
+    # <snippet name="set_template_semantic_name">
     set_semantic_name = None
+    # </snippet>
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
+    # <snippet name="examples">
     examples = []
+    # </snippet>
 
     # Here your regex is used to create a custom metric for this expectation
     map_metric = SetBasedColumnMapExpectation.register_metric(
@@ -31,6 +40,7 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     )
 
     # This object contains metadata for display in the public Gallery
+    # <snippet name="set_template_library_metadata">
     library_metadata = {
         "tags": ["set-based"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -41,4 +51,6 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
 
 # </snippet>
 if __name__ == "__main__":
+    # <snippet name="set_template_diagnostics">
     ExpectColumnValuesToBeInSomeSet().print_diagnostic_checklist()
+#     </snippet>

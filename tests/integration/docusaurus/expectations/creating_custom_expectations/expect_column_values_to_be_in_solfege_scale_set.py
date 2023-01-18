@@ -3,13 +3,13 @@ from great_expectations.expectations.set_based_column_map_expectation import (
 )
 
 
-# <snippet>
+# <snippet name="set_based_expectation">
 class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
     # </snippet>
-    # <snippet>
+    # <snippet name="set_based_docstring">
     """Values in this column should be valid members of the Solfege scale: do, re, mi, etc."""
     # </snippet>
-    # <snippet>
+    # <snippet name="set_based_set">
     set_ = [
         "do",
         "re",
@@ -36,10 +36,10 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
 
     set_camel_name = "SolfegeScale"
     # </snippet>
-    # <snippet>
+    # <snippet name="set_based_semantic_name">
     set_semantic_name = "the Solfege scale"
     # </snippet>
-    # <snippet>
+    # <snippet name="set_based_examples">
     examples = [
         {
             "data": {
@@ -126,7 +126,7 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
         set_camel_name=set_camel_name,
         set_=set_,
     )
-    # <snippet>
+    # <snippet name="set_based_library_metadata">
     library_metadata = {
         "tags": ["set-based"],
         "contributors": ["@joegargery"],
@@ -135,7 +135,7 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet>
+    # <snippet name="set_based_diagnostics">
     ExpectColumnValuesToBeInSolfegeScaleSet().print_diagnostic_checklist()
 #     </snippet>
 

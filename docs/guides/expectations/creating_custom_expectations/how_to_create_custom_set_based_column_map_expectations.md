@@ -89,28 +89,28 @@ When in doubt, the next step to implement is the first one that doesn't have a â
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L14
+```python name="set_template_expectation"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L7
+```python name="set_based_expectation"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L15
+```python name="set_template_docstring"
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L10
+```python name="set_based_docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L44
+```python name="set_template_diagnostics"
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L139
+```python name="set_based_diagnostics"
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -140,7 +140,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L43-L123
+```python name="set_based_examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -186,24 +186,24 @@ In the case of your Custom `SetBasedColumnMapExpectation`, Great Expectations wi
 
 To do this, we replace these:
 
-```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L18-L20
+```python name="set_template_set"
 ```
 
 with something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L13-L37
+```python name="set_based_set"
 ```
 
 For more detail when rendering your Custom Expectation, you can optionally specify the semantic name of the set you're validating.
 
 For example:
 
-```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L21
+```python name="set_template_semantic_name"
 ```
 
 becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L40
+```python name="set_based_semantic_name"
 ```
 
 Great Expectations will use these values to tell your Custom Expectation to apply your specified set as a <TechnicalTag tag="metric" text="Metric"/> to be utilized in validating your data.
@@ -284,12 +284,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/set_based_column_map_expectation_template.py#L34-L39
+```python name="set_template_library_metadata"
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py#L130-L133
+```python name="set_based_library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
