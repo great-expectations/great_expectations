@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.data_context_key import DataContextKey
@@ -171,6 +171,30 @@ class Store:
         return self._store_backend.set(
             self.key_to_tuple(key), self.serialize(value), **kwargs
         )
+
+    def get_multiple(self, keys: List[DataContextKey], **kwargs) -> Optional[List[Any]]:
+        key: DataContextKey
+        for key in keys:
+            self._validate_key(key)
+
+        key_tuples: List[tuple] = [key.to_tuple() for key in keys]
+        values = self._store_backend.get_multiple(key_tuples, **kwargs)
+
+        if values:
+            return [self.deserialize(value) for value in values]
+
+        return None
+
+    def set_multiple(self, records: List[Tuple[DataContextKey, Any]], **kwargs) -> None:
+        record: Tuple[Union[DataContextKey, tuple], Any]
+        for record in records:
+            self._validate_key(record[0])
+
+        tuple_keyed_records: List[Tuple[tuple, Any]] = [
+            (self.key_to_tuple(record[0]), self.serialize(record[1]))
+            for record in records
+        ]
+        return self._store_backend.set_multiple(tuple_keyed_records, **kwargs)
 
     def list_keys(self) -> List[DataContextKey]:
         keys_without_store_backend_id = [

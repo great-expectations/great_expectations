@@ -1,8 +1,6 @@
 import datetime
 import logging
 import os
-
-# TODO: <Alex>ALEX</Alex>
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -29,9 +27,6 @@ from great_expectations.util import (
     get_sqlalchemy_url,
     import_make_url,
 )
-
-# TODO: <Alex>ALEX</Alex>
-
 
 logger = logging.getLogger(__name__)
 
@@ -139,24 +134,11 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         **kwargs,
     ) -> ComputedMetricBusinessObject:
         try:
-            batch_id: Optional[Union[str, UUID]]
-            metric_name: Optional[str]
-            metric_domain_kwargs_id: Optional[Union[str, UUID]]
-            metric_value_kwargs_id: Optional[Union[str, UUID]]
-            (
-                batch_id,
-                metric_name,
-                metric_domain_kwargs_id,
-                metric_value_kwargs_id,
-            ) = key
             datetime_begin: Optional[datetime.datetime] = kwargs.get("datetime_begin")
             datetime_end: Optional[datetime.datetime] = kwargs.get("datetime_end")
             computed_metric_business_object: ComputedMetricBusinessObject = (
-                self.get_by_computed_metric_identifier_keys_and_datetime_range(
-                    batch_id=batch_id,
-                    metric_name=metric_name,
-                    metric_domain_kwargs_id=metric_domain_kwargs_id,
-                    metric_value_kwargs_id=metric_value_kwargs_id,
+                self.get_by_computed_metric_identifier_key_tuple_and_datetime_range(
+                    key=key,
                     datetime_begin=datetime_begin,
                     datetime_end=datetime_end,
                 )
@@ -186,41 +168,97 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         with self._managed_scoped_db_session() as session:
             session.add(sa_computed_metric_model_obj)
 
-    def get_by_computed_metric_identifier_keys_and_datetime_range(
+    def _get_multiple(
         self,
-        batch_id: Optional[Union[str, UUID]] = None,
-        metric_name: Optional[str] = None,
-        metric_domain_kwargs_id: Optional[Union[str, UUID]] = None,
-        metric_value_kwargs_id: Optional[Union[str, UUID]] = None,
+        keys: List[
+            Tuple[
+                Optional[Union[str, UUID]],
+                Optional[str],
+                Optional[Union[str, UUID]],
+                Optional[Union[str, UUID]],
+            ]
+        ],
+        **kwargs,
+    ) -> List[ComputedMetricBusinessObject]:
+        try:
+            datetime_begin: Optional[datetime.datetime] = kwargs.get("datetime_begin")
+            datetime_end: Optional[datetime.datetime] = kwargs.get("datetime_end")
+            computed_metric_business_objects: List[
+                ComputedMetricBusinessObject
+            ] = self.get_multiple_by_computed_metric_identifier_key_tuples_and_datetime_range(
+                keys=keys,
+                datetime_begin=datetime_begin,
+                datetime_end=datetime_end,
+            )
+            return computed_metric_business_objects
+
+        except Exception as e:
+            raise gx_exceptions.InvalidKeyError(f"{str(e)}")
+
+    def _set_multiple(
+        self,
+        records: List[
+            Tuple[
+                Tuple[
+                    Optional[Union[str, UUID]],
+                    Optional[str],
+                    Optional[Union[str, UUID]],
+                    Optional[Union[str, UUID]],
+                ],
+                dict,
+            ]
+        ],
+        **kwargs,
+    ) -> None:
+        value: Tuple[
+            Tuple[
+                Optional[Union[str, UUID]],
+                Optional[str],
+                Optional[Union[str, UUID]],
+                Optional[Union[str, UUID]],
+            ],
+            dict,
+        ]
+        computed_metric_business_objects: List[ComputedMetricBusinessObject] = [
+            ComputedMetricBusinessObject(**value[1]) for value in records
+        ]
+        computed_metric_business_object: ComputedMetricBusinessObject
+        sa_computed_metric_model_objs: List[SqlAlchemyComputedMetricModel] = [
+            self._translate_computed_metric_business_object_to_sqlalchemy_model(
+                computed_metric_business_object=computed_metric_business_object
+            )
+            for computed_metric_business_object in computed_metric_business_objects
+        ]
+        with self._managed_scoped_db_session() as session:
+            session.add_all(sa_computed_metric_model_objs)
+
+    def get_by_computed_metric_identifier_key_tuple_and_datetime_range(
+        self,
+        key: Tuple[
+            Optional[Union[str, UUID]],
+            Optional[str],
+            Optional[Union[str, UUID]],
+            Optional[Union[str, UUID]],
+        ],
         datetime_begin: Optional[datetime.datetime] = None,
         datetime_end: Optional[datetime.datetime] = None,
     ) -> ComputedMetricBusinessObject:
-        key = ComputedMetricIdentifier(
-            computed_metric_key=(
-                batch_id,
-                metric_name,
-                metric_domain_kwargs_id,
-                metric_value_kwargs_id,
-            )
-        )
-        (
-            batch_id,
-            metric_name,
-            metric_domain_kwargs_id,
-            metric_value_kwargs_id,
-        ) = key.to_tuple()
-        filtering_criteria = {
-            "batch_id": batch_id,
-            "metric_name": metric_name,
-            "metric_domain_kwargs_id": metric_domain_kwargs_id,
-            "metric_value_kwargs_id": metric_value_kwargs_id,
-        }
         key_part_name: str
         key_part_value: str
         conditions = sa.and_(
             *(
                 getattr(SqlAlchemyComputedMetricModel, key_part_name) == key_part_value
-                for key_part_name, key_part_value in filtering_criteria.items()
+                for key_part_name, key_part_value in dict(
+                    zip(
+                        (
+                            "batch_id",
+                            "metric_name",
+                            "metric_domain_kwargs_id",
+                            "metric_value_kwargs_id",
+                        ),
+                        ComputedMetricIdentifier(computed_metric_key=key).to_tuple(),
+                    )
+                ).items()
             )
         )
 
@@ -240,6 +278,77 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
             )
 
         return results[0]
+
+    def get_multiple_by_computed_metric_identifier_key_tuples_and_datetime_range(
+        self,
+        keys: List[
+            Tuple[
+                Optional[Union[str, UUID]],
+                Optional[str],
+                Optional[Union[str, UUID]],
+                Optional[Union[str, UUID]],
+            ]
+        ],
+        datetime_begin: Optional[datetime.datetime] = None,
+        datetime_end: Optional[datetime.datetime] = None,
+    ) -> List[ComputedMetricBusinessObject]:
+        key: Tuple[
+            Optional[Union[str, UUID]],
+            Optional[str],
+            Optional[Union[str, UUID]],
+            Optional[Union[str, UUID]],
+        ]
+        key_part_name: str
+        key_part_value: str
+        conditions = sa.or_(
+            False,
+            *(
+                sa.and_(
+                    (
+                        getattr(SqlAlchemyComputedMetricModel, key_part_name)
+                        == key_part_value
+                        for key_part_name, key_part_value in dict(
+                            zip(
+                                (
+                                    "batch_id",
+                                    "metric_name",
+                                    "metric_domain_kwargs_id",
+                                    "metric_value_kwargs_id",
+                                ),
+                                ComputedMetricIdentifier(
+                                    computed_metric_key=key
+                                ).to_tuple(),
+                            )
+                        ).items()
+                    )
+                )
+                for key in keys
+            ),
+        )
+
+        with self._managed_scoped_db_session() as session:
+            # noinspection PyUnresolvedReferences
+            results = self._get_datetime_filtered_query_results(
+                query_object=session.query(SqlAlchemyComputedMetricModel)
+                .filter(conditions)
+                .order_by(SqlAlchemyComputedMetricModel.updated_at.desc()),
+                datetime_begin=datetime_begin,
+                datetime_end=datetime_end,
+            )
+
+        element: ComputedMetricBusinessObject
+        results = sorted(
+            results,
+            key=lambda element: (
+                element.batch_id,
+                element.metric_name,
+                element.metric_domain_kwargs_id,
+                element.metric_value_kwargs_id,
+            ),
+            reverse=False,
+        )
+
+        return results
 
     def create(
         self,

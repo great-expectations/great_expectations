@@ -1,7 +1,7 @@
 import logging
 import uuid
 from abc import ABCMeta, abstractmethod
-from typing import Any, List, Optional, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import pyparsing as pp
 
@@ -115,12 +115,12 @@ class StoreBackend(metaclass=ABCMeta):
     def store_backend_id_warnings_suppressed(self):
         return self._construct_store_backend_id(suppress_warning=True)
 
-    def get(self, key, **kwargs):
+    def get(self, key: tuple, **kwargs) -> Any:
         self._validate_key(key)
-        value = self._get(key, **kwargs)
+        value: Any = self._get(key, **kwargs)
         return value
 
-    def set(self, key, value, **kwargs):
+    def set(self, key: tuple, value, **kwargs) -> None:
         self._validate_key(key)
         self._validate_value(value)
         # Allow the implementing setter to return something (e.g. a path used for its key)
@@ -129,6 +129,29 @@ class StoreBackend(metaclass=ABCMeta):
         except ValueError as e:
             logger.debug(str(e))
             raise StoreBackendError("ValueError while calling _set on store backend.")
+
+    def get_multiple(self, keys: List[tuple], **kwargs) -> List[Any]:
+        key: tuple
+        for key in keys:
+            self._validate_key(key)
+
+        values: List[Any] = self._get_multiple(keys, **kwargs)
+        return values
+
+    def set_multiple(self, records: List[Tuple[tuple, Any]], **kwargs):
+        record: Tuple[tuple, Any]
+        for record in records:
+            self._validate_key(record[0])
+            self._validate_value(record[1])
+
+        # Allow the implementing setter to return something (e.g. a path used for its key)
+        try:
+            self._set_multiple(records, **kwargs)
+        except ValueError as e:
+            logger.debug(str(e))
+            raise StoreBackendError(
+                "ValueError while calling _set_multiple on store backend."
+            )
 
     def move(self, source_key, dest_key, **kwargs):
         self._validate_key(source_key)
@@ -170,11 +193,23 @@ class StoreBackend(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def _get(self, key, **kwargs) -> None:
+    def _get(self, key, **kwargs) -> Any:
         raise NotImplementedError
 
     @abstractmethod
-    def _set(self, key, value, **kwargs) -> None:
+    def _set(self, key: tuple, value: Any, **kwargs) -> None:
+        raise NotImplementedError
+
+    # TODO: <Alex>ALEX</Alex>
+    # @abstractmethod
+    # TODO: <Alex>ALEX</Alex>
+    def _get_multiple(self, keys: List[tuple], **kwargs) -> List[Any]:
+        raise NotImplementedError
+
+    # TODO: <Alex>ALEX</Alex>
+    # @abstractmethod
+    # TODO: <Alex>ALEX</Alex>
+    def _set_multiple(self, records: List[Tuple[tuple, Any]], **kwargs) -> None:
         raise NotImplementedError
 
     @abstractmethod

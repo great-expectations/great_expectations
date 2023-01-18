@@ -15,7 +15,6 @@ from typing import (
     Optional,
     Set,
     Tuple,
-    Type,
     Union,
 )
 from uuid import UUID
@@ -24,12 +23,12 @@ from marshmallow import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.computed_metrics.computed_metric import ComputedMetric
+from great_expectations.computed_metrics.computed_metric import (
+    ComputedMetric as ComputedMetricBusinessObject,
+)
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import (
-    MetricFunctionTypes,
-    MetricPartialFunctionTypes,
-)
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.core.util import (
     AzureUrl,
     DBFSPath,
@@ -595,6 +594,83 @@ class ExecutionEngine(ABC):
             metric_fn_bundle_configurations,
         )
 
+    # TODO: <Alex>ALEX</Alex>
+    # def _query_computed_metrics_store(
+    #     self,
+    #     metrics_to_resolve: Iterable[MetricConfiguration],
+    #     runtime_configuration: Optional[dict] = None,
+    # ) -> Tuple[Dict[Tuple[str, str, str], MetricValue], Iterable[MetricConfiguration]]:
+    #     runtime_configuration = runtime_configuration or {}
+    #
+    #     metric_configuration: MetricConfiguration
+    #
+    #     persistable_metrics_to_retrieve: Iterable[MetricConfiguration] = list(
+    #         filter(
+    #             lambda metric_configuration: is_metric_persistable(
+    #                 metric_name=metric_configuration.metric_name, execution_engine=self
+    #             ),
+    #             metrics_to_resolve,
+    #         )
+    #     )
+    #
+    #     resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+    #
+    #     batch_id: str
+    #     key: ComputedMetricIdentifier
+    #     res: ComputedMetricBusinessObject
+    #     for metric_configuration in persistable_metrics_to_retrieve:
+    #         batch_id = (
+    #             metric_configuration.metric_domain_kwargs.get("batch_id")
+    #             or self.batch_manager.active_batch_id
+    #         )
+    #         key = ComputedMetricIdentifier(
+    #             computed_metric_key=(
+    #                 batch_id,
+    #                 metric_configuration.metric_name,
+    #                 metric_configuration.metric_domain_kwargs_id,
+    #                 metric_configuration.metric_value_kwargs_id,
+    #             )
+    #         )
+    #         try:
+    #             res = self._computed_metrics_store.get(key=key, **runtime_configuration)
+    #             resolved_metrics[metric_configuration.id] = res.value
+    #             # TODO: <Alex>ALEX</Alex>
+    #             print(
+    #                 f'ExecutionEngine: Retrieved ComputedMetric record named: "{key.computed_metric_key}"; value: "{res.value}".'
+    #             )
+    #             # TODO: <Alex>ALEX</Alex>
+    #         except gx_exceptions.InvalidKeyError as exc_ik:
+    #             # TODO: <Alex>ALEX</Alex>
+    #             # print(
+    #             #     f'ExecutionEngine: Non-existent ComputedMetric record named "{key.computed_metric_key}".\n\nDetails: {exc_ik}'
+    #             # )
+    #             # TODO: <Alex>ALEX</Alex>
+    #             # TODO: <Alex>ALEX</Alex>
+    #             print(
+    #                 f'ExecutionEngine: Non-existent ComputedMetric record named "{key.computed_metric_key}".'
+    #             )
+    #             # TODO: <Alex>ALEX</Alex>
+    #         except ValidationError as exc_ve:
+    #             # TODO: <Alex>ALEX</Alex>
+    #             print(
+    #                 f"ExecutionEngine: Invalid ComputedMetric record; validation error: {exc_ve}"
+    #             )
+    #             # TODO: <Alex>ALEX</Alex>
+    #
+    #     metric_to_resolve: MetricConfiguration
+    #     metrics_to_resolve = list(
+    #         filter(
+    #             lambda metric_configuration: not self._is_metric_resolved(
+    #                 metric_configuration=metric_configuration,
+    #                 metrics=resolved_metrics,
+    #             ),
+    #             metrics_to_resolve,
+    #         )
+    #     )
+    #
+    #     return resolved_metrics, metrics_to_resolve
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def _query_computed_metrics_store(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
@@ -604,56 +680,96 @@ class ExecutionEngine(ABC):
 
         metric_configuration: MetricConfiguration
 
-        persistable_metrics_to_retrieve: Iterable[MetricConfiguration] = filter(
-            lambda metric_configuration: is_metric_persistable(
-                metric_name=metric_configuration.metric_name, execution_engine=self
-            ),
-            metrics_to_resolve,
+        persistable_metrics_to_retrieve: Iterable[MetricConfiguration] = list(
+            filter(
+                lambda metric_configuration: is_metric_persistable(
+                    metric_name=metric_configuration.metric_name, execution_engine=self
+                ),
+                metrics_to_resolve,
+            )
         )
 
-        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
-
-        batch_id: str
-        key: ComputedMetricIdentifier
-        res: Any
-        for metric_configuration in persistable_metrics_to_retrieve:
-            batch_id = (
-                metric_configuration.metric_domain_kwargs.get("batch_id")
-                or self.batch_manager.active_batch_id
-            )
-            key = ComputedMetricIdentifier(
+        keys: List[ComputedMetricIdentifier] = [
+            ComputedMetricIdentifier(
                 computed_metric_key=(
-                    batch_id,
+                    metric_configuration.metric_domain_kwargs.get("batch_id")
+                    or self.batch_manager.active_batch_id,
                     metric_configuration.metric_name,
                     metric_configuration.metric_domain_kwargs_id,
                     metric_configuration.metric_value_kwargs_id,
                 )
             )
-            try:
-                res = self._computed_metrics_store.get(key=key, **runtime_configuration)
-                resolved_metrics[metric_configuration.id] = res.value
-                # TODO: <Alex>ALEX</Alex>
-                print(
-                    f'ExecutionEngine: Retrieved ComputedMetric record named: "{key.computed_metric_key}"; value: "{res.value}".'
+            for metric_configuration in persistable_metrics_to_retrieve
+        ]
+
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+        if not keys:
+            return resolved_metrics, metrics_to_resolve
+
+        results: List[ComputedMetricBusinessObject]
+        try:
+            results = (
+                self._computed_metrics_store.get_multiple(
+                    keys=keys, **runtime_configuration
                 )
-                # TODO: <Alex>ALEX</Alex>
-            except gx_exceptions.InvalidKeyError as exc_ik:
-                # TODO: <Alex>ALEX</Alex>
-                # print(
-                #     f'ExecutionEngine: Non-existent ComputedMetric record named "{key.computed_metric_key}".\n\nDetails: {exc_ik}'
-                # )
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                print(
-                    f'ExecutionEngine: Non-existent ComputedMetric record named "{key.computed_metric_key}".'
+                or []
+            )
+            # TODO: <Alex>ALEX</Alex>
+            records = "; ".join(
+                [
+                    f'"{(record.batch_id, record.metric_name, record.metric_domain_kwargs_id, record.metric_value_kwargs_id)}": {record.value}'
+                    for record in results
+                ]
+            )
+            print(
+                f"ExecutionEngine: Retrieved {len(results)} ComputedMetric record(s){':' if results else '.'} {records}{'.' if results else ''}"
+            )
+            # TODO: <Alex>ALEX</Alex>
+        except gx_exceptions.InvalidKeyError as exc_ik:
+            results = []
+            # TODO: <Alex>ALEX</Alex>
+            print(
+                f'ExecutionEngine: Non-existent ComputedMetric record(s) requested "{exc_ik}".'
+            )
+            # TODO: <Alex>ALEX</Alex>
+        except ValidationError as exc_ve:
+            results = []
+            # TODO: <Alex>ALEX</Alex>
+            print(
+                f"ExecutionEngine: Invalid ComputedMetric record(s); validation error: {exc_ve}"
+            )
+            # TODO: <Alex>ALEX</Alex>
+
+        matched_results: List[ComputedMetricBusinessObject]
+        result: ComputedMetricBusinessObject
+        key: ComputedMetricIdentifier
+        element: ComputedMetricBusinessObject
+        for metric_configuration in persistable_metrics_to_retrieve:
+            key = ComputedMetricIdentifier(
+                computed_metric_key=(
+                    metric_configuration.metric_domain_kwargs.get("batch_id")
+                    or self.batch_manager.active_batch_id,
+                    metric_configuration.metric_name,
+                    metric_configuration.metric_domain_kwargs_id,
+                    metric_configuration.metric_value_kwargs_id,
                 )
-                # TODO: <Alex>ALEX</Alex>
-            except ValidationError as exc_ve:
-                # TODO: <Alex>ALEX</Alex>
-                print(
-                    f"ExecutionEngine: Invalid ComputedMetric record; validation error: {exc_ve}"
+            )
+            matched_results = list(
+                filter(
+                    lambda element: (
+                        element.batch_id,
+                        element.metric_name,
+                        element.metric_domain_kwargs_id,
+                        element.metric_value_kwargs_id,
+                    )
+                    == key.to_tuple(),
+                    results,
                 )
-                # TODO: <Alex>ALEX</Alex>
+            )
+            if matched_results:
+                result = matched_results[0]
+                resolved_metrics[metric_configuration.id] = result.value
 
         metric_to_resolve: MetricConfiguration
         metrics_to_resolve = list(
@@ -667,6 +783,8 @@ class ExecutionEngine(ABC):
         )
 
         return resolved_metrics, metrics_to_resolve
+
+    # TODO: <Alex>ALEX</Alex>
 
     def _get_computed_metric_evaluation_dependencies_by_metric_name(
         self,
@@ -767,6 +885,71 @@ class ExecutionEngine(ABC):
 
         return resolved_metrics
 
+    # TODO: <Alex>ALEX</Alex>
+    # def _persist_newly_computed_metrics_into_computed_metrics_store(
+    #     self,
+    #     metrics: Dict[Tuple[str, str, str], MetricValue],
+    #     metric_fn_direct_configurations: List[MetricComputationConfiguration],
+    #     metric_fn_bundle_configurations: List[MetricComputationConfiguration],
+    # ) -> None:
+    #     metric_computation_configurations: List[MetricComputationConfiguration] = list(
+    #         filter(
+    #             lambda element: is_metric_persistable(
+    #                 metric_name=element.metric_configuration.metric_name,
+    #                 execution_engine=self,
+    #             ),
+    #             metric_fn_direct_configurations + metric_fn_bundle_configurations,
+    #         )
+    #     )
+    #
+    #     batch_id: str
+    #     key: ComputedMetricIdentifier
+    #     timestamp: datetime.datetime
+    #     computed_metric: ComputedMetric
+    #     metric_computation_configuration: MetricComputationConfiguration
+    #     for metric_computation_configuration in metric_computation_configurations:
+    #         batch_id: Optional[Union[str, UUID]]
+    #         batch_id = (
+    #             metric_computation_configuration.metric_configuration.metric_domain_kwargs.get(
+    #                 "batch_id"
+    #             )
+    #             or self.batch_manager.active_batch_id
+    #         )
+    #         key = ComputedMetricIdentifier(
+    #             computed_metric_key=(
+    #                 batch_id,
+    #                 metric_computation_configuration.metric_configuration.metric_name,
+    #                 metric_computation_configuration.metric_configuration.metric_domain_kwargs_id,
+    #                 metric_computation_configuration.metric_configuration.metric_value_kwargs_id,
+    #             )
+    #         )
+    #         metric_name: Optional[str]
+    #         metric_domain_kwargs_id: Optional[Union[str, UUID]]
+    #         metric_value_kwargs_id: Optional[Union[str, UUID]]
+    #         (
+    #             batch_id,
+    #             metric_name,
+    #             metric_domain_kwargs_id,
+    #             metric_value_kwargs_id,
+    #         ) = key.to_tuple()
+    #         timestamp = datetime.datetime.now()
+    #         computed_metric = ComputedMetric(
+    #             batch_id=batch_id,
+    #             metric_name=metric_name,
+    #             metric_domain_kwargs_id=metric_domain_kwargs_id,
+    #             metric_value_kwargs_id=metric_value_kwargs_id,
+    #             created_at=timestamp,
+    #             updated_at=timestamp,
+    #             value=metrics[metric_computation_configuration.metric_configuration.id],
+    #         )
+    #         self._computed_metrics_store.set(key=key, value=computed_metric)
+    #         # TODO: <Alex>ALEX</Alex>
+    #         print(
+    #             f'ExecutionEngine: Persisted ComputedMetric record named: "{key.computed_metric_key}"; value: {metrics[metric_computation_configuration.metric_configuration.id]}.'
+    #         )
+    #         # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def _persist_newly_computed_metrics_into_computed_metrics_store(
         self,
         metrics: Dict[Tuple[str, str, str], MetricValue],
@@ -782,6 +965,10 @@ class ExecutionEngine(ABC):
                 metric_fn_direct_configurations + metric_fn_bundle_configurations,
             )
         )
+
+        computed_metrics_records: List[
+            Tuple[ComputedMetricIdentifier, ComputedMetric]
+        ] = []
 
         batch_id: str
         key: ComputedMetricIdentifier
@@ -823,12 +1010,23 @@ class ExecutionEngine(ABC):
                 updated_at=timestamp,
                 value=metrics[metric_computation_configuration.metric_configuration.id],
             )
-            self._computed_metrics_store.set(key=key, value=computed_metric)
+            computed_metrics_records.append((key, computed_metric))
+
+        if len(computed_metrics_records) > 0:
+            self._computed_metrics_store.set_multiple(computed_metrics_records)
             # TODO: <Alex>ALEX</Alex>
+            records = "; ".join(
+                [
+                    f'"{record[0].computed_metric_key}": {record[1].value}'
+                    for record in computed_metrics_records
+                ]
+            )
             print(
-                f'ExecutionEngine: Persisted ComputedMetric record named: "{key.computed_metric_key}"; value: "{metrics[metric_computation_configuration.metric_configuration.id]}".'
+                f"ExecutionEngine: Persisted {len(computed_metrics_records)} ComputedMetric record(s): {records}."
             )
             # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX</Alex>
 
     @classmethod
     def _is_metric_resolved(
