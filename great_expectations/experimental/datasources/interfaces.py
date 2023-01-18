@@ -15,7 +15,6 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    overload,
 )
 
 import pandas as pd
@@ -405,7 +404,6 @@ class Batch(ExperimentalBaseModel):
     class Config:
         allow_mutation = False
         arbitrary_types_allowed = True
-        validate_assignment = True
 
     @root_validator(pre=True)
     def _set_id(cls, values: dict) -> dict:
@@ -417,18 +415,6 @@ class Batch(ExperimentalBaseModel):
             [values["datasource"].name, values["data_asset"].name, *options_list]
         )
         return values
-
-    @overload
-    def head(
-        self, n_rows: Literal[0], fetch_all: Literal[False]
-    ) -> pd.DataFrame | list[pyspark_sql_Row]:
-        ...
-
-    @overload
-    def head(
-        self, n_rows: Optional[StrictInt] = ..., fetch_all: StrictBool = ...
-    ) -> pd.DataFrame | list[pyspark_sql_Row] | pyspark_sql_Row:
-        ...
 
     @validate_arguments
     def head(
