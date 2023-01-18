@@ -603,6 +603,7 @@ class ExpectationSuite(SerializableDictDot):
 
         Returns:
             The ExpectationConfiguration to add or replace.
+
         Raises:
             More than one match
             One match if overwrite_existing = False
@@ -684,6 +685,7 @@ class ExpectationSuite(SerializableDictDot):
         Returns:
             The List of "ExpectationConfiguration" objects attempted to be added or replaced (can differ from the list
             of "ExpectationConfiguration" objects in "self.expectations" at the completion of this method's execution).
+
         Raises:
             More than one match
             One match if overwrite_existing = False
@@ -702,6 +704,7 @@ class ExpectationSuite(SerializableDictDot):
         ]
         return expectation_configurations_attempted_to_be_added
 
+    @public_api
     def add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
@@ -722,9 +725,10 @@ class ExpectationSuite(SerializableDictDot):
 
         Returns:
             The ExpectationConfiguration to add or replace.
+
         Raises:
-            More than one match
-            One match if overwrite_existing = False
+            ValueError: More than one match
+            DataContextError: One match if overwrite_existing = False
         """
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
