@@ -729,6 +729,8 @@ class ExpectationSuite(SerializableDictDot):
         Raises:
             ValueError: More than one match
             DataContextError: One match if overwrite_existing = False
+
+        # noqa: DAR402
         """
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
