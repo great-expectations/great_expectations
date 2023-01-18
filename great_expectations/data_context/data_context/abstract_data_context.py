@@ -226,9 +226,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._in_memory_instance_id = (
             None  # This variable *may* be used in case we cannot save an instance id
         )
-        # Init stores
-        self._stores: dict = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
+
+        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
+        # As such, it must be instantiated separately.
+        # All other stores are hydrated JIT through the `stores` property.
+        self._init_datasource_store()
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -419,7 +421,11 @@ class AbstractDataContext(ConfigPeer, ABC):
     @property
     def stores(self) -> dict:
         """A single holder for all Stores in this context"""
-        return self._stores
+        store_configs = self.variables.stores or {}
+        return {
+            name: self._build_store_from_config(store_name=name, store_config=config)
+            for name, config in store_configs.items()
+        }
 
     @property
     def expectations_store_name(self) -> Optional[str]:
@@ -1193,18 +1199,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
-            store_name (str): a key for the new Store in in self._stores
+            store_name (str): a key for the new Store in in self.stores
             store_config (dict): a config for the Store to add
 
         Returns:
             store (Store)
         """
         store = self._build_store_from_config(store_name, store_config)
-
-        # Both the config and the actual dict of hydrated stores need to be managed concurrently
         self.config.stores[store_name] = store_config
-        self._stores[store_name] = store
-
         self._save_project_config()
         return store
 
@@ -1218,9 +1220,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             StoreConfigurationError if the target Store is not found.
         """
         try:
-            # Both the config and the actual dict of hydrated stores need to be managed concurrently
             del self.config.stores[store_name]
-            del self._stores[store_name]
         except KeyError:
             raise gx_exceptions.StoreConfigurationError(
                 f'Attempted to delete a store named: "{store_name}". It is not a configured store.'
