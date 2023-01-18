@@ -1201,8 +1201,20 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         self.config.stores[store_name] = store_config  # type: ignore[index]
         store = self._build_store_from_config(store_name, store_config)
-        self.variables.save_config()
+        self._save_project_config()
         return store
+
+    def delete_store(self, store_name: str) -> None:
+        """
+        TODO
+        """
+        try:
+            del self.config.stores[store_name]
+        except KeyError:
+            raise gx_exceptions.StoreConfigurationError(
+                f'Attempted to delete a store named: "{store_name}". It is not a configured store.'
+            )
+        self._save_project_config()
 
     def list_datasources(self) -> List[dict]:
         """List currently-configured datasources on this context. Masks passwords.

@@ -15,7 +15,6 @@ from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
     FileDataContextVariables,
 )
-from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     datasourceConfigSchema,
