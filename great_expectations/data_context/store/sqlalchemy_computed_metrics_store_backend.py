@@ -3,7 +3,6 @@ import logging
 import os
 
 # TODO: <Alex>ALEX</Alex>
-import threading
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
