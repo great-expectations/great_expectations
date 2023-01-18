@@ -211,7 +211,7 @@ class SphinxInvokeDocsBuilder:
         directories inside of /docs/reference/api/
         """
         # URL is an environment variable provided by Netlify
-        base_url = os.getenv("URL", "https://localhost:3000")
+        base_url = os.getenv("URL", "http://localhost:3000")
         return f"{base_url}/docs/reference/api/"
 
     def _remove_temp_html(self) -> None:
@@ -279,6 +279,16 @@ class SphinxInvokeDocsBuilder:
 
         class_name = self._get_entity_name(definition=definition)
         dotted_path = f"{dotted_path_prefix}.{class_name}"
+
+        # Note: shortened_dotted_paths is temporary,
+        # to be replaced with automated method using AST parsing:
+        shortened_dotted_paths = {
+            "great_expectations.data_context.data_context.abstract_data_context.AbstractDataContext": "great_expectations.data_context.AbstractDataContext",
+            "great_expectations.core.expectation_suite.ExpectationSuite": "great_expectations.core.ExpectationSuite",
+        }
+
+        if dotted_path in shortened_dotted_paths:
+            return shortened_dotted_paths[dotted_path]
 
         return dotted_path
 

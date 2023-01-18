@@ -435,8 +435,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             column_name = configuration.kwargs.get("column")
             expected_type = configuration.kwargs.get("type_")
             metric_kwargs = get_metric_kwargs(
-                configuration=configuration,
                 metric_name="table.column_types",
+                configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")
