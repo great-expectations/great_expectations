@@ -169,7 +169,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 ]:
                     raise ValueError(
                         f"""Basic metric implementations (defined by specifying "metric_name" class variable) only \
-support "{MetricFunctionTypes.VALUE}" and "{MetricPartialFunctionTypes.AGGREGATE_FN}" for "metric_value" \
+support "{MetricFunctionTypes.VALUE.value}" and "{MetricPartialFunctionTypes.AGGREGATE_FN.value}" for "metric_value" \
 "metric_fn_type" property."""
                     )
 

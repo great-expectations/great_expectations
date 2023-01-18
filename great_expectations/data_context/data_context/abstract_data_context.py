@@ -35,6 +35,7 @@ from typing_extensions import Literal
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
+    deprecated_argument,
     deprecated_method_or_class,
     public_api,
 )
@@ -1255,6 +1256,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
+    @public_api
+    @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
+    @deprecated_argument(argument_name="batches", version="0.14.0")
     def add_checkpoint(
         self,
         name: str,
@@ -1282,18 +1286,38 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> Checkpoint:
-        """
-        Constructs a Checkpoint from the class' constructor arguments, persists it
-        utilizing the context's underlying CheckpointStore, and returns it to the user
-        for subsequent usage.
+        """Add a Checkpoint to the DataContext.
+
+        ---Documentation---
+            - https://docs.greatexpectations.io/docs/terms/checkpoint/
 
         Args:
-            See Checkpoint's constructor for more information.
+            name: The name to give the checkpoint.
+            config_version: The config version of this checkpoint.
+            template_name: The template to use in generating this checkpoint.
+            module_name: The module name to use in generating this checkpoint.
+            class_name: The class name to use in generating this checkpoint.
+            run_name_template: The run name template to use in generating this checkpoint.
+            expectation_suite_name: The expectation suite name to use in generating this checkpoint.
+            batch_request: The batch request to use in generating this checkpoint.
+            action_list: The action list to use in generating this checkpoint.
+            evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
+            runtime_configuration: The runtime configuration to use in generating this checkpoint.
+            validations: The validations to use in generating this checkpoint.
+            profilers: The profilers to use in generating this checkpoint.
+            validation_operator_name: The validation operator name to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
+            batches: The batches to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
+            site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
+            expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            default_validation_id: The default validation ID to use in generating this checkpoint.
 
         Returns:
-            The persisted Checkpoint constructed by the input arguments.
+            The Checkpoint object created.
         """
-
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         checkpoint: Checkpoint = Checkpoint.construct_from_config_args(

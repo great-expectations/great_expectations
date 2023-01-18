@@ -7,6 +7,9 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tupl
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
@@ -161,7 +164,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name="column_values.unique.unexpected_count",
+                metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_value_kwargs=None,
             )
 
@@ -172,7 +175,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name="column_values.nonnull.unexpected_count",
+                metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_value_kwargs=None,
             )
 
@@ -183,7 +186,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name="column_values.null.unexpected_count",
+                metric_name=f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_value_kwargs=None,
             )
 

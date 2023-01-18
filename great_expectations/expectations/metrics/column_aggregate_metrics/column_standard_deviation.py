@@ -2,6 +2,9 @@ import logging
 from typing import Optional
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -45,7 +48,9 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
             standard_deviation = sa.func.stdev(column)
         elif _dialect.name.lower() == GXSqlDialect.SQLITE:
             mean = _metrics["column.mean"]
-            nonnull_row_count = _metrics["column_values.null.unexpected_count"]
+            nonnull_row_count = _metrics[
+                f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            ]
             standard_deviation = sa.func.sqrt(
                 sa.func.sum((1.0 * column - mean) * (1.0 * column - mean))
                 / ((1.0 * nonnull_row_count) - 1.0)
@@ -83,8 +88,10 @@ class ColumnStandardDeviation(ColumnAggregateMetricProvider):
                 metric_domain_kwargs=metric.metric_domain_kwargs,
                 metric_value_kwargs=None,
             )
-            dependencies["column_values.null.unexpected_count"] = MetricConfiguration(
-                metric_name="column_values.null.unexpected_count",
+            dependencies[
+                f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            ] = MetricConfiguration(
+                metric_name=f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_domain_kwargs=metric.metric_domain_kwargs,
                 metric_value_kwargs=None,
             )
