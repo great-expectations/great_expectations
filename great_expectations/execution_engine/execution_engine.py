@@ -632,10 +632,20 @@ class ExecutionEngine(ABC):
             try:
                 res = self._computed_metrics_store.get(key=key, **runtime_configuration)
                 resolved_metrics[metric_configuration.id] = res.value
-            except gx_exceptions.InvalidKeyError as exc_ik:
                 # TODO: <Alex>ALEX</Alex>
                 print(
-                    f'ExecutionEngine: Non-existent ComputedMetric record named "{key.computed_metric_key}".\n\nDetails: {exc_ik}'
+                    f'ExecutionEngine: Retrieved ComputedMetric record named: "{key.computed_metric_key}"; value: "{res.value}".'
+                )
+                # TODO: <Alex>ALEX</Alex>
+            except gx_exceptions.InvalidKeyError as exc_ik:
+                # TODO: <Alex>ALEX</Alex>
+                # print(
+                #     f'ExecutionEngine: Non-existent ComputedMetric record named "{key.computed_metric_key}".\n\nDetails: {exc_ik}'
+                # )
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                print(
+                    f'ExecutionEngine: Non-existent ComputedMetric record named "{key.computed_metric_key}".'
                 )
                 # TODO: <Alex>ALEX</Alex>
             except ValidationError as exc_ve:
@@ -814,6 +824,11 @@ class ExecutionEngine(ABC):
                 value=metrics[metric_computation_configuration.metric_configuration.id],
             )
             self._computed_metrics_store.set(key=key, value=computed_metric)
+            # TODO: <Alex>ALEX</Alex>
+            print(
+                f'ExecutionEngine: Persisted ComputedMetric record named: "{key.computed_metric_key}"; value: "{metrics[metric_computation_configuration.metric_configuration.id]}".'
+            )
+            # TODO: <Alex>ALEX</Alex>
 
     @classmethod
     def _is_metric_resolved(

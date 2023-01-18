@@ -225,13 +225,13 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         )
 
         with self._managed_scoped_db_session() as session:
+            # noinspection PyUnresolvedReferences
             results = self._get_datetime_filtered_query_results(
-                query_object=session.query(SqlAlchemyComputedMetricModel).filter(
-                    conditions
-                ),
+                query_object=session.query(SqlAlchemyComputedMetricModel)
+                .filter(conditions)
+                .order_by(SqlAlchemyComputedMetricModel.updated_at.desc()),
                 datetime_begin=datetime_begin,
                 datetime_end=datetime_end,
-                reverse=True,
             )
 
         if not results:
@@ -307,8 +307,11 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         datetime_end: Optional[datetime.datetime] = None,
     ) -> List[ComputedMetricBusinessObject]:
         with self._managed_scoped_db_session() as session:
+            # noinspection PyUnresolvedReferences
             return self._get_datetime_filtered_query_results(
-                query_object=session.query(SqlAlchemyComputedMetricModel),
+                query_object=session.query(SqlAlchemyComputedMetricModel).order_by(
+                    SqlAlchemyComputedMetricModel.updated_at.asc()
+                ),
                 datetime_begin=datetime_begin,
                 datetime_end=datetime_end,
             )
@@ -345,7 +348,6 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         query_object,
         datetime_begin: Optional[datetime.datetime] = None,
         datetime_end: Optional[datetime.datetime] = None,
-        reverse: bool = False,
     ) -> List[ComputedMetricBusinessObject]:
         if datetime_begin is None and datetime_end is None:
             results = query_object.all()
@@ -368,10 +370,6 @@ class SqlAlchemyComputedMetricsStoreBackend(StoreBackend):
         else:
             # The following line should never be reached.
             results = []
-
-        results = sorted(
-            results, key=lambda element: element.updated_at, reverse=reverse
-        )
 
         return [
             self._translate_sqlalchemy_computed_metric_model_to_business_object(
