@@ -151,9 +151,8 @@ class ExpectTableToMeetSomeCriteria(TableExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
+        # </snippet>
         raise NotImplementedError
-
-    # </snippet>
 
     # This object contains metadata for display in the public Gallery
     # <snippet name="table_template_library_metadata">

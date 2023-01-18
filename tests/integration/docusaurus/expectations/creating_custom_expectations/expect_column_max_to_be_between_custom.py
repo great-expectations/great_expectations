@@ -33,16 +33,21 @@ from great_expectations.render.util import (
 )
 
 
+# <snippet name="custom_agg_metric">
 class ColumnCustomMax(ColumnAggregateMetricProvider):
+    # </snippet>
     """MetricProvider Class for Custom Aggregate Max MetricProvider"""
-
+    # <snippet name="custom_agg_metric_name">
     metric_name = "column.custom_max"
-
+    # </snippet>
+    # <snippet name="custom_agg_pandas">
     @column_aggregate_value(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         """Pandas Max Implementation"""
         return column.max()
 
+    # </snippet>
+    # <snippet name="custom_agg_sql">
     @metric_value(
         engine=SqlAlchemyExecutionEngine,
         metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
@@ -73,16 +78,25 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
 
         return result[0]
 
+    # </snippet>
+    # <snippet name="custom_agg_spark">
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, _table, _column_name, **kwargs):
         """Spark Max Implementation"""
         return F.max(column)
 
 
+#     </snippet>
+
+# <snippet name="custom_agg_expectation">
 class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
+    # </snippet>
+    # <snippet name="custom_agg_docstring">
     """Expect column max to be between a given range."""
+    # </snippet>
 
     # Defining test cases
+    # <snippet name="custom_agg_examples">
     examples = [
         {
             "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
@@ -130,9 +144,12 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
             ],
         }
     ]
+    # </snippet>
 
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values
+    # <snippet name="custom_agg_metric_dependencies">
     metric_dependencies = ("column.custom_max",)
+    # </snippet>
     success_keys = ("min_value", "strict_min", "max_value", "strict_max")
 
     # Default values
@@ -193,6 +210,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    # <snippet name="custom_agg_validate">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -229,6 +247,8 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         success = above_min and below_max
 
         return {"success": success, "result": {"observed_value": column_max}}
+
+    # </snippet>
 
     @renderer(renderer_type="render.prescriptive")
     @render_evaluation_parameter_string
@@ -305,14 +325,20 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         ]
 
     # This dictionary contains metadata for display in the public gallery
+    # <snippet name="custom_agg_library_metadata">
     library_metadata = {
         "tags": ["flexible max comparisons"],
         "contributors": ["@joegargery"],
     }
 
 
+#     </snippet>
+
+
 if __name__ == "__main__":
+    # <snippet name="custom_agg_diagnostics">
     ExpectColumnMaxToBeBetweenCustom().print_diagnostic_checklist()
+#     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
