@@ -202,7 +202,7 @@ filterwarnings = [
     # This deprecation warning comes from getsentry/responses, a mocking utility for requests. It is a dependency in moto.
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
-    "error::marshmallow.warnings.RemovedInMarshmallow4Warning"
+    "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
     # This warning is for configuring the result_format parameter at the Validator-level, which will not be persisted,
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Validator-level will not be persisted:UserWarning",
