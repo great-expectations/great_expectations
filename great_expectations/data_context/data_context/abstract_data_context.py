@@ -1199,9 +1199,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             store (Store)
         """
-
         self.config.stores[store_name] = store_config  # type: ignore[index]
-        return self._build_store_from_config(store_name, store_config)
+        store = self._build_store_from_config(store_name, store_config)
+        self.variables.save_config()
+        return store
 
     def list_datasources(self) -> List[dict]:
         """List currently-configured datasources on this context. Masks passwords.
