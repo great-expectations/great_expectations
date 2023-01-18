@@ -5,6 +5,9 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 import numpy as np
 
 from great_expectations.core.domain import Domain
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
@@ -79,7 +82,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         """
         super().__init__(
             name=name,
-            metric_name=f"{map_metric_name}.unexpected_count",
+            metric_name=f"{map_metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
             enforce_numeric_metric=True,
@@ -110,7 +113,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -191,7 +194,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            recompute_existing_parameter_values=recompute_existing_parameter_values,
+            runtime_configuration=runtime_configuration,
         )
 
         # Retrieve "unexpected_count" corresponding to "map_metric_name" (given as argument to this "ParameterBuilder").

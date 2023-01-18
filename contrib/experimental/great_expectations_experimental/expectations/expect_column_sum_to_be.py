@@ -36,20 +36,6 @@ class ExpectColumnSumToBe(ColumnExpectation):
                     "out": {"success": False},
                 },
             ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
-                },
-            ],
         }
     ]
 

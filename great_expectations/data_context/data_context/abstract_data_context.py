@@ -34,7 +34,11 @@ from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import (
+    deprecated_argument,
+    deprecated_method_or_class,
+    public_api,
+)
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -645,6 +649,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._cached_datasources[datasource_name] = updated_datasource
         return updated_datasource
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
         args_payload_fn=add_datasource_usage_statistics,
@@ -656,16 +661,20 @@ class AbstractDataContext(ConfigPeer, ABC):
         save_changes: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        """Add a new datasource to the data context, with configuration provided as kwargs.
+        """Add a new Datasource to the data context, with configuration provided as kwargs.
+
+        --Documentation--
+            - https://docs.greatexpectations.io/docs/terms/datasource
+
         Args:
-            name: the name for the new datasource to add
-            initialize: if False, add the datasource to the config, but do not
+            name: the name of the new Datasource to add
+            initialize: if False, add the Datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
-            save_changes (bool): should GX save the Datasource config?
-            kwargs (keyword arguments): the configuration for the new datasource
+            save_changes: should GX save the Datasource config?
+            kwargs: the configuration for the new Datasource
 
         Returns:
-            datasource (Datasource)
+            Datasource instance added.
         """
         save_changes = self._determine_save_changes_flag(save_changes)
 
@@ -1068,15 +1077,40 @@ class AbstractDataContext(ConfigPeer, ABC):
         ]
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        """List existing Checkpoint identifiers on this context.
+
+        Args:
+            None
+
+        Returns:
+            Either a list of strings or ConfigurationIdentifier depending on the environment and context type
+        """
+
         return self.checkpoint_store.list_checkpoints()
 
     def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        """List existing Profiler identifiers on this context.
+
+        Args:
+            None
+
+        Returns:
+            Either a list of strings or ConfigurationIdentifier depending on the environment and context type
+        """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
 
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
     ) -> RuleBasedProfiler:
+        """Save an existing Profiler object utilizing the context's underlying ProfilerStore.
+
+        Args:
+            profiler: The Profiler object to persist.
+
+        Returns:
+            The input profiler - may be modified with an id depending on the backing store.
+        """
         name = profiler.name
         ge_cloud_id = profiler.ge_cloud_id
         key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
@@ -1222,6 +1256,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
+    @public_api
+    @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
+    @deprecated_argument(argument_name="batches", version="0.14.0")
     def add_checkpoint(
         self,
         name: str,
@@ -1249,7 +1286,38 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> Checkpoint:
+        """Add a Checkpoint to the DataContext.
 
+        ---Documentation---
+            - https://docs.greatexpectations.io/docs/terms/checkpoint/
+
+        Args:
+            name: The name to give the checkpoint.
+            config_version: The config version of this checkpoint.
+            template_name: The template to use in generating this checkpoint.
+            module_name: The module name to use in generating this checkpoint.
+            class_name: The class name to use in generating this checkpoint.
+            run_name_template: The run name template to use in generating this checkpoint.
+            expectation_suite_name: The expectation suite name to use in generating this checkpoint.
+            batch_request: The batch request to use in generating this checkpoint.
+            action_list: The action list to use in generating this checkpoint.
+            evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
+            runtime_configuration: The runtime configuration to use in generating this checkpoint.
+            validations: The validations to use in generating this checkpoint.
+            profilers: The profilers to use in generating this checkpoint.
+            validation_operator_name: The validation operator name to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
+            batches: The batches to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
+            site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
+            expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            default_validation_id: The default validation ID to use in generating this checkpoint.
+
+        Returns:
+            The Checkpoint object created.
+        """
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
@@ -1289,6 +1357,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> Checkpoint:
+        """Retrieves a given Checkpoint by either name or id.
+
+        Args:
+            name: The name of the target Checkpoint.
+            ge_cloud_id: The id associated with the target Checkpoint.
+
+        Returns:
+            The requested Checkpoint.
+
+        Raises:
+            CheckpointNotFoundError if the requested Checkpoint does not exists.
+        """
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
@@ -1307,6 +1387,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
+        """Deletes a given Checkpoint by either name or id.
+
+        Args:
+            name: The name of the target Checkpoint.
+            ge_cloud_id: The id associated with the target Checkpoint.
+
+        Raises:
+            CheckpointNotFoundError if the requested Checkpoint does not exists.
+        """
         return self.checkpoint_store.delete_checkpoint(
             name=name, ge_cloud_id=ge_cloud_id
         )
@@ -1822,6 +1911,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
     ) -> RuleBasedProfiler:
+        """
+        Constructs a Profiler, persists it utilizing the context's underlying ProfilerStore,
+        and returns it to the user for subsequent usage.
+
+        Args:
+            name: The name of the RBP instance
+            config_version: The version of the RBP (currently only 1.0 is supported)
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
+            variables: Any variables to be substituted within the rules
+
+        Returns:
+            The persisted Profiler constructed by the input arguments.
+        """
         config_data = {
             "name": name,
             "config_version": config_version,
@@ -1849,6 +1951,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
+        """Retrieves a given Profiler by either name or id.
+
+        Args:
+            name: The name of the target Profiler.
+            ge_cloud_id: The id associated with the target Profiler.
+
+        Returns:
+            The requested Profiler.
+
+        Raises:
+            ProfilerNotFoundError if the requested Profiler does not exists.
+        """
         return RuleBasedProfiler.get_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
@@ -1861,6 +1975,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
+        """Deletes a given Profiler by either name or id.
+
+        Args:
+            name: The name of the target Profiler.
+            ge_cloud_id: The id associated with the target Profiler.
+
+        Raises:
+            ProfilerNotFoundError if the requested Profiler does not exists.
+        """
         RuleBasedProfiler.delete_profiler(
             profiler_store=self.profiler_store,
             name=name,
@@ -2068,6 +2191,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return validation_operators
 
     def list_validation_operator_names(self):
+        """List the names of currently-configured Validation Operators on this context"""
         if not self.validation_operators:
             return []
 
@@ -2260,11 +2384,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         profiling_results["success"] = True
         return profiling_results
 
+    @deprecated_method_or_class(
+        version="0.14.0", message="Part of the deprecated v2 API"
+    )
     def add_batch_kwargs_generator(
         self, datasource_name, batch_kwargs_generator_name, class_name, **kwargs
     ):
-        """
-        Add a batch kwargs generator to the named datasource, using the provided
+        """Add a batch kwargs generator to the named datasource, using the provided
         configuration.
 
         Args:
@@ -2274,7 +2400,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             **kwargs: batch kwargs generator configuration, provided as kwargs
 
         Returns:
-
+            The batch_kwargs_generator
         """
         datasource_obj = self.get_datasource(datasource_name)
         generator = datasource_obj.add_batch_kwargs_generator(
@@ -2672,6 +2798,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def get_or_create_data_context_config(
         cls, project_config: Union[DataContextConfig, Mapping]
     ) -> DataContextConfig:
+        """Utility method to take in an input config and ensure its conversion to a rich
+        DataContextConfig. If the input is already of the appropriate type, the function
+        exits early.
+
+        Args:
+            project_config: The input config to be evaluated.
+
+        Returns:
+            An instance of DataContextConfig.
+
+        Raises:
+            ValidationError if the input config does not adhere to the required shape of a DataContextConfig.
+        """
         if isinstance(project_config, DataContextConfig):
             return project_config
         try:
@@ -3678,6 +3817,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
     )
+    @public_api
     def build_data_docs(
         self,
         site_names=None,
@@ -3685,33 +3825,31 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         dry_run=False,
         build_index: bool = True,
     ):
-        """
-        Build Data Docs for your project.
+        """Build Data Docs for your project.
 
-        These make it simple to visualize data quality in your project. These
-        include Expectations, Validations & Profiles. The are built for all
-        Datasources from JSON artifacts in the local repo including validations
-        & profiles from the uncommitted directory.
+        --Documentation--
+            - https://docs.greatexpectations.io/docs/terms/data_docs/
 
-        :param site_names: if specified, build data docs only for these sites, otherwise,
-                            build all the sites specified in the context's config
-        :param resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
-                            ValidationResultIdentifier). If specified, rebuild HTML
-                            (or other views the data docs sites are rendering) only for
-                            the resources in this list. This supports incremental build
-                            of data docs sites (e.g., when a new validation result is created)
-                            and avoids full rebuild.
-        :param dry_run: a flag, if True, the method returns a structure containing the
-                            URLs of the sites that *would* be built, but it does not build
-                            these sites. The motivation for adding this flag was to allow
-                            the CLI to display the the URLs before building and to let users
-                            confirm.
-
-        :param build_index: a flag if False, skips building the index page
+        Args:
+            site_names: if specified, build data docs only for these sites, otherwise,
+                build all the sites specified in the context's config
+            resource_identifiers: a list of resource identifiers (ExpectationSuiteIdentifier,
+                ValidationResultIdentifier). If specified, rebuild HTML
+                (or other views the data docs sites are rendering) only for
+                the resources in this list. This supports incremental build
+                of data docs sites (e.g., when a new validation result is created)
+                and avoids full rebuild.
+            dry_run: a flag, if True, the method returns a structure containing the
+                URLs of the sites that *would* be built, but it does not build
+                these sites.
+            build_index: a flag if False, skips building the index page
 
         Returns:
             A dictionary with the names of the updated data documentation sites as keys and the the location info
             of their index.html files as values
+
+        Raises:
+            ClassInstantiationError: Site config in your Data Context config is not valid.
         """
         logger.debug("Starting DataContext.build_data_docs")
 
