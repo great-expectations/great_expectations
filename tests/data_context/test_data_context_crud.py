@@ -72,6 +72,7 @@ def test_delete_store_success(in_memory_data_context: StubEphemeralDataContext):
     assert context.save_count == 1
 
 
+@pytest.mark.unit
 def test_delete_store_failure(in_memory_data_context: StubEphemeralDataContext):
     context = in_memory_data_context
 
