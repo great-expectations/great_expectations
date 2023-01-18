@@ -230,14 +230,15 @@ class SphinxInvokeDocsBuilder:
                 md_stub = self._create_class_md_stub(definition=definition)
                 self._write_stub(
                     stub=md_stub,
-                    file_name=self._get_md_file_name_from_entity_name(
-                        definition=definition
-                    ),
+                    path=self._get_md_file_name_from_entity_name(definition=definition),
                 )
 
-    def _write_stub(self, stub: str, file_name: str) -> None:
+    def _write_stub(self, stub: str, path: pathlib.Path) -> None:
         """Write the markdown stub file with appropriate filename."""
-        filepath = self.base_path / file_name
+        filepath = self.base_path / path
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        # TODO: One less level of nesting
+        filepath.touch()
         with filepath.open("a") as f:
             f.write(stub)
 
@@ -250,7 +251,7 @@ class SphinxInvokeDocsBuilder:
             md_stub = self._create_module_md_stub(definition=definition)
             self._write_stub(
                 stub=md_stub,
-                file_name=self._get_md_file_name_from_dotted_path_prefix(
+                path=self._get_md_file_name_from_dotted_path_prefix(
                     definition=definition
                 ),
             )
@@ -259,15 +260,24 @@ class SphinxInvokeDocsBuilder:
         """Get the name of the entity (class, module, function)."""
         return definition.ast_definition.name
 
-    def _get_md_file_name_from_entity_name(self, definition: Definition) -> str:
+    def _get_md_file_name_from_entity_name(
+        self, definition: Definition
+    ) -> pathlib.Path:
         """Generate markdown file name from the entity definition."""
         snake_name = camel_to_snake(self._get_entity_name(definition=definition))
-        return f"{snake_name}.md"
+        shortest_dotted_path = get_shortest_dotted_path(
+            definition=definition, repo_root_path=self.repo_root
+        )
+        path = pathlib.Path(shortest_dotted_path.replace(".", "/")) / f"{snake_name}.md"
+        return path
 
-    def _get_md_file_name_from_dotted_path_prefix(self, definition: Definition) -> str:
+    def _get_md_file_name_from_dotted_path_prefix(
+        self, definition: Definition
+    ) -> pathlib.Path:
         """Generate markdown file name from the dotted path prefix."""
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
-        return f"{dotted_path_prefix}.md"
+        path = pathlib.Path(dotted_path_prefix.replace(".", "/") + ".md")
+        return path
 
     def _get_dotted_path_prefix(self, definition: Definition):
         """Get the dotted path up to the class or function name."""
