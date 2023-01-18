@@ -143,7 +143,6 @@ def context_with_single_sqlite_table(empty_data_context, tmp_path_factory):
     context = empty_data_context
     yaml = YAMLHandler()
 
-    # base directory
     base_directory = str(tmp_path_factory.mktemp("test_checkpoint_sql"))
     visitor_asset_base_directory_path: str = os.path.join(base_directory, "data")
     os.makedirs(visitor_asset_base_directory_path)
@@ -189,7 +188,6 @@ def context_with_single_sqlite_table_and_expectation(
     context_with_single_sqlite_table,
 ):
     context = context_with_single_sqlite_table
-    # create expectation suite
     suite = context.create_expectation_suite("visitors_exp")
     expectation = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -205,7 +203,6 @@ def context_with_single_csv_pandas(empty_data_context, tmp_path_factory):
     context = empty_data_context
     yaml = YAMLHandler()
 
-    # base directory
     base_directory = str(tmp_path_factory.mktemp("test_checkpoint_pandas"))
     visitor_asset_base_directory_path: str = os.path.join(base_directory, "data")
     os.makedirs(visitor_asset_base_directory_path)
@@ -250,7 +247,7 @@ def context_with_single_csv_pandas_and_expectation(
     context_with_single_csv_pandas,
 ):
     context = context_with_single_csv_pandas
-    # create expectation suite
+
     suite = context.create_expectation_suite("visitors_exp")
     expectation = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",

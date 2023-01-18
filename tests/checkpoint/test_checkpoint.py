@@ -4314,10 +4314,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     }
 
     context.add_checkpoint(**checkpoint_config)
-    result_format: dict = {
-        "result_format": "COMPLETE",
-        "unexpected_index_column_names": ["event_id"],
-    }
     result = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
         validations=[{"batch_request": runtime_batch_request}],
@@ -5222,8 +5218,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
 
     context.add_checkpoint(**checkpoint_config)
     checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
-    result_format_dict: dict = {"result_format": "COMPLETE"}
-    result: CheckpointResult = checkpoint.run(result_format=result_format_dict)
+    result: CheckpointResult = checkpoint.run()
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
