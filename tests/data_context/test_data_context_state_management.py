@@ -12,7 +12,7 @@ from great_expectations.exceptions.exceptions import StoreConfigurationError
 
 class EphemeralDataContextSpy(EphemeralDataContext):
     """
-    Simply wrap around EphemeralDataContext but kept tabs on specific method calls around state management.
+    Simply wraps around EphemeralDataContext but keeps tabs on specific method calls around state management.
     """
 
     def __init__(
