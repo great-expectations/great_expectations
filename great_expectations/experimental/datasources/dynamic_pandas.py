@@ -24,6 +24,8 @@ from pydantic import FilePath
 from pydantic.typing import resolve_annotations
 from typing_extensions import Final, Literal, TypeAlias, reveal_type
 
+from great_expectations.experimental.datasources.interfaces import DataAsset
+
 logger = logging.getLogger(__file__)
 
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
@@ -184,21 +186,22 @@ def _to_pydantic_fields(
     return fields_dict
 
 
-M = TypeVar("M", bound=pydantic.BaseModel)
+M = TypeVar("M", bound=DataAsset)
 
 
 def _create_pandas_asset_model(
-    model_name: str, model_base: Type[M], fields_dict: Dict[str, _FieldSpec]
+    method_name: str, model_base: Type[M], fields_dict: Dict[str, _FieldSpec]
 ) -> Type[M]:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
-    model = pydantic.create_model(model_name, __base__=model_base, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
+    model_name = "CSVAsset"
+    model = pydantic.create_model(model_name, __base__=model_base, type=(Literal["csv"], "csv"), **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
     return model
 
 
 def _generate_data_asset_models(
     base_model_class: Type[M],
 ) -> List[Type[M]]:
-    io_methods = _extract_io_methods()[:]
+    io_methods = _extract_io_methods()[1:3]
     io_method_sigs = _extract_io_signatures(io_methods)
 
     models: List[Type[M]] = []
@@ -207,7 +210,7 @@ def _generate_data_asset_models(
         fields = _to_pydantic_fields(signature_tuple)
 
         model = _create_pandas_asset_model(
-            signature_tuple.name.strip("read_"), base_model_class, fields
+            signature_tuple.name, base_model_class, fields
         )
         models.append(model)
 
