@@ -1200,16 +1200,25 @@ class AbstractDataContext(ConfigPeer, ABC):
             store (Store)
         """
         store = self._build_store_from_config(store_name, store_config)
+
+        # Both the config and the actual dict of hydrated stores need to be managed concurrently
         self.config.stores[store_name] = store_config
         self._stores[store_name] = store
+
         self._save_project_config()
         return store
 
     def delete_store(self, store_name: str) -> None:
-        """
-        TODO
+        """Delete an existing Store from the DataContext.
+
+        Args:
+            store_name: The name of the Store to be deleted.
+
+        Raises:
+            StoreConfigurationError if the target Store is not found.
         """
         try:
+            # Both the config and the actual dict of hydrated stores need to be managed concurrently
             del self.config.stores[store_name]
             del self._stores[store_name]
         except KeyError:
@@ -3027,7 +3036,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "root_directory": self.root_directory,
             },
         )
-        self._stores[store_name] = new_store
         return new_store
 
     # properties
@@ -3299,7 +3307,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _construct_data_context_id(self) -> str:
         # Choose the id of the currently-configured expectations store, if it is a persistent store
-        expectations_store = self._stores[self.variables.expectations_store_name]
+        expectations_store = self.stores[self.expectations_store_name]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation
             # if there was an invalid store config
