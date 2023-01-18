@@ -5,6 +5,9 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.expectation_configuration import parse_result_format
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -284,7 +287,9 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             "mostly", self.default_kwarg_values.get("mostly")
         )
         total_count = metrics.get("table.row_count")
-        unexpected_count = metrics.get(f"{self.map_metric}.unexpected_count")
+        unexpected_count = metrics.get(
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+        )
 
         if total_count is None or total_count == 0:
             # Vacuously true
@@ -300,9 +305,13 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             success=success,
             element_count=metrics.get("table.row_count"),
             nonnull_count=nonnull_count,
-            unexpected_count=metrics.get(f"{self.map_metric}.unexpected_count"),
-            unexpected_list=metrics.get(f"{self.map_metric}.unexpected_values"),
+            unexpected_count=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+            ),
+            unexpected_list=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+            ),
             unexpected_index_list=metrics.get(
-                f"{self.map_metric}.unexpected_index_list"
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
             ),
         )
