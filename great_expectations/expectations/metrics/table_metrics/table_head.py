@@ -23,13 +23,6 @@ class TableHead(TableMetricProvider):
     value_keys = ("n_rows", "fetch_all")
     default_kwarg_values = {"n_rows": 5, "fetch_all": False}
 
-    @classmethod
-    def is_persistable(cls) -> bool:
-        """
-        Computed values can contain types that are incompatible with getting persisted (other than in memory).
-        """
-        return False
-
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,

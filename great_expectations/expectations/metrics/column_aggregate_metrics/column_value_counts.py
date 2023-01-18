@@ -29,13 +29,6 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
 
     default_kwarg_values = {"sort": "value", "collate": None}
 
-    @classmethod
-    def is_persistable(cls) -> bool:
-        """
-        Computed values can contain types that are incompatible with getting persisted (other than in memory).
-        """
-        return False
-
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,

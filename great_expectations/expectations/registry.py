@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import warnings
+from enum import Enum
 from typing import (
     TYPE_CHECKING,
     Callable,
@@ -16,6 +17,12 @@ from typing import (
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.metric_function_types import (
+    MetricFunctionTypes,
+    MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -25,10 +32,6 @@ from great_expectations.validator.computed_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationConfiguration
-    from great_expectations.core.metric_function_types import (
-        MetricFunctionTypes,
-        MetricPartialFunctionTypes,
-    )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
@@ -36,10 +39,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-IN_MEMORY_STORE_BACKEND_ONLY_PERSISTABLE_METRICS: set = {
-    "table.column_types",
-    "table.head",
-}
 
 _registered_expectations: dict = {}
 _registered_metrics: dict = {}
@@ -385,3 +384,68 @@ def list_registered_expectation_implementations(
             registered_expectation_implementations.append(expectation_name)
 
     return registered_expectation_implementations
+
+
+def is_metric_persistable(metric_name: str, execution_engine: ExecutionEngine) -> bool:
+    """Computed values can be too large and/or of incompatible type for getting persisted (other than in memory)."""
+    if metric_name in {
+        "table.column_types",  # Computed values can contain types that are incompatible with getting persisted (other than in memory).
+        "table.head",  # Computed values can contain types that are incompatible with getting persisted (other than in memory).
+        # TODO: <Alex>ALEX</Alex>
+        # "column.quantile_values",  # Computed values can contain types that are incompatible with getting persisted (other than in memory).
+        # TODO: <Alex>ALEX</Alex>
+        "column.value_counts",  # Computed values can contain types that are incompatible with getting persisted (other than in memory).
+    }:
+        return False
+
+    metric_suffix: Enum
+
+    if metric_name.endswith(
+        tuple(
+            f".{metric_suffix.value}"
+            for metric_suffix in {
+                MetricPartialFunctionTypeSuffixes.MAP,
+                MetricPartialFunctionTypeSuffixes.CONDITION,
+                MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION,
+            }
+        )
+    ):
+        return False
+
+    metric_class: Type[MetricProvider]
+    metric_fn: Optional[Callable]
+    metric_class, metric_fn = get_metric_provider(
+        metric_name=metric_name, execution_engine=execution_engine
+    )
+    if not metric_class.is_persistable():
+        return False
+
+    if metric_name.endswith(
+        tuple(
+            f".{metric_suffix.value}"
+            for metric_suffix in {
+                SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT,
+                SummarizationMetricNameSuffixes.UNEXPECTED_COUNT,
+            }
+        )
+    ):
+        return True
+
+    if metric_name.endswith(
+        tuple(
+            f".{metric_suffix.value}"
+            for metric_suffix in {
+                SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST,
+                SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY,
+                SummarizationMetricNameSuffixes.UNEXPECTED_ROWS,
+                SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS,
+                SummarizationMetricNameSuffixes.UNEXPECTED_VALUES,
+            }
+        )
+    ):
+        return False
+
+    metric_fn_type: MetricFunctionTypes | MetricPartialFunctionTypes | None = getattr(
+        metric_fn, "metric_fn_type", None
+    )
+    return metric_fn_type == MetricFunctionTypes.VALUE

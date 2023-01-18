@@ -44,8 +44,8 @@ from great_expectations.data_context.types.resource_identifiers import (
     ComputedMetricIdentifier,
 )
 from great_expectations.expectations.registry import (
-    IN_MEMORY_STORE_BACKEND_ONLY_PERSISTABLE_METRICS,
     get_metric_provider,
+    is_metric_persistable,
 )
 from great_expectations.expectations.row_conditions import (
     RowCondition,
@@ -605,8 +605,8 @@ class ExecutionEngine(ABC):
         metric_configuration: MetricConfiguration
 
         persistable_metrics_to_retrieve: Iterable[MetricConfiguration] = filter(
-            lambda metric_configuration: self._is_metric_persistable(
-                metric_name=metric_configuration.metric_name
+            lambda metric_configuration: is_metric_persistable(
+                metric_name=metric_configuration.metric_name, execution_engine=self
             ),
             metrics_to_resolve,
         )
@@ -765,8 +765,9 @@ class ExecutionEngine(ABC):
     ) -> None:
         metric_computation_configurations: List[MetricComputationConfiguration] = list(
             filter(
-                lambda element: self._is_metric_persistable(
-                    metric_name=element.metric_configuration.metric_name
+                lambda element: is_metric_persistable(
+                    metric_name=element.metric_configuration.metric_name,
+                    execution_engine=self,
                 ),
                 metric_fn_direct_configurations + metric_fn_bundle_configurations,
             )
@@ -813,27 +814,6 @@ class ExecutionEngine(ABC):
                 value=metrics[metric_computation_configuration.metric_configuration.id],
             )
             self._computed_metrics_store.set(key=key, value=computed_metric)
-
-    def _is_metric_persistable(self, metric_name: str) -> bool:
-        if metric_name in IN_MEMORY_STORE_BACKEND_ONLY_PERSISTABLE_METRICS:
-            return False
-
-        metric_class: Type[MetricProvider]
-        metric_fn: Optional[Callable]
-        metric_class, metric_fn = get_metric_provider(
-            metric_name=metric_name, execution_engine=self
-        )
-
-        if not metric_class.is_persistable():
-            return False
-
-        if metric_fn is None:
-            return True
-
-        metric_fn_type: MetricFunctionTypes | MetricPartialFunctionTypes | None = (
-            getattr(metric_fn, "metric_fn_type", None)
-        )
-        return metric_fn_type == MetricFunctionTypes.VALUE
 
     @classmethod
     def _is_metric_resolved(

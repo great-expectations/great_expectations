@@ -3669,13 +3669,6 @@ class MapMetricProvider(MetricProvider):
             in MapMetricProvider.SQLALCHEMY_SELECTABLE_METRICS
         )
 
-    @classmethod
-    def is_persistable(cls) -> bool:
-        """
-        Computed values can be too large and/or of incompatible type for getting persisted (other than in memory).
-        """
-        return False
-
 
 class ColumnMapMetricProvider(MapMetricProvider):
     condition_domain_keys = (

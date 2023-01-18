@@ -1815,6 +1815,9 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
     df = spark_session.createDataFrame(df)
     engine = basic_spark_df_execution_engine
+    # TODO: <Alex>ALEX</Alex>
+    engine._computed_metrics_store._store_backend.delete_multiple()
+    # TODO: <Alex>ALEX</Alex>
     engine.load_batch_data(batch_id="my_id", batch_data=df)
 
     condition_metric = MetricConfiguration(
@@ -1936,6 +1939,7 @@ def test_map_column_values_increasing_pd():
             metrics=metrics,
         )
         metrics.update(results)
+
     assert len(record) == 1
     assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
         record.list[0].message
@@ -2038,6 +2042,7 @@ def test_map_column_values_increasing_spark(spark_session):
             metrics=metrics,
         )
         metrics.update(results)
+
     assert len(record) == 1
     assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
         record.list[0].message
@@ -2125,6 +2130,7 @@ def test_map_column_values_decreasing_pd():
             metrics=metrics,
         )
         metrics.update(results)
+
     assert len(record) == 1
     assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
         record.list[0].message
@@ -2227,6 +2233,7 @@ def test_map_column_values_decreasing_spark(spark_session):
             metrics=metrics,
         )
         metrics.update(results)
+
     assert len(record) == 1
     assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
         record.list[0].message
@@ -4694,13 +4701,16 @@ def test_batch_aggregate_metrics_pd():
             metrics=metrics,
         )
         metrics.update(results)
+
     assert len(records) == 4
     for record in records:
         assert 'The parameter "parse_strings_as_datetimes" is deprecated' in str(
             record.message
         )
+
     end = datetime.datetime.now()
     print(end - start)
+
     assert results[desired_metric_1.id] == pd.Timestamp(year=2021, month=6, day=18)
     assert results[desired_metric_2.id] == pd.Timestamp(year=2021, month=1, day=1)
     assert results[desired_metric_3.id] == pd.Timestamp(year=2021, month=6, day=18)
