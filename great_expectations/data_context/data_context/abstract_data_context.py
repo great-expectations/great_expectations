@@ -228,7 +228,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         # Init stores
         self._stores: dict = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)  # type: ignore[arg-type]
+        self._init_stores(self.project_config_with_variables_substituted.stores)
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -1199,7 +1199,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             store (Store)
         """
-        self.config.stores[store_name] = store_config  # type: ignore[index]
+        self.config.stores[store_name] = store_config
         store = self._build_store_from_config(store_name, store_config)
         self._save_project_config()
         return store
