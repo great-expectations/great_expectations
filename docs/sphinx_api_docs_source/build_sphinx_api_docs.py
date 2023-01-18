@@ -237,9 +237,7 @@ class SphinxInvokeDocsBuilder:
         """Write the markdown stub file with appropriate filename."""
         filepath = self.base_path / path
         filepath.parent.mkdir(parents=True, exist_ok=True)
-        # TODO: One less level of nesting
-        filepath.touch()
-        with filepath.open("a") as f:
+        with filepath.open("w") as f:
             f.write(stub)
 
     def _build_module_md_stubs(self) -> None:
@@ -268,7 +266,10 @@ class SphinxInvokeDocsBuilder:
         shortest_dotted_path = get_shortest_dotted_path(
             definition=definition, repo_root_path=self.repo_root
         )
-        path = pathlib.Path(shortest_dotted_path.replace(".", "/")) / f"{snake_name}.md"
+        # Use parent since file will create sidebar entry with class name
+        # (if .parent is not used, then there will be a duplicate).
+        path_prefix = pathlib.Path(shortest_dotted_path.replace(".", "/")).parent
+        path = path_prefix / f"{snake_name}.md"
         return path
 
     def _get_md_file_name_from_dotted_path_prefix(
