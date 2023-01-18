@@ -4314,6 +4314,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     }
 
     context.add_checkpoint(**checkpoint_config)
+
     result = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
         validations=[{"batch_request": runtime_batch_request}],
