@@ -22,7 +22,7 @@ import pydantic
 from pydantic import Field, StrictBool, StrictInt
 from pydantic import dataclasses as pydantic_dc
 from pydantic import root_validator, validate_arguments
-from typing_extensions import ClassVar, Literal, TypeAlias, TypeGuard
+from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.experimental.datasources.experimental_base_model import (
