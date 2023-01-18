@@ -115,27 +115,27 @@ Now we're going to begin laying the groundwork for the functionality of your Cus
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L22
+```python name="query_template_expectation"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L21
+```python name="query_table_expectation"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L25
+```python name="query_template_docstring"
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L24
+```python name="query_table_docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L116
+```python name="query_template_diagnostics"
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L161
+```python name="query_table_diagnostics"
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -172,7 +172,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L88-L148
+```python name="query_table_examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -219,12 +219,12 @@ To implement your query, replace the `query` attribute of your Custom Expectatio
 
 This:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L35-L37
+```python name="query_template_query"
 ```
 
 Becomes something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L30-L33
+```python name="query_table_query"
 ```
 
 :::warning
@@ -252,12 +252,12 @@ To connect this Metric to our Custom Expectation, we'll need to include the `met
 
 This tuple:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L30
+```python name="query_template_dependencies"
 ```
 
 Becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L27
+```python name="query_table_dependencies"
 ```
 
 <details>
@@ -281,7 +281,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L68-L74
+```python name="query_template_validate"
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies,
@@ -290,7 +290,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `query.table` Metric against our success keys:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py#L68-L85
+```python name="query_table_validate"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -415,27 +415,27 @@ Now we're going to begin laying the groundwork for the functionality of your Cus
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L22
+```python name="query_template_expectation"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L21
+```python name="query_column_expectation"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L25
+```python name="query_template_docstring"
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L24
+```python name="query_column_docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L116
+```python name="query_template_diagnostics"
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L213
+```python name="query_column_diagnostics"
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -472,7 +472,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L118-L200
+```python name="query_column_examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -519,12 +519,12 @@ To implement your query, replace the `query` attribute of your Custom Expectatio
 
 This:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L35-L37
+```python name="query_template_query"
 ```
 
 Becomes something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L30-L35
+```python name="query_column_query"
 ```
 
 :::warning
@@ -555,12 +555,12 @@ In this case, we'll be using the `query.column` Metric, allowing us to parameter
 
 This tuple:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L30
+```python name="query_template_dependencies"
 ```
 
 Becomes:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L27
+```python name="query_column_dependencies"
 ```
 
 <details>
@@ -584,7 +584,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L82-L88
+```python name="query_template_validate"
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies,
@@ -593,7 +593,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `query.column` Metric against our success keys:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L82-L114
+```python name="query_column_validate"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -656,12 +656,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../tests/integration/docusaurus/expectations/examples/query_expectation_template.py#L105-L110
+```python name="query_template_library_metadata"
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py#L203-L207
+```python name="query_table_library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

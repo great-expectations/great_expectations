@@ -17,22 +17,22 @@ from great_expectations.expectations.expectation import (
 )
 
 
-# <snippet>
+# <snippet name="query_table_expectation">
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # </snippet>
-    # <snippet>
+    # <snippet name="query_table_docstring">
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
     # </snippet>
-    # <snippet>
+    # <snippet name="query_table_dependencies">
     metric_dependencies = ("query.table",)
     # </snippet>
-    # <snippet>
+    # <snippet name="query_table_query">
     query = """
             SELECT COUNT(*)
             FROM {active_batch}
             """
     # </snippet>
-    # <snippet>
+    # <snippet name="query_table_keys">
     success_keys = (
         "value",
         "query",
@@ -64,7 +64,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-    # <snippet>
+    # <snippet name="query_table_validate">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -72,7 +72,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-        # </snippet>
+
         value = configuration["kwargs"].get("value")
         query_result = metrics.get("query.table")[0][0]
 
@@ -84,7 +84,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         }
 
     # </snippet>
-    # <snippet>
+    # <snippet name="query_table_examples">
     examples = [
         {
             "data": [
@@ -148,16 +148,16 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     ]
     # </snippet>
     # This dictionary contains metadata for display in the public gallery
-    # <snippet>
+    # <snippet name="query_table_library_metadata">
     library_metadata = {
         "tags": ["query-based"],
         "contributors": ["@joegargery"],
     }
-    # </snippet
+    # </snippet>
 
 
 if __name__ == "__main__":
-    # <snippet>
+    # <snippet name="query_table_diagnostics">
     ExpectQueriedTableRowCountToBe().print_diagnostic_checklist()
     # </snippet>
 

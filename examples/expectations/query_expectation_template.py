@@ -15,19 +15,29 @@ from great_expectations.expectations.expectation import (
 
 
 # This class defines the Expectation itself
+# <snippet name="query_template_expectation">
 class ExpectQueryToMatchSomeCriteria(QueryExpectation):
+    # </snippet>
+    # <snippet name="query_template_docstring">
     """TODO: Add a docstring here"""
+    # </snippet>
 
     # This is the id string of the Metric(s) used by this Expectation.
+    # <snippet name="query_template_dependencies">
     metric_dependencies = ("METRIC NAME GOES HERE",)
+    # </snippet>
 
     # This is the default, baked-in SQL Query for this QueryExpectation
+    # <snippet name="query_template_query">
     query = """
             SQL QUERY GOES HERE
             """
+    # </snippet>
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
+    # <snippet name="query_template_keys">
     success_keys = ("query",)
+    # </snippet>
 
     domain_keys = ("batch_id", "row_condition", "condition_parser")
 
@@ -69,6 +79,7 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
+    # <snippet name="query_template_validate">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -76,13 +87,17 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
+        # </snippet>
         raise NotImplementedError
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
+    # <snippet name="query_template_examples">
     examples = []
+    # </snippet>
 
     # This dictionary contains metadata for display in the public gallery
+    # <snippet name="query_template_library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -91,5 +106,10 @@ class ExpectQueryToMatchSomeCriteria(QueryExpectation):
     }
 
 
+#     </snippet>
+
+
 if __name__ == "__main__":
+    # <snippet name="query_template_diagnostics">
     ExpectQueryToMatchSomeCriteria().print_diagnostic_checklist()
+#     </snippet>
