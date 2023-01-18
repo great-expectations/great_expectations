@@ -10,7 +10,11 @@ from great_expectations.data_context.types.base import (
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 
 
-class StubEphemeralDataContext(EphemeralDataContext):
+class EphemeralDataContextSpy(EphemeralDataContext):
+    """
+    Simply wrap around EphemeralDataContext but kept tabs on specific method calls around state management.
+    """
+
     def __init__(
         self,
         project_config: DataContextConfig,
@@ -26,14 +30,14 @@ class StubEphemeralDataContext(EphemeralDataContext):
 
 
 @pytest.fixture
-def in_memory_data_context() -> StubEphemeralDataContext:
+def in_memory_data_context() -> EphemeralDataContextSpy:
     config = DataContextConfig(store_backend_defaults=InMemoryStoreBackendDefaults())
-    context = StubEphemeralDataContext(project_config=config)
+    context = EphemeralDataContextSpy(project_config=config)
     return context
 
 
 @pytest.mark.unit
-def test_add_store(in_memory_data_context: StubEphemeralDataContext):
+def test_add_store(in_memory_data_context: EphemeralDataContextSpy):
     context = in_memory_data_context
 
     num_stores_before = len(context.stores)
@@ -56,7 +60,7 @@ def test_add_store(in_memory_data_context: StubEphemeralDataContext):
 
 
 @pytest.mark.unit
-def test_delete_store_success(in_memory_data_context: StubEphemeralDataContext):
+def test_delete_store_success(in_memory_data_context: EphemeralDataContextSpy):
     context = in_memory_data_context
 
     num_stores_before = len(context.stores)
@@ -73,7 +77,7 @@ def test_delete_store_success(in_memory_data_context: StubEphemeralDataContext):
 
 
 @pytest.mark.unit
-def test_delete_store_failure(in_memory_data_context: StubEphemeralDataContext):
+def test_delete_store_failure(in_memory_data_context: EphemeralDataContextSpy):
     context = in_memory_data_context
 
     num_stores_before = len(context.stores)
