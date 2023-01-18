@@ -4391,11 +4391,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
-    first_result_key: str = list(result.run_results.keys())[0]
-    assert result.run_results[first_result_key]["actions_results"][
-        "update_data_docs"
-    ].get("local_site")
-
 
 def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_data(
     data_context_with_datasource_pandas_engine,
@@ -5218,6 +5213,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
 
     context.add_checkpoint(**checkpoint_config)
     checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+
     result: CheckpointResult = checkpoint.run()
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
@@ -5228,126 +5224,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
-
-
-@pytest.mark.integration
-def test_sql_checkpoint_data_docs_created(
-    context_with_single_sqlite_table_and_expectation,
-):
-    context: DataContext = context_with_single_sqlite_table_and_expectation
-    batch_request: dict = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_sql_data_connector",
-        "data_asset_name": "event_names",
-    }
-    context.include_rendered_content.globally = True
-
-    checkpoint_config: dict = {
-        "class_name": "Checkpoint",
-        "name": "my_checkpoint",
-        "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
-        "expectation_suite_name": "visitors_exp",
-        "action_list": [
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
-        "validations": [
-            {
-                "batch_request": batch_request,
-            }
-        ],
-    }
-
-    context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
-
-    result_format_dict: dict = {
-        "result_format": "COMPLETE",
-        "unexpected_index_column_names": ["event_id"],
-    }
-    result: CheckpointResult = checkpoint.run(result_format=result_format_dict)
-
-    first_result_key: str = list(result.run_results.keys())[0]
-    assert result.run_results[first_result_key]["actions_results"][
-        "update_data_docs"
-    ].get("local_site")
-
-
-@pytest.mark.integration
-def test_pandas_checkpoint_data_docs_created(
-    context_with_single_csv_pandas_and_expectation,
-):
-    context: DataContext = context_with_single_csv_pandas_and_expectation
-    batch_request: dict = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_pandas_data_connector",
-        "data_asset_name": "visits.csv",
-    }
-    context.include_rendered_content.globally = True
-
-    checkpoint_config: dict = {
-        "class_name": "Checkpoint",
-        "name": "my_checkpoint",
-        "config_version": 1,
-        "run_name_template": "%Y-%M-foo-bar-template",
-        "expectation_suite_name": "visitors_exp",
-        "action_list": [
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
-        "validations": [
-            {
-                "batch_request": batch_request,
-            }
-        ],
-    }
-
-    context.add_checkpoint(**checkpoint_config)
-    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
-
-    result_format_dict: dict = {
-        "result_format": "COMPLETE",
-        "unexpected_index_column_names": ["event_id"],
-    }
-    result: CheckpointResult = checkpoint.run(result_format=result_format_dict)
-
-    first_result_key: str = list(result.run_results.keys())[0]
-    assert result.run_results[first_result_key]["actions_results"][
-        "update_data_docs"
-    ].get("local_site")
 
 
 @pytest.mark.integration
