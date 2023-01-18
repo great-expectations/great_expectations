@@ -167,6 +167,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         "mostly": 1,
     }
 
+    # <snippet name="custom_agg_validate_config">
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -184,35 +185,49 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
         super().validate_configuration(configuration)
         if configuration is None:
             configuration = self.configuration
+        #     </snippet>
 
+        # <snippet name="custom_agg_validate_config_params">
         min_value = configuration.kwargs["min_value"]
         max_value = configuration.kwargs["max_value"]
         strict_min = configuration.kwargs["strict_min"]
         strict_max = configuration.kwargs["strict_max"]
+        # </snippet>
 
         # Validating that min_val, max_val, strict_min, and strict_max are of the proper format and type
+        # <snippet name="custom_agg_validate_config_values">
         try:
             assert (
                 min_value is not None or max_value is not None
             ), "min_value and max_value cannot both be none"
+            # </snippet>
+            # <snippet name="custom_agg_validate_config_types">
             assert min_value is None or isinstance(
                 min_value, (float, int)
             ), "Provided min threshold must be a number"
             assert max_value is None or isinstance(
                 max_value, (float, int)
             ), "Provided max threshold must be a number"
+            # </snippet>
+            # <snippet name="custom_agg_validate_config_comparison">
             if min_value and max_value:
                 assert (
                     min_value <= max_value
                 ), "Provided min threshold must be less than or equal to max threshold"
+            #     </snippet>
+            # <snippet name="custom_agg_validate_config_none">
             assert strict_min is None or isinstance(
                 strict_min, bool
             ), "strict_min must be a boolean value"
             assert strict_max is None or isinstance(
                 strict_max, bool
             ), "strict_max must be a boolean value"
+        #     </snippet>
+        # <snippet name="custom_agg_validate_config_except">
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+
+    #     </snippet>
 
     # <snippet name="custom_agg_validate">
     def _validate(

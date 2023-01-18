@@ -69,7 +69,7 @@ The decorated method takes in an SQLAlchemy `Column` object and will either retu
   
 For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to leverage SQLAlchemy's `in_` ColumnOperator and the `@column_condition_partial` decorator.
 
-```python name="custom_map_sql"
+```python name="custom_map_sqlalchemy"
 ```
 
 <details>
