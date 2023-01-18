@@ -9,7 +9,7 @@ from great_expectations.expectations.core.expect_column_values_to_be_in_set impo
 )
 
 
-# <snippet>
+# <snippet name="parameterized_set_example">
 class ExpectColumnValuesToBeTwoLetterCountryCode(ExpectColumnValuesToBeInSet):
     default_kwarg_values = {
         "value_set": ["FR", "DE", "CH", "ES", "IT", "BE", "NL", "PL"],
