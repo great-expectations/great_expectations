@@ -391,9 +391,6 @@ def is_metric_persistable(metric_name: str, execution_engine: ExecutionEngine) -
     if metric_name in {
         "table.column_types",  # Computed values can contain types that are incompatible with getting persisted (other than in memory).
         "table.head",  # Computed values can contain types that are incompatible with getting persisted (other than in memory).
-        # TODO: <Alex>ALEX</Alex>
-        # "column.quantile_values",  # Computed values can contain types that are incompatible with getting persisted (other than in memory).
-        # TODO: <Alex>ALEX</Alex>
         "column.value_counts",  # Computed values can contain types that are incompatible with getting persisted (other than in memory).
     }:
         return False
