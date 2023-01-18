@@ -1199,8 +1199,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             store (Store)
         """
-        self.config.stores[store_name] = store_config
         store = self._build_store_from_config(store_name, store_config)
+        self.config.stores[store_name] = store_config
+        self._stores[store_name] = store
         self._save_project_config()
         return store
 
@@ -1210,6 +1211,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         try:
             del self.config.stores[store_name]
+            del self._stores[store_name]
         except KeyError:
             raise gx_exceptions.StoreConfigurationError(
                 f'Attempted to delete a store named: "{store_name}". It is not a configured store.'
