@@ -191,40 +191,60 @@ def _create_pandas_asset_model(
     return model
 
 
-if __name__ == "__main__":
-    io_methods = _extract_io_methods()[1:]
-    print(f"\n  IO Methods\n{pf(io_methods)}\n")
-
+def _generate_data_asset_models() -> List[Type[pydantic.BaseModel]]:
+    io_methods = _extract_io_methods()[:]
     io_method_sigs = _extract_io_signatures(io_methods)
-    print("\n  IO Method Signatures\n")
 
-    for signature in io_method_sigs:
-        print(f"{signature}\n")
-        fields = _to_pydantic_fields(signature)
-        # print(f"\n  Pydantic Field Specs\n{pf(fields)}")
+    models: List[Type[pydantic.BaseModel]] = []
+    for signature_tuple in io_method_sigs:
 
-        model = _create_pandas_asset_model("POCAssetModel", fields)
-        # print(f"\nNEED_SPECIAL_HANDLING\n{pf(dict(NEED_SPECIAL_HANDLING))}")
-        # print(
-        #     f"\nFIELD_SKIPPED_UNSUPPORTED_TYPE\n{pf(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n"
-        # )
-        # print(f"\nFIELD_SKIPPED_NO_ANNOTATION\n{pf(FIELD_SKIPPED_NO_ANNOTATION)}\n")
-        print(model)
-        model.update_forward_refs(
-            FilePath=FilePath, Sequence=Sequence, Hashable=Hashable, Literal=Literal
-        )
-        # print(model(filepath_or_buffer=__file__))
-        print("-----------------------------------")
+        fields = _to_pydantic_fields(signature_tuple)
 
-    special_handling = {
-        k: v
-        for (k, v) in NEED_SPECIAL_HANDLING.items()
-        if k in FIELD_SKIPPED_UNSUPPORTED_TYPE or k in FIELD_SKIPPED_NO_ANNOTATION
-    }
-    print(f"\nNEED_SPECIAL_HANDLING\n{pf(special_handling)}")
-    print(
-        f"\nFIELD_SKIPPED_UNSUPPORTED_TYPE: {len(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n{pf(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n"
-    )
-    print(
-        f"\nFIELD_SKIPPED_NO_ANNOTATION: {len(FIELD_SKIPPED_NO_ANNOTATION)}\n{pf(FIELD_SKIPPED_NO_ANNOTATION)}\n"
-    )
+        model = _create_pandas_asset_model(signature_tuple.name.strip("read_"), fields)
+        models.append(model)
+
+    return models
+
+
+if __name__ == "__main__":
+
+    models = _generate_data_asset_models()
+    print(f"  Models\n{pf(models)}")
+
+    # io_methods = _extract_io_methods()[:]
+    # print(f"\n  IO Methods\n{pf(io_methods)}\n")
+
+    # io_method_sigs = _extract_io_signatures(io_methods)
+    # print("\n  IO Method Signatures\n")
+
+    # for signature in io_method_sigs:
+    #     print(f"{signature}\n")
+
+    #     # print(f"\n  Pydantic Field Specs\n{pf(fields)}")
+
+    #     model = _create_pandas_asset_model("POCAssetModel", fields)
+    #     # print(f"\nNEED_SPECIAL_HANDLING\n{pf(dict(NEED_SPECIAL_HANDLING))}")
+    #     # print(
+    #     #     f"\nFIELD_SKIPPED_UNSUPPORTED_TYPE\n{pf(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n"
+    #     # )
+    #     # print(f"\nFIELD_SKIPPED_NO_ANNOTATION\n{pf(FIELD_SKIPPED_NO_ANNOTATION)}\n")
+    #     print(model)
+    #     model.update_forward_refs(
+    #         FilePath=FilePath, Sequence=Sequence, Hashable=Hashable, Literal=Literal
+    #     )
+    #     # print(model(filepath_or_buffer=__file__))
+    #     print("-----------------------------------")
+
+    # special_handling = {
+    #     k: v
+    #     for (k, v) in NEED_SPECIAL_HANDLING.items()
+    #     # if k in FIELD_SKIPPED_UNSUPPORTED_TYPE
+    #     if k in FIELD_SKIPPED_NO_ANNOTATION
+    # }
+    # print(f"\nNEED_SPECIAL_HANDLING\n{pf(special_handling)}")
+    # print(
+    #     f"\nFIELD_SKIPPED_UNSUPPORTED_TYPE: {len(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n{pf(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n"
+    # )
+    # print(
+    #     f"\nFIELD_SKIPPED_NO_ANNOTATION: {len(FIELD_SKIPPED_NO_ANNOTATION)}\n{pf(FIELD_SKIPPED_NO_ANNOTATION)}\n"
+    # )
