@@ -1,5 +1,6 @@
 import inspect
 import logging
+import pathlib
 import sys
 from collections import defaultdict
 from pprint import pformat as pf
@@ -78,6 +79,11 @@ class _SignatureTuple(NamedTuple):
 class _FieldSpec(NamedTuple):
     type: Type
     default_value: object  # ... for required value
+
+
+FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
+    "filepath_or_buffer": {"path": _FieldSpec(pathlib.Path, ...)}
+}
 
 
 def _public_dir(obj: object) -> List[str]:
@@ -179,9 +185,13 @@ def _to_pydantic_fields(
             FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
             continue
 
-        fields_dict[param_name] = _FieldSpec(
-            type=type_, default_value=_get_default_value(param)
-        )
+        substitution = FIELD_SUBSTITUTIONS.get(param_name)
+        if substitution:
+            fields_dict.update(substitution)
+        else:
+            fields_dict[param_name] = _FieldSpec(
+                type=type_, default_value=_get_default_value(param)
+            )
 
     return fields_dict
 
