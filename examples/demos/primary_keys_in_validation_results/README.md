@@ -10,7 +10,7 @@ date: 20220118
 
 ## What's in the folder?
 
-- `great_expectation.yml` file containing a `Datasource` with a `ConfiguredAssetDataConnector` connecting to example data. For Pandas and Spark it is the `.csv` and for sqlite it is the `.db` file.
+- `great_expectation.yml` file containing a `Datasource` with a `InferredAssetDataConnector` connecting to example data. For Pandas and Spark it is the `.csv` and for sqlite it is the `.db` file.
 - `ExpectationSuite` named `visitors_exp` that contains a single Expectation. It is configured to detect non-pageview related entries in the `event_type` column of our data.
 - `Checkpoint` configuration named `my_checkpoint` will run the `visitor_exp` Suite against the data configured in the `Datasource`.
 - Jupyter Notebook containing `Checkpoint` configuration with `result_format` configured in the following ways:
