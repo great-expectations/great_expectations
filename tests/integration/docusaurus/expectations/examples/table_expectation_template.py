@@ -26,17 +26,17 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnExpectations, the main business logic for calculation will live in this class.
-# <snippet name="table_template_metric">
+# <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py TableMeetsSomeCriteria class_def">
 class TableMeetsSomeCriteria(TableMetricProvider):
     # </snippet>
 
     # This is the id string that will be used to reference your Metric.
-    # <snippet name="table_template_metric_name">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py metric_name">
     metric_name = "METRIC NAME GOES HERE"
     # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet name="table_template_pandas">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py pandas">
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
@@ -89,21 +89,21 @@ class TableMeetsSomeCriteria(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-# <snippet name="table_template_expectation">
+# <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py ExpectTableToMeetSomeCriteria class_def">
 class ExpectTableToMeetSomeCriteria(TableExpectation):
     # </snippet>
-    # <snippet name="table_template_docstring">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py docstring">
     """TODO: add a docstring here"""
     # </snippet>
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="table_template_examples">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py examples">
     examples = []
     # </snippet>
 
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
-    # <snippet name="table_template_metric_dependencies">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py metric_dependencies">
     metric_dependencies = ("METRIC NAME GOES HERE",)
     # </snippet>
 
@@ -142,7 +142,7 @@ class ExpectTableToMeetSomeCriteria(TableExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
-    # <snippet name="table_template_validate">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py validate">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -154,7 +154,7 @@ class ExpectTableToMeetSomeCriteria(TableExpectation):
         raise NotImplementedError
 
     # This object contains metadata for display in the public Gallery
-    # <snippet name="table_template_library_metadata">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -167,6 +167,6 @@ class ExpectTableToMeetSomeCriteria(TableExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="table_template_diagnostics">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py diagnostics">
     ExpectTableToMeetSomeCriteria().print_diagnostic_checklist()
 #     </snippet>

@@ -89,7 +89,7 @@ By convention, your <TechnicalTag tag="metric" text="Metric"/> class is defined 
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python name="table_template_expectation"
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py ExpectTableToMeetSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -97,7 +97,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python name="table_template_docstring"
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py docstring"
 ```
 
 with something like:
@@ -105,7 +105,7 @@ with something like:
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python name="table_template_diagnostics"
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py diagnostics"
 ```
 
 with this one:
@@ -220,7 +220,7 @@ The remainder of the Metric Identifier simply describes what the Metric computes
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python name="table_template_metric_name"
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py metric_name"
 ```
 
 with
@@ -230,7 +230,7 @@ with
 
 Second, in the Expectation class, replace
 
-```python name="table_template_metric_dependencies"
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py metric_dependencies"
 ```
 
 with
@@ -244,7 +244,7 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python name="table_template_metric"
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py TableMeetsSomeCriteria class_def"
 ```
 
 with 
@@ -258,7 +258,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python name="table_template_validate"
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py validate"
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -326,7 +326,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python name="table_template_library_metadata"
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py library_metadata"
 ```
 
 would become

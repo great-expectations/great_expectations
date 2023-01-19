@@ -90,7 +90,7 @@ When in doubt, the next step to implement is the first one that doesn't have a â
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python name="regex_template_expectation_class"
+```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py ExpectColumnValuesToMatchSomeRegex class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -98,7 +98,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python name="regex_template_docstring"
+```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py docstring"
 ```
 
 with something like:
@@ -107,7 +107,7 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python name="regex_template_diagnostics"
+```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py diagnostics"
 ```
 
 with this one:
@@ -187,7 +187,7 @@ In the case of your Custom `RegexBasedColumnMapExpectation`, Great Expectations 
 
 To do this, we replace these:
 
-```python name="regex_template_definition"
+```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py definition"
 ```
 
 with something like this:
@@ -199,7 +199,7 @@ For more detail when rendering your Custom Expectation, you can optionally speci
 
 For example:
 
-```python name="regex_template_plural"
+```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py plural"
 ```
 
 becomes:
@@ -285,7 +285,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python name="regex_template_library_metadata"
+```python name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py library_metadata"
 ```
 
 would become

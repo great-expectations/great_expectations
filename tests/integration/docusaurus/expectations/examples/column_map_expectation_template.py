@@ -23,17 +23,17 @@ from great_expectations.expectations.metrics import (
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-# <snippet name="map_template_metric_class">
+# <snippet name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py ColumnValuesMatchSomeCriteria class_def">
 class ColumnValuesMatchSomeCriteria(ColumnMapMetricProvider):
     # </snippet>
 
     # This is the id string that will be used to reference your metric.
-    # <snippet name="map_template_metric_name">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py metric_name">
     condition_metric_name = "METRIC NAME GOES HERE"
     # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet name="map_template_pandas">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py pandas">
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         raise NotImplementedError
@@ -52,22 +52,22 @@ class ColumnValuesMatchSomeCriteria(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-# <snippet name="map_template_expectation_class">
+# <snippet name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py ExpectColumnValuesToMatchSomeCriteria class_def">
 class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
     # </snippet>
-    # <snippet name="map_template_docstring">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py docstring">
     """TODO: Add a docstring here"""
     # </snippet>
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="map_template_examples">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py examples">
     examples = []
     # </snippet>
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    # <snippet name="map_template_map_metric">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py map_metric">
     map_metric = "METRIC NAME GOES HERE"
     # </snippet>
 
@@ -106,7 +106,7 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
-    # <snippet name="map_template_library_metadata">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -119,6 +119,6 @@ class ExpectColumnValuesToMatchSomeCriteria(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="map_template_diagnostics">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py diagnostics">
     ExpectColumnValuesToMatchSomeCriteria().print_diagnostic_checklist()
 #     </snippet>

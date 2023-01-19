@@ -17,19 +17,19 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 
 
 # This class defines the Expectation itself
-# <snippet name="regex_template_expectation_class">
+# <snippet name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py ExpectColumnValuesToMatchSomeRegex class_def">
 class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     # </snippet>
-    # <snippet name="regex_template_docstring">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py docstring">
     """TODO: Add a docstring here"""
     # </snippet>
 
     # These values will be used to configure the metric created by your expectation
-    # <snippet name="regex_template_definition">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py definition">
     regex_camel_name = "RegexName"
     regex = "regex pattern"
     # </snippet>
-    # <snippet name="regex_template_plural">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py plural">
     semantic_type_name_plural = None
     # </snippet>
 
@@ -44,7 +44,7 @@ class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     )
 
     # This object contains metadata for display in the public Gallery
-    # <snippet name="regex_template_library_metadata">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -55,6 +55,6 @@ class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
 
 # </snippet>
 if __name__ == "__main__":
-    # <snippet name="regex_template_diagnostics">
+    # <snippet name="tests/integration/docusaurus/expectations/examples/regex_based_column_map_expectation_template.py diagnostics">
     ExpectColumnValuesToMatchSomeRegex().print_diagnostic_checklist()
 #     </snippet>

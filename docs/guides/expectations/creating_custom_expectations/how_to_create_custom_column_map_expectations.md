@@ -89,7 +89,7 @@ By convention, your <TechnicalTag tag="metric" text="Metric" /> class is defined
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python name="map_template_expectation_class"
+```python name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py ExpectColumnValuesToMatchSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -97,7 +97,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python name="map_template_docstring"
+```python name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py docstring"
 ```
 
 with something like:
@@ -106,7 +106,7 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python name="map_template_diagnostics"
+```python name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py diagnostics"
 ```
 
 with this one:
@@ -213,7 +213,7 @@ Next, choose a Metric Identifier for your Metric. By convention, Metric Identifi
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python name="map_template_metric_name"
+```python name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py metric_name"
 ```
 
 with
@@ -223,7 +223,7 @@ with
 
 Second, in the Expectation class, replace
 
-```python name="map_template_map_metric"
+```python name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py map_metric"
 ```
 
 with
@@ -237,7 +237,7 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python name="map_template_metric_class"
+```python name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py ColumnValuesMatchSomeCriteria class_def"
 ```
 
 with 
@@ -307,7 +307,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python name="map_template_library_metadata"
+```python name="tests/integration/docusaurus/expectations/examples/column_map_expectation_template.py library_metadata"
 ```
 
 would become

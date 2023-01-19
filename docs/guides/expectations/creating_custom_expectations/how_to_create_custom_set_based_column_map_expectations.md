@@ -89,7 +89,7 @@ When in doubt, the next step to implement is the first one that doesn't have a â
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python name="set_template_expectation"
+```python name="tests/integration/docusaurus/expectations/examples/set_based_column_map_expectation_template.py ExpectColumnValuesToBeInSomeSet class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -97,7 +97,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python name="set_template_docstring"
+```python name="tests/integration/docusaurus/expectations/examples/set_based_column_map_expectation_template.py docstring"
 ```
 
 with something like:
@@ -106,7 +106,7 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python name="set_template_diagnostics"
+```python name="tests/integration/docusaurus/expectations/examples/set_based_column_map_expectation_template.py diagnostics"
 ```
 
 with this one:
@@ -186,7 +186,7 @@ In the case of your Custom `SetBasedColumnMapExpectation`, Great Expectations wi
 
 To do this, we replace these:
 
-```python name="set_template_set"
+```python name="tests/integration/docusaurus/expectations/examples/set_based_column_map_expectation_template.py set"
 ```
 
 with something like this:
@@ -198,7 +198,7 @@ For more detail when rendering your Custom Expectation, you can optionally speci
 
 For example:
 
-```python name="set_template_semantic_name"
+```python name="tests/integration/docusaurus/expectations/examples/set_based_column_map_expectation_template.py semantic_name"
 ```
 
 becomes:
@@ -284,7 +284,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python name="set_template_library_metadata"
+```python name="tests/integration/docusaurus/expectations/examples/set_based_column_map_expectation_template.py library_metadata"
 ```
 
 would become
