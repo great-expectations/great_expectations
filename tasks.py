@@ -8,10 +8,13 @@ To show all available tasks `invoke --list`
 
 To show task help page `invoke <NAME> --help`
 """
+from __future__ import annotations
+
 import json
 import os
 import pathlib
 import shutil
+from typing import TYPE_CHECKING
 
 import invoke
 
@@ -23,6 +26,9 @@ try:
     is_ge_installed: bool = True
 except ModuleNotFoundError:
     is_ge_installed = False
+
+if TYPE_CHECKING:
+    from invoke.context import Context
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
@@ -36,7 +42,7 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
         "path": _PATH_HELP_DESC,
     }
 )
-def sort(ctx, path=".", check=False, exclude=None):
+def sort(ctx: Context, path=".", check=False, exclude=None):
     """Sort module imports."""
     cmds = ["isort", path]
     if check:
@@ -54,7 +60,7 @@ def sort(ctx, path=".", check=False, exclude=None):
         "sort": "Disable import sorting. Runs by default.",
     }
 )
-def fmt(ctx, path=".", sort_=True, check=False, exclude=None):
+def fmt(ctx: Context, path=".", sort_=True, check=False, exclude=None):
     """
     Run code formatter.
     """
@@ -70,14 +76,14 @@ def fmt(ctx, path=".", sort_=True, check=False, exclude=None):
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def lint(ctx, path="."):
+def lint(ctx: Context, path="."):
     """Run code linter"""
     cmds = ["flake8", path, "--statistics"]
     ctx.run(" ".join(cmds), echo=True)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def upgrade(ctx, path="."):
+def upgrade(ctx: Context, path="."):
     """Run code syntax upgrades."""
     cmds = ["pyupgrade", path, "--py3-plus"]
     ctx.run(" ".join(cmds))
@@ -90,7 +96,7 @@ def upgrade(ctx, path="."):
         "sync": "Re-install the latest git hooks.",
     }
 )
-def hooks(ctx, all_files=False, diff=False, sync=False):
+def hooks(ctx: Context, all_files=False, diff=False, sync=False):
     """Run and manage pre-commit hooks."""
     cmds = ["pre-commit", "run"]
     if diff:
@@ -110,7 +116,7 @@ def hooks(ctx, all_files=False, diff=False, sync=False):
 
 
 @invoke.task(aliases=["docstring"])
-def docstrings(ctx):
+def docstrings(ctx: Context):
     """Check public API docstrings."""
     try:
         check_public_api_docstrings.main()
@@ -122,7 +128,7 @@ def docstrings(ctx):
 
 
 @invoke.task(aliases=["type-cov"])  # type: ignore
-def type_coverage(ctx):
+def type_coverage(ctx: Context):
     """
     Check total type-hint coverage compared to `develop`.
     """
@@ -147,7 +153,7 @@ def type_coverage(ctx):
     },
 )
 def type_check(
-    ctx,
+    ctx: Context,
     packages,
     install_types=False,
     pretty=False,
@@ -211,7 +217,7 @@ def type_check(
 
 
 @invoke.task(aliases=["get-stats"])
-def get_usage_stats_json(ctx):
+def get_usage_stats_json(ctx: Context):
     """
     Dump usage stats event examples to json file
     """
@@ -262,7 +268,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
     },
 )
 def tests(
-    ctx,
+    ctx: Context,
     unit=True,
     integration=False,
     ignore_markers=False,
@@ -333,7 +339,7 @@ PYTHON_VERSION_DEFAULT: float = 3.8
     }
 )
 def docker(
-    ctx,
+    ctx: Context,
     name="gx38local",
     tag="latest",
     build=False,
