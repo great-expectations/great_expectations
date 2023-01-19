@@ -46,7 +46,9 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
         "path": _PATH_HELP_DESC,
     }
 )
-def sort(ctx: Context, path=".", check=False, exclude=None):
+def sort(
+    ctx: Context, path: str = ".", check: bool = False, exclude: str | None = None
+):
     """Sort module imports."""
     cmds = ["isort", path]
     if check:
@@ -64,7 +66,13 @@ def sort(ctx: Context, path=".", check=False, exclude=None):
         "sort": "Disable import sorting. Runs by default.",
     }
 )
-def fmt(ctx: Context, path=".", sort_=True, check=False, exclude=None):
+def fmt(
+    ctx: Context,
+    path: str = ".",
+    sort_: bool = True,
+    check: bool = False,
+    exclude: str | None = None,
+):
     """
     Run code formatter.
     """
@@ -80,14 +88,14 @@ def fmt(ctx: Context, path=".", sort_=True, check=False, exclude=None):
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def lint(ctx: Context, path="."):
+def lint(ctx: Context, path: str = "."):
     """Run code linter"""
     cmds = ["flake8", path, "--statistics"]
     ctx.run(" ".join(cmds), echo=True)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def upgrade(ctx: Context, path="."):
+def upgrade(ctx: Context, path: str = "."):
     """Run code syntax upgrades."""
     cmds = ["pyupgrade", path, "--py3-plus"]
     ctx.run(" ".join(cmds))
@@ -100,7 +108,9 @@ def upgrade(ctx: Context, path="."):
         "sync": "Re-install the latest git hooks.",
     }
 )
-def hooks(ctx: Context, all_files=False, diff=False, sync=False):
+def hooks(
+    ctx: Context, all_files: bool = False, diff: bool = False, sync: bool = False
+):
     """Run and manage pre-commit hooks."""
     cmds = ["pre-commit", "run"]
     if diff:
@@ -158,14 +168,14 @@ def type_coverage(ctx: Context):
 )
 def type_check(
     ctx: Context,
-    packages,
-    install_types=False,
-    pretty=False,
-    warn_unused_ignores=False,
-    daemon=False,
-    clear_cache=False,
-    report=False,
-    ci=False,
+    packages: list[str],
+    install_types: bool = False,
+    pretty: bool = False,
+    warn_unused_ignores: bool = False,
+    daemon: bool = False,
+    clear_cache: bool = False,
+    report: bool = False,
+    ci: bool = False,
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -242,7 +252,7 @@ def get_usage_stats_json(ctx: Context):
 
 
 @invoke.task(pre=[get_usage_stats_json], aliases=["move-stats"])
-def mv_usage_stats_json(ctx):
+def mv_usage_stats_json(ctx: Context):
     """
     Use databricks-cli lib to move usage stats event examples to dbfs:/
     """
@@ -273,16 +283,16 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
 )
 def tests(
     ctx: Context,
-    unit=True,
-    integration=False,
-    ignore_markers=False,
-    ci=False,
-    html=False,
-    cloud=True,
-    slowest=5,
-    timeout=UNIT_TEST_DEFAULT_TIMEOUT,
-    package=None,
-    full_cov=False,
+    unit: bool = True,
+    integration: bool = False,
+    ignore_markers: bool = False,
+    ci: bool = False,
+    html: bool = False,
+    cloud: bool = True,
+    slowest: int = 5,
+    timeout: float = UNIT_TEST_DEFAULT_TIMEOUT,
+    package: str | None = None,
+    full_cov: bool = False,
 ):
     """
     Run tests. Runs unit tests by default.
@@ -344,12 +354,12 @@ PYTHON_VERSION_DEFAULT: float = 3.8
 )
 def docker(
     ctx: Context,
-    name="gx38local",
-    tag="latest",
-    build=False,
-    detach=False,
-    cmd="bash",
-    py=PYTHON_VERSION_DEFAULT,
+    name: str = "gx38local",
+    tag: str = "latest",
+    build: bool = False,
+    detach: bool = False,
+    cmd: str = "bash",
+    py: float = PYTHON_VERSION_DEFAULT,
 ):
     """
     Build or run gx docker image.
