@@ -32,7 +32,7 @@ title: Changelog
 * [MAINTENANCE] Improve type hints in ExecutionEngine.resolve_metrics() flow and delete unnecessary checks ([#6804](https://github.com/great-expectations/great_expectations/pull/6804))
 * [MAINTENANCE] Fixes for column_values_to_be_between tests ([#6809](https://github.com/great-expectations/great_expectations/pull/6809))
 * [MAINTENANCE] Clean up public api report part 3 ([#6803](https://github.com/great-expectations/great_expectations/pull/6803))
-* [MAINTENANCE] Add docstring for `AbstractDataContext.add_checkpoint` ([#6728](https://github.com/great-expectations/great_expectations/pull/6728)) (thanks @abegong)
+* [MAINTENANCE] Add docstring for `AbstractDataContext.add_checkpoint` ([#6728](https://github.com/great-expectations/great_expectations/pull/6728))
 * [MAINTENANCE] Use Enum classes for all metric name suffixes ([#6819](https://github.com/great-expectations/great_expectations/pull/6819))
 * [MAINTENANCE] Use shortened_dotted_paths in API docs ([#6820](https://github.com/great-expectations/great_expectations/pull/6820))
 * [MAINTENANCE] Update batch request option validation error message ([#6821](https://github.com/great-expectations/great_expectations/pull/6821))
