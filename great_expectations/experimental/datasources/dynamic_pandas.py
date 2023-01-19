@@ -84,6 +84,11 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "filepath_or_buffer": {"path": _FieldSpec(pathlib.Path, ...)}
 }
 
+_METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
+    "read_csv": "CSVAsset",
+    "read_excel": "ExcelAsset",
+}
+
 
 def _public_dir(obj: object) -> List[str]:
     return [x for x in dir(obj) if not x.startswith("_")]
@@ -199,29 +204,37 @@ M = TypeVar("M", bound=DataAsset)
 
 
 def _create_pandas_asset_model(
-    method_name: str, model_base: Type[M], fields_dict: Dict[str, _FieldSpec]
+    model_name: str,
+    model_base: Type[M],
+    type_field: Tuple[Union[Type, str], str],
+    fields_dict: Dict[str, _FieldSpec],
 ) -> Type[M]:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
-    model_name = "CSVAsset"
-    model = pydantic.create_model(model_name, __base__=model_base, type=(Literal["csv"], "csv"), **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
+    model = pydantic.create_model(model_name, __base__=model_base, type=type_field, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
     return model
 
 
 def _generate_data_asset_models(
     base_model_class: Type[M],
-) -> List[Type[M]]:
+) -> Dict[str, Type[M]]:
     io_methods = _extract_io_methods()[1:3]
     io_method_sigs = _extract_io_signatures(io_methods)
 
-    models: List[Type[M]] = []
+    models: Dict[str, Type[M]] = {}
     for signature_tuple in io_method_sigs:
 
         fields = _to_pydantic_fields(signature_tuple)
 
+        model_name = _METHOD_TO_CLASS_NAME_MAPPINGS[signature_tuple.name]
+        type_name = signature_tuple.name.lstrip("read_")
         model = _create_pandas_asset_model(
-            signature_tuple.name, base_model_class, fields
+            model_name=model_name,
+            model_base=base_model_class,
+            type_field=(f"Literal['{type_name}']", type_name),
+            fields_dict=fields,
         )
-        models.append(model)
+        models[type_name] = model
+        # model.update_forward_refs()
 
     return models
 

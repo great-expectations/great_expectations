@@ -181,7 +181,9 @@ class _DataFrameAsset(DataAsset):
 
 _ASSET_MODELS = _generate_data_asset_models(_DataFrameAsset)
 
-CSVAsset: Type[_DataFrameAsset] = _ASSET_MODELS[0]
+CSVAsset = _ASSET_MODELS["csv"]
+
+# print(CSVAsset.schema())
 
 
 class PandasDatasource(Datasource):
