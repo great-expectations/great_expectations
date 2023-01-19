@@ -16,7 +16,6 @@ from typing import (
 )
 
 import pydantic
-from pydantic import AnyUrl
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal
 
@@ -29,6 +28,13 @@ from great_expectations.experimental.datasources.interfaces import (
     DataAsset,
     Datasource,
 )
+
+try:
+    from sqlalchemy import create_engine
+    from sqlalchemy.engine import Engine
+except ImportError:
+    create_engine = None
+    Engine = None
 
 if TYPE_CHECKING:
     import sqlalchemy
@@ -309,9 +315,14 @@ class SQLDatasource(Datasource):
 
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
-    type: Literal["sql"] = "sql"
-    connection_string: AnyUrl
+    type: Literal["sql"] = pydantic.Field("sql", allow_mutation=False)
+    connection_string: pydantic.AnyUrl = pydantic.Field(..., allow_mutation=False)
     assets: Dict[str, TableAsset] = {}
+
+    class Config:
+        arbitrary_types_allowed = True
+        extra = pydantic.Extra.forbid
+        validate_assignment = True
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
@@ -319,6 +330,15 @@ class SQLDatasource(Datasource):
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
         return SqlAlchemyExecutionEngine
+
+    def test_connection(self) -> None:
+        # test database connection
+        engine: Engine = create_engine(self.connection_string)
+        engine.connect()
+        # if TableAssets are defined, also check if those exist
+        if self.assets:
+            for table_asset in self.assets.values():
+                sqlalchemy.inspect(engine).has_table(table_asset.table_name)
 
     def add_table_asset(
         self,

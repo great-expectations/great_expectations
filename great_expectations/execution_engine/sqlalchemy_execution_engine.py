@@ -271,7 +271,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 name (str): \
                     The name of the SqlAlchemyExecutionEngine
                 credentials: \
-                    If the Execution Engine is not provided, the credentials can be used to build the Execution
+                    If the Engine is not provided, the credentials can be used to build the Execution
                     Engine. If the Engine is provided, it will be used instead
                 data_context (DataContext): \
                     An object representing a Great Expectations project that can be used to access Expectation
@@ -281,7 +281,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     Engine has already been configured and should be reused. Will override Credentials
                     if provided.
                 connection_string (string): \
-                    If neither the engines nor the credentials have been provided, a connection string can be used
+                    If neither the engine nor the credentials have been provided, a connection string can be used
                     to access the data. This will be overridden by both the engine and credentials if those are
                     provided.
                 url (string): \
