@@ -30,6 +30,10 @@ except ModuleNotFoundError:
 if TYPE_CHECKING:
     from invoke.context import Context
 
+    from great_expectations.experimental.datasources.experimental_base_model import (
+        ExperimentalBaseModel,
+    )
+
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
 _PATH_HELP_DESC = "Target path. (Default: .)"
@@ -408,9 +412,6 @@ def type_schema(ctx: Context, type: str, indent: int = 4):
 
     --list to show all available types
     """
-    from great_expectations.experimental.datasources.experimental_base_model import (
-        ExperimentalBaseModel,
-    )
     from great_expectations.experimental.datasources.sources import _SourceFactories
 
     if type == "--list":
