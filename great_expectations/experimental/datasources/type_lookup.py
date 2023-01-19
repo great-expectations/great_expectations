@@ -128,7 +128,7 @@ class TypeLookup(
         txn_exc: Union[Exception, None] = None
 
         backup_data = copy.copy(self.data)
-        LOGGER.info("Beginning TypeLookup transaction")
+        LOGGER.debug("Beginning TypeLookup transaction")
         try:
             yield self
         except Exception as exc:
@@ -136,11 +136,11 @@ class TypeLookup(
             raise
         finally:
             if txn_exc:
-                LOGGER.info("Transaction of items rolled back")
+                LOGGER.debug("Transaction of items rolled back")
                 self.data = backup_data
             else:
-                LOGGER.info("Transaction committing items")
-            LOGGER.info("Completed TypeLookup transaction")
+                LOGGER.debug("Transaction committing items")
+            LOGGER.debug("Completed TypeLookup transaction")
 
 
 if __name__ == "__main__":

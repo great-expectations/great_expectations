@@ -44,11 +44,11 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
         LOGGER.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
 
         meta_cls.__cls_set.add(cls)
-        LOGGER.info(f"Datasources: {len(meta_cls.__cls_set)}")
+        LOGGER.debug(f"Datasources: {len(meta_cls.__cls_set)}")
 
         def _datasource_factory(name: str, **kwargs) -> Datasource:
             # TODO: update signature to match Datasource __init__ (ex update __signature__)
-            LOGGER.info(f"5. Adding '{name}' {cls_name}")
+            LOGGER.debug(f"5. Adding '{name}' {cls_name}")
             return cls(name=name, **kwargs)
 
         _datasource_factory.__doc__ = cls.__doc__
