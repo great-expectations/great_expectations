@@ -374,6 +374,77 @@ class CodeParser:
         return function_definitions
 
 
+def get_shortest_dotted_path(
+    definition: Definition, repo_root_path: pathlib.Path
+) -> str:
+    """Get the shortest dotted path to a class definition.
+
+    e.g. if a class is imported in a parent __init__.py file use that
+    instead of the file with the class definition.
+
+    Args:
+        definition: Class definition.
+        repo_root_path: Repository root path to make sure paths are relative.
+
+    Returns:
+        Dotted representation of shortest import path
+            e.g. great_expectations.core.ExpectationSuite
+    """
+
+    if definition.filepath.is_absolute():
+        relative_definition_path = definition.filepath.relative_to(repo_root_path)
+    else:
+        relative_definition_path = definition.filepath
+
+    # Traverse parent folders from definition.filepath
+    shortest_path_prefix = str(".".join(relative_definition_path.parts)).replace(
+        ".py", ""
+    )
+    shortest_path = f"{shortest_path_prefix}.{definition.name}"
+
+    path_parts = list(relative_definition_path.parts)
+    while path_parts:
+        # Keep traversing, shortening path if shorter path is found.
+        path_parts.pop()
+        # if __init__.py is found, ast parse and check for import of the class
+        init_path = repo_root_path / pathlib.Path(*path_parts, "__init__.py")
+        if init_path.is_file():
+
+            import_names = []
+            with open(init_path) as f:
+                file_contents: str = f.read()
+
+            import_names.extend(_get_import_names(file_contents))
+
+            # If name is found in imports, shorten path to where __init__.py is found
+            if definition.name in import_names:
+                shortest_path_prefix = str(".".join(path_parts))
+                shortest_path = f"{shortest_path_prefix}.{definition.name}"
+
+    return shortest_path
+
+
+def _get_import_names(code: str) -> List[str]:
+    """Get import names from import statements.
+
+    Args:
+        code: Code with imports to parse.
+
+    Returns:
+        Flattened list of names from imports.
+    """
+
+    tree = ast.parse(code)
+
+    import_names = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in node.names:
+                import_names.append(alias.name)
+
+    return import_names
+
+
 class PublicAPIChecker:
     """Check if functions, methods and classes are marked part of the PublicAPI."""
 
