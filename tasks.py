@@ -393,6 +393,42 @@ def docker(
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
+@invoke.task(
+    aliases=("schema",),
+    help={
+        "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class. Or '--list'",
+        "indent": "Indent size for nested json objects. Default: 4",
+    },
+)
+def type_schema(ctx: Context, type: str, indent: int = 4):
+    """
+    Show the jsonschema for a given ZEP `type`
+
+    Example: invoke schema sqlite
+
+    --list to show all available types
+    """
+    from great_expectations.experimental.datasources.experimental_base_model import (
+        ExperimentalBaseModel,
+    )
+    from great_expectations.experimental.datasources.sources import _SourceFactories
+
+    if type == "--list":
+        print("Registered ZEP types\n--------------------")
+        print("\t" + "\n\t".join(_SourceFactories.type_lookup.str_values()))
+    elif type == "--help" or type == "-h":
+        ctx.run("invoke --help schema")
+    else:
+        try:
+            model: ExperimentalBaseModel = _SourceFactories.type_lookup[type]
+            print(model.schema_json(indent=indent))
+        except KeyError as err:
+            raise invoke.Exit(
+                f"No '{type}' type found. Try 'invoke schema --list' to see available types",
+                code=1,
+            )
+
+
 def _exit_with_error_if_not_in_repo_root(task_name: str):
     """Exit if the command was not run from the repository root."""
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
