@@ -8,7 +8,7 @@
 import os
 import sys
 
-from great_expectations.core._docs_decorators import WHITELISTED_TAG
+WHITELISTED_TAG = "--Public API--"
 
 
 def _prepend_base_repository_dir_to_sys_path():
