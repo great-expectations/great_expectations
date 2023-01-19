@@ -94,7 +94,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python name="regex_based_expectation_class"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py ExpectColumnValuesToOnlyContainVowels class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -102,7 +102,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python name="regex_based_docstring"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -111,7 +111,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python name="regex_based_diagnostics"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py diagnostics"
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -141,7 +141,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python name="regex_based_examples"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -192,7 +192,7 @@ To do this, we replace these:
 
 with something like this:
 
-```python name="regex_based_definition"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py definition"
 ```
 
 For more detail when rendering your Custom Expectation, you can optionally specify the plural form of a Semantic Type you're validating.
@@ -204,7 +204,7 @@ For example:
 
 becomes:
 
-```python name="regex_based_plural"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py plural"
 ```
 
 Great Expectations will use these values to tell your Custom Expectation to apply your specified regex as a <TechnicalTag tag="metric" text="Metric"/> to be utilized in validating your data.
@@ -290,7 +290,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python name="regex_based_library_metadata"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

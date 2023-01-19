@@ -50,9 +50,10 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
+        configuration = configuration or self.configuration
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
 
@@ -78,11 +79,10 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
         value = configuration["kwargs"].get("value")
         threshold = configuration["kwargs"].get("threshold")
         query_result = metrics.get("query.column")
-        query_result = dict(query_result)
+        query_result = dict([element.values() for element in query_result])
 
         if isinstance(value, list):
             success = all(
@@ -116,6 +116,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                     },
                 },
             ],
+            "suppress_test_for": ["bigquery", "trino", "snowflake"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -127,7 +128,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "threshold": 0.6,
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -139,7 +139,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "threshold": 1,
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "multi_value_positive_test",
@@ -151,7 +150,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                         "threshold": [0.6, 0.4],
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "multi_value_positive_test_static_data_asset",
@@ -169,7 +167,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                                  """,
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "multi_value_positive_test_row_condition",
@@ -178,12 +175,11 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
                     "in": {
                         "column": "col2",
                         "value": ["a", "b"],
-                        "threshold": [0.6, 0.4],
+                        "threshold": [0.5, 0.5],
                         "row_condition": 'col("col1")==2',
                         "condition_parser": "great_expectations__experimental__",
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
                 },
             ],
         },
@@ -192,7 +188,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "tags": ["query-based"],
-        "contributors": ["@joegargery"],
+        "contributors": ["@austiezr", "@mkopec87"],
     }
 
 

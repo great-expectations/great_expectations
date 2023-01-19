@@ -7,13 +7,14 @@ import logging
 import sys
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
     batch_request_contains_batch_data,
 )
 from great_expectations.core.config_peer import ConfigPeer
+from great_expectations.core.domain import Domain
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -43,7 +44,6 @@ from great_expectations.rule_based_profiler.config.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
 )
@@ -183,7 +183,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             "expectation_configuration_builders",
         ):
             if attr not in rule_config:
-                raise ge_exceptions.ProfilerConfigurationError(
+                raise gx_exceptions.ProfilerConfigurationError(
                     message=f'Invalid rule "{rule_name}": missing mandatory {attr}.'
                 )
 
@@ -242,7 +242,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
         reconciliation_directives: ReconciliationDirectives = DEFAULT_RECONCILATION_DIRECTIVES,
         variables_directives_list: Optional[
             List[RuntimeEnvironmentVariablesDirectives]
@@ -260,7 +260,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules: name/(configuration-dictionary) (overrides)
             batch_list: Explicit list of Batch objects to supply data at runtime
             batch_request: Explicit batch_request used to supply data at runtime
-            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
             reconciliation_directives: directives for how each rule component should be overwritten
             variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
             domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
@@ -324,7 +324,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 variables=effective_variables,
                 batch_list=batch_list,
                 batch_request=batch_request,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
                 reconciliation_directives=reconciliation_directives,
                 rule_state=RuleState(),
             )
@@ -1072,7 +1072,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules,
             batch_list=batch_list,
             batch_request=batch_request,
-            recompute_existing_parameter_values=False,
+            runtime_configuration=None,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
             variables_directives_list=None,
             domain_type_directives_list=None,
@@ -1105,7 +1105,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             rules=rules,
             batch_list=batch_list,
             batch_request=batch_request,
-            recompute_existing_parameter_values=False,
+            runtime_configuration=None,
             reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
             variables_directives_list=None,
             domain_type_directives_list=None,
@@ -1121,7 +1121,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if not RuleBasedProfiler._check_validity_of_batch_requests_in_config(
             config=config
         ):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 f'batch_data found in batch_request cannot be saved to ProfilerStore "{profiler_store.store_name}"'
             )
 
@@ -1138,7 +1138,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
         )
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if data_context.ge_cloud_mode:
+
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        if isinstance(data_context, CloudDataContext):
             key = GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER)
         else:
             key = ConfigurationIdentifier(
@@ -1147,7 +1152,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         response = profiler_store.set(key=key, value=config)
         if isinstance(response, GXCloudResourceRef):
-            new_profiler.ge_cloud_id = response.ge_cloud_id
+            new_profiler.ge_cloud_id = response.cloud_id
 
         return new_profiler
 
@@ -1191,7 +1196,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(
@@ -1199,13 +1204,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
         try:
             profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
-        except ge_exceptions.InvalidKeyError as exc_ik:
+        except gx_exceptions.InvalidKeyError as exc_ik:
             id: Union[GXCloudIdentifier, ConfigurationIdentifier] = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
             )
-            raise ge_exceptions.ProfilerNotFoundError(
+            raise gx_exceptions.ProfilerNotFoundError(
                 message=f'Non-existent Profiler configuration named "{id}".\n\nDetails: {exc_ik}'
             )
 
@@ -1241,27 +1246,27 @@ class BaseRuleBasedProfiler(ConfigPeer):
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
         if ge_cloud_id:
             key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, ge_cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
             )
         else:
             key = ConfigurationIdentifier(configuration_key=name)
 
         try:
             profiler_store.remove_key(key=key)
-        except (ge_exceptions.InvalidKeyError, KeyError) as exc_ik:
+        except (gx_exceptions.InvalidKeyError, KeyError) as exc_ik:
             id = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
             )
-            raise ge_exceptions.ProfilerNotFoundError(
+            raise gx_exceptions.ProfilerNotFoundError(
                 message=f'Non-existent Profiler configuration named "{id}".\n\nDetails: {exc_ik}'
             )
 
     @staticmethod
     def list_profilers(
         profiler_store: ProfilerStore,
-        ge_cloud_mode: bool,
+        ge_cloud_mode: bool = False,
     ) -> List[str]:
         if ge_cloud_mode:
             return profiler_store.list_keys()
@@ -1478,6 +1483,6 @@ def _validate_builder_override_config(builder_config: dict) -> None:
             "module_name" in builder_config,
         )
     ):
-        raise ge_exceptions.ProfilerConfigurationError(
+        raise gx_exceptions.ProfilerConfigurationError(
             'Both "class_name" and "module_name" must be specified.'
         )

@@ -90,8 +90,8 @@ class DatasourceStore(Store):
 
     def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
         datasource_ge_cloud_id: str = response_json["data"]["id"]
         datasource_config_dict: dict = response_json["data"]["attributes"][
@@ -174,7 +174,7 @@ class DatasourceStore(Store):
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
         ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(key, value)
         if ref and isinstance(ref, GXCloudResourceRef):
-            key.ge_cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
+            key.cloud_id = ref.cloud_id  # type: ignore[attr-defined]
 
         return_value: DatasourceConfig = self.get(key)  # type: ignore[assignment]
         if not return_value.name and isinstance(key, DataContextVariableKey):

@@ -56,6 +56,7 @@ class ColumnValuesToBeValidTexasZip(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidTexasZip(ColumnMapExpectation):
     """Expect values in this column to be valid Texas zipcodes.
+
     See https://pypi.org/project/zipcodes/ for more information.
     """
 
@@ -111,8 +112,7 @@ class ExpectColumnValuesToBeValidTexasZip(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

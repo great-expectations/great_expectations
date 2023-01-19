@@ -545,7 +545,7 @@ class TestEqDunder:
         assert different_but_equivalent_suite != suite_with_single_expectation
 
 
-#### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
+# ### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
 
 
 @pytest.fixture

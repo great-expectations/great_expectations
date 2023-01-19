@@ -230,7 +230,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
             expectation_type (Optional[str]): The string name of the Expectation.
             info_dict (dict): A dictionary to update within this function.
         """
-        if expectation_type in self.CORE_GE_EXPECTATION_TYPES:
+        if expectation_type in self.CORE_GX_EXPECTATION_TYPES:
             info_dict["expectation_type"] = expectation_type
         else:
             info_dict["anonymized_expectation_type"] = self._anonymize_string(

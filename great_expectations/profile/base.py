@@ -15,6 +15,7 @@ from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.dataset import Dataset
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -200,7 +201,7 @@ class DatasetProfiler(DataAssetProfiler):
 
         if "notes" not in expectation_suite.meta:
             expectation_suite.meta["notes"] = {
-                "format": "markdown",
+                "format": MetaNotesFormat.MARKDOWN,
                 "content": [
                     "_To add additional notes, edit the <code>meta.notes.content</code> field in the appropriate Expectation json file._"
                     # TODO: be more helpful to the user by piping in the filename.

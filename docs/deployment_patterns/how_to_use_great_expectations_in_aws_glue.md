@@ -10,7 +10,7 @@ We will cover case with RuntimeDataConnector and use S3 as metadata store.
 ### 0. Pre-requirements
 
 - Configure great_expectations.yaml and upload to your S3 bucket or generate it dynamically from code
-```yaml file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns_great_expectations.yaml#L1-L67
+```yaml file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns_great_expectations.yaml#L1-L70
 ```
 
 

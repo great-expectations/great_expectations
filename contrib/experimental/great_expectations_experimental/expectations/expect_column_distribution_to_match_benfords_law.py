@@ -7,12 +7,12 @@ import pandas as pd
 
 import great_expectations
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -232,9 +232,9 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnMetricProvider):
 
 
 class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
-    """
-    Tests whether data matches Benford's Law Fraud Detection Algorithm.
-    Uses a Chi-Square Goodness of Fit test with an 80@ p-value
+    """Expect column distribution to match Benford's Law.
+
+    Tests whether data matches Benford's Law Fraud Detection Algorithm. Uses a Chi-Square Goodness of Fit test with an 80@ p-value.
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -290,7 +290,7 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
     #     "catch_exceptions": False,
     # }
 
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):
     #     """
     #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
     #     necessary configuration arguments have been provided for the validation of the expectation.
@@ -311,15 +311,11 @@ class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     styling = runtime_configuration.get("styling")
     #     params = substitute_none_for_missing(
     #         configuration.kwargs,

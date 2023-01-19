@@ -6,39 +6,30 @@ For detailed instructions on how to use it, please see:
 
 from typing import Dict, Optional
 
-import pandas as pd
-
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import TableExpectation
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricConfiguration,
-    MetricDomainTypes,
-    metric_value,
-)
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py TableColumnsUnique class_def">
 # This class defines a Metric to support your Expectation.
-# <snippet name="custom_table_metric">
 class TableColumnsUnique(TableMetricProvider):
     # </snippet>
 
     # This is the id string that will be used to reference your Metric.
-    # <snippet name="custom_table_metric_name">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py metric_name">
     metric_name = "table.columns.unique"
     # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet name="custom_table_pandas">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py pandas">
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
@@ -94,16 +85,16 @@ class TableColumnsUnique(TableMetricProvider):
         }
 
 
-# <snippet name="custom_table_expectation">
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py ExpectTableColumnsToBeUnique class_def">
 class ExpectTableColumnsToBeUnique(TableExpectation):
     # </snippet>
-    # <snippet name="custom_table_docstring">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py docstring">
     """Expect table to contain columns with unique contents."""
     # </snippet>
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="custom_table_examples">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py examples">
     examples = [
         {
             "data": {
@@ -147,7 +138,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
     ]
     # </snippet>
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
-    # <snippet name="custom_table_metric_dependencies">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py metric_dependencies">
     metric_dependencies = ("table.columns.unique", "table.columns")
     # </snippet>
 
@@ -158,7 +149,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
     default_kwarg_values = {"strict": True}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -172,8 +163,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         strict = configuration.kwargs.get("strict")
 
@@ -186,7 +176,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
-    # <snippet name="custom_table_validate">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py validate">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -212,7 +202,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
         # </snippet>
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet name="custom_table_library_metadata">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py library_metadata">
     library_metadata = {
         "tags": ["uniqueness"],
         "contributors": ["@joegargery"],
@@ -221,7 +211,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="custom_table_diagnostics">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py diagnostics">
     ExpectTableColumnsToBeUnique().print_diagnostic_checklist()
 #     </snippet>
 

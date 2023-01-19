@@ -13,44 +13,51 @@ from pyparsing import (
     alphas,
     nums,
 )
+from typing_extensions import Final
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.types import SerializableDictDot, SerializableDotDict
 
-FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER: str = "$"
+FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER: Final[str] = "$"
 
-FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: str = "."
+FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER: Final[str] = "."
 
-DOMAIN_KWARGS_PARAMETER_NAME: str = "domain_kwargs"
-DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: str = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}domain{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{DOMAIN_KWARGS_PARAMETER_NAME}"
+DOMAIN_KWARGS_PARAMETER_NAME: Final[str] = "domain_kwargs"
+DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME: Final[
+    str
+] = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}domain{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{DOMAIN_KWARGS_PARAMETER_NAME}"
 
-PARAMETER_NAME_ROOT_FOR_VARIABLES: str = "variables"
-VARIABLES_PREFIX: str = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{PARAMETER_NAME_ROOT_FOR_VARIABLES}"
-VARIABLES_KEY: str = (
-    f"{VARIABLES_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
-)
+PARAMETER_NAME_ROOT_FOR_VARIABLES: Final[str] = "variables"
+VARIABLES_PREFIX: Final[
+    str
+] = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{PARAMETER_NAME_ROOT_FOR_VARIABLES}"
+VARIABLES_KEY: Final[
+    str
+] = f"{VARIABLES_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
 
-PARAMETER_NAME_ROOT_FOR_PARAMETERS: str = "parameter"
-PARAMETER_PREFIX: str = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{PARAMETER_NAME_ROOT_FOR_PARAMETERS}"
-PARAMETER_KEY: str = (
-    f"{PARAMETER_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
-)
+PARAMETER_NAME_ROOT_FOR_PARAMETERS: Final[str] = "parameter"
+PARAMETER_PREFIX: Final[
+    str
+] = f"{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{PARAMETER_NAME_ROOT_FOR_PARAMETERS}"
+PARAMETER_KEY: Final[
+    str
+] = f"{PARAMETER_PREFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
 
-RAW_SUFFIX: str = "raw"
-RAW_PARAMETER_KEY: str = (
-    f"{PARAMETER_KEY}{RAW_SUFFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
-)
+RAW_SUFFIX: Final[str] = "raw"
+RAW_PARAMETER_KEY: Final[
+    str
+] = f"{PARAMETER_KEY}{RAW_SUFFIX}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}"
 
-FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: str = "value"
-FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: str = "attributed_value"
-FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: str = "details"
+FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY: Final[str] = "attributed_value"
+FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY: Final[str] = "details"
+FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY: Final[str] = "value"
 
-RESERVED_TERMINAL_LITERALS: Set[str] = {
-    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
+RESERVED_TERMINAL_LITERALS: Final[Set[str]] = {
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
 }
 
 attribute_naming_pattern = Word(alphas, alphanums + "_.") + ZeroOrMore(
@@ -77,7 +84,7 @@ attribute_naming_pattern = Word(alphas, alphanums + "_.") + ZeroOrMore(
 T = TypeVar("T")
 
 
-class ParameterAttributeNameParserError(ge_exceptions.GreatExpectationsError):
+class ParameterAttributeNameParserError(gx_exceptions.GreatExpectationsError):
     pass
 
 
@@ -114,7 +121,7 @@ def validate_fully_qualified_parameter_name(
     if not is_fully_qualified_parameter_name_literal_string_format(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     ):
-        raise ge_exceptions.ProfilerExecutionError(
+        raise gx_exceptions.ProfilerExecutionError(
             message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
 names must start with {FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER} (e.g., "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{fully_qualified_parameter_name}").
 """
@@ -142,7 +149,7 @@ class ParameterNode(SerializableDotDict):
     """
 
     def to_dict(self) -> dict:
-        return convert_parameter_node_to_dictionary(source=dict(self))
+        return convert_parameter_node_to_dictionary(source=dict(self))  # type: ignore[return-value] # could be None
 
     def to_json_dict(self) -> dict:
         return convert_to_json_serializable(data=self.to_dict())
@@ -227,21 +234,47 @@ class ParameterContainer(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
-def convert_dictionary_to_parameter_node(
+def deep_convert_properties_iterable_to_parameter_node(
     source: Union[T, dict]
 ) -> Union[T, ParameterNode]:
-    if not isinstance(source, dict):
-        return source
+    if isinstance(source, dict):
+        return _deep_convert_properties_iterable_to_parameter_node(
+            source=ParameterNode(source)
+        )
 
-    return _convert_dictionary_to_parameter_node(source)
+    # Must allow for non-dictionary source types, since their internal nested structures may contain dictionaries.
+    if isinstance(source, (list, set, tuple)):
+        data_type: type = type(source)
+
+        element: Any
+        return data_type(
+            [
+                deep_convert_properties_iterable_to_parameter_node(source=element)
+                for element in source
+            ]
+        )
+
+    return source
 
 
-def _convert_dictionary_to_parameter_node(source: dict) -> ParameterNode:
+def _deep_convert_properties_iterable_to_parameter_node(source: dict) -> ParameterNode:
     key: str
     value: Any
     for key, value in source.items():
         if isinstance(value, dict):
-            source[key] = _convert_dictionary_to_parameter_node(value)
+            source[key] = _deep_convert_properties_iterable_to_parameter_node(
+                source=value
+            )
+        elif isinstance(value, (list, set, tuple)):
+            data_type: type = type(value)
+
+            element: Any
+            source[key] = data_type(
+                [
+                    deep_convert_properties_iterable_to_parameter_node(source=element)
+                    for element in value
+                ]
+            )
 
     return ParameterNode(source)
 
@@ -389,9 +422,9 @@ def _build_parameter_node_tree_for_one_parameter(
             node[parameter_name] = ParameterNode({})
             node = node[parameter_name]
 
-    node[parameter_name_as_list[-1]] = convert_dictionary_to_parameter_node(
-        parameter_value
-    )
+    node[
+        parameter_name_as_list[-1]
+    ] = deep_convert_properties_iterable_to_parameter_node(parameter_value)
 
 
 def get_parameter_value_by_fully_qualified_parameter_name(
@@ -445,9 +478,9 @@ def get_parameter_value_by_fully_qualified_parameter_name(
     parameter_container: ParameterContainer
 
     if fully_qualified_parameter_name.startswith(VARIABLES_PREFIX):
-        parameter_container = variables
+        parameter_container = variables  # type: ignore[assignment] # could be None
     else:
-        parameter_container = parameters[domain.id]
+        parameter_container = parameters[domain.id]  # type: ignore[index,union-attr] # `parameters` & `domain` could be None
 
     fully_qualified_parameter_name = fully_qualified_parameter_name[1:]
 
@@ -472,6 +505,9 @@ def _get_parameter_value_from_parameter_container(
     fully_qualified_parameter_name_as_list: List[str],
     parameter_container: ParameterContainer,
 ) -> Optional[Union[Any, ParameterNode]]:
+    if parameter_container is None:
+        return None
+
     parameter_node: Optional[ParameterNode] = parameter_container.get_parameter_node(
         parameter_name_root=fully_qualified_parameter_name_as_list[0]
     )
@@ -497,7 +533,7 @@ def _get_parameter_value_from_parameter_container(
             parent_parameter_node = return_value
 
             attribute_value_reference = parsed_attribute_name[0]
-            return_value = return_value[attribute_value_reference]
+            return_value = return_value[attribute_value_reference]  # type: ignore[index] # could be None
 
             parsed_attribute_name = parsed_attribute_name[1:]
 
@@ -511,7 +547,7 @@ def _get_parameter_value_from_parameter_container(
 """
         )
 
-    if attribute_value_reference not in parent_parameter_node:
+    if attribute_value_reference not in parent_parameter_node:  # type: ignore[operator] # could be None
         raise KeyError(
             f"""Unable to find value for parameter name "{fully_qualified_parameter_name}": Part \
 "{parameter_name_part}" of fully-qualified parameter name does not exist.
@@ -559,7 +595,7 @@ def get_fully_qualified_parameter_names(
         )
 
     if parameters is not None:
-        parameter_container: ParameterContainer = parameters[domain.id]
+        parameter_container: ParameterContainer = parameters[domain.id]  # type: ignore[union-attr] # could be None
 
         if not (
             parameter_container is None or parameter_container.parameter_nodes is None
@@ -648,9 +684,12 @@ def _get_parameter_name_parts_up_to_including_reserved_literal(
     if not (set(attribute_name_as_list) & RESERVED_TERMINAL_LITERALS):
         return attribute_name_as_list
 
+    # TODO: <Alex>12/29/2022: Lexicographical order avoids collisions between regular keys and reserved literals.</Alex>
+    reserved_terminal_literals: List[str] = list(sorted(RESERVED_TERMINAL_LITERALS))
+
     idx: Optional[int] = None
     key: str
-    for key in RESERVED_TERMINAL_LITERALS:
+    for key in reserved_terminal_literals:
         try:
             idx = attribute_name_as_list.index(key)
             break

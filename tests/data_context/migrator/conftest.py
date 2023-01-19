@@ -67,6 +67,11 @@ class DummyDatasource:
     pass
 
 
+class StubConfigurationProvider:
+    def substitute_config(self, config):
+        return config
+
+
 class StubBaseDataContext:
     """Stub for testing ConfigurationBundle."""
 
@@ -115,7 +120,9 @@ class StubBaseDataContext:
         config = DataContextConfig(
             anonymous_usage_statistics=self._anonymized_usage_statistics_config
         )
-        return EphemeralDataContextVariables(config=config)
+        return EphemeralDataContextVariables(
+            config=config, config_provider=StubConfigurationProvider()
+        )
 
     @property
     def _datasource_store(self):

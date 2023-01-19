@@ -1,21 +1,21 @@
 import os
 from typing import List
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py imports">
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest
 
 # </snippet>
 
 CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
-# <snippet>
-context = ge.get_context()
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py get_context">
+context = gx.get_context()
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py datasource_yaml">
 datasource_yaml = rf"""
 name: my_azure_datasource
 class_name: Datasource
@@ -56,16 +56,16 @@ datasource_yaml = datasource_yaml.replace(
 )
 datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", CREDENTIAL)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # Here is a BatchRequest naming a data_asset
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py batch_request">
 batch_request = BatchRequest(
     datasource_name="my_azure_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -79,7 +79,7 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py validator_creation">
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
@@ -90,7 +90,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_azure_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_azure_datasource"][

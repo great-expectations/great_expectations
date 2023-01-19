@@ -5,8 +5,11 @@ from unittest.mock import MagicMock
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchRequest
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -964,7 +967,7 @@ def test_run_profiler_without_dynamic_args(
         rules=None,
         batch_list=None,
         batch_request=None,
-        recompute_existing_parameter_values=False,
+        runtime_configuration=None,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
             domain_builder=ReconciliationStrategy.UPDATE,
@@ -1007,7 +1010,7 @@ def test_run_profiler_with_dynamic_args(
         rules=rules,
         batch_list=None,
         batch_request=None,
-        recompute_existing_parameter_values=False,
+        runtime_configuration=None,
         reconciliation_directives=ReconciliationDirectives(
             variables=ReconciliationStrategy.UPDATE,
             domain_builder=ReconciliationStrategy.UPDATE,
@@ -1167,7 +1170,7 @@ def test_add_profiler(
     profiler_key: ConfigurationIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    mock_data_context.ge_cloud_mode = False
+    mock_data_context.cloud_mode = False
     profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
         profiler_config_with_placeholder_args,
         data_context=mock_data_context,
@@ -1181,21 +1184,22 @@ def test_add_profiler(
     )
 
 
-@mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
 @pytest.mark.cloud
 @pytest.mark.unit
 def test_add_profiler_ge_cloud_mode(
-    mock_data_context: mock.MagicMock,
     ge_cloud_profiler_id: str,
     ge_cloud_profiler_key: GXCloudIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
-    mock_data_context.ge_cloud_mode.return_value = True
-    profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
-        profiler_config_with_placeholder_args,
-        data_context=mock_data_context,
-        profiler_store=mock_data_context.profiler_store,
-    )
+    with mock.patch(
+        "great_expectations.data_context.data_context.CloudDataContext",
+        spec=CloudDataContext,
+    ) as mock_data_context:
+        profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
+            profiler_config_with_placeholder_args,
+            data_context=mock_data_context,
+            profiler_store=mock_data_context.profiler_store,
+        )
 
     assert isinstance(profiler, RuleBasedProfiler)
     assert profiler.name == profiler_config_with_placeholder_args.name
@@ -1275,7 +1279,7 @@ def test_get_profiler(
 def test_get_profiler_non_existent_profiler_raises_error(
     mock_data_context: mock.MagicMock, empty_profiler_store: ProfilerStore
 ):
-    with pytest.raises(ge_exceptions.ProfilerNotFoundError) as e:
+    with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         RuleBasedProfiler.get_profiler(
             data_context=mock_data_context,
             profiler_store=empty_profiler_store,
@@ -1323,7 +1327,7 @@ def test_delete_profiler_with_too_many_args_raises_error(
 def test_delete_profiler_non_existent_profiler_raises_error(
     populated_profiler_store: ProfilerStore,
 ):
-    with pytest.raises(ge_exceptions.ProfilerNotFoundError) as e:
+    with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         RuleBasedProfiler.delete_profiler(
             profiler_store=populated_profiler_store,
             name="my_non_existent_profiler",

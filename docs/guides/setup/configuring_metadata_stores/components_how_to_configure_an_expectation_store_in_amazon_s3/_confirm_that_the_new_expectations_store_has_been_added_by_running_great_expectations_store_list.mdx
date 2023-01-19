@@ -4,15 +4,9 @@ You can verify that your Stores are properly configured by running the command:
 great_expectations store list
 ```
 
-This will list the currently configured Stores that Great Expectations has access to.  If you added a new S3 Expectations Store, the output should include the following `ExpectationsStore` entries:
+This will list the currently configured Stores that Great Expectations has access to.  If you added a new S3 Expectations Store, the output should include the following `ExpectationsStore` entry:
 
 ```bash title="Terminal output"
-- name: expectations_store
-class_name: ExpectationsStore
-store_backend:
-  class_name: TupleFilesystemStoreBackend
-  base_directory: expectations/
-
 - name: expectations_S3_store
 class_name: ExpectationsStore
 store_backend:
@@ -21,4 +15,4 @@ store_backend:
   prefix: '<your_s3_bucket_folder_name>'
 ```
 
-Notice the output contains two Expectation Stores: the original ``expectations_store`` on the local filesystem and the ``expectations_S3_store`` we just configured.  This is ok, since Great Expectations will look for Expectations in the S3 bucket as long as we set the ``expectations_store_name`` variable to ``expectations_S3_store``.
+Notice the output contains only one Expectation Store: your configuration contains the original ``expectations_store`` on the local filesystem and the ``expectations_S3_store`` we just configured, but the `great_expectations store list` command only lists your active stores.  For your Expecation Store, this is the one that you set as the value of the ``expectations_store_name`` variable in the configuration file: ``expectations_S3_store``.

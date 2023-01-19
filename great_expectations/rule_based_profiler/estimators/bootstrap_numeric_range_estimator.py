@@ -3,8 +3,8 @@ from typing import Dict, Optional
 
 import numpy as np
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.domain import Domain
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NumericRangeEstimationResult,
 )
@@ -60,7 +60,7 @@ class BootstrapNumericRangeEstimator(NumericRangeEstimator):
             parse_strings_as_datetimes=True,
             fuzzy=False,
         ):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f'Estimator "{self.__class__.__name__}" does not support DateTime/TimeStamp data types.'
             )
 

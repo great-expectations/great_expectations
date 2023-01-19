@@ -3,12 +3,12 @@ from typing import List
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest
 
 CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
-context = ge.get_context()
+context = gx.get_context()
 
 datasource_yaml = f"""
 name: my_azure_datasource
@@ -73,7 +73,7 @@ print(validator.head())
 
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_azure_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_azure_datasource"][

@@ -9,7 +9,7 @@ import click
 from ruamel.yaml import YAML
 from ruamel.yaml.compat import StringIO
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.cli.v012.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.v012.datasource import get_batch_kwargs
@@ -22,7 +22,10 @@ from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.data_context import DataContext
-from great_expectations.data_context.types.base import CURRENT_GE_CONFIG_VERSION
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
+from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     RunIdentifier,
@@ -219,15 +222,15 @@ Great Expectations will store these expectations in a new Expectation Suite '{:s
 def _raise_profiling_errors(profiling_results) -> None:
     if (
         profiling_results["error"]["code"]
-        == DataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
+        == FileDataContext.PROFILING_ERROR_CODE_SPECIFIED_DATA_ASSETS_NOT_FOUND
     ):
-        raise ge_exceptions.DataContextError(
+        raise gx_exceptions.DataContextError(
             """Some of the data assets you specified were not found: {:s}
             """.format(
                 ",".join(profiling_results["error"]["not_found_data_assets"])
             )
         )
-    raise ge_exceptions.DataContextError(
+    raise gx_exceptions.DataContextError(
         f"Unknown profiling error code: {profiling_results['error']['code']}"
     )
 
@@ -332,7 +335,7 @@ def load_expectation_suite(
     try:
         suite = context.get_expectation_suite(suite_name)
         return suite
-    except ge_exceptions.DataContextError:
+    except gx_exceptions.DataContextError:
         exit_with_failure_message_and_stats(
             context,
             usage_event,
@@ -366,8 +369,8 @@ def load_checkpoint(
         )
         return checkpoint
     except (
-        ge_exceptions.CheckpointNotFoundError,
-        ge_exceptions.InvalidCheckpointConfigError,
+        gx_exceptions.CheckpointNotFoundError,
+        gx_exceptions.InvalidCheckpointConfigError,
     ):
         exit_with_failure_message_and_stats(
             context,
@@ -377,7 +380,7 @@ def load_checkpoint(
   - `<green>great_expectations checkpoint list</green>` to verify your checkpoint exists
   - `<green>great_expectations checkpoint new</green>` to configure a new checkpoint""",
         )
-    except ge_exceptions.CheckpointError as e:
+    except gx_exceptions.CheckpointError as e:
         exit_with_failure_message_and_stats(context, usage_event, f"<red>{e}</red>")
 
 
@@ -427,7 +430,7 @@ def load_data_context_with_error_handling(
         ge_config_version: int = context.get_config().config_version
         if (
             from_cli_upgrade_command
-            and int(ge_config_version) < CURRENT_GE_CONFIG_VERSION
+            and int(ge_config_version) < CURRENT_GX_CONFIG_VERSION
         ):
             directory = directory or context.root_directory
             (
@@ -442,9 +445,9 @@ def load_data_context_with_error_handling(
             if not exception_occurred and increment_version:
                 context = DataContext(context_root_dir=directory)
         return context
-    except ge_exceptions.UnsupportedConfigVersionError as err:
-        directory = directory or DataContext.find_context_root_dir()
-        ge_config_version = DataContext.get_ge_config_version(
+    except gx_exceptions.UnsupportedConfigVersionError as err:
+        directory = directory or FileDataContext.find_context_root_dir()
+        ge_config_version = FileDataContext.get_ge_config_version(
             context_root_dir=directory
         )
         upgrade_helper_class = (
@@ -452,7 +455,7 @@ def load_data_context_with_error_handling(
             if ge_config_version
             else None
         )
-        if upgrade_helper_class and ge_config_version < CURRENT_GE_CONFIG_VERSION:
+        if upgrade_helper_class and ge_config_version < CURRENT_GX_CONFIG_VERSION:
             upgrade_project(
                 context_root_dir=directory,
                 ge_config_version=ge_config_version,
@@ -462,18 +465,18 @@ def load_data_context_with_error_handling(
             cli_message(f"<red>{err.message}</red>")
             sys.exit(1)
     except (
-        ge_exceptions.ConfigNotFoundError,
-        ge_exceptions.InvalidConfigError,
+        gx_exceptions.ConfigNotFoundError,
+        gx_exceptions.InvalidConfigError,
     ) as err:
         cli_message(f"<red>{err.message}</red>")
         sys.exit(1)
-    except ge_exceptions.PluginModuleNotFoundError as err:
+    except gx_exceptions.PluginModuleNotFoundError as err:
         cli_message(err.cli.v012_colored_message)
         sys.exit(1)
-    except ge_exceptions.PluginClassNotFoundError as err:
+    except gx_exceptions.PluginClassNotFoundError as err:
         cli_message(err.cli.v012_colored_message)
         sys.exit(1)
-    except ge_exceptions.InvalidConfigurationYamlError as err:
+    except gx_exceptions.InvalidConfigurationYamlError as err:
         cli_message(f"<red>{str(err)}</red>")
         sys.exit(1)
 
@@ -485,13 +488,13 @@ def upgrade_project(
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
             f"the version "
-            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.</red>"
+            f"number must be at least {CURRENT_GX_CONFIG_VERSION}.</red>"
         )
     else:
         message = (
             f"<red>\nYour project appears to have an out-of-date config version ({ge_config_version}) - "
             f"the version "
-            f"number must be at least {CURRENT_GE_CONFIG_VERSION}.\nIn order to proceed, "
+            f"number must be at least {CURRENT_GX_CONFIG_VERSION}.\nIn order to proceed, "
             f"your project must be upgraded.</red>"
         )
 
@@ -506,7 +509,7 @@ def upgrade_project(
     cli_message(SECTION_SEPARATOR)
 
     # use loop in case multiple upgrades need to take place
-    while ge_config_version < CURRENT_GE_CONFIG_VERSION:
+    while ge_config_version < CURRENT_GX_CONFIG_VERSION:
         (
             increment_version,
             exception_occurred,
@@ -532,7 +535,7 @@ To learn more about the upgrade process, visit \
 <cyan>https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html</cyan>
 """
 
-    if ge_config_version < CURRENT_GE_CONFIG_VERSION:
+    if ge_config_version < CURRENT_GX_CONFIG_VERSION:
         cli_message(upgrade_incomplete_message)
     else:
         cli_message(upgrade_success_message)
@@ -549,9 +552,9 @@ def upgrade_project_up_to_one_version_increment(
     if not upgrade_helper_class:
         return False, False
     target_ge_config_version = int(ge_config_version) + 1
-    # set version temporarily to CURRENT_GE_CONFIG_VERSION to get functional DataContext
-    DataContext.set_ge_config_version(
-        config_version=CURRENT_GE_CONFIG_VERSION,
+    # set version temporarily to CURRENT_GX_CONFIG_VERSION to get functional DataContext
+    FileDataContext.set_ge_config_version(
+        config_version=CURRENT_GX_CONFIG_VERSION,
         context_root_dir=context_root_dir,
     )
     upgrade_helper = upgrade_helper_class(context_root_dir=context_root_dir)
@@ -579,27 +582,27 @@ def upgrade_project_up_to_one_version_increment(
         cli_message(upgrade_report)
         if exception_occurred:
             # restore version number to current number
-            DataContext.set_ge_config_version(
+            FileDataContext.set_ge_config_version(
                 ge_config_version, context_root_dir, validate_config_version=False
             )
             # display report to user
             return False, True
         # set config version to target version
         if increment_version:
-            DataContext.set_ge_config_version(
+            FileDataContext.set_ge_config_version(
                 target_ge_config_version,
                 context_root_dir,
                 validate_config_version=False,
             )
             return True, False
         # restore version number to current number
-        DataContext.set_ge_config_version(
+        FileDataContext.set_ge_config_version(
             ge_config_version, context_root_dir, validate_config_version=False
         )
         return False, False
 
     # restore version number to current number
-    DataContext.set_ge_config_version(
+    FileDataContext.set_ge_config_version(
         ge_config_version, context_root_dir, validate_config_version=False
     )
     cli_message(continuation_message)

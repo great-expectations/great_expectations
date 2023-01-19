@@ -14,7 +14,6 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.data_context import BaseDataContext
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
@@ -37,7 +36,11 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.self_check.util import expectationSuiteSchema
-from great_expectations.util import gen_directory_tree_str, is_library_loadable
+from great_expectations.util import (
+    gen_directory_tree_str,
+    get_context,
+    is_library_loadable,
+)
 
 yaml = YAMLHandler()
 
@@ -105,7 +108,7 @@ def basic_data_context_config_for_validation_operator():
 def validation_operators_data_context(
     basic_data_context_config_for_validation_operator, filesystem_csv_4
 ):
-    data_context = BaseDataContext(basic_data_context_config_for_validation_operator)
+    data_context = get_context(basic_data_context_config_for_validation_operator)
 
     data_context.add_datasource(
         "my_datasource",
@@ -1455,10 +1458,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
 @pytest.mark.integration
 def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
     path_to_great_expectations_yml: str = os.path.join(
-        empty_data_context.root_directory, empty_data_context.GE_YML
+        empty_data_context.root_directory, empty_data_context.GX_YML
     )
 
-    # 1. Set simple string config value and confirm it persists in the GE.yml
+    # 1. Set simple string config value and confirm it persists in the GX.yml
 
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
@@ -1481,7 +1484,7 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
 
     assert config_commented_map_from_yaml["config_version"] == new_config_version
 
-    # 2. Set nested dictionary config value and confirm it persists in the GE.yml
+    # 2. Set nested dictionary config value and confirm it persists in the GX.yml
 
     inline_store_backend = InlineStoreBackend(
         data_context=empty_data_context,

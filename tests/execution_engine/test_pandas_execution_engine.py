@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 
 # noinspection PyBroadException
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.validator.computed_metric import MetricValue
 
 try:
@@ -15,9 +16,8 @@ except:
     azure = None
 
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
     storage,
@@ -374,7 +374,7 @@ def test_resolve_metric_bundle():
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -429,7 +429,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     desired_metrics = (mean, stdev)
 
     # noinspection PyUnusedLocal
-    with pytest.raises(ge_exceptions.MetricProviderError) as e:
+    with pytest.raises(gx_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
@@ -455,7 +455,7 @@ def test_get_batch_data(test_df):
     assert split_df.dataframe.shape == (120, 10)
 
     # No dataset passed to RuntimeDataBatchSpec
-    with pytest.raises(ge_exceptions.InvalidBatchSpecError):
+    with pytest.raises(gx_exceptions.InvalidBatchSpecError):
         PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec())
 
 
@@ -493,7 +493,7 @@ def test_get_batch_with_no_s3_configured():
     # if S3 was not configured
     execution_engine_no_s3 = PandasExecutionEngine()
 
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine_no_s3.get_batch_data(batch_spec=batch_spec)
 
 
@@ -567,7 +567,7 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
     execution_engine_no_azure._azure = None
 
     # Raises error due the connection object not being set
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine_no_azure.get_batch_data(batch_spec=azure_batch_spec)
 
 
@@ -641,5 +641,5 @@ def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):
     # gcs_batchspec point to data that the ExecutionEngine does not have access to
     execution_engine_no_gcs = PandasExecutionEngine()
     # Raises error if batch_spec causes ExecutionEngine error
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine_no_gcs.get_batch_data(batch_spec=gcs_batch_spec)

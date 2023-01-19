@@ -2,20 +2,25 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context import BaseDataContext, DataContext
 from great_expectations.data_context.cloud_constants import CLOUD_DEFAULT_BASE_URL
-from great_expectations.exceptions import DataContextError, GXCloudError
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
+)
+from great_expectations.exceptions import GXCloudError
+from great_expectations.exceptions.exceptions import GXCloudConfigurationError
+from great_expectations.util import get_context
 
 
 @pytest.mark.cloud
+@pytest.mark.unit
 def test_data_context_ge_cloud_mode_with_incomplete_cloud_config_should_throw_error():
     # Don't want to make a real request in a unit test so we simply patch the config fixture
     with mock.patch(
-        "great_expectations.data_context.CloudDataContext._get_ge_cloud_config_dict",
+        "great_expectations.data_context.CloudDataContext._get_cloud_config_dict",
         return_value={"base_url": None, "organization_id": None, "access_token": None},
     ):
-        with pytest.raises(DataContextError):
-            DataContext(context_root_dir="/my/context/root/dir", ge_cloud_mode=True)
+        with pytest.raises(GXCloudConfigurationError):
+            get_context(context_root_dir="/my/context/root/dir", cloud_mode=True)
 
 
 @pytest.mark.cloud
@@ -30,11 +35,11 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
     # Ensure that the request goes through
     mock_request.return_value.status_code = 200
     try:
-        DataContext(
-            ge_cloud_mode=True,
-            ge_cloud_base_url=ge_cloud_runtime_base_url,
-            ge_cloud_organization_id=ge_cloud_runtime_organization_id,
-            ge_cloud_access_token=ge_cloud_access_token,
+        get_context(
+            cloud_mode=True,
+            cloud_base_url=ge_cloud_runtime_base_url,
+            cloud_organization_id=ge_cloud_runtime_organization_id,
+            cloud_access_token=ge_cloud_access_token,
         )
     except:  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
         pass
@@ -60,11 +65,11 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
     mock_request.return_value.status_code = 401
 
     with pytest.raises(GXCloudError):
-        DataContext(
-            ge_cloud_mode=True,
-            ge_cloud_base_url=ge_cloud_runtime_base_url,
-            ge_cloud_organization_id=ge_cloud_runtime_organization_id,
-            ge_cloud_access_token=ge_cloud_access_token,
+        get_context(
+            cloud_mode=True,
+            cloud_base_url=ge_cloud_runtime_base_url,
+            cloud_organization_id=ge_cloud_runtime_organization_id,
+            cloud_access_token=ge_cloud_access_token,
         )
 
 
@@ -74,7 +79,7 @@ def test_data_context_ge_cloud_mode_with_bad_request_to_cloud_api_should_throw_e
 def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     mock_request,
     ge_cloud_base_url,
-    empty_base_data_context_in_cloud_mode_custom_base_url: BaseDataContext,
+    empty_base_data_context_in_cloud_mode_custom_base_url: CloudDataContext,
     ge_cloud_runtime_organization_id,
     ge_cloud_access_token,
 ):
@@ -83,7 +88,7 @@ def test_data_context_in_cloud_mode_passes_base_url_to_store_backend(
     # Ensure that the request goes through
     mock_request.return_value.status_code = 200
 
-    context: BaseDataContext = empty_base_data_context_in_cloud_mode_custom_base_url
+    context = empty_base_data_context_in_cloud_mode_custom_base_url
 
     # Assertions that the context fixture is set up properly
     assert not context.ge_cloud_config.base_url == CLOUD_DEFAULT_BASE_URL

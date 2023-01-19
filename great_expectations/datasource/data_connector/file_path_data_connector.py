@@ -2,7 +2,7 @@ import logging
 import os
 from typing import Iterator, List, Optional, cast
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -160,14 +160,18 @@ class FilePathDataConnector(DataConnector):
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
 
-        batch_definition_list: List[BatchDefinition] = list(
-            filter(
-                lambda batch_definition: batch_definition_matches_batch_request(
+        # Use a combination of a list and set to preserve iteration order
+        batch_definition_list: List[BatchDefinition] = list()
+        batch_definition_set = set()
+        for batch_definition in self._get_batch_definition_list_from_cache():
+            if (
+                batch_definition_matches_batch_request(
                     batch_definition=batch_definition, batch_request=batch_request
-                ),
-                self._get_batch_definition_list_from_cache(),
-            )
-        )
+                )
+                and batch_definition not in batch_definition_set
+            ):
+                batch_definition_list.append(batch_definition)
+                batch_definition_set.add(batch_definition)
 
         if self.sorters:
             batch_definition_list = self._sort_batch_definition_list(
@@ -301,13 +305,13 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             if any(
                 [sorter_name not in group_names for sorter_name in self.sorters.keys()]
             ):
-                raise ge_exceptions.DataConnectorError(
+                raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
 configured group_name.
                     """
                 )
             if len(group_names) < len(self.sorters):
-                raise ge_exceptions.DataConnectorError(
+                raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" is configured with {len(group_names)} group names;
 this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     """

@@ -45,14 +45,14 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
     ge_cloud_id = "d581305a-cdce-483b-84ba-5c673d2ce009"
     cloud_ref = GXCloudResourceRef(
         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-        ge_cloud_id=ge_cloud_id,
+        cloud_id=ge_cloud_id,
         url="foo/bar/baz",
     )
 
     with mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
     ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set",
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._set",
         return_value=cloud_ref,
     ):
         expectation_suite: ExpectationSuite = context.create_expectation_suite(
@@ -66,9 +66,9 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
     assert expectation_suite.expectations[0].rendered_content is None
 
     with mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
     ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._update"
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._update"
     ) as mock_update:
         context.save_expectation_suite(
             expectation_suite,
@@ -98,7 +98,6 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
                                         }
                                     },
                                     "template": "Must have exactly $value rows.",
-                                    "header": None,
                                 },
                                 "name": "atomic.prescriptive.summary",
                                 "value_type": "StringValueType",
@@ -159,9 +158,9 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
     )
 
     with mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend.list_keys"
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend.list_keys"
     ), mock.patch(
-        "great_expectations.data_context.store.ge_cloud_store_backend.GeCloudStoreBackend._set"
+        "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._set"
     ):
         validator: Validator = context.get_validator(
             batch_request=batch_request,

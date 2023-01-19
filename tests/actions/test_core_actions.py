@@ -65,7 +65,7 @@ def test_StoreAction():
     stores = {"fake_in_memory_store": fake_in_memory_store}
 
     class Object:
-        ge_cloud_mode = False
+        cloud_mode = False
 
     data_context = Object()
     data_context.stores = stores
@@ -637,7 +637,7 @@ def test_cloud_notification_action(
     expected_ge_cloud_url = urljoin(
         cloud_action.data_context.ge_cloud_config.base_url,
         f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/checkpoints/"
-        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
+        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.cloud_id}/notification-actions",
     )
     expected_headers = {
         "Content-Type": "application/vnd.api+json",
@@ -671,7 +671,7 @@ def test_cloud_notification_action_bad_response(
     expected_ge_cloud_url = urljoin(
         cloud_action.data_context.ge_cloud_config.base_url,
         f"/organizations/{cloud_action.data_context.ge_cloud_config.organization_id}/checkpoints/"
-        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.ge_cloud_id}/notification-actions",
+        f"{cloud_action.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_ge_cloud_identifier.cloud_id}/notification-actions",
     )
     expected_headers = {
         "Content-Type": "application/vnd.api+json",

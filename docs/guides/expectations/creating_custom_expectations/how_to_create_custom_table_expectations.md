@@ -93,7 +93,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python name="custom_table_expectation"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py ExpectTableColumnsToBeUnique class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -101,7 +101,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python name="custom_table_docstring"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -109,7 +109,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python name="custom_table_diagnostics"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py diagnostics"
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -138,7 +138,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python name="custom_table_examples"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -189,7 +189,7 @@ Metrics answer questions about your data posed by your Expectation, <br/> and al
 
 Your Metric function will have the `@metric_value` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to find the unique columns of a table with the PandasExecutionEngine.
 
-```python name="custom_table_pandas"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py pandas"
 ```
 
 :::note
@@ -225,7 +225,7 @@ You'll need to substitute this metric into two places in the code. First, in the
 
 with
 
-```python name="custom_table_metric_name"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py metric_name"
 ```
 
 Second, in the Expectation class, replace
@@ -235,7 +235,7 @@ Second, in the Expectation class, replace
 
 with
 
-```python name="custom_table_metric_dependencies"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py metric_dependencies"
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -249,7 +249,7 @@ For example, replace:
 
 with 
 
-```python name="custom_table_metric"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py TableColumnsUnique class_def"
 ```
 
 ### 7. Validate
@@ -267,7 +267,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `table.columns.unique` Metric against our success keys:
 
-```python name="custom_table_validate"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py validate"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -331,7 +331,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python name="custom_table_library_metadata"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

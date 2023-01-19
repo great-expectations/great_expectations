@@ -72,7 +72,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.10.1 flake8==5.0.4 black==22.3.0 pyupgrade==2.7.2 invoke==1.7.1
+              pip install $(grep -E '^(black|invoke|isort|flake8|pyupgrade)' reqs/requirements-dev-contrib.txt)
               EXIT_STATUS=0
               invoke fmt --check || EXIT_STATUS=$?
               invoke lint || EXIT_STATUS=$?
@@ -88,16 +88,20 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install mypy invoke # Prereq for type hint script
+          pip install $(grep -E '^(invoke|mypy|pytest-cov)' reqs/requirements-dev-contrib.txt)
           invoke type-coverage
         name: TypeHintChecker
 
     - job: static_type_check
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: 3.7
+        displayName: 'Use Python 3.7'
       - script: |
-          pip install mypy invoke
-          invoke type-check --install-types --warn-unused-ignores --pretty 
+          pip install --requirement requirements-types.txt
+          invoke type-check --ci --pretty
         name: StaticTypeCheck
 
     - job: docstring_checker
@@ -106,11 +110,19 @@ stages:
       - bash: python scripts/check_docstring_coverage.py
         name: DocstringChecker
 
+    - job: docstring_linter
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+      - script: |
+          pip install --requirement reqs/requirements-dev-test.txt
+          invoke docstrings
+        name: DocstringLinter
+
     - job: unused_import_checker
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
       - script: |
-          pip install flake8
+          pip install $(grep -E '^(flake8)' reqs/requirements-dev-contrib.txt)
           # https://www.flake8rules.com/rules/F401.html - Prunes the dgtest graph to improve accuracy
           flake8 --select F401 great_expectations tests
         name: UnusedImportChecker
@@ -124,11 +136,22 @@ stages:
       - job: make_suffix
         steps:
           - bash: |
+              # Create a docker allowed image name from the branch name
+              eval `python - <<EOF
+              import os
+              import re
+              branch_name = os.environ["BRANCH_NAME"]
+              new_name = re.sub('[^a-zA-Z0-9_\-\.]', '-', branch_name)
+              print(f'export "IMAGE_BRANCH"="{new_name}"')
+              EOF`
+
               EPOCH=`date +%s`
-              SUFFIX="develop_${EPOCH}_${RANDOM}"
+              SUFFIX="${IMAGE_BRANCH}_${EPOCH}_${RANDOM}"
               echo "Generated image suffix: ${SUFFIX}"
               echo "##vso[task.setvariable variable=IMAGE_SUFFIX;isOutput=true]${SUFFIX}"
             name: suffix
+            env:
+              BRANCH_NAME: $(Build.SourceBranchName)
 
       - job: build_push
         dependsOn: make_suffix
@@ -141,21 +164,27 @@ stages:
               python.version: '3.8'
             Python39:
               python.version: '3.9'
+            Python310:
+              python.version: '3.10'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
           GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
         steps:
           - bash: |
               DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
-              # We repull the develop branch. We could build the local branch that is already present but we should
-              # prune it's depth since we don't need the git history.
+              # Remove /refs/heads or /refs/tags from the FULL_BRANCH_NAME
+              BRANCH_NAME="${FULL_BRANCH_NAME/#refs\/heads\/}"
+              BRANCH_NAME="${BRANCH_NAME/#refs\/tags\/}"
+              # Use the local branch that is already present, but prune it's depth since we don't need the git history.
               CMD="docker buildx build -f docker/Dockerfile.tests --tag greatexpectations/test:${DOCKER_TAG} "
               CMD+="--target test --build-arg PYTHON_VERSION=$(python.version) "
               CMD+="--build-arg GE_USAGE_STATISTICS_URL=\"$(GE_USAGE_STATISTICS_URL)\" "
-              CMD+="--build-arg SOURCE=github --build-arg BRANCH=develop ."
+              CMD+="--build-arg SOURCE=github --build-arg BRANCH=\"${BRANCH_NAME}\" ."
               echo ${CMD}
               eval ${CMD}
             displayName: 'Build python $(python.version) image'
+            env:
+              FULL_BRANCH_NAME: $(Build.SourceBranch)
 
           - bash: |
               docker login -u ${DOCKER_USER} -p ${DOCKER_TOKEN}
@@ -170,7 +199,7 @@ stages:
               DOCKER_USER: $(DOCKER_USER)
               DOCKER_TOKEN: $(DOCKER_TOKEN)
 
-      - job: test_comprehensive
+      - job: test_majority
         dependsOn: [make_suffix, build_push]
         condition: succeeded()
         timeoutInMinutes: 120
@@ -182,6 +211,8 @@ stages:
               python.version: '3.8'
             Python39:
               python.version: '3.9'
+            Python310:
+              python.version: '3.10'
         services:
           postgres: postgres
         variables:
@@ -236,6 +267,8 @@ stages:
               python.version: '3.8'
             Python39:
               python.version: '3.9'
+            Python310:
+              python.version: '3.10'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
@@ -260,6 +293,8 @@ stages:
               python.version: '3.8'
             Python39:
               python.version: '3.9'
+            Python310:
+              python.version: '3.10'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
@@ -286,6 +321,8 @@ stages:
               python.version: '3.8'
             Python39:
               python.version: '3.9'
+            Python310:
+              python.version: '3.10'
         services:
           mysql: mysql
         variables:
@@ -330,6 +367,8 @@ stages:
               python.version: '3.8'
             Python39:
               python.version: '3.9'
+            Python310:
+              python.version: '3.10'
         services:
           trino: trino
         variables:
@@ -364,6 +403,8 @@ stages:
               python.version: '3.8'
             Python39:
               python.version: '3.9'
+            Python310:
+              python.version: '3.10'
         services:
           postgres: postgres
         variables:
@@ -384,16 +425,16 @@ stages:
           matrix:
             Python37:
               python.version: '3.7'
-              min_numpy: '1.18.5'
-              min_pandas: '1.1.0'
+              min_constraints: 'azure/constraints-test/py37-min-install.txt'
             Python38:
               python.version: '3.8'
-              min_numpy: '1.18.5'
-              min_pandas: '1.1.0'
+              min_constraints: 'azure/constraints-test/py38-min-install.txt'
             Python39:
               python.version: '3.9'
-              min_numpy: '1.19.3'
-              min_pandas: '1.1.3'
+              min_constraints: 'azure/constraints-test/py39-min-install.txt'
+            Python310:
+              python.version: '3.10'
+              min_constraints: 'azure/constraints-test/py310-min-install.txt'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
@@ -402,8 +443,9 @@ stages:
               PYTEST="docker run -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) "
               PYTEST+="-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_DEFAULT_REGION=$(AWS_DEFAULT_REGION) "
               PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} bash -c \""
-              PYTEST+="printf 'Y\nY\n' | pip uninstall numpy pandas && "
-              PYTEST+="printf 'Y\nY\n' | pip install numpy==$(min_numpy) pandas==$(min_pandas) && "
+              PYTEST+="pip install --no-cache-dir --requirement requirements-dev.txt "
+              PYTEST+="--requirement reqs/requirements-dev-test.txt --constraint constraints-dev.txt "
+              PYTEST+="--constraint $(min_constraints) && "
               PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistic "
               PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py\""
               echo ${PYTEST}
@@ -425,6 +467,8 @@ stages:
               python.version: '3.8'
             Python39:
               python.version: '3.9'
+            Python310:
+              python.version: '3.10'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
@@ -436,11 +480,45 @@ stages:
               eval ${PYTEST}
             displayName: 'Pytest Usage Stats'
 
+      - job: cloud_integration_tests
+        dependsOn: [make_suffix, build_push]
+        condition: succeeded()
+        strategy:
+          matrix:
+            Python37:
+              python.version: '3.7'
+            Python38:
+              python.version: '3.8'
+            Python39:
+              python.version: '3.9'
+            Python310:
+              python.version: '3.10'
+        variables:
+          IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
+        steps:
+          - bash: |
+              DOCKER_TAG="$(python.version)_$(IMAGE_SUFFIX)"
+              # We set both GX_* and GE_* in the docker container until we are able to update the config in our
+              # cloud CI account.
+              PYTEST="docker run -e GX_CLOUD_ORGANIZATION_ID=${GX_CLOUD_ORGANIZATION_ID} "
+              PYTEST+="-e GX_CLOUD_ACCESS_TOKEN=${GX_CLOUD_ACCESS_TOKEN} -e GX_CLOUD_BASE_URL=${GX_CLOUD_BASE_URL} "
+              PYTEST+="-e GE_CLOUD_ORGANIZATION_ID=${GX_CLOUD_ORGANIZATION_ID} "
+              PYTEST+="-e GE_CLOUD_ACCESS_TOKEN=${GX_CLOUD_ACCESS_TOKEN} -e GE_CLOUD_BASE_URL=${GX_CLOUD_BASE_URL} "
+              PYTEST+="greatexpectations/test:${DOCKER_TAG} "
+              PYTEST+="pytest --random-order --cloud -m \"cloud and e2e\""
+              echo ${PYTEST}
+              eval ${PYTEST}
+            env:
+              GX_CLOUD_BASE_URL: $(GE_CLOUD_BASE_URL)
+              GX_CLOUD_ACCESS_TOKEN: $(GE_CLOUD_ACCESS_TOKEN)
+              GX_CLOUD_ORGANIZATION_ID: $(GE_CLOUD_ORGANIZATION_ID)
+            displayName: 'Cloud integration Tests'
+
 
   - stage: import_ge
     dependsOn: [lint]
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-latest'
     jobs:
       - job: import_ge
         condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
@@ -453,7 +531,8 @@ stages:
              python.version: '3.8'
            Python39:
              python.version: '3.9'
-
+           Python310:
+             python.version: '3.10'
 
         steps:
          - task: UsePythonVersion@0
@@ -466,10 +545,10 @@ stages:
 
          - script: |
              pip install  .
-           displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
+           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
          - script: |
-             python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
+             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
   - stage: db_integration
@@ -500,16 +579,10 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install \
-                --requirement reqs/requirements-dev-test.txt \
-                --requirement reqs/requirements-dev-sqlalchemy.txt \
-                --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
+              pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest pytest-cov pytest-azurepipelines pytest-random-order
               pytest tests/test_definitions tests/expectations \
                 --mssql \
                 --napoleon-docstrings \
@@ -539,8 +612,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install twine
-              pip install wheel
+              pip install twine wheel
               git config --global user.email "team@greatexpectations.io"
               git config --global user.name "Great Expectations"
             displayName: 'Prepare packaging'

@@ -20,9 +20,9 @@ Airflow is a data orchestration tool for creating and maintaining data pipelines
 
 Before you start writing your DAG, you will want to make sure you have a Data Context and Checkpoint configured.
 
-A [Data Context](https://docs.greatexpectations.io/docs/reference/data_context) represents a Great Expectations project. It organizes storage and access for Expectation Suites, Datasources, notification settings, and data fixtures.
+A [Data Context](https://docs.greatexpectations.io/docs/terms/data_context) represents a Great Expectations project. It organizes storage and access for Expectation Suites, Datasources, notification settings, and data fixtures.
 
-[Checkpoints](https://docs.greatexpectations.io/docs/reference/checkpoints_and_actions) provide a convenient abstraction for bundling the validation of a Batch (or Batches) of data against an Expectation Suite (or several), as well as the actions that should be taken after the validation.
+[Checkpoints](https://docs.greatexpectations.io/docs/terms/checkpoint) provide a convenient abstraction for bundling the validation of a Batch (or Batches) of data against an Expectation Suite (or several), as well as the actions that should be taken after the validation.
 
 ## Install the `GreatExpectationsOperator`
 

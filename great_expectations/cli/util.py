@@ -38,7 +38,8 @@ def verify_library_dependent_modules(
         success = False
 
     if do_reload:
-        reload_modules(module_names=module_names_to_reload)
+        reload_modules(module_names=module_names_to_reload)  # type: ignore[arg-type]
+        # len() check above verifies not None (must be a list)
 
     return success
 

@@ -4,8 +4,9 @@ from typing import Dict, Optional
 
 import pytest
 
-from great_expectations import DataContext
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.types.base import (
     BaseStoreBackendDefaults,
     DatabaseStoreBackendDefaults,
@@ -18,7 +19,7 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
     S3StoreBackendDefaults,
 )
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import filter_properties_dict, get_context
 
 """
 What does this test and why?
@@ -162,7 +163,7 @@ def test_DataContextConfig_with_BaseStoreBackendDefaults_and_simple_defaults(
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
@@ -268,7 +269,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults(
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
@@ -396,7 +397,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_using_all_parameters(
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
@@ -463,7 +464,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
@@ -512,7 +513,7 @@ def test_DataContextConfig_with_FilesystemStoreBackendDefaults_and_simple_defaul
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
@@ -631,7 +632,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults(
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
@@ -769,7 +770,7 @@ def test_DataContextConfig_with_GCSStoreBackendDefaults_using_all_parameters(
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
@@ -910,7 +911,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults(
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
@@ -1090,7 +1091,7 @@ def test_DataContextConfig_with_DatabaseStoreBackendDefaults_using_all_parameter
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
@@ -1358,7 +1359,7 @@ def test_override_general_defaults(
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
@@ -1471,13 +1472,13 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,
     )
 
-    data_context = BaseDataContext(project_config=data_context_config)
+    data_context = get_context(project_config=data_context_config)
     assert (
         data_context.datasources["my_pandas_datasource"]
         .get_batch_kwargs_generator("subdir_reader")
@@ -1540,7 +1541,7 @@ def test_DataContextConfig_with_InMemoryStoreBackendDefaults(
         clean_falsy=True,
     )
     assert isinstance(
-        DataContext.get_or_create_data_context_config(
+        SerializableDataContext.get_or_create_data_context_config(
             project_config=data_context_config
         ),
         DataContextConfig,

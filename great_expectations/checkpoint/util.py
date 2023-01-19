@@ -9,7 +9,7 @@ from typing import List, Optional, Union
 
 import requests
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     BatchRequest,
     BatchRequestBase,
@@ -36,10 +36,15 @@ def send_slack_notification(
     query = query
     headers = None
 
+    # Slack doc about overwritting the channel when using the legacy Incoming Webhooks
+    # https://api.slack.com/legacy/custom-integrations/messaging/webhooks
+    # ** Since it is legacy, it could be deprecated or removed in the future **
+    if slack_channel:
+        query["channel"] = slack_channel
+
     if not slack_webhook:
         url = "https://slack.com/api/chat.postMessage"
         headers = {"Authorization": f"Bearer {slack_token}"}
-        query["channel"] = slack_channel
 
     try:
         response = session.post(url=url, headers=headers, json=query)
@@ -250,7 +255,7 @@ def get_substituted_batch_request(
     for key, value in validation_batch_request.items():
         substituted_value = substituted_runtime_batch_request.get(key)
         if value is not None and substituted_value is not None:
-            raise ge_exceptions.CheckpointError(
+            raise gx_exceptions.CheckpointError(
                 f'BatchRequest attribute "{key}" was specified in both validation and top-level CheckpointConfig.'
             )
 
@@ -470,18 +475,18 @@ def get_validations_with_batch_request_as_dict(
 
 def validate_validation_dict(validation_dict: dict) -> None:
     if validation_dict.get("batch_request") is None:
-        raise ge_exceptions.CheckpointError("validation batch_request cannot be None")
+        raise gx_exceptions.CheckpointError("validation batch_request cannot be None")
     if not validation_dict.get("expectation_suite_name"):
-        raise ge_exceptions.CheckpointError(
+        raise gx_exceptions.CheckpointError(
             "validation expectation_suite_name must be specified"
         )
     if not validation_dict.get("action_list"):
-        raise ge_exceptions.CheckpointError("validation action_list cannot be empty")
+        raise gx_exceptions.CheckpointError("validation action_list cannot be empty")
 
 
 def send_cloud_notification(url: str, headers: dict):
     """
-    Post a CloudNotificationAction to GE Cloud Backend for processing.
+    Post a CloudNotificationAction to GX Cloud Backend for processing.
     """
     session = requests.Session()
 

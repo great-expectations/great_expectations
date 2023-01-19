@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )

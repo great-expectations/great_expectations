@@ -62,17 +62,14 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
         column (str): \
             The column name.
 
-
     Keyword Args:
         word (str) : \
-            The word to check if it's contained in the reverse geocoded string.
+            The word to check if it's contained in the reverse geocoded string. \
             Must be a lowercase string.
 
         provider (str or geopy.geocoder): \
-            The reverse geocoding service provider.
-            Default: photon
+            The reverse geocoding service provider. Default: photon. \
             More info here: https://geopandas.org/en/stable/docs/reference/api/geopandas.tools.reverse_geocode.html
-
     """
 
     def validate_configuration(
@@ -178,7 +175,6 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ) -> List[
@@ -193,9 +189,8 @@ class ExpectColumnValuesReverseGeocodedLatLonToContain(ColumnMapExpectation):
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

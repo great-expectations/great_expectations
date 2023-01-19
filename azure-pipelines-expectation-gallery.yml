@@ -8,7 +8,7 @@
 # to ensure that the gallery is kept to-up-date with change.
 
 schedules:
-- cron: 0 */2 * * *
+- cron: 0 7 * * *
   displayName: Scheduled Runs
   branches:
     include:
@@ -75,15 +75,15 @@ stages:
                 [ScriptsChanged]
                 assets/scripts/**
 
-  - stage: deploy_gallery
+  - stage: deploy_gallery_staging
     dependsOn: scope_check
     condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-20.04'
 
     jobs:
       - job: build_gallery
-        timeoutInMinutes: 300
+        timeoutInMinutes: 420
         variables:
           python.version: '3.8'
           GE_pytest_opts: ''
@@ -106,6 +106,7 @@ stages:
           - script: |
               pip install \
                 "google-cloud-bigquery-storage" \
+                "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable "contrib/cli" \
                 --editable ".[dev]" \
@@ -145,11 +146,11 @@ stages:
               secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
 
-          - bash: python ./build_gallery.py --backends "pandas" --outfile-name "quick_check.json" ; exp_count=$(grep "^ *\"expect_" quick_check.json | wc -l); package_summary=$(grep "\"package\":" quick_check.json | sort | uniq -c | sort -nr) ; echo -e "\n\n$exp_count Expectations in quick_check.json\n";  echo -e "$package_summary"; [[ $exp_count -lt 297 ]] && echo "Fewer than 297 Expectations" && exit 1 ; [[ $(echo -e "$package_summary" | wc -l) -lt 6 ]] && echo "Fewer than 6 packages" && exit 1 ; echo "ok"
+          - bash: python ./build_gallery.py --backends "pandas" --outfile-name "quick_check.json" ; exp_count=$(grep "^ *\"expect_" quick_check.json | wc -l); package_summary=$(grep "\"package\":" quick_check.json | sort | uniq -c | sort -nr) ; touch gallery-tracebacks.txt; cat gallery-tracebacks.txt ; echo -e "\n\n$exp_count Expectations in quick_check.json\n";  echo -e "$package_summary"; [[ $exp_count -lt 297 ]] && echo "Fewer than 297 Expectations" && exit 1 ; [[ $(echo -e "$package_summary" | wc -l) -lt 6 ]] && echo "Fewer than 6 packages" && exit 1 ; echo "ok"
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery Quick Check'
 
-          - bash: python ./build_gallery.py --outfile-name "expectation_library_v2.json" 2>&1 | tee output--build_gallery.txt ; grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery.txt | sort > gallery-exp-types.txt
+          - bash: python ./build_gallery.py --outfile-name "expectation_library_v2--staging.json" 2>&1 | tee output--build_gallery.txt ; grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery.txt | sort > gallery-exp-types.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Build Gallery'
             env:
@@ -256,6 +257,9 @@ stages:
               ALGOLIA_PACKAGE_EXPEC_INDEX: $(ALGOLIA_PACKAGE_EXPEC_INDEX)
               ALGOLIA_PACKAGE_INDEX: $(ALGOLIA_PACKAGE_INDEX)
               ALGOLIA_WRITE_KEY: $(ALGOLIA_WRITE_KEY)
+              # Build Gallery Paths
+              ALGOLIA_S3_PACKAGES_URL: $(ALGOLIA_S3_PACKAGES_URL)
+              ALGOLIA_S3_EXPECTATIONS_URL: $(ALGOLIA_S3_EXPECTATIONS_URL)
               # replica indices from expectations for sorting
               ALGOLIA_EXPEC_REPLICA_ALPHA_ASC_INDEX: $(ALGOLIA_EXPEC_REPLICA_ALPHA_ASC_INDEX)
               ALGOLIA_EXPEC_REPLICA_ALPHA_DSC_INDEX: $(ALGOLIA_EXPEC_REPLICA_ALPHA_DSC_INDEX)

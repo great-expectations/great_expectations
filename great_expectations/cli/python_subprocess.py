@@ -3,7 +3,7 @@ import sys
 import time
 import traceback
 from subprocess import PIPE, CalledProcessError, CompletedProcess, Popen, run
-from typing import Optional
+from typing import Optional, Union
 
 import click
 
@@ -76,7 +76,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
 
     bar_length_100_percent: int = 100
 
-    max_work_amount: int = bar_length_100_percent
+    max_work_amount: Union[int, float] = bar_length_100_percent
 
     poll_period_seconds: int = 1
 
@@ -106,7 +106,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                 errors=None,
             ) as proc:
                 poll_status_code: Optional[int] = proc.poll()
-                poll_stdout: str = proc.stdout.readline()
+                poll_stdout: str = proc.stdout.readline()  # type: ignore[union-attr] # stdout could be None
                 while poll_status_code is None:
                     gathered += max([len(poll_stdout), poll_period_seconds])
                     progress = float(gathered) / max_work_amount
@@ -125,7 +125,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
                     bar.update(0)
                     time.sleep(poll_period_seconds)
                     poll_status_code = proc.poll()
-                    poll_stdout = proc.stdout.readline()
+                    poll_stdout = proc.stdout.readline()  # type: ignore[union-attr] # stdout could be None
                 status_code = proc.returncode
                 if status_code != poll_status_code:
                     status_code = 1

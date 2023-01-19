@@ -8,7 +8,7 @@ from marshmallow import INCLUDE, Schema, fields, validates_schema
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
@@ -146,7 +146,7 @@ def test_v3_configuration_store(tmp_path_factory):
             base_directory="unknown_base_directory",
             configuration_key=configuration_name_0,
         )
-    with pytest.raises(ge_exceptions.InvalidKeyError):
+    with pytest.raises(gx_exceptions.InvalidKeyError):
         # noinspection PyUnusedLocal
         loaded_config: BaseYamlConfig = load_config_from_filesystem(
             configuration_store_class_name="SampleConfigurationStore",
@@ -315,7 +315,7 @@ def test_self_check(capsys) -> None:
             None,
             "abc123",
             GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.CHECKPOINT, ge_cloud_id="abc123"
+                resource_type=GXCloudRESTResource.CHECKPOINT, cloud_id="abc123"
             ),
             id="id",
         ),
@@ -325,7 +325,9 @@ def test_self_check(capsys) -> None:
 def test_determine_key_constructs_key(
     name: Optional[str], ge_cloud_id: Optional[str], expected_key: DataContextKey
 ) -> None:
-    actual_key = ConfigurationStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+    actual_key = ConfigurationStore(store_name="test").determine_key(
+        name=name, ge_cloud_id=ge_cloud_id
+    )
     assert actual_key == expected_key
 
 
@@ -345,7 +347,9 @@ def test_determine_key_raises_error_with_conflicting_args(
     name: Optional[str], ge_cloud_id: Optional[str]
 ) -> None:
     with pytest.raises(AssertionError) as e:
-        ConfigurationStore.determine_key(name=name, ge_cloud_id=ge_cloud_id)
+        ConfigurationStore(store_name="test").determine_key(
+            name=name, ge_cloud_id=ge_cloud_id
+        )
 
     assert "Must provide either name or ge_cloud_id" in str(e.value)
 

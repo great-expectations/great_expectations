@@ -91,7 +91,7 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-```python name="custom_multicolumn_expectation"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py ExpectMulticolumnValuesToBeMultiplesOfThree class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
@@ -99,7 +99,7 @@ You can also go ahead and write a new one-line docstring, replacing
 ```
 
 with something like:
-```python name="custom_multicolumn_docstring"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
@@ -108,7 +108,7 @@ You'll also need to change the class name at the bottom of the file, by replacin
 ```
 
 with this one:
-```python name="custom_multicolumn_diagnostics"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py print_diagnostic_checklist"
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -138,7 +138,7 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python name="custom_multicolumn_examples"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
@@ -186,7 +186,7 @@ Metrics answer questions about your data posed by your Expectation, <br/> and al
 
 Your Metric function will have the `@multicolumn_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values across a set of columns are multiples of 3 using the `PandasExecutionEngine`.
 
-```python name="custom_multicolumn_pandas"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py _pandas"
 ```
 
 This is all that you need to define for now. The `MulticolumnMapMetricProvider` and `MulticolumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
@@ -215,7 +215,7 @@ You'll need to substitute this metric into two places in the code. First, in the
 
 with
 
-```python name="custom_multicolumn_metric_name"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py condition_metric_name"
 ```
 
 Second, in the Expectation class, replace
@@ -225,7 +225,7 @@ Second, in the Expectation class, replace
 
 with
 
-```python name="custom_multicolumn_map_metric"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py map_metric"
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -239,7 +239,7 @@ For example, replace:
 
 with 
 
-```python name="custom_multicolumn_metric"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py MulticolumnValuesMultipleThree class_def"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -308,7 +308,7 @@ If you plan to contribute your Expectation to the public open source project, yo
 
 would become
 
-```python name="custom_multicolumn_library_metadata"
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!

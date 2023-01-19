@@ -9,19 +9,7 @@ import TipCustomDataConnectorModuleName from '../components/_tip_custom_data_con
 
 At this point, your configuration should look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_runtime_data_connector": {}
-    }
-}
+```python name="spark Datasource configuration up to adding an empty runtime data connector"
 ```
 
 <PartDataConnectorKeysOverview data_connector_type="RuntimeDataConnector" data_connector_name="name_of_my_runtime_data_connector" runtime={true} batch_spec_passthrough={false} glob_directive={false} />
@@ -29,29 +17,12 @@ datasource_config: dict = {
 
 For this example, you will be using the `RuntimeDataConnector` as your `class_name`.  This key/value entry will therefore look like:
 
-```python
-    "class_name": "RuntimeDataConnector",
+```python name="runtime data connector define class_name as RuntimeDataConnector"
 ```
 
 After including an empty list for your `batch_identifiers` and an empty dictionary for `batch_spec_passthrough` your full configuration should now look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_runtime_data_connector": {
-            "class_name": "RuntimeDataConnector",
-            "batch_spec_passthrough": {},
-            "batch_identifiers": [],
-        }
-    }
-}
+```python name="runtime spark datasource_config up to adding empty batch_identifiers and batch_spec_passthrough dictionaries"
 ```
 
 <TipCustomDataConnectorModuleName />

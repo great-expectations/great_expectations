@@ -113,8 +113,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     """Expect column entries to be secure passwords, as defined by expectation parameters.
 
     expect_column_values_to_be_secure_passwords is a \
-    :func:`column_map_expectation <great_expectations.execution_engine.execution_engine.MetaExecutionEngine
-    .column_map_expectation>`.
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
        min_length (int): minimum length
@@ -127,28 +126,26 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
-            Return `"success": True` if at least mostly fraction of values match the expectation. \
-            For more detail, see :ref:`mostly`.
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
     """
 
     library_metadata = {
@@ -194,14 +191,11 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
     @classmethod
     @renderer(renderer_type="renderer.question")
-    def _question_renderer(
-        cls, configuration, result=None, language=None, runtime_configuration=None
-    ):
+    def _question_renderer(cls, configuration, result=None, runtime_configuration=None):
         column = configuration.kwargs.get("column")
         # password = configuration.kwargs.get("password")
         mostly = "{:.2%}".format(float(configuration.kwargs.get("mostly", 1)))
@@ -211,7 +205,7 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     @classmethod
     @renderer(renderer_type="renderer.answer")
     def _answer_renderer(
-        cls, configuration=None, result=None, language=None, runtime_configuration=None
+        cls, configuration=None, result=None, runtime_configuration=None
     ):
         column = result.expectation_config.kwargs.get("column")
         # password = result.expectation_config.kwargs.get("password")
@@ -229,15 +223,11 @@ class ExpectColumnValuesToBeSecurePasswords(ColumnMapExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     styling = runtime_configuration.get("styling")
     #     params = substitute_none_for_missing(
     #         configuration.kwargs,

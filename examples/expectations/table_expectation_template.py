@@ -26,17 +26,12 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnExpectations, the main business logic for calculation will live in this class.
-# <snippet name="table_template_metric">
 class TableMeetsSomeCriteria(TableMetricProvider):
-    # </snippet>
 
     # This is the id string that will be used to reference your Metric.
-    # <snippet name="table_template_metric_name">
     metric_name = "METRIC NAME GOES HERE"
-    # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet name="table_template_pandas">
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
@@ -47,8 +42,6 @@ class TableMeetsSomeCriteria(TableMetricProvider):
         runtime_configuration,
     ):
         raise NotImplementedError
-
-    # </snippet>
 
     # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
@@ -89,23 +82,15 @@ class TableMeetsSomeCriteria(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-# <snippet name="table_template_expectation">
 class ExpectTableToMeetSomeCriteria(TableExpectation):
-    # </snippet>
-    # <snippet name="table_template_docstring">
     """TODO: add a docstring here"""
-    # </snippet>
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="table_template_examples">
     examples = []
-    # </snippet>
 
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
-    # <snippet name="table_template_metric_dependencies">
     metric_dependencies = ("METRIC NAME GOES HERE",)
-    # </snippet>
 
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ()
@@ -128,8 +113,7 @@ class ExpectTableToMeetSomeCriteria(TableExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:
@@ -143,7 +127,6 @@ class ExpectTableToMeetSomeCriteria(TableExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
-    # <snippet name="table_template_validate">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -151,11 +134,9 @@ class ExpectTableToMeetSomeCriteria(TableExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        # </snippet>
         raise NotImplementedError
 
     # This object contains metadata for display in the public Gallery
-    # <snippet name="table_template_library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -164,10 +145,5 @@ class ExpectTableToMeetSomeCriteria(TableExpectation):
     }
 
 
-#     </snippet>
-
-
 if __name__ == "__main__":
-    # <snippet name="table_template_diagnostics">
     ExpectTableToMeetSomeCriteria().print_diagnostic_checklist()
-#     </snippet>

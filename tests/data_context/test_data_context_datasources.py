@@ -3,12 +3,12 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.data_context.base_data_context import (
-    BaseDataContext,
-)
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudStoreBackend,
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
 )
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
@@ -19,6 +19,7 @@ from great_expectations.data_context.types.base import (
     GXCloudConfig,
 )
 from great_expectations.datasource import Datasource
+from great_expectations.util import get_context
 
 
 @pytest.fixture
@@ -60,14 +61,16 @@ def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
     # Clear datasources to improve test performance in DataContext._init_datasources
     data_context_config_with_datasources.datasources = {}
 
-    context = BaseDataContext(
+    context = get_context(
         project_config=data_context_config_with_datasources,
         context_root_dir=str(project_path),
-        ge_cloud_mode=True,
-        ge_cloud_config=ge_cloud_config,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_mode=True,
     )
 
-    assert isinstance(context._datasource_store.store_backend, GeCloudStoreBackend)
+    assert isinstance(context._datasource_store.store_backend, GXCloudStoreBackend)
 
 
 @pytest.mark.integration
@@ -81,10 +84,10 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
     # Clear datasources to improve test performance in DataContext._init_datasources
     data_context_config_with_datasources.datasources = {}
 
-    context = BaseDataContext(
+    context = get_context(
         project_config=data_context_config_with_datasources,
         context_root_dir=str(project_path),
-        ge_cloud_mode=False,
+        cloud_mode=False,
     )
 
     assert isinstance(context._datasource_store.store_backend, InlineStoreBackend)
@@ -167,7 +170,7 @@ def test_get_datasource_cache_miss(
     with mock.patch(
         "great_expectations.data_context.store.DatasourceStore.has_key"
     ), mock.patch(
-        "great_expectations.data_context.data_context.BaseDataContext._instantiate_datasource_from_config"
+        "great_expectations.data_context.data_context.AbstractDataContext._instantiate_datasource_from_config"
     ), mock.patch(
         "great_expectations.data_context.types.base.datasourceConfigSchema.load",
     ), mock.patch(
@@ -316,7 +319,7 @@ def test_DataContext_delete_datasource_updates_cache(
 
 @pytest.mark.unit
 def test_BaseDataContext_add_datasource_updates_cache(
-    in_memory_runtime_context: BaseDataContext,
+    in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
@@ -338,7 +341,7 @@ def test_BaseDataContext_add_datasource_updates_cache(
 
 @pytest.mark.unit
 def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
-    in_memory_runtime_context: BaseDataContext,
+    in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
@@ -373,7 +376,7 @@ def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
 
 @pytest.mark.unit
 def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
-    in_memory_runtime_context: BaseDataContext,
+    in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
@@ -399,7 +402,7 @@ def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
 
 @pytest.mark.unit
 def test_BaseDataContext_delete_datasource_updates_cache(
-    in_memory_runtime_context: BaseDataContext,
+    in_memory_runtime_context: EphemeralDataContext,
 ) -> None:
     """
     What does this test and why?

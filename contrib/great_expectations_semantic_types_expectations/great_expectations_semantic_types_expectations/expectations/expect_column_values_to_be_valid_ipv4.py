@@ -44,7 +44,7 @@ class ColumnValuesToBeValidIPv4(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIpv4(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid IPv4 address format."""
+    """Expect column values to be valid IPv4 addresses."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -126,8 +126,7 @@ class ExpectColumnValuesToBeValidIpv4(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

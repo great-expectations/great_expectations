@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast
 
 import pandas as pd
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -192,7 +192,7 @@ Notes:
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
         elif not isinstance(batch_data, PandasBatchData):
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "PandasExecutionEngine requires batch data that is either a DataFrame or a PandasBatchData object"
             )
 
@@ -215,7 +215,7 @@ Notes:
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
             if isinstance(batch_data, str):
-                raise ge_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine has been passed a string type batch_data, "{batch_data}", which is illegal.  Please check your config.
 """
                 )
@@ -236,7 +236,7 @@ Notes:
                 self._instantiate_s3_client()
             # if we were not able to instantiate S3 client, then raise error
             if self._s3 is None:
-                raise ge_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(
                     """PandasExecutionEngine has been passed a S3BatchSpec,
                         but the ExecutionEngine does not have a boto3 client configured. Please check your config."""
                 )
@@ -252,7 +252,7 @@ Notes:
                         reader_options["compression"] = inferred_compression_param
                 s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
             except (ParamValidationError, ClientError) as error:
-                raise ge_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
                 )
             logger.debug(
@@ -268,7 +268,7 @@ Notes:
                 self._instantiate_azure_client()
             # if we were not able to instantiate Azure client, then raise error
             if self._azure is None:
-                raise ge_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(
                     """PandasExecutionEngine has been passed a AzureBatchSpec,
                         but the ExecutionEngine does not have an Azure client configured. Please check your config."""
                 )
@@ -294,7 +294,7 @@ Notes:
                 self._instantiate_gcs_client()
             # if we were not able to instantiate GCS client, then raise error
             if self._gcs is None:
-                raise ge_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(
                     """PandasExecutionEngine has been passed a GCSBatchSpec,
                         but the ExecutionEngine does not have an GCS client configured. Please check your config."""
                 )
@@ -309,7 +309,7 @@ Notes:
                     f"Fetching GCS blob. Bucket: {gcs_url.bucket} Blob: {gcs_url.blob}"
                 )
             except GoogleAPIError as error:
-                raise ge_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine encountered the following error while trying to read data from GCS \
 Bucket: {error}"""
                 )
@@ -326,7 +326,7 @@ Bucket: {error}"""
             df = reader_fn(path, **reader_options)
 
         else:
-            raise ge_exceptions.BatchSpecError(
+            raise gx_exceptions.BatchSpecError(
                 f"""batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, \
 not {batch_spec.__class__.__name__}"""
             )
@@ -372,7 +372,7 @@ not {batch_spec.__class__.__name__}"""
 
     # NOTE Abe 20201105: Any reason this shouldn't be a private method?
     @staticmethod
-    def guess_reader_method_from_path(path):
+    def guess_reader_method_from_path(path: str):
         """Helper method for deciding which reader to use to read in a certain path.
 
         Args:
@@ -382,6 +382,7 @@ not {batch_spec.__class__.__name__}"""
             ReaderMethod to use for the filepath
 
         """
+        path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
         elif (
@@ -405,7 +406,7 @@ not {batch_spec.__class__.__name__}"""
             return {"reader_method": "read_sas"}
 
         else:
-            raise ge_exceptions.ExecutionEngineError(
+            raise gx_exceptions.ExecutionEngineError(
                 f'Unable to determine reader method from path: "{path}".'
             )
 
@@ -422,7 +423,7 @@ not {batch_spec.__class__.__name__}"""
 
         """
         if reader_method is None and path is None:
-            raise ge_exceptions.ExecutionEngineError(
+            raise gx_exceptions.ExecutionEngineError(
                 "Unable to determine pandas reader function without reader_method or path."
             )
 
@@ -440,15 +441,17 @@ not {batch_spec.__class__.__name__}"""
                 reader_fn = partial(reader_fn, **reader_options)
             return reader_fn
         except AttributeError:
-            raise ge_exceptions.ExecutionEngineError(
+            raise gx_exceptions.ExecutionEngineError(
                 f'Unable to find reader_method "{reader_method}" in pandas.'
             )
 
-    def resolve_metric_bundle(  # type: ignore[empty-body]
+    def resolve_metric_bundle(
         self, metric_fn_bundle
     ) -> Dict[Tuple[str, str, str], Any]:
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
-        pass  # This method is NO-OP for PandasExecutionEngine (no bundling for direct execution computational backend).
+        return (
+            {}
+        )  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
 
     def get_domain_records(  # noqa: C901 - 17
         self,
@@ -478,7 +481,7 @@ not {batch_spec.__class__.__name__}"""
                     PandasBatchData, self.batch_manager.active_batch_data
                 ).dataframe
             else:
-                raise ge_exceptions.ValidationError(
+                raise gx_exceptions.ValidationError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
@@ -487,7 +490,7 @@ not {batch_spec.__class__.__name__}"""
                     PandasBatchData, self.batch_manager.batch_data_cache[batch_id]
                 ).dataframe
             else:
-                raise ge_exceptions.ValidationError(
+                raise gx_exceptions.ValidationError(
                     f"Unable to find batch with batch_id {batch_id}"
                 )
 

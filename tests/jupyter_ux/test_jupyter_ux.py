@@ -2,7 +2,7 @@ import logging
 
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux as jux
 
 
@@ -172,7 +172,7 @@ def test_display_column_expectations_as_section(basic_expectation_suite):
 
 @pytest.mark.smoketest
 def test_display_profiled_column_evrs_as_section(titanic_profiled_evrs_1):
-    section_html = jux.display_profiled_column_evrs_as_section(
+    section_html = jux.display_profiled_column_evrs_as_section(  # noqa: F841
         titanic_profiled_evrs_1,
         "SexCode",
         include_styling=False,
@@ -182,7 +182,7 @@ def test_display_profiled_column_evrs_as_section(titanic_profiled_evrs_1):
 
 @pytest.mark.smoketest
 def test_display_column_evrs_as_section(titanic_profiled_evrs_1):
-    section_html = jux.display_column_evrs_as_section(
+    section_html = jux.display_column_evrs_as_section(  # noqa: F841
         titanic_profiled_evrs_1,
         "SexCode",
         include_styling=False,
@@ -199,7 +199,7 @@ def test_configure_logging(caplog):
     root.info("do_not_show")
 
     # This df is used only for logging; we don't want to test against different backends
-    df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
+    df = gx.dataset.PandasDataset({"a": [1, 2, 3]})
     df.expect_column_to_exist("a")
     df.get_expectation_suite()
 
@@ -212,7 +212,7 @@ def test_configure_logging(caplog):
     # Now use the logging setup from the notebook
     logger = logging.getLogger("great_expectations")
     jux.setup_notebook_logging(logger)
-    df = ge.dataset.PandasDataset({"a": [1, 2, 3]})
+    df = gx.dataset.PandasDataset({"a": [1, 2, 3]})
     df.expect_column_to_exist("a")
     df.get_expectation_suite()
 

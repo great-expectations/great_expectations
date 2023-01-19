@@ -3,13 +3,13 @@ from great_expectations.expectations.set_based_column_map_expectation import (
 )
 
 
-# <snippet name="set_based_expectation">
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py ExpectColumnValuesToBeInSolfegeScaleSet class_def">
 class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
     # </snippet>
-    # <snippet name="set_based_docstring">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py docstring">
     """Values in this column should be valid members of the Solfege scale: do, re, mi, etc."""
     # </snippet>
-    # <snippet name="set_based_set">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py set">
     set_ = [
         "do",
         "re",
@@ -36,10 +36,10 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
 
     set_camel_name = "SolfegeScale"
     # </snippet>
-    # <snippet name="set_based_semantic_name">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py semantic_name">
     set_semantic_name = "the Solfege scale"
     # </snippet>
-    # <snippet name="set_based_examples">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py examples">
     examples = [
         {
             "data": {
@@ -126,7 +126,7 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
         set_camel_name=set_camel_name,
         set_=set_,
     )
-    # <snippet name="set_based_library_metadata">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py library_metadata">
     library_metadata = {
         "tags": ["set-based"],
         "contributors": ["@joegargery"],
@@ -135,7 +135,7 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="set_based_diagnostics">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py diagnostics">
     ExpectColumnValuesToBeInSolfegeScaleSet().print_diagnostic_checklist()
 #     </snippet>
 

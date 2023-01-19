@@ -25,9 +25,6 @@
       "postgresql": {
         "ts": "TIMESTAMP"
       },
-      "mssql": {
-        "ts": "DATETIME"
-      },
       "mysql": {
         "ts": "TIMESTAMP"
       },
@@ -38,7 +35,7 @@
     "tests": [
       {
         "title": "basic_positive_test_with_timestamps_tz_informed",
-        "suppress_test_for": ["trino", "bigquery"],
+        "suppress_test_for": ["trino", "bigquery", "mssql"],
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -54,7 +51,7 @@
       },
       {
         "title": "basic_negative_test_with_timestamps_tz_informed",
-        "suppress_test_for": ["trino", "bigquery"],
+        "suppress_test_for": ["trino", "bigquery", "mssql"] ,
         "exact_match_out": false,
         "out": {
           "unexpected_index_list": [0, 8, 9],

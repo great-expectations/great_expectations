@@ -6,9 +6,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec, RuntimeDataBatchSpec
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import SparkDFExecutionEngine
 from great_expectations.expectations.row_conditions import (
     RowCondition,
@@ -726,14 +727,14 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
 
     metrics.update(results)
 
     desired_aggregate_fn_metric_1 = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -741,7 +742,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_2 = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -749,7 +750,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_3 = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -757,7 +758,7 @@ def test_sparkdf_batch_aggregate_metrics(caplog, spark_session):
         "table.columns": table_columns_metric,
     }
     desired_aggregate_fn_metric_4 = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
     )
@@ -994,7 +995,7 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
     ), "Data does not match after getting compute domain"
 
     # Ensuring errors for column and column_ pair domains are caught
-    with pytest.raises(ge_exceptions.GreatExpectationsError):
+    with pytest.raises(gx_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
@@ -1003,7 +1004,7 @@ def test_get_domain_records_with_unmeetable_row_condition_alt(spark_session):
             },
             domain_type="column",
         )
-    with pytest.raises(ge_exceptions.GreatExpectationsError) as g:
+    with pytest.raises(gx_exceptions.GreatExpectationsError) as g:
         # noinspection PyUnusedLocal
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
@@ -1079,7 +1080,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(spark_session):
     engine.load_batch_data(batch_data=df, batch_id="1234")
 
     # Expect GreatExpectationsError because parser doesn't exist
-    with pytest.raises(ge_exceptions.GreatExpectationsError):
+    with pytest.raises(gx_exceptions.GreatExpectationsError):
         # noinspection PyUnusedLocal
         data = engine.get_domain_records(
             domain_kwargs={
@@ -1121,7 +1122,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(spark_session):
     )
 
     # Ensuring a metric provider error is raised if metric does not exist
-    with pytest.raises(ge_exceptions.MetricProviderError) as e:
+    with pytest.raises(gx_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
         res = engine.resolve_metrics(
             metrics_to_resolve=(
@@ -1162,13 +1163,13 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name="column_values.length.max.aggregate_fn",
+        metric_name=f"column_values.length.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={
             "column": "names",
             "batch_id": "my_id",
@@ -1181,7 +1182,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
 
     try:
         results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
-    except ge_exceptions.MetricProviderError as e:
+    except gx_exceptions.MetricProviderError as e:
         assert False, str(e)
 
     desired_metric = MetricConfiguration(
@@ -1200,7 +1201,7 @@ def test_resolve_metric_bundle_with_compute_domain_kwargs_json_serialization(
             metrics_to_resolve=(desired_metric,), metrics=results
         )
         assert results == {desired_metric.id: 16}
-    except ge_exceptions.MetricProviderError as e:
+    except gx_exceptions.MetricProviderError as e:
         assert False, str(e)
 
 

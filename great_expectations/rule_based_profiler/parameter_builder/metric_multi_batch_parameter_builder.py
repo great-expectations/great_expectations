@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
 
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -125,7 +125,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -151,6 +151,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             limit=limit,
             enforce_numeric_metric=self.enforce_numeric_metric,
             replace_nan_with_zero=self.replace_nan_with_zero,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,

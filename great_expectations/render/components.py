@@ -4,12 +4,18 @@ import json
 from copy import deepcopy
 from enum import Enum
 from string import Template as pTemplate
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
-from marshmallow import INCLUDE, Schema, fields, post_dump, post_load
+from marshmallow import Schema, fields, post_dump, post_load
 
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import (
+        MetaNotes,
+        RendererTableValue,
+    )
 
 
 class RendererPrefix(str, Enum):
@@ -624,9 +630,10 @@ class RenderedAtomicValue(DictDot):
         header: Optional[RenderedAtomicValue] = None,
         template: Optional[str] = None,
         params: Optional[dict] = None,
-        header_row: Optional[List[RenderedAtomicValue]] = None,
-        table: Optional[List[List[RenderedAtomicValue]]] = None,
+        header_row: Optional[List[RendererTableValue]] = None,
+        table: Optional[List[List[RendererTableValue]]] = None,
         graph: Optional[dict] = None,
+        meta_notes: Optional[MetaNotes] = None,
     ) -> None:
         self.schema: Optional[dict] = schema
         self.header: Optional[RenderedAtomicValue] = header
@@ -636,11 +643,13 @@ class RenderedAtomicValue(DictDot):
         self.params: Optional[dict] = params
 
         # TableType
-        self.header_row: Optional[List[RenderedAtomicValue]] = header_row
-        self.table: Optional[List[List[RenderedAtomicValue]]] = table
+        self.header_row: Optional[List[RendererTableValue]] = header_row
+        self.table: Optional[List[List[RendererTableValue]]] = table
 
         # GraphType
         self.graph = RenderedAtomicValueGraph(graph=graph)
+
+        self.meta_notes: Optional[MetaNotes] = meta_notes
 
     def __repr__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
@@ -679,9 +688,6 @@ class RenderedAtomicValueGraph(DictDot):
 
 
 class RenderedAtomicValueSchema(Schema):
-    class Meta:
-        unknown = INCLUDE
-
     schema = fields.Dict(required=False, allow_none=True)
     header = fields.Dict(required=False, allow_none=True)
 
@@ -696,17 +702,21 @@ class RenderedAtomicValueSchema(Schema):
     # for GraphType
     graph = fields.Dict(required=False, allow_none=True)
 
+    meta_notes = fields.Dict(required=False, allow_none=True)
+
     @post_load
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
 
     REMOVE_KEYS_IF_NONE = [
+        "header",
         "template",
         "table",
         "params",
         "header_row",
         "table",
         "graph",
+        "meta_notes",
     ]
 
     @post_dump
@@ -754,9 +764,6 @@ class RenderedAtomicContent(RenderedContent):
 
 
 class RenderedAtomicContentSchema(Schema):
-    class Meta:
-        unknown: INCLUDE
-
     name = fields.String(required=False, allow_none=True)
     value = fields.Nested(RenderedAtomicValueSchema(), required=True, allow_none=False)
     value_type = fields.String(required=True, allow_none=False)

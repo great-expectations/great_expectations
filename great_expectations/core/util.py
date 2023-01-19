@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import decimal
@@ -7,16 +9,30 @@ import re
 import sys
 import uuid
 from collections import OrderedDict
-from collections.abc import Mapping
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    MutableMapping,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    overload,
+)
 from urllib.parse import urlparse
 
 import dateutil.parser
 import numpy as np
 import pandas as pd
 from IPython import get_ipython
+from typing_extensions import TypeAlias
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
+from great_expectations.alias_types import JSONValues
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
@@ -29,7 +45,7 @@ from great_expectations.util import convert_decimal_to_float
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None  # type: ignore
+    StructType = None
 
 logger = logging.getLogger(__name__)
 
@@ -70,25 +86,35 @@ SCHEMAS = {
     },
 }
 
-
 try:
     import pyspark
+    from pyspark.sql import SparkSession
+
 except ImportError:
     pyspark = None
+    SparkSession = None
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
 
 
+if TYPE_CHECKING:
+    import numpy.typing as npt
+    from pyspark.sql import SparkSession  # noqa: F401
+    from ruamel.yaml.comments import CommentedMap
+
+
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
+
+M = TypeVar("M", bound=MutableMapping)
 
 
 def nested_update(
-    d: Union[Iterable, dict],
-    u: Union[Iterable, dict],
+    d: M,
+    u: Mapping,
     dedup: bool = False,
     concat_lists: bool = True,
-):
+) -> M:
     """
     Update d with items from u, recursively and joining elements. By default, list values are
     concatenated without de-duplication. If concat_lists is set to False, lists in u (new dict)
@@ -162,15 +188,95 @@ def determine_progress_bar_method_by_environment() -> Callable:
     return tqdm
 
 
-def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
+ToBool: TypeAlias = bool
+ToFloat: TypeAlias = Union[float, np.floating]
+ToInt: TypeAlias = Union[int, np.integer]
+ToStr: TypeAlias = Union[
+    str, bytes, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
+]
+
+ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index, pd.Series]
+ToDict: TypeAlias = Union[
+    dict, "CommentedMap", pd.DataFrame, SerializableDictDot, SerializableDotDict
+]
+
+JSONConvertable: TypeAlias = Union[
+    ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None
+]
+
+
+@overload
+def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToList`?
+    data: ToDict,
+) -> dict:
+    ...
+
+
+@overload
+def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToDict`?
+    data: ToList,
+) -> list:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToBool,
+) -> bool:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToFloat,
+) -> float:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToInt,
+) -> int:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: ToStr,
+) -> str:
+    ...
+
+
+@overload
+def convert_to_json_serializable(
+    data: None,
+) -> None:
+    ...
+
+
+def convert_to_json_serializable(  # noqa: C901 - complexity 28
+    data: JSONConvertable,
+) -> JSONValues:
     """
     Helper function to convert an object to one that is json serializable
+
     Args:
         data: an object to attempt to convert a corresponding json-serializable object
     Returns:
-        (dict) A converted test_object
+        converted object
     Warning:
-        test_obj may also be converted in place.
+        data may also be converted in place
+    Examples:
+        >>> convert_to_json_serializable(1)
+        1
+
+        >>> convert_to_json_serializable("hello")
+        "hello"
+
+        >>> convert_to_json_serializable(Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]))
+        "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
+
+
     """
 
     # If it's one of our types, we use our own conversion; this can move to full schema
@@ -195,7 +301,7 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
         return new_dict
 
     if isinstance(data, (list, tuple, set)):
-        new_list = []
+        new_list: List[JSONValues] = []
         for val in data:
             new_list.append(convert_to_json_serializable(val))
 
@@ -216,6 +322,9 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
     if isinstance(data, (datetime.datetime, datetime.date)):
         return data.isoformat()
 
+    if isinstance(data, (np.datetime64)):
+        return np.datetime_as_string(data)
+
     if isinstance(data, uuid.UUID):
         return str(data)
 
@@ -232,11 +341,11 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
         return bool(data)
 
     if np.issubdtype(type(data), np.integer) or np.issubdtype(type(data), np.uint):
-        return int(data)
+        return int(data)  # type: ignore[arg-type] # could be None
 
     if np.issubdtype(type(data), np.floating):
         # Note: Use np.floating to avoid FutureWarning from numpy
-        return float(round(data, sys.float_info.dig))
+        return float(round(data, sys.float_info.dig))  # type: ignore[arg-type] # could be None
 
     # Note: This clause has to come after checking for np.ndarray or we get:
     #      `ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.all()`
@@ -296,6 +405,7 @@ def convert_to_json_serializable(data):  # noqa: C901 - complexity 28
         raise TypeError(
             f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
         )
+    return None
 
 
 def ensure_json_serializable(data):  # noqa: C901 - complexity 21
@@ -410,7 +520,7 @@ def substitute_all_strftime_format_strings(
     elements using either the provided datetime_obj or the current datetime
     """
 
-    datetime_obj: datetime.datetime = datetime_obj or datetime.datetime.now()
+    datetime_obj = datetime_obj or datetime.datetime.now()
     if isinstance(data, dict) or isinstance(data, OrderedDict):
         return {
             k: substitute_all_strftime_format_strings(v, datetime_obj=datetime_obj)
@@ -431,7 +541,7 @@ def parse_string_to_datetime(
     datetime_string: str, datetime_format_string: Optional[str] = None
 ) -> datetime.datetime:
     if not isinstance(datetime_string, str):
-        raise ge_exceptions.SorterError(
+        raise gx_exceptions.SorterError(
             f"""Source "datetime_string" must have string type (actual type is "{str(type(datetime_string))}").
             """
         )
@@ -440,7 +550,7 @@ def parse_string_to_datetime(
         return dateutil.parser.parse(timestr=datetime_string)
 
     if datetime_format_string and not isinstance(datetime_format_string, str):
-        raise ge_exceptions.SorterError(
+        raise gx_exceptions.SorterError(
             f"""DateTime parsing formatter "datetime_format_string" must have string type (actual type is
 "{str(type(datetime_format_string))}").
             """
@@ -644,30 +754,21 @@ class DBFSPath:
             raise ValueError("Path should start with either /dbfs or dbfs:")
 
 
-def sniff_s3_compression(s3_url: S3Url) -> str:
+def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
     """Attempts to get read_csv compression from s3_url"""
-    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix)
+    return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
     force_reuse_spark_context: bool = False,
-):
+) -> Any:
     # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
     # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
     # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
     # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
     # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
-    try:
-        from pyspark.sql import SparkSession
-    except ImportError:
-        SparkSession = None
-        # TODO: review logging more detail here
-        logger.debug(
-            "Unable to load pyspark; install optional spark dependency for support."
-        )
-
     if spark_config is None:
         spark_config = {}
     else:
@@ -721,14 +822,6 @@ def get_or_create_spark_session(
     # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
     # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
     # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
-    try:
-        from pyspark.sql import SparkSession
-    except ImportError:
-        SparkSession = None
-        # TODO: review logging more detail here
-        logger.debug(
-            "Unable to load pyspark; install optional spark dependency for support."
-        )
 
     spark_session: Optional[SparkSession]
     try:
@@ -762,7 +855,7 @@ def get_or_create_spark_session(
 
 
 def spark_restart_required(
-    current_spark_config: List[tuple], desired_spark_config: dict
+    current_spark_config: List[Tuple[str, str]], desired_spark_config: dict
 ) -> bool:
 
     # we can't change spark context config values within databricks runtimes

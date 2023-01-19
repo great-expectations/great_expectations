@@ -8,7 +8,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
@@ -27,10 +27,10 @@ class TableHead(TableMetricProvider):
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
@@ -43,15 +43,14 @@ class TableHead(TableMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        df = None
         table_name = getattr(selectable, "name", None)
         if (
             isinstance(table_name, sa.sql.elements._anonymous_label)
@@ -120,7 +119,7 @@ class TableHead(TableMetricProvider):
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
                 )
-            elif execution_engine.engine.dialect.name.lower() == GESqlDialect.MSSQL:
+            elif execution_engine.engine.dialect.name.lower() == GXSqlDialect.MSSQL:
                 # limit doesn't compile properly for mssql
                 sql = str(
                     stmt.compile(
@@ -144,10 +143,10 @@ class TableHead(TableMetricProvider):
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE

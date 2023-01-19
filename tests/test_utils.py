@@ -1,6 +1,5 @@
 import logging
 import os
-import pathlib
 import uuid
 import warnings
 from contextlib import contextmanager
@@ -12,7 +11,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.alias_types import PathStr
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import (
     CheckpointStore,
@@ -50,6 +50,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
+
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -307,7 +308,7 @@ def build_configuration_store(
     if store_backend is not None and isinstance(store_backend, StoreBackend):
         store_backend = store_backend.config
     elif not isinstance(store_backend, dict):
-        raise ge_exceptions.DataContextError(
+        raise gx_exceptions.DataContextError(
             "Invalid configuration: A store_backend needs to be a dictionary or inherit from the StoreBackend class."
         )
 
@@ -362,9 +363,9 @@ def load_checkpoint_config_from_store_backend(
     )
     try:
         return config_store.get(key=key)  # type: ignore[return-value]
-    except ge_exceptions.InvalidBaseYamlConfigError as exc:
+    except gx_exceptions.InvalidBaseYamlConfigError as exc:
         logger.error(exc.messages)
-        raise ge_exceptions.InvalidCheckpointConfigError(
+        raise gx_exceptions.InvalidCheckpointConfigError(
             "Error while processing DataContextConfig.", exc
         )
 
@@ -665,10 +666,10 @@ def load_data_into_test_database(
                 connection=connection,
             )
             return return_value
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
             logger.error(error_message)
-            raise ge_exceptions.DatabaseConnectionError(error_message)
+            raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
             # sensitive information does not make it into our CI logs.
         finally:
@@ -695,10 +696,10 @@ def load_data_into_test_database(
                 method=to_sql_method,
             )
             return return_value
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
             logger.error(error_message)
-            raise ge_exceptions.DatabaseConnectionError(error_message)
+            raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
             # sensitive information does not make it into our CI logs.
         finally:
@@ -857,10 +858,10 @@ def check_athena_table_count(
         connection = engine.connect()
         result = connection.execute(sa.text(f"SHOW TABLES in {db_name}")).fetchall()
         return len(result) == expected_table_count
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
         logger.error(error_message)
-        raise ge_exceptions.DatabaseConnectionError(error_message)
+        raise gx_exceptions.DatabaseConnectionError(error_message)
         # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
         # sensitive information does not make it into our CI logs.
     finally:
@@ -892,6 +893,40 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     finally:
         connection.close()
         engine.dispose()
+
+
+def get_default_postgres_url() -> str:
+    """Get connection string to postgres container
+    Returns:
+        String of default connection to Docker container
+    """
+    return "postgresql+psycopg2://postgres:@localhost/test_ci"
+
+
+def get_default_mysql_url() -> str:
+    """Get connection string to mysql container
+    Returns:
+        String of default connection to Docker container
+    """
+    return "mysql+pymysql://root@localhost/test_ci"
+
+
+def get_default_trino_url() -> str:
+    """Get connection string to trino container
+    Returns:
+        String of default connection to Docker container
+    """
+    return "trino://test@localhost:8088/memory/schema"
+
+
+def get_default_mssql_url() -> str:
+    """Get connection string to mssql container
+    Returns:
+        String of default connection to Docker container
+    """
+    db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
+    connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
+    return connection_string
 
 
 def get_awsathena_db_name(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
@@ -989,7 +1024,7 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
 
 
 @contextmanager
-def working_directory(directory: Union[str, Path]):
+def working_directory(directory: PathStr):
     """
     Resets working directory to cwd() after changing to 'directory' passed in as parameter.
     Reference:

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Union
 
-from great_expectations.rule_based_profiler.domain import SemanticDomainTypes
+from great_expectations.core.domain import SemanticDomainTypes
 
 
 class SemanticTypeFilter(ABC):

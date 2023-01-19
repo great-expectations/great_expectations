@@ -178,6 +178,8 @@
 /docs/community https://docs.greatexpectations.io/docs
 /docs/guides/setup/installation/spark_emr https://docs.greatexpectations.io/docs/guides/setup/installation/hosted_environment
 
+# Redirects for integrations And How-Tos
+/docs/deployment_patterns/reference_architecture_overview /docs/deployment_patterns/integrations_and_howtos_overview
 # Redirects for Universal Map getting started tutorial
 /docs/tutorials/getting_started/intro /docs/tutorials/getting_started/tutorial_overview
 /docs/tutorials/getting_started/initialize_a_data_context /docs/tutorials/getting_started/tutorial_setup
@@ -218,3 +220,12 @@
 /docs/reference/supporting_resources.md https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
 /docs/reference/validation.md https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview
 /docs/guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook https://greatexpectations.io/expectations/
+
+# Redirects for deprecated API docs
+/docs/api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext /docs/reference/api/abstract_data_context
+/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config /docs/reference/api/abstract_data_context
+/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create /docs/reference/api/great_expectations.util
+
+/docs/api_docs/classes/great_expectations-data_context-data_context-data_context-datacontext /docs/reference/api/abstract_data_context
+/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-test_yaml_config /docs/reference/api/abstract_data_context
+/docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-create /docs/reference/api/great_expectations.util

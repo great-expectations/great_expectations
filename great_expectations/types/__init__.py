@@ -1,13 +1,14 @@
 import copy
 import logging
 from enum import Enum
-from typing import Optional, Set
+from typing import ClassVar, Optional, Set
 
 import pandas as pd
 
 from .base import SerializableDotDict
-from .color_palettes import ColorPalettes, Colors
+from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig
+from .fonts import FontFamily, FontFamilyURL
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +65,8 @@ class DictDot:
     For more examples of usage, please see `test_dataclass_serializable_dot_dict_pattern.py` in the tests folder.
     """
 
-    include_field_names: Set[str] = set()
-    exclude_field_names: Set[str] = set()
+    include_field_names: ClassVar[Set[str]] = set()
+    exclude_field_names: ClassVar[Set[str]] = set()
 
     def __getitem__(self, item):
         if isinstance(item, int):

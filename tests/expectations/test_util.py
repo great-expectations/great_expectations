@@ -65,7 +65,7 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
 
     table_column_types_metric: MetricConfiguration = MetricConfiguration(
         metric_name="table.column_types",
-        metric_domain_kwargs=dict(),
+        metric_domain_kwargs={},
         metric_value_kwargs={
             "include_nested": True,
         },
@@ -75,7 +75,7 @@ def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, d
 
     table_columns_metric: MetricConfiguration = MetricConfiguration(
         metric_name="table.columns",
-        metric_domain_kwargs=dict(),
+        metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
     table_columns_metric.metric_dependencies = {

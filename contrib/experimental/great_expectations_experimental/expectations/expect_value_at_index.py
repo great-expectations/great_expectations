@@ -71,9 +71,7 @@ class ColumnValuesHasValueIndex(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectValueAtIndex(ColumnMapExpectation):
-    """
-    check for a specified value at a given index location within each element of the column
-    """
+    """Expect a specific value at a given index location within each element of the column."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -235,7 +233,7 @@ class ExpectValueAtIndex(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -247,7 +245,7 @@ class ExpectValueAtIndex(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -265,16 +263,12 @@ class ExpectValueAtIndex(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):
 #!!! This example renderer should be shorter
 #         runtime_configuration = runtime_configuration or {}
-#         include_column_name = runtime_configuration.get("include_column_name", True)
-#         include_column_name = (
-#             include_column_name if include_column_name is not None else True
-#         )
+#         include_column_name = False if runtime_configuration.get("include_column_name") is False else True
 #         styling = runtime_configuration.get("styling")
 #         params = substitute_none_for_missing(
 #             configuration.kwargs,

@@ -1,9 +1,10 @@
 import logging
 import traceback
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Dict, Optional, Type, Union
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.core.expectation_validation_result import (
+from great_expectations.alias_types import JSONValues
+from great_expectations.core import (
+    ExpectationConfiguration,
     ExpectationValidationResult,
 )
 from great_expectations.expectations.registry import (
@@ -13,6 +14,7 @@ from great_expectations.expectations.registry import (
 from great_expectations.render import (
     CollapseContent,
     LegacyRendererType,
+    RenderedComponentContent,
     RenderedMarkdownContent,
     RenderedStringTemplateContent,
     TextContent,
@@ -23,10 +25,10 @@ logger = logging.getLogger(__name__)
 
 
 class ContentBlockRenderer(Renderer):
-    _rendered_component_type = TextContent
+    _rendered_component_type: Type[RenderedComponentContent] = TextContent
     _default_header = ""
 
-    _default_content_block_styling = {"classes": ["col-12"]}
+    _default_content_block_styling: Dict[str, JSONValues] = {"classes": ["col-12"]}
 
     _default_element_styling = {}
 
@@ -416,10 +418,9 @@ diagnose and repair the underlying issue.  Detailed information follows:
     @classmethod
     def _missing_content_block_fn(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
         return []

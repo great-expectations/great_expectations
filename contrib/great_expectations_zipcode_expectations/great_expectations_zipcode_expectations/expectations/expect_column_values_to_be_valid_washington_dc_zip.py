@@ -56,6 +56,7 @@ class ColumnValuesToBeValidWashingtonDCZip(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidWashingtonDCZip(ColumnMapExpectation):
     """Expect values in this column to be valid Washington D.C. zipcodes.
+
     See https://pypi.org/project/zipcodes/ for more information.
     """
 
@@ -111,8 +112,7 @@ class ExpectColumnValuesToBeValidWashingtonDCZip(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

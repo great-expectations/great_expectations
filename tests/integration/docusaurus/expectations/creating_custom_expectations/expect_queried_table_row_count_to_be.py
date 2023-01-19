@@ -4,9 +4,10 @@ For detailed information on QueryExpectations, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
 """
 
-from typing import Any, Dict, Optional, Union
+from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -17,22 +18,22 @@ from great_expectations.expectations.expectation import (
 )
 
 
-# <snippet name="query_table_expectation">
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py ExpectQueriedTableRowCountToBe class_def">
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # </snippet>
-    # <snippet name="query_table_docstring">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py docstring">
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
     # </snippet>
-    # <snippet name="query_table_dependencies">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies">
     metric_dependencies = ("query.table",)
     # </snippet>
-    # <snippet name="query_table_query">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py query">
     query = """
             SELECT COUNT(*)
             FROM {active_batch}
             """
     # </snippet>
-    # <snippet name="query_table_keys">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py success_keys">
     success_keys = (
         "value",
         "query",
@@ -51,7 +52,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
         value = configuration["kwargs"].get("value")
@@ -64,7 +65,8 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
-    # <snippet name="query_table_validate">
+    # <snippet name="expect_queried_table_row_count_to_be.py _validate function">
+    # <snippet name="expect_queried_table_row_count_to_be.py _validate function signature">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -72,9 +74,10 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
+        # </snippet>
+        metrics = convert_to_json_serializable(data=metrics)
+        query_result = list(metrics.get("query.table")[0].values())[0]
         value = configuration["kwargs"].get("value")
-        query_result = metrics.get("query.table")[0][0]
 
         success = query_result == value
 
@@ -84,7 +87,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         }
 
     # </snippet>
-    # <snippet name="query_table_examples">
+    # <snippet name="expect_queried_table_row_count_to_be.py examples">
     examples = [
         {
             "data": [
@@ -148,7 +151,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     ]
     # </snippet>
     # This dictionary contains metadata for display in the public gallery
-    # <snippet name="query_table_library_metadata">
+    # <snippet name="expect_queried_table_row_count_to_be.py library_metadata">
     library_metadata = {
         "tags": ["query-based"],
         "contributors": ["@joegargery"],
@@ -157,7 +160,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="query_table_diagnostics">
+    # <snippet name="expect_queried_table_row_count_to_be.py print_diagnostic_checklist">
     ExpectQueriedTableRowCountToBe().print_diagnostic_checklist()
     # </snippet>
 

@@ -163,14 +163,19 @@ class ExpectationsStore(Store):
 
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
-        ge_cloud_expectation_suite_id = response_json["data"]["id"]
-        expectation_suite_dict = response_json["data"]["attributes"]["suite"]
-        expectation_suite_dict["ge_cloud_id"] = ge_cloud_expectation_suite_id
+        suite_data: Dict
+        if isinstance(response_json["data"], list):
+            suite_data = response_json["data"][0]
+        else:
+            suite_data = response_json["data"]
+        ge_cloud_suite_id: str = suite_data["id"]
+        suite_dict: Dict = suite_data["attributes"]["suite"]
+        suite_dict["ge_cloud_id"] = ge_cloud_suite_id
 
-        return expectation_suite_dict
+        return suite_dict
 
     def get(self, key) -> ExpectationSuite:
         return super().get(key)  # type: ignore[return-value]
@@ -179,8 +184,8 @@ class ExpectationsStore(Store):
         return self.store_backend.remove_key(key)
 
     def serialize(self, value):
-        if self.ge_cloud_mode:
-            # GeCloudStoreBackend expects a json str
+        if self.cloud_mode:
+            # GXCloudStoreBackend expects a json str
             return self._expectationSuiteSchema.dump(value)
         return self._expectationSuiteSchema.dumps(value, indent=2, sort_keys=True)
 
@@ -214,7 +219,7 @@ class ExpectationsStore(Store):
         test_key_name = "test-key-" + "".join(
             [random.choice(list("0123456789ABCDEF")) for i in range(20)]
         )
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             test_key: GXCloudIdentifier = self.key_class(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),

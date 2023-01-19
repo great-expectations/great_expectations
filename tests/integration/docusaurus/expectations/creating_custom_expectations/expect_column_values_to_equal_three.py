@@ -1,15 +1,13 @@
 from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
+    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    ExecutionEngine,
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -19,38 +17,33 @@ from great_expectations.expectations.expectation import (
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
-    metric_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import F
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.render import CollapseContent, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-# <snippet name="custom_map_metric_class">
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py ColumnValuesEqualThree class_def">
 class ColumnValuesEqualThree(ColumnMapMetricProvider):
     # </snippet>
 
     # This is the id string that will be used to reference your metric.
-    # <snippet name="custom_map_metric_name">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py metric_name">
     condition_metric_name = "column_values.equal_three"
     # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet name="custom_map_pandas">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py pandas">
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
         return column == 3
         # </snippet>
 
-    # <snippet name="custom_map_spark_definition">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_definition">
     @metric_partial(
         engine=SparkDFExecutionEngine,
         partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
@@ -65,7 +58,7 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         runtime_configuration,
     ):
         # </snippet>
-        # <snippet name="custom_map_spark_selectable">
+        # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_selectable">
         (
             selectable,
             compute_domain_kwargs,
@@ -77,13 +70,13 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
         column_name = accessor_domain_kwargs["column"]
         column = F.col(column_name)
         # </snippet>
-        # <snippet name="custom_map_spark_query">
+        # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_query">
         query = F.when(column == 3, F.lit(False)).otherwise(F.lit(True))
 
         return (query, compute_domain_kwargs, accessor_domain_kwargs)
         # </snippet>
 
-    # <snippet name="custom_map_sqlalchemy">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py sqlalchemy">
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):
         return column.in_([3])
@@ -121,15 +114,15 @@ class ColumnValuesEqualThree(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-# <snippet name="custom_map_expectation_class">
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py ExpectColumnValuesToEqualThree class_def">
 class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
     # </snippet>
-    # <snippet name="custom_map_docstring">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py docstring">
     """Expect values in this column to equal 3."""
     # </snippet>
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
-    # <snippet name="custom_map_examples">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py examples">
     examples = [
         {
             "data": {
@@ -162,7 +155,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    # <snippet name="custom_map_map_metric">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py map_metric">
     map_metric = "column_values.equal_three"
     # </snippet>
 
@@ -180,7 +173,6 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ):
@@ -211,7 +203,6 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ):
@@ -313,7 +304,6 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ):
@@ -379,7 +369,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
         return unexpected_table_content_block
 
     # This dictionary contains metadata for display in the public gallery
-    # <snippet name="custom_map_library_metadata">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py library_metadata">
     library_metadata = {
         "tags": ["extremely basic math"],
         "contributors": ["@joegargery"],
@@ -388,7 +378,7 @@ class ExpectColumnValuesToEqualThree(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="custom_map_diagnostics">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py diagnostics">
     ExpectColumnValuesToEqualThree().print_diagnostic_checklist()
 #     </snippet>
 

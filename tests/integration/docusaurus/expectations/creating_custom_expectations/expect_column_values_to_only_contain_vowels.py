@@ -10,20 +10,20 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 )
 
 
-# <snippet name="regex_based_expectation_class">
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py ExpectColumnValuesToOnlyContainVowels class_def">
 class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
     # </snippet>
-    # <snippet name="regex_based_docstring">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py docstring">
     """Values in this column should only contain vowels"""
     # </snippet>
-    # <snippet name="regex_based_definition">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py definition">
     regex_camel_name = "Vowel"
     regex = "^[aeiouyAEIOUY]*$"
     # </snippet>
-    # <snippet name="regex_based_plural">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py plural">
     semantic_type_name_plural = "vowels"
     # </snippet>
-    # <snippet name="regex_based_examples">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py examples">
     examples = [
         {
             "data": {
@@ -119,7 +119,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
         regex_camel_name=regex_camel_name,
         regex_=regex,
     )
-    # <snippet name="regex_based_library_metadata">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py library_metadata">
     library_metadata = {
         "tags": ["regex"],
         "contributors": ["@joegargery"],
@@ -128,7 +128,7 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # <snippet name="regex_based_diagnostics">
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py diagnostics">
     ExpectColumnValuesToOnlyContainVowels().print_diagnostic_checklist()
 #     </snippet>
 

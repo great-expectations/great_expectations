@@ -5,13 +5,12 @@ This validator evaluates YAML configurations of core Great Expectations componen
  configuration of the Data Context in some cases if the configuration is valid.
 
  Typical usage example:
- import great_expectations as ge
- context = ge.get_context()
+ import great_expectations as gx
+ context = gx.get_context()
  context.test_yaml_config(my_config)
 """
 from __future__ import annotations
 
-import os
 import traceback
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 
@@ -30,13 +29,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.data_context.store import Store
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    DataContextConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.util import (
-    instantiate_class_from_config,
-    substitute_all_config_variables,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -158,7 +153,9 @@ class _YamlConfigValidator:
 
         Args:
             yaml_config: A string containing the yaml config to be tested
-            name: (Optional) A string containing the name of the component to instantiate
+            name: Optional name of the component to instantiate
+            class_name: Optional, overridden if provided in the config
+            runtime_environment: Optional override for config items
             pretty_print: Determines whether to print human-readable output
             return_mode: Determines what type of object test_yaml_config will return.
                 Valid modes are "instantiated_class" and "report_object"
@@ -288,7 +285,7 @@ class _YamlConfigValidator:
                 usage_stats_event_payload.get("parent_class") is None
                 and class_name in self.ALL_TEST_YAML_CONFIG_SUPPORTED_TYPES
             ):
-                # add parent_class if it doesn't exist and class_name is one of our supported core GE types
+                # add parent_class if it doesn't exist and class_name is one of our supported core GX types
                 usage_stats_event_payload["parent_class"] = class_name
             send_usage_message_from_handler(
                 event=usage_stats_event_name,
@@ -334,26 +331,16 @@ class _YamlConfigValidator:
         self, yaml_config: str, runtime_environment: dict, usage_stats_event_name: str
     ) -> str:
         try:
-            substituted_config_variables: Union[
-                DataContextConfig, dict
-            ] = substitute_all_config_variables(
-                self.config_variables,
-                dict(os.environ),
-            )
+            config_provider = self._data_context.config_provider
+            config_values = config_provider.get_values()
 
-            substitutions: dict = {
-                **substituted_config_variables,  # type: ignore[list-item]
-                **dict(os.environ),
-                **runtime_environment,
-            }
+            # While normally we'd just call `self.config_provider.substitute_config()`,
+            # we need to account for `runtime_environment` values that may have been passed.
+            config_values.update(runtime_environment)
 
-            config_str_with_substituted_variables: str = (
-                substitute_all_config_variables(
-                    yaml_config,
-                    substitutions,
-                )
+            return config_provider.substitute_config(
+                config=yaml_config, config_values=config_values
             )
-            return config_str_with_substituted_variables
         except Exception as e:
             usage_stats_event_payload: dict = {
                 "diagnostic_info": ["__substitution_error__"],
@@ -461,8 +448,8 @@ class _YamlConfigValidator:
 
         checkpoint_config: Union[CheckpointConfig, dict]
 
-        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)  # type: ignore[assignment]
-        checkpoint_config = checkpoint_config.to_json_dict()  # type: ignore[union-attr]
+        checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)
+        checkpoint_config = checkpoint_config.to_json_dict()
         checkpoint_config.update({"name": checkpoint_name})
 
         checkpoint_class_args: dict = filter_properties_dict(  # type: ignore[assignment]
@@ -630,10 +617,10 @@ class _YamlConfigValidator:
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
             checkpoint_config: Union[CheckpointConfig, dict]
-            checkpoint_config = CheckpointConfig.from_commented_map(  # type: ignore[assignment]
+            checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config
             )
-            checkpoint_config = checkpoint_config.to_json_dict()  # type: ignore[union-attr]
+            checkpoint_config = checkpoint_config.to_json_dict()
             checkpoint_config.update({"name": checkpoint_name})
             usage_stats_event_payload = anonymizer.anonymize(
                 obj=checkpoint_config, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]

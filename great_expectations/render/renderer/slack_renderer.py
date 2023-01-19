@@ -11,12 +11,13 @@ class SlackRenderer(Renderer):
     def __init__(self) -> None:
         super().__init__()
 
-    def render(
+    def render(  # noqa: C901 - 17
         self,
         validation_result=None,
         data_docs_pages=None,
         notify_with=None,
         show_failed_expectations: bool = False,
+        validation_result_urls: List[str] = [],
     ):
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
@@ -75,8 +76,24 @@ class SlackRenderer(Renderer):
                     failed_expectations_text = self.create_failed_expectations_text(
                         validation_result["results"]
                     )
+            summary_text = ""
+            if validation_result_urls:
+                # This adds hyperlinks for defined URL
+                if len(validation_result_urls) == 1:
+                    title_hlink = f"*<{validation_result_urls[0]} | Validation Result>*"
+                else:
+                    title_hlink = "*Validation Result*"
+                batch_validation_status_hlinks = "".join(
+                    f"*Batch Validation Status*: *<{validation_result_url} | {status}>*"
+                    for validation_result_url in validation_result_urls
+                )
+                summary_text += f"""{title_hlink}
+{batch_validation_status_hlinks}
+                """
+            else:
+                summary_text += f"*Batch Validation Status*: {status}"
 
-            summary_text = f"""*Batch Validation Status*: {status}
+            summary_text += f"""
 *Expectation suite name*: `{expectation_suite_name}`
 *Data asset name*: `{data_asset_name}`
 *Run ID*: `{run_id}`

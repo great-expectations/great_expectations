@@ -54,7 +54,7 @@ class ColumnValuesToBeValidDate(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidDate(ColumnMapExpectation):
-    """Expect column values to be valid date"""
+    """Expect column values to be valid dates."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -124,8 +124,7 @@ class ExpectColumnValuesToBeValidDate(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

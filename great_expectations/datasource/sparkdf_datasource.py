@@ -198,7 +198,7 @@ class SparkDFDatasource(LegacyDatasource):
             if "s3" in batch_kwargs:
                 # deprecated-v0.13.0
                 warnings.warn(
-                    "Direct GE Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "
+                    "Direct GX Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "
                     "Please use a path including the s3a:// protocol instead.",
                     DeprecationWarning,
                 )
@@ -248,7 +248,8 @@ class SparkDFDatasource(LegacyDatasource):
         )
 
     @staticmethod
-    def guess_reader_method_from_path(path):
+    def guess_reader_method_from_path(path: str):
+        path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "csv"}
         elif (
@@ -257,7 +258,8 @@ class SparkDFDatasource(LegacyDatasource):
             return {"reader_method": "parquet"}
 
         raise BatchKwargsError(
-            f"Unable to determine reader method from path: {path}", {"path": path}
+            f"Unable to determine reader method from path: {path}",
+            {"path": path},
         )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):

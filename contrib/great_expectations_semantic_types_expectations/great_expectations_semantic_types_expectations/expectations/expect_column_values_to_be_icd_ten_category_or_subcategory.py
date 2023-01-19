@@ -49,9 +49,7 @@ class ColumnValuesMatchValidIcdTenCategoryOrSubcategory(ColumnMapMetricProvider)
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeIcdTenCategoryOrSubcategory(ColumnMapExpectation):
-    """
-    Expect column values to consist only of ICD-10 categories or subcategories.
-    """
+    """Expect column values to consist only of ICD-10 categories or subcategories."""
 
     examples = [
         {
@@ -141,8 +139,7 @@ class ExpectColumnValuesToBeIcdTenCategoryOrSubcategory(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

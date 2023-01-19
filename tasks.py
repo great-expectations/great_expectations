@@ -15,7 +15,7 @@ import shutil
 
 import invoke
 
-from scripts import check_type_hint_coverage
+from scripts import check_public_api_docstrings, check_type_hint_coverage
 
 try:
     from tests.integration.usage_statistics import usage_stats_utils
@@ -109,6 +109,18 @@ def hooks(ctx, all_files=False, diff=False, sync=False):
         ctx.run(" ".join(["pre-commit", "install"]), echo=True)
 
 
+@invoke.task(aliases=["docstring"])
+def docstrings(ctx):
+    """Check public API docstrings."""
+    try:
+        check_public_api_docstrings.main()
+    except AssertionError as err:
+        raise invoke.Exit(
+            message=f"{err}\n\nGenerated with {check_public_api_docstrings.__file__}",
+            code=1,
+        )
+
+
 @invoke.task(aliases=["type-cov"])  # type: ignore
 def type_coverage(ctx):
     """
@@ -143,10 +155,29 @@ def type_check(
     daemon=False,
     clear_cache=False,
     report=False,
+    ci=False,
 ):
     """Run mypy static type-checking on select packages."""
+    mypy_cache = pathlib.Path(".mypy_cache")
+
+    if ci:
+        mypy_cache.mkdir(exist_ok=True)
+        print(f"  mypy cache {mypy_cache.absolute()}")
+
+        type_check(
+            ctx,
+            packages,
+            install_types=True,
+            pretty=pretty,
+            warn_unused_ignores=True,
+            daemon=daemon,
+            clear_cache=clear_cache,
+            report=report,
+            ci=False,
+        )
+        return  # don't run twice
+
     if clear_cache:
-        mypy_cache = pathlib.Path(".mypy_cache")
         print(f"  Clearing {mypy_cache} ... ", end="")
         try:
             shutil.rmtree(mypy_cache)
@@ -313,13 +344,10 @@ def docker(
     """
     Build or run gx docker image.
     """
+
+    _exit_with_error_if_not_in_repo_root(task_name="docker")
+
     filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
-    curdir = os.path.realpath(os.getcwd())
-    if filedir != curdir:
-        raise invoke.Exit(
-            "The docker task must be invoked from the same directory as the task.py file at the top of the repo.",
-            code=1,
-        )
 
     cmds = ["docker"]
 
@@ -357,3 +385,15 @@ def docker(
         )
 
     ctx.run(" ".join(cmds), echo=True, pty=True)
+
+
+def _exit_with_error_if_not_in_repo_root(task_name: str):
+    """Exit if the command was not run from the repository root."""
+    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    curdir = os.path.realpath(os.getcwd())
+    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
+    if filedir != curdir:
+        raise invoke.Exit(
+            exit_message,
+            code=1,
+        )

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -25,7 +25,7 @@ class Builder(SerializableDictDot):
     A Builder provides methods to serialize any builder object of a rule generically.
     """
 
-    exclude_field_names: Set[str] = {
+    exclude_field_names: ClassVar[Set[str]] = {
         "batch_list",
         "batch_request",
         "data_context",
@@ -39,9 +39,9 @@ class Builder(SerializableDictDot):
         Args:
             data_context: AbstractDataContext associated with this Builder
         """
-        self._batch_list = None
-        self._batch_request = None
-        self._data_context = data_context
+        self._batch_list: Optional[List[Batch]] = None
+        self._batch_request: Union[BatchRequestBase, dict, None] = None
+        self._data_context: Optional[AbstractDataContext] = data_context
 
     """
     Full getter/setter accessors for "batch_request" and "batch_list" are for configuring Builder dynamically.
@@ -56,7 +56,7 @@ class Builder(SerializableDictDot):
         self._batch_list = value
 
     @property
-    def batch_request(self) -> Optional[Union[BatchRequestBase, dict]]:
+    def batch_request(self) -> Union[BatchRequestBase, dict, None]:
         return self._batch_request
 
     @batch_request.setter
@@ -101,7 +101,7 @@ class Builder(SerializableDictDot):
             ]
         )
         if num_supplied_batch_specification_args > 1:
-            raise ge_exceptions.ProfilerConfigurationError(
+            raise gx_exceptions.ProfilerConfigurationError(
                 f'Please pass at most one of "batch_list" and "batch_request" arguments (you passed {num_supplied_batch_specification_args} arguments).'
             )
 

@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
@@ -39,13 +39,16 @@ class CheckpointStore(ConfigurationStore):
 
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
-        ge_cloud_checkpoint_id = response_json["data"]["id"]
-        checkpoint_config_dict = response_json["data"]["attributes"][
-            "checkpoint_config"
-        ]
+        cp_data: Dict
+        if isinstance(response_json["data"], list):
+            cp_data = response_json["data"][0]
+        else:
+            cp_data = response_json["data"]
+        ge_cloud_checkpoint_id: str = cp_data["id"]
+        checkpoint_config_dict: Dict = cp_data["attributes"]["checkpoint_config"]
         checkpoint_config_dict["ge_cloud_id"] = ge_cloud_checkpoint_id
 
         # Checkpoints accept a `ge_cloud_id` but not an `id`
@@ -60,7 +63,7 @@ class CheckpointStore(ConfigurationStore):
         test_checkpoint_configuration = CheckpointConfig(
             **{"name": test_checkpoint_name}  # type: ignore[arg-type]
         )
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             test_key: GXCloudIdentifier = self.key_class(  # type: ignore[call-arg,assignment]
                 resource_type=GXCloudRESTResource.CHECKPOINT,
                 ge_cloud_id=str(uuid.uuid4()),
@@ -104,7 +107,7 @@ class CheckpointStore(ConfigurationStore):
         return os.path.isdir(checkpoints_directory_path)
 
     def list_checkpoints(
-        self, ge_cloud_mode: bool
+        self, ge_cloud_mode: bool = False
     ) -> Union[List[str], List[ConfigurationIdentifier]]:
         keys: Union[List[str], List[ConfigurationIdentifier]] = self.list_keys()  # type: ignore[assignment]
         if ge_cloud_mode:
@@ -121,8 +124,8 @@ class CheckpointStore(ConfigurationStore):
         )
         try:
             self.remove_key(key=key)
-        except ge_exceptions.InvalidKeyError as exc_ik:
-            raise ge_exceptions.CheckpointNotFoundError(
+        except gx_exceptions.InvalidKeyError as exc_ik:
+            raise gx_exceptions.CheckpointNotFoundError(
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
             )
 
@@ -134,12 +137,12 @@ class CheckpointStore(ConfigurationStore):
         )
         try:
             checkpoint_config: CheckpointConfig = self.get(key=key)  # type: ignore[assignment]
-        except ge_exceptions.InvalidKeyError as exc_ik:
-            raise ge_exceptions.CheckpointNotFoundError(
+        except gx_exceptions.InvalidKeyError as exc_ik:
+            raise gx_exceptions.CheckpointNotFoundError(
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
             )
         except ValidationError as exc_ve:
-            raise ge_exceptions.InvalidCheckpointConfigError(
+            raise gx_exceptions.InvalidCheckpointConfigError(
                 message="Invalid Checkpoint configuration", validation_error=exc_ve
             )
 
@@ -159,7 +162,7 @@ class CheckpointStore(ConfigurationStore):
                     )
                 )
             ):
-                raise ge_exceptions.CheckpointError(
+                raise gx_exceptions.CheckpointError(
                     message="Attempt to instantiate LegacyCheckpoint with insufficient and/or incorrect arguments."
                 )
 
@@ -174,7 +177,7 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment]
         checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
-            ge_cloud_id = checkpoint_ref.ge_cloud_id
+            ge_cloud_id = checkpoint_ref.cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)  # type: ignore[misc]
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
@@ -184,7 +187,7 @@ class CheckpointStore(ConfigurationStore):
             checkpoint_config: Config containing the checkpoint name.
 
         Returns:
-            None unless using GeCloudStoreBackend and if so the GeCloudResourceRef which contains the id
+            None unless using GXCloudStoreBackend and if so the GeCloudResourceRef which contains the id
             which was used to create the config in the backend.
         """
         # CheckpointConfig not an AbstractConfig??
@@ -195,7 +198,7 @@ class CheckpointStore(ConfigurationStore):
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
         ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
         if ref and isinstance(ref, GXCloudResourceRef):
-            key.ge_cloud_id = ref.ge_cloud_id  # type: ignore[attr-defined]
+            key.cloud_id = ref.cloud_id  # type: ignore[attr-defined]
 
         config = self.get(key=key)
 

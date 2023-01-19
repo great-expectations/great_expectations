@@ -54,8 +54,9 @@ class ColumnValuesToBeValidUSStateAbbreviation(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidUSStateAbbreviation(ColumnMapExpectation):
     """Expect values in this column to be valid state abbreviations.
-    See https://pypi.org/project/us/ for more information.
-    DC statehood is a perennial issue in data science, and the owners of the us repo addressed it differently than we have: https://github.com/unitedstates/python-us/issues/50
+
+    See https://pypi.org/project/us/ for more information. \
+    DC statehood is a perennial issue in data science, and the owners of the us repo addressed it differently than we have: https://github.com/unitedstates/python-us/issues/50. \
     dc_statehood defaults to True, though can be overriden by end users
     """
 
@@ -97,7 +98,7 @@ class ExpectColumnValuesToBeValidUSStateAbbreviation(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -111,8 +112,7 @@ class ExpectColumnValuesToBeValidUSStateAbbreviation(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

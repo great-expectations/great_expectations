@@ -20,8 +20,13 @@ from typing import (
 
 from marshmallow import Schema, ValidationError, fields, pre_dump
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import __version__ as ge_version
+from great_expectations.core._docs_decorators import (
+    deprecated_argument,
+    new_argument,
+    public_api,
+)
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
 )
@@ -60,13 +65,28 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@public_api
+@deprecated_argument(argument_name="data_asset_type", version="0.14.0")
+@new_argument(
+    argument_name="ge_cloud_id", version="0.13.33", message="Used in cloud deployments."
+)
 class ExpectationSuite(SerializableDictDot):
-    """
-    This ExpectationSuite object has create, read, update, and delete functionality for its expectations:
-        -create: self.add_expectation()
-        -read: self.find_expectation_indexes()
-        -update: self.add_expectation() or self.patch_expectation()
-        -delete: self.remove_expectation()
+    """Suite of expectations plus create, read, update, and delete functionality.
+
+    - create: add_expectation(), append_expectation()
+    - read: find_expectation_indexes(), find_expectations(), show_expectations_by_domain_type(), show_expectations_by_expectation_type()
+    - update: add_expectation(), append_expectation(), patch_expectation(), replace_expectation(), add_expectation_configurations()
+    - delete: remove_expectation(), remove_all_expectations_of_type()
+
+    Args:
+        expectation_suite_name: Name of the Expectation Suite.
+        data_context: Data Context associated with this Expectation Suite.
+        expectations: Expectation Configurations to associate with this Expectation Suite.
+        evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+        data_asset_type: Type of data asset to associate with this suite.
+        execution_engine_type: Name of the execution engine type.
+        meta: Metadata related to the suite.
+        ge_cloud_id: Great Expectations Cloud id for this Expectation Suite.
     """
 
     def __init__(
@@ -154,7 +174,7 @@ class ExpectationSuite(SerializableDictDot):
             "profiler_config": profiler_config,
             "comment": comment,
         }
-        ge.util.filter_properties_dict(
+        gx.util.filter_properties_dict(
             properties=citation, clean_falsy=True, inplace=True
         )
         self.meta["citations"].append(citation)
@@ -308,6 +328,12 @@ class ExpectationSuite(SerializableDictDot):
         """
         self.expectations.append(expectation_config)
 
+    @public_api
+    @new_argument(
+        argument_name="ge_cloud_id",
+        version="0.13.33",
+        message="Used in cloud deployments.",
+    )
     def remove_expectation(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
@@ -315,21 +341,23 @@ class ExpectationSuite(SerializableDictDot):
         remove_multiple_matches: bool = False,
         ge_cloud_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> List[ExpectationConfiguration]:
-        """
+        """Remove an ExpectationConfiguration from the ExpectationSuite.
 
         Args:
-            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against for
-                the removal of expectations.
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against.
             match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
                 on the data evaluated by that expectation, 'success' to match based on all configuration parameters
-                 that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
-                 based on all configuration parameters
-            remove_multiple_matches: If True, will remove multiple matching expectations. If False, will raise a ValueError.
-        Returns: The list of deleted ExpectationConfigurations
+                that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
+                based on all configuration parameters.
+            remove_multiple_matches: If True, will remove multiple matching expectations.
+            ge_cloud_id: Great Expectations Cloud id for an Expectation.
+
+        Returns:
+            The list of deleted ExpectationConfigurations.
 
         Raises:
-            No match
-            More than 1 match, if remove_multiple_matches = False
+            TypeError: Must provide either expectation_configuration or ge_cloud_id.
+            ValueError: No match or multiple matches found (and remove_multiple_matches=False).
         """
         if expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
@@ -562,7 +590,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         This is a private method for adding expectations that allows for usage_events to be suppressed when
         Expectations are added through internal processing (ie. while building profilers, rendering or validation). It
-        takes in send_usage_event boolean.
+        takes in send_usage_event boolean.  If successful, upserts ExpectationConfiguration into this ExpectationSuite.
 
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
@@ -575,6 +603,7 @@ class ExpectationSuite(SerializableDictDot):
 
         Returns:
             The ExpectationConfiguration to add or replace.
+
         Raises:
             More than one match
             One match if overwrite_existing = False
@@ -642,7 +671,8 @@ class ExpectationSuite(SerializableDictDot):
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> List[ExpectationConfiguration]:
-        """
+        """Upsert a list of ExpectationConfigurations into this ExpectationSuite.
+
         Args:
             expectation_configurations: The List of candidate new/modifed "ExpectationConfiguration" objects for Suite.
             send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
@@ -655,6 +685,7 @@ class ExpectationSuite(SerializableDictDot):
         Returns:
             The List of "ExpectationConfiguration" objects attempted to be added or replaced (can differ from the list
             of "ExpectationConfiguration" objects in "self.expectations" at the completion of this method's execution).
+
         Raises:
             More than one match
             One match if overwrite_existing = False
@@ -673,6 +704,7 @@ class ExpectationSuite(SerializableDictDot):
         ]
         return expectation_configurations_attempted_to_be_added
 
+    @public_api
     def add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
@@ -680,7 +712,8 @@ class ExpectationSuite(SerializableDictDot):
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
-        """
+        """Upsert specified ExpectationConfiguration into this ExpectationSuite.
+
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
             send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
@@ -692,9 +725,12 @@ class ExpectationSuite(SerializableDictDot):
 
         Returns:
             The ExpectationConfiguration to add or replace.
+
         Raises:
-            More than one match
-            One match if overwrite_existing = False
+            ValueError: More than one match
+            DataContextError: One match if overwrite_existing = False
+
+        # noqa: DAR402
         """
         return self._add_expectation(
             expectation_configuration=expectation_configuration,

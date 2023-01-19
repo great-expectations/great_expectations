@@ -22,7 +22,7 @@ def test_serialize_cloud_mode(basic_data_context_config: DataContextConfig):
     store = DataContextStore(store_name="data_context_store")
 
     with mock.patch(
-        "great_expectations.data_context.store.DataContextStore.ge_cloud_mode"
+        "great_expectations.data_context.store.DataContextStore.cloud_mode"
     ) as mock_cloud_mode:
         type(mock_cloud_mode.return_value).ok = mock.PropertyMock(return_value=True)
         actual = store.serialize(basic_data_context_config)

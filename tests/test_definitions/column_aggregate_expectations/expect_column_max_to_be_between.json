@@ -158,8 +158,10 @@
         "observed_value": "2001-01-01T12:00:01"
       }
     },{
-      "title": "datetime_with_evaluation_parameter_except_sqlite",
-      "only_for": ["sqlite"],
+      "title": "datetime_with_evaluation_parameter_sqlite",
+      "only_for": [
+        "sqlite"
+      ],
       "exact_match_out": false,
       "in": {
         "column": "ts",

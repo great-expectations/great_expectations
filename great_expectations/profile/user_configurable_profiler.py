@@ -79,7 +79,7 @@ class UserConfigurableProfiler:
         instantiated with or without a config. The config may contain a semantic_types dict or not. Once a profiler is
         instantiated, if config items change, a new profiler will be needed.
 
-        Write an entry on how to use the profiler for the GE docs site
+        Write an entry on how to use the profiler for the GX docs site
                 Args:
                     profile_dataset: A Great Expectations Dataset or Validator object
                     excluded_expectations: A list of expectations to not include in the suite
@@ -478,7 +478,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         """
         Adds the data type of a column to the column_info dictionary on self
         Args:
-            profile_dataset: A GE dataset
+            profile_dataset: A GX dataset
             column_name: The name of the column for which to retrieve the data type
 
         Returns:
@@ -513,7 +513,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         during the init of the profiler do not persist.
 
         Args:
-            profile_dataset: A GE dataset
+            profile_dataset: A GX dataset
             column: The column for which to get the data type
 
         Returns:
@@ -582,7 +582,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         """
         Adds the cardinality of a column to the column_info dictionary on self
         Args:
-            profile_dataset: A GE Dataset
+            profile_dataset: A GX Dataset
             column_name: The name of the column for which to add cardinality
 
         Returns:
@@ -620,7 +620,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         Determines the cardinality of a column using the get_basic_column_cardinality method from
         OrderedProfilerCardinality
         Args:
-            profile_dataset: A GE Dataset
+            profile_dataset: A GX Dataset
             column: The column for which to get cardinality
 
         Returns:
@@ -698,7 +698,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         """
         Adds column description metadata to the suite on a Dataset object
         Args:
-            profile_dataset: A GE Dataset
+            profile_dataset: A GX Dataset
 
         Returns:
             An expectation suite with column description metadata
@@ -794,11 +794,11 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         """
         Adds a value_set expectation for a given column
         Args:
-            profile_dataset: A GE Dataset
+            profile_dataset: A GX Dataset
             column: The column for which to add an expectation
 
         Returns:
-            The GE Dataset
+            The GX Dataset
         """
         if "expect_column_values_to_be_in_set" not in self.excluded_expectations:
             value_set = profile_dataset.expect_column_distinct_values_to_be_in_set(
@@ -823,11 +823,11 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         """
         Adds a set of numeric expectations for a given column
         Args:
-            profile_dataset: A GE Dataset
+            profile_dataset: A GX Dataset
             column: The column for which to add expectations
 
         Returns:
-            The GE Dataset
+            The GX Dataset
         """
 
         # min
@@ -1007,11 +1007,11 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         """
         Adds a uniqueness expectation for a given column or set of columns
         Args:
-            profile_dataset: A GE Dataset
+            profile_dataset: A GX Dataset
             column_list: A list containing one or more columns for which to add a uniqueness expectation
 
         Returns:
-            The GE Dataset
+            The GX Dataset
         """
         # uniqueness
         if (
@@ -1037,11 +1037,11 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         With the 0.12 API there isn't a quick way to introspect for value_lengths - if we did that, we could build a
         potentially useful value_lengths expectation here.
         Args:
-            profile_dataset: A GE Dataset
+            profile_dataset: A GX Dataset
             column: The column for which to add the expectation
 
         Returns:
-            The GE Dataset
+            The GX Dataset
         """
 
         if (
@@ -1057,11 +1057,11 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         """
         Adds `expect_column_values_to_be_between` for a given column
         Args:
-            profile_dataset: A GE Dataset
+            profile_dataset: A GX Dataset
             column: The column for which to add the expectation
 
         Returns:
-            The GE Dataset
+            The GX Dataset
         """
 
         if "expect_column_values_to_be_between" not in self.excluded_expectations:
@@ -1124,11 +1124,11 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             - `expect_column_proportion_of_unique_values_to_be_between`
             - `expect_column_values_to_be_in_type_list`
         Args:
-            profile_dataset: A GE Dataset
+            profile_dataset: A GX Dataset
             column: The column for which to add the expectations
 
         Returns:
-            The GE Dataset
+            The GX Dataset
         """
         if "expect_column_values_to_not_be_null" not in self.excluded_expectations:
             not_null_result = profile_dataset.expect_column_values_to_not_be_null(
@@ -1213,10 +1213,10 @@ nan: {pct_unique}
         """
         Adds two table level expectations to the dataset
         Args:
-            profile_dataset: A GE Dataset
+            profile_dataset: A GX Dataset
 
         Returns:
-            The GE Dataset
+            The GX Dataset
         """
 
         if (

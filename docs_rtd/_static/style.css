@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
+
 h1,
 h2,
 h3,
@@ -7,7 +10,7 @@ h6,
 p,
 body,
 a {
-  font-family: HKGroteskPro, serif !important;
+  font-family: Montserrat, serif !important;
 }
 
 h1,
@@ -27,31 +30,31 @@ a {
 }
 
 @font-face {
-  font-family: HKGroteskPro;
+  font-family: Montserrat;
   font-weight: 400;
-  src: url(hk-grotesk-pro/HKGroteskPro-Regular.woff2) format("woff2"),
-    url(hk-grotesk-pro/HKGroteskPro-Regular.woff) format("woff");
+  src: url(hk-grotesk-pro/Montserrat-Regular.woff2) format("woff2"),
+    url(hk-grotesk-pro/Montserrat-Regular.woff) format("woff");
 }
 
 @font-face {
-  font-family: HKGroteskPro;
+  font-family: Montserrat;
   font-weight: 600;
-  src: url(hk-grotesk-pro/HKGroteskPro-Medium.woff2) format("woff2"),
-    url(hk-grotesk-pro/HKGroteskPro-Medium.woff) format("woff");
+  src: url(hk-grotesk-pro/Montserrat-Medium.woff2) format("woff2"),
+    url(hk-grotesk-pro/Montserrat-Medium.woff) format("woff");
 }
 
 @font-face {
-  font-family: HKGroteskPro;
+  font-family: Montserrat;
   font-weight: 700;
-  src: url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff2) format("woff2"),
-    url(hk-grotesk-pro/HKGroteskPro-SemiBold.woff) format("woff");
+  src: url(hk-grotesk-pro/Montserrat-SemiBold.woff2) format("woff2"),
+    url(hk-grotesk-pro/Montserrat-SemiBold.woff) format("woff");
 }
 
 @font-face {
-  font-family: HKGroteskPro;
+  font-family: Montserrat;
   font-weight: 800;
-  src: url(hk-grotesk-pro/HKGroteskPro-Bold.woff2) format("woff2"),
-    url(hk-grotesk-pro/HKGroteskPro-Bold.woff) format("woff");
+  src: url(hk-grotesk-pro/Montserrat-Bold.woff2) format("woff2"),
+    url(hk-grotesk-pro/Montserrat-Bold.woff) format("woff");
 }
 
 @media print {
@@ -122,7 +125,7 @@ a {
 
 .wy-menu-vertical a:hover {
   color: #333333;
-  background: #00bfa5;
+  background: #ff6310;
 }
 
 .wy-nav-side {
@@ -130,7 +133,7 @@ a {
   top: 72px;
 }
 
-/*GE HEADER STYLES*/
+/*GX HEADER STYLES*/
 
 .ge_header {
   background-color: #fff;
@@ -154,7 +157,7 @@ a {
   display: inline;
   vertical-align: middle;
   margin-right: 16px;
-  max-width: 224px;
+  max-width: 200px;
   width: 100%;
   margin-bottom: 0;
 }
@@ -172,42 +175,31 @@ a {
   display: inline-block;
   vertical-align: bottom;
   padding: 0 20px;
+  font-weight: 600;
   display: block;
   color: rgba(0, 0, 0, 0.65) !important;
   float: left;
   border-bottom: 2px solid transparent;
-  transition: border-bottom 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
-    background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
-    padding 0.15s cubic-bezier(0.645, 0.045, 0.355, 1);
 }
 
-#header-actions a:hover {
-  color: #00bfa5 !important;
-  border-bottom: 2px solid #00bfa5;
-  transition: border-bottom 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
-    background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1),
-    padding 0.15s cubic-bezier(0.645, 0.045, 0.355, 1);
-}
-
-#community-modal {
+.drop-modal {
   background: #fff;
   min-width: 172px;
   border-radius: 4px;
   height: 0px;
   transition: all 0.3s ease-in-out;
   overflow: hidden;
-  position: relative;
-  width: 180px;
-  right: 30px;
+  position: absolute;
+  margin-left: -30px;
 }
 
-#community-modal ul {
+.drop-modal ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-#community-modal li {
+.drop-modal li {
   margin-bottom: 8px;
   padding: 0 16px 0 28px;
   height: 40px;
@@ -219,7 +211,7 @@ a {
   text-overflow: ellipsis;
 }
 
-#community-modal a {
+.drop-modal a {
   border-bottom: none !important;
 }
 
@@ -285,7 +277,7 @@ a {
 /*** Make the API Reference breadcrumbs look kind of normal ***/
 ul.wy-breadcrumbs li code span.pre {
   font-size: 16px;
-  font-family: HKGroteskPro, serif;
+  font-family: Montserrat, serif;
   font-weight: 400;
   color: rgb(155, 89, 182);
 }

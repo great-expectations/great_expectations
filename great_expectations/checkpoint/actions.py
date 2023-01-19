@@ -3,13 +3,17 @@ An action is a way to take an arbitrary method and make it configurable and runn
 
 The only requirement from an action is for it to have a take_action method.
 """
+from __future__ import annotations
 
 import logging
 import warnings
-from typing import Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 from urllib.parse import urljoin
 
+from typing_extensions import Final
+
 from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 try:
@@ -34,6 +38,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import DataContext
+
 logger = logging.getLogger(__name__)
 
 
@@ -47,6 +54,16 @@ class ValidationAction:
 
     def __init__(self, data_context) -> None:
         self.data_context = data_context
+
+    @property
+    def _using_cloud_context(self) -> bool:
+        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
+        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
 
     def run(
         self,
@@ -138,7 +155,6 @@ class SlackNotificationAction(ValidationAction):
             module_name: great_expectations.render.renderer.slack_renderer
             class_name: SlackRenderer
           show_failed_expectations: *Optional* (boolean) shows a list of failed expectation types. default is false.
-
     """
 
     def __init__(
@@ -222,12 +238,31 @@ class SlackNotificationAction(ValidationAction):
 
         validation_success = validation_result_suite.success
         data_docs_pages = None
-
         if payload:
             # process the payload
             for action_names in payload.keys():
                 if payload[action_names]["class"] == "UpdateDataDocsAction":
                     data_docs_pages = payload[action_names]
+
+        # Assemble complete GX Cloud URL for a specific validation result
+        data_docs_urls: list[
+            dict[str, str | None]
+        ] = self.data_context.get_docs_sites_urls(
+            resource_identifier=validation_result_suite_identifier
+        )
+
+        validation_result_urls: list[str] = [
+            data_docs_url["site_url"]
+            for data_docs_url in data_docs_urls
+            if data_docs_url["site_url"]
+        ]
+        if (
+            isinstance(validation_result_suite_identifier, GXCloudIdentifier)
+            and validation_result_suite_identifier.cloud_id
+        ):
+            cloud_base_url: Final[str] = CLOUD_APP_DEFAULT_BASE_URL
+            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.cloud_id}"
+            validation_result_urls.append(validation_result_url)
 
         if (
             self.notify_on == "all"
@@ -241,6 +276,7 @@ class SlackNotificationAction(ValidationAction):
                 data_docs_pages,
                 self.notify_with,
                 self.show_failed_expectations,
+                validation_result_urls,
             )
 
             # this will actually send the POST request to the Slack webapp server
@@ -803,7 +839,7 @@ class StoreValidationResultAction(ValidationAction):
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
-        checkpoint_identifier=None,
+        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("StoreValidationResultAction.run")
 
@@ -824,14 +860,12 @@ class StoreValidationResultAction(ValidationAction):
             )
 
         checkpoint_ge_cloud_id = None
-        if self.data_context.ge_cloud_mode and checkpoint_identifier:
-            checkpoint_ge_cloud_id = checkpoint_identifier.ge_cloud_id
+        if self._using_cloud_context and checkpoint_identifier:
+            checkpoint_ge_cloud_id = checkpoint_identifier.cloud_id
 
         expectation_suite_ge_cloud_id = None
-        if self.data_context.ge_cloud_mode and expectation_suite_identifier:
-            expectation_suite_ge_cloud_id = str(
-                expectation_suite_identifier.ge_cloud_id
-            )
+        if self._using_cloud_context and expectation_suite_identifier:
+            expectation_suite_ge_cloud_id = str(expectation_suite_identifier.cloud_id)
 
         return_val = self.target_store.set(
             validation_result_suite_identifier,
@@ -839,10 +873,10 @@ class StoreValidationResultAction(ValidationAction):
             checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
-        if self.data_context.ge_cloud_mode:
+        if self._using_cloud_context:
             return_val: GXCloudResourceRef
-            new_ge_cloud_id = return_val.ge_cloud_id
-            validation_result_suite_identifier.ge_cloud_id = new_ge_cloud_id
+            new_ge_cloud_id = return_val.cloud_id
+            validation_result_suite_identifier.cloud_id = new_ge_cloud_id
 
 
 class StoreEvaluationParametersAction(ValidationAction):
@@ -1081,24 +1115,24 @@ class UpdateDataDocsAction(ValidationAction):
                 expectation_suite_identifier,
             ],
         )
-        # <snippet>
+        # <snippet name="great_expectations/checkpoint/actions.py empty dict">
         data_docs_validation_results = {}
         # </snippet>
-        if self.data_context.ge_cloud_mode:
+        if self._using_cloud_context:
             return data_docs_validation_results
 
         # get the URL for the validation result
-        # <snippet>
+        # <snippet name="great_expectations/checkpoint/actions.py get_docs_sites_urls">
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
             site_names=self._site_names,
         )
         # </snippet>
         # process payload
-        # <snippet>
+        # <snippet name="great_expectations/checkpoint/actions.py iterate">
         for sites in docs_site_urls_list:
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
-        # <snippet>
+        # </snippet>
         return data_docs_validation_results
 
 
@@ -1110,7 +1144,7 @@ class CloudNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: "DataContext",
+        data_context: DataContext,
         checkpoint_ge_cloud_id: str,
     ) -> None:
         super().__init__(data_context)
@@ -1132,9 +1166,9 @@ class CloudNotificationAction(ValidationAction):
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
             )
 
-        if not self.data_context.ge_cloud_mode:
+        if not self._using_cloud_context:
             return Exception(
-                "CloudNotificationActions can only be used in GE Cloud Mode."
+                "CloudNotificationActions can only be used in GX Cloud Mode."
             )
         if not isinstance(validation_result_suite_identifier, GXCloudIdentifier):
             raise TypeError(
@@ -1146,7 +1180,7 @@ class CloudNotificationAction(ValidationAction):
         ge_cloud_url = urljoin(
             self.data_context.ge_cloud_config.base_url,
             f"/organizations/{self.data_context.ge_cloud_config.organization_id}/checkpoints/"
-            f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.ge_cloud_id}/notification-actions",
+            f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.cloud_id}/notification-actions",
         )
         auth_headers = {
             "Content-Type": "application/vnd.api+json",
@@ -1161,7 +1195,7 @@ class SNSNotificationAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context: "DataContext", sns_topic_arn: str, sns_message_subject
+        self, data_context: DataContext, sns_topic_arn: str, sns_message_subject
     ) -> None:
         super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn

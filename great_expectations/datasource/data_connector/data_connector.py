@@ -2,7 +2,7 @@ import logging
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
@@ -35,7 +35,7 @@ class DataConnector:
     A Batch is the primary unit of validation in the Great Expectations DataContext.
     Batches include metadata that identifies how they were constructed--the same “batch_spec”
     assembled by the data connector, While not every Datasource will enable re-fetching a
-    specific batch of data, GE can store snapshots of batches or store metadata from an
+    specific batch of data, GX can store snapshots of batches or store metadata from an
     external data version control system.
     """
 
@@ -57,7 +57,7 @@ class DataConnector:
             batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
         """
         if execution_engine is None:
-            raise ge_exceptions.DataConnectorError(
+            raise gx_exceptions.DataConnectorError(
                 "A non-existent/unknown ExecutionEngine instance was referenced."
             )
 

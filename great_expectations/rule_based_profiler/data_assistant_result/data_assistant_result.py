@@ -4,7 +4,6 @@ import copy
 import datetime
 import json
 import os
-import warnings
 from collections import defaultdict, namedtuple
 from dataclasses import asdict, dataclass, field
 from typing import (
@@ -28,8 +27,9 @@ import pandas as pd
 from IPython.display import HTML, display
 
 from great_expectations import __version__ as ge_version
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -56,7 +56,6 @@ from great_expectations.rule_based_profiler.data_assistant_result.plot_result im
     PlotMode,
     PlotResult,
 )
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
     sanitize_parameter_name,
@@ -69,7 +68,13 @@ from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     ParameterNode,
 )
-from great_expectations.types import ColorPalettes, Colors, SerializableDictDot
+from great_expectations.types import (
+    FontFamily,
+    FontFamilyURL,
+    SecondaryColors,
+    SerializableDictDot,
+    TintsAndShades,
+)
 
 if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
@@ -152,7 +157,7 @@ class DataAssistantResult(SerializableDictDot):
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     @property
-    def metric_expectation_map(self) -> Dict[Union[str, Tuple[str]], str]:
+    def metric_expectation_map(self) -> Dict[Union[str, Tuple[str, ...]], str]:
         """
         A mapping is defined for which metrics to plot and their associated expectations.
         """
@@ -228,7 +233,9 @@ class DataAssistantResult(SerializableDictDot):
             "_batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
                 data=self._batch_id_to_batch_identifier_display_name_map
             ),
-            "profiler_config": self.profiler_config.to_json_dict(),
+            "profiler_config": self.profiler_config.to_json_dict()
+            if self.profiler_config
+            else None,
             "profiler_execution_time": convert_to_json_serializable(
                 data=self.profiler_execution_time
             ),
@@ -247,11 +254,15 @@ class DataAssistantResult(SerializableDictDot):
                     ),
                 }
                 for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-            ],
+            ]
+            if self.metrics_by_domain
+            else None,
             "expectation_configurations": [
                 expectation_configuration.to_json_dict()
                 for expectation_configuration in self.expectation_configurations
-            ],
+            ]
+            if self.expectation_configurations
+            else None,
             "citation": convert_to_json_serializable(data=self.citation),
         }
 
@@ -292,13 +303,11 @@ class DataAssistantResult(SerializableDictDot):
                 if key in DataAssistantResult.IN_JUPYTER_NOTEBOOK_KEYS
             }
 
-            verbose: Union[bool, str] = str(
-                os.getenv("GE_TROUBLESHOOTING", False)
-            ).lower()
-            if verbose != "true":
-                verbose = "false"
+            verbose_from_env: str = str(os.getenv("GE_TROUBLESHOOTING", False)).lower()
+            if verbose_from_env != "true":
+                verbose_from_env = "false"
 
-            verbose = json.loads(verbose)
+            verbose: bool = json.loads(verbose_from_env)
 
             auxiliary_profiler_execution_details: dict = (
                 self._get_auxiliary_profiler_execution_details(verbose=verbose)
@@ -320,12 +329,12 @@ class DataAssistantResult(SerializableDictDot):
         json_dict.update(auxiliary_profiler_execution_details)
         return json.dumps(json_dict, indent=2)
 
-    def _get_metric_expectation_map(self) -> Dict[Tuple[str], str]:
+    def _get_metric_expectation_map(self) -> Dict[Tuple[str, ...], str]:
         if not all(
             [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
             for metric_names in self.metric_expectation_map.keys()
         ):
-            raise ge_exceptions.DataAssistantResultExecutionError(
+            raise gx_exceptions.DataAssistantResultExecutionError(
                 "All metric_expectation_map keys must be of type str or tuple."
             )
 
@@ -338,8 +347,12 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:
         auxiliary_info: dict = {
-            "num_profiler_rules": len(self.profiler_config.rules),
-            "num_expectation_configurations": len(self.expectation_configurations),
+            "num_profiler_rules": len(self.profiler_config.rules)
+            if self.profiler_config and self.profiler_config.rules
+            else 0,
+            "num_expectation_configurations": len(self.expectation_configurations)
+            if self.expectation_configurations
+            else 0,
             "auto_generated_at": datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             ),
@@ -349,16 +362,21 @@ class DataAssistantResult(SerializableDictDot):
         if verbose:
             rule_name_to_rule_stats_map: Dict[str, RuleStats] = {}
 
-            rule_domains: List[Domain] = list(self.metrics_by_domain.keys())
+            rule_domains: List[Domain] = (
+                list(self.metrics_by_domain.keys()) if self.metrics_by_domain else []
+            )
 
-            rule_stats: RuleStats
+            rule_stats: RuleStats | None
             domains: List[Domain]
             domain: Domain
             domain_as_json_dict: dict
             num_domains: int
 
+            if not (self.profiler_config and self.profiler_config.rules):
+                return auxiliary_info
+
             rule_name: str
-            rule_config: RuleConfig
+            rule_config: Union[RuleConfig, dict]
             for rule_name, rule_config in self.profiler_config.rules.items():
                 domains = list(
                     filter(
@@ -380,8 +398,14 @@ class DataAssistantResult(SerializableDictDot):
                     rule_name_to_rule_stats_map[rule_name] = rule_stats
                     rule_stats.rule_domain_builder_execution_time = (
                         self.rule_domain_builder_execution_time[rule_name]
+                        if self.rule_domain_builder_execution_time
+                        else float(np.nan)
                     )
-                    rule_stats.rule_execution_time = self.rule_execution_time[rule_name]
+                    rule_stats.rule_execution_time = (
+                        self.rule_execution_time[rule_name]
+                        if self.rule_execution_time
+                        else float(np.nan)
+                    )
 
                 if num_domains > 0:
                     for domain in domains:
@@ -451,21 +475,21 @@ class DataAssistantResult(SerializableDictDot):
             persist=False,
         )
         expectation_suite.add_expectation_configurations(
-            expectation_configurations=self.expectation_configurations,
+            expectation_configurations=self.expectation_configurations
+            if self.expectation_configurations
+            else [],
             send_usage_event=False,
             match_type="domain",
             overwrite_existing=True,
         )
 
-        citation: Dict[str, Any]
-        if include_profiler_config:
-            citation = self.citation
-        else:
+        citation: Dict[str, Any] = self.citation or {}
+        if not include_profiler_config:
             key: str
             value: Any
             citation = {
                 key: value
-                for key, value in self.citation.items()
+                for key, value in citation.items()
                 if key != "profiler_config"
             }
 
@@ -655,23 +679,50 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 display_chart_dict[chart_titles[idx]] = themed_charts[idx]
 
             dropdown_title_color: str = altair_theme["legend"]["titleColor"]
-            dropdown_font: str = altair_theme["font"]
             dropdown_font_size: str = altair_theme["axis"]["titleFontSize"]
+            dropdown_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
             dropdown_text_color: str = altair_theme["axis"]["labelColor"]
+
+            font_family: str = altair_theme["font"]
+
+            gx_font_family = True
+            try:
+                FontFamily(font_family)
+            except ValueError:
+                gx_font_family = False
+
+            if gx_font_family:
+                font_family_url = FontFamilyURL[FontFamily(font_family).name].value
+
+                title_font_weight: int = altair_theme["title"]["fontWeight"]
+                subtitle_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
+                url_font_weights: str = ";".join(
+                    {str(title_font_weight), str(subtitle_font_weight)}
+                )
+
+                font_url = f"{font_family_url}:wght@{url_font_weights}&display=swap"
+
+                font_css = f"""
+                <style>
+                @import url('{font_url}');
+                </style>
+                """
+                display(HTML(font_css))
 
             # Altair does not have a way to format the dropdown input so the rendered CSS must be altered directly
             altair_dropdown_css: str = f"""
                 <style>
                 span.vega-bind-name {{
                     color: {dropdown_title_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
-                    font-weight: bold;
+                    font-weight: {dropdown_font_weight};
                 }}
                 form.vega-bindings {{
                     color: {dropdown_text_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
+                    font-weight: {dropdown_font_weight};
                     position: absolute;
                     left: 75px;
                     top: 28px;
@@ -687,16 +738,17 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 <style>
                 .widget-inline-hbox .widget-label {{
                     color: {dropdown_title_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
-                    font-weight: bold;
+                    font-weight: {dropdown_font_weight};
                 }}
                 .widget-dropdown > select {{
                     padding-right: 21px;
                     padding-left: 3px;
                     color: {dropdown_text_color};
-                    font-family: {dropdown_font};
+                    font-family: {font_family};
                     font-size: {dropdown_font_size}px;
+                    font-weight: {dropdown_font_weight};
                     height: 20px;
                     line-height: {dropdown_font_size}px;
                     background-size: 20px;
@@ -713,13 +765,6 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 layout={"width": "max-content", "margin": "0px"},
             )
 
-            # As of 19 July, 2022 there is a Deprecation Warning due to the latest ipywidgets' interaction with
-            # ipykernel (Kernel._parent_header deprecated in v6.0.0). Rather than add a version constraint to ipykernel,
-            # we suppress Deprecation Warnings produced by module ipywidgets.widgets.widget_output.
-            warnings.filterwarnings(
-                action="ignore",
-                module="ipywidgets.widgets.widget_output",
-            )
             widgets.interact(
                 DataAssistantResult._display_chart_from_dict,
                 display_chart_dict=widgets.fixed(display_chart_dict),
@@ -764,7 +809,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         for chart in charts:
             chart_title = DataAssistantResult._get_chart_layer_title(layer=chart)
             if chart_title is None:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     "All DataAssistantResult charts must have a title."
                 )
 
@@ -1071,7 +1116,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         if column_set is None:
             chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point(color=Colors.PURPLE.value)
+                .mark_point(color=SecondaryColors.MIDNIGHT_BLUE)
                 .encode(
                     x=alt.X(
                         batch_plot_component.name,
@@ -1111,7 +1156,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             ).mark_text(
                 text=text,
-                color=Colors.PURPLE.value,
+                color=SecondaryColors.MIDNIGHT_BLUE,
                 lineBreak=r"$",
                 dy=dy,
             )
@@ -1142,7 +1187,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         if column_set is None:
             chart = (
                 alt.Chart(data=df, title=title)
-                .mark_point(color=Colors.PURPLE.value)
+                .mark_point(color=SecondaryColors.MIDNIGHT_BLUE)
                 .encode(
                     x=alt.X(
                         batch_plot_component.name,
@@ -1182,7 +1227,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 )
             ).mark_text(
                 text=text,
-                color=Colors.PURPLE.value,
+                color=SecondaryColors.MIDNIGHT_BLUE,
                 lineBreak=r"$",
                 dy=dy,
             )
@@ -1963,7 +2008,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2056,8 +2101,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             point_color_condition = alt.condition(
                 predicate=predicate,
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(SecondaryColors.LEAF_GREEN),
+                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
             anomaly_coded_base = alt.Chart(data=df, title=title)
@@ -2091,7 +2136,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2194,8 +2239,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             bar_color_condition: alt.condition = alt.condition(
                 predicate=predicate,
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(SecondaryColors.ROYAL_BLUE),
+                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
             anomaly_coded_base = alt.Chart(data=df, title=title)
@@ -2220,7 +2265,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         expectation_type: Optional[str] = None,
     ) -> alt.Chart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2323,8 +2368,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             )
             point_color_condition = alt.condition(
                 predicate=predicate,
-                if_false=alt.value(Colors.GREEN.value),
-                if_true=alt.value(Colors.PINK.value),
+                if_false=alt.value(SecondaryColors.LEAF_GREEN),
+                if_true=alt.value(SecondaryColors.POMEGRANATE_PINK),
             )
 
             anomaly_coded_base = alt.Chart(data=df, title=title)
@@ -2585,7 +2630,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2704,8 +2749,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             point_color_condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.PINK.value),
-                if_true=alt.value(Colors.GREEN.value),
+                if_false=alt.value(SecondaryColors.POMEGRANATE_PINK),
+                if_true=alt.value(SecondaryColors.LEAF_GREEN),
             )
 
             anomaly_coded_points = points.encode(
@@ -2736,7 +2781,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.VConcatChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2847,8 +2892,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             bar_color_condition: alt.condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.PINK.value),
-                if_true=alt.value(Colors.GREEN.value),
+                if_false=alt.value(SecondaryColors.POMEGRANATE_PINK),
+                if_true=alt.value(SecondaryColors.ROYAL_BLUE),
             )
 
             bars.layer[idx] = bar_layer.encode(
@@ -2874,7 +2919,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         predicates: List[Union[bool, int]],
     ) -> alt.LayerChart:
         expectation_kwarg_line_color: alt.HexColor = alt.HexColor(
-            ColorPalettes.HEATMAP_6.value[4]
+            TintsAndShades.ROYAL_BLUE_30
         )
         expectation_kwarg_line_stroke_width: int = 5
 
@@ -2995,8 +3040,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
             point_color_condition = alt.condition(
                 predicate=predicates[idx],
-                if_false=alt.value(Colors.PINK.value),
-                if_true=alt.value(Colors.GREEN.value),
+                if_false=alt.value(SecondaryColors.POMEGRANATE_PINK),
+                if_true=alt.value(SecondaryColors.LEAF_GREEN),
             )
 
             anomaly_coded_points = points.encode(
@@ -3370,7 +3415,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ):
                 expectation_plot_impl = self._get_expect_domain_values_temporal_chart
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 
@@ -3409,7 +3454,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ):
                 metric_plot_impl = self._get_temporal_metrics_chart
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 
@@ -3585,7 +3630,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     self._get_interactive_expect_column_values_temporal_chart
                 )
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 
@@ -3624,7 +3669,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             ):
                 plot_impl = self._get_interactive_temporal_metrics_chart
             else:
-                raise ge_exceptions.DataAssistantResultExecutionError(
+                raise gx_exceptions.DataAssistantResultExecutionError(
                     f"All metrics to chart should be of the same AltairDataType, but metrics: {metric_names} are not."
                 )
 
@@ -3649,7 +3694,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             for value in attributed_values[0].values()
         ]
 
-        sanitized_metric_name: str = sanitize_parameter_name(name=metric_name)
+        sanitized_metric_name: str = sanitize_parameter_name(
+            name=metric_name, suffix=None
+        )
 
         df: pd.DataFrame = pd.DataFrame({sanitized_metric_name: metric_values})
 
@@ -3950,7 +3997,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     ) -> Set[str]:
         metric_types: Dict[str, AltairDataTypes] = self.metric_types
         return {
-            sanitize_parameter_name(name=metric)
+            sanitize_parameter_name(name=metric, suffix=None)
             for metric in metric_types.keys()
             if metric_types[metric] == altair_type
         }
@@ -3960,7 +4007,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         metric_names: Tuple[str],
     ) -> Set[str]:
         return {
-            sanitize_parameter_name(name=metric_name) for metric_name in metric_names
+            sanitize_parameter_name(name=metric_name, suffix=None)
+            for metric_name in metric_names
         }
 
     @staticmethod

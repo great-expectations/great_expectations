@@ -7,15 +7,15 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 _This piece of documentation was authored by [Allan Campopiano](https://www.linkedin.com/in/allan-campopiano-703394120)._
 
-This guide will help you get started with Great Expectations on Deepnote. You will learn how to validate columns in a Pandas DataFrame, 
+This guide will help you get started with Great Expectations on Deepnote. You will learn how to validate columns in a Pandas DataFrame,
 host your data docs, and schedule a pipeline job.
 
-All of this will be accomplished from within a single, [ready-to-use notebook](https://deepnote.com/project/Reduce-Pipeline-Debt-With-Great-Expectations-d78cwK3GRYKU7AAl9fO7lg/%2Fnotebook.ipynb/#00000-85c6538f-6aaa-427b-9eda-29fdacf56457), 
+All of this will be accomplished from within a single, [ready-to-use notebook](https://deepnote.com/project/Reduce-Pipeline-Debt-With-Great-Expectations-d78cwK3GRYKU7AAl9fO7lg/%2Fnotebook.ipynb/#00000-85c6538f-6aaa-427b-9eda-29fdacf56457),
 with no prerequisites beyond signing up for a [free Deepnote account](https://deepnote.com/)!
 
 ### Benefits of Great Expectations in Deepnote
 
-Deepnote provides a "click and play" notebook platform that integrates perfectly with Great Expectations. 
+Deepnote provides a "click and play" notebook platform that integrates perfectly with Great Expectations.
 You can read all about it in [this blog post](https://deepnote.com/blog/how-not-to-draw-an-owl-cky1yda1c784x0b30j4ktcok7)!
 
 Here are some of the notable benefits:
@@ -29,13 +29,13 @@ These benefits make Deepnote one of the easiest and fastest ways to get started 
 
 ### 1. Begin by importing Great Expectations
 
-Since Great Expectations can be listed in Deepnote's `requirements.txt`, it will be installed automatically. You can read more about package installation [here](https://docs.deepnote.com/environment/python-requirements). 
+Since Great Expectations can be listed in Deepnote's `requirements.txt`, it will be installed automatically. You can read more about package installation [here](https://docs.deepnote.com/environment/python-requirements).
 This lets us import the required libraries right away.
 
 ```python
 import pandas as pd
 import numpy as np
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
@@ -57,7 +57,7 @@ which will hold all of the forthcoming project configurations. Note that if this
 
 ### 3. Validate a Pandas DataFrame
 
-In practice, this is where you would bring in your own data; however, for the sake of a placeholder, 
+In practice, this is where you would bring in your own data; however, for the sake of a placeholder,
 a DataFrame with random values is created. The Expectations we set later on this data may pass or fail.
 
 :::note
@@ -97,7 +97,7 @@ df.show()
 
 ### 4. Define Expectations
 
-Expectations can be defined directly on a Pandas DataFrame using `ge.from_pandas(df)`. 
+Expectations can be defined directly on a Pandas DataFrame using `ge.from_pandas(df)`.
 We're defining three Expectations on our DataFrame:
 
 1. The `products` column must contain unique values
@@ -113,7 +113,7 @@ You can see all the Expectations available in the [gallery](https://greatexpecta
 :::
 
 ```python
-df = ge.from_pandas(df)
+df = gx.from_pandas(df)
 
 # ~30% chance of passing
 df.expect_column_values_to_be_unique("products") # ~30% chance of passing
@@ -129,8 +129,8 @@ df.expect_column_values_to_be_between(
 
 ### 5. Set project configurations
 
-Before we can validate our expectations against our data, we need to tell Great Expectations more about our project's configuration. 
-Great Expectations keeps track of many configurations with a <TechnicalTag tag="data_context" text="Data Context"/>. 
+Before we can validate our expectations against our data, we need to tell Great Expectations more about our project's configuration.
+Great Expectations keeps track of many configurations with a <TechnicalTag tag="data_context" text="Data Context"/>.
 These configurations are used to manage aspects of your project behind the scenes.
 
 :::info
@@ -162,7 +162,7 @@ data_context_config = DataContextConfig(
     ),
 )
 
-context = BaseDataContext(project_config=data_context_config)
+context = gx.get_context(project_config=data_context_config)
 context.save_expectation_suite(
     expectation_suite_name="my_expectation_suite",
     expectation_suite=df.get_expectation_suite(discard_failed_expectations=False),
@@ -171,19 +171,19 @@ context.save_expectation_suite(
 
 ### 6. Setting up a Batch and Checkpoint
 
-In order to populate the documentation (<TechnicalTag tag="data_docs" text="Data Docs"/>) for our tests, 
-we need to set up at least one <TechnicalTag tag="batch" text="Batch"/> and a <TechnicalTag tag="checkpoint" text="Checkpoint"/>. 
+In order to populate the documentation (<TechnicalTag tag="data_docs" text="Data Docs"/>) for our tests,
+we need to set up at least one <TechnicalTag tag="batch" text="Batch"/> and a <TechnicalTag tag="checkpoint" text="Checkpoint"/>.
 
 A Batch is a pairing of data and metadata to be validated. A Checkpoint is a bundle of at least:
 - One Batch (the data to be validated)
 - One Expectation Suite (our Expectations for that data)
 - One <TechnicalTag tag="action" text="Action"/> (saving our validation results, rebuilding Data Docs, sending a Slack notification, etc.)
 
-In the cell below, one Batch is constructed from our DataFrame with a <TechnicalTag tag="batch_request" text="RuntimeBatchRequest"/>. 
+In the cell below, one Batch is constructed from our DataFrame with a <TechnicalTag tag="batch_request" text="RuntimeBatchRequest"/>.
 
-We then create a Checkpoint, and pass in our `batch_request`. 
+We then create a Checkpoint, and pass in our `batch_request`.
 
-When we execute this code, our Expectation Suite is run against our data, validating whether that data meets our 
+When we execute this code, our Expectation Suite is run against our data, validating whether that data meets our
 Expectations or not. The results are then persisted temporarily until we build our Data Docs.
 
 ```python
@@ -217,7 +217,7 @@ Our Data Docs can now be generated and served (thanks to [Deepnote Tunneling](ht
 
 ```python
 context.build_data_docs();
- 
+
 # Uncomment this line to serve up the documentation
 #!python -m http.server 8080 --directory great_expectations/uncommitted/data_docs/local_site
 ```
@@ -238,5 +238,5 @@ Congratulations!<br/>&#127881; You've successfully deployed Great Expectations o
 
 ## Summary
 
-Deepnote integrates perfectly with Great Expectations, allowing documentation to be hosted and notebooks to be scheduled. Please visit [Deepnote](https://deepnote.com/) 
+Deepnote integrates perfectly with Great Expectations, allowing documentation to be hosted and notebooks to be scheduled. Please visit [Deepnote](https://deepnote.com/)
 to learn more about how to bring tools, teams, and workflows together.

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
+from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     AbsoluteCardinalityLimit,
@@ -192,12 +192,14 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """Return domains matching the selected cardinality_limit_mode.
 
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of domains that match the desired cardinality.
@@ -299,6 +301,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         ] = self._column_names_meeting_cardinality_limit(
             validator=validator,
             metrics_for_cardinality_check=metrics_for_cardinality_check,
+            runtime_configuration=runtime_configuration,
         )
         candidate_column_names.extend(allowed_column_names_passthrough)
 
@@ -355,12 +358,14 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self,
         validator: Validator,
         metrics_for_cardinality_check: Dict[str, List[MetricConfiguration]],
+        runtime_configuration: Optional[dict] = None,
     ) -> List[str]:
         """Compute cardinality and return column names meeting cardinality limit.
 
         Args:
             validator: Validator used to compute column cardinality.
             metrics_for_cardinality_check: metric configurations used to compute cardinality.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of column names meeting cardinality.
@@ -374,6 +379,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metrics_for_cardinality_check,
+            runtime_configuration=runtime_configuration,
         )
 
         candidate_column_names: List[str] = [

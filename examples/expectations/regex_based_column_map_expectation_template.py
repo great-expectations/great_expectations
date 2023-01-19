@@ -17,21 +17,13 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 
 
 # This class defines the Expectation itself
-# <snippet name="regex_template_expectation_class">
 class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
-    # </snippet>
-    # <snippet name="regex_template_docstring">
     """TODO: Add a docstring here"""
-    # </snippet>
 
     # These values will be used to configure the metric created by your expectation
-    # <snippet name="regex_template_definition">
     regex_camel_name = "RegexName"
     regex = "regex pattern"
-    # </snippet>
-    # <snippet name="regex_template_plural">
     semantic_type_name_plural = None
-    # </snippet>
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -44,7 +36,6 @@ class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     )
 
     # This object contains metadata for display in the public Gallery
-    # <snippet name="regex_template_library_metadata">
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
@@ -53,8 +44,5 @@ class ExpectColumnValuesToMatchSomeRegex(RegexBasedColumnMapExpectation):
     }
 
 
-# </snippet>
 if __name__ == "__main__":
-    # <snippet name="regex_template_diagnostics">
     ExpectColumnValuesToMatchSomeRegex().print_diagnostic_checklist()
-#     </snippet>

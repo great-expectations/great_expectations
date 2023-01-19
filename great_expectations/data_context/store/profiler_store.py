@@ -31,7 +31,7 @@ class ProfilerStore(ConfigurationStore):
         )
 
         test_key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if self.ge_cloud_mode:
+        if self.cloud_mode:
             test_key = self.key_class(  # type: ignore[assignment,call-arg]
                 resource_type=GXCloudRESTResource.PROFILER,
                 ge_cloud_id=str(uuid.uuid4()),
@@ -64,8 +64,8 @@ class ProfilerStore(ConfigurationStore):
 
     def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
         ge_cloud_profiler_id = response_json["data"]["id"]
         profiler_config_dict = response_json["data"]["attributes"]["profiler"]

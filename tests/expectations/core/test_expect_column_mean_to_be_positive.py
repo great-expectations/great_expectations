@@ -7,7 +7,7 @@ from great_expectations.expectations.core.expect_column_mean_to_be_between impor
 )
 
 
-# <snippet name="parameterized_example">
+# <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py ExpectColumnMeanToBePositive_class_def">
 class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
     """Expects the mean of values in this column to be positive"""
 
@@ -16,7 +16,7 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
         "strict_min": True,
     }
     # </snippet>
-    # <snippet name="parameterized_validate_config">
+    # <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py validate_config">
     def validate_configuration(self, configuration):
         super().validate_configuration(configuration)
         assert "min_value" not in configuration.kwargs, "min_value cannot be altered"
@@ -25,7 +25,7 @@ class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
         assert "strict_max" not in configuration.kwargs, "strict_max cannot be altered"
 
     # </snippet>
-    # <snippet name="parameterized_library_metadata">
+    # <snippet name="tests/expectations/core/test_expect_column_mean_to_be_positive.py library_metadata">
     library_metadata = {"tags": ["basic stats"], "contributors": ["@joegargery"]}
 
 
