@@ -10,6 +10,7 @@ To show task help page `invoke <NAME> --help`
 """
 from __future__ import annotations
 
+import io
 import json
 import os
 import pathlib
@@ -424,20 +425,23 @@ def type_schema(ctx: Context, type: str, indent: int = 4):
     """
     from great_expectations.experimental.datasources.sources import _SourceFactories
 
+    buffer = io.StringIO()
+
     if type == "--list":
-        print("Registered ZEP types\n--------------------")
-        print("\t" + "\n\t".join(_SourceFactories.type_lookup.str_values()))
+        buffer.write("Registered ZEP types\n--------------------")
+        buffer.write("\t" + "\n\t".join(_SourceFactories.type_lookup.str_values()))
     elif type == "--help" or type == "-h":
         ctx.run("invoke --help schema")
     else:
         try:
             model: ExperimentalBaseModel = _SourceFactories.type_lookup[type]
-            print(model.schema_json(indent=indent))
+            buffer.write(model.schema_json(indent=indent))
         except KeyError as err:
             raise invoke.Exit(
                 f"No '{type}' type found. Try 'invoke schema --list' to see available types",
                 code=1,
             )
+    print(buffer.getvalue())
 
 
 def _exit_with_error_if_not_in_repo_root(task_name: str):
