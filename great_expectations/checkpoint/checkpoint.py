@@ -434,9 +434,8 @@ class BaseCheckpoint(ConfigPeer):
                 )
 
         Args:
-
             pretty_print (bool): If True, then additional messages if Checkpoint configuration is missing
-            a "validations" or "action_list" attribute.
+                a "validations" or "action_list" attribute.
 
         Returns:
             Dictionary containing Checkpoint configuration converted into json dictionary.
