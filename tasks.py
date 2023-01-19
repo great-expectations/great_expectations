@@ -440,7 +440,7 @@ def type_schema(
         buffer.write(
             "--------------------\nRegistered ZEP types\n--------------------\n"
         )
-        buffer.write("\t" + "\n\t".join(_SourceFactories.type_lookup.str_values()))
+        buffer.write("\t" + "\n\t".join(_SourceFactories.type_lookup.type_names()))
     elif type == "--help" or type == "-h":
         ctx.run("invoke --help schema")
     else:
