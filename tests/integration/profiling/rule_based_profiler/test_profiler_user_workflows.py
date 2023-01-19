@@ -619,7 +619,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
 
     # noinspection PyUnresolvedReferences
     pickup_datetime: datetime.datetime = pd.to_datetime(
-        validator_latest.head(n_rows=1)["pickup_datetime"][0]
+        validator_latest.head(n_rows=1).data["pickup_datetime"][0]
     ).to_pydatetime()
     month: int = pickup_datetime.month
     assert month == 3
