@@ -409,8 +409,8 @@ class Datasource(
 @dataclasses.dataclass(frozen=True)
 class HeadData:
     """
-    An immutable wrapper around pd.DataFrame for .head() methods which are intended to be used for visual inspection of
-        BatchData.
+    An immutable wrapper around pd.DataFrame for .head() methods which
+        are intended to be used for visual inspection of BatchData.
     """
 
     data: pd.DataFrame
