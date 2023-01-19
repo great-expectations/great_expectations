@@ -2451,6 +2451,10 @@ class DataContextConfig(BaseYamlConfig):
         serializeable_dict = self.to_json_dict()
         return PasswordMasker.sanitize_config(serializeable_dict)
 
+    def update(self, config: DataContextConfig) -> None:
+        for k, v in config.items():
+            self[k] = v
+
     def __repr__(self) -> str:
         """
         # TODO: <Alex>2/4/2022</Alex>
