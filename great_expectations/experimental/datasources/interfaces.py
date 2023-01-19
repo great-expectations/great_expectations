@@ -505,13 +505,15 @@ class Batch(ExperimentalBaseModel):
             metric.id
         ]
         table_head_df: pd.DataFrame
-        if not isinstance(table_head_metric_value, pd.DataFrame):
-            if not isinstance(table_head_metric_value, list):
-                table_head_df = pd.DataFrame(table_head_metric_value.asDict())
-            else:
-                table_head_df = pd.DataFrame(
-                    [row.asDict() for row in table_head_metric_value]
-                )
+        if isinstance(table_head_metric_value, list):
+            # convert list of pyspark.sql.Row to pd.DataFrame
+            table_head_df = pd.DataFrame(
+                [row.asDict() for row in table_head_metric_value]
+            )
+        elif isinstance(table_head_metric_value, pyspark_sql_Row):
+            # convert pyspark.sql.Row to pd.DataFrame
+            table_head_df = pd.DataFrame(table_head_metric_value.asDict())
         else:
+            # otherwise table_head_metric_value is a pd.DataFrame already
             table_head_df = table_head_metric_value
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
