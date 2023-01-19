@@ -277,6 +277,9 @@ class SphinxInvokeDocsBuilder:
     ) -> pathlib.Path:
         """Generate markdown file name from the dotted path prefix."""
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
+        # TODO: Clean up this method
+        # return f"{dotted_path_prefix}.md"
+
         path = pathlib.Path(dotted_path_prefix.replace(".", "/") + ".md")
         return path
 
