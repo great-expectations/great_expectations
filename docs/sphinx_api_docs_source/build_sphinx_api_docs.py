@@ -178,10 +178,23 @@ class SphinxInvokeDocsBuilder:
                 internal_refs = doc.find_all(class_="reference internal")
                 for internal_ref in internal_refs:
                     href = internal_ref["href"]
+
+                    split_href = href.split("#")
+
                     shortened_path_version = self._get_mdx_file_path(
-                        pathlib.Path(href.split("#")[0])
+                        pathlib.Path(split_href[0])
                     ).with_suffix(".html")
-                    absolute_href = self._get_base_url() + str(shortened_path_version)
+
+                    fragment = ""
+                    if len(split_href) > 1:
+                        fragment = split_href[1]
+
+                    absolute_href = (
+                        self._get_base_url()
+                        + str(shortened_path_version)
+                        + "#"
+                        + fragment
+                    )
                     internal_ref["href"] = absolute_href
 
                 doc_str = str(doc)
