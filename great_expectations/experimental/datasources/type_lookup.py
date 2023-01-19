@@ -51,6 +51,13 @@ class TypeLookup(
         __dict = __dict or {}
         super().__init__(__dict, **kwargs)
 
+    def str_values(self) -> Generator[str, None, None]:
+        """Return only the `str` values of the TypeLookup."""
+        for k in self:
+            if isinstance(k, str):
+                yield k
+            continue
+
     @overload
     def __getitem__(self, key: str) -> Type:
         ...
