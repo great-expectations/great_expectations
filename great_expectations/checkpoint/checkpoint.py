@@ -408,7 +408,6 @@ class BaseCheckpoint(ConfigPeer):
                 f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
             ) from e
 
-    @public_api
     def self_check(self, pretty_print: bool = True) -> dict:
         """Method that is intended to provide visibility into parameters that Checkpoint was instantiated with.
 
