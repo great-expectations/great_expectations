@@ -311,9 +311,6 @@ class SphinxInvokeDocsBuilder:
     ) -> pathlib.Path:
         """Generate markdown file name from the dotted path prefix."""
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
-        # TODO: Clean up this method
-        # return f"{dotted_path_prefix}.md"
-
         path = pathlib.Path(dotted_path_prefix.replace(".", "/") + ".md")
         return path
 
@@ -343,8 +340,9 @@ class SphinxInvokeDocsBuilder:
     def _create_module_md_stub(self, definition: Definition) -> str:
         """Create the markdown stub content for a module."""
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
+        file_name = dotted_path_prefix.split(".")[-1]
 
-        return f"""# {dotted_path_prefix}
+        return f"""# {file_name}
 
 ```{{eval-rst}}
 .. automodule:: {dotted_path_prefix}
