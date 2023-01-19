@@ -8,6 +8,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.experimental.datasources.interfaces import HeadData
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -73,7 +74,7 @@ class MetricsCalculator:
         n_rows: int = 5,
         domain_kwargs: Optional[Dict[str, Any]] = None,
         fetch_all: bool = False,
-    ) -> pd.DataFrame:
+    ) -> HeadData:
         """
         Convenience method to run "table.head" metric.
         """
@@ -108,7 +109,8 @@ class MetricsCalculator:
                 "Unsupported or unknown ExecutionEngine type encountered in Validator class."
             )
 
-        return df.reset_index(drop=True, inplace=False)
+        df = df.reset_index(drop=True, inplace=False)
+        return HeadData(data=df)
 
     def get_metric(
         self,

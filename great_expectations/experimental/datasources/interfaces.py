@@ -492,21 +492,21 @@ class Batch(ExperimentalBaseModel):
             metric_domain_kwargs={"batch_id": self.id},
             metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
         )
-        table_head: pd.DataFrame | list[
+        table_head_metric_value: pd.DataFrame | list[
             pyspark_sql_Row
         ] | pyspark_sql_Row = self.data.execution_engine.resolve_metrics(
             metrics_to_resolve=(metric,)
         )[
             metric.id
         ]
-        head_data: HeadData
-        if not isinstance(table_head, pd.DataFrame):
-            if not isinstance(table_head, list):
-                head_data = HeadData(data=pd.DataFrame(table_head.asDict()))
+        table_head_df: pd.DataFrame
+        if not isinstance(table_head_metric_value, pd.DataFrame):
+            if not isinstance(table_head_metric_value, list):
+                table_head_df = pd.DataFrame(table_head_metric_value.asDict())
             else:
-                head_data = HeadData(
-                    data=pd.DataFrame([row.asDict() for row in table_head])
+                table_head_df = pd.DataFrame(
+                    [row.asDict() for row in table_head_metric_value]
                 )
         else:
-            head_data = HeadData(data=table_head)
-        return head_data
+            table_head_df = table_head_metric_value
+        return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
