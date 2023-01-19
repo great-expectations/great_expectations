@@ -994,6 +994,11 @@ class CodeReferenceFilter:
         IncludeExcludeDefinition(
             reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
             name="self_check",
+            filepath=pathlib.Path("great_expectations/checkpoint/checkpoint.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="self_check is mentioned but in the docs we currently recommend using test_yaml_config which uses self_check under the hood. E.g. https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config/#steps",
+            name="self_check",
             filepath=pathlib.Path(
                 "great_expectations/datasource/data_connector/data_connector.py"
             ),
