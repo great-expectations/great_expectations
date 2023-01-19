@@ -416,27 +416,9 @@ class BaseCheckpoint(ConfigPeer):
         If used as part of the test_yaml_config() workflow, the user will be able to know if the Checkpoint is
         configured with all necessary parameters.
 
-        When run with self_check()::
-
-            yaml_config: str = # [a checkpoint yaml configuration]
-            config: CommentedMap = yaml.load(yaml_config)
-            checkpoint_config: CheckpointConfig = CheckpointConfig(**config)
-            checkpoint: Checkpoint = Checkpoint(
-                data_context=context,
-                checkpoint_config.to_json_dict()
-            )
-            checkpoint.self_check()
-
-
-        When run with test_yaml_config::
-
-            checkpoint: Checkpoint = context.test_yaml_config(
-                yaml_config=yaml_config,
-                name="my_checkpoint"
-                )
 
         Args:
-            pretty_print (bool): shows how the print additional messages if Checkpoint configuration is missing
+            pretty_print (bool): If True, then additional messages if Checkpoint configuration is missing
             a "validations" or "action_list" attribute.
 
         Returns:
