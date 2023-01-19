@@ -173,10 +173,15 @@ class SphinxInvokeDocsBuilder:
                 # Process internal links
                 # Note: Currently the docusaurus link checker does not work well with
                 # anchor links, so we need to make these links absolute.
+                # We also need to use the shortened path version to match
+                # what is used for the page url.
                 internal_refs = doc.find_all(class_="reference internal")
                 for internal_ref in internal_refs:
                     href = internal_ref["href"]
-                    absolute_href = self._get_base_url() + href
+                    shortened_path_version = self._get_mdx_file_path(
+                        pathlib.Path(href.split("#")[0])
+                    ).with_suffix(".html")
+                    absolute_href = self._get_base_url() + str(shortened_path_version)
                     internal_ref["href"] = absolute_href
 
                 doc_str = str(doc)
@@ -192,7 +197,9 @@ class SphinxInvokeDocsBuilder:
                 doc_str = doc_front_matter + doc_str
 
                 # Write out mdx files
-                output_path = self._get_mdx_file_path(html_file_path=html_file)
+                output_path = self.docusaurus_api_docs_path / self._get_mdx_file_path(
+                    html_file_path=html_file
+                )
                 output_path.parent.mkdir(parents=True, exist_ok=True)
                 logger.info(f"Writing out mdx file: {str(output_path.absolute())}")
                 with open(output_path, "w") as fout:
@@ -228,13 +235,11 @@ class SphinxInvokeDocsBuilder:
             path_prefix = pathlib.Path(shortest_dotted_path.replace(".", "/")).parent
 
             # Join the shortest path and write output
-            output_path = (
-                self.docusaurus_api_docs_path / path_prefix / html_file_path.stem
-            ).with_suffix(".mdx")
+            output_path = (path_prefix / html_file_path.stem).with_suffix(".mdx")
         else:
-            output_path = self.docusaurus_api_docs_path / html_file_path.relative_to(
-                static_html_file_path
-            ).with_suffix(".mdx")
+            output_path = html_file_path.relative_to(static_html_file_path).with_suffix(
+                ".mdx"
+            )
 
         return output_path
 
