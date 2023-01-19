@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 from uuid import UUID
 
 import great_expectations.exceptions as gx_exceptions
-from docs.sphinx_api_docs_source.tasks import public_api
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
@@ -19,6 +18,7 @@ from great_expectations.checkpoint.util import (
     substitute_template_config,
 )
 from great_expectations.core import RunIdentifier
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
 from great_expectations.core.batch import (
     BatchRequest,
@@ -410,14 +410,31 @@ class BaseCheckpoint(ConfigPeer):
 
     @public_api
     def self_check(self, pretty_print: bool = True) -> dict:
-        """
-        Method that is intended to provide visibility into parameters that Checkpoint was instantiated with.
+        """Method that is intended to provide visibility into parameters that Checkpoint was instantiated with.
 
         If used as part of the test_yaml_config() workflow, the user will be able to know if the Checkpoint is
         configured with all necessary parameters.
 
+        When run with self_check()::
+
+            yaml_config: str = # [a checkpoint yaml configuration]
+            config: CommentedMap = yaml.load(yaml_config)
+            checkpoint_config: CheckpointConfig = CheckpointConfig(**config)
+            checkpoint: Checkpoint = Checkpoint(
+                data_context=context,
+                checkpoint_config.to_json_dict()
+            )
+            checkpoint.self_check()
+
+        When run with test_yaml_config::
+
+            checkpoint: Checkpoint = context.test_yaml_config(
+                yaml_config=yaml_config,
+                name="my_checkpoint"
+                )
 
         Args:
+
             pretty_print (bool): If True, then additional messages if Checkpoint configuration is missing
             a "validations" or "action_list" attribute.
 
