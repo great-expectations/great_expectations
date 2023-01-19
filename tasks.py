@@ -412,10 +412,19 @@ def docker(
     aliases=("schema",),
     help={
         "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class. Or '--list'",
+        "save_path": (
+            "Filepath to write the schema to. Will overwrite or create the file if it does not exist."
+            " If not provided the schema will be sent to the console."
+        ),
         "indent": "Indent size for nested json objects. Default: 4",
     },
 )
-def type_schema(ctx: Context, type: str, indent: int = 4):
+def type_schema(
+    ctx: Context,
+    type: str,
+    save_path: str | pathlib.Path | None = None,
+    indent: int = 4,
+):
     """
     Show the jsonschema for a given ZEP `type`
 
@@ -428,7 +437,9 @@ def type_schema(ctx: Context, type: str, indent: int = 4):
     buffer = io.StringIO()
 
     if type == "--list":
-        buffer.write("Registered ZEP types\n--------------------")
+        buffer.write(
+            "--------------------\nRegistered ZEP types\n--------------------\n"
+        )
         buffer.write("\t" + "\n\t".join(_SourceFactories.type_lookup.str_values()))
     elif type == "--help" or type == "-h":
         ctx.run("invoke --help schema")
@@ -436,12 +447,19 @@ def type_schema(ctx: Context, type: str, indent: int = 4):
         try:
             model: ExperimentalBaseModel = _SourceFactories.type_lookup[type]
             buffer.write(model.schema_json(indent=indent))
-        except KeyError as err:
+        except KeyError:
             raise invoke.Exit(
                 f"No '{type}' type found. Try 'invoke schema --list' to see available types",
                 code=1,
             )
-    print(buffer.getvalue())
+
+    text: str = buffer.getvalue()
+    if save_path:
+        save_path = pathlib.Path(save_path).resolve()
+        save_path.write_text(text)
+        print(f"'{type}' schema written to {save_path}")
+    else:
+        print(text)
 
 
 def _exit_with_error_if_not_in_repo_root(task_name: str):
