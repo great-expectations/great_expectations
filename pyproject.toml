@@ -48,7 +48,6 @@ exclude = [
     # number is the current number of typing errors for the excluded pattern
     'checkpoint/actions\.py',  # 18
     'checkpoint/checkpoint\.py',  # 22
-    'checkpoint/configurator\.py', # 2
     'checkpoint/types/checkpoint_result\.py',  # 34
     'checkpoint/util\.py',  # 5
     'cli/checkpoint\.py',  # 9
@@ -150,7 +149,7 @@ exclude = [
     'render/renderer/suite_scaffold_notebook_renderer\.py',  # 7
     'render/renderer/v3/suite_edit_notebook_renderer\.py',  # 11
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
-    'render/util\.py',  # 2
+    'render/util\.py',  # 17
     'render/view/view\.py',  # 11
     'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 63
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
@@ -172,7 +171,6 @@ exclude = [
     'rule_based_profiler/rule_based_profiler\.py',  # 40
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
-    'validator/exception_info\.py', # 1
     'validator/validator\.py', # 54
 ]
 
@@ -199,7 +197,13 @@ filterwarnings = [
     # This deprecation warning comes from getsentry/responses, a mocking utility for requests. It is a dependency in moto.
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
-    "error::marshmallow.warnings.RemovedInMarshmallow4Warning"
+    "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
+    # This warning is for configuring the result_format parameter at the Validator-level, which will not be persisted,
+    # but is still useful for building the configuration.
+    "ignore:`result_format` configured at the Validator-level will not be persisted:UserWarning",
+    # This warning is for configuring the result_format parameter at the Expectation-level, which will not be persisted,
+    # but is still useful for building the configuration.
+    "ignore:`result_format` configured at the Expectation-level will not be persisted:UserWarning",
 ]
 junit_family="xunit2"
 markers = [

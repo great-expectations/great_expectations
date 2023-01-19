@@ -174,9 +174,9 @@ class DataAsset(ExperimentalBaseModel):
         """
         if options is not None and not self._valid_batch_request_options(options):
             raise BatchRequestError(
-                "Batch request options should have a subset of keys:\n"
+                "Batch request options should only contain keys from the following list:\n"
                 f"{list(self.batch_request_options_template().keys())}\n"
-                f"but actually has the form:\n{pf(options)}\n"
+                f"but your specified keys contain\n{pf(options)}\nwhich is not valid.\n"
             )
         return BatchRequest(
             datasource_name=self._datasource.name,
@@ -225,6 +225,34 @@ class DataAsset(ExperimentalBaseModel):
     def add_sorters(
         self: DataAssetType, sorters: BatchSortersDefinition
     ) -> DataAssetType:
+        """Associates a sorter to this DataAsset
+
+        The passed in sorters will replace any previously associated sorters.
+        Batches returned from this DataAsset will be sorted on the batch's
+        metadata in the order specified by `sorters`. Sorters work left to right.
+        That is, batches will be sorted first by sorters[0].key, then
+        sorters[1].key, and so on. If sorter[i].reverse is True, that key will
+        sort the batches in descending, as opposed to ascending, order.
+
+        Args:
+            sorters: A list of either BatchSorter objects or strings. The strings
+              are a shorthand for BatchSorter objects and are parsed as follows:
+              r'[+-]?.*'
+              An optional prefix of '+' or '-' sets BatchSorter.reverse to
+              'False' or 'True' respectively. It is 'False' if no prefix is present.
+              The rest of the string gets assigned to the BatchSorter.key.
+              For example:
+              ["key1", "-key2", "key3"]
+              is equivalent to:
+              [
+                  BatchSorter(key="key1", reverse=False),
+                  BatchSorter(key="key2", reverse=True),
+                  BatchSorter(key="key3", reverse=False),
+              ]
+
+        Returns:
+            This DataAsset with the passed in sorters accessible via self.order_by
+        """
         # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
         # https://docs.pydantic.dev/usage/model_config/#options
         self.order_by = _batch_sorter_from_list(sorters)
