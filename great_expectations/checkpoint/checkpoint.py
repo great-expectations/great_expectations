@@ -18,7 +18,6 @@ from great_expectations.checkpoint.util import (
     substitute_template_config,
 )
 from great_expectations.core import RunIdentifier
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.async_executor import AsyncExecutor, AsyncResult
 from great_expectations.core.batch import (
     BatchRequest,
