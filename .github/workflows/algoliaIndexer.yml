@@ -2,8 +2,9 @@ name: Alogolia Indexer
 
 on:
   push:
-    branches: [ main ]
-    
+    branches:
+      - develop
+
 jobs:
   build:
     runs-on: ubuntu-latest

@@ -26,7 +26,6 @@ import logging
 import os
 import pathlib
 import shutil
-import urllib
 from typing import Tuple
 from urllib.parse import urlparse
 
@@ -38,7 +37,7 @@ from scripts.check_public_api_docstrings import (
     get_public_api_definitions,
     get_public_api_module_level_function_definitions,
 )
-from scripts.public_api_report import Definition
+from scripts.public_api_report import Definition, get_shortest_dotted_path
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -211,7 +210,7 @@ class SphinxInvokeDocsBuilder:
         directories inside of /docs/reference/api/
         """
         # URL is an environment variable provided by Netlify
-        base_url = os.getenv("URL", "https://localhost:3000")
+        base_url = os.getenv("URL", "http://localhost:3000")
         return f"{base_url}/docs/reference/api/"
 
     def _remove_temp_html(self) -> None:
@@ -242,7 +241,7 @@ class SphinxInvokeDocsBuilder:
         with filepath.open("a") as f:
             f.write(stub)
 
-    def _build_module_md_stubs(self):
+    def _build_module_md_stubs(self) -> None:
         """Build markdown stub files with rst directives for auto documenting modules."""
 
         definitions = get_public_api_module_level_function_definitions()
@@ -256,31 +255,19 @@ class SphinxInvokeDocsBuilder:
                 ),
             )
 
-    def _get_entity_name(self, definition: Definition):
+    def _get_entity_name(self, definition: Definition) -> str:
         """Get the name of the entity (class, module, function)."""
         return definition.ast_definition.name
 
-    def _get_md_file_name_from_entity_name(self, definition: Definition):
+    def _get_md_file_name_from_entity_name(self, definition: Definition) -> str:
         """Generate markdown file name from the entity definition."""
         snake_name = camel_to_snake(self._get_entity_name(definition=definition))
         return f"{snake_name}.md"
 
-    def _get_md_file_name_from_dotted_path_prefix(self, definition: Definition):
+    def _get_md_file_name_from_dotted_path_prefix(self, definition: Definition) -> str:
         """Generate markdown file name from the dotted path prefix."""
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
         return f"{dotted_path_prefix}.md"
-
-    def _get_dotted_path_to_class(self, definition: Definition):
-        """Get the dotted path to a class.
-
-        e.g. great_expectations.core.expectation_suite.ExpectationSuite
-        """
-        dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
-
-        class_name = self._get_entity_name(definition=definition)
-        dotted_path = f"{dotted_path_prefix}.{class_name}"
-
-        return dotted_path
 
     def _get_dotted_path_prefix(self, definition: Definition):
         """Get the dotted path up to the class or function name."""
@@ -292,7 +279,9 @@ class SphinxInvokeDocsBuilder:
     def _create_class_md_stub(self, definition: Definition) -> str:
         """Create the markdown stub content for a class."""
         class_name = self._get_entity_name(definition=definition)
-        dotted_import = self._get_dotted_path_to_class(definition=definition)
+        dotted_import = get_shortest_dotted_path(
+            definition=definition, repo_root_path=self.repo_root
+        )
         return f"""# {class_name}
 
 ```{{eval-rst}}
