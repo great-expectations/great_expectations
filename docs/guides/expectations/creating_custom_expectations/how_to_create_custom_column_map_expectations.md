@@ -106,7 +106,6 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-<<<<<<< HEAD
 ```python name="map_template_diagnostics"
 ```
 
@@ -308,7 +307,6 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-<<<<<<< HEAD
 ```python name="map_template_library_metadata"
 ```
 

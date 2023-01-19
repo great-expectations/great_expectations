@@ -91,7 +91,6 @@ Replace the Expectation class name
 ```
 
 with your real Expectation class name, in upper camel case:
-<<<<<<< HEAD
 ```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py ExpectColumnPairValuesToHaveADifferenceOfThree class_def"
 ```
 

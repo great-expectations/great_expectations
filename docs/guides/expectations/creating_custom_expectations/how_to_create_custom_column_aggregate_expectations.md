@@ -105,7 +105,6 @@ with something like:
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-<<<<<<< HEAD
 ```python name="agg_template_diagnostics"
 ```
 
@@ -255,7 +254,6 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-<<<<<<< HEAD
 ```python name="agg_template_validate"
 ```
 
