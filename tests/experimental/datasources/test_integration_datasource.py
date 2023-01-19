@@ -3,7 +3,6 @@ from __future__ import annotations
 import pathlib
 from typing import TYPE_CHECKING
 
-import pandas as pd
 import pytest
 from pydantic import ValidationError
 
@@ -15,11 +14,11 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import pyspark_sql_Row
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,
+    HeadData,
 )
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
@@ -421,65 +420,43 @@ def test_batch_head(
         # get the expected column names
         expected_columns: set[str] = set(metrics_calculator.columns())
 
-        head_df: pd.DataFrame
-        head_df_row_count: int
+        head_data: HeadData
         total_row_count: int
         if n_rows is not None and not fetch_all:
-            head_df = batch.head(n_rows=n_rows, fetch_all=fetch_all)
-
-            # the set of types returned by pd.DataFrame.head() and pyspark.sql.DataFrame.head()
-            if pyspark_sql_Row and isinstance(head_df, list):
-                assert all(isinstance(row, pyspark_sql_Row) for row in head_df)
-                assert all(set(row.asDict()) == expected_columns for row in head_df)
-            elif pyspark_sql_Row and isinstance(head_df, pyspark_sql_Row):
-                assert set(head_df.asDict()) == expected_columns
-            else:
-                assert isinstance(head_df, pd.DataFrame)
-                assert set(head_df.columns) == expected_columns
+            head_data = batch.head(n_rows=n_rows, fetch_all=fetch_all)
+            assert isinstance(head_data, HeadData)
 
             total_row_count = metrics_calculator.get_metric(metric=row_count_metric)
-
-            # count the number of rows in head_df depending on return type
-            if pyspark_sql_Row and isinstance(head_df, pyspark_sql_Row):
-                head_df_row_count = 1
-            elif isinstance(head_df, pd.DataFrame):
-                head_df_row_count = len(head_df.index)
-            else:
-                head_df_row_count = len(head_df)
+            head_data_row_count: int = len(head_data.data.index)
 
             # if n_rows is between 0 and the total_row_count, that's how many rows we expect
             if 0 <= n_rows <= total_row_count:
-                assert head_df_row_count == n_rows
+                assert head_data_row_count == n_rows
             # if n_rows is greater than the total_row_count, we only expect total_row_count rows
             elif n_rows > total_row_count:
-                assert head_df_row_count == total_row_count
+                assert head_data_row_count == total_row_count
             # if n_rows is negative and abs(n_rows) is larger than total_row_count we expect zero rows
             elif n_rows < 0 and abs(n_rows) > total_row_count:
-                assert head_df_row_count == 0
+                assert head_data_row_count == 0
             # if n_rows is negative, we expect all but the final abs(n_rows)
             else:
-                assert head_df_row_count == n_rows + total_row_count
+                assert head_data_row_count == n_rows + total_row_count
         elif fetch_all:
             total_row_count = metrics_calculator.get_metric(metric=row_count_metric)
             if n_rows:
-                head_df = batch.head(n_rows=n_rows, fetch_all=fetch_all)
+                head_data = batch.head(n_rows=n_rows, fetch_all=fetch_all)
             else:
-                head_df = batch.head(fetch_all=fetch_all)
-            # count the number of rows in head_df depending on return type
-            if pyspark_sql_Row and isinstance(head_df, pyspark_sql_Row):
-                head_df_row_count = 1
-            elif isinstance(head_df, pd.DataFrame):
-                head_df_row_count = len(head_df.index)
-            else:
-                head_df_row_count = len(head_df)
-            assert head_df_row_count == total_row_count
-            assert set(head_df.columns) == expected_columns
+                head_data = batch.head(fetch_all=fetch_all)
+            assert isinstance(head_data, HeadData)
+            assert len(head_data.data.index) == total_row_count
         else:
             # default to 5 rows
-            head_df = batch.head(fetch_all=fetch_all)
-            assert isinstance(head_df, pd.DataFrame)
-            assert len(head_df.index) == 5
-            assert set(head_df.columns) == expected_columns
+            head_data = batch.head(fetch_all=fetch_all)
+            assert isinstance(head_data, HeadData)
+            assert len(head_data.data.index) == 5
+
+        assert set(head_data.data.columns) == expected_columns
+
     else:
         with pytest.raises(ValidationError) as e:
             batch.head(n_rows=n_rows, fetch_all=fetch_all)

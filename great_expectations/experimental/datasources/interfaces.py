@@ -39,7 +39,6 @@ if TYPE_CHECKING:
     #       from core.batch so we no longer need to call Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import BatchData, BatchDefinition, BatchMarkers
     from great_expectations.execution_engine import ExecutionEngine
-    from great_expectations.validator.computed_metric import MetricValue
 
 try:
     from pyspark.sql import Row as pyspark_sql_Row
@@ -407,6 +406,14 @@ class Datasource(
     # End Abstract Methods
 
 
+@dataclasses.dataclass(frozen=True)
+class HeadData:
+    data: pd.DataFrame
+
+    def __repr__(self) -> str:
+        return self.data.__repr__()
+
+
 class Batch(ExperimentalBaseModel):
     """This represents a batch of data.
 
@@ -463,7 +470,7 @@ class Batch(ExperimentalBaseModel):
         self,
         n_rows: Optional[StrictInt] = None,
         fetch_all: StrictBool = False,
-    ) -> Union[pd.DataFrame, List[pyspark_sql_Row], pyspark_sql_Row]:
+    ) -> HeadData:
         """Return the first n rows of this Batch.
 
         This method returns the first n rows for the Batch based on position.
@@ -477,11 +484,7 @@ class Batch(ExperimentalBaseModel):
             fetch_all: If True, ignore n_rows and return the entire Batch.
 
         Returns
-            PandasExecutionEngine and SqlAlchemyExecutionEngine:
-                - A Pandas DataFrame containing the first n rows.
-            SparkDFExecutionEngine:
-                - If n_rows != 1, a list containing the first n pyspark.sql.Rows.
-                - If n_rows = 1, a pyspark.sql.Row.
+            HeadData
         """
         self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
         metric = MetricConfiguration(
@@ -489,7 +492,21 @@ class Batch(ExperimentalBaseModel):
             metric_domain_kwargs={"batch_id": self.id},
             metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
         )
-        resolved_metrics: dict[
-            tuple[str, str, str], MetricValue
-        ] = self.data.execution_engine.resolve_metrics(metrics_to_resolve=(metric,))
-        return resolved_metrics[metric.id]
+        table_head: pd.DataFrame | list[
+            pyspark_sql_Row
+        ] | pyspark_sql_Row = self.data.execution_engine.resolve_metrics(
+            metrics_to_resolve=(metric,)
+        )[
+            metric.id
+        ]
+        head_data: HeadData
+        if not isinstance(table_head, pd.DataFrame):
+            if not isinstance(table_head, list):
+                head_data = HeadData(data=pd.DataFrame(table_head.asDict()))
+            else:
+                head_data = HeadData(
+                    data=pd.DataFrame([row.asDict() for row in table_head])
+                )
+        else:
+            head_data = HeadData(data=table_head)
+        return head_data
