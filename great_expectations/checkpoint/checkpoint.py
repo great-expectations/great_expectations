@@ -409,7 +409,7 @@ class BaseCheckpoint(ConfigPeer):
             ) from e
 
     @public_api
-    def self_check(self, pretty_print=True) -> dict:
+    def self_check(self, pretty_print: bool = True) -> dict:
         """
         Method that is intended to provide visibility into parameters that Checkpoint was instantiated with.
 
