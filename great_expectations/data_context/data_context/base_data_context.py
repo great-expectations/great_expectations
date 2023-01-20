@@ -8,7 +8,7 @@ from great_expectations.util import get_context
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
 
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -16,6 +16,8 @@ from great_expectations.data_context.types.base import DataContextConfig, GXClou
 
 
 @public_api
+@deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
+@deprecated_argument(argument_name="ge_cloud_config", version="0.15.37")
 def BaseDataContext(
     project_config: Union[DataContextConfig, Mapping],
     context_root_dir: Optional[PathStr] = None,
@@ -26,26 +28,39 @@ def BaseDataContext(
     ge_cloud_mode: bool = False,
     ge_cloud_config: Optional[GXCloudConfig] = None,
 ) -> AbstractDataContext:
-    """This class implements most of the functionality of DataContext, with a few exceptions.
+    """A lightweight wrapper around `get_context()`.
 
-    1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
-    2. BaseDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
-        into DataContext class.
+    While this used to be the canonical method of instantiating a DataContext before 0.15.40,
+    it is now recommended to use `get_context()`.
 
-    Together, these changes make BaseDataContext class more testable.
+    Usage:
+        `import BaseDataContext from great_expectations.data_context`
+
+        `my_context = BaseDataContext(<insert_your_parameters>)`
+
+    This class implements most of the functionality of DataContext, with a few exceptions.
+
 
     Args:
-        project_config: Union[DataContextConfig, Mapping],
-        context_root_dir: Optional[PathStr] = None,
-        runtime_environment: Optional[dict] = None,
-        cloud_mode: bool = False,
-        cloud_config: Optional[GXCloudConfig] = None,
-        # Deprecated as of 0.15.37
-        ge_cloud_mode: bool = False,
-        ge_cloud_config: Optional[GXCloudConfig] = None,
+        project_config: In-memory configuration for Data Context.
+        context_root_dir (str or pathlib.Path): Path to directory that contains great_expectations.yml file
+        runtime_environment: A dictionary of values can be passed to a DataContext when it is instantiated.
+            These values will override both values from the config variables file and
+            from environment variables.
+        cloud_config: GX Cloud credentials (base URL, access token, and org id)
+        cloud_mode: Whether to run GX in Cloud mode (default is None).
+            If None, cloud mode is assumed if Cloud credentials are set up. Set to False to override.
+        ge_cloud_config: GX Cloud credentials (base URL, access token, and org id)
+        ge_cloud_mode: Whether to run GX in Cloud mode (default is None).
+            If None, cloud mode is assumed if Cloud credentials are set up. Set to False to override.
 
     Returns:
-        Something
+        A Data Context. Either a FileDataContext, EphemeralDataContext, or
+        CloudDataContext depending on environment and/or
+        parameters.
+
+    Raises:
+        GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
 
 
     --ge-feature-maturity-info--
