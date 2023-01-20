@@ -8,12 +8,14 @@ from great_expectations.util import get_context
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 
 
+@public_api
 def BaseDataContext(
     project_config: Union[DataContextConfig, Mapping],
     context_root_dir: Optional[PathStr] = None,
