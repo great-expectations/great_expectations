@@ -177,7 +177,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
-        "Validates the configuration of an Expectation.
+        Validates the configuration of an Expectation.
 
         For `expect_column_values_to_not_match_like_pattern` it is required that:
             - 'regex' kwarg is of type str or dict
