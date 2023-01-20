@@ -1075,14 +1075,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             if store.get("name") in active_store_names  # type: ignore[arg-type,operator]
         ]
 
+    @public_api
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         """List existing Checkpoint identifiers on this context.
-
-        Args:
-            None
-
         Returns:
-            Either a list of strings or ConfigurationIdentifier depending on the environment and context type
+            Either a list of strings or ConfigurationIdentifiers depending on the environment and context type.
         """
 
         return self.checkpoint_store.list_checkpoints()
@@ -1090,11 +1087,8 @@ class AbstractDataContext(ConfigPeer, ABC):
     def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         """List existing Profiler identifiers on this context.
 
-        Args:
-            None
-
         Returns:
-            Either a list of strings or ConfigurationIdentifier depending on the environment and context type
+            Either a list of strings or ConfigurationIdentifiers depending on the environment and context type.
         """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
 
@@ -1130,16 +1124,20 @@ class AbstractDataContext(ConfigPeer, ABC):
     ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
         return ConfigurationIdentifier(configuration_key=name)
 
+    @public_api
     def get_datasource(
         self, datasource_name: str = "default"
     ) -> Union[LegacyDatasource, BaseDatasource, XDatasource]:
-        """Get the named datasource
+        """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
 
         Args:
-            datasource_name (str): the name of the datasource from the configuration
+            datasource_name: The name of the target datasource.
 
         Returns:
-            datasource (Datasource)
+            The target datasource.
+
+        Raises:
+            ValueError: The input datasource_name is None.
         """
         if datasource_name is None:
             raise ValueError(
@@ -1227,11 +1225,15 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self._save_project_config()
 
+    @public_api
     def list_datasources(self) -> List[dict]:
-        """List currently-configured datasources on this context. Masks passwords.
+        """List the configurations of the datasources associated with this context.
+
+        Note that any sensitive values are obfuscated before being returned.
 
         Returns:
-            List(dict): each dictionary includes "name", "class_name", and "module_name" keys
+            A list of dictionaries representing datasource configurations. Each value
+            with contain a "name", "class_name", and "module_name" at a minimum.
         """
         datasources: List[dict] = []
 
@@ -1252,15 +1254,18 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasources.append(masked_config)
         return datasources
 
+    @public_api
+    @deprecated_argument(argument_name="save_changes", version="0.15.32")
     def delete_datasource(
         self, datasource_name: Optional[str], save_changes: Optional[bool] = None
     ) -> None:
-        """Delete a datasource
+        """Delete a given Datasource by name from the context's underlying DatasourceStore.
+
         Args:
-            datasource_name: The name of the datasource to delete.
+            datasource_name: The name of the target datasource.
 
         Raises:
-            ValueError: If the datasource name isn't provided or cannot be found.
+            ValueError: The datasource name isn't provided or cannot be found.
         """
         save_changes = self._determine_save_changes_flag(save_changes)
 
@@ -1513,9 +1518,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             target_store_name,
         )
 
+    @public_api
     def list_expectation_suite_names(self) -> List[str]:
-        """
-        Lists the available expectation suite names.
+        """Lists the available expectation suite names.
+
+        Returns:
+            A list of suite names (sorted in alphabetic order).
         """
         sorted_expectation_suite_names = [
             i.expectation_suite_name for i in self.list_expectation_suites()  # type: ignore[union-attr]
