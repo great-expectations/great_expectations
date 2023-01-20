@@ -1887,22 +1887,36 @@ class AbstractDataContext(ConfigPeer, ABC):
             self.expectations_store.remove_key(key)
             return True
 
+    @public_api
+    @deprecated_argument(argument_name="ge_cloud_id", version="0.15.45")
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
         include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
-        """Get an Expectation Suite by name or GX Cloud ID
+        """Get an Expectation Suite by name
+
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
             include_rendered_content (bool): Whether or not to re-populate rendered_content for each
                 ExpectationConfiguration.
-            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite.
+            ge_cloud_id (str): The GX Cloud ID for the Expectation Suite (unused)
 
         Returns:
             An existing ExpectationSuite
+
+        Raises:
+            DataContextError: There is no expectation suite with the name provided
         """
+        if ge_cloud_id is not None:
+            # deprecated-v0.15.45
+            warnings.warn(
+                "ge_cloud_id is deprecated as of v0.15.45 and will be removed in v0.16. Please use"
+                "expectation_suite_name instead",
+                DeprecationWarning,
+            )
+
         key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name  # type: ignore[arg-type]
         )
