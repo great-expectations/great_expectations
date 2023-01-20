@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Union
 
 from marshmallow import Schema, fields, post_load, pre_dump
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -63,10 +64,7 @@ class CheckpointResult(SerializableDictDot):
         self._checkpoint_config = checkpoint_config
         if success is None:
             self._success = all(
-                [
-                    run_result["validation_result"].success
-                    for run_result in run_results.values()
-                ]
+                [run_result["validation_result"].success for run_result in run_results.values()]
             )
         else:
             self._success = success
@@ -129,7 +127,16 @@ class CheckpointResult(SerializableDictDot):
             )
         return self._data_asset_names
 
+    @public_api
     def list_expectation_suite_names(self) -> List[str]:
+        """Return the list of expecation suite names for a checkpoint.
+
+        Args:
+            None
+
+        Returns:
+            self._expectation_suite_names: List[str] of all expectation suite names
+        """
         if self._expectation_suite_names is None:
             self._expectation_suite_names = list(
                 {
@@ -150,8 +157,7 @@ class CheckpointResult(SerializableDictDot):
         if group_by is None:
             if self._validation_results is None:
                 self._validation_results = [
-                    run_result["validation_result"]
-                    for run_result in self.run_results.values()
+                    run_result["validation_result"] for run_result in self.run_results.values()
                 ]
             return self._validation_results
         elif group_by == "validation_result_identifier":
@@ -196,12 +202,9 @@ class CheckpointResult(SerializableDictDot):
                     validation_results_by_data_asset_name[data_asset_name] = [
                         data_asset["validation_results"]
                         for data_asset in self.list_data_assets_validated()
-                        if data_asset["batch_definition"].data_asset_name
-                        == data_asset_name
+                        if data_asset["batch_definition"].data_asset_name == data_asset_name
                     ]
-            self._validation_results_by_data_asset_name = (
-                validation_results_by_data_asset_name
-            )
+            self._validation_results_by_data_asset_name = validation_results_by_data_asset_name
         return self._validation_results_by_data_asset_name
 
     def list_data_assets_validated(
@@ -221,13 +224,9 @@ class CheckpointResult(SerializableDictDot):
             assets_validated_by_batch_id = {}
 
             for validation_result in self.list_validation_results():
-                active_batch_definition = validation_result.meta[
-                    "active_batch_definition"
-                ]
+                active_batch_definition = validation_result.meta["active_batch_definition"]
                 batch_id = active_batch_definition.id
-                expectation_suite_name = validation_result.meta[
-                    "expectation_suite_name"
-                ]
+                expectation_suite_name = validation_result.meta["expectation_suite_name"]
                 if batch_id not in assets_validated_by_batch_id:
                     assets_validated_by_batch_id[batch_id] = {
                         "batch_definition": active_batch_definition,
@@ -238,9 +237,9 @@ class CheckpointResult(SerializableDictDot):
                     assets_validated_by_batch_id[batch_id]["validation_results"].append(
                         validation_result
                     )
-                    assets_validated_by_batch_id[batch_id][
-                        "expectation_suite_names"
-                    ].append(expectation_suite_name)
+                    assets_validated_by_batch_id[batch_id]["expectation_suite_names"].append(
+                        expectation_suite_name
+                    )
             self._data_assets_validated_by_batch_id = assets_validated_by_batch_id
         return self._data_assets_validated_by_batch_id
 
@@ -255,9 +254,7 @@ class CheckpointResult(SerializableDictDot):
                     if validation_result.success
                 ]
             )
-            unsuccessful_validation_count = (
-                validation_result_count - successful_validation_count
-            )
+            unsuccessful_validation_count = validation_result_count - successful_validation_count
             successful_validation_percent = (
                 validation_result_count
                 and (successful_validation_count / validation_result_count) * 100
@@ -298,9 +295,7 @@ class CheckpointResult(SerializableDictDot):
             "checkpoint_config": self.checkpoint_config.to_json_dict(),
             "success": convert_to_json_serializable(data=self.success),
         }
-        serializeable_dict = recursively_convert_to_json_serializable(
-            test_obj=serializeable_dict
-        )
+        serializeable_dict = recursively_convert_to_json_serializable(test_obj=serializeable_dict)
         return serializeable_dict
 
     def __getstate__(self):
