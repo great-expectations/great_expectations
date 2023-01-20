@@ -100,7 +100,7 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
         """Validates the configuration for the Expectation. 
         
         For `expect_column_values_to_match_like_pattern`
-        we require that the `configuraton.kwargs` contain a `like_pattern` key that is either a `str`, `dict`.
+        we require that the `configuraton.kwargs` contain a `like_pattern` key that is either a `str` or `dict`.
 
         Args:
             configuration: The ExpectationConfiguration to be validated.
