@@ -96,7 +96,7 @@ class ExpectColumnValuesToMatchLikePatternList(ColumnMapExpectation):
     ) -> None:
         """Validates the configuration for the Expectation. 
         
-        For `expect_column_values_to_match_pattern_list`
+        For `expect_column_values_to_match_like_pattern`
         we require that the `configuraton.kwargs` contain a `like_pattern_list` key that is either a `list` or `dict`.
 
         Args:
