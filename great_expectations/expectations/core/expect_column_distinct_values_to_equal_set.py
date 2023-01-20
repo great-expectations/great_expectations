@@ -4,6 +4,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
@@ -98,10 +99,21 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         "value_set",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
+        r"""Validates configuration for the expectation.
+
+        For `expect_column_distinct_values_to_equal_set` we require that the `configuraton.kwargs` contain
+        a `value_set` key that is either a `list`, `set`, or `dict`.
+
+        Args:
+            configuration: The configuration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:

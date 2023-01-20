@@ -337,7 +337,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
     ) -> None:
         r"""Validates configuration for the expectation.
 
-        For `expect_column_distinct_values_to_be_in_set` we require\ that the `configuraton.kwargs` contain
+        For `expect_column_distinct_values_to_be_in_set` we require that the `configuraton.kwargs` contain
         a `value_set` key that is either a `list`, `set`, or `dict`.
 
         Args:
