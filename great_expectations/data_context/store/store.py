@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Type
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.gx_cloud_store_backend import (
@@ -212,3 +215,40 @@ class Store:
             name = config.name
 
         return self.store_backend.build_key(name=name, id=id)
+
+    @staticmethod
+    def build_store_from_config(
+        store_name: Optional[str] = None,
+        store_config: Optional[dict] = None,
+        module_name: str = "great_expectations.data_context.store",
+        runtime_environment: Optional[dict] = None,
+    ) -> Store:
+        if store_config is None or module_name is None:
+            raise gx_exceptions.StoreConfigurationError(
+                "Cannot build a store without both a store_config and a module_name"
+            )
+
+        try:
+            config_defaults: dict = {
+                "store_name": store_name,
+                "module_name": module_name,
+            }
+            new_store = instantiate_class_from_config(
+                config=store_config,
+                runtime_environment=runtime_environment,
+                config_defaults=config_defaults,
+            )
+        except gx_exceptions.DataContextError as e:
+            new_store = None
+            logger.critical(
+                f"Error {e} occurred while attempting to instantiate a store."
+            )
+        if not new_store:
+            class_name: str = store_config["class_name"]
+            module_name = store_config["module_name"]
+            raise gx_exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=class_name,
+            )
+        return new_store
