@@ -103,10 +103,6 @@ def _query_for_year_and_month(
         [sqlalchemy.engine.base.Connection, str, str], DatetimeRange
     ],
 ) -> Dict[str, List]:
-    # We should make an assertion about the execution_engine earlier. Right now it is assigned to
-    # after construction. We may be able to use a hook in a property setter.
-    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
     with table_asset.datasource.engine.connect() as conn:
         datetimes: DatetimeRange = query_datetime_range(
             conn,
@@ -141,7 +137,7 @@ class TableAsset(DataAsset):
     _datasource: SQLDatasource = pydantic.PrivateAttr()
 
     @property
-    def datasource(self) -> Datasource:
+    def datasource(self) -> SQLDatasource:
         return self._datasource
 
     def batch_request_options_template(

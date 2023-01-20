@@ -1678,7 +1678,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         )
 
-        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
+        # We get a single BatchData so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         execution_engine: ExecutionEngine = batch_list[-1].data.execution_engine
 
