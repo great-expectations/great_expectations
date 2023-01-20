@@ -3,12 +3,11 @@ import inspect
 import logging
 import os
 import warnings
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 
 import pyparsing as pp
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
@@ -16,9 +15,6 @@ try:
     import sqlalchemy as sa
 except ImportError:
     sa = None
-
-if TYPE_CHECKING:
-    from great_expectations.data_context.store import Store
 
 logger = logging.getLogger(__name__)
 
@@ -102,39 +98,6 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         )
 
     return class_instance
-
-
-def build_store_from_config(
-    store_name: Optional[str] = None,
-    store_config: Optional[dict] = None,
-    module_name: str = "great_expectations.data_context.store",
-    runtime_environment: Optional[dict] = None,
-) -> Optional["Store"]:
-    if store_config is None or module_name is None:
-        return None
-
-    try:
-        config_defaults: dict = {
-            "store_name": store_name,
-            "module_name": module_name,
-        }
-        new_store = instantiate_class_from_config(
-            config=store_config,
-            runtime_environment=runtime_environment,
-            config_defaults=config_defaults,
-        )
-    except gx_exceptions.DataContextError as e:
-        new_store = None
-        logger.critical(f"Error {e} occurred while attempting to instantiate a store.")
-    if not new_store:
-        class_name: str = store_config["class_name"]
-        module_name = store_config["module_name"]
-        raise gx_exceptions.ClassInstantiationError(
-            module_name=module_name,
-            package_name=None,
-            class_name=class_name,
-        )
-    return new_store
 
 
 def format_dict_for_error_message(dict_):

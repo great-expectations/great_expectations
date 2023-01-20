@@ -36,13 +36,11 @@ class BatchManager:
         self._active_batch_id: Optional[str] = None
         self._active_batch_data_id: Optional[str] = None
 
-        if batch_list is None:
-            batch_list = []
-
         self._batch_cache: Dict[str, Batch] = OrderedDict()
         self._batch_data_cache: Dict[str, BatchDataType] = {}
 
-        self.load_batch_list(batch_list=batch_list)
+        if batch_list:
+            self.load_batch_list(batch_list=batch_list)
 
     @property
     def batch_data_cache(self) -> Dict[str, BatchDataType]:
@@ -144,10 +142,7 @@ class BatchManager:
         self._batch_cache = OrderedDict()
         self._active_batch_id = None
 
-    def load_batch_list(self, batch_list: Optional[List[Batch]]) -> None:
-        if batch_list is None:
-            batch_list = []
-
+    def load_batch_list(self, batch_list: List[Batch]) -> None:
         batch: Batch
         for batch in batch_list:
             try:
