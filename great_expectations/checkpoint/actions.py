@@ -37,6 +37,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
+from great_expectations.core._docs_decorators import public_api
 
 if TYPE_CHECKING:
     from great_expectations.data_context import DataContext
@@ -44,6 +45,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class ValidationAction:
     """Base class for all Actions that act on Validation Results and are aware of a Data Context namespace structure.
 
@@ -127,6 +129,7 @@ class NoOpAction(ValidationAction):
         print("Happily doing nothing")
 
 
+@public_api
 class SlackNotificationAction(ValidationAction):
     """Sends a Slack notification to a given webhook.
 
@@ -287,8 +290,9 @@ class SlackNotificationAction(ValidationAction):
             return {"slack_notification_result": "none required"}
 
 
+@public_api
 class PagerdutyAlertAction(ValidationAction):
-    """Sends a PagerDuty event
+    """Sends a PagerDuty event.
 
     YAML configuration example:: yaml
 
@@ -304,8 +308,6 @@ class PagerdutyAlertAction(ValidationAction):
         api_key (str): Events API v2 key for pagerduty.
         routing_key (str): The 32 character Integration Key for an integration on a service or on a global ruleset.
         notify_on (str): Specifies validation status that triggers notification. One of "all", "failure", "success".
-
-
     """
 
     def __init__(
@@ -382,6 +384,7 @@ class PagerdutyAlertAction(ValidationAction):
         return {"pagerduty_alert_result": "none sent"}
 
 
+@public_api
 class MicrosoftTeamsNotificationAction(ValidationAction):
     """Sends a Microsoft Teams notification to a given webhook.
 
@@ -408,8 +411,8 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
                "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
                "class_name": "MicrosoftTeamsRenderer",
            }
-        microsoft_teams_webhook (str): Incoming Microsoft Teams webhook to which to send notifications
-        notify_on (str): "Specifies validation status that triggers notification. One of "all", "failure", "success".
+        microsoft_teams_webhook (str): Incoming Microsoft Teams webhook to which to send notifications.
+        notify_on (str): Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
     def __init__(
@@ -495,8 +498,9 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             return {"microsoft_teams_notification_result": None}
 
 
+@public_api
 class OpsgenieAlertAction(ValidationAction):
-    """Sends an Opsgenie alert
+    """Sends an Opsgenie alert.
 
     YAML configuration example:: yaml
 
@@ -608,6 +612,7 @@ class OpsgenieAlertAction(ValidationAction):
             return {"opsgenie_alert_result": ""}
 
 
+@public_api
 class EmailAction(ValidationAction):
     """Sends an email to a given list of email addresses.
 
