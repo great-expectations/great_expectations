@@ -29,10 +29,10 @@ class YAMLHandler:
         '''
         yaml_handler = YAMLHandler()
         res: dict = yaml_handler.load(simple_yaml)
-
         example_dict: dict = dict(abc=1)
         yaml_handler = YAMLHandler()
         yaml_handler.dump(example_dict)
+
     """
 
     def __init__(self) -> None:
