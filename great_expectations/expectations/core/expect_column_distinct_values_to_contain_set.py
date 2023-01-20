@@ -101,20 +101,20 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates the configuration for the expectation. 
+        """Validates the configuration for the Expectation. 
         
         For `expect_column_distinct_values_to_contain_set`
         we require that the `configuraton.kwargs` contain a `value_set` key that is either a `list`, `set`,
         or `dict`.
 
         Args:
-            configuration: The configuration to be validated.
+            configuration: The ExpectationConfiguration to be validated.
 
         Returns:
-            `None` if the configuration is valid
+            `None`
             
         Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the expectation
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
         """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
