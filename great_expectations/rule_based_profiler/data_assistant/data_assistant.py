@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 from inspect import isabstract
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import Batch, BatchRequestBase
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
@@ -517,6 +518,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 rule.parameter_builders or []
             )
 
+    @public_api
     def run(
         self,
         variables: Optional[Dict[str, Any]] = None,
@@ -528,17 +530,27 @@ class DataAssistant(metaclass=MetaDataAssistant):
             List[RuntimeEnvironmentDomainTypeDirectives]
         ] = None,
     ) -> DataAssistantResult:
-        """
-        Run the DataAssistant as it is currently configured.
+        """Run the DataAssistant as it is currently configured.
+
+        Example Usage::
+
+            data_assistant = VolumeDataAssistant(
+                name="my_volume_data_assistant",
+                validator=validator,
+            )
+            result: DataAssistantResult = data_assistant.run(
+                variables=None,
+                rules=None,
+            )
 
         Args:
-            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
-            rules: name/(configuration-dictionary) (overrides)
-            variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
-            domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
+            variables: Attribute name/value pairs (overrides); commonly-used in Builder objects.
+            rules: Name/configuration dictionary (overrides)
+            variables_directives_list: Additional/override runtime variables directives (modify `BaseRuleBasedProfiler`).
+            domain_type_directives_list: Additional/override runtime domain directives (modify `BaseRuleBasedProfiler`).
 
         Returns:
-            DataAssistantResult: The result object for the DataAssistant
+            An instance of `DataAssistantResult`.
         """
         usage_statistics_handler: Optional[UsageStatisticsHandler]
         if self._data_context is None:
