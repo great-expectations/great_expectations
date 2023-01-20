@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import io
 from pathlib import Path
-from typing import Optional, Union
 
 from ruamel.yaml import YAML
 
@@ -37,7 +38,7 @@ class YAMLHandler:
         self._handler.indent(mapping=2, sequence=4, offset=2)
         self._handler.default_flow_style = False
 
-    def load(self, stream: Union[io.TextIOWrapper, str]) -> dict:
+    def load(self, stream: io.TextIOWrapper | str) -> dict:
         """Converts a YAML input stream into a Python dictionary.
         Args:
             stream: The input stream to read in. Although this function calls ruamel's load(), we
@@ -52,9 +53,9 @@ class YAMLHandler:
     def dump(
         self,
         data: dict,
-        stream: Optional[Union[io.TextIOWrapper, io.StringIO, Path]] = None,
-        **kwargs
-    ) -> Optional[str]:
+        stream: io.TextIOWrapper | io.StringIO | Path | None = None,
+        **kwargs,
+    ) -> str | None:
         """Converts a Python dictionary into a YAML string.
 
         Dump code has been adopted from:
