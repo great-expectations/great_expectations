@@ -45,11 +45,10 @@ logger = logging.getLogger(__name__)
 
 
 class ValidationAction:
-    """
-    This is the base class for all actions that act on validation results
-    and are aware of a Data Context namespace structure.
+    """Base class for all Actions that act on Validation Results and are aware of a Data Context namespace structure.
 
-    The Data Context is passed to this class in its constructor.
+    Args:
+        data_context: Data Context that is used by the Action.
     """
 
     def __init__(self, data_context) -> None:
