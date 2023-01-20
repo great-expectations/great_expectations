@@ -128,12 +128,11 @@ class NoOpAction(ValidationAction):
 
 
 class SlackNotificationAction(ValidationAction):
-    """
-    SlackNotificationAction sends a Slack notification to a given webhook.
+    """Sends a Slack notification to a given webhook.
 
-    **Configuration**
 
-    .. code-block:: yaml
+
+    YAML configuration example:: yaml
 
         - name: send_slack_notification_on_validation_result
         action:
@@ -142,18 +141,31 @@ class SlackNotificationAction(ValidationAction):
           # or pass in as environment variable
           # use slack_webhook when not using slack bot token
           slack_webhook: ${validation_notification_slack_webhook}
-          # pass slack token and slack channel when not using slack_webhook
-          slack_token: # token from slack app
-          slack_channel: # slack channel that messages should go to
-          notify_on: all # possible values: "all", "failure", "success"
-          notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
+          slack_token:
+          slack_channel:
+          notify_on: all
+          notify_with:
           renderer:
             # the class that implements the message to be sent
             # this is the default implementation, but you can
             # implement a custom one
             module_name: great_expectations.render.renderer.slack_renderer
             class_name: SlackRenderer
-          show_failed_expectations: *Optional* (boolean) shows a list of failed expectation types. default is false.
+          show_failed_expectations: True
+
+    Args:
+        data_context: Data Context that is used by the Action.
+        renderer (dict): Dictionary specifying the Renderer used to generate a query consumable by Slack API, for example:
+            {
+               "module_name": "great_expectations.render.renderer.slack_renderer",
+               "class_name": "SlackRenderer",
+           }
+        slack_webhook (str): Optional. The incoming Slack webhook to which to send notification.
+        slack_token (str): Optional. Token from Slack app. Used when not using slack_webhook.
+        slack_channel (str): Optional. Slack channel to receive notification. Used when not using slack_webhook.
+        notify_on (str): Specifies validation status that will trigger notification. One of "all", "failure", "success".
+        notify_with (list[str]): Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
+        show_failed_expectations (bool): Shows a list of failed expectation types.
     """
 
     def __init__(
@@ -167,20 +179,6 @@ class SlackNotificationAction(ValidationAction):
         notify_with=None,
         show_failed_expectations=False,
     ) -> None:
-        """Construct a SlackNotificationAction
-
-        Args:
-            data_context:
-            renderer: dictionary specifying the renderer used to generate a query consumable by Slack API, for example:
-                {
-                   "module_name": "great_expectations.render.renderer.slack_renderer",
-                   "class_name": "SlackRenderer",
-               }
-            slack_webhook: incoming Slack webhook to which to send notification
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            payload: *Optional* payload from other ValidationActions
-
-        """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
