@@ -39,8 +39,6 @@ except ImportError:
 if TYPE_CHECKING:
     import sqlalchemy
 
-    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
 
 class SQLDatasourceError(Exception):
     pass
@@ -109,11 +107,7 @@ def _query_for_year_and_month(
     # after construction. We may be able to use a hook in a property setter.
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
-    assert isinstance(
-        table_asset.datasource.execution_engine, SqlAlchemyExecutionEngine
-    )
-
-    with table_asset.datasource.execution_engine.engine.connect() as conn:
+    with table_asset.datasource.engine.connect() as conn:
         datetimes: DatetimeRange = query_datetime_range(
             conn,
             table_asset.table_name,
@@ -142,6 +136,13 @@ class TableAsset(DataAsset):
     table_name: str
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
+
+    # non-field private attrs
+    _datasource: SQLDatasource = pydantic.PrivateAttr()
+
+    @property
+    def datasource(self) -> Datasource:
+        return self._datasource
 
     def batch_request_options_template(
         self,
@@ -241,6 +242,8 @@ class TableAsset(DataAsset):
         Returns:
             A list of batches that match the options specified in the batch request.
         """
+        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
         self._validate_batch_request(batch_request)
 
         batch_list: List[Batch] = []
@@ -265,9 +268,9 @@ class TableAsset(DataAsset):
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
-            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
-                batch_spec=batch_spec
-            )
+            data, markers = SqlAlchemyExecutionEngine(
+                engine=self.datasource.engine
+            ).get_batch_data_and_markers(batch_spec=batch_spec)
 
             # batch_definition (along with batch_spec and markers) is only here to satisfy a
             # legacy constraint when computing usage statistics in a validator. We hope to remove
@@ -327,13 +330,6 @@ class SQLDatasource(Datasource):
     def _set_engine(cls, values: dict) -> dict:
         values["engine"] = create_engine(values["connection_string"])
         return values
-
-    @property
-    def execution_engine(self) -> SqlAlchemyExecutionEngine:
-        """Returns a SqlAlchemyExecutionEngine that utilizes this datasource's _engine."""
-        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
-        return SqlAlchemyExecutionEngine(engine=self.engine)
 
     def test_connection(self) -> None:
         # test database connection

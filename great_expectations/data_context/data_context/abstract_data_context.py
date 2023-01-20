@@ -1680,15 +1680,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        execution_engine: ExecutionEngine
-        if hasattr(batch_list[-1], "execution_engine"):
-            # 'XBatch's are execution engine aware. We just checked for this attr so we ignore the following
-            # attr defined mypy error
-            execution_engine = batch_list[-1].execution_engine
-        else:
-            execution_engine = self.datasources[  # type: ignore[union-attr]
-                batch_list[-1].batch_definition.datasource_name
-            ].execution_engine
+        execution_engine: ExecutionEngine = batch_list[-1].data.execution_engine
 
         validator = Validator(
             execution_engine=execution_engine,

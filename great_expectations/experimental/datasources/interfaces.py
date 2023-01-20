@@ -320,11 +320,6 @@ class Datasource(
         LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
 
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        """Returns the execution engine to be used"""
-        raise NotImplementedError
-
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
