@@ -275,7 +275,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                 min_val is not None or max_val is not None
             ), "min_value and max_value cannot both be None"
         except AssertionError as e:
-            gx_exceptions.InvalidExpectationConfigurationError(str(e))
+            raise gx_exceptions.InvalidExpectationConfigurationError(str(e))
 
         self.validate_metric_value_between_configuration(configuration=configuration)
 
