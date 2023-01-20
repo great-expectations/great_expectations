@@ -5,7 +5,7 @@ import logging
 import os
 import pathlib
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
+from typing import Dict, List, Optional, Pattern, Tuple, Type, Union
 
 import pydantic
 from typing_extensions import ClassVar, Literal
@@ -22,13 +22,14 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
 )
 
-if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
-
 LOGGER = logging.getLogger(__name__)
 
 
 class PandasDatasourceError(Exception):
+    pass
+
+
+class CSVAssetError(Exception):
     pass
 
 
@@ -44,6 +45,11 @@ class CSVAsset(DataAsset):
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
+    _datasource: Datasource = pydantic.PrivateAttr()
+
+    @property
+    def datasource(self) -> Datasource:
+        return self._datasource
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
@@ -126,6 +132,8 @@ class CSVAsset(DataAsset):
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
+        from great_expectations.execution_engine import PandasExecutionEngine
+
         self._validate_batch_request(batch_request)
         batch_list: List[Batch] = []
 
@@ -133,7 +141,7 @@ class CSVAsset(DataAsset):
             batch_request
         ):
             batch_spec = PathBatchSpec(path=str(path))
-            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+            data, markers = PandasExecutionEngine().get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
             # batch_definition (along with batch_spec and markers) is only here to satisfy a
@@ -178,14 +186,19 @@ class PandasDatasource(Datasource):
     name: str
     assets: Dict[str, CSVAsset] = {}
 
-    @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
-        """Return the PandasExecutionEngine unless the override is set"""
-        from great_expectations.execution_engine.pandas_execution_engine import (
-            PandasExecutionEngine,
-        )
-
-        return PandasExecutionEngine
+    def test_connection(self) -> None:
+        if self.assets:
+            for asset in self.assets.values():
+                success = False
+                for filename in os.listdir(asset.path):
+                    if asset.regex.match(filename):
+                        # if one file in the asset matches the regex, we consider this asset valid
+                        success = True
+                        break
+                if not success:
+                    raise CSVAssetError(
+                        f"No file at path: {asset.path} matched the regex: {asset.regex}."
+                    )
 
     def add_csv_asset(
         self,

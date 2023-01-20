@@ -332,8 +332,8 @@ class SQLDatasource(Datasource):
         self.engine.connect()
         # if TableAssets are defined, also check if those exist
         if self.assets:
-            for table_asset in self.assets.values():
-                sqlalchemy.inspect(self.engine).has_table(table_asset.table_name)
+            for asset in self.assets.values():
+                sqlalchemy.inspect(self.engine).has_table(asset.table_name)
 
     def add_table_asset(
         self,
