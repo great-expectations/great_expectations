@@ -1079,10 +1079,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         """List existing Checkpoint identifiers on this context.
+
         Returns:
             Either a list of strings or ConfigurationIdentifiers depending on the environment and context type.
         """
-
         return self.checkpoint_store.list_checkpoints()
 
     def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
