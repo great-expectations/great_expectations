@@ -153,7 +153,7 @@ class SlackNotificationAction(ValidationAction):
 
     Args:
         data_context: Data Context that is used by the Action.
-        renderer (dict): Dictionary specifying the Renderer used to generate a query consumable by Slack API, e.g.:
+        renderer (dict): Specifies the Renderer used to generate a query consumable by Slack API, e.g.:
             {
                "module_name": "great_expectations.render.renderer.slack_renderer",
                "class_name": "SlackRenderer",
@@ -403,7 +403,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     Args:
         data_context: Data Context that is used by the Action.
-        renderer (dict): Dictionary specifying the renderer used to generate a query consumable by teams API, e.g.:
+        renderer (dict): Specifies the renderer used to generate a query consumable by teams API, e.g.:
             {
                "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
                "class_name": "MicrosoftTeamsRenderer",
@@ -508,7 +508,7 @@ class OpsgenieAlertAction(ValidationAction):
           api_key: ${opsgenie_api_key}
           region:
           priority: P2
-          notify_on: failure 
+          notify_on: failure
 
     Args:
         data_context: Data Context that is used by the Action.
@@ -609,15 +609,15 @@ class OpsgenieAlertAction(ValidationAction):
 
 
 class EmailAction(ValidationAction):
-    """
-    EmailAction sends an email to a given list of email addresses.
-    **Configuration**
-    .. code-block:: yaml
+    """Sends an email to a given list of email addresses.
+
+    YAML configuration example:: yaml
+
         - name: send_email_on_validation_result
         action:
           class_name: EmailAction
           notify_on: all # possible values: "all", "failure", "success"
-          notify_with: # optional list of DataDocs site names to display in the email message. Defaults to showing all
+          notify_with:
           renderer:
             # the class that implements the message to be sent
             # this is the default implementation, but you can
@@ -630,10 +630,28 @@ class EmailAction(ValidationAction):
           smtp_port: ${smtp_port}
           sender_login: ${email_address}
           sender_password: ${sender_password}
-          sender_alias: ${sender_alias} # useful to send an email as an alias (default = sender_login)
-          receiver_emails: ${receiver_emails} # string containing email addresses separated by commas
+          sender_alias: ${sender_alias} # useful to send an email as an alias
+          receiver_emails: ${receiver_emails}
           use_tls: False
           use_ssl: True
+
+    Args:
+        data_context: Data Context that is used by the Action.
+        renderer (dict): Specifies the renderer used to generate an email, for example:
+            {
+               "module_name": "great_expectations.render.renderer.email_renderer",
+               "class_name": "EmailRenderer",
+           }
+        smtp_address (str): Address of the SMTP server used to send the email.
+        smtp_address (str): Port of the SMTP server used to send the email.
+        sender_login (str): Login used send the email.
+        sender_password (str): Password used to send the email.
+        sender_alias (str): Optional. Alias used to send the email (default = sender_login).
+        receiver_emails (str): Email addresses that will receive the email (separated by commas).
+        use_tls (bool): Optional. Use of TLS to send the email (using either TLS or SSL is highly recommended).
+        use_ssl (bool): Optional. Use of SSL to send the email (using either TLS or SSL is highly recommended).
+        notify_on (str): "Specifies validation status that triggers notification. One of "all", "failure", "success".
+        notify_with (list[str]): Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
     """
 
     def __init__(
@@ -651,25 +669,6 @@ class EmailAction(ValidationAction):
         notify_on="all",
         notify_with=None,
     ) -> None:
-        """Construct an EmailAction
-        Args:
-            data_context:
-            renderer: dictionary specifying the renderer used to generate an email, for example:
-                {
-                   "module_name": "great_expectations.render.renderer.email_renderer",
-                   "class_name": "EmailRenderer",
-               }
-            smtp_address: address of the SMTP server used to send the email
-            smtp_address: port of the SMTP server used to send the email
-            sender_login: login used send the email
-            sender_password: password used to send the email
-            sender_alias: optional alias used to send the email (default = sender_login)
-            receiver_emails: email addresses that will be receive the email (separated by commas)
-            use_tls: optional use of TLS to send the email (using either TLS or SSL is highly recommended)
-            use_ssl: optional use of SSL to send the email (using either TLS or SSL is highly recommended)
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            notify_with: optional list of DataDocs site names to display in the email message
-        """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
