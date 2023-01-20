@@ -106,7 +106,7 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
         Validates the configuration of an Expectation.
 
         For `expect_column_values_to_not_match_regex_list` it is required that:
-            - 'regex_list' kwarg is of type str or dict
+            - 'regex_list' kwarg is of type list or dict
             - if 'regex_list' is list, assert is non-empty and each entry is of type str
             - if 'regex_list' is dict, assert a key "$PARAMETER" is present
 
