@@ -7,8 +7,10 @@ from pprint import pformat as pf
 from typing import (  # type: ignore[attr-defined]
     Callable,
     Dict,
+    Hashable,
     List,
     NamedTuple,
+    Sequence,
     Set,
     Tuple,
     Type,
@@ -87,6 +89,12 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
     "read_csv": "CSVAsset",
     "read_excel": "ExcelAsset",
+}
+
+_TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
+    "Literal": Literal,
+    "Sequence": Sequence,
+    "Hashable": Hashable,
 }
 
 
@@ -234,7 +242,7 @@ def _generate_data_asset_models(
             fields_dict=fields,
         )
         models[type_name] = model
-        # model.update_forward_refs()
+        model.update_forward_refs(**_TYPE_REF_LOCALS)
 
     return models
 
