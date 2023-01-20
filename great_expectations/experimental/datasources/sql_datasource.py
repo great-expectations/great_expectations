@@ -39,7 +39,7 @@ except ImportError:
 if TYPE_CHECKING:
     import sqlalchemy
 
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 class SQLDatasourceError(Exception):
@@ -315,30 +315,33 @@ class SQLDatasource(Datasource):
 
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
-    type: Literal["sql"] = pydantic.Field("sql", allow_mutation=False)
-    connection_string: pydantic.AnyUrl = pydantic.Field(..., allow_mutation=False)
+    type: Literal["sql"] = "sql"
+    connection_string: pydantic.AnyUrl
     assets: Dict[str, TableAsset] = {}
+    engine: Engine
 
     class Config:
         arbitrary_types_allowed = True
-        extra = pydantic.Extra.forbid
-        validate_assignment = True
+
+    @pydantic.root_validator(pre=True)
+    def _set_engine(cls, values: dict) -> dict:
+        values["engine"] = create_engine(values["connection_string"])
+        return values
 
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
-        """Returns the default execution engine type."""
+    def execution_engine(self) -> SqlAlchemyExecutionEngine:
+        """Returns a SqlAlchemyExecutionEngine that utilizes this datasource's _engine."""
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
-        return SqlAlchemyExecutionEngine
+        return SqlAlchemyExecutionEngine(engine=self.engine)
 
     def test_connection(self) -> None:
         # test database connection
-        engine: Engine = create_engine(self.connection_string)
-        engine.connect()
+        self.engine.connect()
         # if TableAssets are defined, also check if those exist
         if self.assets:
             for table_asset in self.assets.values():
-                sqlalchemy.inspect(engine).has_table(table_asset.table_name)
+                sqlalchemy.inspect(self.engine).has_table(table_asset.table_name)
 
     def add_table_asset(
         self,

@@ -296,38 +296,11 @@ class Datasource(
 
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
-    # Datasource instance attrs but these will be fed into the `execution_engine` constructor
-    _excluded_eng_args: ClassVar[Set[str]] = {
-        "name",
-        "type",
-        "execution_engine",
-        "assets",
-    }
-    # Setting this in a Datasource subclass will override the execution engine type.
-    # The primary use case is to inject an execution engine for testing.
-    execution_engine_override: ClassVar[Optional[Type[ExecutionEngine]]] = None
 
     # instance attrs
     type: str
     name: str
     assets: MutableMapping[str, DataAssetType] = {}
-    _execution_engine: ExecutionEngine = pydantic.PrivateAttr()
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        engine_kwargs = {
-            k: v for (k, v) in kwargs.items() if k not in self._excluded_eng_args
-        }
-        self._execution_engine = self._execution_engine_type()(**engine_kwargs)
-
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        return self._execution_engine
-
-    class Config:
-        # TODO: revisit this (1 option - define __get_validator__ on ExecutionEngine)
-        # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
-        arbitrary_types_allowed = True
 
     @pydantic.validator("assets", pre=True)
     @classmethod
@@ -347,9 +320,10 @@ class Datasource(
         LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
 
-    def _execution_engine_type(self) -> Type[ExecutionEngine]:
+    @property
+    def execution_engine(self) -> ExecutionEngine:
         """Returns the execution engine to be used"""
-        return self.execution_engine_override or self.execution_engine_type
+        raise NotImplementedError
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
