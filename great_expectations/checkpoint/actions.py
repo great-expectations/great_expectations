@@ -795,6 +795,7 @@ class EmailAction(ValidationAction):
         else:
             return {"email_result": ""}
 
+
 class StoreValidationResultAction(ValidationAction):
     """
         StoreValidationResultAction stores a validation result in the ValidationsStore.
@@ -887,12 +888,11 @@ class StoreEvaluationParametersAction(ValidationAction):
     Evaluation parameters allow expectations to refer to statistics/metrics computed
     in the process of validating other prior expectations.
 
-    .. code-block:: yaml
+    Typical usage example::
 
         - name: store_evaluation_params
         action:
           class_name: StoreEvaluationParametersAction
-          # the name must refer to a store that is configured in the great_expectations.yml file
           target_store_name: evaluation_parameter_store
 
     Args:
@@ -900,7 +900,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         target_store_name: The name of the store in the Data Context to store the evaluation parameters.
 
     Raises:
-        TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}
+        TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
 
     def __init__(self, data_context, target_store_name=None) -> None:
@@ -935,7 +935,7 @@ class StoreEvaluationParametersAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
+                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -943,41 +943,40 @@ class StoreEvaluationParametersAction(ValidationAction):
         self.data_context.store_evaluation_parameters(validation_result_suite)
 
 
+@public_api
 class StoreMetricsAction(ValidationAction):
     """
-    StoreMetricsAction extracts metrics from a Validation Result and stores them
-    in a metrics store.
+     Extract metrics from a Validation Result and store them in a metrics store.
 
-    **Configuration**
-
-    .. code-block:: yaml
+    Typical usage example::
 
         - name: store_evaluation_params
         action:
           class_name: StoreMetricsAction
-          # name of the store where the action will store the metrics
           # the name must refer to a store that is configured in the great_expectations.yml file
           target_store_name: my_metrics_store
 
-    """
-
-    def __init__(
-        self, data_context, requested_metrics, target_store_name="metrics_store"
-    ) -> None:
-        """
-
-        Args:
-            data_context: Data Context
-            requested_metrics: dictionary of metrics to store. Dictionary should have the following structure:
+     Args:
+        data_context: GX Data Context.
+        requested_metrics: Dictionary of metrics to store.
+            Dictionary should have the following structure::
 
                 expectation_suite_name:
                     metric_name:
                         - metric_kwargs_id
 
-                You may use "*" to denote that any expectation suite should match.
-            target_store_name: the name of the store in the Data Context which
-                should be used to store the metrics
-        """
+            You may use "*" to denote that any expectation suite should match.
+        target_store_name: The name of the store where the action will store the metrics.
+
+    Raises:
+        DataContextError: Unable to find store {} in your DataContext configuration.
+        DataContextError: StoreMetricsAction must have a valid MetricsStore for its target store.
+        TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
+    """
+
+    def __init__(
+        self, data_context, requested_metrics, target_store_name="metrics_store"
+    ) -> None:
         super().__init__(data_context)
         self._requested_metrics = requested_metrics
         self._target_store_name = target_store_name
@@ -1018,7 +1017,7 @@ class StoreMetricsAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
+                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
                     type(validation_result_suite_identifier)
                 )
             )
