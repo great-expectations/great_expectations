@@ -61,7 +61,7 @@ class InlineRenderer(Renderer):
             A list of RenderedAtomicContent objects for a given ExpectationConfiguration or ExpectationValidationResult.
         """
         expectation_type: str
-        renderer_typs: List[AtomicRendererType]
+        renderer_types: List[AtomicRendererType]
         if isinstance(render_object, ExpectationConfiguration):
             expectation_type = render_object.expectation_type
             renderer_types = [AtomicRendererType.PRESCRIPTIVE]
