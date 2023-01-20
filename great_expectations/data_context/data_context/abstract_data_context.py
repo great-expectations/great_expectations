@@ -2478,29 +2478,24 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         return generator
 
+    @public_api
     def get_available_data_asset_names(
-        self, datasource_names=None, batch_kwargs_generator_names=None
+        self,
+        datasource_names: Optional[str | list[str]] = None,
+        batch_kwargs_generator_names: Optional[str | list[str]] = None,
     ):
         """Inspect datasource and batch kwargs generators to provide available data_asset objects.
 
         Args:
-            datasource_names: list of datasources for which to provide available data_asset_name objects. If None, \
-            return available data assets for all datasources.
-            batch_kwargs_generator_names: list of batch kwargs generators for which to provide available
-            data_asset_name objects.
+            datasource_names: List of datasources for which to provide available data asset name objects.
+                              If None, return available data assets for all datasources.
+            batch_kwargs_generator_names: List of batch kwargs generators for which to provide available data_asset_name objects.
 
         Returns:
-            data_asset_names (dict): Dictionary describing available data assets
-            ::
+            data_asset_names: Dictionary describing available data assets
 
-                {
-                  datasource_name: {
-                    batch_kwargs_generator_name: [ data_asset_1, data_asset_2, ... ]
-                    ...
-                  }
-                  ...
-                }
-
+        Raises:
+            ValueError: `datasource_names` is not None, a string, or list of strings.
         """
         data_asset_names = {}
         if datasource_names is None:
