@@ -99,7 +99,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
-    build_store_from_config,
     instantiate_class_from_config,
     parse_substitution_variable,
 )
@@ -228,7 +227,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         # Init stores
         self._stores: dict = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)  # type: ignore[arg-type]
+        self._init_stores(self.project_config_with_variables_substituted.stores)
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -567,7 +566,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     f"{float(CURRENT_GX_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the upgrade process."
                 )
-                built_store: Optional[Store] = self._build_store_from_config(
+                built_store: Store = self._build_store_from_config(
                     profiler_store_name,  # type: ignore[arg-type]
                     DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],  # type: ignore[index,arg-type]
                 )
@@ -1189,19 +1188,44 @@ class AbstractDataContext(ConfigPeer, ABC):
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
 
-    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
+    def add_store(self, store_name: str, store_config: dict) -> Store:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
         Args:
-            store_name (str): a key for the new Store in in self._stores
+            store_name (str): a key for the new Store in in self.stores
             store_config (dict): a config for the Store to add
 
         Returns:
             store (Store)
         """
+        store = self._build_store_from_config(store_name, store_config)
 
-        self.config.stores[store_name] = store_config  # type: ignore[index]
-        return self._build_store_from_config(store_name, store_config)
+        # Both the config and the actual stores need to be kept in sync
+        self.config.stores[store_name] = store_config
+        self._stores[store_name] = store
+
+        self._save_project_config()
+        return store
+
+    def delete_store(self, store_name: str) -> None:
+        """Delete an existing Store from the DataContext.
+
+        Args:
+            store_name: The name of the Store to be deleted.
+
+        Raises:
+            StoreConfigurationError if the target Store is not found.
+        """
+        if store_name not in self.config.stores and store_name not in self._stores:
+            raise gx_exceptions.StoreConfigurationError(
+                f'Attempted to delete a store named: "{store_name}". It is not a configured store.'
+            )
+
+        # Both the config and the actual stores need to be kept in sync
+        self.config.stores.pop(store_name, None)
+        self._stores.pop(store_name, None)
+
+        self._save_project_config()
 
     def list_datasources(self) -> List[dict]:
         """List currently-configured datasources on this context. Masks passwords.
@@ -2980,9 +3004,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             conf_file_option="usage_statistics_url",
         )
 
-    def _build_store_from_config(
-        self, store_name: str, store_config: dict
-    ) -> Optional[Store]:
+    def _build_store_from_config(self, store_name: str, store_config: dict) -> Store:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
         # the expectations_store does not yet exist by:
@@ -3004,7 +3026,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ):
             store_config["store_backend"].update({"suppress_store_backend_id": True})
 
-        new_store = build_store_from_config(
+        new_store = Store.build_store_from_config(
             store_name=store_name,
             store_config=store_config,
             module_name=module_name,
@@ -3284,7 +3306,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _construct_data_context_id(self) -> str:
         # Choose the id of the currently-configured expectations store, if it is a persistent store
-        expectations_store = self._stores[self.variables.expectations_store_name]
+        expectations_store = self.stores[self.expectations_store_name]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation
             # if there was an invalid store config
