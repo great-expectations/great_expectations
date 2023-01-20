@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, List, Optional
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -240,8 +241,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates the configuration of an Expectation.
+        """Validates the configuration of an Expectation.
 
         For `expect_column_values_to_be_between` it is required that:
             - One of `min_value` or `max_value` is not `None`.
@@ -270,9 +270,12 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             min_val = configuration.kwargs["min_value"]
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
-        assert (
-            min_val is not None or max_val is not None
-        ), "min_value and max_value cannot both be None"
+        try:
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be None"
+        except AssertionError as e:
+            gx_exceptions.InvalidExpectationConfigurationError(str(e))
 
         self.validate_metric_value_between_configuration(configuration=configuration)
 
