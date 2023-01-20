@@ -93,7 +93,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
-        "Validates the configuration of an Expectation.
+        Validates the configuration of an Expectation.
 
         For `expect_column_values_to_not_match_like_pattern_list` it is required that:
             - 'like_pattern_list' is present in configuration's kwarg
