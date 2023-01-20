@@ -649,6 +649,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return updated_datasource
 
     @public_api
+    @deprecated_argument(argument_name="save_changes", version="0.15.32")
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
         args_payload_fn=add_datasource_usage_statistics,
@@ -1259,10 +1260,15 @@ class AbstractDataContext(ConfigPeer, ABC):
     def delete_datasource(
         self, datasource_name: Optional[str], save_changes: Optional[bool] = None
     ) -> None:
-        """Delete a given Datasource by name from the context's underlying DatasourceStore.
+        """Delete a given Datasource by name.
+
+        Note that this method causes deletion from the underlying DatasourceStore.
+        This can be overridden to only impact the Datasource cache through the deprecated
+        save_changes argument.
 
         Args:
             datasource_name: The name of the target datasource.
+            save_changes: Should this change be persisted by the DatasourceStore?
 
         Raises:
             ValueError: The datasource name isn't provided or cannot be found.
