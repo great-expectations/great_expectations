@@ -1789,7 +1789,7 @@ def _pandas_map_condition_index(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> Union[List[int], List[Dict[str, Any]]]:
+) -> Union[List[int], List[Dict[str, Any]], None]:
     (
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
@@ -1838,6 +1838,13 @@ def _pandas_map_condition_index(
     domain_records_df = domain_records_df[boolean_mapped_unexpected_values]
     expectation_domain_column_name: Union[str, None] = domain_kwargs.get("column")
 
+    # We will not return map_condition_index if return_unexpected_index_list = False
+    return_unexpected_index_list: bool = result_format.get(
+        "return_unexpected_index_list", True
+    )
+    if return_unexpected_index_list is False:
+        return
+
     unexpected_index_list: Union[
         List[int], List[Dict[str, Any]]
     ] = compute_unexpected_pandas_indices(
@@ -1872,7 +1879,7 @@ def _pandas_map_condition_query(
 
     # We will not return map_condition_query if return_unexpected_index_query = False
     return_unexpected_index_query: bool = result_format.get(
-        "return_unexpected_index_query"
+        "return_unexpected_index_query", True
     )
     if return_unexpected_index_query is False:
         return
@@ -2510,7 +2517,7 @@ def _sqlalchemy_map_condition_query(
 
     # We will not return map_condition_query if return_unexpected_index_query = False
     return_unexpected_index_query: bool = result_format.get(
-        "return_unexpected_index_query"
+        "return_unexpected_index_query", True
     )
     if return_unexpected_index_query is False:
         return
@@ -2558,7 +2565,7 @@ def _sqlalchemy_map_condition_index(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> List[Dict[str, Any]]:
+) -> Union[List[Dict[str, Any]], None]:
     """
     Returns indices of the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -2574,6 +2581,14 @@ def _sqlalchemy_map_condition_index(
 
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     result_format: dict = metric_value_kwargs["result_format"]
+
+    # We will not return map_condition_index if return_unexpected_index_list = False
+    return_unexpected_index_list: bool = result_format.get(
+        "return_unexpected_index_list", True
+    )
+
+    if return_unexpected_index_list is False:
+        return
 
     column_selector: List[sa.Column] = []
     all_table_columns: List[str] = metrics.get("table.columns")
@@ -2838,6 +2853,14 @@ def _spark_map_condition_index(
         raise gx_exceptions.MetricResolutionError(
             "unexpected_indices cannot be returned without 'unexpected_index_column_names'. Please check your configuration."
         )
+
+    # We will not return map_condition_index if return_unexpected_index_list = False
+    return_unexpected_index_list: bool = result_format.get(
+        "return_unexpected_index_list", True
+    )
+
+    if return_unexpected_index_list is False:
+        return
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
