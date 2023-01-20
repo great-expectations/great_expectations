@@ -153,7 +153,7 @@ class SlackNotificationAction(ValidationAction):
 
     Args:
         data_context: Data Context that is used by the Action.
-        renderer (dict): Dictionary specifying the Renderer used to generate a query consumable by Slack API, for example:
+        renderer (dict): Dictionary specifying the Renderer used to generate a query consumable by Slack API, e.g.:
             {
                "module_name": "great_expectations.render.renderer.slack_renderer",
                "class_name": "SlackRenderer",
@@ -161,7 +161,7 @@ class SlackNotificationAction(ValidationAction):
         slack_webhook (str): Optional. The incoming Slack webhook to which to send notification.
         slack_token (str): Optional. Token from Slack app. Used when not using slack_webhook.
         slack_channel (str): Optional. Slack channel to receive notification. Used when not using slack_webhook.
-        notify_on (str): Specifies validation status that will trigger notification. One of "all", "failure", "success".
+        notify_on (str): Specifies validation status that triggers notification. One of "all", "failure", "success".
         notify_with (list[str]): Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
         show_failed_expectations (bool): Shows a list of failed expectation types.
     """
@@ -383,12 +383,9 @@ class PagerdutyAlertAction(ValidationAction):
 
 
 class MicrosoftTeamsNotificationAction(ValidationAction):
-    """
-    MicrosoftTeamsNotificationAction sends a Microsoft Teams notification to a given webhook.
+    """Sends a Microsoft Teams notification to a given webhook.
 
-    **Configuration**
-
-    .. code-block:: yaml
+    YAML configuration example:: yaml
 
         - name: send_microsoft_teams_notification_on_validation_result
         action:
@@ -396,7 +393,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
           # put the actual webhook URL in the uncommitted/config_variables.yml file
           # or pass in as environment variable
           microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}
-          notify_on: all # possible values: "all", "failure", "success"
+          notify_on: all
           renderer:
             # the class that implements the message to be sent
             # this is the default implementation, but you can
@@ -404,6 +401,15 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             module_name: great_expectations.render.renderer.microsoft_teams_renderer
             class_name: MicrosoftTeamsRenderer
 
+    Args:
+        data_context: Data Context that is used by the Action.
+        renderer (dict): Dictionary specifying the renderer used to generate a query consumable by teams API, e.g.:
+            {
+               "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+               "class_name": "MicrosoftTeamsRenderer",
+           }
+        microsoft_teams_webhook (str): Incoming Microsoft Teams webhook to which to send notifications
+        notify_on (str): "Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
     def __init__(
@@ -413,19 +419,6 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         microsoft_teams_webhook,
         notify_on="all",
     ) -> None:
-        """Construct a MicrosoftTeamsNotificationAction
-
-        Args:
-            data_context:
-            renderer: dictionary specifying the renderer used to generate a query consumable by teams API, for example:
-                {
-                   "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
-                   "class_name": "MicrosoftTeamsRenderer",
-               }
-            microsoft_teams_webhook: incoming Microsoft Teams webhook to which to send notifications
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            payload: *Optional* payload from other ValidationActions
-        """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
