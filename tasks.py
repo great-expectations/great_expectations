@@ -130,8 +130,8 @@ def hooks(
         ctx.run(" ".join(["pre-commit", "install"]), echo=True)
 
 
-@invoke.task(aliases=["docstring"])
-def docstrings(ctx: Context, paths: str):
+@invoke.task(aliases=["docstring"], iterable=("paths",))
+def docstrings(ctx: Context, paths: list[str] | None = None):
     """
     Check public API docstrings.
 
@@ -139,7 +139,7 @@ def docstrings(ctx: Context, paths: str):
     To pass multiple items use quotes example: 'great_expectations/core great_expectations/util.py'.
     """
     if paths:
-        select_paths = [pathlib.Path(p) for p in paths.split()]
+        select_paths = [pathlib.Path(p) for p in paths]
     else:
         select_paths = None
     try:
