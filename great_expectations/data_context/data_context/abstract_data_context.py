@@ -1854,14 +1854,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         When run with create_expectation_suite()::
 
-            batch_kwargs = {
-                "datasource": "movies_db",
-                "table": "genres_movies"
-            }
             expectation_suite_name = "genres_movies.fkey"
             context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
             batch = context.get_batch(
-                batch_kwargs=batch_kwargs,
                 expectation_suite_name=expectation_suite_name
             )
 
