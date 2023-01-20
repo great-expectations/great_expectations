@@ -22,6 +22,7 @@ from marshmallow import Schema, ValidationError, fields, pre_dump
 
 import great_expectations as gx
 from great_expectations import __version__ as ge_version
+from great_expectations.alias_types import JSONValues
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,
@@ -252,7 +253,13 @@ class ExpectationSuite(SerializableDictDot):
 
         return result
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this ExpectationSuite.
+
+        Returns:
+            A JSON-serializable dict representation of this ExpectationSuite.
+        """
         myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
