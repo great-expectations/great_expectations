@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from pprint import pprint
 from typing import ContextManager
+from unittest import mock
 
 import pytest
 from pydantic import ValidationError
@@ -23,6 +24,7 @@ from tests.experimental.datasources.conftest import (
     DEFAULT_MAX_DT,
     DEFAULT_MIN_DT,
     sa_engine_mock,
+    sqlachemy_execution_engine_mock_cls,
 )
 
 # We set a default time range that we use for testing. We grab the years from the
@@ -165,17 +167,33 @@ def test_construct_table_asset_directly_with_splitter(create_source):
 
 @pytest.mark.unit
 def test_datasource_gets_batch_list_no_splitter(create_source):
+    fake_batch_spec = {
+        "batch_identifiers": {},
+        "data_asset_name": "my_asset",
+        "table_name": "my_table",
+        "type": "table",
+    }
+
     def validate_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
-        assert spec == {
-            "batch_identifiers": {},
-            "data_asset_name": "my_asset",
-            "table_name": "my_table",
-            "type": "table",
-        }
+        assert spec == fake_batch_spec
 
     with create_source() as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
-        source.get_batch_list_from_batch_request(asset.get_batch_request())
+        mock_sqlalchemy_execution_engine = sqlachemy_execution_engine_mock_cls(
+            validate_batch_spec=validate_batch_spec,
+            dialect="postgresql",
+        )()
+        (
+            batch_data,
+            batch_markers,
+        ) = mock_sqlalchemy_execution_engine.get_batch_data_and_markers(
+            batch_spec=fake_batch_spec
+        )
+        with mock.patch(
+            "great_expectations.execution_engine.SqlAlchemyExecutionEngine.get_batch_data_and_markers"
+        ) as get_batch_data_and_markers:
+            get_batch_data_and_markers.return_value = batch_data, batch_markers
+            source.get_batch_list_from_batch_request(asset.get_batch_request())
 
 
 def assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs):
