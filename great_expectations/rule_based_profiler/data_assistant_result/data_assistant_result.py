@@ -29,6 +29,7 @@ from IPython.display import HTML, display
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -202,14 +203,23 @@ class DataAssistantResult(SerializableDictDot):
             send_usage_event=send_usage_event,
         ).show_expectations_by_expectation_type()
 
+    @public_api
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> ExpectationSuite:
-        """
-        Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
+        """Get Expectation Suite from "DataAssistantResult" object.
+
+        Args:
+            expectation_suite_name: The name for the Expectation Suite. Default generated if none provided.
+            include_profiler_config: Whether to include the rule-based profiler config used by the data assistant to generate the Expectation Suite.
+            send_usage_event: Set to False to disable sending usage events for this method.
+
+        Returns:
+            ExpectationSuite object.
+
         """
         if send_usage_event:
             return self._get_expectation_suite_with_usage_statistics(
