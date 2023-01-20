@@ -1,6 +1,7 @@
 import logging
 import os
 import pathlib
+import sys
 from typing import Union
 
 import invoke
@@ -11,6 +12,10 @@ from scripts import public_api_report
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
+
+
+scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
+sys.path.append(str(scripts_path))
 
 
 @invoke.task
