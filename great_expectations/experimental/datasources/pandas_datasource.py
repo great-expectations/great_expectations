@@ -146,6 +146,7 @@ class _DataFrameAsset(DataAsset):
             data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
+
             # batch_definition (along with batch_spec and markers) is only here to satisfy a
             # legacy constraint when computing usage statistics in a validator. We hope to remove
             # it in the future.
@@ -163,6 +164,10 @@ class _DataFrameAsset(DataAsset):
 
             batch_metadata = copy.deepcopy(request.options)
             batch_metadata["path"] = path
+
+            # Some pydantic annotations are postponed due to circular imports. This will set the annotations before we
+            # instantiate the Batch class since we can import them above.
+            Batch.update_forward_refs()
             batch_list.append(
                 Batch(
                     datasource=self.datasource,

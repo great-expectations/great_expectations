@@ -1,15 +1,24 @@
+from __future__ import annotations
+
 import pathlib
-from typing import Tuple
+from typing import TYPE_CHECKING
 
 import pytest
+from pydantic import ValidationError
 
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,
+    HeadData,
 )
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
@@ -18,11 +27,16 @@ from great_expectations.render import (
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metrics_calculator import MetricsCalculator
+
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.interfaces import Batch
 
 
 def sql_data(
     context: AbstractDataContext,
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     db_file = (
         pathlib.Path(__file__)
         / "../../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
@@ -45,7 +59,7 @@ def sql_data(
 
 def pandas_data(
     context: AbstractDataContext,
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     csv_path = (
         pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
     ).resolve()
@@ -63,7 +77,7 @@ def pandas_data(
 @pytest.fixture(params=[sql_data, pandas_data])
 def datasource_test_data(
     empty_data_context, request
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     return request.param(empty_data_context)
 
 
@@ -220,7 +234,7 @@ def test_run_data_assistant_and_checkpoint(datasource_test_data):
 
 def multibatch_sql_data(
     context: AbstractDataContext,
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     db_file = (
         pathlib.Path(__file__)
         / "../../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata_sample_2020_all_months_combined.db"
@@ -243,7 +257,7 @@ def multibatch_sql_data(
 
 def multibatch_pandas_data(
     context: AbstractDataContext,
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     csv_path = (
         pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
     ).resolve()
@@ -261,7 +275,7 @@ def multibatch_pandas_data(
 @pytest.fixture(params=[multibatch_sql_data, multibatch_pandas_data])
 def multibatch_datasource_test_data(
     empty_data_context, request
-) -> Tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     return request.param(empty_data_context)
 
 
@@ -296,7 +310,7 @@ def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test
 def _configure_and_run_data_assistant(
     context: AbstractDataContext,
     batch_request: BatchRequest,
-) -> Tuple[DataAssistantResult, CheckpointResult]:
+) -> tuple[DataAssistantResult, CheckpointResult]:
     expectation_suite_name = "my_onboarding_assistant_suite"
     context.create_expectation_suite(
         expectation_suite_name=expectation_suite_name, overwrite_existing=True
@@ -336,3 +350,126 @@ def _configure_and_run_data_assistant(
     checkpoint_result = checkpoint.run()
 
     return data_assistant_result, checkpoint_result
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ["n_rows", "fetch_all", "success"],
+    [
+        (None, False, True),
+        (3, False, True),
+        (7, False, True),
+        (-100, False, True),
+        ("invalid_value", False, False),
+        (1.5, False, False),
+        (True, False, False),
+        (0, False, True),
+        (200000, False, True),
+        (1, False, True),
+        (-50000, False, True),
+        (-5, True, True),
+        (0, True, True),
+        (3, True, True),
+        (50000, True, True),
+        (-20000, True, True),
+        (None, True, True),
+        (15, "invalid_value", False),
+    ],
+)
+def test_batch_head(
+    datasource_test_data: tuple[
+        AbstractDataContext, Datasource, DataAsset, BatchRequest
+    ],
+    fetch_all: bool | str,
+    n_rows: int | float | str | None,
+    success: bool,
+) -> None:
+    _, datasource, _, batch_request = datasource_test_data
+    batch_list: list[Batch] = datasource.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) > 0
+
+    # arbitrarily select the first batch for testing
+    batch: Batch = batch_list[0]
+    if success:
+        assert n_rows is None or isinstance(n_rows, int)
+        assert isinstance(fetch_all, bool)
+
+        execution_engine: ExecutionEngine = batch.data.execution_engine
+        execution_engine.batch_manager.load_batch_list(batch_list=[batch])
+
+        metrics_calculator = MetricsCalculator(execution_engine=execution_engine)
+
+        # define metric for the total number of rows
+        row_count_metric = MetricConfiguration(
+            metric_name="table.row_count",
+            metric_domain_kwargs={"batch_id": batch.id},
+            metric_value_kwargs=None,
+        )
+        if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+            row_count_partial_fn_metric = MetricConfiguration(
+                metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                metric_domain_kwargs={"batch_id": batch.id},
+                metric_value_kwargs=None,
+            )
+            row_count_metric.metric_dependencies = {
+                "metric_partial_fn": row_count_partial_fn_metric
+            }
+
+        # get the expected column names
+        expected_columns: set[str] = set(metrics_calculator.columns())
+
+        head_data: HeadData
+        total_row_count: int
+        if n_rows is not None and not fetch_all:
+            head_data = batch.head(n_rows=n_rows, fetch_all=fetch_all)
+            assert isinstance(head_data, HeadData)
+
+            total_row_count = metrics_calculator.get_metric(metric=row_count_metric)
+            head_data_row_count: int = len(head_data.data.index)
+
+            # if n_rows is between 0 and the total_row_count, that's how many rows we expect
+            if 0 <= n_rows <= total_row_count:
+                assert head_data_row_count == n_rows
+            # if n_rows is greater than the total_row_count, we only expect total_row_count rows
+            elif n_rows > total_row_count:
+                assert head_data_row_count == total_row_count
+            # if n_rows is negative and abs(n_rows) is larger than total_row_count we expect zero rows
+            elif n_rows < 0 and abs(n_rows) > total_row_count:
+                assert head_data_row_count == 0
+            # if n_rows is negative, we expect all but the final abs(n_rows)
+            else:
+                assert head_data_row_count == n_rows + total_row_count
+        elif fetch_all:
+            total_row_count = metrics_calculator.get_metric(metric=row_count_metric)
+            if n_rows:
+                head_data = batch.head(n_rows=n_rows, fetch_all=fetch_all)
+            else:
+                head_data = batch.head(fetch_all=fetch_all)
+            assert isinstance(head_data, HeadData)
+            assert len(head_data.data.index) == total_row_count
+        else:
+            # default to 5 rows
+            head_data = batch.head(fetch_all=fetch_all)
+            assert isinstance(head_data, HeadData)
+            assert len(head_data.data.index) == 5
+
+        assert set(head_data.data.columns) == expected_columns
+
+    else:
+        with pytest.raises(ValidationError) as e:
+            batch.head(n_rows=n_rows, fetch_all=fetch_all)
+        n_rows_validation_error = (
+            "1 validation error for Head\n"
+            "n_rows\n"
+            "  value is not a valid integer (type=type_error.integer)"
+        )
+        fetch_all_validation_error = (
+            "1 validation error for Head\n"
+            "fetch_all\n"
+            "  value is not a valid boolean (type=value_error.strictbool)"
+        )
+        assert n_rows_validation_error in str(
+            e.value
+        ) or fetch_all_validation_error in str(e.value)

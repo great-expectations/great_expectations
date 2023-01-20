@@ -205,7 +205,8 @@ class Validator:
         execution_engine.batch_manager.reset_batch_cache()
         self._execution_engine: ExecutionEngine = execution_engine
 
-        self.load_batch_list(batch_list=batches)
+        if batches:
+            self.load_batch_list(batch_list=batches)
 
         self._expose_dataframe_methods: bool = False
 
