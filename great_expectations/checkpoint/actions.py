@@ -301,9 +301,9 @@ class PagerdutyAlertAction(ValidationAction):
 
     Args:
         data_context:
-        api_key: Events API v2 key for pagerduty.
-        routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
-        notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
+        api_key (str): Events API v2 key for pagerduty.
+        routing_key (str): The 32 character Integration Key for an integration on a service or on a global ruleset.
+        notify_on (str): Specifies validation status that triggers notification. One of "all", "failure", "success".
 
 
     """
@@ -496,23 +496,26 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
 
 class OpsgenieAlertAction(ValidationAction):
-    """
-    OpsgenieAlertAction creates and sends an Opsgenie alert
+    """Sends an Opsgenie alert
 
-    **Configuration**
-
-    .. code-block:: yaml
+    YAML configuration example:: yaml
 
         - name: send_opsgenie_alert_on_validation_result
         action:
           class_name: OpsgenieAlertAction
           # put the actual webhook URL in the uncommitted/config_variables.yml file
           # or pass in as environment variable
-          api_key: ${opsgenie_api_key} # Opsgenie API key
-          region: specifies the Opsgenie region. Populate 'EU' for Europe otherwise leave empty
-          priority: specify the priority of the alert (P1 - P5) defaults to P3
-          notify_on: failure # possible values: "all", "failure", "success"
+          api_key: ${opsgenie_api_key}
+          region:
+          priority: P2
+          notify_on: failure 
 
+    Args:
+        data_context: Data Context that is used by the Action.
+        api_key (str): Opsgenie API key.
+        region (str): Specifies the Opsgenie region. Populate 'EU' for Europe otherwise do not set.
+        priority (str): Specifies the priority of the alert (P1 - P5).
+        notify_on (str): Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
     def __init__(
@@ -525,15 +528,6 @@ class OpsgenieAlertAction(ValidationAction):
         notify_on="failure",
         tags: Optional[list] = None,
     ) -> None:
-        """Construct a OpsgenieAlertAction
-
-        Args:
-            data_context:
-            api_key: Opsgenie API key
-            region: specifies the Opsgenie region. Populate 'EU' for Europe otherwise do not set
-            priority: specify the priority of the alert (P1 - P5) defaults to P3
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-        """
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
