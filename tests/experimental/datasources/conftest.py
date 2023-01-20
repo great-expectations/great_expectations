@@ -8,8 +8,6 @@ LOGGER = logging.getLogger(__name__)
 
 from contextlib import contextmanager
 
-from sqlalchemy.sql.compiler import SQLCompiler
-
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
     BatchMarkers,
@@ -25,9 +23,6 @@ DEFAULT_MAX_DT = datetime(2022, 12, 31, 0, 0, 0)
 class Dialect:
     def __init__(self, dialect: str):
         self.name = dialect
-
-    def statement_compiler(dialect, **kwargs) -> SQLCompiler:
-        return SQLCompiler()
 
 
 class _MockConnection:
