@@ -507,6 +507,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return expectation_suite
 
+    @public_api
     def plot_metrics(
         self,
         sequential: bool = True,
@@ -514,17 +515,16 @@ class DataAssistantResult(SerializableDictDot):
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
-        """
-        Use contents of "DataAssistantResult" object to display metrics for visualization purposes.
+        """Use contents of `DataAssistantResult` object to display metrics for visualization purposes.
 
         Altair theme configuration reference:
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            sequential: Whether the batches are sequential or not
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: Columns to include in metrics plot
-            exclude_column_names: Columns to exclude from metrics plot
+            sequential: Whether the batches are sequential or not.
+            theme: Altair top-level chart configuration dictionary.
+            include_column_names: Columns to include in metrics plot.
+            exclude_column_names: Columns to exclude from metrics plot.
 
         Returns:
             PlotResult wrapper object around Altair charts.
@@ -537,6 +537,7 @@ class DataAssistantResult(SerializableDictDot):
             exclude_column_names=exclude_column_names,
         )
 
+    @public_api
     def plot_expectations_and_metrics(
         self,
         sequential: bool = True,
@@ -544,17 +545,16 @@ class DataAssistantResult(SerializableDictDot):
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
-        """
-        Use contents of "DataAssistantResult" object to display metrics and expectations for visualization purposes.
+        """Use contents of `DataAssistantResult` object to display metrics and expectations for visualization purposes.
 
         Altair theme configuration reference:
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            sequential: Whether the batches are sequential or not
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: Columns to include in expectations and metrics plot
-            exclude_column_names: Columns to exclude from expectations and metrics plot
+            sequential: Whether the batches are sequential or not.
+            theme: Altair top-level chart configuration dictionary.
+            include_column_names: Columns to include in expectations and metrics plot.
+            exclude_column_names: Columns to exclude from expectations and metrics plot.
 
         Returns:
             PlotResult wrapper object around Altair charts.
