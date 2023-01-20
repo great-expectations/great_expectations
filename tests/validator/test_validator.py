@@ -231,7 +231,7 @@ def test_head(
         batch_request=BatchRequest(**batch_request),
         create_expectation_suite_with_name="warning",
     )
-    head: pd.DataFrame = validator.head().data
+    head: pd.DataFrame = validator.head()
 
     expected: Dict[str, Dict[int, Union[int, str]]] = {
         "Unnamed: 0": {0: 1, 1: 2, 2: 3, 3: 4, 4: 5},
