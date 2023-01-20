@@ -1212,7 +1212,7 @@ class SNSNotificationAction(ValidationAction):
           # put the actual SNS Arn in the uncommitted/config_variables.yml file
           # or pass in as environment variable
           data_context:
-          sns_topic_arn: ${validation_notification_sns_arn}
+          sns_topic_arn:
           sns_subject:
 
     Args:
