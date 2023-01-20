@@ -38,12 +38,12 @@ def _source(
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
     dialect: str = "postgresql",
 ) -> PostgresDatasource:
-    sa_eng_cls = sa_engine_mock(dialect=dialect)
+    sa_engine_mock = sa_engine_mock(dialect=dialect)
     postgres_datasource = PostgresDatasource(
         name="my_datasource",
         connection_string=connection_string,
     )
-    postgres_datasource._engine = sa_eng_cls
+    postgres_datasource._engine = sa_engine_mock
     yield postgres_datasource
 
 
