@@ -187,18 +187,26 @@ class _DataFrameAsset(DataAsset):
 _ASSET_MODELS = _generate_data_asset_models(_DataFrameAsset)
 
 CSVAsset = _ASSET_MODELS["csv"]
+ExcelAsset = _ASSET_MODELS["excel"]
+JSONAsset = _ASSET_MODELS["json"]
+ParquetAsset = _ASSET_MODELS["parquet"]
 
 # print(CSVAsset.schema())
 
 
 class PandasDatasource(Datasource):
     # class attrs
-    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset]
+    asset_types: ClassVar[List[Type[DataAsset]]] = [
+        CSVAsset,
+        ExcelAsset,
+        ParquetAsset,
+        JSONAsset,
+    ]
 
     # instance attrs
     type: Literal["pandas"] = "pandas"
     name: str
-    assets: Dict[str, CSVAsset] = {}  # type: ignore[valid-type]
+    assets: Dict[str, Union[CSVAsset, ExcelAsset, ParquetAsset, JSONAsset]] = {}  # type: ignore[valid-type]
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
