@@ -109,8 +109,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
 
         Args:
             configuration: The ExpectationConfiguration to be validated.
-
-            
+   
         Raises:
             InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
         """
