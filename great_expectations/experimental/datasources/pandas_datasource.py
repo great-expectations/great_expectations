@@ -45,11 +45,7 @@ class CSVAsset(DataAsset):
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
-    _datasource: Datasource = pydantic.PrivateAttr()
-
-    @property
-    def datasource(self) -> Datasource:
-        return self._datasource
+    _datasource: PandasDatasource = pydantic.PrivateAttr()
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
