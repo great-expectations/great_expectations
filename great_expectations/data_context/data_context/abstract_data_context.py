@@ -1188,6 +1188,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
 
+    @public_api
     def add_store(self, store_name: str, store_config: dict) -> Store:
         """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
 
