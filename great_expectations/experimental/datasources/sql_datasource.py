@@ -333,10 +333,9 @@ class SQLDatasource(Datasource):
         arbitrary_types_allowed = True
         extra = pydantic.Extra.forbid
 
-    @pydantic.root_validator()
-    def _validate_connection_string_and_set_engine(cls, values: dict) -> dict:
-        values["_engine"] = create_engine(values["connection_string"])
-        return values
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._engine = create_engine(self.connection_string)
 
     def test_connection(self) -> None:
         # test database connection
