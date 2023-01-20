@@ -179,7 +179,7 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
         """
         Validates the configuration of an Expectation.
 
-        For `expect_column_values_to_not_match_like_pattern` it is required that:
+        For `expect_column_values_to_not_match_regex` it is required that:
             - 'regex' kwarg is of type str or dict
             - if dict, assert a key "$PARAMETER" is present
 
