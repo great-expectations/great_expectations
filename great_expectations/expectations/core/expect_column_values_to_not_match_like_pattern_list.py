@@ -97,6 +97,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
 
         For `expect_column_values_to_not_match_like_pattern_list` it is required that:
             - 'like_pattern_list' is present in configuration's kwarg
+            - assert 'like_pattern_list' is of type list or dict
             - if 'like_pattern_list' is list, assert non-empty
             - if 'like_pattern_list' is dict, assert a key "$PARAMETER" is present
 
@@ -106,7 +107,7 @@ class ExpectColumnValuesToNotMatchLikePatternList(ColumnMapExpectation):
 
         Raises:
             `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
-                                                                           Expectation."
+                                  Expectation."
         """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
