@@ -64,6 +64,9 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.core.util import nested_update
 from great_expectations.exceptions import (
     ExpectationNotFoundError,
@@ -873,6 +876,9 @@ class Expectation(metaclass=MetaExpectation):
         )
         if result_dict.get("unexpected_index_query"):
             query = result_dict.get("unexpected_index_query")
+            # in Pandas case, this is a list
+            if not isinstance(query, str):
+                query = str(query)
             query_info = CollapseContent(
                 **{
                     "collapse_toggle_link": "To retrieve all unexpected values...",
@@ -2524,28 +2530,28 @@ class ColumnMapExpectation(TableExpectation, ABC):
         metric_kwargs: dict
 
         metric_kwargs = get_metric_kwargs(
-            metric_name="column_values.nonnull.unexpected_count",
+            metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
-            metric_name="column_values.nonnull.unexpected_count",
+            metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_configuration=MetricConfiguration(
-                "column_values.nonnull.unexpected_count",
+                metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
         )
 
         metric_kwargs = get_metric_kwargs(
-            metric_name=f"{self.map_metric}.unexpected_count",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
-            metric_name=f"{self.map_metric}.unexpected_count",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_configuration=MetricConfiguration(
-                f"{self.map_metric}.unexpected_count",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
@@ -2576,14 +2582,14 @@ class ColumnMapExpectation(TableExpectation, ABC):
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
-            f"{self.map_metric}.unexpected_values",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
-            metric_name=f"{self.map_metric}.unexpected_values",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
             metric_configuration=MetricConfiguration(
-                metric_name=f"{self.map_metric}.unexpected_values",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
@@ -2591,14 +2597,14 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
-                f"{self.map_metric}.unexpected_rows",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.unexpected_rows",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                 metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.unexpected_rows",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                     metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
@@ -2606,14 +2612,14 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
-                f"{self.map_metric}.unexpected_rows",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.unexpected_rows",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                 metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.unexpected_rows",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                     metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
@@ -2625,27 +2631,27 @@ class ColumnMapExpectation(TableExpectation, ABC):
         # only for SUMMARY and COMPLETE
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
-                f"{self.map_metric}.unexpected_index_list",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.unexpected_index_list",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                 metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                     metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
             metric_kwargs = get_metric_kwargs(
-                f"{self.map_metric}.unexpected_index_query",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.unexpected_index_query",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
                 metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.unexpected_index_query",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
                     metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
@@ -2655,27 +2661,27 @@ class ColumnMapExpectation(TableExpectation, ABC):
         ):
             if "unexpected_index_column_names" in validation_dependencies.result_format:
                 metric_kwargs = get_metric_kwargs(
-                    f"{self.map_metric}.unexpected_index_list",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                     configuration=configuration,
                     runtime_configuration=runtime_configuration,
                 )
                 validation_dependencies.set_metric_configuration(
-                    metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                     metric_configuration=MetricConfiguration(
-                        metric_name=f"{self.map_metric}.unexpected_index_list",
+                        metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                         metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                         metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                     ),
                 )
                 metric_kwargs = get_metric_kwargs(
-                    f"{self.map_metric}.unexpected_index_query",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
                     configuration=configuration,
                     runtime_configuration=runtime_configuration,
                 )
                 validation_dependencies.set_metric_configuration(
-                    metric_name=f"{self.map_metric}.unexpected_index_query",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
                     metric_configuration=MetricConfiguration(
-                        metric_name=f"{self.map_metric}.unexpected_index_query",
+                        metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
                         metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                         metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                     ),
@@ -2708,23 +2714,25 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
         total_count: Optional[int] = metrics.get("table.row_count")
         null_count: Optional[int] = metrics.get(
-            "column_values.nonnull.unexpected_count"
+            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         )
         unexpected_count: Optional[int] = metrics.get(
-            f"{self.map_metric}.unexpected_count"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         )
         unexpected_values: Optional[List[Any]] = metrics.get(
-            f"{self.map_metric}.unexpected_values"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
         )
         unexpected_index_list: Optional[List[int]] = metrics.get(
-            f"{self.map_metric}.unexpected_index_list"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
         )
         unexpected_index_query: Optional[str] = metrics.get(
-            f"{self.map_metric}.unexpected_index_query"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
         )
         unexpected_rows = None
         if include_unexpected_rows:
-            unexpected_rows = metrics.get(f"{self.map_metric}.unexpected_rows")
+            unexpected_rows = metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+            )
 
         if total_count is None or null_count is None:
             total_count = nonnull_count = 0
@@ -2821,14 +2829,14 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         metric_kwargs: dict
 
         metric_kwargs = get_metric_kwargs(
-            metric_name=f"{self.map_metric}.unexpected_count",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
-            metric_name=f"{self.map_metric}.unexpected_count",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_configuration=MetricConfiguration(
-                f"{self.map_metric}.unexpected_count",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
@@ -2849,14 +2857,14 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         )
 
         metric_kwargs = get_metric_kwargs(
-            f"{self.map_metric}.filtered_row_count",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
-            metric_name=f"{self.map_metric}.filtered_row_count",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT.value}",
             metric_configuration=MetricConfiguration(
-                metric_name=f"{self.map_metric}.filtered_row_count",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
@@ -2873,14 +2881,14 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
-            f"{self.map_metric}.unexpected_values",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
-            metric_name=f"{self.map_metric}.unexpected_values",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
             metric_configuration=MetricConfiguration(
-                metric_name=f"{self.map_metric}.unexpected_values",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
@@ -2891,14 +2899,14 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
 
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
-                f"{self.map_metric}.unexpected_rows",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.unexpected_rows",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                 metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.unexpected_rows",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                     metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
@@ -2906,14 +2914,14 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
-                f"{self.map_metric}.unexpected_index_list",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.unexpected_index_list",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                 metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                     metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
@@ -2935,16 +2943,16 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         )
         total_count: Optional[int] = metrics.get("table.row_count")
         unexpected_count: Optional[int] = metrics.get(
-            f"{self.map_metric}.unexpected_count"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         )
         unexpected_values: Optional[Any] = metrics.get(
-            f"{self.map_metric}.unexpected_values"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
         )
         unexpected_index_list: Optional[List[int]] = metrics.get(
-            f"{self.map_metric}.unexpected_index_list"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
         )
         filtered_row_count: Optional[int] = metrics.get(
-            f"{self.map_metric}.filtered_row_count"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT.value}"
         )
 
         if (
@@ -3040,14 +3048,14 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         metric_kwargs: dict
 
         metric_kwargs = get_metric_kwargs(
-            metric_name=f"{self.map_metric}.unexpected_count",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
-            metric_name=f"{self.map_metric}.unexpected_count",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_configuration=MetricConfiguration(
-                f"{self.map_metric}.unexpected_count",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
@@ -3068,14 +3076,14 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
 
         metric_kwargs = get_metric_kwargs(
-            f"{self.map_metric}.filtered_row_count",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
-            metric_name=f"{self.map_metric}.filtered_row_count",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT.value}",
             metric_configuration=MetricConfiguration(
-                metric_name=f"{self.map_metric}.filtered_row_count",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
@@ -3092,14 +3100,14 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             return validation_dependencies
 
         metric_kwargs = get_metric_kwargs(
-            f"{self.map_metric}.unexpected_values",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
         validation_dependencies.set_metric_configuration(
-            metric_name=f"{self.map_metric}.unexpected_values",
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
             metric_configuration=MetricConfiguration(
-                metric_name=f"{self.map_metric}.unexpected_values",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
                 metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                 metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
             ),
@@ -3110,14 +3118,14 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
 
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
-                f"{self.map_metric}.unexpected_rows",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.unexpected_rows",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                 metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.unexpected_rows",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
                     metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
@@ -3125,14 +3133,14 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
-                f"{self.map_metric}.unexpected_index_list",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                 configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.unexpected_index_list",
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                 metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.unexpected_index_list",
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
                     metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
@@ -3152,16 +3160,16 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
         total_count: Optional[int] = metrics.get("table.row_count")
         unexpected_count: Optional[int] = metrics.get(
-            f"{self.map_metric}.unexpected_count"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
         )
         unexpected_values: Optional[Any] = metrics.get(
-            f"{self.map_metric}.unexpected_values"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
         )
         unexpected_index_list: Optional[List[int]] = metrics.get(
-            f"{self.map_metric}.unexpected_index_list"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
         )
         filtered_row_count: Optional[int] = metrics.get(
-            f"{self.map_metric}.filtered_row_count"
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT.value}"
         )
 
         if (
