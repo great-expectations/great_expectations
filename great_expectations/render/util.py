@@ -1,4 +1,6 @@
 """Rendering utility"""
+from __future__ import annotations
+
 import copy
 import decimal
 import locale
@@ -8,6 +10,7 @@ from typing import Any, List, Optional, Tuple, Union
 
 import pandas as pd
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
@@ -19,24 +22,29 @@ ctx = decimal.Context()
 ctx.prec = DEFAULT_PRECISION
 
 
-def num_to_str(f, precision=DEFAULT_PRECISION, use_locale=False, no_scientific=False):
+@public_api
+def num_to_str(
+    f: float,
+    precision: int = DEFAULT_PRECISION,
+    use_locale: bool = False,
+    no_scientific: bool = False,
+) -> str:
     """Convert the given float to a string, centralizing standards for precision and decisions about scientific
     notation. Adds an approximately equal sign in the event precision loss (e.g. rounding) has occurred.
 
-    There's a good discussion of related issues here:
+    For more context, please review the following:
         https://stackoverflow.com/questions/38847690/convert-float-to-string-in-positional-format-without-scientific-notation-and-fa
 
     Args:
-        f: the number to format
-        precision: the number of digits of precision to display
-        use_locale: if True, use locale-specific formatting (e.g. adding thousands separators)
-        no_scientific: if True, print all available digits of precision without scientific notation. This may insert
-            leading zeros before very small numbers, causing the resulting string to be longer than `precision`
-            characters
+        f: The number to format.
+        precision: The number of digits of precision to display (defaults to 4).
+        use_locale: If True, use locale-specific formatting (e.g. adding thousands separators).
+        no_scientific: If True, print all available digits of precision without scientific notation. This may insert
+                       leading zeros before very small numbers, causing the resulting string to be longer than `precision`
+                       characters.
 
     Returns:
-        A string representation of the float, according to the desired parameters
-
+        A string representation of the input float `f`, according to the desired parameters.
     """
     assert not (use_locale and no_scientific)
     if precision != DEFAULT_PRECISION:
@@ -191,17 +199,16 @@ def parse_row_condition_string_pandas_engine(
     return template_str, params
 
 
-def handle_strict_min_max(params: dict) -> (str, str):
-    """
-    Utility function for the at least and at most conditions based on strictness.
+@public_api
+def handle_strict_min_max(params: dict) -> tuple[str, str]:
+    """Utility function for the at least and at most conditions based on strictness.
 
     Args:
-        params: dictionary containing "strict_min" and "strict_max" booleans.
+        params: Dictionary containing "strict_min" and "strict_max" booleans.
 
     Returns:
-        tuple of strings to use for the at least condition and the at most condition
+        Tuple of strings to use for the at least condition and the at most condition.
     """
-
     at_least_str = (
         "greater than"
         if params.get("strict_min") is True
