@@ -15,6 +15,7 @@ import json
 import os
 import pathlib
 import shutil
+import sys
 from typing import TYPE_CHECKING
 
 import invoke
@@ -133,6 +134,8 @@ def hooks(
 @invoke.task(aliases=["docstring"])
 def docstrings(ctx: Context):
     """Check public API docstrings."""
+    scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
+    sys.path.append(str(scripts_path))
     try:
         check_public_api_docstrings.main()
     except AssertionError as err:
