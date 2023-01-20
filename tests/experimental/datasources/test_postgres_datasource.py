@@ -1,12 +1,11 @@
 from contextlib import contextmanager
 from pprint import pprint
-from typing import Callable, ContextManager
+from typing import ContextManager
 
 import pytest
 from pydantic import ValidationError
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestError,
@@ -23,7 +22,7 @@ from great_expectations.experimental.datasources.sql_datasource import (
 from tests.experimental.datasources.conftest import (
     DEFAULT_MAX_DT,
     DEFAULT_MIN_DT,
-    sqlachemy_execution_engine_mock_cls,
+    sa_engine_mock,
 )
 
 # We set a default time range that we use for testing. We grab the years from the
@@ -35,11 +34,15 @@ _DEFAULT_TEST_MONTHS = list(range(1, 13))
 @contextmanager
 def _source(
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
+    dialect: str = "postgresql",
 ) -> PostgresDatasource:
-    yield PostgresDatasource(
+    sa_eng_cls = sa_engine_mock(dialect=dialect)
+    postgres_datasource = PostgresDatasource(
         name="my_datasource",
         connection_string=connection_string,
     )
+    postgres_datasource._engine = sa_eng_cls
+    yield postgres_datasource
 
 
 # We may be able parameterize this fixture so we can instantiate _source in the fixture. This
