@@ -96,8 +96,7 @@ class ExpectColumnValuesToNotMatchLikePattern(ColumnMapExpectation):
         Validates the configuration of an Expectation.
 
         For `expect_column_values_to_not_match_like_pattern` it is required that:
-            - configuration's kwargs contains a key 'like_pattern'
-            - if 'like_pattern' is list, assert non-empty
+            - configuration's kwargs contains a key 'like_pattern' of type str or dict
             - if 'like_pattern' is dict, assert key "$PARAMETER" is present
 
         Args:
