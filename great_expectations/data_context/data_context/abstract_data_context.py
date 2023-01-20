@@ -1138,7 +1138,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             The target datasource.
 
         Raises:
-            ValueError: The input datasource_name is None.
+            ValueError: The input `datasource_name` is None.
         """
         if datasource_name is None:
             raise ValueError(
@@ -1264,14 +1264,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Note that this method causes deletion from the underlying DatasourceStore.
         This can be overridden to only impact the Datasource cache through the deprecated
-        save_changes argument.
+        `save_changes` argument.
 
         Args:
             datasource_name: The name of the target datasource.
             save_changes: Should this change be persisted by the DatasourceStore?
 
         Raises:
-            ValueError: The datasource name isn't provided or cannot be found.
+            ValueError: The `datasource_name` isn't provided or cannot be found.
         """
         save_changes = self._determine_save_changes_flag(save_changes)
 
@@ -1853,7 +1853,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Note that this method can be called by itself or run within the get_validator workflow.
 
-        When run with create_expectation_suite::
+        When run with create_expectation_suite()::
 
             batch_kwargs = {
                 "datasource": "movies_db",
@@ -1867,7 +1867,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
 
-        When run as part of get_validator::
+        When run as part of get_validator()::
 
             validator = context.get_validator(
                 datasource_name="my_datasource",
@@ -1887,8 +1887,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             A new (empty) ExpectationSuite.
 
         Raises:
-            ValueError: The input overwrite_existing is of the wrong type.
-            DataContextError: A suite with the same name already exists (and overwrite_existing is not enabled).
+            ValueError: The input `overwrite_existing` is of the wrong type.
+            DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
         """
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
