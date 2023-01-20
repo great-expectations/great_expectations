@@ -13,6 +13,7 @@ from urllib.parse import urljoin
 from typing_extensions import Final
 
 from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 
@@ -794,7 +795,6 @@ class EmailAction(ValidationAction):
         else:
             return {"email_result": ""}
 
-
 class StoreValidationResultAction(ValidationAction):
     """
         StoreValidationResultAction stores a validation result in the ValidationsStore.
@@ -879,35 +879,31 @@ class StoreValidationResultAction(ValidationAction):
             validation_result_suite_identifier.cloud_id = new_ge_cloud_id
 
 
+@public_api
 class StoreEvaluationParametersAction(ValidationAction):
     """
-    StoreEvaluationParametersAction extracts evaluation parameters from a validation result and stores them in the store
-    configured for this action.
+    Stores evaluation parameters from a validation result.
 
     Evaluation parameters allow expectations to refer to statistics/metrics computed
     in the process of validating other prior expectations.
-
-    **Configuration**
 
     .. code-block:: yaml
 
         - name: store_evaluation_params
         action:
           class_name: StoreEvaluationParametersAction
-          # name of the store where the action will store the parameters
           # the name must refer to a store that is configured in the great_expectations.yml file
           target_store_name: evaluation_parameter_store
 
+    Args:
+        data_context: GX Data Context.
+        target_store_name: The name of the store in the Data Context to store the evaluation parameters.
+
+    Raises:
+        TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}
     """
 
     def __init__(self, data_context, target_store_name=None) -> None:
-        """
-
-        Args:
-            data_context: Data Context
-            target_store_name: the name of the store in the Data Context which
-                should be used to store the evaluation parameters
-        """
         super().__init__(data_context)
 
         if target_store_name is None:
