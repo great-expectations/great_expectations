@@ -796,13 +796,11 @@ class EmailAction(ValidationAction):
             return {"email_result": ""}
 
 
+@public_api
 class StoreValidationResultAction(ValidationAction):
-    """
-        StoreValidationResultAction stores a validation result in the ValidationsStore.
+    """Store a validation result in the ValidationsStore.
 
-    **Configuration**
-
-    .. code-block:: yaml
+    Typical usage example::
 
         - name: store_validation_result
         action:
@@ -811,6 +809,12 @@ class StoreValidationResultAction(ValidationAction):
           # the name must refer to a store that is configured in the great_expectations.yml file
           target_store_name: validations_store
 
+    Args:
+        data_context: GX Data Context.
+        target_store_name: The name of the store where the actions will store the validation result.
+
+    Raises:
+        TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
 
     def __init__(
@@ -818,13 +822,6 @@ class StoreValidationResultAction(ValidationAction):
         data_context,
         target_store_name=None,
     ) -> None:
-        """
-
-        :param data_context: Data Context
-        :param target_store_name: the name of the param_store in the Data Context which
-                should be used to param_store the validation result
-        """
-
         super().__init__(data_context)
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
@@ -855,7 +852,7 @@ class StoreValidationResultAction(ValidationAction):
             (ValidationResultIdentifier, GXCloudIdentifier),
         ):
             raise TypeError(
-                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}".format(
+                "validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.".format(
                     type(validation_result_suite_identifier)
                 )
             )
@@ -882,8 +879,7 @@ class StoreValidationResultAction(ValidationAction):
 
 @public_api
 class StoreEvaluationParametersAction(ValidationAction):
-    """
-    Stores evaluation parameters from a validation result.
+    """Store evaluation parameters from a validation result.
 
     Evaluation parameters allow expectations to refer to statistics/metrics computed
     in the process of validating other prior expectations.
@@ -945,8 +941,7 @@ class StoreEvaluationParametersAction(ValidationAction):
 
 @public_api
 class StoreMetricsAction(ValidationAction):
-    """
-     Extract metrics from a Validation Result and store them in a metrics store.
+    """Extract metrics from a Validation Result and store them in a metrics store.
 
     Typical usage example::
 
