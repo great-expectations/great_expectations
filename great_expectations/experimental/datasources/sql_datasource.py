@@ -136,6 +136,10 @@ class TableAsset(DataAsset):
     # non-field private attrs
     _datasource: SQLDatasource = pydantic.PrivateAttr()
 
+    @property
+    def datasource(self) -> SQLDatasource:
+        return self._datasource
+
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:

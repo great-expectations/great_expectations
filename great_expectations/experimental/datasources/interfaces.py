@@ -137,14 +137,6 @@ class DataAsset(ExperimentalBaseModel):
     def datasource(self) -> Datasource:
         return self._datasource
 
-    # TODO (kilo): remove setter and add custom init for DataAsset to inject datasource in constructor??
-    # This setter is non-functional: https://github.com/pydantic/pydantic/issues/3395
-    # There is some related discussion linked from that ticket which may be a workaround.
-    @datasource.setter
-    def datasource(self, ds: Datasource):
-        assert isinstance(ds, Datasource)
-        self._datasource = ds
-
     # Abstract Methods
     def batch_request_options_template(
         self,

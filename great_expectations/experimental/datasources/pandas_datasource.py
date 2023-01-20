@@ -47,6 +47,10 @@ class CSVAsset(DataAsset):
     )
     _datasource: PandasDatasource = pydantic.PrivateAttr()
 
+    @property
+    def datasource(self) -> PandasDatasource:
+        return self._datasource
+
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
     ) -> List[Tuple[BatchRequest, pathlib.Path]]:
