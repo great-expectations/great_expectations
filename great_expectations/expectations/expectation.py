@@ -2366,17 +2366,7 @@ class QueryExpectation(TableExpectation, ABC):
             will not be usable for the Expectation
         2. Data Docs rendering methods decorated with the @renderer decorator.
 
-    QueryExpectations may optionally define a `query` attribute, and specify that query as a default in `default_kwarg_values`:: python
-
-        class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
-            query = "SELECT {col}, CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch}) FROM {active_batch} GROUP BY {col}"
-
-            ...
-
-            default_kwarg_values = {
-                ...
-                "query": query,
-            }
+    QueryExpectations may optionally define a `query` attribute, and specify that query as a default in `default_kwarg_values`.
 
     Doing so precludes the need to pass a query into the Expectation, but will override the default query
     if a query is passed in.
