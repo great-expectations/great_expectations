@@ -295,11 +295,15 @@ class PagerdutyAlertAction(ValidationAction):
         - name: send_pagerduty_alert_on_validation_result
         action:
           class_name: PagerdutyAlertAction
-          api_key: ${pagerduty_api_key} # Events API v2 key
-          routing_key: # The 32 character Integration Key for an integration on a service or on a global ruleset.
-          notify_on: failure # possible values: "all", "failure", "success"
+          api_key: ${pagerduty_api_key}
+          routing_key: ${pagerduty_routing_key}
+          notify_on: failure
 
     Args:
+        data_context:
+        api_key: Events API v2 key for pagerduty.
+        routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
+        notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
 
 
     """
@@ -311,14 +315,6 @@ class PagerdutyAlertAction(ValidationAction):
         routing_key,
         notify_on="failure",
     ) -> None:
-        """Construct a PagerdutyAlertAction
-
-        Args:
-            data_context:
-            api_key: Events API v2 key for pagerduty.
-            routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-        """
         super().__init__(data_context)
         if not pypd:
             raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
