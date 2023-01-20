@@ -86,8 +86,9 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
-    "read_csv": "CSVAsset",
-    "read_excel": "ExcelAsset",
+    "csv": "CSVAsset",
+    "json": "JSONAsset",
+    "html": "HTMLAsset",
 }
 
 _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
@@ -232,8 +233,11 @@ def _generate_data_asset_models(
 
         fields = _to_pydantic_fields(signature_tuple)
 
-        model_name = _METHOD_TO_CLASS_NAME_MAPPINGS[signature_tuple.name]
-        type_name = signature_tuple.name.lstrip("read_")
+        type_name = signature_tuple.name.split("read_")[1]
+        model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
+            type_name, f"{type_name.capitalize()}Asset"
+        )
+
         model = _create_pandas_asset_model(
             model_name=model_name,
             model_base=base_model_class,
