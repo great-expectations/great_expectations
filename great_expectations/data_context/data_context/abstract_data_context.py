@@ -1828,21 +1828,26 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
+    @public_api
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
         **kwargs: Optional[dict],
     ) -> ExpectationSuite:
-        """Build a new expectation suite and save it into the data_context expectation store.
+        """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
 
         Args:
-            expectation_suite_name: The name of the expectation_suite to create
-            overwrite_existing (boolean): Whether to overwrite expectation suite if expectation suite with given name
-                already exists.
+            expectation_suite_name: The name of the suite to create.
+            overwrite_existing: Whether to overwrite if a suite with the given name already exists.
+            **kwargs: Any key-value arguments to pass to the store when persisting.
 
         Returns:
-            A new (empty) expectation suite.
+            A new (empty) ExpectationSuite.
+
+        Raises:
+            ValueError: The input overwrite_existing is of the wrong type.
+            DataContextError: A suite with the same name already exists (and overwrite_existing is not enabled).
         """
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
@@ -1856,10 +1861,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             and not overwrite_existing
         ):
             raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(
-                    expectation_suite_name
-                )
+                f"expectation_suite with name {expectation_suite_name} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True."
             )
         self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
