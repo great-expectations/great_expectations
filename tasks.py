@@ -10,6 +10,7 @@ To show task help page `invoke <NAME> --help`
 """
 from __future__ import annotations
 
+import io
 import json
 import os
 import pathlib
@@ -30,6 +31,10 @@ except ModuleNotFoundError:
 if TYPE_CHECKING:
     from invoke.context import Context
 
+    from great_expectations.experimental.datasources.experimental_base_model import (
+        ExperimentalBaseModel,
+    )
+
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
 _PATH_HELP_DESC = "Target path. (Default: .)"
@@ -42,7 +47,9 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
         "path": _PATH_HELP_DESC,
     }
 )
-def sort(ctx: Context, path=".", check=False, exclude=None):
+def sort(
+    ctx: Context, path: str = ".", check: bool = False, exclude: str | None = None
+):
     """Sort module imports."""
     cmds = ["isort", path]
     if check:
@@ -60,7 +67,13 @@ def sort(ctx: Context, path=".", check=False, exclude=None):
         "sort": "Disable import sorting. Runs by default.",
     }
 )
-def fmt(ctx: Context, path=".", sort_=True, check=False, exclude=None):
+def fmt(
+    ctx: Context,
+    path: str = ".",
+    sort_: bool = True,
+    check: bool = False,
+    exclude: str | None = None,
+):
     """
     Run code formatter.
     """
@@ -76,14 +89,14 @@ def fmt(ctx: Context, path=".", sort_=True, check=False, exclude=None):
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def lint(ctx: Context, path="."):
+def lint(ctx: Context, path: str = "."):
     """Run code linter"""
     cmds = ["flake8", path, "--statistics"]
     ctx.run(" ".join(cmds), echo=True)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def upgrade(ctx: Context, path="."):
+def upgrade(ctx: Context, path: str = "."):
     """Run code syntax upgrades."""
     cmds = ["pyupgrade", path, "--py3-plus"]
     ctx.run(" ".join(cmds))
@@ -96,7 +109,9 @@ def upgrade(ctx: Context, path="."):
         "sync": "Re-install the latest git hooks.",
     }
 )
-def hooks(ctx: Context, all_files=False, diff=False, sync=False):
+def hooks(
+    ctx: Context, all_files: bool = False, diff: bool = False, sync: bool = False
+):
     """Run and manage pre-commit hooks."""
     cmds = ["pre-commit", "run"]
     if diff:
@@ -154,14 +169,14 @@ def type_coverage(ctx: Context):
 )
 def type_check(
     ctx: Context,
-    packages,
-    install_types=False,
-    pretty=False,
-    warn_unused_ignores=False,
-    daemon=False,
-    clear_cache=False,
-    report=False,
-    ci=False,
+    packages: list[str],
+    install_types: bool = False,
+    pretty: bool = False,
+    warn_unused_ignores: bool = False,
+    daemon: bool = False,
+    clear_cache: bool = False,
+    report: bool = False,
+    ci: bool = False,
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -238,7 +253,7 @@ def get_usage_stats_json(ctx: Context):
 
 
 @invoke.task(pre=[get_usage_stats_json], aliases=["move-stats"])
-def mv_usage_stats_json(ctx):
+def mv_usage_stats_json(ctx: Context):
     """
     Use databricks-cli lib to move usage stats event examples to dbfs:/
     """
@@ -269,16 +284,16 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
 )
 def tests(
     ctx: Context,
-    unit=True,
-    integration=False,
-    ignore_markers=False,
-    ci=False,
-    html=False,
-    cloud=True,
-    slowest=5,
-    timeout=UNIT_TEST_DEFAULT_TIMEOUT,
-    package=None,
-    full_cov=False,
+    unit: bool = True,
+    integration: bool = False,
+    ignore_markers: bool = False,
+    ci: bool = False,
+    html: bool = False,
+    cloud: bool = True,
+    slowest: int = 5,
+    timeout: float = UNIT_TEST_DEFAULT_TIMEOUT,
+    package: str | None = None,
+    full_cov: bool = False,
 ):
     """
     Run tests. Runs unit tests by default.
@@ -340,12 +355,12 @@ PYTHON_VERSION_DEFAULT: float = 3.8
 )
 def docker(
     ctx: Context,
-    name="gx38local",
-    tag="latest",
-    build=False,
-    detach=False,
-    cmd="bash",
-    py=PYTHON_VERSION_DEFAULT,
+    name: str = "gx38local",
+    tag: str = "latest",
+    build: bool = False,
+    detach: bool = False,
+    cmd: str = "bash",
+    py: float = PYTHON_VERSION_DEFAULT,
 ):
     """
     Build or run gx docker image.
@@ -397,10 +412,19 @@ def docker(
     aliases=("schema",),
     help={
         "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class. Or '--list'",
+        "save_path": (
+            "Filepath to write the schema to. Will overwrite or create the file if it does not exist."
+            " If not provided the schema will be sent to the console."
+        ),
         "indent": "Indent size for nested json objects. Default: 4",
     },
 )
-def type_schema(ctx: Context, type: str, indent: int = 4):
+def type_schema(
+    ctx: Context,
+    type: str,
+    save_path: str | pathlib.Path | None = None,
+    indent: int = 4,
+):
     """
     Show the jsonschema for a given ZEP `type`
 
@@ -408,25 +432,34 @@ def type_schema(ctx: Context, type: str, indent: int = 4):
 
     --list to show all available types
     """
-    from great_expectations.experimental.datasources.experimental_base_model import (
-        ExperimentalBaseModel,
-    )
     from great_expectations.experimental.datasources.sources import _SourceFactories
 
+    buffer = io.StringIO()
+
     if type == "--list":
-        print("Registered ZEP types\n--------------------")
-        print("\t" + "\n\t".join(_SourceFactories.type_lookup.str_values()))
+        buffer.write(
+            "--------------------\nRegistered ZEP types\n--------------------\n"
+        )
+        buffer.write("\t" + "\n\t".join(_SourceFactories.type_lookup.type_names()))
     elif type == "--help" or type == "-h":
         ctx.run("invoke --help schema")
     else:
         try:
             model: ExperimentalBaseModel = _SourceFactories.type_lookup[type]
-            print(model.schema_json(indent=indent))
-        except KeyError as err:
+            buffer.write(model.schema_json(indent=indent))
+        except KeyError:
             raise invoke.Exit(
                 f"No '{type}' type found. Try 'invoke schema --list' to see available types",
                 code=1,
             )
+
+    text: str = buffer.getvalue()
+    if save_path:
+        save_path = pathlib.Path(save_path).resolve()
+        save_path.write_text(text)
+        print(f"'{type}' schema written to {save_path}")
+    else:
+        print(text)
 
 
 def _exit_with_error_if_not_in_repo_root(task_name: str):
