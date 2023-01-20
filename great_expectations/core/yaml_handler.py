@@ -5,10 +5,13 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
+from great_expectations.core._docs_decorators import public_api
 
+
+@public_api
 class YAMLHandler:
-    """
-    Facade class designed to be a lightweight wrapper around YAML serialization.
+    r"""Facade class designed to be a lightweight wrapper around YAML serialization.
+
     For all YAML-related activities in Great Expectations, this is the entry point.
 
     Note that this is meant to be library agnostic - the underlying implementation does not
@@ -18,18 +21,17 @@ class YAMLHandler:
 
     Typical usage example:
 
-        simple_yaml: str = f\"""
+        simple_yaml: str = f'''
             name: test
             class_name: test_class
             module_name: test.test_class
-        \"""
+        '''
         yaml_handler = YAMLHandler()
         res: dict = yaml_handler.load(simple_yaml)
 
         example_dict: dict = dict(abc=1)
         yaml_handler = YAMLHandler()
         yaml_handler.dump(example_dict)
-
     """
 
     def __init__(self) -> None:
@@ -40,6 +42,7 @@ class YAMLHandler:
 
     def load(self, stream: io.TextIOWrapper | str) -> dict:
         """Converts a YAML input stream into a Python dictionary.
+
         Args:
             stream: The input stream to read in. Although this function calls ruamel's load(), we
                 use a slightly more restrictive type-hint than ruamel (which uses Any). This is in order to tightly
