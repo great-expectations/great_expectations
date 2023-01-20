@@ -26,7 +26,13 @@ def BaseDataContext(
     ge_cloud_mode: bool = False,
     ge_cloud_config: Optional[GXCloudConfig] = None,
 ) -> AbstractDataContext:
-    """My description
+    """This class implements most of the functionality of DataContext, with a few exceptions.
+
+    1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
+    2. BaseDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
+        into DataContext class.
+
+    Together, these changes make BaseDataContext class more testable.
 
     Args:
         project_config: Union[DataContextConfig, Mapping],
@@ -41,14 +47,6 @@ def BaseDataContext(
     Returns:
         Something
 
-
-        This class implements most of the functionality of DataContext, with a few exceptions.
-
-        1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
-        2. BaseDataContext doesn't attempt to "guess" paths or objects types. Instead, that logic is pushed
-            into DataContext class.
-
-        Together, these changes make BaseDataContext class more testable.
 
     --ge-feature-maturity-info--
 
