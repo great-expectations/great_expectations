@@ -10,7 +10,7 @@ from great_expectations.core._docs_decorators import public_api
 
 @public_api
 class YAMLHandler:
-    r"""Facade class designed to be a lightweight wrapper around YAML serialization.
+    """Facade class designed to be a lightweight wrapper around YAML serialization.
 
     For all YAML-related activities in Great Expectations, this is the entry point.
 
