@@ -67,7 +67,8 @@ class MetricPartialFunctionTypes(enum.Enum):
     def metric_suffix(self) -> str:
         """Examines the "name" property of this "Enum" and returns corresponding suffix for metric registration/usage.
 
-        Returns: (str) designated metric name suffix
+        Returns:
+            (str) designated metric name suffix
         """
         if self.name in [
             "MAP_FN",
