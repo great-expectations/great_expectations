@@ -180,10 +180,12 @@ class DataAsset(ExperimentalBaseModel):
             get_batch_list_from_batch_request method.
         """
         if options is not None and not self._valid_batch_request_options(options):
+            allowed_keys = set(self.batch_request_options_template().keys())
+            actual_keys = set(options.keys())
             raise BatchRequestError(
-                "Batch request options should only contain keys from the following list:\n"
-                f"{list(self.batch_request_options_template().keys())}\n"
-                f"but your specified keys contain\n{pf(options)}\nwhich is not valid.\n"
+                "Batch request options should only contain keys from the following set:\n"
+                f"{allowed_keys}\nbut your specified keys contain\n"
+                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
         return BatchRequest(
             datasource_name=self._datasource.name,
