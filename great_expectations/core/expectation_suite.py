@@ -739,9 +739,11 @@ class ExpectationSuite(SerializableDictDot):
             overwrite_existing=overwrite_existing,
         )
 
+    @public_api
     def show_expectations_by_domain_type(self) -> None:
-        """
-        Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
+        """Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
+
+        The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
         """
         expectation_configurations_by_domain: Dict[
             str, List[ExpectationConfiguration]
@@ -762,8 +764,9 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_configurations: Optional[List[ExpectationConfiguration]] = None,
     ) -> None:
-        """
-        Displays "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
+        """Displays "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
+
+        The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
         """
         if expectation_configurations is None:
             expectation_configurations = (

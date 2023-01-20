@@ -2387,7 +2387,7 @@ class DataContextConfig(BaseYamlConfig):
         self.plugins_directory = plugins_directory
         if validation_operators is not None:
             self.validation_operators = validation_operators
-        self.stores = stores
+        self.stores = stores or {}
         self.notebooks = notebooks
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path

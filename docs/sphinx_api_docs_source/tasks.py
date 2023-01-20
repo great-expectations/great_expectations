@@ -1,6 +1,7 @@
 import logging
 import os
 import pathlib
+import sys
 from typing import Union
 
 import invoke
@@ -16,6 +17,9 @@ logger.setLevel(logging.INFO)
 @invoke.task
 def docs(ctx):
     """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
+    scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
+    sys.path.append(str(scripts_path))
+
     sphinx_api_docs_source_dir = pathlib.Path(__file__).parent
 
     _exit_with_error_if_not_run_from_correct_dir(
@@ -27,14 +31,17 @@ def docs(ctx):
     doc_builder.build_docs()
 
 
-@invoke.task
-def public_api(ctx):
+@invoke.task(name="public-api")
+def public_api_task(ctx):
     """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
+
+    scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
+    sys.path.append(str(scripts_path))
 
     sphinx_api_docs_source_dir = pathlib.Path(__file__).parent
 
     _exit_with_error_if_not_run_from_correct_dir(
-        task_name="public_api", correct_dir=sphinx_api_docs_source_dir
+        task_name="public-api", correct_dir=sphinx_api_docs_source_dir
     )
 
     public_api_report.main()
