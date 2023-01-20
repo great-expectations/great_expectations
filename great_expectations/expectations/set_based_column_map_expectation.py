@@ -45,6 +45,7 @@ logger = logging.getLogger(__name__)
 @public_api
 class SetColumnMapMetricProvider(ColumnMapMetricProvider):
     """Base class for all SetColumnMapMetrics.
+
     SetColumnMapMetric classes inheriting from SetColumnMapMetricProvider are ephemeral,
     defined by their `set` attribute, and registered during the execution of their associated SetColumnMapExpectation.
 

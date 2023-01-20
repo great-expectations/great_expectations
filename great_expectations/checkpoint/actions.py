@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from urllib.parse import urljoin
 
 from typing_extensions import Final
@@ -1040,9 +1040,7 @@ class StoreMetricsAction(ValidationAction):
     message="target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
 )
 class UpdateDataDocsAction(ValidationAction):
-    """UpdateDataDocsAction is a validation action that
-    notifies the site builders of all the data docs sites of the Data Context
-    that a validation result should be added to the data docs.
+    """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
 
     YAML configuration example:: yaml
 

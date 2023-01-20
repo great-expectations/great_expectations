@@ -46,6 +46,7 @@ logger = logging.getLogger(__name__)
 @public_api
 class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
     """Base class for all RegexColumnMapMetrics.
+
     RegexColumnMapMetric classes inheriting from RegexColumnMapMetricProvider are ephemeral,
     defined by their `regex` attribute, and registered during the execution of their associated RegexColumnMapExpectation.
 
