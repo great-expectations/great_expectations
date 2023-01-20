@@ -123,10 +123,14 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
-        "Validates the configuration of an Expectation.
+        Validates the configuration of an Expectation.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided it will be pulled from the configuration attribute of the Expectation instance.
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                                  from the configuration attribute of the Expectation instance.
 
         Raises:
             `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the Expectation."
