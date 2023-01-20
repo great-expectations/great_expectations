@@ -136,7 +136,8 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
     Check public API docstrings.
 
     Optionally pass a directory or file.
-    To pass multiple items use quotes example: 'great_expectations/core great_expectations/util.py'.
+    To pass multiple items:
+        invoke docstrings -p=great_expectations/core -p=great_expectations/util.py
     """
     if paths:
         select_paths = [pathlib.Path(p) for p in paths]
