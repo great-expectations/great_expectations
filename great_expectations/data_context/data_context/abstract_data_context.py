@@ -851,7 +851,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             datasource_name = arg1
         try:
-            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(  # type: ignore[assignment]
+            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(
                 datasource_name=datasource_name
             )
             if issubclass(type(datasource), BaseDatasource):
@@ -918,12 +918,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
-        datasource = self.get_datasource(batch_kwargs.get("datasource"))  # type: ignore[arg-type]
-        batch = datasource.get_batch(  # type: ignore[union-attr]
+        datasource = self.get_datasource(batch_kwargs.get("datasource"))
+        batch = datasource.get_batch(
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
         if data_asset_type is None:
-            data_asset_type = datasource.config.get("data_asset_type")  # type: ignore[union-attr]
+            data_asset_type = datasource.config.get("data_asset_type")
 
         validator = BridgeValidator(
             batch=batch,
@@ -1285,9 +1285,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             raise ValueError(f"Datasource {datasource_name} not found")
 
         if save_changes:
-            datasource_config = datasourceConfigSchema.load(
-                datasource.config  # type: ignore[union-attr] # XDatasource has no .config
-            )
+            datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)  # type: ignore[attr-defined]
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
@@ -2482,8 +2480,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @public_api
     def get_available_data_asset_names(
         self,
-        datasource_names: Optional[str | list[str]] = None,
-        batch_kwargs_generator_names: Optional[str | list[str]] = None,
+        datasource_names: str | list[str] | None = None,
+        batch_kwargs_generator_names: str | list[str] | None = None,
     ):
         """Inspect datasource and batch kwargs generators to provide available data_asset objects.
 
@@ -2526,7 +2524,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
             elif len(batch_kwargs_generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
-                datasource_names[
+                # 20230120 - Chetan - I believe this is a latent bug - we should not be doing string-based indexing
+                #                     within a list. This will result in a runtime error.
+                datasource_names[  # type:ignore[call-overload]
                     datasource_names[0]
                 ] = datasource.get_available_data_asset_names(
                     batch_kwargs_generator_names

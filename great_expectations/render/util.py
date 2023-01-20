@@ -29,7 +29,7 @@ def num_to_str(
     use_locale: bool = False,
     no_scientific: bool = False,
 ) -> str:
-    """Convert the given float to a string, centralizing standards for precision and decisions about scientific
+    """Convert the given float to a string, centralizing standards for precision and decisions about scientific \
     notation. Adds an approximately equal sign in the event precision loss (e.g. rounding) has occurred.
 
     For more context, please review the following:
