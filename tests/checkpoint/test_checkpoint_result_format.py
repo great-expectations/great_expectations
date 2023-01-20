@@ -1803,8 +1803,9 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_s
 
     dict_to_update_checkpoint: dict = {
         "result_format": {
-            "result_format": "BASIC",
+            "result_format": "COMPLETE",
             "unexpected_index_column_names": ["pk_1"],
+            "return_unexpected_index_list": False,
         }
     }
     context: DataContext = _add_expectations_and_checkpoint(
