@@ -340,6 +340,9 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         For `expect_column_distinct_values_to_be_in_set` we require that the `configuraton.kwargs` contain
         a `value_set` key that is either a `list`, `set`, or `dict`.
 
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
         Args:
             configuration: The configuration to be validated.
 

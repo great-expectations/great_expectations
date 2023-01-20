@@ -197,11 +197,15 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
         For `expect_column_kl_divergence_to_be_less_than`, `configuraton.kwargs` may contain `min_value` and
         `max_value` whose value is either a number or date.
 
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
         Args:
             configuration: The configuration to be validated.
 
         Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation.
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the
+                Expectation.
 
         # noqa: DAR402
         """
