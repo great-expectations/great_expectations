@@ -319,7 +319,7 @@ class SQLDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
-    connection_string: pydantic.AnyUrl
+    connection_string: str
     assets: Dict[str, TableAsset] = {}
     engine: Engine
 
