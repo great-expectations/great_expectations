@@ -130,8 +130,6 @@ class NoOpAction(ValidationAction):
 class SlackNotificationAction(ValidationAction):
     """Sends a Slack notification to a given webhook.
 
-
-
     YAML configuration example:: yaml
 
         - name: send_slack_notification_on_validation_result
@@ -290,12 +288,9 @@ class SlackNotificationAction(ValidationAction):
 
 
 class PagerdutyAlertAction(ValidationAction):
-    """
-    PagerdutyAlertAction sends a pagerduty event
+    """Sends a PagerDuty event
 
-    **Configuration**
-
-    .. code-block:: yaml
+    YAML configuration example:: yaml
 
         - name: send_pagerduty_alert_on_validation_result
         action:
@@ -303,6 +298,9 @@ class PagerdutyAlertAction(ValidationAction):
           api_key: ${pagerduty_api_key} # Events API v2 key
           routing_key: # The 32 character Integration Key for an integration on a service or on a global ruleset.
           notify_on: failure # possible values: "all", "failure", "success"
+
+    Args:
+
 
     """
 
