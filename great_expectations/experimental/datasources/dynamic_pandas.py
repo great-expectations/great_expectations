@@ -10,7 +10,6 @@ from typing import (  # type: ignore[attr-defined]
     Hashable,
     List,
     NamedTuple,
-    Sequence,
     Set,
     Tuple,
     Type,
@@ -50,10 +49,10 @@ CAN_HANDLE: Final[Set[str]] = {
     "None",
     # typing
     "Hashable",
-    "Sequence[Hashable]",
-    "Sequence[str]",
-    "Sequence[int]",
-    "Sequence[tuple[int, int]]",
+    "typing.Sequence[Hashable]",
+    "typing.Sequence[str]",
+    "typing.Sequence[int]",
+    "typing.Sequence[tuple[int, int]]",
     "Literal['infer']",
     "Literal[False]",
     "Literal[True]",
@@ -93,7 +92,7 @@ _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
 
 _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "Literal": Literal,
-    "Sequence": Sequence,
+    # "Sequence": Sequence,
     "Hashable": Hashable,
 }
 
