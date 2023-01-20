@@ -19,7 +19,7 @@ class YAMLHandler:
         * load
         * dump
 
-    Typical usage example:
+    Typical usage example::
 
         simple_yaml: str = f'''
             name: test
