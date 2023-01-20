@@ -17,9 +17,8 @@ class YAMLHandler:
     Note that this is meant to be library agnostic - the underlying implementation does not
     matter as long as we fulfill the following contract:
 
-    - load
-
-    - dump
+    * load
+    * dump
 
     Typical usage example::
 
