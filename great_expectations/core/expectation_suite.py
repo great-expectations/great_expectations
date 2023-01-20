@@ -742,7 +742,8 @@ class ExpectationSuite(SerializableDictDot):
     @public_api
     def show_expectations_by_domain_type(self) -> None:
         """Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
-            The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
+
+        The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
 
         Args: N/A
 
@@ -772,7 +773,8 @@ class ExpectationSuite(SerializableDictDot):
         expectation_configurations: Optional[List[ExpectationConfiguration]] = None,
     ) -> None:
         """Displays "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
-            The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
+
+        The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
 
         Args: N/A
 
