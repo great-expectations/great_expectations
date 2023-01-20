@@ -1861,8 +1861,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             and not overwrite_existing
         ):
             raise gx_exceptions.DataContextError(
-                f"expectation_suite with name {expectation_suite_name} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True."
+                "expectation_suite with name {} already exists. If you would like to overwrite this "
+                "expectation_suite, set overwrite_existing=True.".format(
+                    expectation_suite_name
+                )
             )
         self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
