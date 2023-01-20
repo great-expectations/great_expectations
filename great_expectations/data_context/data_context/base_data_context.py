@@ -26,7 +26,22 @@ def BaseDataContext(
     ge_cloud_mode: bool = False,
     ge_cloud_config: Optional[GXCloudConfig] = None,
 ) -> AbstractDataContext:
-    """
+    """My description
+
+    Args:
+        project_config: Union[DataContextConfig, Mapping],
+        context_root_dir: Optional[PathStr] = None,
+        runtime_environment: Optional[dict] = None,
+        cloud_mode: bool = False,
+        cloud_config: Optional[GXCloudConfig] = None,
+        # Deprecated as of 0.15.37
+        ge_cloud_mode: bool = False,
+        ge_cloud_config: Optional[GXCloudConfig] = None,
+
+    Returns:
+        Something
+
+
         This class implements most of the functionality of DataContext, with a few exceptions.
 
         1. BaseDataContext does not attempt to keep its project_config in sync with a file on disc.
