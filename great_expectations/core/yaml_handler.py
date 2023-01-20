@@ -22,7 +22,7 @@ class YAMLHandler:
 
     Typical usage example::
 
-        simple_yaml: str = f'''
+        simple_yaml: str = '''
             name: test
             class_name: test_class
             module_name: test.test_class
