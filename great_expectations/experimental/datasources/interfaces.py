@@ -357,16 +357,6 @@ class Datasource(
         self.assets[asset.name] = asset
         return asset
 
-    # Abstract Methods
-    @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
-        """Return the ExecutionEngine type use for this Datasource"""
-        raise NotImplementedError(
-            "One needs to implement 'execution_engine_type' on a Datasource subclass"
-        )
-
-    # End Abstract Methods
-
 
 @dataclasses.dataclass(frozen=True)
 class HeadData:

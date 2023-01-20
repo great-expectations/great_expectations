@@ -200,9 +200,8 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         asset_types = [RedAsset, BlueAsset]
         type: str = "purple"
 
-        @property
-        def execution_engine_type(self) -> Type[ExecutionEngine]:
-            return DummyExecutionEngine
+        def test_connection(self):
+            ...
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)

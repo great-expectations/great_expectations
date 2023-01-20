@@ -321,14 +321,21 @@ class SQLDatasource(Datasource):
     type: Literal["sql"] = "sql"
     connection_string: str
     assets: Dict[str, TableAsset] = {}
-    engine: Engine
+
+    # non-field private attrs
+    _engine: Engine = pydantic.PrivateAttr()
+
+    @property
+    def engine(self) -> Engine:
+        return self._engine
 
     class Config:
         arbitrary_types_allowed = True
+        extra = pydantic.Extra.forbid
 
-    @pydantic.root_validator(pre=True)
-    def _set_engine(cls, values: dict) -> dict:
-        values["engine"] = create_engine(values["connection_string"])
+    @pydantic.root_validator()
+    def _validate_connection_string_and_set_engine(cls, values: dict) -> dict:
+        values["_engine"] = create_engine(values["connection_string"])
         return values
 
     def test_connection(self) -> None:
