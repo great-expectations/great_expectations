@@ -15,6 +15,7 @@ import json
 import os
 import pathlib
 import shutil
+import sys
 from typing import TYPE_CHECKING
 
 import invoke
@@ -139,6 +140,9 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
     To pass multiple items:
         invoke docstrings -p=great_expectations/core -p=great_expectations/util.py
     """
+    scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
+    sys.path.append(str(scripts_path))
+
     if paths:
         select_paths = [pathlib.Path(p) for p in paths]
     else:
