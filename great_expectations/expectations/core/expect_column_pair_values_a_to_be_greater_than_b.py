@@ -103,14 +103,14 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates the configuration for the Expectation. 
-        
+        """Validates the configuration for the Expectation.
+
         For `expect_column_pair_values_a_to_be_greater_than_b`
         we require that the `configuraton.kwargs` contain both `column_A` and `column_B` keys.
 
         Args:
             configuration: The ExpectationConfiguration to be validated.
-            
+
         Raises:
             InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
         """

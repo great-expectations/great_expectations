@@ -97,14 +97,14 @@ class ExpectColumnValuesToMatchLikePattern(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates the configuration for the Expectation. 
-        
+        """Validates the configuration for the Expectation.
+
         For `expect_column_values_to_match_like_pattern`
         we require that the `configuraton.kwargs` contain a `like_pattern` key that is either a `str` or `dict`.
 
         Args:
             configuration: The ExpectationConfiguration to be validated.
-            
+
         Raises:
             InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
         """
