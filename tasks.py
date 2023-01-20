@@ -131,13 +131,24 @@ def hooks(
         ctx.run(" ".join(["pre-commit", "install"]), echo=True)
 
 
-@invoke.task(aliases=["docstring"])
-def docstrings(ctx: Context):
-    """Check public API docstrings."""
+@invoke.task(aliases=["docstring"], iterable=("paths",))
+def docstrings(ctx: Context, paths: list[str] | None = None):
+    """
+    Check public API docstrings.
+
+    Optionally pass a directory or file.
+    To pass multiple items:
+        invoke docstrings -p=great_expectations/core -p=great_expectations/util.py
+    """
     scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
     sys.path.append(str(scripts_path))
+
+    if paths:
+        select_paths = [pathlib.Path(p) for p in paths]
+    else:
+        select_paths = None
     try:
-        check_public_api_docstrings.main()
+        check_public_api_docstrings.main(select_paths=select_paths)
     except AssertionError as err:
         raise invoke.Exit(
             message=f"{err}\n\nGenerated with {check_public_api_docstrings.__file__}",
