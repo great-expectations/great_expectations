@@ -64,8 +64,8 @@ class MetricPartialFunctionTypes(enum.Enum):
     WINDOW_CONDITION_FN = "window_condition_fn"  # pertains to "SqlAlchemyExecutionEngine" and "SparkDFExecutionEngine"
     AGGREGATE_FN = "aggregate_fn"  # pertains to "SqlAlchemyExecutionEngine" and "SparkDFExecutionEngine"
 
-    @public_api
     @property
+    @public_api
     def metric_suffix(self) -> str:
         """Examines the "name" property of this "Enum" and returns corresponding suffix for metric registration/usage.
 
