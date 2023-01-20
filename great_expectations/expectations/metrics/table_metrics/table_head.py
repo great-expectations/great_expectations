@@ -1,4 +1,6 @@
-from typing import Any, Dict
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
 
@@ -17,6 +19,9 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
+if TYPE_CHECKING:
+    from great_expectations.expectations.metrics.import_manager import pyspark_sql_Row
+
 
 class TableHead(TableMetricProvider):
     metric_name = "table.head"
@@ -29,15 +34,20 @@ class TableHead(TableMetricProvider):
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
-    ):
+    ) -> pd.DataFrame:
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         if metric_value_kwargs.get("fetch_all", cls.default_kwarg_values["fetch_all"]):
             return df
-        return df.head(metric_value_kwargs["n_rows"])
+        n_rows: int = (
+            metric_value_kwargs.get("n_rows")
+            if metric_value_kwargs.get("n_rows") is not None
+            else cls.default_kwarg_values["n_rows"]
+        )
+        return df.head(n=n_rows)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
@@ -45,13 +55,19 @@ class TableHead(TableMetricProvider):
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
-    ):
+    ) -> pd.DataFrame:
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
         table_name = getattr(selectable, "name", None)
+        n_rows: int = (
+            metric_value_kwargs.get("n_rows")
+            if metric_value_kwargs.get("n_rows") is not None
+            else cls.default_kwarg_values["n_rows"]
+        )
+        df_chunk_iterator: Iterator[pd.DataFrame]
         if (
             isinstance(table_name, sa.sql.elements._anonymous_label)
             or table_name is None
@@ -64,17 +80,19 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                     )
                 else:
-                    df = next(
-                        pd.read_sql_query(
-                            sql=selectable,
-                            con=execution_engine.engine,
-                            chunksize=metric_value_kwargs["n_rows"],
-                        )
+                    # passing chunksize causes the Iterator to be returned
+                    df_chunk_iterator = pd.read_sql_query(
+                        sql=selectable,
+                        con=execution_engine.engine,
+                        chunksize=abs(n_rows),
+                    )
+                    df = TableHead._get_head_df_from_df_iterator(
+                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                     )
             except (ValueError, NotImplementedError):
-                # it looks like MetaData that is used by pd.read_sql_query
-                # cannot work on a temp table.
-                # If it fails, we are trying to get the data using read_sql
+                # MetaData that is used by pd.read_sql_table
+                # cannot work on a temp table with pandas < 1.4.0.
+                # If it fails, we try to get the data using read_sql.
                 df = None
             except StopIteration:
                 validator = Validator(execution_engine=execution_engine)
@@ -91,18 +109,21 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                     )
                 else:
-                    df = next(
-                        pd.read_sql_table(
-                            table_name=getattr(selectable, "name", None),
-                            schema=getattr(selectable, "schema", None),
-                            con=execution_engine.engine,
-                            chunksize=metric_value_kwargs["n_rows"],
-                        )
+                    # passing chunksize causes the Iterator to be returned
+                    df_chunk_iterator = pd.read_sql_table(
+                        table_name=getattr(selectable, "name", None),
+                        schema=getattr(selectable, "schema", None),
+                        con=execution_engine.engine,
+                        chunksize=abs(n_rows),
                     )
+                    df = TableHead._get_head_df_from_df_iterator(
+                        df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                    )
+
             except (ValueError, NotImplementedError):
-                # it looks like MetaData that is used by pd.read_sql_table
-                # cannot work on a temp table.
-                # If it fails, we are trying to get the data using read_sql
+                # MetaData that is used by pd.read_sql_table
+                # cannot work on a temp table with pandas < 1.4.0.
+                # If it fails, we try to get the data using read_sql.
                 df = None
             except StopIteration:
                 validator = Validator(execution_engine=execution_engine)
@@ -114,7 +135,8 @@ class TableHead(TableMetricProvider):
         if df is None:
             # we want to compile our selectable
             stmt = sa.select(["*"]).select_from(selectable)
-            if metric_value_kwargs["fetch_all"]:
+            fetch_all = metric_value_kwargs["fetch_all"]
+            if fetch_all:
                 sql = stmt.compile(
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
@@ -127,16 +149,46 @@ class TableHead(TableMetricProvider):
                         compile_kwargs={"literal_binds": True},
                     )
                 )
-                sql = f"SELECT TOP {metric_value_kwargs['n_rows']}{sql[6:]}"
+                if n_rows > 0:
+                    sql = f"SELECT TOP {n_rows}{sql[6:]}"
             else:
-                stmt = stmt.limit(metric_value_kwargs["n_rows"])
+                if n_rows > 0:
+                    stmt = stmt.limit(n_rows)
                 sql = stmt.compile(
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
                 )
 
-            df = pd.read_sql(sql, con=execution_engine.engine)
+            # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
+            if n_rows <= 0 and not fetch_all:
+                df_chunk_iterator = pd.read_sql(
+                    sql=sql, con=execution_engine.engine, chunksize=abs(n_rows)
+                )
+                df = TableHead._get_head_df_from_df_iterator(
+                    df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
+                )
+            else:
+                df = pd.read_sql(sql=sql, con=execution_engine.engine)
 
+        return df
+
+    @staticmethod
+    def _get_head_df_from_df_iterator(
+        df_chunk_iterator: Iterator[pd.DataFrame], n_rows: int
+    ) -> pd.DataFrame:
+        if n_rows > 0:
+            df = next(df_chunk_iterator)
+        else:
+            # if n_rows is zero or negative, remove the last chunk
+            df_chunk_list: list[pd.DataFrame]
+            df_last_chunk: pd.DataFrame
+            *df_chunk_list, df_last_chunk = df_chunk_iterator
+            if df_chunk_list:
+                df = pd.concat(objs=df_chunk_list, ignore_index=True)
+            else:
+                # if n_rows is zero, the last chunk is the entire dataframe,
+                # so we truncate it to preserve the header
+                df = df_last_chunk.head(0)
         return df
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -145,12 +197,23 @@ class TableHead(TableMetricProvider):
         execution_engine: SparkDFExecutionEngine,
         metric_domain_kwargs: dict,
         metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
+        metrics: dict[str, Any],
         runtime_configuration: dict,
-    ):
+    ) -> list[pyspark_sql_Row] | pyspark_sql_Row:
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
+        rows: list[pyspark_sql_Row] | pyspark_sql_Row
         if metric_value_kwargs["fetch_all"]:
-            return df.collect()
-        return df.head(metric_value_kwargs["n_rows"])
+            rows = df.collect()
+        else:
+            n_rows: int = (
+                metric_value_kwargs.get("n_rows")
+                if metric_value_kwargs.get("n_rows") is not None
+                else cls.default_kwarg_values["n_rows"]
+            )
+            if n_rows >= 0:
+                rows = df.head(n=n_rows)
+            else:
+                rows = df.head(n=df.count() + n_rows)
+        return rows
