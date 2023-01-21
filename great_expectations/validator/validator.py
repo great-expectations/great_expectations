@@ -1411,22 +1411,22 @@ class Validator:
     ) -> ExpectationSuite:
         """Get a copy of the Expectation Suite from the Validator object.
 
-            Args:
-                discard_failed_expectations:
-                    Omit Expectations which failed on their last run.
-                discard_result_format_kwargs:
-                    Omit `result_format` from each Expectation.
-                discard_include_config_kwargs:
-                    Omit `include_config` from each Expectation.
-                discard_catch_exceptions_kwargs:
-                    Omit `catch_exceptions` from each Expectation.
-                suppress_warnings:
-                    Do not log warnings.
-                suppress_logging:
-                    Do not log anything.
+        Args:
+            discard_failed_expectations:
+                Omit Expectations which failed on their last run.
+            discard_result_format_kwargs:
+                Omit `result_format` from each Expectation.
+            discard_include_config_kwargs:
+                Omit `include_config` from each Expectation.
+            discard_catch_exceptions_kwargs:
+                Omit `catch_exceptions` from each Expectation.
+            suppress_warnings:
+                Do not log warnings.
+            suppress_logging:
+                Do not log anything.
 
-            Returns:
-                ExpectationSuite object.
+        Returns:
+            ExpectationSuite object.
         """
 
         expectation_suite = copy.deepcopy(self.expectation_suite)
