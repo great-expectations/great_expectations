@@ -1895,7 +1895,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         include_rendered_content: Optional[bool] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> ExpectationSuite:
-        """Get an Expectation Suite by name
+        """Get an Expectation Suite by name.
 
         Args:
             expectation_suite_name (str): The name of the Expectation Suite
