@@ -5,6 +5,7 @@ from pathlib import Path
 
 from ruamel.yaml import YAML
 
+from great_expectations.alias_types import JSONValues
 from great_expectations.core._docs_decorators import public_api
 
 
@@ -41,7 +42,7 @@ class YAMLHandler:
         self._handler.indent(mapping=2, sequence=4, offset=2)
         self._handler.default_flow_style = False
 
-    def load(self, stream: io.TextIOWrapper | str) -> dict:
+    def load(self, stream: io.TextIOWrapper | str) -> dict[str, JSONValues]:
         """Converts a YAML input stream into a Python dictionary.
 
         Args:
