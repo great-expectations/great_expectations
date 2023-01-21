@@ -239,7 +239,13 @@ class DictDot:
 
 class SerializableDictDot(DictDot):
     def to_json_dict(self) -> Dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of the SerializableDictDot."""
+        """Returns a JSON-serializable dict representation of the SerializableDictDot.
+
+        Subclasses must implement this abstract method.
+
+        Returns:
+            A JSON-serializable dict representation of the SerializableDictDot
+        """
 
         # TODO: <Alex>2/4/2022</Alex>
         # A reference implementation can be provided, once circular import dependencies, caused by relative locations of
