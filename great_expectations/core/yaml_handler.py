@@ -23,7 +23,7 @@ class YAMLHandler:
 
     Typical usage example:
 
-    .. code-block:: python
+    .. code-block:: text
 
         >>> simple_yaml: str = '''
         ...    name: test
