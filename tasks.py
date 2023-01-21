@@ -94,7 +94,7 @@ def lint(ctx: Context, path: str = ".", fix: bool = False):
     """Run code linter"""
     cmds = ["ruff", path]
     if fix:
-        cmds += "--fix"
+        cmds.append("--fix")
     ctx.run(" ".join(cmds), echo=True)
 
 
