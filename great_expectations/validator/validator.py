@@ -1518,9 +1518,9 @@ class Validator:
         Args:
             filepath: The location and name to write the JSON config file to. This parameter overrides the Data Context configuration.
             discard_failed_expectations: If True, excludes expectations that do not return `success = True`. If False, all expectations are saved.
-            discard_result_format_kwargs: If True, the :ref:`result_format` attribute for each expectation is not included in the saved configuration.
-            discard_include_config_kwargs: If True, the :ref:`include_config` attribute for each expectation is not included in the saved configuration.
-            discard_catch_exceptions_kwargs: If True, the :ref:`catch_exceptions` attribute for each expectation is not included in the saved configuration.
+            discard_result_format_kwargs: If True, the `result_format` attribute for each expectation is not included in the saved configuration.
+            discard_include_config_kwargs: If True, the `include_config` attribute for each expectation is not included in the saved configuration.
+            discard_catch_exceptions_kwargs: If True, the `catch_exceptions` attribute for each expectation is not included in the saved configuration.
             suppress_warnings: If True, all warnings raised by Great Expectations, as a result of dropped expectations, are suppressed.
 
         Raises:
@@ -1576,9 +1576,7 @@ class Validator:
         checkpoint_name: Optional[str] = None,
     ) -> Union[ExpectationValidationResult, ExpectationSuiteValidationResult]:
         # noinspection SpellCheckingInspection
-        """Generate a JSON-formatted report describing the outcome of all expectations.
-
-        Use the default expectation_suite=None to validate the expectations config associated with the DataAsset.
+        """Run all expectations and return the outcome of the run.
 
         Args:
             expectation_suite: If None, uses the Expectation Suite configuration generated during the current Validator session. If an `ExpectationSuite` object, uses it as the configuration. If a string, assumes it is a path to a JSON file, and loads it as the Expectation Sutie configuration.
@@ -1593,34 +1591,7 @@ class Validator:
             checkpoint_name: Name of the Checkpoint which invoked this Validator.validate() call against an Expectation Suite. It will be added to `meta` field of the returned ExpectationSuiteValidationResult.
 
         Returns:
-            A JSON-formatted dictionary containing a list of the validation results. An example of the returned format::
-
-                {
-                  "results": [
-                    {
-                      "unexpected_list": [unexpected_value_1, unexpected_value_2],
-                      "expectation_type": "expect_*",
-                      "kwargs": {
-                        "column": "Column_Name",
-                        "output_format": "SUMMARY"
-                      },
-                      "success": true,
-                      "raised_exception: false.
-                      "exception_traceback": null
-                    },
-                    {
-                      ... (Second expectation results)
-                    },
-                    ... (More expectations results)
-                  ],
-                  "success": true,
-                  "statistics": {
-                    "evaluated_expectations": n,
-                    "successful_expectations": m,
-                    "unsuccessful_expectations": n - m,
-                    "success_percent": m / n
-                  }
-                }
+            Object containg the results.
 
         Raises:
             Exception: Depending on the Data Context configuration and arguments, there are numerous possible exceptions that may be raised.
