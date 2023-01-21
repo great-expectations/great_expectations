@@ -188,7 +188,12 @@ docstring_style = "google"
 
 [tool.ruff]
 target-version = "py37"
-select = ["E", "F", "C", "I"]
+select = [
+    "E", # pycodestyle
+    "F", # Pyflakes
+    "C", # Complexity (mccabe+)
+    "I", # isort
+]
 ignore = [
     "E501",  # line-length # TODO: too many violations
     "E402", # module level import not at top of file # TODO
