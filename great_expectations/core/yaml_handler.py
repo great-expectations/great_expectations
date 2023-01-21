@@ -21,18 +21,18 @@ class YAMLHandler:
     * load
     * dump
 
-    Typical usage example::
+    Typical usage example:
 
-        simple_yaml: str = '''\n
-            name: test\n
-            class_name: test_class\n
-            module_name: test.test_class
-        '''
-        yaml_handler = YAMLHandler()
-        res: dict = yaml_handler.load(simple_yaml)
-        example_dict: dict = dict(abc=1)
-        yaml_handler = YAMLHandler()
-        yaml_handler.dump(example_dict)
+    simple_yaml: str = '''
+        name: test
+        class_name: test_class
+        module_name: test.test_class
+    '''
+    yaml_handler = YAMLHandler()
+    res: dict = yaml_handler.load(simple_yaml)
+    example_dict: dict = dict(abc=1)
+    yaml_handler = YAMLHandler()
+    yaml_handler.dump(example_dict)
 
     """
 
