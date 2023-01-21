@@ -20,10 +20,11 @@ repos:
     rev: 22.3.0
     hooks:
       - id: black
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    # Ruff version.
+    rev: 'v0.0.228'
     hooks:
-      - id: flake8
+      - id: ruff
         files: ^(great_expectations/core)
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.7.2
