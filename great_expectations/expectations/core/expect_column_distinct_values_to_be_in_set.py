@@ -344,10 +344,11 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
         superclass hierarchy.
 
         Args:
-            configuration: The configuration to be validated.
+            configuration: The ExpectationConfiguration to be validated.
 
         Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the expectation.
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the
+                Expectation.
         """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration

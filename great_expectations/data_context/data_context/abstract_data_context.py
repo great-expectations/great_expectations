@@ -1551,6 +1551,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         return keys  # type: ignore[return-value]
 
+    @public_api
     def get_validator(
         self,
         datasource_name: Optional[str] = None,
@@ -1582,10 +1583,62 @@ class AbstractDataContext(ConfigPeer, ABC):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
-        """
-        This method applies only to the new (V3) Datasource schema.
-        """
+        """Retrieves a validator with a Batch list and an Expectation Suite.
 
+        `get_validator` first calls `get_batch_list` to retrieve a batch list, then creates or retrieves
+        an ExpectationSuite used to validate the Batches in the list.
+
+        Args:
+            datasource_name: The name of the Datasource that defines the Data Asset to retrieve the batch for
+            data_connector_name: The Data Connector within the datasource for the Data Asset
+            data_asset_name: The name of the Data Asset within the Data Connector
+            batch: The Batch to use with the Validator
+            batch_list: The List of Batches to use with the Validator
+            batch_request: Encapsulates all the parameters used here to retrieve a BatchList. Use either
+                `batch_request` or the other params (but not both)
+            batch_request_list: A List of BatchRequest to use with the Validator
+            batch_data: Provides runtime data for the batch; is added as the key `batch_data` to
+                the `runtime_parameters` dictionary of a BatchRequest
+            query: Provides runtime data for the batch; is added as the key `query` to
+                the `runtime_parameters` dictionary of a BatchRequest
+            path: Provides runtime data for the batch; is added as the key `path` to
+                the `runtime_parameters` dictionary of a BatchRequest
+            runtime_parameters: Specifies runtime parameters for the BatchRequest; can includes keys `batch_data`,
+                `query`, and `path`
+            data_connector_query: Used to specify connector query parameters; specifically `batch_filter_parameters`,
+                `limit`, `index`, and `custom_filter_function`
+            batch_identifiers: Any identifiers of batches for the BatchRequest
+            batch_filter_parameters: Filter parameters used in the data connector query
+            limit: Part of the data_connector_query, limits the number of rows in a batch
+            index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
+                numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
+            custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
+            sampling_method: The method used to sample Batch data (see: Splitting and Sampling)
+            sampling_kwargs: Arguments for the sampling method
+            splitter_method: The method used to split the Data Asset into Batches
+            splitter_kwargs: Arguments for the splitting method
+            batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
+            expectation_suite_ge_cloud_id: The identifier of the ExpectationSuite to retrieve from the DataContext
+                (can be used in place of `expectation_suite_name`)
+            expectation_suite_name: The name of the ExpectationSuite to retrieve from the DataContext
+            expectation_suite: The ExpectationSuite to use with the validator
+            create_expectation_suite_with_name: Creates a Validator with a new ExpectationSuite with the provided name
+            include_rendered_content: If `True` the ExpectationSuite will include rendered content when saved
+            **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
+
+        Returns:
+            Validator: A Validator with the specified Batch list and ExpectationSuite
+
+        Raises:
+            DatasourceError: If the specified `datasource_name` does not exist in the DataContext
+            TypeError: If the specified types of the `batch_request` are not supported, or if the
+                `datasource_name` is not a `str`
+            ValueError: If more than one exclusive parameter is specified (ex: specifing more than one
+                of `batch_data`, `query` or `path`), or if the ExpectationSuite cannot be created or
+                retrieved using either the provided name or identifier
+
+        # noqa: DAR402
+        """
         include_rendered_content = (
             self._determine_if_expectation_validation_result_include_rendered_content(
                 include_rendered_content=include_rendered_content
@@ -1781,7 +1834,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource_name: The name of the Datasource that defines the Data Asset to retrieve the batch for
             data_connector_name: The Data Connector within the datasource for the Data Asset
             data_asset_name: The name of the Data Asset within the Data Connector
-
             batch_request: Encapsulates all the parameters used here to retrieve a BatchList. Use either
                 `batch_request` or the other params (but not both)
             batch_data: Provides runtime data for the batch; is added as the key `batch_data` to
@@ -1796,20 +1848,15 @@ class AbstractDataContext(ConfigPeer, ABC):
                 `limit`, `index`, and `custom_filter_function`
             batch_identifiers: Any identifiers of batches for the BatchRequest
             batch_filter_parameters: Filter parameters used in the data connector query
-
             limit: Part of the data_connector_query, limits the number of rows in a batch
             index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
                 numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
             custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
-
             sampling_method: The method used to sample Batch data (see: Splitting and Sampling)
             sampling_kwargs: Arguments for the sampling method
-
             splitter_method: The method used to split the Data Asset into Batches
             splitter_kwargs: Arguments for the splitting method
-
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
-
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
