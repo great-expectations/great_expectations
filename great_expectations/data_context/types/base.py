@@ -716,7 +716,7 @@ class DataConnectorConfigSchema(AbstractConfigSchema):
         if data["class_name"][0] == "$":
             return
         if ("default_regex" in data) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetFilesystemDataConnector",
                 "ConfiguredAssetFilesystemDataConnector",
@@ -737,7 +737,7 @@ configuration to continue.
                 """
             )
         if ("glob_directive" in data) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetFilesystemDataConnector",
                 "ConfiguredAssetFilesystemDataConnector",
@@ -752,7 +752,7 @@ configuration to continue.
                 """
             )
         if ("delimiter" in data) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetS3DataConnector",
                 "ConfiguredAssetS3DataConnector",
@@ -767,7 +767,7 @@ to continue.
 """
             )
         if ("prefix" in data) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetS3DataConnector",
                 "ConfiguredAssetS3DataConnector",
@@ -782,7 +782,7 @@ continue.
                 """
             )
         if ("bucket" in data or "max_keys" in data) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetS3DataConnector",
                 "ConfiguredAssetS3DataConnector",
@@ -797,7 +797,7 @@ continue.
         if (
             "azure_options" in data or "container" in data or "name_starts_with" in data
         ) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetAzureDataConnector",
                 "ConfiguredAssetAzureDataConnector",
@@ -824,7 +824,7 @@ configuration to continue.
         if (
             "gcs_options" in data or "bucket_or_name" in data or "max_results" in data
         ) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetGCSDataConnector",
                 "ConfiguredAssetGCSDataConnector",
@@ -856,7 +856,7 @@ data connector. You must only select one between `filename` (from_service_accoun
             or "sampling_kwargs" in data
             or "skip_inapplicable_tables" in data
         ) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetSqlDataConnector",
                 "ConfiguredAssetSqlDataConnector",
@@ -874,7 +874,7 @@ continue.
             or "excluded_tables" in data
             or "included_tables" in data
         ) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetSqlDataConnector",
                 "ConfiguredAssetSqlDataConnector",
@@ -894,7 +894,7 @@ continue.
             or "catalog_id" in data
             or "glue_introspection_directives" in data
         ) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "InferredAssetAWSGlueDataCatalogDataConnector",
                 "ConfiguredAssetAWSGlueDataCatalogDataConnector",
@@ -1245,7 +1245,7 @@ class DatasourceConfigSchema(AbstractConfigSchema):
             or "introspection" in data
             or "tables" in data
         ) and not (
-            data["class_name"]
+            data["class_name"]  # noqa: E713 # membership check
             in [
                 "SqlAlchemyDatasource",
                 "SimpleSqlalchemyDatasource",
