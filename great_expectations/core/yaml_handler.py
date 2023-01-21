@@ -21,7 +21,9 @@ class YAMLHandler:
     * load
     * dump
 
-    Typical usage example::
+    Typical usage example:
+
+    .. code-block:: python
 
         >>> simple_yaml: str = '''
         ...    name: test
