@@ -800,7 +800,7 @@ class EmailAction(ValidationAction):
 class StoreValidationResultAction(ValidationAction):
     """Store a validation result in the ValidationsStore.
 
-    Typical usage example::
+    Typical usage example:
 
         ```yaml
         - name: store_validation_result
