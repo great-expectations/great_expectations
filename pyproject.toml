@@ -192,7 +192,7 @@ select = [
     "E", # pycodestyle
     "F", # Pyflakes
     "C", # Complexity (mccabe+)
-    "I", # isort
+    # "I", # isort # TODO: replace isort usage with this
 ]
 ignore = [
     "E501",  # line-length # TODO: too many violations

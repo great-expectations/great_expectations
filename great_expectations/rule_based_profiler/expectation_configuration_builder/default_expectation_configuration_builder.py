@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Set, Union
 
+from pyparsing import Combine
+from pyparsing import Optional as ppOptional
 from pyparsing import (
-    Combine,
     ParseException,
     ParseResults,
     Suppress,
@@ -15,7 +16,6 @@ from pyparsing import (
     oneOf,
     opAssoc,
 )
-from pyparsing import Optional as ppOptional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
