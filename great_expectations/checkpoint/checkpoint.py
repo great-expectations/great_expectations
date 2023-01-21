@@ -141,8 +141,9 @@ class BaseCheckpoint(ConfigPeer):
             expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
 
         Raises:
-            InvalidCheckpointConfigError if run_id is provided with run_name or run_time.
-            InvalidCheckpointConfigError if `result_format` is not an expected type.
+            InvalidCheckpointConfigError: If `run_id` is provided with `run_name` or `run_time`.
+            InvalidCheckpointConfigError: If `result_format` is not an expected type.
+            CheckpointError: If Checkpoint does not contain a `batch_request` or validations.
 
         Returns:
             CheckpointResult
@@ -595,8 +596,7 @@ is run), with each validation having its own defined "action_list" attribute.
     message="Used in cloud deployments.",
 )
 class Checkpoint(BaseCheckpoint):
-    """
-    A checkpoint is the primary means for validating data in a production deployment of Great Expectations.
+    """A checkpoint is the primary means for validating data in a production deployment of Great Expectations.
 
     Checkpoints provide a convenient abstraction for bundling the Validation of a Batch (or Batches) of data against
     an Expectation Suite (or several), as well as the Actions that should be taken after the validation.
@@ -1117,6 +1117,19 @@ class LegacyCheckpoint(Checkpoint):
         result_format=None,
         **kwargs,
     ):
+        """Legacy Checkpoint that has been deprecated since 0.14.0.
+
+        Args:
+            run_id: The run_id for the validation; if None, a default value will be used.
+            evaluation_parameters: Evaluation parameters to use in generating this checkpoint.
+            run_name: The run_name for the validation; if None, a default value will be used.
+            run_time: The date/time of the run.
+            result_format: One of several supported formatting directives for expectation validation results
+            kwargs: Additional kwargs
+
+        Returns:
+            Checkpoint result.
+        """
         batches_to_validate = self._get_batches_to_validate(self.batches)
 
         if (
@@ -1189,8 +1202,7 @@ class LegacyCheckpoint(Checkpoint):
     message="Used in cloud deployments.",
 )
 class SimpleCheckpoint(Checkpoint):
-    """
-    A SimpleCheckpoint provides a means to simplify the process of specifying a Checkpoint configuration.
+    """A SimpleCheckpoint provides a means to simplify the process of specifying a Checkpoint configuration.
 
     It provides a basic set of actions - store Validation Result, store Evaluation Parameters, update Data Docs,
     and optionally, send a Slack notification - allowing you to omit an action_list from your configuration and at runtime.
@@ -1284,6 +1296,12 @@ class SimpleCheckpoint(Checkpoint):
             expectation_suite_ge_cloud_id=checkpoint_config.expectation_suite_ge_cloud_id,
         )
 
+    @public_api
+    @new_argument(
+        argument_name="expectation_suite_ge_cloud_id",
+        version="0.13.33",
+        message="Used in cloud deployments.",
+    )
     def run(
         self,
         template_name: Optional[str] = None,
@@ -1330,14 +1348,9 @@ class SimpleCheckpoint(Checkpoint):
             notify_with: a list of Data Docs site names for which to include a URL in any notifications - defaults to `all`.
             expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
 
-        Raises:
-            InvalidCheckpointConfigError if run_id is provided with run_name or run_time.
-            InvalidCheckpointConfigError if `result_format` is not an expected type.
-
         Returns:
             CheckpointResult
         """
-
         new_baseline_config = None
 
         # if any SimpleCheckpoint-specific kwargs are passed, generate a new baseline config using configurator,
