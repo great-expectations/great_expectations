@@ -50,13 +50,10 @@ class YAMLHandler:
 
         Example::
 
-            import pathlib
-
-            yaml_handler = YAMLHandler()
-
-            my_file = pathlib.Path("my_file.yaml")
-
-            dict_from_yaml = YAML_HANDLER.load(my_file.read_text())
+            >>> import pathlib
+            >>> yaml_handler = YAMLHandler()
+            >>> my_file_str = pathlib.Path("my_file.yaml").read_text()
+            >>> dict_from_yaml = YAML_HANDLER.load(my_file_str)
 
         Args:
             stream: The input stream to read in. Although this function calls ruamel's load(), we
@@ -80,14 +77,22 @@ class YAMLHandler:
         Dump code has been adopted from:
         https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
 
+        Example::
+
+            >>> data = {'foo': 'bar'}
+            >>> yaml_str = yaml_handler.dump(data)
+            >>> print(yaml_str)
+            foo:
+                bar:
+
         Args:
             data: The dictionary to serialize into a Python object.
             stream: The output stream to modify. If not provided, we default to io.StringIO.
             kwargs: Additional key-word arguments to pass to underlying yaml dump method.
 
         Returns:
-            If no stream argument is provided, the str that results from _handler.dump().
-            Otherwise, None as the _handler.dump() works in place and will exercise the handler accordingly.
+            If no stream argument is provided, the str that results from ``_handler.dump()``.
+            Otherwise, None as the `_handler.dump()` works in place and will exercise the handler accordingly.
         """
         if stream:
             return self._dump(data=data, stream=stream, **kwargs)  # type: ignore[func-returns-value]
