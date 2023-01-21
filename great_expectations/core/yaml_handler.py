@@ -24,15 +24,15 @@ class YAMLHandler:
     Typical usage example::
 
         >>> simple_yaml: str = '''
-        >>>    name: test
-        >>>    class_name: test_class
-        >>>    module_name: test.test_class
-        >>> '''
-        >>> yaml_handler = YAMLHandler()
-        >>> res: dict = yaml_handler.load(simple_yaml)
-        >>> example_dict: dict = dict(abc=1)
-        >>> yaml_handler = YAMLHandler()
-        >>> yaml_handler.dump(example_dict)
+        ...    name: test
+        ...    class_name: test_class
+        ...    module_name: test.test_class
+        ... '''
+        ... yaml_handler = YAMLHandler()
+        ... res: dict = yaml_handler.load(simple_yaml)
+        ... example_dict: dict = dict(abc=1)
+        ... yaml_handler = YAMLHandler()
+        ... yaml_handler.dump(example_dict)
 
     """
 
