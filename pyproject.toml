@@ -186,6 +186,51 @@ convention = "google"
 [tool.darglint]
 docstring_style = "google"
 
+[tool.ruff]
+target-version = "py37"
+select = ["E", "F", "C"]
+ignore = [
+    "E501",  # line-length # TODO: too many violations
+    "E402", # module level import not at top of file # TODO
+    "F842", # variable annotated but unused # TODO
+    "C400", # TODO
+    "C408", # TODO
+    "C409", # TODO
+    "C413", # TODO
+    "C414", # TODO
+    "C416", # TODO
+    "C417", # TODO
+]
+extend-exclude = [
+    "scripts/*",
+    "docs/*",
+    "build/*",
+    "assets/*",
+    "contrib/*",
+    "versioneer*",
+    "examples/*",
+    # TODO: remove the items below and fix linting issues
+    "great_expectations/expectations/metrics", # 57 warnings
+    "great_expectations/dataset", # 52 warnings
+    "tests/checkpoint", # 15 warnings
+    "tests/cli", # 34 warnings
+    "tests/data_asset", # 10 warnings
+    "tests/data_context", # 127 warnings
+    "tests/dataset", # 10 warnings
+    "tests/datasource", # 81 warnings
+    "tests/execution_engine",  # 23 warnings
+    "tests/expectations", # 56 warnings
+    "tests/integration", # 114 warnings
+    "tests/rule_based_profiler", # 28 warnings
+    "tests/test_fixtures/notebook_assets/suite_edit/footer.py",  # 7 warnings
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"] # unused import
+
+[tool.ruff.mccabe]
+max-complexity = 15
+
 [tool.pytest.ini_options]
 filterwarnings = [
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
