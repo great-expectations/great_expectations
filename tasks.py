@@ -52,9 +52,12 @@ def sort(
     ctx: Context, path: str = ".", check: bool = False, exclude: str | None = None
 ):
     """Sort module imports."""
-    cmds = ["ruff", path, "--select", "I"]
-    if check:
-        cmds.append("--diff")  # TODO: test this
+    cmds = [
+        "ruff",
+        path,
+        "--select I",
+        "--diff" if check else "--fix",
+    ]
     if exclude:
         cmds.extend(["--skip", exclude])  # TODO: check & test this
     ctx.run(" ".join(cmds), echo=True)
