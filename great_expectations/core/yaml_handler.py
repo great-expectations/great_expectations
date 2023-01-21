@@ -22,9 +22,9 @@ class YAMLHandler:
 
     Typical usage example::
 
-        simple_yaml: str = '''
-            name: test
-            class_name: test_class
+        simple_yaml: str = '''\n
+            name: test\n
+            class_name: test_class\n
             module_name: test.test_class
         '''
         yaml_handler = YAMLHandler()
