@@ -800,19 +800,16 @@ class EmailAction(ValidationAction):
 class StoreValidationResultAction(ValidationAction):
     """Store a validation result in the ValidationsStore.
 
-    Typical usage example:
+    Typical usage example::
 
-        `- name: store_validation_result`
-
-        `action:`
-
-          `class_name: StoreValidationResultAction`
-
-          `# name of the store where the actions will store validation results`
-
-          `# the name must refer to a store that is configured in the great_expectations.yml file`
-
-          `target_store_name: validations_store`
+        ```yaml
+        - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+          # name of the store where the actions will store validation results
+          # the name must refer to a store that is configured in the great_expectations.yml file
+          target_store_name: validations_store
+        ```
 
     Args:
         data_context: GX Data Context.
