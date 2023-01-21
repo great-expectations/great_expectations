@@ -329,7 +329,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        """Save the provided ExpectationSuite into the DataContext.
+        """Save the provided ExpectationSuite into the DataContext using the configured ExpectationStore
 
         Args:
             expectation_suite: The ExpectationSuite to save.
@@ -341,6 +341,9 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Returns:
             None
+
+        Raises:
+            DataContextError: If a suite with the same name exists and `overwrite_existing` is set to `False`.
         """
         if expectation_suite_name is None:
             key = ExpectationSuiteIdentifier(
