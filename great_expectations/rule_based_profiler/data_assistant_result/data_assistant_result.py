@@ -114,6 +114,7 @@ class RuleStats(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
+@public_api
 @dataclass
 class DataAssistantResult(SerializableDictDot):
     """Result from a Data Assistant run, plus plotting functionality.
