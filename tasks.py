@@ -49,15 +49,24 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
     }
 )
 def sort(
-    ctx: Context, path: str = ".", check: bool = False, exclude: str | None = None
+    ctx: Context,
+    path: str = ".",
+    check: bool = False,
+    exclude: str | None = None,
+    ruff: bool = False,
 ):
     """Sort module imports."""
-    cmds = [
-        "ruff",
-        path,
-        "--select I",
-        "--diff" if check else "--fix",
-    ]
+    if ruff:
+        cmds = [
+            "ruff",
+            path,
+            "--select I",
+            "--diff" if check else "--fix",
+        ]
+    else:
+        cmds = ["isort", path]
+        if check:
+            cmds.append("--check-only")
     if exclude:
         cmds.extend(["--skip", exclude])  # TODO: check & test this
     ctx.run(" ".join(cmds), echo=True)
