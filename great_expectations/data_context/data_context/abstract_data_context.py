@@ -37,6 +37,7 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     deprecated_method_or_class,
+    new_argument,
     public_api,
 )
 from great_expectations.core.batch import (
@@ -315,6 +316,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         self.variables.save_config()
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         args_payload_fn=save_expectation_suite_usage_statistics,
@@ -327,8 +329,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        """
-        Each DataContext will define how ExpectationSuite will be saved.
+        """Save the provided ExpectationSuite into the DataContext.
+
+        Args:
+            expectation_suite: The ExpectationSuite to save.
+            expectation_suite_name: The name of this ExpectationSuite. If no name is provided, the name will be read
+                from the suite.
+            overwrite_existing: Whether to overwrite the suite if it already exists.
+            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
+            kwargs: Additional parameters, unused
+
+        Returns:
+            None
         """
         if expectation_suite_name is None:
             key = ExpectationSuiteIdentifier(
