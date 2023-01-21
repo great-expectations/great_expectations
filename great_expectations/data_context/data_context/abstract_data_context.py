@@ -329,7 +329,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        """Save the provided ExpectationSuite into the DataContext using the configured ExpectationStore
+        """Save the provided ExpectationSuite into the DataContext using the configured ExpectationStore.
 
         Args:
             expectation_suite: The ExpectationSuite to save.
@@ -1440,6 +1440,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             name=name, ge_cloud_id=ge_cloud_id
         )
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
     )
@@ -1463,8 +1464,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
-        """
-        Validate against a pre-defined Checkpoint. (Experimental)
+        """Validate against using an existing Checkpoint.
 
         Args:
             checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
@@ -1741,6 +1741,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return validator
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
         args_payload_fn=get_batch_list_usage_statistics,
@@ -1769,48 +1770,60 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
-        This method applies only to the new (V3) Datasource schema.
 
-        Args:
-            batch_request
-
-            datasource_name
-            data_connector_name
-            data_asset_name
-
-            batch_request
-            batch_data
-            query
-            path
-            runtime_parameters
-            data_connector_query
-            batch_identifiers
-            batch_filter_parameters
-
-            limit
-            index
-            custom_filter_function
-
-            sampling_method
-            sampling_kwargs
-
-            splitter_method
-            splitter_kwargs
-
-            batch_spec_passthrough
-
-            **kwargs
-
-        Returns:
-            (Batch) The requested batch
-
-        `get_batch` is the main user-facing API for getting batches.
+        `get_batch_list` is the main user-facing API for getting batches.
         In contrast to virtually all other methods in the class, it does not require typed or nested inputs.
         Instead, this method is intended to help the user pick the right parameters
 
         This method attempts to return any number of batches, including an empty list.
-        """
 
+        Args:
+            datasource_name: The name of the Datasource that defines the Data Asset to retrieve the batch for
+            data_connector_name: The Data Connector within the datasource for the Data Asset
+            data_asset_name: The name of the Data Asset within the Data Connector
+
+            batch_request: Encapsulates all the parameters used here to retrieve a BatchList. Use either
+                `batch_request` or the other params (but not both)
+            batch_data: Provides runtime data for the batch; is added as the key `batch_data` to
+                the `runtime_parameters` dictionary of a BatchRequest
+            query: Provides runtime data for the batch; is added as the key `query` to
+                the `runtime_parameters` dictionary of a BatchRequest
+            path: Provides runtime data for the batch; is added as the key `path` to
+                the `runtime_parameters` dictionary of a BatchRequest
+            runtime_parameters: Specifies runtime parameters for the BatchRequest; can includes keys `batch_data`,
+                `query`, and `path`
+            data_connector_query: Used to specify connector query parameters; specifically `batch_filter_parameters`,
+                `limit`, `index`, and `custom_filter_function`
+            batch_identifiers: Any identifiers of batches for the BatchRequest
+            batch_filter_parameters: Filter parameters used in the data connector query
+
+            limit: Part of the data_connector_query, limits the number of rows in a batch
+            index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
+                numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
+            custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
+
+            sampling_method: The method used to sample Batch data (see: Splitting and Sampling)
+            sampling_kwargs: Arguments for the sampling method
+
+            splitter_method: The method used to split the Data Asset into Batches
+            splitter_kwargs: Arguments for the splitting method
+
+            batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
+
+            **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
+
+        Returns:
+            (Batch) The `List` of requested Batch instances
+
+        Raises:
+            DatasourceError: If the specified `datasource_name` does not exist in the DataContext
+            TypeError: If the specified types of the `batch_request` are not supported, or if the
+                `datasource_name` is not a `str`
+            ValueError: If more than one exclusive parameter is specified (ex: specifing more than one
+                of `batch_data`, `query` or `path`)
+
+        # noqa: DAR402
+        """
         batch_request = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
