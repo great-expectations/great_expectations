@@ -216,7 +216,7 @@ def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
     if expectation_suite_name.endswith(".json"):
         expectation_suite_name = expectation_suite_name[:-5]
 
-    suite: Optional[ExpectationSuite]
+    suite: ExpectationSuite
     try:
         suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
@@ -229,7 +229,6 @@ def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
             )
             return suite
         else:
-            suite = None
             exit_with_failure_message_and_stats(
                 data_context=data_context,
                 usage_event=usage_event,

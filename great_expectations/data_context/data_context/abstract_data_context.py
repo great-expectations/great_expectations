@@ -37,7 +37,6 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     deprecated_method_or_class,
-    new_argument,
     public_api,
 )
 from great_expectations.core.batch import (
