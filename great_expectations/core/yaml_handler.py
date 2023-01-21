@@ -44,8 +44,19 @@ class YAMLHandler:
         self._handler.indent(mapping=2, sequence=4, offset=2)
         self._handler.default_flow_style = False
 
+    @public_api
     def load(self, stream: io.TextIOWrapper | str) -> dict[str, JSONValues]:
         """Converts a YAML input stream into a Python dictionary.
+
+        Example::
+
+            import pathlib
+
+            yaml_handler = YAMLHandler()
+
+            my_file = pathlib.Path("my_file.yaml")
+
+            dict_from_yaml = YAML_HANDLER.load(my_file.read_text())
 
         Args:
             stream: The input stream to read in. Although this function calls ruamel's load(), we
@@ -57,6 +68,7 @@ class YAMLHandler:
         """
         return self._handler.load(stream=stream)
 
+    @public_api
     def dump(
         self,
         data: dict,
@@ -71,6 +83,7 @@ class YAMLHandler:
         Args:
             data: The dictionary to serialize into a Python object.
             stream: The output stream to modify. If not provided, we default to io.StringIO.
+            kwargs: Additional key-word arguments to pass to underlying yaml dump method.
 
         Returns:
             If no stream argument is provided, the str that results from _handler.dump().
