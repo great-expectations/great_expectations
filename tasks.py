@@ -90,9 +90,11 @@ def fmt(
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def lint(ctx: Context, path: str = "."):
+def lint(ctx: Context, path: str = ".", fix: bool = False):
     """Run code linter"""
-    cmds = ["flake8", path, "--statistics"]
+    cmds = ["ruff", path]
+    if fix:
+        cmds += "--fix"
     ctx.run(" ".join(cmds), echo=True)
 
 
