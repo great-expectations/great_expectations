@@ -40,7 +40,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import DataContext
+    from great_expectations.data_context import AbstractDataContext, DataContext
 
 logger = logging.getLogger(__name__)
 
@@ -800,7 +800,7 @@ class EmailAction(ValidationAction):
 class StoreValidationResultAction(ValidationAction):
     """Store a validation result in the ValidationsStore.
 
-    Typical usage example::
+    Typical usage example::yaml
 
         - name: store_validation_result
         action:
@@ -819,8 +819,8 @@ class StoreValidationResultAction(ValidationAction):
 
     def __init__(
         self,
-        data_context,
-        target_store_name=None,
+        data_context: AbstractDataContext,
+        target_store_name: Optional[str] = None,
     ) -> None:
         super().__init__(data_context)
         if target_store_name is None:
@@ -884,7 +884,7 @@ class StoreEvaluationParametersAction(ValidationAction):
     Evaluation parameters allow expectations to refer to statistics/metrics computed
     in the process of validating other prior expectations.
 
-    Typical usage example::
+    Typical usage example::yaml
 
         - name: store_evaluation_params
         action:
@@ -899,7 +899,9 @@ class StoreEvaluationParametersAction(ValidationAction):
         TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.
     """
 
-    def __init__(self, data_context, target_store_name=None) -> None:
+    def __init__(
+        self, data_context: AbstractDataContext, target_store_name: Optional[str] = None
+    ) -> None:
         super().__init__(data_context)
 
         if target_store_name is None:
@@ -943,7 +945,7 @@ class StoreEvaluationParametersAction(ValidationAction):
 class StoreMetricsAction(ValidationAction):
     """Extract metrics from a Validation Result and store them in a metrics store.
 
-    Typical usage example::
+    Typical usage example::yaml
 
         - name: store_evaluation_params
         action:
@@ -951,7 +953,7 @@ class StoreMetricsAction(ValidationAction):
           # the name must refer to a store that is configured in the great_expectations.yml file
           target_store_name: my_metrics_store
 
-     Args:
+    Args:
         data_context: GX Data Context.
         requested_metrics: Dictionary of metrics to store.
             Dictionary should have the following structure::
@@ -970,7 +972,10 @@ class StoreMetricsAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context, requested_metrics, target_store_name="metrics_store"
+        self,
+        data_context: AbstractDataContext,
+        requested_metrics: dict,
+        target_store_name: Optional[str] = "metrics_store",
     ) -> None:
         super().__init__(data_context)
         self._requested_metrics = requested_metrics
