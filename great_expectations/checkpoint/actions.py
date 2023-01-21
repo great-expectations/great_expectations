@@ -800,14 +800,14 @@ class EmailAction(ValidationAction):
 class StoreValidationResultAction(ValidationAction):
     """Store a validation result in the ValidationsStore.
 
-    Typical usage example::yaml
+    Typical usage example::
 
-        - name: store_validation_result
-        action:
-          class_name: StoreValidationResultAction
-          # name of the store where the actions will store validation results
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: validations_store
+        `- name: store_validation_result`
+        `action:`
+          `class_name: StoreValidationResultAction`
+          `# name of the store where the actions will store validation results`
+          `# the name must refer to a store that is configured in the great_expectations.yml file`
+          `target_store_name: validations_store`
 
     Args:
         data_context: GX Data Context.
@@ -884,12 +884,12 @@ class StoreEvaluationParametersAction(ValidationAction):
     Evaluation parameters allow expectations to refer to statistics/metrics computed
     in the process of validating other prior expectations.
 
-    Typical usage example::yaml
+    Typical usage example::
 
-        - name: store_evaluation_params
-        action:
-          class_name: StoreEvaluationParametersAction
-          target_store_name: evaluation_parameter_store
+        `- name: store_evaluation_params`
+        `action:`
+          `class_name: StoreEvaluationParametersAction`
+          `target_store_name: evaluation_parameter_store`
 
     Args:
         data_context: GX Data Context.
@@ -945,22 +945,23 @@ class StoreEvaluationParametersAction(ValidationAction):
 class StoreMetricsAction(ValidationAction):
     """Extract metrics from a Validation Result and store them in a metrics store.
 
-    Typical usage example::yaml
+    Typical usage example::
 
-        - name: store_evaluation_params
-        action:
-          class_name: StoreMetricsAction
-          # the name must refer to a store that is configured in the great_expectations.yml file
-          target_store_name: my_metrics_store
+        `- name: store_evaluation_params`
+        `action:`
+         ` class_name: StoreMetricsAction`
+          `# the name must refer to a store that is configured in the great_expectations.yml file`
+          `target_store_name: my_metrics_store`
 
     Args:
         data_context: GX Data Context.
         requested_metrics: Dictionary of metrics to store.
-            Dictionary should have the following structure::
 
-                expectation_suite_name:
-                    metric_name:
-                        - metric_kwargs_id
+        Dictionary should have the following structure::
+
+                `expectation_suite_name:`
+                    `metric_name:`
+                        `- metric_kwargs_id`
 
             You may use "*" to denote that any expectation suite should match.
         target_store_name: The name of the store where the action will store the metrics.
