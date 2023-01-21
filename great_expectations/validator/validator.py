@@ -161,10 +161,9 @@ ValidationStatistics = namedtuple(
 )
 
 
+@public_api
 class Validator:
-    """
-    Validator is the key object used to create Expectations, validate Expectations,
-    and get Metrics for Expectations.
+    """Validator is the key object used to create Expectations, validate Expectations, and get Metrics for Expectations.
 
     Validators are used by Checkpoints to validate Expectations.
 
