@@ -46,6 +46,11 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
         "check": _CHECK_HELP_DESC,
         "exclude": _EXCLUDE_HELP_DESC,
         "path": _PATH_HELP_DESC,
+        "isort": "Use `isort` to sort packages. Default behavior.",
+        "ruff": (
+            "Use `ruff` instead of `isort` to sort imports."
+            " This will eventually become the default."
+        ),
     }
 )
 def sort(
@@ -54,8 +59,11 @@ def sort(
     check: bool = False,
     exclude: str | None = None,
     ruff: bool = False,
+    isort: bool = False,  # isort is the current default
 ):
     """Sort module imports."""
+    if ruff and isort:
+        raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)
     if ruff:
         cmds = [
             "ruff",
@@ -63,12 +71,14 @@ def sort(
             "--select I",
             "--diff" if check else "--fix",
         ]
+        if exclude:
+            cmds.extend(["--extend-exclude", exclude])
     else:
         cmds = ["isort", path]
         if check:
             cmds.append("--check-only")
-    if exclude:
-        cmds.extend(["--skip", exclude])  # TODO: check & test this
+        if exclude:
+            cmds.extend(["--skip", exclude])
     ctx.run(" ".join(cmds), echo=True)
 
 
