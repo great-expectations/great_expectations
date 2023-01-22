@@ -245,7 +245,10 @@ extend-exclude = [
 ]
 
 [tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"] # unused import
+"__init__.py" = [
+    "F401",  # unused import
+    "F403",  # star imports
+    ]
 
 [tool.ruff.mccabe]
 max-complexity = 15
