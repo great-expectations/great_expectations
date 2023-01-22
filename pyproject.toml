@@ -192,20 +192,21 @@ line-length = 88
 select = [
     "E", # pycodestyle
     "F", # Pyflakes
-    "C", # Complexity (mccabe+)
+    "C", # Complexity (mccabe+) & comprehensions
     # "I", # isort # TODO: replace isort usage with this
 ]
 ignore = [
-    "E501",  # line-length # TODO: too many violations
-    "E402", # module level import not at top of file # TODO
-    "F842", # variable annotated but unused # TODO
-    "C400", # TODO
-    "C408", # TODO
-    "C409", # TODO
-    "C413", # TODO
-    "C414", # TODO
-    "C416", # TODO
-    "C417", # TODO
+    "E501", # line-length # TODO: too many violations
+    "E402", # module level import not at top of file
+    "F842", # variable annotated but unused # TODO enable
+    # https://github.com/charliermarsh/ruff#flake8-comprehensions-c4
+    "C400", # TODO enable
+    "C408", # TODO enable
+    "C409", # TODO enable
+    "C413", # TODO enable
+    "C414", # TODO enable
+    "C416", # TODO enable
+    "C417", # TODO enable
 ]
 extend-exclude = [
     "scripts/*",
