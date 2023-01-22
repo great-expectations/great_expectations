@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.2.0
+    rev: v4.4.0
     hooks:
       - id: check-ast
       - id: check-json
@@ -13,7 +13,7 @@ repos:
       - id: requirements-txt-fixer
         exclude: docs/.*
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.10.1
+    rev: 5.11.4
     hooks:
       - id: isort
   - repo: https://github.com/psf/black
@@ -22,7 +22,7 @@ repos:
       - id: black
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     # Ruff version.
-    rev: 'v0.0.228'
+    rev: 'v0.0.229'
     hooks:
       - id: ruff
         files: ^(great_expectations/core)
