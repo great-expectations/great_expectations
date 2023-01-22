@@ -39,6 +39,8 @@ if TYPE_CHECKING:
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
 _PATH_HELP_DESC = "Target path. (Default: .)"
+# https://www.pyinvoke.org/faq.html?highlight=pty#why-is-my-command-behaving-differently-under-invoke-versus-being-run-by-hand
+_PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
 
 
 @invoke.task(
@@ -51,6 +53,7 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
             "Use `ruff` instead of `isort` to sort imports."
             " This will eventually become the default."
         ),
+        "pty": _PTY_HELP_DESC,
     }
 )
 def sort(
@@ -89,6 +92,7 @@ def sort(
         "exclude": _EXCLUDE_HELP_DESC,
         "path": _PATH_HELP_DESC,
         "sort": "Disable import sorting. Runs by default.",
+        "pty": _PTY_HELP_DESC,
     }
 )
 def fmt(
@@ -113,12 +117,27 @@ def fmt(
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
-@invoke.task(help={"path": _PATH_HELP_DESC})
-def lint(ctx: Context, path: str = ".", fix: bool = False, pty: bool = True):
+@invoke.task(
+    help={
+        "path": _PATH_HELP_DESC,
+        "fix": "Attempt to automatically fix lint violations.",
+        "watch": "Run in watch mode by re-running whenever files change.",
+        "pty": _PTY_HELP_DESC,
+    }
+)
+def lint(
+    ctx: Context,
+    path: str = ".",
+    fix: bool = False,
+    watch: bool = False,
+    pty: bool = True,
+):
     """Run code linter"""
     cmds = ["ruff", path]
     if fix:
         cmds.append("--fix")
+    if watch:
+        cmds.append("--watch")
     ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
