@@ -1114,7 +1114,7 @@ def get_unexpected_indices_for_multiple_pandas_named_indices(
     """
     if expectation_domain_column_name is None:
         raise gx_exceptions.MetricResolutionError(
-            message=f"Error: The domain column is currently set to None. Please check your configuration.",
+            message="Error: The domain column is currently set to None. Please check your configuration.",
             failed_metrics=["unexpected_index_list"],
         )
 
