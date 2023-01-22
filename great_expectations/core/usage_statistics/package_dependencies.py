@@ -74,7 +74,7 @@ class GXDependencies:
             "darglint",
             "docstring-parser",
             "feather-format",
-            "flake8",
+            "ruff",
             "flask",
             "freezegun",
             "gcsfs",
@@ -125,7 +125,7 @@ class GXDependencies:
     GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING: List[str] = [
         # requirements-dev-contrib.txt:
         "black",
-        "flake8",
+        "ruff",
         "invoke",
         "isort",
         "mypy",
