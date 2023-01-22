@@ -36,7 +36,6 @@ except ImportError:
 
 try:
     import sqlalchemy as sa
-    from sqlalchemy import Table
     from sqlalchemy.dialects import registry
     from sqlalchemy.engine import Connection, Engine, reflection
     from sqlalchemy.engine.interfaces import Dialect
