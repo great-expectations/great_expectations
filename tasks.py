@@ -112,12 +112,12 @@ def fmt(
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def lint(ctx: Context, path: str = ".", fix: bool = False):
+def lint(ctx: Context, path: str = ".", fix: bool = False, pty=True):
     """Run code linter"""
     cmds = ["ruff", path]
     if fix:
         cmds.append("--fix")
-    ctx.run(" ".join(cmds), echo=True)
+    ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
