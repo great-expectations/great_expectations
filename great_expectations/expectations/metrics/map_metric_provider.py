@@ -1,7 +1,20 @@
+from __future__ import annotations
+
 import inspect
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 
 import numpy as np
 import pandas as pd
@@ -52,6 +65,9 @@ from great_expectations.util import (
     get_sqlalchemy_selectable,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    import pyspark
 
 logger = logging.getLogger(__name__)
 
@@ -2747,7 +2763,7 @@ def _spark_column_map_condition_value_counts(
         execution_engine=execution_engine,
     )
 
-    df: "pyspark.sql.dataframe.DataFrame" = execution_engine.get_domain_records(
+    df: pyspark.sql.dataframe.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs
     )
 
@@ -2829,7 +2845,7 @@ def _spark_map_condition_index(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     domain_column = domain_kwargs["column"]
 
-    df: "pyspark.sql.dataframe.DataFrame" = execution_engine.get_domain_records(
+    df: pyspark.sql.dataframe.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
     )
 
