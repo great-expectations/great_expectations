@@ -56,7 +56,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
-def column_function_partial(
+def column_function_partial(  # noqa: C901 - 19
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[str] = None,
     **kwargs,
@@ -283,7 +283,7 @@ def column_function_partial(
         )
 
 
-def column_condition_partial(
+def column_condition_partial(  # noqa: C901 - 23
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
     **kwargs,
@@ -546,7 +546,7 @@ def column_condition_partial(
         )
 
 
-def column_pair_function_partial(
+def column_pair_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -770,7 +770,7 @@ def column_pair_function_partial(
         )
 
 
-def column_pair_condition_partial(
+def column_pair_condition_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
     **kwargs,
@@ -1018,7 +1018,7 @@ def column_pair_condition_partial(
         )
 
 
-def multicolumn_function_partial(
+def multicolumn_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -1234,7 +1234,7 @@ def multicolumn_function_partial(
         )
 
 
-def multicolumn_condition_partial(
+def multicolumn_condition_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
     **kwargs,
@@ -3123,7 +3123,7 @@ class MapMetricProvider(MetricProvider):
     }
 
     @classmethod
-    def _register_metric_functions(cls):
+    def _register_metric_functions(cls):  # noqa: C901 - 28
         if not (
             hasattr(cls, "function_metric_name")
             or hasattr(cls, "condition_metric_name")

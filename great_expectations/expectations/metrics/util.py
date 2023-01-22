@@ -137,7 +137,9 @@ if TYPE_CHECKING:
     import sqlalchemy
 
 
-def get_dialect_regex_expression(column, regex, dialect, positive=True):
+def get_dialect_regex_expression(  # noqa: C901 - 36
+    column, regex, dialect, positive=True
+):
     try:
         # postgres
         if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
@@ -740,7 +742,9 @@ def parse_value_set(value_set):
     return parsed_value_set
 
 
-def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=True):
+def get_dialect_like_pattern_expression(  # noqa: C901 - 28
+    column, dialect, like_pattern, positive=True
+):
     dialect_supported: bool = False
 
     try:
@@ -815,7 +819,7 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     return None
 
 
-def validate_distribution_parameters(distribution, params):
+def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
