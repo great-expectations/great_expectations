@@ -21,11 +21,11 @@ repos:
     hooks:
       - id: black
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    # Ruff version.
     rev: 'v0.0.229'
     hooks:
       - id: ruff
-        files: ^(great_expectations/core)
+        files: ^(great_expectations/core)  # TODO: expand to all of gx
+        args: ["--fix"]
   - repo: https://github.com/asottile/pyupgrade
     rev: v2.7.2
     hooks:
@@ -41,8 +41,4 @@ ci:
     autoupdate_branch: 'develop'
     autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
     autoupdate_schedule: monthly
-    # skip flake8 enforcement with pre-commit CI as it is enforced elsewhere
-    # flake8 hook also doesn't have an options to auto-fix
-    # pre-commit hooks should either have mechanisms for auto-fixing or should be simple to do manually
-    skip: [flake8]
     submodules: false
