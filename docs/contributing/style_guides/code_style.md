@@ -54,7 +54,7 @@ Options:
 
 ### Linting
 
-Our CI system will check using `black`, `isort`, `ruffand `pyupgrade`.
+Our CI system will check using `black`, `isort`, `ruff` and `pyupgrade`.
 
 If you have already committed files but are seeing errors during the continuous integration tests, you can run tests manually:
 
