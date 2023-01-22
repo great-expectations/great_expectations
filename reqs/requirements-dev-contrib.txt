@@ -1,5 +1,4 @@
 black==22.3.0
-flake8==5.0.4
 invoke>=2.0.0
 isort==5.11.4
 mypy==0.991
