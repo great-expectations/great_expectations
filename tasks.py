@@ -60,6 +60,7 @@ def sort(
     exclude: str | None = None,
     ruff: bool = False,
     isort: bool = False,  # isort is the current default
+    pty: bool = True,
 ):
     """Sort module imports."""
     if ruff and isort:
@@ -79,7 +80,7 @@ def sort(
             cmds.append("--check-only")
         if exclude:
             cmds.extend(["--skip", exclude])
-    ctx.run(" ".join(cmds), echo=True)
+    ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
 @invoke.task(
@@ -96,23 +97,24 @@ def fmt(
     sort_: bool = True,
     check: bool = False,
     exclude: str | None = None,
+    pty: bool = True,
 ):
     """
     Run code formatter.
     """
     if sort_:
-        sort(ctx, path, check=check, exclude=exclude)
+        sort(ctx, path, check=check, exclude=exclude, pty=pty)
 
     cmds = ["black", path]
     if check:
         cmds.append("--check")
     if exclude:
         cmds.extend(["--exclude", exclude])
-    ctx.run(" ".join(cmds), echo=True)
+    ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def lint(ctx: Context, path: str = ".", fix: bool = False, pty=True):
+def lint(ctx: Context, path: str = ".", fix: bool = False, pty: bool = True):
     """Run code linter"""
     cmds = ["ruff", path]
     if fix:
