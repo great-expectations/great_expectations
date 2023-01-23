@@ -709,6 +709,40 @@ def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset(
     assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
 
 
+def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_with_file_endswith_upcase(
+    datasource_with_runtime_data_connector_and_pandas_execution_engine,
+    taxi_test_file_upcase,
+):
+    batch_identifiers = {"day": 1, "month": 12}
+    # Verify that all keys in batch_identifiers are acceptable as batch_identifiers (using batch count).
+    batch_request: dict = {
+        "datasource_name": datasource_with_runtime_data_connector_and_pandas_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "asset_a",
+        "runtime_parameters": {
+            "path": taxi_test_file_upcase,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "asset_a"
+    assert isinstance(my_batch_1.data.dataframe, pd.DataFrame)
+    assert my_batch_1.data.dataframe.shape == (10000, 18)
+    assert (
+        my_batch_1.batch_markers["pandas_data_fingerprint"]
+        == "c4f929e6d4fab001fedc9e075bf4b612"
+    )
+    assert my_batch_1.batch_definition.batch_identifiers == batch_identifiers
+
+
 def test_file_path_pandas_execution_engine_get_batch_list_with_named_asset_two_batch_requests(
     datasource_with_runtime_data_connector_and_pandas_execution_engine, taxi_test_file
 ):
