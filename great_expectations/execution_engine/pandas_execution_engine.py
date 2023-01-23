@@ -5,9 +5,10 @@ import pickle
 import warnings
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast, overload
 
 import pandas as pd
+from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchMarkers
@@ -68,6 +69,8 @@ except ImportError:
 
 
 HASH_THRESHOLD = 1e9
+
+DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 
 
 class PandasExecutionEngine(ExecutionEngine):
@@ -410,7 +413,21 @@ not {batch_spec.__class__.__name__}"""
                 f'Unable to determine reader method from path: "{path}".'
             )
 
-    def _get_reader_fn(self, reader_method=None, path=None):
+    @overload
+    def _get_reader_fn(
+        self, reader_method: str = ..., path: None = ...
+    ) -> DataFrameFactoryFn:
+        ...
+
+    @overload
+    def _get_reader_fn(
+        self, reader_method: None = ..., path: str = ...
+    ) -> DataFrameFactoryFn:
+        ...
+
+    def _get_reader_fn(
+        self, reader_method: Optional[str] = None, path: Optional[str] = None
+    ) -> DataFrameFactoryFn:
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
         correct reader_method.
 
