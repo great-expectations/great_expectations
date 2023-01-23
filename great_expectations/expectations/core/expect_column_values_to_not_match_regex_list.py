@@ -102,6 +102,18 @@ class ExpectColumnValuesToNotMatchRegexList(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration for the Expectation.
+
+        For `expect_column_values_to_match_regex_list`
+        we require that the `configuraton.kwargs` contain a `regex_list` key that is either
+        a non-empty `list[str]` or a `dict[list]` with `$PARAMETER` key with list of regexes.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
