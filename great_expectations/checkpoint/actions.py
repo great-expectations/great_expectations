@@ -1042,24 +1042,8 @@ class StoreMetricsAction(ValidationAction):
 class UpdateDataDocsAction(ValidationAction):
     """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
 
-    YAML configuration example
-
-    ::yaml
-
-        - name: update_data_docs
-          action:
-            class_name: UpdateDataDocsAction
-
     You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
-    list of sites to update
-
-    ::yaml
-
-        - name: update_data_docs
-          action:
-            class_name: UpdateDataDocsAction
-            site_names:
-              - local_site
+    list of sites to update.
 
     Args:
         data_context: Data Context that is used by the Action.
@@ -1207,17 +1191,6 @@ class CloudNotificationAction(ValidationAction):
 @public_api
 class SNSNotificationAction(ValidationAction):
     """Action that pushes validations results to an SNS topic with a subject of passed or failed.
-
-    YAML configuration example::
-
-        - name: send_sns_notification_on_validation_result
-        action:
-          class_name: SNSNotificationAction
-          # put the actual SNS Arn in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          data_context:
-          sns_topic_arn:
-          sns_subject:
 
     Args:
         data_context: Data Context that is used by the Action.
