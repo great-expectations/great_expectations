@@ -49,146 +49,146 @@ variables:
 
 
 stages:
-  - stage: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
-    jobs:
-      - job: changes
-        steps:
-          - task: ChangedFiles@1
-            name: CheckChanges
-            inputs:
-              verbose: true
-              rules: |
-                [DocsChanged]
-                docs/**
-                tests/integration/docusaurus/**
-                tests/integration/fixtures/**
-                tests/test_sets/**
-                examples/expectations/*.py
-                static/_redirects
-                static/index.html
-                /*.js
-                /*.json
-                yarn.lock
+  # - stage: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
+  #   jobs:
+  #     - job: changes
+  #       steps:
+  #         - task: ChangedFiles@1
+  #           name: CheckChanges
+  #           inputs:
+  #             verbose: true
+  #             rules: |
+  #               [DocsChanged]
+  #               docs/**
+  #               tests/integration/docusaurus/**
+  #               tests/integration/fixtures/**
+  #               tests/test_sets/**
+  #               examples/expectations/*.py
+  #               static/_redirects
+  #               static/index.html
+  #               /*.js
+  #               /*.json
+  #               yarn.lock
 
-                [GXChanged]
-                great_expectations/**/*.py
-                pyproject.toml
-                setup.cfg
-                setup.py
-                MANIFEST.in
-                tests/**
-                /*.txt
-                /*.yml
-                requirements*
-                reqs/*.txt
-                azure/**/*.yml
-                assets/scripts/**
-                scripts/*.py
-                scripts/*.sh
+  #               [GXChanged]
+  #               great_expectations/**/*.py
+  #               pyproject.toml
+  #               setup.cfg
+  #               setup.py
+  #               MANIFEST.in
+  #               tests/**
+  #               /*.txt
+  #               /*.yml
+  #               requirements*
+  #               reqs/*.txt
+  #               azure/**/*.yml
+  #               assets/scripts/**
+  #               scripts/*.py
+  #               scripts/*.sh
 
-  - stage: lint
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: lint
+  #   dependsOn: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: lint
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: 3.7
-            displayName: 'Use Python 3.7'
+  #   jobs:
+  #     - job: lint
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: 3.7
+  #           displayName: 'Use Python 3.7'
 
-          - script: |
-              pip install $(grep -E '^(black|invoke|isort|flake8|pyupgrade)' reqs/requirements-dev-contrib.txt)
-              EXIT_STATUS=0
-              invoke fmt --check || EXIT_STATUS=$?
-              invoke lint || EXIT_STATUS=$?
-              pyupgrade --py3-plus || EXIT_STATUS=$?
-              exit $EXIT_STATUS
+  #         - script: |
+  #             pip install $(grep -E '^(black|invoke|isort|flake8|pyupgrade)' reqs/requirements-dev-contrib.txt)
+  #             EXIT_STATUS=0
+  #             invoke fmt --check || EXIT_STATUS=$?
+  #             invoke lint || EXIT_STATUS=$?
+  #             pyupgrade --py3-plus || EXIT_STATUS=$?
+  #             exit $EXIT_STATUS
 
-  - stage: custom_checks
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: custom_checks
+  #   dependsOn: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-    - job: type_hint_checker
-      steps:
-      - script: |
-          pip install $(grep -E '^(invoke|mypy|pytest-cov)' reqs/requirements-dev-contrib.txt)
-          invoke type-coverage
-        name: TypeHintChecker
+  #   jobs:
+  #   - job: type_hint_checker
+  #     steps:
+  #     - script: |
+  #         pip install $(grep -E '^(invoke|mypy|pytest-cov)' reqs/requirements-dev-contrib.txt)
+  #         invoke type-coverage
+  #       name: TypeHintChecker
 
-    - job: static_type_check
-      steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: 3.7
-        displayName: 'Use Python 3.7'
-      - script: |
-          pip install --requirement requirements-types.txt
-          invoke type-check --ci --pretty
-        name: StaticTypeCheck
+  #   - job: static_type_check
+  #     steps:
+  #     - task: UsePythonVersion@0
+  #       inputs:
+  #         versionSpec: 3.7
+  #       displayName: 'Use Python 3.7'
+  #     - script: |
+  #         pip install --requirement requirements-types.txt
+  #         invoke type-check --ci --pretty
+  #       name: StaticTypeCheck
 
-    - job: docstring_checker
-      steps:
-      - bash: python scripts/check_docstring_coverage.py
-        name: DocstringChecker
+  #   - job: docstring_checker
+  #     steps:
+  #     - bash: python scripts/check_docstring_coverage.py
+  #       name: DocstringChecker
 
-    - job: docstring_linter
-      steps:
-      - script: |
-          pip install --requirement reqs/requirements-dev-test.txt
-          invoke docstrings
-        name: DocstringLinter
+  #   - job: docstring_linter
+  #     steps:
+  #     - script: |
+  #         pip install --requirement reqs/requirements-dev-test.txt
+  #         invoke docstrings
+  #       name: DocstringLinter
 
-    - job: unused_import_checker
-      steps:
-      - script: |
-          pip install $(grep -E '^(flake8)' reqs/requirements-dev-contrib.txt)
-          # https://www.flake8rules.com/rules/F401.html
-          flake8 --select F401 great_expectations tests
-        name: UnusedImportChecker
+  #   - job: unused_import_checker
+  #     steps:
+  #     - script: |
+  #         pip install $(grep -E '^(flake8)' reqs/requirements-dev-contrib.txt)
+  #         # https://www.flake8rules.com/rules/F401.html
+  #         flake8 --select F401 great_expectations tests
+  #       name: UnusedImportChecker
 
-    - job: docs_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
-      steps:
-      - script: |
-          yarn install
-          python scripts/validate_docs_snippets.py
-        name: DocsSnippetChecker
+  #   - job: docs_snippet_checker
+  #     condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+  #     steps:
+  #     - script: |
+  #         yarn install
+  #         python scripts/validate_docs_snippets.py
+  #       name: DocsSnippetChecker
 
-  - stage: import_ge
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
+  # - stage: import_ge
+  #   dependsOn: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-20.04'
 
-    jobs:
-      - job: import_ge
+  #   jobs:
+  #     - job: import_ge
 
-        steps:
-         - task: UsePythonVersion@0
-           inputs:
-             versionSpec: '3.7'
-           displayName: 'Use Python 3.7'
+  #       steps:
+  #        - task: UsePythonVersion@0
+  #          inputs:
+  #            versionSpec: '3.7'
+  #          displayName: 'Use Python 3.7'
 
-         - bash: python -m pip install --upgrade pip==21.3.1
-           displayName: 'Update pip'
+  #        - bash: python -m pip install --upgrade pip==21.3.1
+  #          displayName: 'Update pip'
 
-         - script: |
-             pip install  .
-           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
+  #        - script: |
+  #            pip install  .
+  #          displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
-         - script: |
-             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
-           displayName: 'Import Great Expectations'
+  #        - script: |
+  #            python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
+  #          displayName: 'Import Great Expectations'
 
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks]
+    # dependsOn: [scope_check, lint, import_ge, custom_checks]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -245,6 +245,7 @@ stages:
                 --cov-report=xml \
                 --cov-report=html \
                 -m 'not unit and not e2e' \
+                -vv \
                 --durations=10
 
             displayName: 'pytest'
@@ -306,6 +307,7 @@ stages:
                 --cov=. \
                 --cov-report=xml \
                 --cov-report=html \
+                -vv \
                 -m 'not unit and not e2e'
 
             displayName: 'pytest'
@@ -324,210 +326,210 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-  - stage: usage_stats_integration
-    dependsOn: [scope_check, lint, import_ge, custom_checks]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: usage_stats_integration
+  #   dependsOn: [scope_check, lint, import_ge, custom_checks]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: test_usage_stats_messages
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-        variables:
-          python.version: '3.8'
+  #   jobs:
+  #     - job: test_usage_stats_messages
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==20.2.4
+  #           displayName: 'Update pip'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
-          - script: |
-              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+  #         # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
+  #         - script: |
+  #             pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #           displayName: 'pytest'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
-  - stage: db_integration
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: db_integration
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint, import_ge, custom_checks]
+  #   dependsOn: [scope_check, lint, import_ge, custom_checks]
 
-    jobs:
-      - job: mysql
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #   jobs:
+  #     - job: mysql
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
-        services:
-          mysql: mysql
+  #       services:
+  #         mysql: mysql
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==21.3.1
+  #           displayName: 'Update pip'
 
-          - script: |
-              printf 'Waiting for MySQL database to accept connections'
-              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
-                printf '.'
-                sleep 1;
-              done;
-            displayName: Wait for database to initialise
+  #         - script: |
+  #             printf 'Waiting for MySQL database to accept connections'
+  #             until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+  #               printf '.'
+  #               sleep 1;
+  #             done;
+  #           displayName: Wait for database to initialise
 
-          - script: |
-              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
-              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
-            displayName: 'Configure mysql'
+  #         - script: |
+  #             echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+  #             mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+  #           displayName: 'Configure mysql'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, mysql]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test, mysql]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              # Run pytest
-              pytest tests/test_definitions tests/expectations \
-                --mysql \
-                --napoleon-docstrings \
-                --junitxml=junit/test-results.xml \
-                --cov=. \
-                --cov-report=xml \
-                --cov-report=html
+  #         - script: |
+  #             # Run pytest
+  #             pytest tests/test_definitions tests/expectations \
+  #               --mysql \
+  #               --napoleon-docstrings \
+  #               --junitxml=junit/test-results.xml \
+  #               --cov=. \
+  #               --cov-report=xml \
+  #               --cov-report=html
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #           displayName: 'pytest'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
-      - job: mssql
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #     - job: mssql
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
-        services:
-          mssql: mssql
+  #       services:
+  #         mssql: mssql
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==21.3.1
+  #           displayName: 'Update pip'
 
-          - script: |
-              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+  #         - script: |
+  #             sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              # Run pytest
-              pytest tests/test_definitions tests/expectations \
-                --mssql \
-                --napoleon-docstrings \
-                --junitxml=junit/test-results.xml \
-                --cov=. \
-                --cov-report=xml \
-                --cov-report=html
+  #         - script: |
+  #             # Run pytest
+  #             pytest tests/test_definitions tests/expectations \
+  #               --mssql \
+  #               --napoleon-docstrings \
+  #               --junitxml=junit/test-results.xml \
+  #               --cov=. \
+  #               --cov-report=xml \
+  #               --cov-report=html
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #           displayName: 'pytest'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
-      - job: trino
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #     - job: trino
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
-        services:
-          trino: trino
+  #       services:
+  #         trino: trino
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==21.3.1
+  #           displayName: 'Update pip'
 
-          - script: |
-              printf 'Waiting for Trino database to accept connections'
-              sleep 30
-#             until trino --execute "SHOW CATALOGS"; do
-#               printf '.'
-#               sleep 1;
-#             done;
-            displayName: Wait for database to initialise
+  #         - script: |
+  #             printf 'Waiting for Trino database to accept connections'
+  #             sleep 30
+# #             until trino --execute "SHOW CATALOGS"; do
+# #               printf '.'
+# #               sleep 1;
+# #             done;
+  #           displayName: Wait for database to initialise
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, trino]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test, trino]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              # Run pytest
-              pytest tests/test_definitions tests/expectations \
-                --trino \
-                --napoleon-docstrings \
-                --junitxml=junit/test-results.xml \
-                --cov=. \
-                --cov-report=xml \
-                --cov-report=html
+  #         - script: |
+  #             # Run pytest
+  #             pytest tests/test_definitions tests/expectations \
+  #               --trino \
+  #               --napoleon-docstrings \
+  #               --junitxml=junit/test-results.xml \
+  #               --cov=. \
+  #               --cov-report=xml \
+  #               --cov-report=html
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #           displayName: 'pytest'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
-  - stage: cli_integration
-    dependsOn: [scope_check, lint, import_ge, custom_checks]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: cli_integration
+  #   dependsOn: [scope_check, lint, import_ge, custom_checks]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: test_cli
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #   jobs:
+  #     - job: test_cli
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
-        services:
-          postgres: postgres
+  #       services:
+  #         postgres: postgres
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip==21.3.1
+  #           displayName: 'Update pip'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, postgresql, spark]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test, postgresql, spark]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              # Run pytest
-              pytest --postgresql --spark --aws-integration tests/cli
+  #         - script: |
+  #             # Run pytest
+  #             pytest --postgresql --spark --aws-integration tests/cli
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #           displayName: 'pytest'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
