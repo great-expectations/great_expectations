@@ -155,6 +155,19 @@ class ExpectColumnValuesToMatchStrftimeFormat(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration for the Expectation.
+
+        For `expect_column_values_to_match_strftime_format`
+        we require that the `configuraton.kwargs` contain a `strftime_format` key that is either a `str` or `dict`
+        containing `$PARAMETER` key and `str` value.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            ValueError: The provided `strftime_format` cannot be used or parsed
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
 
