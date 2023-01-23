@@ -206,19 +206,19 @@
 /docs/guides/expectations/advanced/how_to_create_renderers_for_custom_expectations https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
 /docs/guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
 /docs/guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
-/docs/reference/expectations/expectations.md https://docs.greatexpectations.io/docs/terms/expectation/
-/docs/reference/expectations/expectation_suite_operations.md https://docs.greatexpectations.io/docs/reference/expectation_suite_operations/
-/docs/reference/checkpoints_and_actions.md https://docs.greatexpectations.io/docs/terms/checkpoint
-/docs/reference/core_concepts.md https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
-/docs/reference/data_context.md https://docs.greatexpectations.io/docs/terms/data_context/
-/docs/reference/data_docs.md https://docs.greatexpectations.io/docs/terms/data_docs/
-/docs/reference/datasources.md https://docs.greatexpectations.io/docs/terms/datasource
-/docs/reference/dividing_data_assets_into_batches.md https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store
-/docs/reference/execution_engine.md https://docs.greatexpectations.io/docs/terms/execution_engine/
-/docs/reference/metrics.md https://docs.greatexpectations.io/docs/terms/metric
-/docs/reference/profilers.md https://docs.greatexpectations.io/docs/terms/profiler
-/docs/reference/supporting_resources.md https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
-/docs/reference/validation.md https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview
+/docs/reference/expectations/expectations https://docs.greatexpectations.io/docs/terms/expectation/
+/docs/reference/expectations/expectation_suite_operations https://docs.greatexpectations.io/docs/reference/expectation_suite_operations/
+/docs/reference/checkpoints_and_actions https://docs.greatexpectations.io/docs/terms/checkpoint
+/docs/reference/core_concepts https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
+/docs/reference/data_context https://docs.greatexpectations.io/docs/terms/data_context/
+/docs/reference/data_docs https://docs.greatexpectations.io/docs/terms/data_docs/
+/docs/reference/datasources https://docs.greatexpectations.io/docs/terms/datasource
+/docs/reference/dividing_data_assets_into_batches https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store
+/docs/reference/execution_engine https://docs.greatexpectations.io/docs/terms/execution_engine/
+/docs/reference/metrics https://docs.greatexpectations.io/docs/terms/metric
+/docs/reference/profilers https://docs.greatexpectations.io/docs/terms/profiler
+/docs/reference/supporting_resources https://docs.greatexpectations.io/docs/tutorials/getting_started/tutorial_overview
+/docs/reference/validation https://docs.greatexpectations.io/docs/guides/validation/validate_data_overview
 /docs/guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook https://greatexpectations.io/expectations/
 
 # Redirects for deprecated API docs

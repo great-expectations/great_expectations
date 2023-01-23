@@ -767,6 +767,40 @@ def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_succes
     assert len(my_batch_1.data.dataframe.columns) == 18
 
 
+def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_success_file_path_endswith_upcase_no_headers(
+    datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
+    taxi_test_file_upcase,
+    spark_session,
+):
+    batch_identifiers: Dict[str, int] = {
+        "airflow_run_id": 1234567890,
+    }
+    batch_request: Dict[str, Any] = {
+        "datasource_name": datasource_with_runtime_data_connector_and_sparkdf_execution_engine.name,
+        "data_connector_name": "test_runtime_data_connector",
+        "data_asset_name": "my_data_asset",
+        "runtime_parameters": {
+            "path": taxi_test_file_upcase,
+        },
+        "batch_identifiers": batch_identifiers,
+    }
+    batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
+    batch_list: List[
+        Batch
+    ] = datasource_with_runtime_data_connector_and_sparkdf_execution_engine.get_batch_list_from_batch_request(
+        batch_request=batch_request
+    )
+    assert len(batch_list) == 1
+    my_batch_1 = batch_list[0]
+    assert my_batch_1.batch_spec is not None
+    assert my_batch_1.batch_definition["data_asset_name"] == "my_data_asset"
+    assert isinstance(my_batch_1.data, SparkDFBatchData)
+    assert (
+        my_batch_1.data.dataframe.count() == 10001
+    )  # headers are not read-in by default
+    assert len(my_batch_1.data.dataframe.columns) == 18
+
+
 def test_file_path_sparkdf_execution_engine_batch_list_from_batch_request_success_directory_no_headers(
     datasource_with_runtime_data_connector_and_sparkdf_execution_engine,
     taxi_test_file_directory,
