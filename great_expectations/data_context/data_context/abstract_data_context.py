@@ -298,7 +298,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @abstractmethod
     def _init_project_config(
-        self, project_config: Union[DataContextConfig, Mapping]
+        self, project_config: DataContextConfig | Mapping
     ) -> DataContextConfig:
         raise NotImplementedError
 
@@ -314,6 +314,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             - Ephemeral : not saved, and logging message outputted
         """
         self.variables.save_config()
+
+    def update_project_config(
+        self, project_config: DataContextConfig | Mapping
+    ) -> None:
+        """Update the context's config with the values from another config object.
+
+        Args:
+            project_config: The config to use to update the context's internal state.
+        """
+        self.config.update(project_config)
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
@@ -2821,7 +2831,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     @classmethod
     def get_or_create_data_context_config(
-        cls, project_config: Union[DataContextConfig, Mapping]
+        cls, project_config: DataContextConfig | Mapping
     ) -> DataContextConfig:
         """Utility method to take in an input config and ensure its conversion to a rich
         DataContextConfig. If the input is already of the appropriate type, the function
