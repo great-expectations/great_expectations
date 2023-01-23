@@ -5,14 +5,15 @@ The only requirement from an action is for it to have a take_action method.
 """
 from __future__ import annotations
 
+import json
 import logging
 import warnings
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, Union
 from urllib.parse import urljoin
 
+import requests
 from typing_extensions import Final
 
-from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 
@@ -20,6 +21,8 @@ try:
     import pypd
 except ImportError:
     pypd = None
+
+from typing import Optional
 
 from great_expectations.checkpoint.util import (
     send_cloud_notification,
@@ -29,6 +32,10 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,
+)
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -1235,3 +1242,52 @@ class SNSNotificationAction(ValidationAction):
         return send_sns_notification(
             self.sns_topic_arn, subject, validation_result_suite.__str__(), **kwargs
         )
+
+
+class APINotificationAction(ValidationAction):
+    def __init__(self, data_context, url) -> None:
+        super().__init__(data_context)
+        self.url = url
+
+    def _run(
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
+        data_asset,
+        expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
+        checkpoint_identifier=None,
+        **kwargs,
+    ):
+        suite_name: str = validation_result_suite.meta["expectation_suite_name"]
+        data_asset_name: str = data_asset.active_batch_definition.data_asset_name
+        validation_results: list = validation_result_suite.get("results")
+        validation_results_serializable: list = convert_to_json_serializable(
+            validation_results
+        )
+
+        payload = self.create_payload(
+            data_asset_name, suite_name, validation_results_serializable
+        )
+
+        self.send_results(payload)
+
+    def send_results(self, payload) -> None:
+        try:
+            headers = {"Content-Type": "application/json"}
+            requests.post(self.url, headers=headers, data=payload)
+        except Exception as e:
+            print(f"Exception when sending data to API - {e}")
+            raise e
+
+    @staticmethod
+    def create_payload(
+        data_asset_name, suite_name, validation_results_serializable
+    ) -> str:
+        payload = json.dumps(
+            {
+                "test_suite_name": suite_name,
+                "data_asset_name": data_asset_name,
+                "validation_results": validation_results_serializable,
+            }
+        )
+        return payload
