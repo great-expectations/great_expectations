@@ -244,10 +244,13 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         """Validates the configuration of an Expectation.
 
         For `expect_column_values_to_be_between` it is required that:
-            - One of `min_value` or `max_value` is not `None`.
-            - `min_value` and `max_value` are one of the following types: `datetime`, `float`, `int`, or `dict`
-            - If `min_value` or `max_value` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
-              dictionary keys must be `$PARAMETER`.
+
+        - One of `min_value` or `max_value` is not `None`.
+
+        - `min_value` and `max_value` are one of the following types: `datetime`, `float`, `int`, or `dict`
+
+        - If `min_value` or `max_value` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
+          dictionary keys must be `$PARAMETER`.
 
         The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
         superclass hierarchy.
@@ -257,7 +260,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
                            from the configuration attribute of the Expectation instance.
 
         Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
                                                     Expectation.
         """
         # Setting up a configuration
