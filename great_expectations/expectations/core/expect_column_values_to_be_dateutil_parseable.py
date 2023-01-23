@@ -94,6 +94,12 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
         Args:
             configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
                            from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+
+            # noqa: DAR402 InvalidExpectationConfigurationError
         """
         super().validate_configuration(configuration)
 
