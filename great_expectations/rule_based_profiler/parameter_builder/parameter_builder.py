@@ -136,7 +136,7 @@ class ParameterBuilder(ABC, Builder):
         parameter_computation_impl: Optional[Callable] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> None:
         """
         Args:
@@ -146,8 +146,10 @@ class ParameterBuilder(ABC, Builder):
             parameter_computation_impl: Object containing desired "ParameterBuilder" implementation.
             batch_list: Explicit list of "Batch" objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
-            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
         """
+        runtime_configuration = runtime_configuration or {}
+
         fully_qualified_parameter_names: List[
             str
         ] = get_fully_qualified_parameter_names(
@@ -155,6 +157,12 @@ class ParameterBuilder(ABC, Builder):
             variables=variables,
             parameters=parameters,
         )
+
+        # recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists.
+        recompute_existing_parameter_values: bool = runtime_configuration.get(
+            "recompute_existing_parameter_values", False
+        )
+
         if (
             recompute_existing_parameter_values
             or self.raw_fully_qualified_parameter_name
@@ -172,7 +180,7 @@ class ParameterBuilder(ABC, Builder):
                 variables=variables,
                 parameters=parameters,
                 fully_qualified_parameter_names=fully_qualified_parameter_names,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
 
             if parameter_computation_impl is None:
@@ -182,7 +190,7 @@ class ParameterBuilder(ABC, Builder):
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
 
             parameter_values: Dict[str, Any] = {
@@ -203,13 +211,12 @@ class ParameterBuilder(ABC, Builder):
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
         fully_qualified_parameter_names: Optional[List[str]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> None:
         """
         This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
         "ParameterBuilder" objects), whose output(s) are needed by specified "ParameterBuilder" object to operate.
         """
-
         # Step-1: Check if any "evaluation_parameter_builders" are configured for specified "ParameterBuilder" object.
         evaluation_parameter_builders: List[
             ParameterBuilder
@@ -248,7 +255,7 @@ class ParameterBuilder(ABC, Builder):
                     domain=domain,
                     variables=variables,
                     parameters=parameters,
-                    recompute_existing_parameter_values=recompute_existing_parameter_values,
+                    runtime_configuration=runtime_configuration,
                 )
 
     @abstractmethod
@@ -257,7 +264,7 @@ class ParameterBuilder(ABC, Builder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -342,6 +349,7 @@ class ParameterBuilder(ABC, Builder):
         limit: Optional[int] = None,
         enforce_numeric_metric: Union[str, bool] = False,
         replace_nan_with_zero: Union[str, bool] = False,
+        runtime_configuration: Optional[dict] = None,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
@@ -357,6 +365,7 @@ class ParameterBuilder(ABC, Builder):
         :param limit: Optional limit on number of "Batch" objects requested (supports single-Batch scenarios).
         :param enforce_numeric_metric: Flag controlling whether or not metric output must be numerically-valued.
         :param replace_nan_with_zero: Directive controlling how NaN metric values, if encountered, should be handled.
+        :param runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
         :param domain: "Domain" object scoping "$variable"/"$parameter"-style references in configuration and runtime.
         :param variables: Part of the "rule state" available for "$variable"-style references.
         :param parameters: Part of the "rule state" available for "$parameter"-style references.
@@ -468,7 +477,7 @@ specified (empty "metric_name" value detected)."""
         graph: ValidationGraph = (
             validator.metrics_calculator.build_metric_dependency_graph(
                 metric_configurations=metrics_to_resolve,
-                runtime_configuration=None,
+                runtime_configuration=runtime_configuration,
             )
         )
 
@@ -482,7 +491,7 @@ specified (empty "metric_name" value detected)."""
             aborted_metrics_info,
         ) = validator.metrics_calculator.resolve_validation_graph_and_handle_aborted_metrics_info(
             graph=graph,
-            runtime_configuration=None,
+            runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=0,
         )
 

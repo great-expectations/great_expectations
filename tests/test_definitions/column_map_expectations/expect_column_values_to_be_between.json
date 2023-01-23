@@ -21,9 +21,9 @@
       "numeric": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     },
     "data_alt": {
-      "x": [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      "y": [1, 2, 3, 4, 5, 6, 7, 8, 9],
-      "z": [1, 2, 3, 4, 5, null, null, null, null],
+      "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "y": [1, 2, 3, 4, 5, 6, 7, 8, 9, null],
+      "z": [1, 2, 3, 4, 5, null, null, null, null, null],
       "ts": [
         "Jan 01 1970 12:00:01",
         "Dec 31 1999 12:00:01",
@@ -33,10 +33,11 @@
         "Apr 01 2000 12:00:01",
         "May 01 2000 12:00:01",
         "Jun 01 2000 12:00:01",
-        null
+        null,
+        "Jan 01 2001 12:00:01"
       ],
-      "alpha": ["a", "b", "c", "d", "e", "f", "g", "h", "i"],
-      "numeric": ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+      "alpha": ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"],
+      "numeric": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
     },
     "schemas": {
       "pandas": {
@@ -95,6 +96,21 @@
         "alpha": "STRING",
         "numeric": "NUMERIC"
       },
+      "redshift": {
+        "x": "INTEGER",
+        "y": "VARCHAR",
+        "z": "INTEGER",
+        "ts": "TIMESTAMP",
+        "alpha": "VARCHAR",
+        "numeric": "INTEGER"
+      },
+      "snowflake": {
+        "x": "NUMBER",
+        "y": "STRING",
+        "z": "NUMBER",
+        "alpha": "STRING",
+        "numeric": "NUMBER"
+      },
       "trino": {
         "x": "INTEGER",
         "y": "INTEGER",
@@ -136,6 +152,8 @@
       },
       {
         "title": "basic_positive_test_with_timestamps",
+        "suppress_test_for": ["snowflake"],
+        "_notes": "Suppressed for snowflake because these are not valid timestamp formats https://docs.snowflake.com/en/sql-reference/data-types-datetime.html",
         "exact_match_out": false,
         "out": {
           "unexpected_list": [],
@@ -240,6 +258,8 @@
       },
       {
         "title": "basic_negative_test_with_timestamps",
+        "suppress_test_for": ["snowflake"],
+        "_notes": "Suppressed for snowflake because these are not valid timestamp formats https://docs.snowflake.com/en/sql-reference/data-types-datetime.html",
         "exact_match_out": false,
         "out": {
           "unexpected_index_list": [0, 9],

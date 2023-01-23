@@ -95,7 +95,7 @@ class SqliteDatasource(SQLDatasource):
 
     Args:
         name: The name of this sqlite datasource
-        connection_str: The SQLAlchemy connection string used to connect to the sqlite database.
+        connection_string: The SQLAlchemy connection string used to connect to the sqlite database.
             For example: "sqlite:///path/to/file.db"
         assets: An optional dictionary whose keys are TableAsset names and whose values
             are TableAsset objects.

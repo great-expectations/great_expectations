@@ -13,6 +13,8 @@ from scripts.public_api_report import (
     IncludeExcludeDefinition,
     PublicAPIChecker,
     PublicAPIReport,
+    _get_import_names,
+    get_shortest_dotted_path,
 )
 
 
@@ -266,6 +268,67 @@ class TestCodeParser:
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
         }
+
+
+def test_get_shortest_dotted_path(monkeypatch):
+    """Test path traversal using an example file.
+
+    The example is just any class that is imported in a __init__.py file in a
+    parent folder. This test can be modified to use any such import e.g. if the
+    example file changes, or a fixture created so the example isn't coming
+    from the repo.
+    """
+    repo_root = pathlib.Path(__file__).parent.parent.parent
+    monkeypatch.chdir(repo_root)
+    filepath = pathlib.Path("great_expectations/core/expectation_suite.py")
+    definition = Definition(
+        name="ExpectationSuite", filepath=filepath, ast_definition=ast.ClassDef()
+    )
+
+    # This is the actual path
+    assert (
+        get_shortest_dotted_path(definition=definition, repo_root_path=repo_root)
+        != "great_expectations.core.expectation_suite.ExpectationSuite"
+    )
+    # This is the shortest path
+    assert (
+        get_shortest_dotted_path(definition=definition, repo_root_path=repo_root)
+        == "great_expectations.core.ExpectationSuite"
+    )
+
+
+@pytest.fixture
+def various_imports() -> str:
+    return """import some_module
+import SomeClass
+from some_module import ClassFromSomeModule
+from some_other_module import ClassFromSomeOtherModule
+import AliasClass as ac
+import alias_module as am
+from alias_module import AliasClassFromAliasModule as acfam
+from a.b.c import some_method as sm
+"""
+
+
+def test__get_import_names(various_imports: str):
+    """Make sure the actual class and module names are returned."""
+    tree = ast.parse(various_imports)
+    import_names = []
+
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            import_names.extend(_get_import_names(node))
+
+    assert import_names == [
+        "some_module",
+        "SomeClass",
+        "ClassFromSomeModule",
+        "ClassFromSomeOtherModule",
+        "AliasClass",
+        "alias_module",
+        "AliasClassFromAliasModule",
+        "some_method",
+    ]
 
 
 @pytest.fixture

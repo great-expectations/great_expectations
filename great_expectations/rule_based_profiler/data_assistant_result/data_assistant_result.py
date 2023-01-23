@@ -29,6 +29,7 @@ from IPython.display import HTML, display
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -202,14 +203,23 @@ class DataAssistantResult(SerializableDictDot):
             send_usage_event=send_usage_event,
         ).show_expectations_by_expectation_type()
 
+    @public_api
     def get_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> ExpectationSuite:
-        """
-        Returns: "ExpectationSuite" object, built from properties, populated into this "DataAssistantResult" object.
+        """Get Expectation Suite from "DataAssistantResult" object.
+
+        Args:
+            expectation_suite_name: The name for the Expectation Suite. Default generated if none provided.
+            include_profiler_config: Whether to include the rule-based profiler config used by the data assistant to generate the Expectation Suite.
+            send_usage_event: Set to False to disable sending usage events for this method.
+
+        Returns:
+            ExpectationSuite object.
+
         """
         if send_usage_event:
             return self._get_expectation_suite_with_usage_statistics(
@@ -233,7 +243,9 @@ class DataAssistantResult(SerializableDictDot):
             "_batch_id_to_batch_identifier_display_name_map": convert_to_json_serializable(
                 data=self._batch_id_to_batch_identifier_display_name_map
             ),
-            "profiler_config": self.profiler_config.to_json_dict(),
+            "profiler_config": self.profiler_config.to_json_dict()
+            if self.profiler_config
+            else None,
             "profiler_execution_time": convert_to_json_serializable(
                 data=self.profiler_execution_time
             ),
@@ -252,11 +264,15 @@ class DataAssistantResult(SerializableDictDot):
                     ),
                 }
                 for domain, parameter_values_for_fully_qualified_parameter_names in self.metrics_by_domain.items()
-            ],
+            ]
+            if self.metrics_by_domain
+            else None,
             "expectation_configurations": [
                 expectation_configuration.to_json_dict()
                 for expectation_configuration in self.expectation_configurations
-            ],
+            ]
+            if self.expectation_configurations
+            else None,
             "citation": convert_to_json_serializable(data=self.citation),
         }
 
@@ -297,13 +313,11 @@ class DataAssistantResult(SerializableDictDot):
                 if key in DataAssistantResult.IN_JUPYTER_NOTEBOOK_KEYS
             }
 
-            verbose: Union[bool, str] = str(
-                os.getenv("GE_TROUBLESHOOTING", False)
-            ).lower()
-            if verbose != "true":
-                verbose = "false"
+            verbose_from_env: str = str(os.getenv("GE_TROUBLESHOOTING", False)).lower()
+            if verbose_from_env != "true":
+                verbose_from_env = "false"
 
-            verbose = json.loads(verbose)
+            verbose: bool = json.loads(verbose_from_env)
 
             auxiliary_profiler_execution_details: dict = (
                 self._get_auxiliary_profiler_execution_details(verbose=verbose)
@@ -325,7 +339,7 @@ class DataAssistantResult(SerializableDictDot):
         json_dict.update(auxiliary_profiler_execution_details)
         return json.dumps(json_dict, indent=2)
 
-    def _get_metric_expectation_map(self) -> Dict[Tuple[str], str]:
+    def _get_metric_expectation_map(self) -> Dict[Tuple[str, ...], str]:
         if not all(
             [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
             for metric_names in self.metric_expectation_map.keys()
@@ -343,8 +357,12 @@ class DataAssistantResult(SerializableDictDot):
 
     def _get_auxiliary_profiler_execution_details(self, verbose: bool) -> dict:
         auxiliary_info: dict = {
-            "num_profiler_rules": len(self.profiler_config.rules),
-            "num_expectation_configurations": len(self.expectation_configurations),
+            "num_profiler_rules": len(self.profiler_config.rules)
+            if self.profiler_config and self.profiler_config.rules
+            else 0,
+            "num_expectation_configurations": len(self.expectation_configurations)
+            if self.expectation_configurations
+            else 0,
             "auto_generated_at": datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             ),
@@ -354,16 +372,21 @@ class DataAssistantResult(SerializableDictDot):
         if verbose:
             rule_name_to_rule_stats_map: Dict[str, RuleStats] = {}
 
-            rule_domains: List[Domain] = list(self.metrics_by_domain.keys())
+            rule_domains: List[Domain] = (
+                list(self.metrics_by_domain.keys()) if self.metrics_by_domain else []
+            )
 
-            rule_stats: RuleStats
+            rule_stats: RuleStats | None
             domains: List[Domain]
             domain: Domain
             domain_as_json_dict: dict
             num_domains: int
 
+            if not (self.profiler_config and self.profiler_config.rules):
+                return auxiliary_info
+
             rule_name: str
-            rule_config: RuleConfig
+            rule_config: Union[RuleConfig, dict]
             for rule_name, rule_config in self.profiler_config.rules.items():
                 domains = list(
                     filter(
@@ -385,8 +408,14 @@ class DataAssistantResult(SerializableDictDot):
                     rule_name_to_rule_stats_map[rule_name] = rule_stats
                     rule_stats.rule_domain_builder_execution_time = (
                         self.rule_domain_builder_execution_time[rule_name]
+                        if self.rule_domain_builder_execution_time
+                        else float(np.nan)
                     )
-                    rule_stats.rule_execution_time = self.rule_execution_time[rule_name]
+                    rule_stats.rule_execution_time = (
+                        self.rule_execution_time[rule_name]
+                        if self.rule_execution_time
+                        else float(np.nan)
+                    )
 
                 if num_domains > 0:
                     for domain in domains:
@@ -456,21 +485,21 @@ class DataAssistantResult(SerializableDictDot):
             persist=False,
         )
         expectation_suite.add_expectation_configurations(
-            expectation_configurations=self.expectation_configurations,
+            expectation_configurations=self.expectation_configurations
+            if self.expectation_configurations
+            else [],
             send_usage_event=False,
             match_type="domain",
             overwrite_existing=True,
         )
 
-        citation: Dict[str, Any]
-        if include_profiler_config:
-            citation = self.citation
-        else:
+        citation: Dict[str, Any] = self.citation or {}
+        if not include_profiler_config:
             key: str
             value: Any
             citation = {
                 key: value
-                for key, value in self.citation.items()
+                for key, value in citation.items()
                 if key != "profiler_config"
             }
 
@@ -478,6 +507,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return expectation_suite
 
+    @public_api
     def plot_metrics(
         self,
         sequential: bool = True,
@@ -485,17 +515,16 @@ class DataAssistantResult(SerializableDictDot):
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
-        """
-        Use contents of "DataAssistantResult" object to display metrics for visualization purposes.
+        """Use contents of `DataAssistantResult` object to display metrics for visualization purposes.
 
         Altair theme configuration reference:
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            sequential: Whether the batches are sequential or not
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: Columns to include in metrics plot
-            exclude_column_names: Columns to exclude from metrics plot
+            sequential: Whether the batches are sequential or not.
+            theme: Altair top-level chart configuration dictionary.
+            include_column_names: Columns to include in metrics plot.
+            exclude_column_names: Columns to exclude from metrics plot.
 
         Returns:
             PlotResult wrapper object around Altair charts.
@@ -508,6 +537,7 @@ class DataAssistantResult(SerializableDictDot):
             exclude_column_names=exclude_column_names,
         )
 
+    @public_api
     def plot_expectations_and_metrics(
         self,
         sequential: bool = True,
@@ -515,17 +545,16 @@ class DataAssistantResult(SerializableDictDot):
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
-        """
-        Use contents of "DataAssistantResult" object to display metrics and expectations for visualization purposes.
+        """Use contents of `DataAssistantResult` object to display metrics and expectations for visualization purposes.
 
         Altair theme configuration reference:
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            sequential: Whether the batches are sequential or not
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: Columns to include in expectations and metrics plot
-            exclude_column_names: Columns to exclude from expectations and metrics plot
+            sequential: Whether the batches are sequential or not.
+            theme: Altair top-level chart configuration dictionary.
+            include_column_names: Columns to include in expectations and metrics plot.
+            exclude_column_names: Columns to exclude from expectations and metrics plot.
 
         Returns:
             PlotResult wrapper object around Altair charts.

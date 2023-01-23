@@ -9,14 +9,14 @@ from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
+    BatchRequestError,
     BatchRequestOptions,
+    BatchSorter,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
     PostgresDatasource,
 )
 from great_expectations.experimental.datasources.sql_datasource import (
-    BatchRequestError,
-    BatchSorter,
     SqlYearMonthSplitter,
     TableAsset,
 )
@@ -541,14 +541,14 @@ def test_sort_batch_list_by_unknown_key(create_source):
     "order_by",
     [
         ["+year", "-month"],
-        [{"metadata_key": "year"}, {"metadata_key": "month", "reverse": True}],
+        [{"key": "year"}, {"key": "month", "reverse": True}],
     ],
 )
 def test_table_asset_sorter_parsing(order_by: list):
     """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""
     expected_sorters = [
-        BatchSorter(metadata_key="year"),
-        BatchSorter(metadata_key="month", reverse=True),
+        BatchSorter(key="year"),
+        BatchSorter(key="month", reverse=True),
     ]
 
     table_asset = TableAsset(
