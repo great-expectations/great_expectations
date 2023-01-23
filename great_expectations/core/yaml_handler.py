@@ -82,7 +82,7 @@ class YAMLHandler:
             >>> data = {'foo': 'bar'}
             >>> yaml_str = yaml_handler.dump(data)
             >>> print(yaml_str)
-            foo:
+            foo:                                  
                 bar:
 
         Args:
