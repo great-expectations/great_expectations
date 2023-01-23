@@ -199,6 +199,11 @@ class SphinxInvokeDocsBuilder:
 
                 doc_str = str(doc)
 
+                import_code_block = False
+                self._add_doc_front_matter(
+                    doc=doc_str, title=title_str, import_code_block=import_code_block
+                )
+
                 # Add front matter
                 doc_front_matter = (
                     "---\n"
@@ -378,3 +383,32 @@ class SphinxInvokeDocsBuilder:
         for file in all_files:
             if file not in excluded_files:
                 file.unlink()
+
+    def _add_doc_front_matter(
+        self, doc: str, title: str, import_code_block: bool = False
+    ) -> str:
+        """Add front matter to the beginning of doc.
+
+        Args:
+            doc: Document to add front matter to.
+            title: Desired title for the doc.
+            import_code_block: Whether to include import of docusaurus code block component.
+
+        Returns:
+            Document with front matter added.
+        """
+        import_code_block_content = ""
+        if import_code_block:
+            import_code_block_content = "\nimport CodeBlock from '@theme/CodeBlock';\n"
+
+        doc_front_matter = (
+            "---\n"
+            f"title: {title}\n"
+            f"sidebar_label: {title}\n"
+            "---\n"
+            "\n"
+            f"{import_code_block_content}"
+        )
+        doc = doc_front_matter + doc
+
+        return doc
