@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
