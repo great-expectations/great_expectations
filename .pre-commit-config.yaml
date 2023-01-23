@@ -26,11 +26,6 @@ repos:
       - id: ruff
         files: ^(great_expectations/core)  # TODO: expand to all of gx
         args: ["--fix"]
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v2.7.2
-    hooks:
-      - id: pyupgrade
-        args: ["--py3-plus"]
 # https://pre-commit.ci/
 ci:
     autofix_commit_msg: |
