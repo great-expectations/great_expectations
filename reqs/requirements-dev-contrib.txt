@@ -3,5 +3,4 @@ invoke>=2.0.0
 isort==5.11.4
 mypy==0.991
 pre-commit>=2.21.0
-pyupgrade==2.7.2
 ruff==0.0.230
