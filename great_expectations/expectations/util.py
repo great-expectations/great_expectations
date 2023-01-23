@@ -1,7 +1,10 @@
 import warnings
 from typing import Callable
 
-from great_expectations.core._docs_decorators import deprecated_method_or_class
+from great_expectations.core._docs_decorators import (
+    deprecated_method_or_class,
+    public_api,
+)
 from great_expectations.expectations.expectation import (
     add_values_with_json_schema_from_list_in_params as add_values_with_json_schema_from_list_in_params_expectation,
 )
@@ -34,6 +37,7 @@ def add_values_with_json_schema_from_list_in_params(
     )
 
 
+@public_api
 @deprecated_method_or_class(
     version="0.15.29",
     message="Use `import render_evaluation_parameter_string from great_expectations.expectations.expectation` instead.",
