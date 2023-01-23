@@ -298,7 +298,9 @@ def test_render_profiled_fixture_expectation_suite(
 
     with open(
         file_relative_path(
-            __file__, "./output/test_render_profiled_fixture_expectation_suite.html"
+            __file__,
+            "./output/test_render_profiled_fixture_expectation_suite.html",
+            strict=False,
         ),
         "wb",
     ) as f:
@@ -323,6 +325,7 @@ def test_render_profiled_fixture_expectation_suite_with_distribution(
         file_relative_path(
             __file__,
             "./output/titanic_dataset_profiler_expectation_suite_with_distribution.html",
+            strict=False,
         ),
         "wb",
     ) as f:
@@ -339,7 +342,9 @@ def test_render_profiling_results(titanic_profiled_evrs_1):
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-        file_relative_path(__file__, "./output/test_render_profiling_results.html"),
+        file_relative_path(
+            __file__, "./output/test_render_profiling_results.html", strict=False
+        ),
         "wb",
     ) as f:
         f.write(rendered_page.encode("utf-8"))
@@ -355,7 +360,9 @@ def test_render_validation_results(titanic_profiled_evrs_1):
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-        file_relative_path(__file__, "./output/test_render_validation_results.html"),
+        file_relative_path(
+            __file__, "./output/test_render_validation_results.html", strict=False
+        ),
         "wb",
     ) as f:
         f.write(rendered_page.encode("utf-8"))
@@ -408,7 +415,8 @@ def test_full_oobe_flow():
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-        file_relative_path(__file__, "./output/test_full_oobe_flow.html"), "wb"
+        file_relative_path(__file__, "./output/test_full_oobe_flow.html", strict=False),
+        "wb",
     ) as f:
         f.write(rendered_page.encode("utf-8"))
 
