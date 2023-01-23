@@ -54,8 +54,7 @@ class ValidationAction:
     """
 
     def __init__(self, data_context: DataContext) -> None:
-        """Create a ValidationAction
-        """
+        """Create a ValidationAction"""
         self.data_context = data_context
 
     @property
@@ -182,8 +181,7 @@ class SlackNotificationAction(ValidationAction):
         notify_with: Optional[list[str]] = None,
         show_failed_expectations: bool = False,
     ) -> None:
-        """Create a SlackNotificationAction
-        """
+        """Create a SlackNotificationAction"""
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
@@ -321,8 +319,7 @@ class PagerdutyAlertAction(ValidationAction):
         routing_key: str,
         notify_on: str = "failure",
     ) -> None:
-        """Create a PagerdutyAlertAction
-        """
+        """Create a PagerdutyAlertAction"""
         super().__init__(data_context)
         if not pypd:
             raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
@@ -428,8 +425,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         microsoft_teams_webhook: str,
         notify_on: str = "all",
     ) -> None:
-        """Create a MicrosoftTeamsNotificationAction
-        """
+        """Create a MicrosoftTeamsNotificationAction"""
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
@@ -541,8 +537,7 @@ class OpsgenieAlertAction(ValidationAction):
         notify_on: str = "failure",
         tags: Optional[list[str]] = None,
     ) -> None:
-        """Create an OpsgenieAlertAction
-        """
+        """Create an OpsgenieAlertAction"""
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
@@ -685,8 +680,7 @@ class EmailAction(ValidationAction):
         notify_on: str = "all",
         notify_with: Optional[list[str]] = None,
     ) -> None:
-        """Create an EmailAction
-        """
+        """Create an EmailAction"""
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
