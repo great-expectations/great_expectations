@@ -195,7 +195,7 @@ select = [
     # https://github.com/charliermarsh/ruff#pycodestyle-e-w
     "E", # pycodestyle
     "W", # Warning
-    # https://github.com/charliermarsh/ruff#pyupgrade-up
+    # https://github.com/charliermarsh/ruff#flake8-comprehensions-c4
     # https://github.com/charliermarsh/ruff#mccabe-c90
     "C", # Complexity (mccabe+) & comprehensions
     # https://github.com/charliermarsh/ruff#pyupgrade-up
