@@ -200,19 +200,9 @@ class SphinxInvokeDocsBuilder:
                 doc_str = str(doc)
 
                 import_code_block = False
-                self._add_doc_front_matter(
+                doc_str = self._add_doc_front_matter(
                     doc=doc_str, title=title_str, import_code_block=import_code_block
                 )
-
-                # Add front matter
-                doc_front_matter = (
-                    "---\n"
-                    f"title: {title_str}\n"
-                    f"sidebar_label: {title_str}\n"
-                    "---\n"
-                    "\n"
-                )
-                doc_str = doc_front_matter + doc_str
 
                 # Write out mdx files
                 output_path = self.docusaurus_api_docs_path / self._get_mdx_file_path(
