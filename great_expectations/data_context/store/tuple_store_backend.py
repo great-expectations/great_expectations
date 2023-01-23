@@ -599,7 +599,11 @@ class TupleS3StoreBackend(TupleStoreBackend):
         s3r = self._create_resource()
         bucket = s3r.Bucket(self.bucket)
         key_list = []
-        for s3_object_info in bucket.objects.filter(Prefix=self.prefix):
+        if self.prefix:
+            objects_list = bucket.objects.filter(Prefix=self.prefix)
+        else:
+            objects_list = bucket.objects.all()
+        for s3_object_info in objects_list:
             s3_object_key = s3_object_info.key
             if self.platform_specific_separator:
                 s3_object_key = os.path.relpath(s3_object_key, self.prefix)
