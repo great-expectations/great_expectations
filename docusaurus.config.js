@@ -36,7 +36,8 @@ module.exports = {
       indexName: 'docs-greatexpectations',
 
       searchPagePath: 'search',
-      schedule: 'every 1 day',
+      // schedule is in UTC
+      schedule: 'every 1 day at 5:00 pm',
 
       // Optional: see doc section below
       // contextualSearch: true,

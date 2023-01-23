@@ -17,27 +17,34 @@ from typing import (
     Union,
 )
 
+import pandas as pd
 import pydantic
-from pydantic import Field
+from pydantic import Field, StrictBool, StrictInt
 from pydantic import dataclasses as pydantic_dc
+from pydantic import root_validator, validate_arguments
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import (
-        BatchDataType,
-        BatchDefinition,
-        BatchMarkers,
-        BatchSpec,
-    )
+    # TODO: When the Batch class is moved out of the experimental directory, we should try to import the annotations
+    #       from core.batch so we no longer need to call Batch.update_forward_refs() before instantiation.
+    from great_expectations.core.batch import BatchData, BatchDefinition, BatchMarkers
     from great_expectations.execution_engine import ExecutionEngine
+
+try:
+    from pyspark.sql import Row as pyspark_sql_Row
+except ImportError:
+    LOGGER.debug("No spark sql dataframe module available.")
+    pyspark_sql_Row = None
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants returned. The keys represent dimensions one can slice the data along
@@ -173,10 +180,12 @@ class DataAsset(ExperimentalBaseModel):
             get_batch_list_from_batch_request method.
         """
         if options is not None and not self._valid_batch_request_options(options):
+            allowed_keys = set(self.batch_request_options_template().keys())
+            actual_keys = set(options.keys())
             raise BatchRequestError(
-                "Batch request options should have a subset of keys:\n"
-                f"{list(self.batch_request_options_template().keys())}\n"
-                f"but actually has the form:\n{pf(options)}\n"
+                "Batch request options should only contain keys from the following set:\n"
+                f"{allowed_keys}\nbut your specified keys contain\n"
+                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
         return BatchRequest(
             datasource_name=self._datasource.name,
@@ -225,6 +234,34 @@ class DataAsset(ExperimentalBaseModel):
     def add_sorters(
         self: DataAssetType, sorters: BatchSortersDefinition
     ) -> DataAssetType:
+        """Associates a sorter to this DataAsset
+
+        The passed in sorters will replace any previously associated sorters.
+        Batches returned from this DataAsset will be sorted on the batch's
+        metadata in the order specified by `sorters`. Sorters work left to right.
+        That is, batches will be sorted first by sorters[0].key, then
+        sorters[1].key, and so on. If sorter[i].reverse is True, that key will
+        sort the batches in descending, as opposed to ascending, order.
+
+        Args:
+            sorters: A list of either BatchSorter objects or strings. The strings
+              are a shorthand for BatchSorter objects and are parsed as follows:
+              r'[+-]?.*'
+              An optional prefix of '+' or '-' sets BatchSorter.reverse to
+              'False' or 'True' respectively. It is 'False' if no prefix is present.
+              The rest of the string gets assigned to the BatchSorter.key.
+              For example:
+              ["key1", "-key2", "key3"]
+              is equivalent to:
+              [
+                  BatchSorter(key="key1", reverse=False),
+                  BatchSorter(key="key2", reverse=True),
+                  BatchSorter(key="key3", reverse=False),
+              ]
+
+        Returns:
+            This DataAsset with the passed in sorters accessible via self.order_by
+        """
         # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
         # https://docs.pydantic.dev/usage/model_config/#options
         self.order_by = _batch_sorter_from_list(sorters)
@@ -371,94 +408,115 @@ class Datasource(
     # End Abstract Methods
 
 
-class Batch:
-    # Instance variable declarations
-    _datasource: Datasource
-    _data_asset: DataAsset
-    _batch_request: BatchRequest
-    _data: BatchDataType
-    _id: str
+@dataclasses.dataclass(frozen=True)
+class HeadData:
+    """
+    An immutable wrapper around pd.DataFrame for .head() methods which
+        are intended to be used for visual inspection of BatchData.
+    """
+
+    data: pd.DataFrame
+
+    def __repr__(self) -> str:
+        return self.data.__repr__()
+
+
+class Batch(ExperimentalBaseModel):
+    """This represents a batch of data.
+
+    This is usually not the data itself but a hook to the data on an external datastore such as
+    a spark or a sql database. An exception exists for pandas or any in-memory datastore.
+    """
+
+    datasource: Datasource
+    data_asset: DataAsset
+    batch_request: BatchRequest
+    data: "BatchData"
+    id: str = ""
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
-    metadata: Dict[str, Any]
+    metadata: Dict[str, Any] = {}
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    _legacy_batch_markers: BatchMarkers
-    _legacy_batch_spec: BatchSpec
-    _legacy_batch_definition: BatchDefinition
+    batch_markers: "BatchMarkers" = Field(..., alias="legacy_batch_markers")
+    batch_spec: BatchSpec = Field(..., alias="legacy_batch_spec")
+    batch_definition: "BatchDefinition" = Field(..., alias="legacy_batch_definition")
 
-    def __init__(
-        self,
-        datasource: Datasource,
-        data_asset: DataAsset,
-        batch_request: BatchRequest,
-        # BatchDataType is Union[core.batch.BatchData, pd.DataFrame, SparkDataFrame].  core.batch.Batchdata is the
-        # implicit interface that Datasource implementers can use. We can make this explicit if needed.
-        data: BatchDataType,
-        # Legacy values that should be removed in the future.
-        legacy_batch_markers: BatchMarkers,
-        legacy_batch_spec: BatchSpec,
-        legacy_batch_definition: BatchDefinition,
-        # Optional arguments
-        metadata: Optional[Dict[str, Any]] = None,
-    ) -> None:
-        """This represents a batch of data.
+    class Config:
+        allow_mutation = False
+        arbitrary_types_allowed = True
 
-        This is usually not the data itself but a hook to the data on an external datastore such as
-        a spark or a sql database. An exception exists for pandas or any in-memory datastore.
-        """
-        # These properties are intended to be READ-ONLY
-        self._datasource: Datasource = datasource
-        self._data_asset: DataAsset = data_asset
-        self._batch_request: BatchRequest = batch_request
-        self._data: BatchDataType = data
-        self.metadata = metadata or {}
-
-        self._legacy_batch_markers = legacy_batch_markers
-        self._legacy_batch_spec = legacy_batch_spec
-        self._legacy_batch_definition = legacy_batch_definition
-
-        # computed property
-        # We need to unique identifier. This will likely change as I get more input
+    @root_validator(pre=True)
+    def _set_id(cls, values: dict) -> dict:
+        # We need a unique identifier. This will likely change as we get more input.
         options_list = []
-        for k, v in batch_request.options.items():
+        for k, v in values["batch_request"].options.items():
             options_list.append(f"{k}_{v}")
+        values["id"] = "-".join(
+            [values["datasource"].name, values["data_asset"].name, *options_list]
+        )
+        return values
 
-        self._id: str = "-".join([datasource.name, data_asset.name, *options_list])
+    @classmethod
+    def update_forward_refs(cls):
+        from great_expectations.core.batch import (
+            BatchData,
+            BatchDefinition,
+            BatchMarkers,
+        )
 
-    @property
-    def datasource(self) -> Datasource:
-        return self._datasource
+        super().update_forward_refs(
+            BatchData=BatchData,
+            BatchDefinition=BatchDefinition,
+            BatchMarkers=BatchMarkers,
+        )
 
-    @property
-    def data_asset(self) -> DataAsset:
-        return self._data_asset
+    @validate_arguments
+    def head(
+        self,
+        n_rows: Optional[StrictInt] = None,
+        fetch_all: StrictBool = False,
+    ) -> HeadData:
+        """Return the first n rows of this Batch.
 
-    @property
-    def batch_request(self) -> BatchRequest:
-        return self._batch_request
+        This method returns the first n rows for the Batch based on position.
 
-    @property
-    def id(self) -> str:
-        return self._id
+        For negative values of n_rows, this method returns all rows except the last n rows.
 
-    @property
-    def data(self) -> BatchDataType:
-        return self._data
+        If n_rows is larger than the number of rows, this method returns all rows.
 
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        return self.datasource.execution_engine
+        Parameters
+            n_rows: The number of rows to return from the Batch.
+            fetch_all: If True, ignore n_rows and return the entire Batch.
 
-    @property
-    def batch_markers(self) -> BatchMarkers:
-        return self._legacy_batch_markers
+        Returns
+            HeadData
+        """
+        self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+        metric = MetricConfiguration(
+            metric_name="table.head",
+            metric_domain_kwargs={"batch_id": self.id},
+            metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
+        )
+        table_head_metric_value: pd.DataFrame | list[
+            pyspark_sql_Row
+        ] | pyspark_sql_Row = self.data.execution_engine.resolve_metrics(
+            metrics_to_resolve=(metric,)
+        )[
+            metric.id
+        ]
+        table_head_df: pd.DataFrame
+        if isinstance(table_head_metric_value, pd.DataFrame):
+            # table_head_metric_value is a pd.DataFrame already
+            table_head_df = table_head_metric_value
+        elif isinstance(table_head_metric_value, list):
+            # convert list of pyspark.sql.Row to pd.DataFrame
+            table_head_df = pd.DataFrame(
+                [row.asDict() for row in table_head_metric_value]
+            )
+        else:
+            # otherwise convert pyspark.sql.Row to pd.DataFrame
+            table_head_df = pd.DataFrame(table_head_metric_value.asDict())
 
-    @property
-    def batch_spec(self) -> BatchSpec:
-        return self._legacy_batch_spec
-
-    @property
-    def batch_definition(self) -> BatchDefinition:
-        return self._legacy_batch_definition
+        return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))

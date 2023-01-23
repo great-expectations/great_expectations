@@ -5,11 +5,11 @@ const htmlparser2 = require('htmlparser2')
 /**
  * Constructs a map associating names with snippets by parsing source code.
  *
- * @param {string} dir - The directory of source code to traverse when constructing the map.
+ * @param {string} dirs - The directories of source code to traverse when constructing the map.
  * @returns {object} The "snippet map", which is an object with name, snippet key-value pairs.
  */
-function constructSnippetMap (dir) {
-  const snippets = parseDirectory(dir)
+function constructSnippetMap (dirs) {
+  const snippets = parseSourceDirectories(dirs)
 
   const snippetMap = {}
   for (const snippet of snippets) {
@@ -27,13 +27,18 @@ function constructSnippetMap (dir) {
 }
 
 /**
- * Parses an input directory using an HTML parser to collect snippets.
+ * Parses input directories of source code using an HTML parser to collect snippets.
  *
- * @param {string} dir - The directory to parse for snippet definitions.
+ * @param {string} dirs - The directories to parse for snippet definitions.
  * @returns {object[]} A list of snippet objects parsed from the input directory.
  */
-function parseDirectory (dir) {
-  const files = glob.sync(dir + '/**/*.py')
+function parseSourceDirectories (dirs) {
+  const files = []
+  for (const dir of dirs) {
+    for (const file of glob.sync(dir + '/**/*.py')) {
+      files.push(file)
+    }
+  }
 
   const allSnippets = []
   for (const file of files) {
@@ -157,7 +162,7 @@ function sanitizeText (text) {
  * An alias `yarn snippet-check` is defined in `package.json` for convenience.
  */
 function main () {
-  const snippets = parseDirectory('.')
+  const snippets = parseSourceDirectories(['great_expectations', 'tests'])
   const targetFiles = process.argv.slice(2)
 
   const out = {}
