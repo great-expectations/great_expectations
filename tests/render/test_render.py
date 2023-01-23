@@ -97,7 +97,9 @@ def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
     rendered = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     with open(
         file_relative_path(
-            __file__, "./output/test_render_profiling_results_page_renderer.json"
+            __file__,
+            "./output/test_render_profiling_results_page_renderer.json",
+            strict=False,
         ),
         "w",
     ) as outfile:
@@ -127,6 +129,7 @@ def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_
                 "./output/test_render_profiling_results_column_section_renderer__"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -145,7 +148,9 @@ def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
     rendered = ValidationResultsPageRenderer().render(titanic_profiler_evrs)
     with open(
         file_relative_path(
-            __file__, "./output/test_render_validation_results_page_renderer.json"
+            __file__,
+            "./output/test_render_validation_results_page_renderer.json",
+            strict=False,
         ),
         "w",
     ) as outfile:
@@ -174,6 +179,7 @@ def test_render_validation_results_column_section_renderer(titanic_profiler_evrs
                 "./output/test_render_validation_results_column_section_renderer__"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -210,6 +216,7 @@ def test_render_expectation_suite_column_section_renderer(
                 "./output/test_render_expectation_suite_column_section_renderer"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -378,6 +385,7 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
         file_relative_path(
             __file__,
             "./output/test_render_profiling_results_column_section_renderer_with_exception.html",
+            strict=False,
         ),
         "wb",
     ) as outfile:

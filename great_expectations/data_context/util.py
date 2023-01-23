@@ -110,6 +110,7 @@ def format_dict_for_error_message(dict_):
 def file_relative_path(
     source_path: PathStr,
     relative_path: PathStr,
+    strict: bool = True,
 ) -> str:
     """
     This function is useful when one needs to load a file that is
@@ -124,7 +125,7 @@ def file_relative_path(
     H/T https://github.com/dagster-io/dagster/blob/8a250e9619a49e8bff8e9aa7435df89c2d2ea039/python_modules/dagster/dagster/utils/__init__.py#L34
     """
     dir_path = pathlib.Path(source_path).parent
-    abs_path = dir_path.joinpath(relative_path).resolve(strict=True)
+    abs_path = dir_path.joinpath(relative_path).resolve(strict=strict)
     return str(abs_path)
 
 
