@@ -1044,22 +1044,22 @@ class UpdateDataDocsAction(ValidationAction):
 
     YAML configuration example
 
-    ::
+    ::yaml
 
         - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
+          action:
+            class_name: UpdateDataDocsAction
 
     You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
     list of sites to update
 
-    ::
+    ::yaml
 
         - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-          site_names:
-            - local_site
+          action:
+            class_name: UpdateDataDocsAction
+            site_names:
+              - local_site
 
     Args:
         data_context: Data Context that is used by the Action.
