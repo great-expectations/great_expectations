@@ -40,7 +40,6 @@ def execute_shell_command(command: str) -> int:
             check=True,
             encoding=None,
             errors=None,
-            text=None,
             env=env,
             text=True,
         )
