@@ -6,6 +6,8 @@ Typical usage example:
 
   main() method provided with typical usage.
 """
+from __future__ import annotations
+
 import logging
 import pathlib
 import re
@@ -164,12 +166,16 @@ def run_pydocstyle(paths: List[pathlib.Path]) -> List[str]:
     return raw_results.stdout.split("\n")
 
 
-def _get_docstring_errors() -> List[DocstringError]:
+def _get_docstring_errors(
+    select_paths: list[pathlib.Path] | None = None,
+) -> List[DocstringError]:
     """Get all docstring errors."""
-
-    filepaths_containing_public_api_entities = [
-        pathlib.Path(d.filepath).resolve() for d in get_public_api_definitions()
-    ]
+    if select_paths:
+        filepaths_containing_public_api_entities = [p.resolve() for p in select_paths]
+    else:
+        filepaths_containing_public_api_entities = [
+            pathlib.Path(d.filepath).resolve() for d in get_public_api_definitions()
+        ]
     pydocstyle_raw_errors = run_pydocstyle(
         paths=filepaths_containing_public_api_entities
     )
@@ -207,7 +213,9 @@ def get_public_api_module_level_function_definitions() -> Set[Definition]:
     return public_api_checker.get_module_level_function_public_api_definitions()
 
 
-def _public_api_docstring_errors() -> Set[DocstringError]:
+def _public_api_docstring_errors(
+    select_paths: list[pathlib.Path] | None = None,
+) -> Set[DocstringError]:
     """Get all docstring errors for entities marked with the @public_api decorator."""
 
     logger.debug("Getting public api definitions.")
@@ -219,7 +227,7 @@ def _public_api_docstring_errors() -> Set[DocstringError]:
 
     logger.debug("Getting docstring errors.")
     public_api_docstring_errors: List[DocstringError] = []
-    docstring_errors = _get_docstring_errors()
+    docstring_errors = _get_docstring_errors(select_paths=select_paths)
 
     logger.debug("Getting docstring errors applicable to public api.")
     for docstring_error in docstring_errors:
@@ -255,11 +263,13 @@ def run_darglint(paths: List[pathlib.Path]) -> List[str]:
     return raw_results.stdout.split("\n")
 
 
-def main():
+def main(
+    select_paths: list[pathlib.Path] | None = None,
+):
     logger.info(
         "Generating list of public API docstring errors. This may take a few minutes."
     )
-    errors = _public_api_docstring_errors()
+    errors = _public_api_docstring_errors(select_paths=select_paths)
 
     if not errors:
         logger.info("There are no public API docstring errors.")
