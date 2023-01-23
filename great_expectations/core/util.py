@@ -256,7 +256,7 @@ def convert_to_json_serializable(
 
 
 @public_api
-def convert_to_json_serializable(  # noqa: C901 - complexity 28
+def convert_to_json_serializable(  # noqa: C901 - complexity 32
     data: JSONConvertable,
 ) -> JSONValues:
     """Converts an object to one that is JSON-serializable.
