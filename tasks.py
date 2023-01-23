@@ -149,13 +149,6 @@ def fix(ctx: Context, path: str = "."):
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def fix(ctx: Context, path: str = "."):
-    """Automatically fix all possible code issues."""
-    lint(ctx, path=path, fix=True)
-    fmt(ctx, path=path, sort_=True)
-
-
-@invoke.task(help={"path": _PATH_HELP_DESC})
 def upgrade(ctx: Context, path: str = "."):
     """Run code syntax upgrades."""
     cmds = ["ruff", path, "--select", "UP", "--fix"]
