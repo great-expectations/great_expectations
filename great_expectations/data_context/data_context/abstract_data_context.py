@@ -318,7 +318,11 @@ class AbstractDataContext(ConfigPeer, ABC):
     def update_project_config(
         self, project_config: DataContextConfig | Mapping
     ) -> None:
-        project_config = self.get_or_create_data_context_config(project_config)
+        """Update the context's config with the values from another config object.
+
+        Args:
+            project_config: The config to use to update the context's internal state.
+        """
         self.config.update(project_config)
 
     @usage_statistics_enabled_method(
