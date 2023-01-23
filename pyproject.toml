@@ -190,15 +190,25 @@ docstring_style = "google"
 target-version = "py37"
 line-length = 88
 select = [
-    "E", # pycodestyle
+    # https://github.com/charliermarsh/ruff#pyflakes-f
     "F", # Pyflakes
+    # https://github.com/charliermarsh/ruff#pycodestyle-e-w
+    "E", # pycodestyle
+    "W", # Warning
+    # https://github.com/charliermarsh/ruff#pyupgrade-up
+    # https://github.com/charliermarsh/ruff#mccabe-c90
     "C", # Complexity (mccabe+) & comprehensions
+    # https://github.com/charliermarsh/ruff#pyupgrade-up
+    "UP", # pyupgrade
+    # https://github.com/charliermarsh/ruff#isort-i
     # "I", # isort # TODO: replace isort usage with this
 ]
 ignore = [
+    # https://github.com/charliermarsh/ruff#pyflakes-f
+    "F842", # variable annotated but unused # TODO enable
+    # https://github.com/charliermarsh/ruff#pycodestyle-e-w
     "E501", # line-length # TODO: too many violations
     "E402", # module level import not at top of file
-    "F842", # variable annotated but unused # TODO enable
     # https://github.com/charliermarsh/ruff#flake8-comprehensions-c4
     "C400", # TODO enable
     "C408", # TODO enable
@@ -207,6 +217,9 @@ ignore = [
     "C414", # TODO enable
     "C416", # TODO enable
     "C417", # TODO enable
+    # https://github.com/charliermarsh/ruff#pyupgrade-up
+    "UP006", # use-pep585-annotation
+    "UP007", # use-pep604-annotation
 ]
 extend-exclude = [
     "scripts/*",
