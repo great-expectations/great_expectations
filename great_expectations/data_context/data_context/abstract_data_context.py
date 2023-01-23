@@ -731,6 +731,17 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.config.datasources[datasource_name] = datasource_config  # type: ignore[assignment,index]
         self._cached_datasources[datasource_name] = datasource_config
 
+    def add_or_update_datasource(
+        self,
+        name: Optional[str] = None,
+        id: Optional[str] = None,
+        **kwargs: Optional[dict],
+    ) -> LegacyDatasource | BaseDatasource:
+        """
+        TODO
+        """
+        pass
+
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
         return list(self.variables.data_docs_sites.keys())  # type: ignore[union-attr]
