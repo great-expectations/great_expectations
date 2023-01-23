@@ -758,11 +758,8 @@ class RenderedAtomicContent(RenderedContent):
 
     def to_json_dict(self) -> dict:
         """Returns RenderedAtomicContent as a json dictionary."""
-        d = super().to_json_dict()
-        d["name"] = self.name
+        d = renderedAtomicContentSchema.dump(self)
         d["value"] = self.value.to_json_dict()
-        d["value_type"] = self.value_type
-        d["exception"] = self.exception
         return d
 
 
@@ -791,4 +788,5 @@ class RenderedAtomicContentSchema(Schema):
         return data
 
 
+renderedAtomicContentSchema = RenderedAtomicContentSchema()
 renderedAtomicValueSchema = RenderedAtomicValueSchema()
