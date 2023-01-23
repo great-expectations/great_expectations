@@ -199,10 +199,12 @@ class SphinxInvokeDocsBuilder:
 
                 doc_str = str(doc)
 
-                import_code_block = "CodeBlock" in doc_str
+                code_block_exists = "CodeBlock" in doc_str
                 doc_str = self._add_doc_front_matter(
-                    doc=doc_str, title=title_str, import_code_block=import_code_block
+                    doc=doc_str, title=title_str, import_code_block=code_block_exists
                 )
+                if code_block_exists:
+                    doc_str = self._clean_up_code_blocks(doc_str)
 
                 # Write out mdx files
                 output_path = self.docusaurus_api_docs_path / self._get_mdx_file_path(
@@ -401,4 +403,15 @@ class SphinxInvokeDocsBuilder:
         )
         doc = doc_front_matter + doc
 
+        return doc
+
+    def _clean_up_code_blocks(self, doc: str) -> str:
+        """Revert escaped characters in code blocks.
+
+        CodeBlock common characters <,>,` get escaped when generating HTML.
+        Also quotes use a different quote character. This method cleans up
+        these items so that the code block is rendered appropriately.
+        """
+        doc = doc.replace("&lt;", "<").replace("&gt;", ">").replace("”", '"')
+        doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
         return doc
