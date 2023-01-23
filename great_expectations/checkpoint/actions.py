@@ -1042,14 +1042,18 @@ class StoreMetricsAction(ValidationAction):
 class UpdateDataDocsAction(ValidationAction):
     """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
 
-    YAML configuration example::
+    YAML configuration example
+
+    ::
 
         - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
 
     You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
-    list of sites to update::
+    list of sites to update
+
+    ::
 
         - name: update_data_docs
         action:
