@@ -407,8 +407,38 @@ class BaseCheckpoint(ConfigPeer):
                 f"Exception occurred while running validation[{idx}] of Checkpoint '{self.name}': {e.message}."
             ) from e
 
-    def self_check(self, pretty_print=True) -> dict:
-        # Provide visibility into parameters that Checkpoint was instantiated with.
+    def self_check(self, pretty_print: bool = True) -> dict:
+        """Method that is intended to provide visibility into parameters that Checkpoint was instantiated with.
+
+        If used as part of the test_yaml_config() workflow, the user will be able to know if the Checkpoint is
+        configured with all necessary parameters.
+
+        When run with self_check()::
+
+            yaml_config: str = # [a checkpoint yaml configuration]
+            config: CommentedMap = yaml.load(yaml_config)
+            checkpoint_config: CheckpointConfig = CheckpointConfig(**config)
+            checkpoint: Checkpoint = Checkpoint(
+                data_context=context,
+                checkpoint_config.to_json_dict()
+            )
+            checkpoint.self_check()
+
+        When run with test_yaml_config::
+
+            checkpoint: Checkpoint = context.test_yaml_config(
+                yaml_config=yaml_config,
+                name="my_checkpoint"
+                )
+
+        Args:
+            pretty_print (bool): If True, then additional messages if Checkpoint configuration is missing
+                a "validations" or "action_list" attribute.
+
+        Returns:
+            Dictionary containing Checkpoint configuration converted into json dictionary.
+
+        """
         report_object: dict = {"config": self.config.to_json_dict()}
 
         if pretty_print:

@@ -51,6 +51,13 @@ class TypeLookup(
         __dict = __dict or {}
         super().__init__(__dict, **kwargs)
 
+    def type_names(self) -> Generator[str, None, None]:
+        """Yields only the type `str` names of the TypeLookup."""
+        for k in self:
+            if isinstance(k, str):
+                yield k
+            continue
+
     @overload
     def __getitem__(self, key: str) -> Type:
         ...
@@ -128,7 +135,7 @@ class TypeLookup(
         txn_exc: Union[Exception, None] = None
 
         backup_data = copy.copy(self.data)
-        LOGGER.info("Beginning TypeLookup transaction")
+        LOGGER.debug("Beginning TypeLookup transaction")
         try:
             yield self
         except Exception as exc:
@@ -136,11 +143,11 @@ class TypeLookup(
             raise
         finally:
             if txn_exc:
-                LOGGER.info("Transaction of items rolled back")
+                LOGGER.debug("Transaction of items rolled back")
                 self.data = backup_data
             else:
-                LOGGER.info("Transaction committing items")
-            LOGGER.info("Completed TypeLookup transaction")
+                LOGGER.debug("Transaction committing items")
+            LOGGER.debug("Completed TypeLookup transaction")
 
 
 if __name__ == "__main__":

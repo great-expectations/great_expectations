@@ -276,6 +276,10 @@ class TableAsset(DataAsset):
                 batch_identifiers=IDDict(batch_spec["batch_identifiers"]),
                 batch_spec_passthrough=None,
             )
+
+            # Some pydantic annotations are postponed due to circular imports. This will set the annotations before we
+            # instantiate the Batch class since we can import them above.
+            Batch.update_forward_refs()
             batch_list.append(
                 Batch(
                     datasource=self.datasource,

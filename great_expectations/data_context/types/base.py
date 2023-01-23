@@ -14,6 +14,7 @@ from typing import (
     ClassVar,
     Dict,
     List,
+    Mapping,
     MutableMapping,
     Optional,
     Set,
@@ -2387,7 +2388,7 @@ class DataContextConfig(BaseYamlConfig):
         self.plugins_directory = plugins_directory
         if validation_operators is not None:
             self.validation_operators = validation_operators
-        self.stores = stores
+        self.stores = stores or {}
         self.notebooks = notebooks
         self.data_docs_sites = data_docs_sites
         self.config_variables_file_path = config_variables_file_path
@@ -2450,6 +2451,10 @@ class DataContextConfig(BaseYamlConfig):
 
         serializeable_dict = self.to_json_dict()
         return PasswordMasker.sanitize_config(serializeable_dict)
+
+    def update(self, config: DataContextConfig | Mapping) -> None:
+        for k, v in config.items():
+            self[k] = v
 
     def __repr__(self) -> str:
         """

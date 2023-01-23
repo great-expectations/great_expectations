@@ -167,7 +167,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
     ):
         renderer_configuration = RendererConfiguration(
-            configuraiton=configuration,
+            configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )
