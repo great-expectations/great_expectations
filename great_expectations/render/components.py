@@ -762,6 +762,7 @@ class RenderedAtomicContent(RenderedContent):
         d["name"] = self.name
         d["value"] = self.value.to_json_dict()
         d["value_type"] = self.value_type
+        d["exception"] = self.exception
         return d
 
 
