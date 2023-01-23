@@ -151,8 +151,8 @@ def fix(ctx: Context, path: str = "."):
 @invoke.task(help={"path": _PATH_HELP_DESC})
 def upgrade(ctx: Context, path: str = "."):
     """Run code syntax upgrades."""
-    cmds = ["pyupgrade", path, "--py3-plus"]
-    ctx.run(" ".join(cmds))
+    cmds = ["ruff", path, "--select", "UP", "--fix"]
+    ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
 @invoke.task(
