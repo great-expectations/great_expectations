@@ -186,11 +186,11 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         Args:
             configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
                            from the configuration attribute of the Expectation instance.
+
         Raises:
             `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
                                                     Expectation.
         """
-
         # Setting up a configuration
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
