@@ -4,6 +4,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
@@ -84,6 +85,7 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     map_metric = "column_values.null"
     args_keys = ("column",)
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
