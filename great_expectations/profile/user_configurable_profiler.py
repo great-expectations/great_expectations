@@ -8,6 +8,7 @@ from dateutil.parser import parse
 from tqdm.auto import tqdm
 
 from great_expectations.core import ExpectationSuite
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
@@ -214,14 +215,14 @@ class UserConfigurableProfiler:
             "BOOLEAN": self._build_expectations_value_set,
         }
 
+    @public_api
     def build_suite(self) -> ExpectationSuite:
         """
-        User-facing expectation-suite building function. Works with an instantiated UserConfigurableProfiler object.
-        Args:
+        Build an Expectation Suite based on the `semantic_types_dict` if one is provided.
+        Otherwise, profile the dataset and build the suite based on the results.
 
         Returns:
-            An expectation suite built either with or without a semantic_types dict
-
+            An Expectation Suite.
         """
         expectation_suite: ExpectationSuite
         if len(self.profile_dataset.get_expectation_suite().expectations) > 0:  # type: ignore[union-attr]
