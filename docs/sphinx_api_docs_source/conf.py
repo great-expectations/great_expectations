@@ -2,7 +2,7 @@
 #
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-
+from __future__ import annotations
 
 # -- Update syspath
 import os
@@ -70,6 +70,9 @@ def custom_process_docstring(app, what, name, obj, options, lines):
     _remove_feature_maturity_info(
         app=app, what=what, name=name, obj=obj, options=options, lines=lines
     )
+    _convert_code_snippets_to_docusaurus(
+        app=app, what=what, name=name, obj=obj, options=options, lines=lines
+    )
 
 
 def _remove_whitelist_tag(app, what, name, obj, options, lines):
@@ -115,6 +118,37 @@ def _remove_feature_maturity_info(app, what, name, obj, options, lines):
 
     if feature_maturity_info_start and feature_maturity_info_end:
         del lines[feature_maturity_info_start : feature_maturity_info_end + 1]
+
+
+def _convert_code_snippets_to_docusaurus(app, what, name, obj, options, lines):
+    """Convert code snippets to docusaurus style using CodeBlock component."""
+
+    code_snippet_start: None | int = None
+    code_snippet_end: None | int = None
+    num_triple_quotes: int = 0
+    for idx, line in enumerate(lines):
+        if line.strip().startswith("```"):
+            num_triple_quotes += 1
+            if not code_snippet_start:
+                code_snippet_start = idx
+            elif not code_snippet_end:
+                code_snippet_end = idx
+
+                # Create and replace snippet with CodeBlock
+                language = lines[code_snippet_start].replace("```", "").strip()
+                content = lines[code_snippet_start + 1 : code_snippet_end]
+                stub = '<CodeBlock language="{language}">{{`{content}`}}</CodeBlock>'.format(
+                    language=language, content="{" + "\n".join(content) + "}"
+                )
+                lines[code_snippet_start] = stub
+                del lines[code_snippet_start + 1 : code_snippet_end + 1]
+
+            else:
+                code_snippet_start = idx
+                code_snippet_end = None
+
+    if not num_triple_quotes % 2 == 0:
+        raise ValueError("Triple quotes should be matched.")
 
 
 def setup(app):

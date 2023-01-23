@@ -199,7 +199,7 @@ class SphinxInvokeDocsBuilder:
 
                 doc_str = str(doc)
 
-                import_code_block = False
+                import_code_block = "CodeBlock" in doc_str
                 doc_str = self._add_doc_front_matter(
                     doc=doc_str, title=title_str, import_code_block=import_code_block
                 )
@@ -389,15 +389,15 @@ class SphinxInvokeDocsBuilder:
         """
         import_code_block_content = ""
         if import_code_block:
-            import_code_block_content = "\nimport CodeBlock from '@theme/CodeBlock';\n"
+            import_code_block_content = "import CodeBlock from '@theme/CodeBlock';"
 
         doc_front_matter = (
             "---\n"
             f"title: {title}\n"
             f"sidebar_label: {title}\n"
             "---\n"
-            "\n"
             f"{import_code_block_content}"
+            "\n"
         )
         doc = doc_front_matter + doc
 
