@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Mapping
+
 import pytest
 
 from great_expectations.data_context.data_context.ephemeral_data_context import (
@@ -6,6 +10,7 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
+    ProgressBarsConfig,
 )
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 
@@ -92,3 +97,28 @@ def test_delete_store_failure(in_memory_data_context: EphemeralDataContextSpy):
     assert num_stores_after == num_stores_before
     assert num_store_configs_after == num_store_configs_before
     assert context.save_count == 0
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "config",
+    [
+        pytest.param(
+            DataContextConfig(progress_bars=ProgressBarsConfig(globally=True)),
+            id="DataContextConfig",
+        ),
+        pytest.param(
+            {"progress_bars": ProgressBarsConfig(globally=True)}, id="Mapping"
+        ),
+    ],
+)
+def test_update_project_config(
+    in_memory_data_context: EphemeralDataContextSpy, config: DataContextConfig | Mapping
+):
+    context = in_memory_data_context
+
+    assert context.progress_bars is None
+
+    context.update_project_config(config)
+
+    assert context.progress_bars["globally"] is True
