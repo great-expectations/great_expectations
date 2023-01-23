@@ -1574,7 +1574,9 @@ class Validator:
         run_name: Optional[str] = None,
         run_time: Optional[str] = None,
         checkpoint_name: Optional[str] = None,
-    ) -> Union[ExpectationValidationResult, ExpectationSuiteValidationResult]:
+    ) -> Union[
+        ExpectationValidationResult, ExpectationSuiteValidationResult
+    ]:  # noqa: C901 - 31
         # noinspection SpellCheckingInspection
         """Run all expectations and return the outcome of the run.
 
