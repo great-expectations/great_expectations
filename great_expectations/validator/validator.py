@@ -1554,13 +1554,13 @@ class Validator:
             )
 
     # TODO: <Alex>Should "include_config" also be an argument of this method?</Alex>
-    @public_api
+    @public_api  # noqa: C901 - complexity 31
     @deprecated_argument(
         argument_name="run_id",
         message="Only the str version of this argument is deprecated. run_id should be a RunIdentifier or dict. Support will be removed in 0.16.0.",
         version="0.13.0",
     )
-    def validate(  # noqa: C901 - complexity 31
+    def validate(
         self,
         expectation_suite: str | ExpectationSuite | None = None,
         run_id: str | RunIdentifier | Dict[str, str] | None = None,
@@ -1574,9 +1574,7 @@ class Validator:
         run_name: Optional[str] = None,
         run_time: Optional[str] = None,
         checkpoint_name: Optional[str] = None,
-    ) -> Union[
-        ExpectationValidationResult, ExpectationSuiteValidationResult
-    ]:  # noqa: C901 - 31
+    ) -> Union[ExpectationValidationResult, ExpectationSuiteValidationResult]:
         # noinspection SpellCheckingInspection
         """Run all expectations and return the outcome of the run.
 
