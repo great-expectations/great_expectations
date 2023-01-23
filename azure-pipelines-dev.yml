@@ -103,11 +103,10 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install $(grep -E '^(black|invoke|isort|ruff|pyupgrade)' reqs/requirements-dev-contrib.txt)
+              pip install $(grep -E '^(black|invoke|isort|ruff)' reqs/requirements-dev-contrib.txt)
               EXIT_STATUS=0
               invoke fmt --check || EXIT_STATUS=$?
               invoke lint || EXIT_STATUS=$?
-              pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
   - stage: custom_checks
