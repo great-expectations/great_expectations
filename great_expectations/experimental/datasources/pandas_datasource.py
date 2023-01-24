@@ -10,12 +10,12 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Un
 import pydantic
 from typing_extensions import ClassVar, Literal
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
-    BatchRequestError,
     BatchRequestOptions,
     BatchSortersDefinition,
     DataAsset,
@@ -109,7 +109,7 @@ class CSVAsset(DataAsset):
         if options:
             for option, value in options.items():
                 if option in option_names_to_group and not isinstance(value, str):
-                    raise BatchRequestError(
+                    raise ge_exceptions.InvalidBatchRequestError(
                         f"All regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )

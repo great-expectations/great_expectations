@@ -24,6 +24,7 @@ from pydantic import dataclasses as pydantic_dc
 from pydantic import root_validator, validate_arguments
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
@@ -61,10 +62,6 @@ class BatchRequest:
     datasource_name: str
     data_asset_name: str
     options: BatchRequestOptions
-
-
-class BatchRequestError(Exception):
-    pass
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -182,7 +179,7 @@ class DataAsset(ExperimentalBaseModel):
         if options is not None and not self._valid_batch_request_options(options):
             allowed_keys = set(self.batch_request_options_template().keys())
             actual_keys = set(options.keys())
-            raise BatchRequestError(
+            raise ge_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
@@ -214,7 +211,7 @@ class DataAsset(ExperimentalBaseModel):
                 data_asset_name=self.name,
                 options=self.batch_request_options_template(),
             )
-            raise BatchRequestError(
+            raise ge_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
                 f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
                 f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
