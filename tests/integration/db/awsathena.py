@@ -49,21 +49,22 @@ datasource_dict = {
     "name": "my_awsathena_datasource",
     "class_name": "Datasource",
     "execution_engine": {
-      "class_name": "SqlAlchemyExecutionEngine",
-      "module_name": "great_expectations.execution_engine",
-      "connection_string": connection_string,
+        "class_name": "SqlAlchemyExecutionEngine",
+        "module_name": "great_expectations.execution_engine",
+        "connection_string": connection_string,
     },
     "data_connectors": {
-      "default_runtime_data_connector_name": {
-        "class_name": "RuntimeDataConnector",
-        "batch_identifiers": ["default_identifier_name"],
-        "module_name": "great_expectations.datasource.data_connector",
-      },
-      "default_inferred_data_connector_name": {
-        "class_name": "InferredAssetSqlDataConnector",
-        "module_name": "great_expectations.datasource.data_connector",
-        "include_schema_name": "true"},
-    }
+        "default_runtime_data_connector_name": {
+            "class_name": "RuntimeDataConnector",
+            "batch_identifiers": ["default_identifier_name"],
+            "module_name": "great_expectations.datasource.data_connector",
+        },
+        "default_inferred_data_connector_name": {
+            "class_name": "InferredAssetSqlDataConnector",
+            "module_name": "great_expectations.datasource.data_connector",
+            "include_schema_name": "true",
+        },
+    },
 }
 # </snippet>
 context.test_yaml_config(yaml.dump(datasource_dict))
