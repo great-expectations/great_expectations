@@ -5,8 +5,8 @@ from typing import List, Pattern, cast
 
 import pytest
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.experimental.datasources.interfaces import BatchRequestError
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     PandasDatasource,
@@ -100,7 +100,7 @@ def test_csv_asset_with_non_string_regex_named_parameters(pandas_datasource, csv
         data_path=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
     )
-    with pytest.raises(BatchRequestError):
+    with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # year is an int which will raise an error
         asset.get_batch_request({"year": 2018, "month": "04"})
 
