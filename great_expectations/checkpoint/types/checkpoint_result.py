@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Union
 
 from marshmallow import Schema, fields, post_load, pre_dump
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -129,7 +130,16 @@ class CheckpointResult(SerializableDictDot):
             )
         return self._data_asset_names
 
+    @public_api
     def list_expectation_suite_names(self) -> List[str]:
+        """Return the list of expecation suite names for a checkpoint.
+
+        Args:
+            None
+
+        Returns:
+            self._expectation_suite_names: The list of expectation suite names.
+        """
         if self._expectation_suite_names is None:
             self._expectation_suite_names = list(
                 {
