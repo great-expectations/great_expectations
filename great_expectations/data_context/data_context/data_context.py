@@ -24,7 +24,7 @@ from great_expectations.data_context.types.base import GXCloudConfig
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-
+from great_expectations.core._docs_decorators import public_api
 
 @overload
 def DataContext(
@@ -66,7 +66,7 @@ def DataContext(
 
 # TODO: add additional overloads
 
-
+@public_api
 def DataContext(
     context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
