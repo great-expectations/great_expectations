@@ -9,10 +9,21 @@ import re
 import uuid
 import warnings
 from numbers import Number
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import numpy as np
 import scipy.stats as stats
+from typing_extensions import Protocol, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
@@ -1080,3 +1091,17 @@ def sanitize_parameter_name(
         name = f"{name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{suffix}"
 
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
+
+
+class _NumericIterableWithDtype(Iterable, Protocol):
+    @property
+    def dtype(self) -> Any:
+        ...
+
+
+def _is_iterable_numeric_and_has_dtype_attr(
+    obj: Any,
+) -> TypeGuard[_NumericIterableWithDtype]:
+    if hasattr(obj, "dtype") and not np.issubdtype(obj.dtype, np.number):
+        return True
+    return False
