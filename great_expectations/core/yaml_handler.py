@@ -23,18 +23,18 @@ class YAMLHandler:
 
     Typical usage example:
 
-    .. code-block:: text
-
-        >>> simple_yaml: str = '''
-        ...    name: test
-        ...    class_name: test_class
-        ...    module_name: test.test_class
-        ... '''
-        ... yaml_handler = YAMLHandler()
-        ... res: dict = yaml_handler.load(simple_yaml)
-        ... example_dict: dict = dict(abc=1)
-        ... yaml_handler = YAMLHandler()
-        ... yaml_handler.dump(example_dict)
+    ```python
+    simple_yaml: str = '''
+        name: test
+        class_name: test_class
+        module_name: test.test_class
+    '''
+    yaml_handler = YAMLHandler()
+    res: dict = yaml_handler.load(simple_yaml)
+    example_dict: dict = dict(abc=1)
+    yaml_handler = YAMLHandler()
+    yaml_handler.dump(example_dict)
+    ```
 
     """
 
@@ -77,13 +77,13 @@ class YAMLHandler:
         Dump code has been adopted from:
         https://yaml.readthedocs.io/en/latest/example.html#output-of-dump-as-a-string
 
-        Example::
-
-            >>> data = {'foo': 'bar'}
-            >>> yaml_str = yaml_handler.dump(data)
-            >>> print(yaml_str)
-            foo:                                  
-                bar:
+        ```python
+        >>> data = {'foo': 'bar'}
+        >>> yaml_str = yaml_handler.dump(data)
+        >>> print(yaml_str)
+        foo:
+            bar:
+        ```
 
         Args:
             data: The dictionary to serialize into a Python object.
