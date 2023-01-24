@@ -201,7 +201,7 @@ select = [
     # https://github.com/charliermarsh/ruff#pyupgrade-up
     "UP", # pyupgrade
     # https://github.com/charliermarsh/ruff#isort-i
-    # "I", # isort # TODO: replace isort usage with this
+    "I", # isort
 ]
 ignore = [
     # https://github.com/charliermarsh/ruff#pyflakes-f
