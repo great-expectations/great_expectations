@@ -94,7 +94,7 @@ class YAMLHandler:
 
         Returns:
             If no stream argument is provided, the str that results from ``_handler.dump()``.
-            Otherwise, None as the `_handler.dump()` works in place and will exercise the handler accordingly.
+            Otherwise, None as the ``_handler.dump()`` works in place and will exercise the handler accordingly.
         """
         if stream:
             return self._dump(data=data, stream=stream, **kwargs)  # type: ignore[func-returns-value]
