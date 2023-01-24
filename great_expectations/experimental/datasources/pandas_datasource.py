@@ -5,20 +5,10 @@ import logging
 import os
 import pathlib
 import re
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    List,
-    Optional,
-    Pattern,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
 
 import pydantic
-from typing_extensions import ClassVar, Literal, TypeAlias
+from typing_extensions import ClassVar, Literal
 
 from great_expectations.alias_types import PathStr
 from great_expectations.core.batch_spec import PathBatchSpec

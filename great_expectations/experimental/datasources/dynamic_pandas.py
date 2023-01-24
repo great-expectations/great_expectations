@@ -11,7 +11,6 @@ from typing import (  # type: ignore[attr-defined]
     Hashable,
     List,
     NamedTuple,
-    Sequence,
     Set,
     Tuple,
     Type,
