@@ -51,61 +51,6 @@ class DocstringError:
         return self.raw_error
 
 
-def parse_pydocstyle_errors(raw_errors: List[str]) -> List[DocstringError]:
-    """Parse raw string output of pydocstyle to DocstringError."""
-
-    docstring_errors: List[DocstringError] = []
-    for idx, raw_error in enumerate(raw_errors):
-        if not raw_error:
-            break
-        if raw_error.startswith("/"):
-            raw_error_path = raw_error
-            raw_error_error = raw_errors[idx + 1]
-
-            docstring_errors.append(
-                DocstringError(
-                    name=_parse_name(raw_error_path=raw_error_path),
-                    filepath_relative_to_repo_root=_repo_relative_filepath(
-                        pathlib.Path(_parse_filepath(raw_error_path=raw_error_path))
-                    ),
-                    error=raw_error_error.strip(),
-                    raw_error="\n".join([raw_error_path, raw_error_error]),
-                    line_number=_parse_line_number(raw_error_path),
-                )
-            )
-
-    return docstring_errors
-
-
-def parse_darglint_errors(raw_errors: List[str]) -> List[DocstringError]:
-    """Parse raw string output of darglint to DocstringError."""
-
-    docstring_errors: List[DocstringError] = []
-    for raw_error in raw_errors:
-        if not raw_error:
-            continue
-
-        split_error = raw_error.split(":")
-        path = split_error[0]
-        name = split_error[1]
-        line_number = int(split_error[2])
-        error_code = split_error[3]
-
-        docstring_errors.append(
-            DocstringError(
-                name=name,
-                filepath_relative_to_repo_root=_repo_relative_filepath(
-                    pathlib.Path(path)
-                ),
-                error=error_code,
-                raw_error=raw_error,
-                line_number=line_number,
-            )
-        )
-
-    return docstring_errors
-
-
 def parse_ruff_errors(raw_errors: List[str]) -> List[DocstringError]:
     """Parse raw string output of ruff to DocstringError."""
 
@@ -154,35 +99,6 @@ def _repo_relative_filepath(filepath: pathlib.Path) -> pathlib.Path:
         return filepath
 
 
-def _parse_filepath(raw_error_path: str) -> str:
-    """Parse the filepath from the first part of an error pair."""
-    match = re.search(r"(?:/[^/]+)+?/\w+\.\w+", raw_error_path)
-    if match:
-        filepath: str = match.group(0)
-    else:
-        raise ValueError(f"No filepath found in error: {raw_error_path}.")
-    return filepath
-
-
-def _parse_line_number(raw_error_path: str) -> int:
-    """Parse the line number from the first part of an error pair."""
-    raw_line_num = raw_error_path.split(":")[1]
-    match = re.search(r"\d+", raw_line_num)
-    if match:
-        line_num = int(match.group(0))
-    else:
-        raise ValueError(f"No line number found in error: {raw_error_path}.")
-    return line_num
-
-
-def _parse_name(raw_error_path: str) -> str:
-    match = re.search(r"`(.*?)`", raw_error_path)
-    name = ""
-    if match:
-        name = match.group(0).replace("`", "")
-    return name
-
-
 def run_ruff(paths: List[pathlib.Path]) -> List[str]:
     """Run ruff to identify issues with docstrings."""
 
@@ -203,27 +119,6 @@ def run_ruff(paths: List[pathlib.Path]) -> List[str]:
         raise ValueError(err)
 
     _log_with_timestamp("Finished running ruff")
-    return raw_results.stdout.split("\n")
-
-
-def run_pydocstyle(paths: List[pathlib.Path]) -> List[str]:
-    """Run pydocstyle to identify issues with docstrings."""
-
-    _log_with_timestamp("Running pydocstyle")
-    cmds = ["pydocstyle"] + [str(p) for p in paths]
-    raw_results: subprocess.CompletedProcess = subprocess.run(
-        cmds,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        universal_newlines=True,
-    )
-
-    # Check to make sure `pydocstyle` actually ran
-    err: str = raw_results.stderr
-    if err:
-        raise ValueError(err)
-
-    _log_with_timestamp("Finished running pydocstyle")
     return raw_results.stdout.split("\n")
 
 
@@ -304,33 +199,11 @@ def _public_api_docstring_errors(
     return set(public_api_docstring_errors)
 
 
-def run_darglint(paths: List[pathlib.Path]) -> List[str]:
-    """Run darglint to identify issues with docstrings."""
-
-    _log_with_timestamp("Running darglint")
-    cmds = ["darglint"] + [str(p) for p in paths]
-    raw_results: subprocess.CompletedProcess = subprocess.run(
-        cmds,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        universal_newlines=True,
-    )
-
-    # Check to make sure `darglint` actually ran
-    err: str = raw_results.stderr
-    if err:
-        raise ValueError(err)
-
-    _log_with_timestamp("Finished running darglint")
-
-    return raw_results.stdout.split("\n")
-
-
 def main(
     select_paths: list[pathlib.Path] | None = None,
 ):
     logger.info(
-        "Generating list of public API docstring errors. This may take a few minutes."
+        "Generating list of public API docstring errors. This may take a minute."
     )
     errors = _public_api_docstring_errors(select_paths=select_paths)
 
