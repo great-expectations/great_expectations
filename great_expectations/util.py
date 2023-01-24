@@ -888,7 +888,7 @@ def read_sas(
         )
 
 
-def build_in_memory_runtime_context() -> AbstractDataContext:
+def build_in_memory_runtime_context() -> EphemeralDataContext:
     """
     Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
     """

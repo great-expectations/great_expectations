@@ -2617,7 +2617,7 @@ def empty_base_data_context_in_cloud_mode(
     ge_cloud_config: GXCloudConfig,
 ) -> BaseDataContext:
     project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
+    project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
     context = gx.data_context.BaseDataContext(
@@ -2638,7 +2638,7 @@ def empty_data_context_in_cloud_mode(
 ):
     """This fixture is a DataContext in cloud mode that mocks calls to the cloud backend during setup so that it can be instantiated in tests."""
     project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
+    project_path.mkdir(exist_ok=True)
     project_path_name: str = str(project_path)
 
     def mocked_config(*args, **kwargs) -> DataContextConfig:
