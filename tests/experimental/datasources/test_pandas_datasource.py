@@ -24,7 +24,7 @@ def csv_path() -> Path:
     return Path(
         file_relative_path(
             __file__,
-            pathlib.Path("../../test_sets/taxi_yellow_tripdata_samples"),
+            pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples"),
         )
     )
 
