@@ -54,15 +54,14 @@ Options:
 
 ### Linting
 
-Our CI system will check using `black`, `isort`, `flake8` and `pyupgrade`. 
+Our CI system will check using `black`, `isort`, and `ruff`.
 
 If you have already committed files but are seeing errors during the continuous integration tests, you can run tests manually:
 
 ```console
 black <PATH/TO/YOUR/CHANGES>
 isort <PATH/TO/YOUR/CHANGES> --check-only --skip docs
-flake8 <PATH/TO/YOUR/CHANGES>
-pyupgrade <PATH/TO/YOUR/CHANGES> --py3-plus
+ruff <PATH/TO/YOUR/CHANGES> --fix
 ```
 
 ### Type Checking

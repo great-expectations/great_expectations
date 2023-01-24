@@ -484,27 +484,6 @@ def validate_validation_dict(validation_dict: dict) -> None:
         raise gx_exceptions.CheckpointError("validation action_list cannot be empty")
 
 
-def send_cloud_notification(url: str, headers: dict):
-    """
-    Post a CloudNotificationAction to GX Cloud Backend for processing.
-    """
-    session = requests.Session()
-
-    try:
-        response = session.post(url=url, headers=headers)
-    except requests.ConnectionError:
-        logger.error(f"Failed to connect to Cloud backend after {10} retries.")
-    except Exception as e:
-        logger.error(str(e))
-    else:
-        if response.status_code != 200:
-            message = f"Cloud Notification request returned error {response.status_code}: {response.text}"
-            logger.error(message)
-            return {"cloud_notification_result": message}
-        else:
-            return {"cloud_notification_result": "Cloud notification succeeded."}
-
-
 def send_sns_notification(
     sns_topic_arn: str, sns_subject: str, validation_results: str, **kwargs
 ) -> str:

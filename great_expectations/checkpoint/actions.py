@@ -8,7 +8,6 @@ from __future__ import annotations
 import logging
 import warnings
 from typing import TYPE_CHECKING, Dict, Optional, Union
-from urllib.parse import urljoin
 
 from typing_extensions import Final
 
@@ -22,7 +21,6 @@ except ImportError:
     pypd = None
 
 from great_expectations.checkpoint.util import (
-    send_cloud_notification,
     send_email,
     send_microsoft_teams_notifications,
     send_opsgenie_alert,
@@ -1134,59 +1132,6 @@ class UpdateDataDocsAction(ValidationAction):
             data_docs_validation_results[sites["site_name"]] = sites["site_url"]
         # </snippet>
         return data_docs_validation_results
-
-
-class CloudNotificationAction(ValidationAction):
-    """
-    CloudNotificationAction is an action which utilizes the Cloud store backend
-    to deliver user-specified Notification Actions.
-    """
-
-    def __init__(
-        self,
-        data_context: DataContext,
-        checkpoint_ge_cloud_id: str,
-    ) -> None:
-        super().__init__(data_context)
-        self.checkpoint_ge_cloud_id = checkpoint_ge_cloud_id
-
-    def _run(
-        self,
-        validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: GXCloudIdentifier,
-        data_asset=None,
-        payload: Optional[Dict] = None,
-        expectation_suite_identifier=None,
-        checkpoint_identifier=None,
-    ):
-        logger.debug("CloudNotificationAction.run")
-
-        if validation_result_suite is None:
-            logger.warning(
-                f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
-            )
-
-        if not self._using_cloud_context:
-            return Exception(
-                "CloudNotificationActions can only be used in GX Cloud Mode."
-            )
-        if not isinstance(validation_result_suite_identifier, GXCloudIdentifier):
-            raise TypeError(
-                "validation_result_id must be of type GeCloudIdentifier, not {}".format(
-                    type(validation_result_suite_identifier)
-                )
-            )
-
-        ge_cloud_url = urljoin(
-            self.data_context.ge_cloud_config.base_url,
-            f"/organizations/{self.data_context.ge_cloud_config.organization_id}/checkpoints/"
-            f"{self.checkpoint_ge_cloud_id}/suite-validation-results/{validation_result_suite_identifier.cloud_id}/notification-actions",
-        )
-        auth_headers = {
-            "Content-Type": "application/vnd.api+json",
-            "Authorization": f"Bearer {self.data_context.ge_cloud_config.access_token}",
-        }
-        return send_cloud_notification(url=ge_cloud_url, headers=auth_headers)
 
 
 class SNSNotificationAction(ValidationAction):

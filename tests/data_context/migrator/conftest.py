@@ -200,7 +200,7 @@ def empty_serialized_configuration_bundle() -> dict:
             },
             "notebooks": None,
             "plugins_directory": None,
-            "stores": None,
+            "stores": {},
             "validations_store_name": None,
         },
         "datasources": [],
@@ -235,7 +235,7 @@ def serialized_configuration_bundle() -> dict:
             },
             "notebooks": None,
             "plugins_directory": None,
-            "stores": None,
+            "stores": {},
             "validations_store_name": None,
         },
         "datasources": [

@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 import copy
 import logging
-from typing import Any, ClassVar, List, Optional, Union
+from typing import Any, Optional
 
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import TypedDict
 
 from great_expectations.checkpoint.util import (
     batch_request_in_validations_contains_batch_data,
@@ -77,10 +79,10 @@ class SimpleCheckpointConfigurator:
         self,
         name: str,
         data_context,
-        site_names: Union[None, str, List[str]] = "all",
+        site_names: str | list[str] | None = "all",
         slack_webhook: Optional[str] = None,
         notify_on: str = "all",
-        notify_with: Union[str, List[str]] = "all",
+        notify_with: str | list[str] | None = "all",
         **kwargs,
     ) -> None:
         """
@@ -97,8 +99,8 @@ class SimpleCheckpointConfigurator:
             name: The Checkpoint name
             data_context: a valid DataContext
             site_names: Names of sites to update. Defaults to "all". Set to None to skip updating data docs.
-            slack_webhook: If present, a sleck message will be sent.
-            notify_on: When to send a slack notification. Defaults to "all". Possible values: "all", "failure", "success"
+            slack_webhook: If present, a Slack message will be sent.
+            notify_on: When to send a Slack notification. Defaults to "all". Possible values: "all", "failure", "success"
             notify_with: optional list of DataDocs site names to display in Slack message. Defaults to showing all
 
         Examples:
@@ -239,9 +241,7 @@ class SimpleCheckpointConfigurator:
             raise ValueError("notify_on must be one of: 'all', 'failure', 'success'")
 
     def _validate_notify_with(self):
-        if not self.notify_with:
-            return
-        if self.notify_with == "all":
+        if not self.notify_with or self.notify_with == "all":
             return
         if not is_list_of_strings(self.notify_with):
             raise ValueError("notify_with must be a list of site names")

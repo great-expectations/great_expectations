@@ -35,6 +35,7 @@ from typing_extensions import Literal
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
+    deprecated_argument,
     deprecated_method_or_class,
     public_api,
 )
@@ -98,7 +99,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import (
     PasswordMasker,
-    build_store_from_config,
     instantiate_class_from_config,
     parse_substitution_variable,
 )
@@ -227,7 +227,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         # Init stores
         self._stores: dict = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)  # type: ignore[arg-type]
+        self._init_stores(self.project_config_with_variables_substituted.stores)
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -298,7 +298,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @abstractmethod
     def _init_project_config(
-        self, project_config: Union[DataContextConfig, Mapping]
+        self, project_config: DataContextConfig | Mapping
     ) -> DataContextConfig:
         raise NotImplementedError
 
@@ -314,6 +314,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             - Ephemeral : not saved, and logging message outputted
         """
         self.variables.save_config()
+
+    def update_project_config(
+        self, project_config: DataContextConfig | Mapping
+    ) -> None:
+        """Update the context's config with the values from another config object.
+
+        Args:
+            project_config: The config to use to update the context's internal state.
+        """
+        self.config.update(project_config)
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
@@ -566,7 +576,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     f"{float(CURRENT_GX_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
                     f"Visit {AbstractDataContext.MIGRATION_WEBSITE} to learn more about the upgrade process."
                 )
-                built_store: Optional[Store] = self._build_store_from_config(
+                built_store: Store = self._build_store_from_config(
                     profiler_store_name,  # type: ignore[arg-type]
                     DataContextConfigDefaults.DEFAULT_STORES.value[profiler_store_name],  # type: ignore[index,arg-type]
                 )
@@ -1076,15 +1086,40 @@ class AbstractDataContext(ConfigPeer, ABC):
         ]
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        """List existing Checkpoint identifiers on this context.
+
+        Args:
+            None
+
+        Returns:
+            Either a list of strings or ConfigurationIdentifier depending on the environment and context type
+        """
+
         return self.checkpoint_store.list_checkpoints()
 
     def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+        """List existing Profiler identifiers on this context.
+
+        Args:
+            None
+
+        Returns:
+            Either a list of strings or ConfigurationIdentifier depending on the environment and context type
+        """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
 
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
     ) -> RuleBasedProfiler:
+        """Save an existing Profiler object utilizing the context's underlying ProfilerStore.
+
+        Args:
+            profiler: The Profiler object to persist.
+
+        Returns:
+            The input profiler - may be modified with an id depending on the backing store.
+        """
         name = profiler.name
         ge_cloud_id = profiler.ge_cloud_id
         key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
@@ -1163,19 +1198,45 @@ class AbstractDataContext(ConfigPeer, ABC):
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
 
-    def add_store(self, store_name: str, store_config: dict) -> Optional[Store]:
-        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+    @public_api
+    def add_store(self, store_name: str, store_config: dict) -> Store:
+        """Add a new Store to the DataContext.
 
         Args:
-            store_name (str): a key for the new Store in in self._stores
-            store_config (dict): a config for the Store to add
+            store_name: the name to associate with the created store.
+            store_config: the config to use to construct the store.
 
         Returns:
-            store (Store)
+            The instantiated Store.
         """
+        store = self._build_store_from_config(store_name, store_config)
 
-        self.config.stores[store_name] = store_config  # type: ignore[index]
-        return self._build_store_from_config(store_name, store_config)
+        # Both the config and the actual stores need to be kept in sync
+        self.config.stores[store_name] = store_config
+        self._stores[store_name] = store
+
+        self._save_project_config()
+        return store
+
+    def delete_store(self, store_name: str) -> None:
+        """Delete an existing Store from the DataContext.
+
+        Args:
+            store_name: The name of the Store to be deleted.
+
+        Raises:
+            StoreConfigurationError if the target Store is not found.
+        """
+        if store_name not in self.config.stores and store_name not in self._stores:
+            raise gx_exceptions.StoreConfigurationError(
+                f'Attempted to delete a store named: "{store_name}". It is not a configured store.'
+            )
+
+        # Both the config and the actual stores need to be kept in sync
+        self.config.stores.pop(store_name, None)
+        self._stores.pop(store_name, None)
+
+        self._save_project_config()
 
     def list_datasources(self) -> List[dict]:
         """List currently-configured datasources on this context. Masks passwords.
@@ -1230,6 +1291,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
+    @public_api
+    @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
+    @deprecated_argument(argument_name="batches", version="0.14.0")
     def add_checkpoint(
         self,
         name: str,
@@ -1257,7 +1321,38 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> Checkpoint:
+        """Add a Checkpoint to the DataContext.
 
+        ---Documentation---
+            - https://docs.greatexpectations.io/docs/terms/checkpoint/
+
+        Args:
+            name: The name to give the checkpoint.
+            config_version: The config version of this checkpoint.
+            template_name: The template to use in generating this checkpoint.
+            module_name: The module name to use in generating this checkpoint.
+            class_name: The class name to use in generating this checkpoint.
+            run_name_template: The run name template to use in generating this checkpoint.
+            expectation_suite_name: The expectation suite name to use in generating this checkpoint.
+            batch_request: The batch request to use in generating this checkpoint.
+            action_list: The action list to use in generating this checkpoint.
+            evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
+            runtime_configuration: The runtime configuration to use in generating this checkpoint.
+            validations: The validations to use in generating this checkpoint.
+            profilers: The profilers to use in generating this checkpoint.
+            validation_operator_name: The validation operator name to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
+            batches: The batches to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
+            site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
+            expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            default_validation_id: The default validation ID to use in generating this checkpoint.
+
+        Returns:
+            The Checkpoint object created.
+        """
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
@@ -1297,6 +1392,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> Checkpoint:
+        """Retrieves a given Checkpoint by either name or id.
+
+        Args:
+            name: The name of the target Checkpoint.
+            ge_cloud_id: The id associated with the target Checkpoint.
+
+        Returns:
+            The requested Checkpoint.
+
+        Raises:
+            CheckpointNotFoundError if the requested Checkpoint does not exists.
+        """
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
@@ -1315,6 +1422,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
+        """Deletes a given Checkpoint by either name or id.
+
+        Args:
+            name: The name of the target Checkpoint.
+            ge_cloud_id: The id associated with the target Checkpoint.
+
+        Raises:
+            CheckpointNotFoundError if the requested Checkpoint does not exists.
+        """
         return self.checkpoint_store.delete_checkpoint(
             name=name, ge_cloud_id=ge_cloud_id
         )
@@ -1830,6 +1946,19 @@ class AbstractDataContext(ConfigPeer, ABC):
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
     ) -> RuleBasedProfiler:
+        """
+        Constructs a Profiler, persists it utilizing the context's underlying ProfilerStore,
+        and returns it to the user for subsequent usage.
+
+        Args:
+            name: The name of the RBP instance
+            config_version: The version of the RBP (currently only 1.0 is supported)
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
+            variables: Any variables to be substituted within the rules
+
+        Returns:
+            The persisted Profiler constructed by the input arguments.
+        """
         config_data = {
             "name": name,
             "config_version": config_version,
@@ -1857,6 +1986,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
+        """Retrieves a given Profiler by either name or id.
+
+        Args:
+            name: The name of the target Profiler.
+            ge_cloud_id: The id associated with the target Profiler.
+
+        Returns:
+            The requested Profiler.
+
+        Raises:
+            ProfilerNotFoundError if the requested Profiler does not exists.
+        """
         return RuleBasedProfiler.get_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
@@ -1869,6 +2010,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
+        """Deletes a given Profiler by either name or id.
+
+        Args:
+            name: The name of the target Profiler.
+            ge_cloud_id: The id associated with the target Profiler.
+
+        Raises:
+            ProfilerNotFoundError if the requested Profiler does not exists.
+        """
         RuleBasedProfiler.delete_profiler(
             profiler_store=self.profiler_store,
             name=name,
@@ -2076,6 +2226,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return validation_operators
 
     def list_validation_operator_names(self):
+        """List the names of currently-configured Validation Operators on this context"""
         if not self.validation_operators:
             return []
 
@@ -2680,8 +2831,21 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     @classmethod
     def get_or_create_data_context_config(
-        cls, project_config: Union[DataContextConfig, Mapping]
+        cls, project_config: DataContextConfig | Mapping
     ) -> DataContextConfig:
+        """Utility method to take in an input config and ensure its conversion to a rich
+        DataContextConfig. If the input is already of the appropriate type, the function
+        exits early.
+
+        Args:
+            project_config: The input config to be evaluated.
+
+        Returns:
+            An instance of DataContextConfig.
+
+        Raises:
+            ValidationError if the input config does not adhere to the required shape of a DataContextConfig.
+        """
         if isinstance(project_config, DataContextConfig):
             return project_config
         try:
@@ -2851,9 +3015,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             conf_file_option="usage_statistics_url",
         )
 
-    def _build_store_from_config(
-        self, store_name: str, store_config: dict
-    ) -> Optional[Store]:
+    def _build_store_from_config(self, store_name: str, store_config: dict) -> Store:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
         # the expectations_store does not yet exist by:
@@ -2875,7 +3037,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         ):
             store_config["store_backend"].update({"suppress_store_backend_id": True})
 
-        new_store = build_store_from_config(
+        new_store = Store.build_store_from_config(
             store_name=store_name,
             store_config=store_config,
             module_name=module_name,
@@ -3155,7 +3317,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _construct_data_context_id(self) -> str:
         # Choose the id of the currently-configured expectations store, if it is a persistent store
-        expectations_store = self._stores[self.variables.expectations_store_name]
+        expectations_store = self.stores[self.expectations_store_name]
         if isinstance(expectations_store.store_backend, TupleStoreBackend):
             # suppress_warnings since a warning will already have been issued during the store creation
             # if there was an invalid store config

@@ -17,6 +17,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestError,
     BatchRequestOptions,
+    BatchSortersDefinition,
     DataAsset,
     Datasource,
 )
@@ -135,6 +136,7 @@ class CSVAsset(DataAsset):
             data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
+
             # batch_definition (along with batch_spec and markers) is only here to satisfy a
             # legacy constraint when computing usage statistics in a validator. We hope to remove
             # it in the future.
@@ -152,6 +154,10 @@ class CSVAsset(DataAsset):
 
             batch_metadata = copy.deepcopy(request.options)
             batch_metadata["path"] = path
+
+            # Some pydantic annotations are postponed due to circular imports. This will set the annotations before we
+            # instantiate the Batch class since we can import them above.
+            Batch.update_forward_refs()
             batch_list.append(
                 Batch(
                     datasource=self.datasource,
@@ -164,8 +170,7 @@ class CSVAsset(DataAsset):
                     legacy_batch_definition=batch_definition,
                 )
             )
-        # TODO: implement sorters
-        # self._sort_batches(batch_list)
+        self.sort_batches(batch_list)
         return batch_list
 
 
@@ -188,7 +193,11 @@ class PandasDatasource(Datasource):
         return PandasExecutionEngine
 
     def add_csv_asset(
-        self, name: str, data_path: PathStr, regex: Union[str, re.Pattern]
+        self,
+        name: str,
+        data_path: PathStr,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
     ) -> CSVAsset:
         """Adds a csv asset to this pandas datasource
 
@@ -201,5 +210,6 @@ class PandasDatasource(Datasource):
             name=name,
             path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
         )
         return self.add_asset(asset)
