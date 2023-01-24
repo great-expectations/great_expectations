@@ -117,8 +117,8 @@ class CSVAsset(DataAsset):
                     )
         return super().get_batch_request(options)
 
-    def _option_name_to_regex_group_id(self) -> Dict[str, int]:
-        option_to_group: Dict[str, int] = dict(self.regex.groupindex)
+    def _option_name_to_regex_group_id(self) -> BatchRequestOptions:
+        option_to_group: BatchRequestOptions = dict(self.regex.groupindex)
         named_groups = set(self.regex.groupindex.values())
         for i in range(1, self.regex.groups + 1):
             if i not in named_groups:
