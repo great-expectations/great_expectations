@@ -298,7 +298,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @abstractmethod
     def _init_project_config(
-        self, project_config: Union[DataContextConfig, Mapping]
+        self, project_config: DataContextConfig | Mapping
     ) -> DataContextConfig:
         raise NotImplementedError
 
@@ -314,6 +314,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             - Ephemeral : not saved, and logging message outputted
         """
         self.variables.save_config()
+
+    def update_project_config(
+        self, project_config: DataContextConfig | Mapping
+    ) -> None:
+        """Update the context's config with the values from another config object.
+
+        Args:
+            project_config: The config to use to update the context's internal state.
+        """
+        self.config.update(project_config)
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
@@ -1188,15 +1198,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
 
+    @public_api
     def add_store(self, store_name: str, store_config: dict) -> Store:
-        """Add a new Store to the DataContext and (for convenience) return the instantiated Store object.
+        """Add a new Store to the DataContext.
 
         Args:
-            store_name (str): a key for the new Store in in self.stores
-            store_config (dict): a config for the Store to add
+            store_name: the name to associate with the created store.
+            store_config: the config to use to construct the store.
 
         Returns:
-            store (Store)
+            The instantiated Store.
         """
         store = self._build_store_from_config(store_name, store_config)
 
@@ -2820,7 +2831,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     @classmethod
     def get_or_create_data_context_config(
-        cls, project_config: Union[DataContextConfig, Mapping]
+        cls, project_config: DataContextConfig | Mapping
     ) -> DataContextConfig:
         """Utility method to take in an input config and ensure its conversion to a rich
         DataContextConfig. If the input is already of the appropriate type, the function
