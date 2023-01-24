@@ -321,11 +321,12 @@ Bucket: {error}"""
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 
+        # ZEP code path
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method = batch_spec.reader_method
             reader_options = batch_spec.reader_options
             path = batch_spec.path
-            reader_fn = self._get_reader_fn(reader_method, path)
+            reader_fn: DataFrameFactoryFn = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
 
         else:
