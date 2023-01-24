@@ -57,8 +57,10 @@ class CheckpointResult(SerializableDictDot):
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
         checkpoint_config: CheckpointConfig,
+        validation_result_url: Optional[str] = None,
         success: Optional[bool] = None,
     ) -> None:
+        self._validation_result_url = validation_result_url
         self._run_id = run_id
         self._run_results = run_results
         self._checkpoint_config = checkpoint_config
@@ -105,6 +107,10 @@ class CheckpointResult(SerializableDictDot):
     @property
     def run_id(self) -> RunIdentifier:
         return self._run_id
+
+    @property
+    def validation_result_url(self) -> str:
+        return self._validation_result_url
 
     @property
     def success(self) -> bool:
@@ -301,6 +307,7 @@ class CheckpointResult(SerializableDictDot):
         make this refactoring infeasible at the present time.
         """
         serializeable_dict: dict = {
+            "validation_result_url": self.validation_result_url,
             "run_id": self.run_id.to_json_dict(),
             "run_results": convert_to_json_serializable(
                 data=recursively_convert_to_json_serializable(test_obj=self.run_results)

@@ -4,7 +4,7 @@ import copy
 import datetime
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Final, List, Optional, Union, cast
 from uuid import UUID
 
 import great_expectations.exceptions as gx_exceptions
@@ -37,7 +37,10 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.cloud_constants import (
+    CLOUD_APP_DEFAULT_BASE_URL,
+    GXCloudRESTResource,
+)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -217,7 +220,16 @@ class BaseCheckpoint(ConfigPeer):
 
                 checkpoint_run_results.update(run_results)
 
+        # Generate a URL to the validation result details page in GX Cloud
+        validation_result_url = None
+        cloud_base_url: Final[str] = CLOUD_APP_DEFAULT_BASE_URL
+        for key in checkpoint_run_results:
+            if isinstance(key, GXCloudIdentifier) and key.cloud_id:
+                validation_result_url = (
+                    f"{cloud_base_url}?validationResultId={key.cloud_id}"
+                )
         return CheckpointResult(
+            validation_result_url=validation_result_url,
             run_id=run_id,
             run_results=checkpoint_run_results,
             checkpoint_config=self.config,
