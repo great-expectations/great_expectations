@@ -545,7 +545,7 @@ class ExpectationDiagnostics(SerializableDictDot):
             # TODO: update this for ruff (or don't)
             isort_ok = isort.check_code(
                 code,
-                **isort.profiles.black,  # type: ignore[arg-type]
+                **isort.profiles.black,
                 ignore_whitespace=True,
                 known_local_folder=["great_expectations"],
             )
