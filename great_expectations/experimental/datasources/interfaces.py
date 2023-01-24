@@ -316,9 +316,10 @@ class Datasource(
     @property
     def execution_engine(self) -> ExecutionEngine:
         engine_kwargs = self.dict(exclude=self._excluded_eng_args)
-        return self.execution_engine_override(
-            **engine_kwargs
-        ) or self.execution_engine_type(**engine_kwargs)
+        if self.execution_engine_override:
+            return self.execution_engine_override(**engine_kwargs)
+        else:
+            return self.execution_engine_type(**engine_kwargs)
 
     @pydantic.validator("assets", pre=True)
     @classmethod
