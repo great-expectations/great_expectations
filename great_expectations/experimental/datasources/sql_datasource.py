@@ -29,15 +29,13 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
 )
 
-try:
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine import Engine
-except ImportError:
-    create_engine = None
-    Engine = None
-
 if TYPE_CHECKING:
     import sqlalchemy
+
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+        SqlAlchemyExecutionEngine,
+    )
 
 
 class SQLDatasourceError(Exception):
@@ -238,8 +236,6 @@ class TableAsset(DataAsset):
         Returns:
             A list of batches that match the options specified in the batch request.
         """
-        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
         self._validate_batch_request(batch_request)
 
         batch_list: List[Batch] = []
@@ -323,15 +319,16 @@ class SQLDatasource(Datasource):
     assets: Dict[str, TableAsset] = {}
 
     # non-field private attrs
-    _engine: Engine = pydantic.PrivateAttr()
+    _engine: sqlalchemy.engine.Engine = pydantic.PrivateAttr()
 
     @property
-    def engine(self) -> Engine:
-        return self._engine
+    def execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Returns the default execution engine type."""
+        return SqlAlchemyExecutionEngine
 
-    class Config:
-        arbitrary_types_allowed = True
-        extra = pydantic.Extra.forbid
+    @property
+    def engine(self) -> sqlalchemy.engine.Engine:
+        return self._engine
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -334,23 +334,6 @@ class Datasource(
         LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
 
-    # Abstract Methods
-    @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
-        """Return the ExecutionEngine type use for this Datasource"""
-        raise NotImplementedError(
-            "One needs to implement 'execution_engine_type' on a Datasource subclass"
-        )
-
-    @property
-    def test_connection(self) -> None:
-        """Test the connection for this Datasource."""
-        raise NotImplementedError(
-            "One needs to implement 'test_connection' on a Datasource subclass"
-        )
-
-    # End Abstract Methods
-
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
@@ -387,6 +370,23 @@ class Datasource(
         asset._datasource = self
         self.assets[asset.name] = asset
         return asset
+
+    # Abstract Methods
+    @property
+    def execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Return the ExecutionEngine type use for this Datasource"""
+        raise NotImplementedError(
+            "One needs to implement 'execution_engine_type' on a Datasource subclass"
+        )
+
+    @property
+    def test_connection(self) -> None:
+        """Test the connection for this Datasource."""
+        raise NotImplementedError(
+            "One needs to implement 'test_connection' on a Datasource subclass"
+        )
+
+    # End Abstract Methods
 
 
 @dataclasses.dataclass(frozen=True)
