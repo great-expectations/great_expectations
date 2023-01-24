@@ -314,9 +314,7 @@ class Datasource(
 
     @property
     def execution_engine(self) -> ExecutionEngine:
-        engine_kwargs = {
-            k: v for (k, v) in self.__dict__.items() if k not in self._excluded_eng_args
-        }
+        engine_kwargs = self.dict(exclude=self._excluded_eng_args)
         return self.execution_engine_override(
             **engine_kwargs
         ) or self.execution_engine_type(**engine_kwargs)

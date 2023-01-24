@@ -321,8 +321,7 @@ class SQLDatasource(Datasource):
     connection_string: str
     assets: Dict[str, TableAsset] = {}
 
-    # non-field private attrs
-    _engine: sqlalchemy.engine.Engine = pydantic.PrivateAttr()
+    engine: sqlalchemy.engine.Engine = pydantic.Field(..., exclude=True)
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
@@ -331,18 +330,18 @@ class SQLDatasource(Datasource):
 
         return SqlAlchemyExecutionEngine
 
-    @property
-    def engine(self) -> sqlalchemy.engine.Engine:
-        return self._engine
+    class Config:
+        arbitrary_types_allowed = True
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    @pydantic.root_validator(pre=True)
+    def _create_sqlalchemy_engine(cls, values: dict) -> dict:
         if SQLALCHEMY_IMPORTED:
-            self._engine = sqlalchemy.create_engine(self.connection_string)
+            values["engine"] = sqlalchemy.create_engine(values["connection_string"])
         else:
             raise SQLDatasourceError(
                 "Unable to create SQLDatasource due to missing sqlalchemy dependency."
             )
+        return values
 
     def test_connection(self) -> None:
         # test database connection
