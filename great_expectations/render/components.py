@@ -709,7 +709,7 @@ class RenderedAtomicValueSchema(Schema):
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
 
-    REMOVE_KEYS_IF_NONE: Final[tuple[str]] = (
+    REMOVE_KEYS_IF_NONE: Final[tuple[str, ...]] = (
         "header",
         "template",
         "table",
@@ -770,7 +770,7 @@ class RenderedAtomicContentSchema(Schema):
     value_type = fields.String(required=True, allow_none=False)
     exception = fields.String(required=False, allow_none=True)
 
-    REMOVE_KEYS_IF_NONE: Final[tuple[str]] = ("exception",)
+    REMOVE_KEYS_IF_NONE: Final[tuple[str, ...]] = ("exception",)
 
     @post_load
     def make_rendered_atomic_content(self, data, **kwargs):
