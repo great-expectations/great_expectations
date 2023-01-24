@@ -10,6 +10,7 @@ from typing import (  # type: ignore[attr-defined]
     Hashable,
     List,
     NamedTuple,
+    Sequence,
     Set,
     Tuple,
     Type,
@@ -82,7 +83,8 @@ class _FieldSpec(NamedTuple):
 
 
 FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
-    "filepath_or_buffer": {"path": _FieldSpec(pathlib.Path, ...)}
+    "filepath_or_buffer": {"path": _FieldSpec(pathlib.Path, ...)},
+    "filepath": {"path": _FieldSpec(pathlib.Path, ...)},
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
@@ -95,6 +97,8 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "Literal": Literal,
     # "Sequence": Sequence,
     "Hashable": Hashable,
+    "FilePath": FilePath,
+    "Pattern": re.Pattern,
 }
 
 
@@ -188,12 +192,12 @@ def _to_pydantic_fields(
 
         no_annotation: bool = param.annotation is inspect._empty
         if no_annotation:
-            logger.info(f"`{param_name}` has no type annotation")
+            logger.debug(f"`{param_name}` has no type annotation")
             FIELD_SKIPPED_NO_ANNOTATION.add(param_name)
             continue
         type_ = _get_annotation_type(param)
         if type_ is UNSUPPORTED_TYPE:
-            logger.info(f"`{param_name}` has no supported types. Field skipped")
+            logger.debug(f"`{param_name}` has no supported types. Field skipped")
             FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
             continue
 
@@ -238,60 +242,19 @@ def _generate_data_asset_models(
             type_name, f"{type_name.capitalize()}Asset"
         )
 
-        model = _create_pandas_asset_model(
-            model_name=model_name,
-            model_base=base_model_class,
-            type_field=(f"Literal['{type_name}']", type_name),
-            fields_dict=fields,
-        )
+        try:
+            model = _create_pandas_asset_model(
+                model_name=model_name,
+                model_base=base_model_class,
+                type_field=(f"Literal['{type_name}']", type_name),
+                fields_dict=fields,
+            )
+            print(f"{model_name}\n{pf(fields)}")
+        except NameError as err:
+            logger.exception(err)
+            continue
         models[type_name] = model
         model.update_forward_refs(**_TYPE_REF_LOCALS)
 
-    print(f"  Models\n{pf(models)}")
+    print(pf(dict(NEED_SPECIAL_HANDLING)))
     return models
-
-
-# pd.read_excel(__file__)
-
-# if __name__ == "__main__":
-
-# models = _generate_data_asset_models()
-# print(f"  Models\n{pf(models)}")
-
-# io_methods = _extract_io_methods()[:]
-# print(f"\n  IO Methods\n{pf(io_methods)}\n")
-
-# io_method_sigs = _extract_io_signatures(io_methods)
-# print("\n  IO Method Signatures\n")
-
-# for signature in io_method_sigs:
-#     print(f"{signature}\n")
-
-#     # print(f"\n  Pydantic Field Specs\n{pf(fields)}")
-
-#     model = _create_pandas_asset_model("POCAssetModel", fields)
-#     # print(f"\nNEED_SPECIAL_HANDLING\n{pf(dict(NEED_SPECIAL_HANDLING))}")
-#     # print(
-#     #     f"\nFIELD_SKIPPED_UNSUPPORTED_TYPE\n{pf(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n"
-#     # )
-#     # print(f"\nFIELD_SKIPPED_NO_ANNOTATION\n{pf(FIELD_SKIPPED_NO_ANNOTATION)}\n")
-#     print(model)
-#     model.update_forward_refs(
-#         FilePath=FilePath, Sequence=Sequence, Hashable=Hashable, Literal=Literal
-#     )
-#     # print(model(filepath_or_buffer=__file__))
-#     print("-----------------------------------")
-
-# special_handling = {
-#     k: v
-#     for (k, v) in NEED_SPECIAL_HANDLING.items()
-#     # if k in FIELD_SKIPPED_UNSUPPORTED_TYPE
-#     if k in FIELD_SKIPPED_NO_ANNOTATION
-# }
-# print(f"\nNEED_SPECIAL_HANDLING\n{pf(special_handling)}")
-# print(
-#     f"\nFIELD_SKIPPED_UNSUPPORTED_TYPE: {len(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n{pf(FIELD_SKIPPED_UNSUPPORTED_TYPE)}\n"
-# )
-# print(
-#     f"\nFIELD_SKIPPED_NO_ANNOTATION: {len(FIELD_SKIPPED_NO_ANNOTATION)}\n{pf(FIELD_SKIPPED_NO_ANNOTATION)}\n"
-# )
