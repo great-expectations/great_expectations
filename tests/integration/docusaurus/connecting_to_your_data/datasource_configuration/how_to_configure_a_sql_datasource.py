@@ -366,13 +366,11 @@ def configure_your_data_connectors_data_assets__runtime__yaml():
     connector_name = "name_of_my_runtime_data_connector"
     asset_count = 0
 
-    test_result = (
-        data_context.test_yaml_config(datasource_config)
-    )
+    test_result = data_context.test_yaml_config(datasource_config)
     datasource_check = test_result.self_check(max_examples=12)
     assert (
-            datasource_check["data_connectors"][connector_name]["data_asset_count"]
-            == asset_count
+        datasource_check["data_connectors"][connector_name]["data_asset_count"]
+        == asset_count
     ), f"{connector_name} {asset_count} != {datasource_check['data_connectors'][connector_name]['data_asset_count']}"
 
 
