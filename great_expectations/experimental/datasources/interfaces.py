@@ -301,6 +301,7 @@ class Datasource(
     _excluded_eng_args: ClassVar[Set[str]] = {
         "name",
         "type",
+        "execution_engine",
         "assets",
     }
     # Setting this in a Datasource subclass will override the execution engine type.
