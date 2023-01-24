@@ -75,7 +75,9 @@ attribute_naming_pattern = Word(alphas, alphanums + "_.") + ZeroOrMore(
     )
     ^ (
         Suppress(Literal("["))
-        + Word(nums + "-").setParseAction(lambda s, l, t: [int(t[0])])
+        + Word(nums + "-").setParseAction(
+            lambda s, l, t: [int(t[0])]  # noqa: E741 # ambiguous var name
+        )
         + Suppress(Literal("]"))
     )
 )

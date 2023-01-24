@@ -199,15 +199,12 @@ class SphinxInvokeDocsBuilder:
 
                 doc_str = str(doc)
 
-                # Add front matter
-                doc_front_matter = (
-                    "---\n"
-                    f"title: {title_str}\n"
-                    f"sidebar_label: {title_str}\n"
-                    "---\n"
-                    "\n"
+                code_block_exists = "CodeBlock" in doc_str
+                doc_str = self._add_doc_front_matter(
+                    doc=doc_str, title=title_str, import_code_block=code_block_exists
                 )
-                doc_str = doc_front_matter + doc_str
+                if code_block_exists:
+                    doc_str = self._clean_up_code_blocks(doc_str)
 
                 # Write out mdx files
                 output_path = self.docusaurus_api_docs_path / self._get_mdx_file_path(
@@ -378,3 +375,43 @@ class SphinxInvokeDocsBuilder:
         for file in all_files:
             if file not in excluded_files:
                 file.unlink()
+
+    def _add_doc_front_matter(
+        self, doc: str, title: str, import_code_block: bool = False
+    ) -> str:
+        """Add front matter to the beginning of doc.
+
+        Args:
+            doc: Document to add front matter to.
+            title: Desired title for the doc.
+            import_code_block: Whether to include import of docusaurus code block component.
+
+        Returns:
+            Document with front matter added.
+        """
+        import_code_block_content = ""
+        if import_code_block:
+            import_code_block_content = "import CodeBlock from '@theme/CodeBlock';"
+
+        doc_front_matter = (
+            "---\n"
+            f"title: {title}\n"
+            f"sidebar_label: {title}\n"
+            "---\n"
+            f"{import_code_block_content}"
+            "\n"
+        )
+        doc = doc_front_matter + doc
+
+        return doc
+
+    def _clean_up_code_blocks(self, doc: str) -> str:
+        """Revert escaped characters in code blocks.
+
+        CodeBlock common characters <,>,` get escaped when generating HTML.
+        Also quotes use a different quote character. This method cleans up
+        these items so that the code block is rendered appropriately.
+        """
+        doc = doc.replace("&lt;", "<").replace("&gt;", ">").replace("”", '"')
+        doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
+        return doc
