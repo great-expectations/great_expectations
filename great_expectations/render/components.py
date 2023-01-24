@@ -4,7 +4,7 @@ import json
 from copy import deepcopy
 from enum import Enum
 from string import Template as pTemplate
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Final, List, Optional, Union
 
 from marshmallow import Schema, fields, post_dump, post_load
 
@@ -708,7 +708,7 @@ class RenderedAtomicValueSchema(Schema):
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
 
-    REMOVE_KEYS_IF_NONE = [
+    REMOVE_KEYS_IF_NONE: Final[tuple[str]] = (
         "header",
         "template",
         "table",
@@ -717,7 +717,7 @@ class RenderedAtomicValueSchema(Schema):
         "table",
         "graph",
         "meta_notes",
-    ]
+    )
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
@@ -769,9 +769,7 @@ class RenderedAtomicContentSchema(Schema):
     value_type = fields.String(required=True, allow_none=False)
     exception = fields.String(required=False, allow_none=True)
 
-    REMOVE_KEYS_IF_NONE = [
-        "exception",
-    ]
+    REMOVE_KEYS_IF_NONE: Final[tuple[str]] = ("exception",)
 
     @post_load
     def make_rendered_atomic_content(self, data, **kwargs):
