@@ -29,7 +29,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
     )
 
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: C901 - 44
         cls,
         column,
         min_value=None,
@@ -108,7 +108,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
                 temp_column, min_value, max_value, strict_min, strict_max
             )
 
-        def is_between(val):
+        def is_between(val):  # noqa: C901 - 27
             # TODO Might be worth explicitly defining comparisons between types (for example, between strings and ints).
             # Ensure types can be compared since some types in Python 3 cannot be logically compared.
             # print type(val), type(min_value), type(max_value), val, min_value, max_value
@@ -238,7 +238,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             return (min_value <= column) & (column <= max_value)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: C901 - 17
         cls,
         column,
         min_value=None,
@@ -313,7 +313,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             )
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(
+    def _spark(  # noqa: C901 -17
         cls,
         column,
         min_value=None,
