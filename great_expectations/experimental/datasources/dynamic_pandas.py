@@ -107,7 +107,7 @@ def _public_dir(obj: object) -> List[str]:
 
 def _extract_io_methods() -> List[Tuple[str, DataFrameFactoryFn]]:
     # TODO: use blacklist/whitelist?
-    member_functions = inspect.getmembers(pd.io.api, predicate=inspect.isfunction)
+    member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
     return [t for t in member_functions if t[0].startswith("read_")]
 
 
@@ -188,12 +188,12 @@ def _to_pydantic_fields(
 
         no_annotation: bool = param.annotation is inspect._empty
         if no_annotation:
-            logger.warning(f"`{param_name}` has no type annotation")
+            logger.info(f"`{param_name}` has no type annotation")
             FIELD_SKIPPED_NO_ANNOTATION.add(param_name)
             continue
         type_ = _get_annotation_type(param)
         if type_ is UNSUPPORTED_TYPE:
-            logger.warning(f"`{param_name}` has no supported types. Field skipped")
+            logger.info(f"`{param_name}` has no supported types. Field skipped")
             FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
             continue
 
@@ -225,7 +225,7 @@ def _create_pandas_asset_model(
 def _generate_data_asset_models(
     base_model_class: Type[M],
 ) -> Dict[str, Type[M]]:
-    io_methods = _extract_io_methods()[1:3]
+    io_methods = _extract_io_methods()[:]
     io_method_sigs = _extract_io_signatures(io_methods)
 
     models: Dict[str, Type[M]] = {}
@@ -247,8 +247,11 @@ def _generate_data_asset_models(
         models[type_name] = model
         model.update_forward_refs(**_TYPE_REF_LOCALS)
 
+    print(f"  Models\n{pf(models)}")
     return models
 
+
+# pd.read_excel(__file__)
 
 # if __name__ == "__main__":
 
