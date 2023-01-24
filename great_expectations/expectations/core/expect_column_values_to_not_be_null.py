@@ -303,7 +303,6 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             success = success_ratio >= mostly
 
         nonnull_count = None
-
         return _format_map_output(
             result_format=parse_result_format(result_format),
             success=success,
@@ -317,5 +316,8 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             ),
             unexpected_index_list=metrics.get(
                 f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
+            ),
+            unexpected_index_query=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
             ),
         )

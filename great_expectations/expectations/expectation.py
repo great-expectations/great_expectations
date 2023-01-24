@@ -874,6 +874,8 @@ class Expectation(metaclass=MetaExpectation):
                 },
             }
         )
+        print("this is result_dict")
+        print(result_dict)
         if result_dict.get("unexpected_index_query"):
             query = result_dict.get("unexpected_index_query")
             # in Pandas case, this is a list
@@ -3336,6 +3338,8 @@ def _format_map_output(  # noqa: C901 - 22
     if result_format["result_format"] == "SUMMARY":
         return return_obj
 
+    print("this is unexpected_index_query")
+    print(unexpected_index_query)
     if unexpected_list is not None:
         return_obj["result"].update({"unexpected_list": unexpected_list})
     if unexpected_index_list is not None:
