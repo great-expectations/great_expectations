@@ -11,6 +11,7 @@ from typing import (
     List,
     MutableMapping,
     Optional,
+    Set,
     Type,
     TypeVar,
     Union,
@@ -296,11 +297,24 @@ class Datasource(
 
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
+    # Datasource instance attrs but these will be fed into the `execution_engine` constructor
+    _excluded_eng_args: ClassVar[Set[str]] = {
+        "name",
+        "type",
+        "assets",
+    }
 
     # instance attrs
     type: str
     name: str
     assets: MutableMapping[str, DataAssetType] = {}
+
+    @property
+    def execution_engine(self) -> ExecutionEngine:
+        engine_kwargs = {
+            k: v for (k, v) in self.__dict__.items() if k not in self._excluded_eng_args
+        }
+        return self.execution_engine_type(**engine_kwargs)
 
     @pydantic.validator("assets", pre=True)
     @classmethod
@@ -319,6 +333,23 @@ class Datasource(
 
         LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
+
+    # Abstract Methods
+    @property
+    def execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Return the ExecutionEngine type use for this Datasource"""
+        raise NotImplementedError(
+            "One needs to implement 'execution_engine_type' on a Datasource subclass"
+        )
+
+    @property
+    def test_connection(self) -> None:
+        """Test the connection for this Datasource."""
+        raise NotImplementedError(
+            "One needs to implement 'test_connection' on a Datasource subclass"
+        )
+
+    # End Abstract Methods
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
