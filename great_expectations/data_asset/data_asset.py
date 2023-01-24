@@ -176,9 +176,9 @@ class DataAsset:
                     modification. For more detail, see :ref:`meta`.
         """
 
-        def outer_wrapper(func):
+        def outer_wrapper(func):  # noqa: C901 - 22
             @wraps(func)
-            def wrapper(self, *args, **kwargs):
+            def wrapper(self, *args, **kwargs):  # noqa: C901 - 21
 
                 # Get the name of the method
                 method_name = func.__name__
