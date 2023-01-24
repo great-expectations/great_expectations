@@ -68,6 +68,7 @@ def usage_stats_decorated_methods_on_abstract_data_context() -> list[str]:
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
 def test_all_relevant_context_methods_emit_usage_stats(
     mock_emit: mock.MagicMock,
     usage_stats_decorated_methods_on_abstract_data_context: list[str],
