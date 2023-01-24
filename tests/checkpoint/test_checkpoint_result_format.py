@@ -660,6 +660,55 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
     assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
+@pytest.mark.integration
+def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_suppress_index_output_output(
+    data_context_with_connection_to_animal_names_db,
+    reference_sql_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_values_to_be_in_set,
+    expected_sql_query_output,
+):
+    """
+    What does this test?
+        - return_unexpected_index_list will suppress unexpected_index_list_output
+        - query will still appear
+    """
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+            "return_unexpected_index_list": False,
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_animal_names_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list = evrs[0]["results"][0]["result"].get(
+        "partial_unexpected_index_list"
+    )
+    assert not first_result_partial_list
+
+    query: str = evrs[0]["results"][0]["result"]["unexpected_index_query"]
+    assert query == expected_sql_query_output
+
+
 # pandas
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
