@@ -29,9 +29,15 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
 )
 
-if TYPE_CHECKING:
+SQLALCHEMY_IMPORTED: bool = False
+try:
     import sqlalchemy
 
+    SQLALCHEMY_IMPORTED: bool = True
+except ImportError:
+    pass
+
+if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
 
 
@@ -331,7 +337,12 @@ class SQLDatasource(Datasource):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._engine = create_engine(self.connection_string)
+        if SQLALCHEMY_IMPORTED:
+            self._engine = sqlalchemy.create_engine(self.connection_string)
+        else:
+            raise SQLDatasourceError(
+                "Unable to create SQLDatasource due to missing sqlalchemy dependency."
+            )
 
     def test_connection(self) -> None:
         # test database connection
