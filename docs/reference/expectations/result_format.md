@@ -11,6 +11,7 @@ The `result_format` parameter may be either a string or a dictionary which speci
     * `return_unexpected_index_query`: When running validations, a query (or a set of indices) will be returned that will
       allow you to retrieve the full set of unexpected results including any columns identified in `unexpected_index_column_names`.  Setting this value to `False` will 
       suppress the output (default is `True`).
+    * `return_unexpected_index_list`:  Setting this value to `False` will suppress `unexpected_index_list` output (default is `True`).
     * `partial_unexpected_count`: Sets the number of results to include in partial_unexpected_count, if applicable. If 
       set to 0, this will suppress the unexpected counts.
     * `include_unexpected_rows`: When running validations, this will return the entire row for each unexpected value in
