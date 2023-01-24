@@ -1243,6 +1243,13 @@ class CodeReferenceFilter:
             name="to_json_dict",
             filepath=pathlib.Path("great_expectations/validator/exception_info.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="False match for DataAssistant.run()",
+            name="run",
+            filepath=pathlib.Path(
+                "great_expectations/rule_based_profiler/data_assistant/data_assistant_runner.py"
+            ),
+        ),
     ]
 
     def __init__(
