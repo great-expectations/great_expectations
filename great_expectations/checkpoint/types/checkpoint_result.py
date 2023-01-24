@@ -306,7 +306,7 @@ class CheckpointResult(SerializableDictDot):
         due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
         make this refactoring infeasible at the present time.
         """
-        serializeable_dict: dict = {
+        serializable_dict: dict = {
             "validation_result_url": self.validation_result_url,
             "run_id": self.run_id.to_json_dict(),
             "run_results": convert_to_json_serializable(
@@ -315,10 +315,12 @@ class CheckpointResult(SerializableDictDot):
             "checkpoint_config": self.checkpoint_config.to_json_dict(),
             "success": convert_to_json_serializable(data=self.success),
         }
-        serializeable_dict = recursively_convert_to_json_serializable(
-            test_obj=serializeable_dict
+        if not self.validation_result_url:
+            serializable_dict.pop("validation_result_url")
+        serializable_dict = recursively_convert_to_json_serializable(
+            test_obj=serializable_dict
         )
-        return serializeable_dict
+        return serializable_dict
 
     def __getstate__(self):
         """
@@ -351,8 +353,8 @@ class CheckpointResult(SerializableDictDot):
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
         """
-        serializeable_dict: dict = self.to_json_dict()
-        return json.dumps(serializeable_dict, indent=2)
+        serializable_dict: dict = self.to_json_dict()
+        return json.dumps(serializable_dict, indent=2)
 
     def __str__(self) -> str:
         """
