@@ -63,8 +63,8 @@ def perform_check(suppress_output: bool) -> bool:
         ),
         # TODO: update this (or don't)
         Command(
-            "isort",
-            "isort --profile black --check .",
+            "ruff",
+            "ruff --select I --fix .",
             "Please ensure that your imports are sorted properly with `isort --profile black .`",
         ),
         Command(
