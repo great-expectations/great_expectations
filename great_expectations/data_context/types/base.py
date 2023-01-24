@@ -48,7 +48,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
-
+from great_expectations.core._docs_decorators import public_api
 try:
     from pyspark.sql.types import StructType
 except ImportError:
@@ -2671,11 +2671,37 @@ class CheckpointConfigSchema(Schema):
 
         return data
 
-
+@public_api
 class CheckpointConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = CheckpointConfigSchema
+    """Initializes the CheckpointConfig using a BaseYamlConfig.
 
+    Args:
+        name: The name of the checkpoint.
+        config_version: Your config version
+        template_name: The template name of your checkpoint
+        module_name: The module name used for your checkpoint
+        class_name: The class name of your checkpoint
+        run_name_template: The run template name
+        expectation_suite_name: The expectation suite name of your checkpoint
+        batch_request: The batch request
+        action_list: The action list
+        evaluation_parameters: The evaluation parameters
+        runtime_configuration: The runtime configuration for your checkpoint
+        validations: An optional list of validations in your checkpoint
+        default_validation_id: The default validation id of your checkpoint
+        profilers: An optional list of profilers in your checkpoint
+        validation_operator_name: The validation operator name
+        batches: An optional list of batches
+        commented_map: The commented map
+        ge_cloud_id: Your GE Cloud ID
+        site_names: The site names
+        slack_webhook: The slack webhook
+        notify_on: The notify on
+        notify_with: The notify with
+        expectation_suite_ge_cloud_id: Your expectation suite
+    """
     def __init__(
         self,
         name: Optional[str] = None,
