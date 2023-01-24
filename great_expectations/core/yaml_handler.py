@@ -48,12 +48,14 @@ class YAMLHandler:
     def load(self, stream: io.TextIOWrapper | str) -> dict[str, JSONValues]:
         """Converts a YAML input stream into a Python dictionary.
 
-        Example::
+        Example:
 
-            >>> import pathlib
-            >>> yaml_handler = YAMLHandler()
-            >>> my_file_str = pathlib.Path("my_file.yaml").read_text()
-            >>> dict_from_yaml = YAML_HANDLER.load(my_file_str)
+        ```python
+        >>> import pathlib
+        >>> yaml_handler = YAMLHandler()
+        >>> my_file_str = pathlib.Path("my_file.yaml").read_text()
+        >>> dict_from_yaml = YAML_HANDLER.load(my_file_str)
+        ```
 
         Args:
             stream: The input stream to read in. Although this function calls ruamel's load(), we
