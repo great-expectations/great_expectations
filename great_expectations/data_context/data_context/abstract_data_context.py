@@ -349,9 +349,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
             kwargs: Additional parameters, unused
 
-        Returns:
-            None
-
         Raises:
             DataContextError: If a suite with the same name exists and `overwrite_existing` is set to `False`.
         """
@@ -1474,7 +1471,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
-        """Validate against using an existing Checkpoint.
+        """Validate using an existing Checkpoint.
 
         Args:
             checkpoint_name: The name of a Checkpoint defined via the CLI or by manually creating a yml file
@@ -1870,7 +1867,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
-            (Batch) The `List` of requested Batch instances
+            (Batch) The `list` of requested Batch instances
 
         Raises:
             DatasourceError: If the specified `datasource_name` does not exist in the DataContext

@@ -103,7 +103,7 @@ class ExpectColumnDistinctValuesToEqualSet(ColumnExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        r"""Validates configuration for the Expectation.
+        """Validates configuration for the Expectation.
 
         For `expect_column_distinct_values_to_equal_set` we require that the `configuraton.kwargs` contain
         a `value_set` key that is either a `list`, `set`, or `dict`.

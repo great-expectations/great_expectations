@@ -254,7 +254,7 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        r"""Validates configuration for the Expectation.
+        """Validates configuration for the Expectation.
 
         For `expect_column_mean_to_be_between`, `configuraton.kwargs` may contain `min_value` and
         `max_value` whose value is either a number or date.

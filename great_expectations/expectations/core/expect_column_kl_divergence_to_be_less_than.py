@@ -192,7 +192,7 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        r"""Validates configuration for the Expectation.
+        """Validates configuration for the Expectation.
 
         For `expect_column_kl_divergence_to_be_less_than`, `configuraton.kwargs` may contain `min_value` and
         `max_value` whose value is either a number or date.
