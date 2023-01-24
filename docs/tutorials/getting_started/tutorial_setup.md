@@ -10,7 +10,7 @@ import VersionSnippet from './tutorial_version_snippet.mdx'
 :::note Prerequisites
 In order to work with Great Expectations, you will need:
 
-- A working Python install
+- A working Python install (3.7 to 3.10)
 - The ability to pip install for Python
   - Note: A best practice would be to do this in a virtual environment!
 - A working Git install
