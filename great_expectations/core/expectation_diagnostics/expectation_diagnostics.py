@@ -542,6 +542,7 @@ class ExpectationDiagnostics(SerializableDictDot):
                 )
             else:
                 black_ok = True
+            # TODO: update this for ruff (or don't)
             isort_ok = isort.check_code(
                 code,
                 **isort.profiles.black,  # type: ignore[arg-type]

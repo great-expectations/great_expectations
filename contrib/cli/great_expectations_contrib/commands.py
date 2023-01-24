@@ -61,6 +61,7 @@ def perform_check(suppress_output: bool) -> bool:
             "black --check .",
             "Please ensure that your files are linted properly with `black .`",
         ),
+        # TODO: update this (or don't)
         Command(
             "isort",
             "isort --profile black --check .",
