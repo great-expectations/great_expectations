@@ -191,7 +191,7 @@ class SimpleCheckpointConfigurator:
         return CheckpointConfig(**config_kwargs)
 
     @staticmethod
-    def _default_action_list() -> List[ActionDict]:
+    def _default_action_list() -> list[ActionDict]:
         return [
             ActionDicts.STORE_VALIDATION_RESULT,
             ActionDicts.STORE_EVALUATION_PARAMS,
