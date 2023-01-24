@@ -195,7 +195,9 @@ def test_save_datacontext_persists_zep_config(
 
 
 def test_add_and_save_zep_datasource(
-    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+    file_dc_config_dir_init: pathlib.Path,
+    zep_only_config: GxConfig,
+    db_file: pathlib.Path,
 ):
     datasource_name = "save_ds_test"
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML

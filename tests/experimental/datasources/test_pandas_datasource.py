@@ -2,7 +2,7 @@ import os
 import pathlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Pattern, cast
+from typing import List
 
 import pytest
 
@@ -51,10 +51,11 @@ def test_add_csv_asset_to_datasource(pandas_datasource, csv_path):
 
 @pytest.mark.unit
 def test_construct_csv_asset_directly(csv_path):
+    # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
         path=csv_path,
-        regex=cast(Pattern, r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv"),
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
     assert asset.name == "csv_asset"
     assert asset.path == csv_path
