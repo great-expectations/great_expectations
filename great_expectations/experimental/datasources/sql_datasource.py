@@ -32,10 +32,7 @@ from great_expectations.experimental.datasources.interfaces import (
 if TYPE_CHECKING:
     import sqlalchemy
 
-    from great_expectations.execution_engine import (
-        ExecutionEngine,
-        SqlAlchemyExecutionEngine,
-    )
+    from great_expectations.execution_engine import ExecutionEngine
 
 
 class SQLDatasourceError(Exception):
@@ -260,9 +257,9 @@ class TableAsset(DataAsset):
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
-            data, markers = SqlAlchemyExecutionEngine(
-                engine=self.datasource.engine
-            ).get_batch_data_and_markers(batch_spec=batch_spec)
+            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+                batch_spec=batch_spec
+            )
 
             # batch_definition (along with batch_spec and markers) is only here to satisfy a
             # legacy constraint when computing usage statistics in a validator. We hope to remove
@@ -324,6 +321,8 @@ class SQLDatasource(Datasource):
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the default execution engine type."""
+        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
         return SqlAlchemyExecutionEngine
 
     @property

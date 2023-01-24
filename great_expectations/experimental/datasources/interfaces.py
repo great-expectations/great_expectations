@@ -379,7 +379,6 @@ class Datasource(
             "One needs to implement 'execution_engine_type' on a Datasource subclass"
         )
 
-    @property
     def test_connection(self) -> None:
         """Test the connection for this Datasource."""
         raise NotImplementedError(
