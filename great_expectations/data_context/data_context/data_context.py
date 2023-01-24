@@ -21,10 +21,10 @@ from great_expectations.data_context.data_context.serializable_data_context impo
     SerializableDataContext,
 )
 from great_expectations.data_context.types.base import GXCloudConfig
+from great_expectations.core._docs_decorators import public_api
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
-from great_expectations.core._docs_decorators import public_api
 
 @overload
 def DataContext(
@@ -40,10 +40,7 @@ def DataContext(
     ge_cloud_access_token: None = ...,
     ge_cloud_organization_id: None = ...,
 ) -> FileDataContext:
-    """
-    If `context_root_dir` is provided and `cloud_mode`/`ge_cloud_mode` are `False`
-    a `FileDataContext` will always be returned.
-    """
+    # If `context_root_dir` is provided and `cloud_mode`/`ge_cloud_mode` are `False` a `FileDataContext` will always be returned.
     ...
 
 
@@ -80,22 +77,20 @@ def DataContext(
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
 ) -> AbstractDataContext:
-    """A DataContext represents a Great Expectations project. It is the primary entry point for a Great Expectations
-    deployment, with configurations and methods for all supporting components.
+    """A DataContext represents a Great Expectations project.
 
-    The DataContext is configured via a yml file stored in a directory called great_expectations; this configuration
-    file as well as managed Expectation Suites should be stored in version control. There are other ways to create a
-    Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GX Cloud
-    (coming soon). Please refer to our documentation for more details.
+    It is the primary entry point for a Great Expectations deployment, with configurations and methods for all
+    supporting components. The DataContext is configured via a yml file stored in a directory called great_expectations;
+    this configuration file as well as managed Expectation Suites should be stored in version control. There are other
+    ways to create a Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by
+    GX Cloud (coming soon). Please refer to our documentation for more details.
 
     You can Validate data or generate Expectations using Execution Engines including:
-
      * SQL (multiple dialects supported)
      * Spark
      * Pandas
 
     Your data can be stored in common locations including:
-
      * databases / data warehouses
      * files in s3, GCS, Azure, local storage
      * dataframes (spark and pandas) loaded into memory
@@ -112,6 +107,19 @@ def DataContext(
     --Documentation--
         - https://docs.greatexpectations.io/docs/terms/data_context
 
+    Args:
+        context_root_dir: The context root directory
+        runtime_environment: The runtime environment
+        cloud_mode: The cloud mode
+        cloud_base_url: Your cloud base url
+        cloud_access_token: Your cloud access token
+        cloud_organization_id: Your cloud organization ID
+        ge_cloud_mode: The deprecated cloud mode
+        ge_cloud_base_url: Your deprecated cloud base url
+        ge_cloud_access_token: Your deprecated cloud access token
+        ge_cloud_organization_id: Your deprecated cloud organization ID
+    Returns:
+        context
     """
     # Chetan - 20221208 - not formally deprecating these values until a future date
     (

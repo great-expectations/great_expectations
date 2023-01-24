@@ -12,6 +12,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
+from great_expectations.core._docs_decorators import public_api
 
 if TYPE_CHECKING:
     from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -99,11 +100,9 @@ class BatchIdentifierSchema(Schema):
     def make_batch_identifier(self, data, **kwargs):
         return BatchIdentifier(**data)
 
-
+@public_api
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier
-    and run_id.
-    """
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier and run_id."""
 
     def __init__(self, expectation_suite_identifier, run_id, batch_identifier) -> None:
         """Constructs a ValidationResultIdentifier

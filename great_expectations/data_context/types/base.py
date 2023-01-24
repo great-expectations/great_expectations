@@ -1895,8 +1895,8 @@ class BaseStoreBackendDefaults(DictDot):
 
 @public_api
 class S3StoreBackendDefaults(BaseStoreBackendDefaults):
-    """
-    Default store configs for s3 backends, with some accessible parameters
+    """Default store configs for s3 backends, with some accessible parameters.
+
     Args:
         default_bucket_name: Use this bucket name for stores that do not have a bucket name provided
         expectations_store_bucket_name: Overrides default_bucket_name if supplied
@@ -2008,8 +2008,8 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
 
 @public_api
 class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
-    """
-    Default store configs for filesystem backends, with some accessible parameters
+    """Default store configs for filesystem backends, with some accessible parameters.
+
     Args:
         root_directory: Absolute directory prepended to the base_directory for each store
         plugins_directory: Overrides default if supplied
@@ -2047,8 +2047,7 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
 
 @public_api
 class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
-    """
-    Default store configs for in memory backends.
+    """Default store configs for in memory backends.
 
     This is useful for testing without persistence.
     """
@@ -2314,7 +2313,6 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
             },
         }
 
-@public_api
 class DataContextConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = DataContextConfigSchema
