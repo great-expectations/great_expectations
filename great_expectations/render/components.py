@@ -7,6 +7,7 @@ from string import Template as pTemplate
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from marshmallow import Schema, fields, post_dump, post_load
+from typing_extensions import Final
 
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
@@ -708,7 +709,7 @@ class RenderedAtomicValueSchema(Schema):
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
 
-    REMOVE_KEYS_IF_NONE = [
+    REMOVE_KEYS_IF_NONE: Final[tuple[str, ...]] = (
         "header",
         "template",
         "table",
@@ -717,7 +718,7 @@ class RenderedAtomicValueSchema(Schema):
         "table",
         "graph",
         "meta_notes",
-    ]
+    )
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
@@ -742,11 +743,13 @@ class RenderedAtomicContent(RenderedContent):
         name: Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType],
         value: RenderedAtomicValue,
         value_type: Optional[str] = None,
+        exception: Optional[str] = None,
     ) -> None:
         # str conversion is performed to ensure Enum value is what is serialized
         self.name = str(name)
         self.value = value
         self.value_type = value_type
+        self.exception = exception
 
     def __repr__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
@@ -756,10 +759,8 @@ class RenderedAtomicContent(RenderedContent):
 
     def to_json_dict(self) -> dict:
         """Returns RenderedAtomicContent as a json dictionary."""
-        d = super().to_json_dict()
-        d["name"] = self.name
+        d = renderedAtomicContentSchema.dump(self)
         d["value"] = self.value.to_json_dict()
-        d["value_type"] = self.value_type
         return d
 
 
@@ -767,10 +768,24 @@ class RenderedAtomicContentSchema(Schema):
     name = fields.String(required=False, allow_none=True)
     value = fields.Nested(RenderedAtomicValueSchema(), required=True, allow_none=False)
     value_type = fields.String(required=True, allow_none=False)
+    exception = fields.String(required=False, allow_none=True)
+
+    REMOVE_KEYS_IF_NONE: Final[tuple[str, ...]] = ("exception",)
 
     @post_load
     def make_rendered_atomic_content(self, data, **kwargs):
         return RenderedAtomicContent(**data)
 
+    @post_dump
+    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
+        """Removes the attributes in RenderedAtomicContentSchema.REMOVE_KEYS_IF_NONE during serialization if
+        their values are None."""
+        data = deepcopy(data)
+        for key in RenderedAtomicContentSchema.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
 
+
+renderedAtomicContentSchema = RenderedAtomicContentSchema()
 renderedAtomicValueSchema = RenderedAtomicValueSchema()
