@@ -349,6 +349,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
             kwargs: Additional parameters, unused
 
+        Returns:
+            None
+
         Raises:
             DataContextError: If a suite with the same name exists and `overwrite_existing` is set to `False`.
         """
