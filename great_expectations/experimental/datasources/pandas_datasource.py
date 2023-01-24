@@ -142,7 +142,11 @@ class _DataFrameAsset(DataAsset):
         for request, path in self._fully_specified_batch_requests_with_path(
             batch_request
         ):
-            batch_spec = PathBatchSpec(path=str(path))
+            batch_spec = PathBatchSpec(
+                path=str(path),
+                reader_method="read_csv",  # TODO: pull this
+                reader_options=self.dict(exclude_unset=True, exclude={"path", "regex"}),
+            )
             data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
