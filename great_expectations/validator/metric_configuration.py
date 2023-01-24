@@ -1,5 +1,5 @@
 import json
-from typing import NamedTuple, Optional, Tuple
+from typing import NamedTuple, Optional
 
 from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict

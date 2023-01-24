@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Union
 
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_function_types import (
@@ -17,7 +17,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,
+    MetricConfigurationID,
+)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
