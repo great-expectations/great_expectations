@@ -8,6 +8,7 @@ Typical usage example:
 """
 from __future__ import annotations
 
+import datetime
 import logging
 import pathlib
 import re
@@ -148,7 +149,7 @@ def _parse_name(raw_error_path: str) -> str:
 def run_pydocstyle(paths: List[pathlib.Path]) -> List[str]:
     """Run pydocstyle to identify issues with docstrings."""
 
-    logger.debug("Running pydocstyle")
+    _log_with_timestamp("Running pydocstyle")
     cmds = ["pydocstyle"] + [str(p) for p in paths]
     raw_results: subprocess.CompletedProcess = subprocess.run(
         cmds,
@@ -162,8 +163,15 @@ def run_pydocstyle(paths: List[pathlib.Path]) -> List[str]:
     if err:
         raise ValueError(err)
 
-    logger.debug("Finished running pydocstyle")
+    _log_with_timestamp("Finished running pydocstyle")
     return raw_results.stdout.split("\n")
+
+
+def _log_with_timestamp(content: str) -> None:
+    """Log content with timestamp appended."""
+    timestamp = datetime.datetime.now()
+    timestamp_str = timestamp.strftime("%H:%M:%S")
+    logger.debug(f"{content} Timestamp: {timestamp_str}")
 
 
 def _get_docstring_errors(
@@ -218,18 +226,18 @@ def _public_api_docstring_errors(
 ) -> Set[DocstringError]:
     """Get all docstring errors for entities marked with the @public_api decorator."""
 
-    logger.debug("Getting public api definitions.")
+    _log_with_timestamp("Getting public api definitions.")
     public_api_definitions = get_public_api_definitions()
     public_api_definition_tuples: Set[Tuple[str, str]] = {
         (str(_repo_relative_filepath(d.filepath)), d.name)
         for d in public_api_definitions
     }
 
-    logger.debug("Getting docstring errors.")
+    _log_with_timestamp("Getting docstring errors.")
     public_api_docstring_errors: List[DocstringError] = []
     docstring_errors = _get_docstring_errors(select_paths=select_paths)
 
-    logger.debug("Getting docstring errors applicable to public api.")
+    _log_with_timestamp("Getting docstring errors applicable to public api.")
     for docstring_error in docstring_errors:
         docstring_error_tuple: Tuple[str, str] = (
             str(docstring_error.filepath_relative_to_repo_root),
@@ -244,7 +252,7 @@ def _public_api_docstring_errors(
 def run_darglint(paths: List[pathlib.Path]) -> List[str]:
     """Run darglint to identify issues with docstrings."""
 
-    logger.debug("Running darglint")
+    _log_with_timestamp("Running darglint")
     cmds = ["darglint"] + [str(p) for p in paths]
     raw_results: subprocess.CompletedProcess = subprocess.run(
         cmds,
@@ -258,7 +266,7 @@ def run_darglint(paths: List[pathlib.Path]) -> List[str]:
     if err:
         raise ValueError(err)
 
-    logger.debug("Finished running darglint")
+    _log_with_timestamp("Finished running darglint")
 
     return raw_results.stdout.split("\n")
 
