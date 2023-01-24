@@ -96,9 +96,7 @@ if TYPE_CHECKING:
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import FileDataContext
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
-    )
+    from great_expectations.data_context.data_context import EphemeralDataContext
     from great_expectations.data_context.types.base import DataContextConfig
 
 
