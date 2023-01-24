@@ -66,6 +66,7 @@ def test_construct_postgres_datasource(create_source):
     ) as source:
         assert source.name == "my_datasource"
         assert isinstance(source.execution_engine, SqlAlchemyExecutionEngine)
+        assert source.assets == {}
 
 
 def assert_table_asset(
@@ -182,13 +183,6 @@ def test_construct_table_asset_directly_with_splitter(create_source):
 
 @pytest.mark.unit
 def test_datasource_gets_batch_list_no_splitter(create_source):
-    fake_batch_spec = {
-        "batch_identifiers": {},
-        "data_asset_name": "my_asset",
-        "table_name": "my_table",
-        "type": "table",
-    }
-
     def validate_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         assert spec == {
             "batch_identifiers": {},
@@ -198,7 +192,7 @@ def test_datasource_gets_batch_list_no_splitter(create_source):
         }
 
     with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
+        validate_batch_spec=validate_batch_spec, dialect="postgresql"
     ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         source.get_batch_list_from_batch_request(asset.get_batch_request())
