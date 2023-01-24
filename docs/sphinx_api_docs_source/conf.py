@@ -121,7 +121,18 @@ def _remove_feature_maturity_info(app, what, name, obj, options, lines):
 
 
 def _convert_code_snippets_to_docusaurus(app, what, name, obj, options, lines):
-    """Convert code snippets to docusaurus style using CodeBlock component."""
+    """Convert code snippets to docusaurus style using CodeBlock component.
+
+    Code snippets
+    ```yaml
+    my_yaml:
+      - code_snippet
+    ```
+
+    Note:
+    1. There must be an opening and closing set of triple backticks.
+    2. The opening backticks can have an optional language (see docusaurus for supported languages).
+    """
 
     code_snippet_start: None | int = None
     code_snippet_end: None | int = None
