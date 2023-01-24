@@ -1,4 +1,5 @@
 import os
+import pathlib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Pattern, cast
@@ -23,7 +24,7 @@ def csv_path() -> Path:
     return Path(
         file_relative_path(
             __file__,
-            str(os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")),
+            pathlib.Path("../../test_sets/taxi_yellow_tripdata_samples"),
         )
     )
 
