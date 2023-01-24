@@ -1,8 +1,15 @@
 import logging
 from datetime import datetime
-from typing import Callable, Tuple
+from typing import Callable, Dict, Tuple
 
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+import pytest
+from pytest import MonkeyPatch
+
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
+from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 
 LOGGER = logging.getLogger(__name__)
 
@@ -13,6 +20,7 @@ from great_expectations.core.batch_spec import (
     BatchMarkers,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.experimental.datasources.sources import _SourceFactories
 
 # This is the default min/max time that we are using in our mocks.
 # They are made global so our tests can reference them directly.
@@ -43,7 +51,7 @@ class _MockConnection:
         return [(DEFAULT_MIN_DT, DEFAULT_MAX_DT)]
 
 
-class MockSaEngine:
+class _MockSaEngine:
     def __init__(self, dialect: Dialect):
         self.dialect = dialect
 
@@ -51,10 +59,6 @@ class MockSaEngine:
     def connect(self):
         """A contextmanager that yields a _MockConnection"""
         yield _MockConnection(self.dialect)
-
-
-def sa_engine_mock(dialect: str) -> MockSaEngine:
-    return MockSaEngine(dialect=Dialect(dialect))
 
 
 def sqlachemy_execution_engine_mock_cls(
@@ -73,7 +77,7 @@ def sqlachemy_execution_engine_mock_cls(
             # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
-            self.engine = MockSaEngine(dialect=Dialect(dialect))
+            self.engine = _MockSaEngine(dialect=Dialect(dialect))
 
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec
@@ -90,3 +94,24 @@ class ExecutionEngineDouble:
 
     def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
         return BatchData(self), BatchMarkers(ge_load_time=None)
+
+
+@pytest.fixture
+def inject_engine_lookup_double(monkeypatch: MonkeyPatch) -> ExecutionEngineDouble:  # type: ignore[misc]
+    """
+    Inject an execution engine test double into the _SourcesFactory.engine_lookup
+    so that all Datasources use the execution engine double.
+    Dynamically create a new subclass so that runtime type validation does not fail.
+    """
+    original_engine_override: Dict[MetaDatasource, ExecutionEngine] = {}
+    for key in _SourceFactories.type_lookup.keys():
+        if issubclass(type(key), MetaDatasource):
+            original_engine_override[key] = key.execution_engine_override
+
+    try:
+        for source in original_engine_override.keys():
+            source.execution_engine_override = ExecutionEngineDouble
+        yield ExecutionEngineDouble
+    finally:
+        for source, engine in original_engine_override.items():
+            source.execution_engine_override = engine

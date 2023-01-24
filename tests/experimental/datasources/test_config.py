@@ -133,7 +133,7 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
         p(GxConfig.parse_yaml, PG_CONFIG_YAML_STR, id="pg_config yaml string"),
     ],
 )
-def test_load_config(load_method: Callable, input_):
+def test_load_config(inject_engine_lookup_double, load_method: Callable, input_):
     loaded: GxConfig = load_method(input_)
     pp(loaded)
     assert loaded
@@ -163,6 +163,7 @@ def test_load_config(load_method: Callable, input_):
     ],
 )
 def test_catch_bad_top_level_config(
+    inject_engine_lookup_double,
     config: dict,
     expected_error_loc: tuple,
     expected_msg: str,
@@ -223,6 +224,7 @@ def test_catch_bad_top_level_config(
     ],
 )
 def test_catch_bad_asset_configs(
+    inject_engine_lookup_double,
     bad_asset_config: dict,
     expected_error_loc: tuple,
     expected_msg: str,
@@ -231,7 +233,7 @@ def test_catch_bad_asset_configs(
         "my_test_ds": {
             "type": "postgres",
             "name": "my_test_ds",
-            "connection_string": "postgresql://userName:@hostname/dbName",
+            "connection_string": "postgres://userName:@hostname/dbName",
             "assets": {bad_asset_config["name"]: bad_asset_config},
         }
     }
@@ -264,6 +266,7 @@ def test_catch_bad_asset_configs(
     ],
 )
 def test_general_column_splitter_errors(
+    inject_engine_lookup_double,
     bad_column_kwargs: dict,
     expected_error_type: str,
     expected_msg: str,
@@ -304,7 +307,9 @@ def from_yaml_gx_config() -> GxConfig:
     return gx_config
 
 
-def test_dict_config_round_trip(from_dict_gx_config: GxConfig):
+def test_dict_config_round_trip(
+    inject_engine_lookup_double, from_dict_gx_config: GxConfig
+):
     dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
@@ -315,7 +320,9 @@ def test_dict_config_round_trip(from_dict_gx_config: GxConfig):
     assert from_dict_gx_config == re_loaded
 
 
-def test_json_config_round_trip(from_json_gx_config: GxConfig):
+def test_json_config_round_trip(
+    inject_engine_lookup_double, from_json_gx_config: GxConfig
+):
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
@@ -326,7 +333,9 @@ def test_json_config_round_trip(from_json_gx_config: GxConfig):
     assert from_json_gx_config == re_loaded
 
 
-def test_yaml_config_round_trip(from_yaml_gx_config: GxConfig):
+def test_yaml_config_round_trip(
+    inject_engine_lookup_double, from_yaml_gx_config: GxConfig
+):
     dumped: str = from_yaml_gx_config.yaml()
     print(f"  Dumped YAML ->\n\n{dumped}\n")
 
@@ -338,7 +347,7 @@ def test_yaml_config_round_trip(from_yaml_gx_config: GxConfig):
 
 
 def test_yaml_file_config_round_trip(
-    tmp_path: pathlib.Path, from_yaml_gx_config: GxConfig
+    inject_engine_lookup_double, tmp_path: pathlib.Path, from_yaml_gx_config: GxConfig
 ):
     yaml_file = tmp_path / "test.yaml"
     assert not yaml_file.exists()
@@ -356,7 +365,9 @@ def test_yaml_file_config_round_trip(
     assert from_yaml_gx_config == re_loaded
 
 
-def test_splitters_deserialization(from_json_gx_config: GxConfig):
+def test_splitters_deserialization(
+    inject_engine_lookup_double, from_json_gx_config: GxConfig
+):
     table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
@@ -368,7 +379,9 @@ def test_splitters_deserialization(from_json_gx_config: GxConfig):
 
 
 @pytest.mark.xfail(reason="Key Ordering needs to be implemented")
-def test_yaml_config_round_trip_ordering(from_yaml_gx_config: GxConfig):
+def test_yaml_config_round_trip_ordering(
+    inject_engine_lookup_double, from_yaml_gx_config: GxConfig
+):
     dumped: str = from_yaml_gx_config.yaml()
 
     assert PG_CONFIG_YAML_STR == dumped
@@ -377,7 +390,9 @@ def test_yaml_config_round_trip_ordering(from_yaml_gx_config: GxConfig):
 @pytest.mark.xfail(
     reason="Custom BatchSorter serialization logic needs to be implemented"
 )
-def test_custom_sorter_serialization(from_json_gx_config: GxConfig):
+def test_custom_sorter_serialization(
+    inject_engine_lookup_double, from_json_gx_config: GxConfig
+):
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 

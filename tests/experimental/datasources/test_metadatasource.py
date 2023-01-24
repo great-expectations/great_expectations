@@ -156,6 +156,15 @@ class TestMisconfiguredMetaDatasource:
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
 
+    def test_ds_execution_engine_type_not_defined(
+        self, empty_sources: _SourceFactories
+    ):
+        class MissingExecEngineTypeDatasource(Datasource):
+            type: str = "valid"
+
+        with pytest.raises(NotImplementedError):
+            MissingExecEngineTypeDatasource(name="name")
+
     def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
 
         with pytest.raises(
@@ -190,6 +199,10 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     class PurpleDatasource(Datasource):
         asset_types = [RedAsset, BlueAsset]
         type: str = "purple"
+
+        @property
+        def execution_engine_type(self) -> Type[ExecutionEngine]:
+            return DummyExecutionEngine
 
         def test_connection(self):
             ...
