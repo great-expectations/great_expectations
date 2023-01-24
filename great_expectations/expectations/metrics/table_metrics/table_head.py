@@ -50,7 +50,7 @@ class TableHead(TableMetricProvider):
         return df.head(n=n_rows)
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
-    def _sqlalchemy(
+    def _sqlalchemy(  # noqa: C901 - 16
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
         metric_domain_kwargs: dict,
