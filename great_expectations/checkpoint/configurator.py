@@ -198,22 +198,22 @@ class SimpleCheckpointConfigurator:
         ]
 
     def _add_update_data_docs_action(
-        self, action_list: List[ActionDict]
-    ) -> List[ActionDict]:
+        self, action_list: list[ActionDict]
+    ) -> list[ActionDict]:
         update_docs_action = copy.deepcopy(ActionDicts.UPDATE_DATA_DOCS)
         if isinstance(self.site_names, list):
             update_docs_action["action"]["site_names"] = self.site_names
         action_list.append(update_docs_action)
         return action_list
 
-    def _add_slack_action(self, action_list: List[ActionDict]) -> List[ActionDict]:
+    def _add_slack_action(self, action_list: list[ActionDict]) -> list[ActionDict]:
         """
         The underlying SlackNotificationAction and SlackRenderer default to
         including links to all sites if the key notify_with is not present. We
         are intentionally hiding this from users of SimpleCheckpoint by having a
         default of "all" that sets the configuration appropriately.
         """
-        _notify_with: Optional[Union[str, List[str]]] = self.notify_with
+        _notify_with: str | list[str] | None= self.notify_with
         if self.notify_with == "all":
             _notify_with = None
         action_list.append(
