@@ -1,4 +1,4 @@
-from typing import Dict, Tuple
+from typing import TYPE_CHECKING, Tuple
 
 import pandas as pd
 import pytest
@@ -16,6 +16,9 @@ from great_expectations.self_check.util import build_pandas_engine, build_sa_eng
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
+
+if TYPE_CHECKING:
+    from great_expectations.validator.metric_configuration import MetricConfigurationID
 
 
 @pytest.fixture

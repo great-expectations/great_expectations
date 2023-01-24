@@ -20,15 +20,13 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import (
-    MetricConfiguration,
-    MetricConfigurationID,
-)
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
+    from great_expectations.validator.metric_configuration import MetricConfigurationID
     from great_expectations.validator.validator import Validator
 
 

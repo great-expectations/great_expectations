@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Dict, Tuple, cast
+from typing import TYPE_CHECKING, cast
 
 import pandas as pd
 import pytest
@@ -37,6 +37,9 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
+
+if TYPE_CHECKING:
+    from great_expectations.validator.metric_configuration import MetricConfigurationID
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")

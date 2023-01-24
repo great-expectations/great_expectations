@@ -27,6 +27,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 if TYPE_CHECKING:
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
+    from great_expectations.validator.metric_configuration import MetricConfigurationID
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)

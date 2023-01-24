@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Dict, Tuple
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -20,6 +20,9 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
+
+if TYPE_CHECKING:
+    from great_expectations.validator.metric_configuration import MetricConfigurationID
 
 try:
     pyspark = pytest.importorskip("pyspark")

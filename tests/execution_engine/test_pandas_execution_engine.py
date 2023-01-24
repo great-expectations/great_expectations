@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Tuple
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pandas as pd
@@ -25,6 +25,9 @@ from great_expectations.execution_engine.pandas_execution_engine import (
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
+
+if TYPE_CHECKING:
+    from great_expectations.validator.metric_configuration import MetricConfigurationID
 
 
 def test_constructor_with_boto3_options():

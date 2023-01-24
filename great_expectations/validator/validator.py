@@ -106,6 +106,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context import AbstractDataContext
+    from great_expectations.validator.metric_configuration import MetricConfigurationID
 
 
 @dataclass
