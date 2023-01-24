@@ -3,6 +3,7 @@
   "datasets": [
     {
       "data": {
+        "index": [0, 1, 2, 3],
         "one_null": [4, 5, null, 7],
         "two_null": [null, null, 5, 6],
         "three_null": [null, null, null, 5],
@@ -11,6 +12,7 @@
       },
       "schemas": {
         "spark": {
+          "index": "IntegerType",
           "one_null": "IntegerType",
           "two_null": "IntegerType",
           "three_null": "IntegerType",
@@ -36,7 +38,230 @@
               "partial_unexpected_list": []
             }
           }
-        },{
+        },
+        {
+          "title": "basic_negative_case_complete_result_format_id_pk_pandas",
+          "include_in_gallery": true,
+          "exact_match_out": true,
+          "only_for": ["pandas"],
+          "in": {
+            "column": "one_null",
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["index"]
+            }
+          },
+          "out": {
+            "success": false,
+            "result": {
+              "element_count": 4,
+              "unexpected_count": 3,
+              "unexpected_percent": 75.0,
+              "partial_unexpected_list": [4.0, 5.0, 7.0],
+              "partial_unexpected_index_list": [
+                     {
+                       "one_null": 4.0,
+                       "index": 0
+                     },
+                     {
+                       "one_null": 5.0,
+                       "index": 1
+                     },
+                     {
+                       "one_null": 7.0,
+                       "index": 3
+                     }
+                   ],
+                   "partial_unexpected_counts": [
+                     {
+                       "value": 4.0,
+                       "count": 1
+                     },
+                     {
+                       "value": 5.0,
+                       "count": 1
+                     },
+                     {
+                       "value": 7.0,
+                       "count": 1
+                     }
+                   ],
+                   "unexpected_list": [
+                     4.0,
+                     5.0,
+                     7.0
+                   ],
+                   "unexpected_index_list": [
+                     {
+                       "one_null": 4.0,
+                       "index": 0
+                     },
+                     {
+                       "one_null": 5.0,
+                       "index": 1
+                     },
+                     {
+                       "one_null": 7.0,
+                       "index": 3
+                     }
+                   ],
+                   "unexpected_index_query": [
+                     0,
+                     1,
+                     3
+                   ]
+                 }
+          }
+        },
+        {
+          "title": "basic_negative_case_complete_result_format_id_pk_spark",
+          "include_in_gallery": true,
+          "exact_match_out": true,
+          "only_for": ["spark"],
+          "in": {
+            "column": "one_null",
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["index"]
+            }
+          },
+          "out": {
+            "success": false,
+                 "result": {
+                   "element_count": 4,
+                   "unexpected_count": 3,
+                   "unexpected_percent": 75.0,
+                   "partial_unexpected_list": [
+                     4,
+                     5,
+                     7
+                   ],
+                   "partial_unexpected_index_list": [
+                     {
+                       "index": 0,
+                       "one_null": 4
+                     },
+                     {
+                       "index": 1,
+                       "one_null": 5
+                     },
+                     {
+                       "index": 3,
+                       "one_null": 7
+                     }
+                   ],
+                   "partial_unexpected_counts": [
+                     {
+                       "value": 4,
+                       "count": 1
+                     },
+                     {
+                       "value": 5,
+                       "count": 1
+                     },
+                     {
+                       "value": 7,
+                       "count": 1
+                     }
+                   ],
+                   "unexpected_list": [
+                     4,
+                     5,
+                     7
+                   ],
+                   "unexpected_index_list": [
+                     {
+                       "index": 0,
+                       "one_null": 4
+                     },
+                     {
+                       "index": 1,
+                       "one_null": 5
+                     },
+                     {
+                       "index": 3,
+                       "one_null": 7
+                     }
+                   ],
+                   "unexpected_index_query": "df.filter(F.expr(NOT (one_null IS NULL)))"
+                 }
+          }
+        },
+        {
+          "title": "basic_negative_case_complete_result_format_id_pk_sqlite",
+          "include_in_gallery": true,
+          "exact_match_out": true,
+          "only_for": ["sqlite"],
+          "in": {
+            "column": "one_null",
+            "result_format": {
+                "result_format": "COMPLETE",
+                "unexpected_index_column_names": ["index"]
+            }
+          },
+          "out": {
+            "success": false,
+                 "result": {
+                   "element_count": 4,
+                   "unexpected_count": 3,
+                   "unexpected_percent": 75.0,
+                   "partial_unexpected_list": [
+                     4.0,
+                     5.0,
+                     7.0
+                   ],
+                   "partial_unexpected_index_list": [
+                     {
+                       "one_null": 4.0,
+                       "index": 0
+                     },
+                     {
+                       "one_null": 5.0,
+                       "index": 1
+                     },
+                     {
+                       "one_null": 7.0,
+                       "index": 3
+                     }
+                   ],
+                   "partial_unexpected_counts": [
+                     {
+                       "value": 4.0,
+                       "count": 1
+                     },
+                     {
+                       "value": 5.0,
+                       "count": 1
+                     },
+                     {
+                       "value": 7.0,
+                       "count": 1
+                     }
+                   ],
+                   "unexpected_list": [
+                     4.0,
+                     5.0,
+                     7.0
+                   ],
+                   "unexpected_index_list": [
+                     {
+                       "one_null": 4.0,
+                       "index": 0
+                     },
+                     {
+                       "one_null": 5.0,
+                       "index": 1
+                     },
+                     {
+                       "one_null": 7.0,
+                       "index": 3
+                     }
+                   ],
+                   "unexpected_index_query": "SELECT one_null, \"index\" \nFROM test_data_2pkhp2zl \nWHERE one_null IS NOT NULL;"
+                 }
+          }
+        },
+        {
           "title": "negative_no_missing_values",
           "include_in_gallery": true,
           "exact_match_out": false,

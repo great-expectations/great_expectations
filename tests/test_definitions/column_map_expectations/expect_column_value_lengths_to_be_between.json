@@ -2,6 +2,7 @@
   "expectation_type" : "expect_column_value_lengths_to_be_between",
   "datasets" : [{
     "data" : {
+      "index": [0, 1, 2, 3, 4],
       "s1":["smart","silly","sassy","slimy","sexy"],
       "s2":["cool","calm","collected","casual","creepy"],
       "s3":["cool","calm","collected","casual", null],
@@ -9,6 +10,7 @@
     },
     "schemas": {
       "spark": {
+        "index": "IntegerType",
         "s1": "StringType",
         "s2": "StringType",
         "s3": "StringType",
@@ -40,6 +42,63 @@
       },
       "out":{
         "success":false,
+        "unexpected_index_list": [2],
+        "unexpected_list": ["collected"]
+      }
+    },{
+      "title": "negative_test_matching_min_max_too_small_id_pk_pandas",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "only_for": ["pandas"],
+      "in":{
+        "column": "s2",
+        "min_value": 4,
+        "max_value": 8,
+        "result_format": {
+          "result_format": "COMPLETE",
+          "unexpected_index_column_names": ["index"]
+        }
+      },
+      "out":{
+        "success": true,
+        "unexpected_index_list": [2],
+        "unexpected_list": ["collected"]
+      }
+    },{
+      "title": "negative_test_matching_min_max_too_small_id_pk_spark",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "only_for": ["spark"],
+      "in":{
+        "column": "s2",
+        "min_value": 4,
+        "max_value": 8,
+        "result_format": {
+          "result_format": "COMPLETE",
+          "unexpected_index_column_names": ["index"]
+        }
+      },
+      "out":{
+        "success":true,
+        "unexpected_index_list": [2],
+        "unexpected_list": ["collected"]
+      }
+    },{
+      "title": "negative_test_matching_min_max_too_small_id_pk_sqlite",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "only_for": ["sqlite"],
+      "in":{
+        "column": "s2",
+        "min_value": 4,
+        "max_value": 8,
+        "result_format": {
+          "result_format": "COMPLETE",
+          "unexpected_index_column_names": ["index"]
+        }
+      },
+      "out":{
+        "success":true,
         "unexpected_index_list": [2],
         "unexpected_list": ["collected"]
       }
