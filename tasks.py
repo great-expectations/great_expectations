@@ -61,14 +61,14 @@ def sort(
     path: str = ".",
     check: bool = False,
     exclude: str | None = None,
-    ruff: bool = False,
-    isort: bool = False,  # isort is the current default
+    ruff: bool = False,  # isort is the current default
+    isort: bool = False,
     pty: bool = True,
 ):
     """Sort module imports."""
     if ruff and isort:
         raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)
-    if ruff:
+    if not isort:
         cmds = [
             "ruff",
             path,
