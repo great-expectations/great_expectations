@@ -180,12 +180,6 @@ init_typed = true
 warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
-[tool.pydocstyle]
-convention = "google"
-
-[tool.darglint]
-docstring_style = "google"
-
 [tool.ruff]
 target-version = "py37"
 line-length = 88
@@ -252,6 +246,9 @@ extend-exclude = [
 
 [tool.ruff.mccabe]
 max-complexity = 15
+
+[tool.ruff.pydocstyle]
+convention = "google"
 
 [tool.pytest.ini_options]
 filterwarnings = [
