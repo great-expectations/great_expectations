@@ -28,6 +28,12 @@
       padding: .1rem .25rem
     }
 
+    // Manually set code background color to match the rest of the site
+    // This does not change for light or dark mode
+    pre.prism-code {
+      background-color: #1e1e1e;
+    }
+
 }
 
 
