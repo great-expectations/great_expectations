@@ -1893,7 +1893,7 @@ class BaseStoreBackendDefaults(DictDot):
         self.data_docs_sites = data_docs_sites
         self.data_docs_site_name = data_docs_site_name
 
-
+@public_api
 class S3StoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for s3 backends, with some accessible parameters
@@ -2006,7 +2006,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
             }
         }
 
-
+@public_api
 class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for filesystem backends, with some accessible parameters
@@ -2045,7 +2045,7 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
                 "root_directory"
             ] = root_directory
 
-
+@public_api
 class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
     """
     Default store configs for in memory backends.
@@ -2314,7 +2314,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
             },
         }
 
-
+@public_api
 class DataContextConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = DataContextConfigSchema
