@@ -303,6 +303,9 @@ class Datasource(
         "type",
         "assets",
     }
+    # Setting this in a Datasource subclass will override the execution engine type.
+    # The primary use case is to inject an execution engine for testing.
+    execution_engine_override: ClassVar[Optional[Type[ExecutionEngine]]] = None
 
     # instance attrs
     type: str
@@ -314,7 +317,9 @@ class Datasource(
         engine_kwargs = {
             k: v for (k, v) in self.__dict__.items() if k not in self._excluded_eng_args
         }
-        return self.execution_engine_type(**engine_kwargs)
+        return self.execution_engine_override(
+            **engine_kwargs
+        ) or self.execution_engine_type(**engine_kwargs)
 
     @pydantic.validator("assets", pre=True)
     @classmethod
