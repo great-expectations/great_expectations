@@ -230,7 +230,6 @@ extend-exclude = [
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
-    "great_expectations/expectations/metrics", # 57 warnings
     "great_expectations/dataset", # 52 warnings
     "tests/checkpoint", # 15 warnings
     "tests/cli", # 34 warnings
@@ -246,7 +245,10 @@ extend-exclude = [
 ]
 
 [tool.ruff.per-file-ignores]
-"__init__.py" = ["F401"] # unused import
+"__init__.py" = [
+    "F401",  # unused import
+    "F403",  # star imports
+    ]
 
 [tool.ruff.mccabe]
 max-complexity = 15
