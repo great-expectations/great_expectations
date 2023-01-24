@@ -253,6 +253,9 @@ extend-exclude = [
 [tool.ruff.mccabe]
 max-complexity = 15
 
+[tool.ruff.pydocstyle]
+convention = "google"
+
 [tool.pytest.ini_options]
 filterwarnings = [
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would

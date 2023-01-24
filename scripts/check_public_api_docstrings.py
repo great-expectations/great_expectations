@@ -106,6 +106,43 @@ def parse_darglint_errors(raw_errors: List[str]) -> List[DocstringError]:
     return docstring_errors
 
 
+def parse_ruff_errors(raw_errors: List[str]) -> List[DocstringError]:
+    """Parse raw string output of ruff to DocstringError."""
+
+    docstring_errors: List[DocstringError] = []
+    pattern = re.compile(r"^D\d{3}")
+    for raw_error in raw_errors:
+        if not raw_error:
+            continue
+
+        split_error = raw_error.split(":")
+        if len(split_error) >= 4:
+            path = split_error[0]
+            line_number = int(split_error[1])
+            error_code_and_error = split_error[3].strip()
+
+            error_code_match = re.search(pattern, error_code_and_error)
+            if error_code_match:
+                error_code = error_code_match.group()
+            else:
+                error_code = ""
+            name = re.sub(pattern, "", error_code_and_error).strip()
+
+            docstring_errors.append(
+                DocstringError(
+                    name=name,
+                    filepath_relative_to_repo_root=_repo_relative_filepath(
+                        pathlib.Path(path)
+                    ),
+                    error=error_code,
+                    raw_error=raw_error,
+                    line_number=line_number,
+                )
+            )
+
+    return docstring_errors
+
+
 def _repo_root() -> pathlib.Path:
     return pathlib.Path(__file__).parent.parent
 
@@ -146,6 +183,29 @@ def _parse_name(raw_error_path: str) -> str:
     return name
 
 
+def run_ruff(paths: List[pathlib.Path]) -> List[str]:
+    """Run ruff to identify issues with docstrings."""
+
+    _log_with_timestamp("Running ruff")
+    # --select D option to enable pydocstyle errors in ruff
+    # https://github.com/charliermarsh/ruff#pydocstyle-d
+    cmds = ["ruff", "--select", "D"] + [str(p) for p in paths]
+    raw_results: subprocess.CompletedProcess = subprocess.run(
+        cmds,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    )
+
+    # Check to make sure `ruff` actually ran
+    err: str = raw_results.stderr
+    if err:
+        raise ValueError(err)
+
+    _log_with_timestamp("Finished running ruff")
+    return raw_results.stdout.split("\n")
+
+
 def run_pydocstyle(paths: List[pathlib.Path]) -> List[str]:
     """Run pydocstyle to identify issues with docstrings."""
 
@@ -184,15 +244,10 @@ def _get_docstring_errors(
         filepaths_containing_public_api_entities = [
             pathlib.Path(d.filepath).resolve() for d in get_public_api_definitions()
         ]
-    pydocstyle_raw_errors = run_pydocstyle(
-        paths=filepaths_containing_public_api_entities
-    )
-    darglint_raw_errors = run_darglint(paths=filepaths_containing_public_api_entities)
 
-    parsed_pydocstyle_errors = parse_pydocstyle_errors(raw_errors=pydocstyle_raw_errors)
-    parsed_darglint_errors = parse_darglint_errors(raw_errors=darglint_raw_errors)
-
-    return parsed_pydocstyle_errors + parsed_darglint_errors
+    ruff_raw_errors = run_ruff(paths=filepaths_containing_public_api_entities)
+    parsed_ruff_errors = parse_ruff_errors(ruff_raw_errors)
+    return parsed_ruff_errors
 
 
 def get_public_api_definitions() -> Set[Definition]:
@@ -278,6 +333,8 @@ def main(
         "Generating list of public API docstring errors. This may take a few minutes."
     )
     errors = _public_api_docstring_errors(select_paths=select_paths)
+
+    _log_with_timestamp("Finished evaluating public docstrings.")
 
     if not errors:
         logger.info("There are no public API docstring errors.")
