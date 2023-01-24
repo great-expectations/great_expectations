@@ -1,7 +1,6 @@
 import json
 import logging
 from unittest import mock
-from urllib.parse import urljoin
 
 import pytest
 from freezegun import freeze_time
