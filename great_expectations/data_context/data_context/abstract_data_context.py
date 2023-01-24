@@ -1593,7 +1593,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
-        """Retrieves a validator with a Batch list and an Expectation Suite.
+        """Retrieve a Validator with a Batch list and an Expectation Suite.
 
         `get_validator` first calls `get_batch_list` to retrieve a batch list, then creates or retrieves
         an ExpectationSuite used to validate the Batches in the list.
