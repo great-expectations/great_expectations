@@ -1,14 +1,16 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Pattern, cast
 
 import pytest
 
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.experimental.datasources import PandasDatasource
 from great_expectations.experimental.datasources.interfaces import BatchRequestError
-from great_expectations.experimental.datasources.pandas_datasource import CSVAsset
+from great_expectations.experimental.datasources.pandas_datasource import (
+    CSVAsset,
+    PandasDatasource,
+)
 
 
 @pytest.fixture
@@ -48,7 +50,7 @@ def test_construct_csv_asset_directly(csv_path):
     asset = CSVAsset(
         name="csv_asset",
         path=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        regex=cast(Pattern, r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv"),
     )
     assert asset.name == "csv_asset"
     assert asset.path == csv_path
@@ -132,9 +134,12 @@ def test_get_batch_list_from_partially_specified_batch_request(
     # Verify test directory has files that don't match what we will query for
     all_files = os.listdir(csv_path)
     # assert there are files that are not csv files
-    assert any([not file.endswith("csv") for file in all_files])
+    file_name: str
+    assert any([not file_name.endswith("csv") for file_name in all_files])
     # assert there are 12 files from 2018
-    files_for_2018 = [file for file in all_files if file.find("2018") >= 0]
+    files_for_2018 = [
+        file_name for file_name in all_files if file_name.find("2018") >= 0
+    ]
     assert len(files_for_2018) == 12
 
     asset = pandas_datasource.add_csv_asset(
@@ -193,11 +198,12 @@ def test_pandas_sorter(pandas_datasource, csv_path, order_by):
     months = [format(m, "02d") for m in range(1, 13)]
     all_files = os.listdir(csv_path)
     # assert there are 12 files for each year
+    file_name: str
     for year in years:
         files_for_year = [
-            file
-            for file in all_files
-            if file.find(f"yellow_tripdata_sample_{year}") == 0
+            file_name
+            for file_name in all_files
+            if file_name.find(f"yellow_tripdata_sample_{year}") == 0
         ]
         assert len(files_for_year) == 12
 
@@ -213,7 +219,7 @@ def test_pandas_sorter(pandas_datasource, csv_path, order_by):
     @dataclass(frozen=True)
     class TimeRange:
         key: str
-        range: List[int]
+        range: List[str]
 
     ordered_years = reversed(years) if "-year" in order_by else years
     ordered_months = reversed(months) if "-month" in order_by else months

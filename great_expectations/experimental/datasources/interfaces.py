@@ -56,7 +56,7 @@ except ImportError:
 BatchRequestOptions: TypeAlias = Dict[str, Any]
 
 
-@dataclasses.dataclass(frozen=True)
+@pydantic_dc.dataclass(frozen=True)
 class BatchRequest:
     datasource_name: str
     data_asset_name: str
