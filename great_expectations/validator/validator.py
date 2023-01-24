@@ -205,7 +205,8 @@ class Validator:
         execution_engine.batch_manager.reset_batch_cache()
         self._execution_engine: ExecutionEngine = execution_engine
 
-        self.load_batch_list(batch_list=batches)
+        if batches:
+            self.load_batch_list(batch_list=batches)
 
         self._expose_dataframe_methods: bool = False
 
@@ -323,14 +324,20 @@ class Validator:
     def load_batch_list(self, batch_list: List[Batch]) -> None:
         self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
 
+    @public_api
     def get_metric(
         self,
         metric: MetricConfiguration,
     ) -> Any:
-        """
-        Convenience method that returns the value of the requested metric.
+        """Convenience method, return the value of the requested metric.
 
         (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+
+        Args:
+            metric: MetricConfiguration
+
+        Returns:
+            The value of the requested metric.
         """
         return self._metrics_calculator.get_metric(metric=metric)
 
@@ -355,6 +362,8 @@ class Validator:
         self,
         metric_configurations: List[MetricConfiguration],
         runtime_configuration: Optional[dict] = None,
+        min_graph_edges_pbar_enable: int = 0,
+        # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """
         Convenience method that computes requested metrics (specified as elements of "MetricConfiguration" list).
@@ -364,6 +373,7 @@ class Validator:
         Args:
             metric_configurations: List of desired MetricConfiguration objects to be resolved.
             runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
+            min_graph_edges_pbar_enable: Minumum number of graph edges to warrant showing progress bars.
 
         Returns:
             Dictionary with requested metrics resolved, with unique metric ID as key and computed metric as value.
@@ -371,6 +381,7 @@ class Validator:
         return self._metrics_calculator.compute_metrics(
             metric_configurations=metric_configurations,
             runtime_configuration=runtime_configuration,
+            min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
         )
 
     def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
@@ -522,6 +533,7 @@ class Validator:
                     expectation_kwargs=expectation_kwargs,
                     meta=meta,
                     expectation_impl=expectation_impl,
+                    runtime_configuration=basic_runtime_configuration,
                 )
             )
 
@@ -598,6 +610,7 @@ class Validator:
         expectation_kwargs: dict,
         meta: dict,
         expectation_impl: "Expectation",  # noqa: F821
+        runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
         auto: bool = expectation_kwargs.get("auto", False)
         profiler_config: Optional[RuleBasedProfilerConfig] = expectation_kwargs.get(
@@ -627,7 +640,7 @@ class Validator:
                 rules=None,
                 batch_list=list(self.batch_cache.values()),
                 batch_request=None,
-                recompute_existing_parameter_values=False,
+                runtime_configuration=runtime_configuration,
                 reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
             )
             expectation_configurations: List[
@@ -704,18 +717,6 @@ class Validator:
                 kwargs = {}
 
             expectation_kwargs: dict = recursively_convert_to_json_serializable(kwargs)
-
-            basic_default_expectation_args: dict = {
-                k: v
-                for k, v in self.default_expectation_args.items()
-                if k in Validator.RUNTIME_KEYS
-            }
-            basic_runtime_configuration: dict = copy.deepcopy(
-                basic_default_expectation_args
-            )
-            basic_runtime_configuration.update(
-                {k: v for k, v in kwargs.items() if k in Validator.RUNTIME_KEYS}
-            )
 
             allowed_config_keys: Tuple[str] = expectation_impl.get_allowed_config_keys()
 

@@ -1,6 +1,6 @@
 import logging
 from functools import wraps
-from typing import Callable, Optional, Tuple, Type, Union, cast
+from typing import Callable, Dict, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
@@ -101,21 +101,23 @@ class MetricProvider(metaclass=MetaMetricProvider):
     @classmethod
     def _register_metric_functions(cls) -> None:
         metric_name = getattr(cls, "metric_name", None)
-        metric_domain_keys = cls.domain_keys
-        metric_value_keys = cls.value_keys
-
-        if metric_name is None:
+        if not metric_name:
             # No metric name has been defined
             return
 
+        metric_domain_keys = cls.domain_keys
+        metric_value_keys = cls.value_keys
+
         for attr_name in dir(cls):
             attr_obj = getattr(cls, attr_name)
-            if not hasattr(attr_obj, "metric_engine") and not hasattr(
-                attr_obj, "_renderer_type"
+            if not (
+                hasattr(attr_obj, "metric_engine")
+                or hasattr(attr_obj, "_renderer_type")
             ):
-                # This is not a metric or renderer
+                # This is not a metric or renderer.
                 continue
-            elif hasattr(attr_obj, "metric_engine"):
+
+            if hasattr(attr_obj, "metric_engine"):
                 engine = getattr(attr_obj, "metric_engine")
                 if not issubclass(engine, ExecutionEngine):
                     raise ValueError(
@@ -133,8 +135,43 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     Union[MetricFunctionTypes, MetricPartialFunctionTypes]
                 ] = getattr(metric_fn, "metric_fn_type", MetricFunctionTypes.VALUE)
 
-                if metric_fn_type is None:
+                if not metric_fn_type:
+                    # This is not a metric (valid metrics possess exectly one metric function).
                     return
+
+                """
+                Basic metric implementations (defined by specifying "metric_name" class variable in "metric_class") use
+                either "@metric_value" decorator (with default "metric_fn_type" set to "MetricFunctionTypes.VALUE"); or
+                "@metric_partial" decorator with specification "partial_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN"
+                (which ultimately sets "metric_fn_type" of inner function to this value); or "@column_aggregate_value"
+                decorator (with default "metric_fn_type" set to "MetricFunctionTypes.VALUE"); or (applicable for column
+                domain metrics only) "column_aggregate_partial" decorator with "partial_fn_type" explicitly set to
+                "MetricPartialFunctionTypes.AGGREGATE_FN".  When "metric_fn_type" of metric implementation function is
+                of "aggregate partial" type ("MetricPartialFunctionTypes.AGGREGATE_FN"), underlying backend (e.g., SQL
+                or Spark) employs "deferred execution" (gather computation needs to build execution plan, then execute
+                all computations combined).  Deferred aggregate function calls are bundled (applies to SQL and Spark).
+                To instruct "ExecutionEngine" accordingly, original metric is registered with its "declared" name, but
+                with "metric_provider" function omitted (set to "None"), and additional "AGGREGATE_FN" metric, with its
+                "metric_provider" set to (decorated) implementation function, defined in metric class, is registered.
+                Then "AGGREGATE_FN" metric can specified with key "metric_partial_fn" as evaluation metric dependency.
+                By convention, aggregate partial metric implementation functions return three-valued tuple, containing
+                deferred execution metric implementation function of corresponding "ExecutionEngine" backend (called
+                "metric_aggregate") as well as "compute_domain_kwargs" and "accessor_domain_kwargs", which are relevant
+                for bundled computation and result access, respectively.  When "ExecutionEngine.resolve_metrics()" finds
+                no "metric_provider" (metric_fn being "None"), it then obtains this three-valued tuple from dictionary
+                of "resolved_metric_dependencies_by_metric_name" using previously declared "metric_partial_fn" key (as
+                described above), composes full metric execution configuration structure, and adds this configuration
+                to list of metrics to be resolved as one bundle (specifics pertaining to "ExecutionEngine" subclasses).
+                """
+                if metric_fn_type not in [
+                    MetricFunctionTypes.VALUE,
+                    MetricPartialFunctionTypes.AGGREGATE_FN,
+                ]:
+                    raise ValueError(
+                        f"""Basic metric implementations (defined by specifying "metric_name" class variable) only \
+support "{MetricFunctionTypes.VALUE.value}" and "{MetricPartialFunctionTypes.AGGREGATE_FN.value}" for "metric_value" \
+"metric_fn_type" property."""
+                    )
 
                 if metric_fn_type == MetricFunctionTypes.VALUE:
                     register_metric(
@@ -148,11 +185,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                     )
                 else:
                     register_metric(
-                        metric_name=declared_metric_name
-                        + "."
-                        + cast(
-                            MetricPartialFunctionTypes, metric_fn_type
-                        ).metric_suffix,  # this will be a MetricPartial
+                        metric_name=f"{declared_metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,
                         execution_engine=engine,
@@ -207,24 +240,23 @@ class MetricProvider(metaclass=MetaMetricProvider):
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
     ):
-        dependencies = {}
-        if execution_engine is not None:
-            metric_name = metric.metric_name
-            for metric_fn_type in MetricPartialFunctionTypes:
-                metric_suffix = f".{metric_fn_type.metric_suffix}"
-                try:
-                    _ = get_metric_provider(
-                        metric_name + metric_suffix, execution_engine
-                    )
-                    has_aggregate_fn = True
-                except gx_exceptions.MetricProviderError:
-                    has_aggregate_fn = False
+        dependencies: Dict[str, MetricConfiguration] = {}
 
-                if has_aggregate_fn:
-                    dependencies["metric_partial_fn"] = MetricConfiguration(
-                        metric_name=metric_name + metric_suffix,
-                        metric_domain_kwargs=metric.metric_domain_kwargs,
-                        metric_value_kwargs=metric.metric_value_kwargs,
-                    )
+        if execution_engine is None:
+            return dependencies
+
+        try:
+            metric_name: str = metric.metric_name
+            _ = get_metric_provider(
+                f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                execution_engine,
+            )
+            dependencies["metric_partial_fn"] = MetricConfiguration(
+                metric_name=f"{metric_name}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                metric_domain_kwargs=metric.metric_domain_kwargs,
+                metric_value_kwargs=metric.metric_value_kwargs,
+            )
+        except gx_exceptions.MetricProviderError:
+            pass
 
         return dependencies

@@ -48,7 +48,6 @@ exclude = [
     # number is the current number of typing errors for the excluded pattern
     'checkpoint/actions\.py',  # 18
     'checkpoint/checkpoint\.py',  # 22
-    'checkpoint/configurator\.py', # 2
     'checkpoint/types/checkpoint_result\.py',  # 34
     'checkpoint/util\.py',  # 5
     'cli/checkpoint\.py',  # 9
@@ -150,7 +149,7 @@ exclude = [
     'render/renderer/suite_scaffold_notebook_renderer\.py',  # 7
     'render/renderer/v3/suite_edit_notebook_renderer\.py',  # 11
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
-    'render/util\.py',  # 2
+    'render/util\.py',  # 17
     'render/view/view\.py',  # 11
     'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 63
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
@@ -172,7 +171,6 @@ exclude = [
     'rule_based_profiler/rule_based_profiler\.py',  # 40
     'validation_operators/types/validation_operator_result\.py', # 35
     'validation_operators/validation_operators\.py',  # 16
-    'validator/exception_info\.py', # 1
     'validator/validator\.py', # 54
 ]
 
@@ -188,6 +186,73 @@ convention = "google"
 [tool.darglint]
 docstring_style = "google"
 
+[tool.ruff]
+target-version = "py37"
+line-length = 88
+select = [
+    # https://github.com/charliermarsh/ruff#pyflakes-f
+    "F", # Pyflakes
+    # https://github.com/charliermarsh/ruff#pycodestyle-e-w
+    "E", # pycodestyle
+    "W", # Warning
+    # https://github.com/charliermarsh/ruff#flake8-comprehensions-c4
+    # https://github.com/charliermarsh/ruff#mccabe-c90
+    "C", # Complexity (mccabe+) & comprehensions
+    # https://github.com/charliermarsh/ruff#pyupgrade-up
+    "UP", # pyupgrade
+    # https://github.com/charliermarsh/ruff#isort-i
+    # "I", # isort # TODO: replace isort usage with this
+]
+ignore = [
+    # https://github.com/charliermarsh/ruff#pyflakes-f
+    "F842", # variable annotated but unused # TODO enable
+    # https://github.com/charliermarsh/ruff#pycodestyle-e-w
+    "E501", # line-length # TODO: too many violations
+    "E402", # module level import not at top of file
+    # https://github.com/charliermarsh/ruff#flake8-comprehensions-c4
+    "C400", # TODO enable
+    "C408", # TODO enable
+    "C409", # TODO enable
+    "C413", # TODO enable
+    "C414", # TODO enable
+    "C416", # TODO enable
+    "C417", # TODO enable
+    # https://github.com/charliermarsh/ruff#pyupgrade-up
+    "UP006", # use-pep585-annotation
+    "UP007", # use-pep604-annotation
+]
+extend-exclude = [
+    "scripts/*",
+    "docs/*",
+    "build/*",
+    "assets/*",
+    "contrib/*",
+    "versioneer*",
+    "examples/*",
+    # TODO: remove the items below and fix linting issues
+    "great_expectations/dataset", # 52 warnings
+    "tests/checkpoint", # 15 warnings
+    "tests/cli", # 34 warnings
+    "tests/data_asset", # 10 warnings
+    "tests/data_context", # 127 warnings
+    "tests/dataset", # 10 warnings
+    "tests/datasource", # 81 warnings
+    "tests/execution_engine",  # 23 warnings
+    "tests/expectations", # 56 warnings
+    "tests/integration", # 114 warnings
+    "tests/rule_based_profiler", # 28 warnings
+    "tests/test_fixtures/notebook_assets/suite_edit/footer.py",  # 7 warnings
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = [
+    "F401",  # unused import
+    "F403",  # star imports
+    ]
+
+[tool.ruff.mccabe]
+max-complexity = 15
+
 [tool.pytest.ini_options]
 filterwarnings = [
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
@@ -199,7 +264,13 @@ filterwarnings = [
     # This deprecation warning comes from getsentry/responses, a mocking utility for requests. It is a dependency in moto.
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
-    "error::marshmallow.warnings.RemovedInMarshmallow4Warning"
+    "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
+    # This warning is for configuring the result_format parameter at the Validator-level, which will not be persisted,
+    # but is still useful for building the configuration.
+    "ignore:`result_format` configured at the Validator-level will not be persisted:UserWarning",
+    # This warning is for configuring the result_format parameter at the Expectation-level, which will not be persisted,
+    # but is still useful for building the configuration.
+    "ignore:`result_format` configured at the Expectation-level will not be persisted:UserWarning",
 ]
 junit_family="xunit2"
 markers = [

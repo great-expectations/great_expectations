@@ -86,6 +86,7 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
                 "summed_column_zero_both": generate_data_sample({1: 3, 0: 12}),
             },
             # "column_b": [today, yesterday, yesterday, two_days_ago]},
+            "suppress_test_for": ["bigquery"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -100,7 +101,6 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
                         "threshold": default_kwarg_values["threshold"],
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "negative test",
@@ -158,13 +158,6 @@ class ExpectDaySumToBeCloseToEquivalentWeekDayMean(QueryExpectation):
                     },
                     "out": {"success": False},
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                },
-                {"backend": "spark", "dialects": None},
             ],
         }
     ]

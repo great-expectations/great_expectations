@@ -74,7 +74,7 @@ class GXDependencies:
             "darglint",
             "docstring-parser",
             "feather-format",
-            "flake8",
+            "ruff",
             "flask",
             "freezegun",
             "gcsfs",
@@ -106,7 +106,6 @@ class GXDependencies:
             "pytest-order",
             "pytest-random-order",
             "pytest-timeout",
-            "pyupgrade",
             "requirements-parser",
             "s3fs",
             "snapshottest",
@@ -125,7 +124,7 @@ class GXDependencies:
     GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING: List[str] = [
         # requirements-dev-contrib.txt:
         "black",
-        "flake8",
+        "ruff",
         "invoke",
         "isort",
         "mypy",
@@ -133,7 +132,6 @@ class GXDependencies:
         "pytest-cov",
         "pytest-order",
         "pytest-random-order",
-        "pyupgrade",
         # requirements-dev-lite.txt:
         "darglint",
         "flask",

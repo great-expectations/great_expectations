@@ -80,6 +80,7 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
                     "data": {"col1": [1, 1, 1, 2, 2, 2, 2, 2]},
                 },
             ],
+            "suppress_test_for": ["bigquery"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -90,7 +91,6 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
                         "threshold": 4,
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -101,7 +101,6 @@ class ExpectQueryCountWithFilterToMeetThreshold(QueryExpectation):
                         "threshold": 4,
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite", "spark"],
                 },
             ],
         },

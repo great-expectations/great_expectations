@@ -2,7 +2,7 @@
 require('dotenv').config();
 const fetch = require('node-fetch');
 const removeMd = require('remove-markdown');
-const packageS3URL = "https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/package_manifests.json";
+const packageS3URL = process.env.ALGOLIA_S3_PACKAGES_URL;
 const algoliasearch = require("algoliasearch");
 const client = algoliasearch(process.env.ALGOLIA_ACCOUNT, process.env.ALGOLIA_WRITE_KEY);
 const packageAlgoliaIndex = process.env.ALGOLIA_PACKAGE_INDEX;
@@ -21,7 +21,7 @@ function removeMarkdown(str) {
     return plainText;
 }
 
-// Replica expectation Index Names And Sorting Order Settings 
+// Replica expectation Index Names And Sorting Order Settings
 const expecReplicaIndexAndSettings = [
     {
         replica: `${process.env.ALGOLIA_PACK_EXPEC_REPLICA_ALPHA_ASC_INDEX}`, ranking: ['asc(description.snake_name)']
@@ -37,7 +37,7 @@ const expecReplicaIndexAndSettings = [
     },
 ]
 
-// Main Packages' Expectations Index setSettings 
+// Main Packages' Expectations Index setSettings
 const expecAttributesForFaceting = ["searchable(library_metadata.tags)", "searchable(engineSupported)", "searchable(exp_type)", "searchable(package)"];
 const maxFacetHits = 100;
 const epxecSearchableAttributes = ["description.snake_name", "description.short_description"]
@@ -143,12 +143,12 @@ function mainExpecIndexSetting() {
         maxFacetHits: maxFacetHits,
         searchableAttributes: epxecSearchableAttributes,
         customRanking: mainExpecIndexRanking,
-        // Creating replica index 
+        // Creating replica index
         replicas: expecReplicaIndexAndSettings.map(replica => replica.replica)
     })
         .then(() => {
             console.log('facets and replicas created. Now configuring expectation replica indices');
-            // Creating replica index setsettings 
+            // Creating replica index setsettings
             setExpecIndexReplicaSettings();
         })
         .catch(err => console.log("Error creating setting for Package Expectation Index !!", err));;
