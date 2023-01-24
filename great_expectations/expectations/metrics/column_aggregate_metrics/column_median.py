@@ -59,7 +59,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)
-            .where(column != None)
+            .where(column != None)  # noqa: E711
             .offset(max(nonnull_count // 2 - 1, 0))
             .limit(2)
             .select_from(selectable)
