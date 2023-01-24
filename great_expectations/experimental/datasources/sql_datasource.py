@@ -320,7 +320,6 @@ class SQLDatasource(Datasource):
     type: Literal["sql"] = "sql"
     connection_string: str
     assets: Dict[str, TableAsset] = {}
-
     engine: sqlalchemy.engine.Engine = pydantic.Field(..., exclude=True)
 
     @property
@@ -335,12 +334,13 @@ class SQLDatasource(Datasource):
 
     @pydantic.root_validator(pre=True)
     def _create_sqlalchemy_engine(cls, values: dict) -> dict:
-        if SQLALCHEMY_IMPORTED:
-            values["engine"] = sqlalchemy.create_engine(values["connection_string"])
-        else:
-            raise SQLDatasourceError(
-                "Unable to create SQLDatasource due to missing sqlalchemy dependency."
-            )
+        if "engine" not in values:
+            if SQLALCHEMY_IMPORTED:
+                values["engine"] = sqlalchemy.create_engine(values["connection_string"])
+            else:
+                raise SQLDatasourceError(
+                    "Unable to create SQLDatasource due to missing sqlalchemy dependency."
+                )
         return values
 
     def test_connection(self) -> None:
