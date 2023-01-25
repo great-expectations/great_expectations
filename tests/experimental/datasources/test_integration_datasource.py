@@ -321,9 +321,6 @@ def _configure_and_run_data_assistant(
             "estimator": "exact",
             "random_seed": 2022080401,
         },
-        # We exclude congestion_surcharge due to this bug:
-        # https://greatexpectations.atlassian.net/browse/GREAT-1465
-        exclude_column_names=["congestion_surcharge"],
     )
     expectation_suite = data_assistant_result.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
