@@ -193,8 +193,6 @@ ExcelAsset = _ASSET_MODELS["excel"]
 JSONAsset = _ASSET_MODELS["json"]
 ParquetAsset = _ASSET_MODELS["parquet"]
 
-# print(CSVAsset.schema())
-
 
 class PandasDatasource(Datasource):
     # class attrs
