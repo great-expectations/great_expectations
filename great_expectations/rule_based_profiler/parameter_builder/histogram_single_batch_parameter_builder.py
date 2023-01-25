@@ -9,7 +9,7 @@ from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
-    _is_iterable_numeric_and_has_dtype_attr,
+    _is_iterable_of_numeric_dtypes,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -145,7 +145,7 @@ elements.
 """
             )
 
-        if not _is_iterable_numeric_and_has_dtype_attr(bins):
+        if not _is_iterable_of_numeric_dtypes(bins):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Partitioning values for {self.__class__.__name__} by \
 {self._column_partition_metric_single_batch_parameter_builder_config.name} did not yield bins of supported data type.
