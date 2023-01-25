@@ -160,6 +160,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     """
     # TODO: parse the annotation string
     annotation = param.annotation
+    assert isinstance(annotation, str)
     # print(type(annotation), annotation)
 
     types: list = []

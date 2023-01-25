@@ -280,7 +280,7 @@ def test_pandas_sorter(pandas_datasource, csv_path: Path, order_by):
     @dataclass(frozen=True)
     class TimeRange:
         key: str
-        range: List[int]
+        range: list[int]
 
     ordered_years = reversed(years) if "-year" in order_by else years
     ordered_months = reversed(months) if "-month" in order_by else months
