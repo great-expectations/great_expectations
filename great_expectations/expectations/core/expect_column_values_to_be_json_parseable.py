@@ -104,9 +104,7 @@ class ExpectColumnValuesToBeJsonParseable(ColumnMapExpectation):
 
         Raises:
             InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                    Expectation.
-
-            # noqa: DAR402 InvalidExpectationConfigurationError
+                                                  Expectation.
         """
         super().validate_configuration(configuration)
 
