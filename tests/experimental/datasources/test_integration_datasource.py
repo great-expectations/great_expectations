@@ -91,7 +91,7 @@ def pandas_json_data(
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.json",
         order_by=["year", "month"],
     )
-    batch_request = asset.get_batch_request({"year": "2019", "month": "01"})
+    batch_request = asset.get_batch_request({"year": "2018", "month": "08"})
     return context, panda_ds, asset, batch_request
 
 
