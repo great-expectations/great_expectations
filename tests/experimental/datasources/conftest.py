@@ -51,7 +51,7 @@ class _MockConnection:
         return [(DEFAULT_MIN_DT, DEFAULT_MAX_DT)]
 
 
-class _MockSaEngine:
+class MockSaEngine:
     def __init__(self, dialect: Dialect):
         self.dialect = dialect
 
@@ -77,7 +77,7 @@ def sqlachemy_execution_engine_mock_cls(
             # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
-            self.engine = _MockSaEngine(dialect=Dialect(dialect))
+            self.engine = MockSaEngine(dialect=Dialect(dialect))
 
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec

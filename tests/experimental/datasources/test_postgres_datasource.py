@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from pprint import pprint
 from typing import Callable, ContextManager
+from unittest import mock
 
 import pytest
 from pydantic import ValidationError
@@ -23,6 +24,8 @@ from great_expectations.experimental.datasources.sql_datasource import (
 from tests.experimental.datasources.conftest import (
     DEFAULT_MAX_DT,
     DEFAULT_MIN_DT,
+    Dialect,
+    MockSaEngine,
     sqlachemy_execution_engine_mock_cls,
 )
 
@@ -44,10 +47,15 @@ def _source(
     original_override = PostgresDatasource.execution_engine_override
     try:
         PostgresDatasource.execution_engine_override = execution_eng_cls
-        yield PostgresDatasource(
+        postgres_datasource = PostgresDatasource(
             name="my_datasource",
             connection_string=connection_string,
         )
+        postgres_datasource.engine = MockSaEngine(
+            dialect=Dialect("postgresql+psycopg2")
+        )
+        with mock.patch("sqlalchemy.inspect"):
+            yield postgres_datasource
     finally:
         PostgresDatasource.execution_engine_override = original_override
 
