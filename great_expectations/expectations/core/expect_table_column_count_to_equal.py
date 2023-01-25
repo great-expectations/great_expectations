@@ -4,6 +4,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
@@ -73,26 +74,23 @@ class ExpectTableColumnCountToEqual(TableExpectation):
     }
     args_keys = ("value",)
 
-    """ A Metric Decorator for the Column Count"""
-
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates the configuration for the Expectation.
 
-        The configuration will also be validated using each of the `validate_configuration` methods 
-        in its Expectation superclass hierarchy.
+        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` as a number.
 
         Args:
-            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, 
-                            it will be pulled from the configuration attribute of the Expectation instance.
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided,
+                it will be pulled from the configuration attribute of the Expectation instance.
 
         Raises:
-            `InvalidExpectationConfigurationError`: The configuration does not contain the values required
-                                                     by the Expectation.
+            InvalidExpectationConfigurationError: The configuration does not contain the values required
+                by the Expectation.
         """
-
         # Setting up a configuration
         super().validate_configuration(configuration)
 
