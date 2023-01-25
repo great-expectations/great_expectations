@@ -28,7 +28,8 @@ import logging
 import os
 import pathlib
 import shutil
-from typing import Dict, Tuple, List
+import sys
+from typing import Dict
 from urllib.parse import urlparse
 
 import invoke
@@ -109,6 +110,11 @@ class SphinxInvokeDocsBuilder:
 
     def _build_html_api_docs_in_temp_folder(self):
         """Builds html api documentation in temporary folder."""
+
+        sphinx_api_docs_source_dir = pathlib.Path.cwd()
+        if sphinx_api_docs_source_dir not in sys.path:
+            sys.path.append(str(sphinx_api_docs_source_dir))
+
         cmd = f"sphinx-build -M html ./ {self.temp_sphinx_html_dir} -E"
         self.ctx.run(cmd, echo=True, pty=True)
         logger.debug("Raw Sphinx HTML generated.")
@@ -367,12 +373,12 @@ class SphinxInvokeDocsBuilder:
     def _remove_md_stubs(self):
         """Remove all markdown stub files."""
 
-        excluded_files: Tuple[pathlib.Path, ...] = (
+        excluded_files: tuple[pathlib.Path, ...] = (
             self.base_path / "index.md",
             self.base_path / "README.md",
         )
 
-        all_files: Tuple[pathlib.Path] = tuple(self.base_path.glob("*.md"))
+        all_files: tuple[pathlib.Path] = tuple(self.base_path.glob("*.md"))
 
         for file in all_files:
             if file not in excluded_files:
@@ -420,7 +426,7 @@ class SphinxInvokeDocsBuilder:
         return doc
 
 
-def convert_code_blocks(lines: List[str], name: str) -> None:
+def convert_code_blocks(lines: list[str], name: str) -> None:
     """Convert code blocks to CodeBlock components.
 
     Modify lines in place to match Sphinx functionality.
@@ -434,7 +440,7 @@ def convert_code_blocks(lines: List[str], name: str) -> None:
     num_triple_quotes: int = 0
 
     # Find number of code snippets
-    code_snippet_indices: List[Tuple[int, int]] = []
+    code_snippet_indices: list[tuple[int, int]] = []
     for idx, line in enumerate(lines):
         if line.strip().startswith("```"):
             num_triple_quotes += 1
