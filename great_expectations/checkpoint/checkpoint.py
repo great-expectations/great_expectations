@@ -1326,7 +1326,9 @@ class SimpleCheckpoint(Checkpoint):
         notify_with: Union[str, List[str]] = "all",
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
-        """Validate against current SimpleCheckpoint.
+        """Validate against the current SimpleCheckpoint.
+        
+        Arguments allow for override of the current SimpleCheckpoint configuration.
 
         Args:
             template_name: The name of another checkpoint to use as a base template.
