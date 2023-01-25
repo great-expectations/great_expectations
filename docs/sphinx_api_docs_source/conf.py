@@ -8,6 +8,8 @@ from __future__ import annotations
 import os
 import sys
 
+from build_sphinx_api_docs import convert_code_blocks
+
 WHITELISTED_TAG = "--Public API--"
 
 
@@ -133,33 +135,7 @@ def _convert_code_snippets_to_docusaurus(app, what, name, obj, options, lines):
     1. There must be an opening and closing set of triple backticks.
     2. The opening backticks can have an optional language (see docusaurus for supported languages).
     """
-
-    code_snippet_start: None | int = None
-    code_snippet_end: None | int = None
-    num_triple_quotes: int = 0
-    for idx, line in enumerate(lines):
-        if line.strip().startswith("```"):
-            num_triple_quotes += 1
-            if not code_snippet_start:
-                code_snippet_start = idx
-            elif not code_snippet_end:
-                code_snippet_end = idx
-
-                # Create and replace snippet with CodeBlock
-                language = lines[code_snippet_start].replace("```", "").strip()
-                content = lines[code_snippet_start + 1 : code_snippet_end]
-                stub = '<CodeBlock language="{language}">{{`{content}`}}</CodeBlock>'.format(
-                    language=language, content="{" + "\n".join(content) + "}"
-                )
-                lines[code_snippet_start] = stub
-                del lines[code_snippet_start + 1 : code_snippet_end + 1]
-
-            else:
-                code_snippet_start = idx
-                code_snippet_end = None
-
-    if not num_triple_quotes % 2 == 0:
-        raise ValueError("Triple quotes should be matched.")
+    convert_code_blocks(lines=lines, name=name)
 
 
 def setup(app):

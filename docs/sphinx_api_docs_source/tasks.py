@@ -18,9 +18,12 @@ logger.setLevel(logging.INFO)
 def docs(ctx):
     """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
     scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
-    sys.path.append(str(scripts_path))
+    if scripts_path not in sys.path:
+        sys.path.append(str(scripts_path))
 
-    sphinx_api_docs_source_dir = pathlib.Path(__file__).parent
+    sphinx_api_docs_source_dir = pathlib.Path.cwd()
+    if sphinx_api_docs_source_dir not in sys.path:
+        sys.path.append(str(sphinx_api_docs_source_dir))
 
     _exit_with_error_if_not_run_from_correct_dir(
         task_name="docs", correct_dir=sphinx_api_docs_source_dir
