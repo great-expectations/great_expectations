@@ -84,6 +84,7 @@ class _FieldSpec(NamedTuple):
 
 FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "filepath_or_buffer": {"path": _FieldSpec(pathlib.Path, ...)},
+    "path_or_buf": {"path": _FieldSpec(pathlib.Path, ...)},
     "filepath": {"path": _FieldSpec(pathlib.Path, ...)},
 }
 
