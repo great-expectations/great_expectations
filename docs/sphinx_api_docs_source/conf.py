@@ -6,6 +6,7 @@ from __future__ import annotations
 
 # -- Update syspath
 import os
+import pathlib
 import sys
 
 from build_sphinx_api_docs import convert_code_blocks
@@ -19,6 +20,15 @@ def _prepend_base_repository_dir_to_sys_path():
 
 
 _prepend_base_repository_dir_to_sys_path()
+
+
+def _add_current_path_to_sys_path():
+    current_path = pathlib.Path.cwd()
+    if current_path not in sys.path:
+        sys.path.append(str(current_path))
+
+
+_add_current_path_to_sys_path()
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
