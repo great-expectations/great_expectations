@@ -376,6 +376,7 @@ class Datasource(
         Args:
             asset: The DataAsset to be added to this datasource.
         """
+        asset.test_connection()
         # The setter for datasource is non-functional so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self

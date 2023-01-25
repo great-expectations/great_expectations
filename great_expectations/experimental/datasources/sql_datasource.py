@@ -334,7 +334,7 @@ class SQLDatasource(Datasource):
         Validates that SQL Alchemy was successfully imported and attempts to
         create an engine if a properly formed connection_string was passed.
         """
-        if "engine" not in values:
+        if values["engine"] is None:
             if SQLALCHEMY_IMPORTED:
                 if "connection_string" in values:
                     try:
