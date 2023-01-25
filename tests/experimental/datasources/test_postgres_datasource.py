@@ -73,7 +73,7 @@ def test_construct_postgres_datasource(create_source):
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
         assert source.name == "my_datasource"
-        assert isinstance(source.execution_engine, SqlAlchemyExecutionEngine)
+        assert source.execution_engine_type is SqlAlchemyExecutionEngine
         assert source.assets == {}
 
 

@@ -108,7 +108,8 @@ def _query_for_year_and_month(
         [sqlalchemy.engine.base.Connection, str, str], DatetimeRange
     ],
 ) -> Dict[str, List]:
-    with table_asset.datasource.engine.connect() as conn:
+    datasource: SQLDatasource = table_asset.datasource
+    with datasource.engine.connect() as conn:
         datetimes: DatetimeRange = query_datetime_range(
             conn,
             table_asset.table_name,
