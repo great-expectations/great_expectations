@@ -22,8 +22,6 @@ def docs(ctx):
         sys.path.append(str(scripts_path))
 
     sphinx_api_docs_source_dir = pathlib.Path.cwd()
-    if sphinx_api_docs_source_dir not in sys.path:
-        sys.path.append(str(sphinx_api_docs_source_dir))
 
     _exit_with_error_if_not_run_from_correct_dir(
         task_name="docs", correct_dir=sphinx_api_docs_source_dir
