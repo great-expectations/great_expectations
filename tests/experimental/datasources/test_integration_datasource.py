@@ -57,7 +57,7 @@ def sql_data(
     return context, datasource, asset, batch_request
 
 
-def pandas_data(
+def pandas_csv_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     csv_path = (
@@ -74,7 +74,7 @@ def pandas_data(
     return context, panda_ds, asset, batch_request
 
 
-@pytest.fixture(params=[sql_data, pandas_data])
+@pytest.fixture(params=[sql_data, pandas_csv_data])
 def datasource_test_data(
     empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
