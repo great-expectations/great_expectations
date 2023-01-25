@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import ast
 import logging
 from unittest import mock
 
 import pytest
 
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.usage_statistics.usage_statistics import ENABLED_METHODS
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
@@ -16,7 +16,6 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.util import file_relative_path
 
 logger = logging.getLogger(__name__)
 
@@ -28,38 +27,16 @@ def enable_usage_stats(monkeypatch):
 
 @pytest.fixture
 def usage_stats_decorated_methods_on_abstract_data_context() -> list[str]:
-    """
-    Uses AST parsing to collect the names of all methods that are decorated with
-    `usage_statistics_enabled_method`.
-
-    This is used to ensure that any changes made to `AbstractDataContext` are automatically
-    accounted for in our tests.
-    """
-    path_to_abstract_context = file_relative_path(
-        __file__,
-        "../../../great_expectations/data_context/data_context/abstract_data_context.py",
+    return list(
+        map(
+            lambda m: m.split(".")[1],
+            filter(
+                lambda m: m.startswith("AbstractDataContext")
+                and not m.endswith("__init__"),
+                ENABLED_METHODS,
+            ),
+        ),
     )
-    with open(path_to_abstract_context) as f:
-        root = ast.parse(f.read())
-
-    relevant_methods = []
-    for node in ast.walk(root):
-        if not isinstance(node, ast.FunctionDef):
-            continue
-
-        name = node.name
-        # Ignore dunders like __init__
-        if name.startswith("__") and name.endswith("__"):
-            continue
-
-        decorators = node.decorator_list
-        for decorator in decorators:
-            if isinstance(decorator, ast.Call):
-                if decorator.func.id == "usage_statistics_enabled_method":
-                    relevant_methods.append(name)
-                    break
-
-    return relevant_methods
 
 
 @mock.patch(
