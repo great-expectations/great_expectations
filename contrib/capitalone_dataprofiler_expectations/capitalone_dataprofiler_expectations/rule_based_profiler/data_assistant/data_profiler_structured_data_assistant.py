@@ -1,5 +1,9 @@
 from typing import Any, Dict, List, Optional
 
+from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
+    DataProfilerStructuredDataAssistantResult,
+)
+
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant_result import (
@@ -23,10 +27,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.rule_based_profiler.rule import Rule
 from great_expectations.validator.validator import Validator
-
-from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
-    DataProfilerStructuredDataAssistantResult,
-)
 
 
 class DataProfilerStructuredDataAssistant(DataAssistant):
