@@ -66,7 +66,7 @@ def pandas_data(
     panda_ds = context.sources.add_pandas(name="my_pandas")
     asset = panda_ds.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
@@ -264,7 +264,7 @@ def multibatch_pandas_data(
     panda_ds = context.sources.add_pandas(name="my_pandas")
     asset = panda_ds.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )

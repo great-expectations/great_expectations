@@ -11,7 +11,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
 )
 from great_expectations.experimental.datasources.pandas_datasource import (
-    CSVAsset,
+    CsvDataAsset,
     PandasDatasource,
 )
 
@@ -42,7 +42,7 @@ def test_add_csv_asset_to_datasource(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
     assert asset.name == "csv_asset"
@@ -56,7 +56,7 @@ def test_add_csv_asset_to_datasource(
 @pytest.mark.unit
 def test_construct_csv_asset_directly(csv_path: pathlib.Path):
     # noinspection PyTypeChecker
-    asset = CSVAsset(
+    asset = CsvDataAsset(
         name="csv_asset",
         path=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",  # Ignoring IDE warning (type declarations are consistent).
@@ -75,7 +75,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
     options = asset.batch_request_options_template()
@@ -88,7 +88,7 @@ def test_csv_asset_with_regex_named_parameters(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
     options = asset.batch_request_options_template()
@@ -101,7 +101,7 @@ def test_csv_asset_with_some_regex_named_parameters(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
     )
     options = asset.batch_request_options_template()
@@ -114,7 +114,7 @@ def test_csv_asset_with_non_string_regex_named_parameters(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
@@ -128,7 +128,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
     request = asset.get_batch_request({"year": "2018", "month": "04"})
@@ -165,7 +165,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
 
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
     request = asset.get_batch_request({"year": "2018"})
@@ -236,7 +236,7 @@ def test_pandas_sorter(
 
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
         order_by=order_by,
     )
