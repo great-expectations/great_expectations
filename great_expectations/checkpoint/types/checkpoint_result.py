@@ -317,7 +317,7 @@ class CheckpointResult(SerializableDictDot):
         }
         if not self.validation_result_url:
             serializable_dict.pop("validation_result_url")
-        return recursively_convert_to_json_serializable(test_obj=serializable_dict)
+        return serializable_dict
 
     def __getstate__(self):
         """
