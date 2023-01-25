@@ -4,17 +4,7 @@ import copy
 import logging
 import pathlib
 import re
-from typing import (
-    TYPE_CHECKING,
-    Dict,
-    Generator,
-    List,
-    Optional,
-    Pattern,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
 
 import pydantic
 from typing_extensions import ClassVar, Literal
@@ -72,7 +62,7 @@ class CSVAsset(DataAsset):
         group_id_to_option = {v: k for k, v in option_to_group_id.items()}
         batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
 
-        all_files: Generator[pathlib.Path] = pathlib.Path(self.path).iterdir()
+        all_files: List[pathlib.Path] = list(pathlib.Path(self.path).iterdir())
 
         file_name: pathlib.Path
         for file_name in all_files:
