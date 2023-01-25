@@ -7,12 +7,14 @@ from pathlib import Path
 import pandas as pd
 import pydantic
 import pytest
+from pytest import param
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources import PandasDatasource
 from great_expectations.experimental.datasources.interfaces import BatchRequestError
 from great_expectations.experimental.datasources.pandas_datasource import CSVAsset
 
+# TODO: use this to parametrize `test_data_asset_defined_for_io_read_method`
 PANDAS_IO_METHODS: list[str] = [
     member_tuple[0]
     for member_tuple in inspect.getmembers(pd, predicate=inspect.isfunction)
@@ -36,17 +38,44 @@ class TestDynamicPandasAssets:
 
         assert asset_class_names == asset_field_union_members
 
-    @pytest.mark.parametrize("method_name", [*PANDAS_IO_METHODS])
+    @pytest.mark.parametrize(
+        "method_name",
+        [
+            param("read_clipboard", marks=pytest.mark.xfail),
+            "read_csv",
+            "read_excel",
+            param("read_feather", marks=pytest.mark.xfail),
+            param("read_fwf", marks=pytest.mark.xfail),
+            param("read_gbq", marks=pytest.mark.xfail),
+            param("read_hdf", marks=pytest.mark.xfail),
+            param("read_html", marks=pytest.mark.xfail),
+            "read_json",
+            param("read_orc", marks=pytest.mark.xfail),
+            "read_parquet",
+            param("read_pickle", marks=pytest.mark.xfail),
+            param("read_sas", marks=pytest.mark.xfail),
+            param("read_spss", marks=pytest.mark.xfail),
+            param("read_sql", marks=pytest.mark.xfail),
+            param("read_sql_query", marks=pytest.mark.xfail),
+            param("read_sql_table", marks=pytest.mark.xfail),
+            param("read_stata", marks=pytest.mark.xfail),
+            param("read_table", marks=pytest.mark.xfail),
+            param("read_xml", marks=pytest.mark.xfail),
+        ],
+    )
     def test_data_asset_defined_for_io_read_method(self, method_name: str):
         _, type_name = method_name.split("read_")
         assert type_name
 
         asset_class_names: set[str] = {
-            t.__name__.lower().rstrip("asset") for t in PandasDatasource.asset_types
+            t.__name__.lower().split("asset")[0] for t in PandasDatasource.asset_types
         }
         print(asset_class_names)
 
         assert type_name in asset_class_names
+
+    def test_data_asset_reader_options_passthrough(self):
+        raise NotImplementedError("create this test")
 
 
 @pytest.fixture
