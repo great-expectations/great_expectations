@@ -330,10 +330,7 @@ class Datasource(
     @property
     def execution_engine(self) -> ExecutionEngine:
         engine_kwargs = self.dict(exclude=self._excluded_eng_args)
-        if self.execution_engine_override:
-            return self.execution_engine_override(**engine_kwargs)
-        else:
-            return self.execution_engine_type(**engine_kwargs)
+        return self._execution_engine_type()(**engine_kwargs)
 
     @pydantic.validator("assets", pre=True)
     @classmethod
@@ -352,6 +349,10 @@ class Datasource(
 
         LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
+
+    def _execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Returns the execution engine to be used"""
+        return self.execution_engine_override or self.execution_engine_type
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
