@@ -887,12 +887,12 @@ class StoreEvaluationParametersAction(ValidationAction):
     in the process of validating other prior expectations.
 
     Typical usage example:
-    ```yaml
+        ```yaml
         - name: store_evaluation_params
         action:
           class_name: StoreEvaluationParametersAction
           target_store_name: evaluation_parameter_store
-    ```
+        ```
 
     Args:
         data_context: GX Data Context.
