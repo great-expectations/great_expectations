@@ -261,7 +261,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
         Raises:
             InvalidExpectationConfigurationError: The configuration does not contain the values required by the
-                                                    Expectation.
+                                                  Expectation.
         """
         # Setting up a configuration
         super().validate_configuration(configuration)
