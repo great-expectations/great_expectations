@@ -739,7 +739,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str,
         config: dict,
         save_changes: bool | None = None,
-    ) -> Datasource | None:
+    ) -> Datasource:
         datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
 
@@ -751,6 +751,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource = self._instantiate_datasource_from_config_and_update_project_config(
             config=datasource_config, initialize=True, save_changes=False
         )
+        assert datasource is not None
         return datasource
 
     def add_or_update_datasource(
