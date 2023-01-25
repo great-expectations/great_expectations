@@ -1,6 +1,6 @@
 import pathlib
 from dataclasses import dataclass
-from typing import Generator, List
+from typing import List
 
 import pytest
 
