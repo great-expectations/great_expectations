@@ -138,6 +138,12 @@ class DataAsset(ExperimentalBaseModel):
     def datasource(self) -> Datasource:
         return self._datasource
 
+    def test_connection(self) -> None:
+        """Test the connection for this DataAsset."""
+        raise NotImplementedError(
+            "One needs to implement 'test_connection' on a DataAsset subclass"
+        )
+
     # Abstract Methods
     def batch_request_options_template(
         self,

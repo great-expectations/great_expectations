@@ -49,6 +49,18 @@ class CSVAsset(DataAsset):
         default="batch_request_param_"
     )
 
+    def test_connection(self) -> None:
+        success = False
+        for filename in os.listdir(self.path):
+            if self.regex.match(filename):
+                # if one file in the asset matches the regex, we consider this asset valid
+                success = True
+                break
+        if not success:
+            raise CSVAssetError(
+                f"No file at path: {self.path} matched the regex: {self.regex}."
+            )
+
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
     ) -> List[Tuple[BatchRequest, pathlib.Path]]:
@@ -199,16 +211,7 @@ class PandasDatasource(Datasource):
     def test_connection(self) -> None:
         if self.assets:
             for asset in self.assets.values():
-                success = False
-                for filename in os.listdir(asset.path):
-                    if asset.regex.match(filename):
-                        # if one file in the asset matches the regex, we consider this asset valid
-                        success = True
-                        break
-                if not success:
-                    raise CSVAssetError(
-                        f"No file at path: {asset.path} matched the regex: {asset.regex}."
-                    )
+                asset.test_connection()
 
     def add_csv_asset(
         self,

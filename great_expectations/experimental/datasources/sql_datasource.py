@@ -134,6 +134,9 @@ class TableAsset(DataAsset):
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
 
+    def test_connection(self) -> None:
+        sqlalchemy.inspect(self.datasource.engine).has_table(self.table_name)
+
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
@@ -342,7 +345,7 @@ class SQLDatasource(Datasource):
         # if TableAssets are defined, also check if those exist
         if self.assets:
             for asset in self.assets.values():
-                sqlalchemy.inspect(self.engine).has_table(asset.table_name)
+                asset.test_connection()
 
     def add_table_asset(
         self,
