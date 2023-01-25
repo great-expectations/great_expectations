@@ -225,6 +225,7 @@ class PandasDatasource(Datasource):
         data_path: PathStr,
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
+        **kwargs,  # TODO: update signature to have specific keys & types
     ) -> CSVAsset:  # type: ignore[valid-type]
         """Adds a csv asset to this pandas datasource
 
@@ -232,11 +233,88 @@ class PandasDatasource(Datasource):
             name: The name of the csv asset
             data_path: Path to directory with csv files
             regex: regex pattern that matches csv filenames that is used to label the batches
+            kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         asset = CSVAsset(  # type: ignore[call-arg] # type has a default??
             name=name,
             path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            **kwargs,
+        )
+        return self.add_asset(asset)
+
+    def add_json_asset(
+        self,
+        name: str,
+        data_path: PathStr,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
+        **kwargs,  # TODO: update signature to have specific keys & types
+    ) -> JSONAsset:  # type: ignore[valid-type]
+        """Adds a JSON asset to this pandas datasource
+
+        Args:
+            name: The name of the csv asset
+            data_path: Path to directory with csv files
+            regex: regex pattern that matches csv filenames that is used to label the batches
+            kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
+        """
+        asset = JSONAsset(  # type: ignore[call-arg] # type has a default??
+            name=name,
+            path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
+            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            **kwargs,
+        )
+        return self.add_asset(asset)
+
+    def add_excel_asset(
+        self,
+        name: str,
+        data_path: PathStr,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
+        **kwargs,  # TODO: update signature to have specific keys & types
+    ) -> ExcelAsset:  # type: ignore[valid-type]
+        """Adds a Excel asset to this pandas datasource
+
+        Args:
+            name: The name of the csv asset
+            data_path: Path to directory with csv files
+            regex: regex pattern that matches csv filenames that is used to label the batches
+            kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
+        """
+        asset = ExcelAsset(  # type: ignore[call-arg] # type has a default??
+            name=name,
+            path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
+            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            **kwargs,
+        )
+        return self.add_asset(asset)
+
+    def add_parquet_asset(
+        self,
+        name: str,
+        data_path: PathStr,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
+        **kwargs,  # TODO: update signature to have specific keys & types
+    ) -> ParquetAsset:  # type: ignore[valid-type]
+        """Adds a parquet asset to this pandas datasource
+
+        Args:
+            name: The name of the csv asset
+            data_path: Path to directory with csv files
+            regex: regex pattern that matches csv filenames that is used to label the batches
+            kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
+        """
+        asset = ParquetAsset(  # type: ignore[call-arg] # type has a default??
+            name=name,
+            path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
+            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            **kwargs,
         )
         return self.add_asset(asset)
