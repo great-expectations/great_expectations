@@ -39,7 +39,10 @@ except ImportError:
     pass
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+        SqlAlchemyExecutionEngine,
+    )
 
 
 class SQLDatasourceError(Exception):
@@ -260,7 +263,9 @@ class TableAsset(DataAsset):
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
-            execution_engine = self.datasource.get_execution_engine()
+            execution_engine: SqlAlchemyExecutionEngine = (
+                self.datasource.get_execution_engine()
+            )
             data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
@@ -280,7 +285,8 @@ class TableAsset(DataAsset):
                 batch_spec_passthrough=None,
             )
 
-            # Some pydantic annotations are postponed due to circular imports. This will set the annotations before we
+            # Some pydantic annotations are postponed due to circular imports.
+            # Batch.update_forward_refs() will set the annotations before we
             # instantiate the Batch class since we can import them above.
             Batch.update_forward_refs()
             batch_list.append(

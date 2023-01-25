@@ -23,7 +23,11 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+        PandasExecutionEngine,
+        SparkDFExecutionEngine,
+    )
 
 LOGGER = logging.getLogger(__name__)
 
@@ -149,7 +153,9 @@ class CSVAsset(DataAsset):
             batch_request
         ):
             batch_spec = PathBatchSpec(path=str(path))
-            execution_engine = self.datasource.get_execution_engine()
+            execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (
+                self.datasource.get_execution_engine()
+            )
             data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
@@ -172,7 +178,8 @@ class CSVAsset(DataAsset):
             batch_metadata = copy.deepcopy(request.options)
             batch_metadata["path"] = path
 
-            # Some pydantic annotations are postponed due to circular imports. This will set the annotations before we
+            # Some pydantic annotations are postponed due to circular imports.
+            # Batch.update_forward_refs() will set the annotations before we
             # instantiate the Batch class since we can import them above.
             Batch.update_forward_refs()
             batch_list.append(
