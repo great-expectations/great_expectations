@@ -1935,7 +1935,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
+        **kwargs,
     ):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
@@ -1956,10 +1956,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             and not overwrite_existing
         ):
             raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(
-                    expectation_suite_name
-                )
+                f"expectation_suite with name {expectation_suite_name} already exists."
+                " If you would like to overwrite this expectation_suite, please delete or"
+                " update it using `delete_expectation_suite` or `update_expectation_suite`, respectively."
             )
         self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite

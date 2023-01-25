@@ -4,15 +4,29 @@ from typing import Mapping
 
 import pytest
 
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
+from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
     ProgressBarsConfig,
 )
 from great_expectations.exceptions.exceptions import StoreConfigurationError
+
+
+class StoreSpy(Store):
+    def __init__(self) -> None:
+        self.save_count = 0
+        super().__init__()
+
+    def set(self, key, value, **kwargs):
+        self.save_count += 1
+        return super().set(key=key, value=value, **kwargs)
 
 
 class EphemeralDataContextSpy(EphemeralDataContext):
@@ -26,6 +40,11 @@ class EphemeralDataContextSpy(EphemeralDataContext):
     ) -> None:
         super().__init__(project_config)
         self.save_count = 0
+        self._expectations_store = StoreSpy()
+
+    @property
+    def expectations_store(self):
+        return self._expectations_store
 
     def _save_project_config(self):
         """
@@ -122,3 +141,70 @@ def test_update_project_config(
     context.update_project_config(config)
 
     assert context.progress_bars["globally"] is True
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "kwargs,expected_suite",
+    [
+        pytest.param(
+            {"expectation_suite_name": "my_new_suite"},
+            ExpectationSuite(expectation_suite_name="my_new_suite"),
+            id="only name",
+        ),
+        pytest.param(
+            {
+                "expectations": [
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_values_to_be_in_set",
+                        kwargs={"column": "x", "value_set": [1, 2, 4]},
+                    ),
+                ],
+                "expectation_suite_name": "default",
+                "meta": {"great_expectations_version": "0.15.44"},
+            },
+            ExpectationSuite(
+                expectations=[
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_values_to_be_in_set",
+                        kwargs={"column": "x", "value_set": [1, 2, 4]},
+                    ),
+                ],
+                expectation_suite_name="default",
+                meta={"great_expectations_version": "0.15.44"},
+            ),
+            id="misc args",
+        ),
+    ],
+)
+def test_add_expectation_suite_success(
+    in_memory_data_context: EphemeralDataContextSpy,
+    kwargs: dict,
+    expected_suite: ExpectationSuite,
+):
+    context = in_memory_data_context
+
+    suite = context.add_expectation_suite(**kwargs)
+
+    assert suite == expected_suite
+    assert context.expectations_store.save_count == 1
+
+
+@pytest.mark.unit
+def test_add_expectation_suite_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+
+    suite_name = "default"
+    context.add_expectation_suite(expectation_suite_name=suite_name)
+
+    with pytest.raises(gx_exceptions.DataContextError) as e:
+        context.add_expectation_suite(expectation_suite_name=suite_name)
+
+    assert f"expectation_suite with name {suite_name} already exists" in str(e.value)
+    assert (
+        "please delete or update it using `delete_expectation_suite` or `update_expectation_suite`"
+        in str(e.value)
+    )
+    assert context.expectations_store.save_count == 1
