@@ -428,9 +428,6 @@ def convert_code_blocks(lines: List[str], name: str) -> None:
     Args:
         lines: Lines in the docstring.
         name: Name of the entity whose docstring we are processing.
-
-    Returns:
-
     """
     code_snippet_start: None | int = None
     code_snippet_end: None | int = None
