@@ -1,4 +1,4 @@
-from docs.sphinx_api_docs_source.build_sphinx_api_docs import convert_code_blocks
+from docs.sphinx_api_docs_source.conf import convert_code_blocks
 
 
 def test_convert_code_blocks():

@@ -9,8 +9,6 @@ import os
 import pathlib
 import sys
 
-from build_sphinx_api_docs import convert_code_blocks
-
 WHITELISTED_TAG = "--Public API--"
 
 
@@ -34,7 +32,7 @@ _add_current_path_to_sys_path()
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "great_expectations"
-copyright = "2022, The Great Expectations Team"
+copyright = "2023, The Great Expectations Team"
 author = "The Great Expectations Team"
 
 # -- General configuration ---------------------------------------------------
@@ -151,3 +149,58 @@ def _convert_code_snippets_to_docusaurus(app, what, name, obj, options, lines):
 def setup(app):
     app.connect("autodoc-skip-member", skip_if_not_whitelisted)
     app.connect("autodoc-process-docstring", custom_process_docstring)
+
+
+def convert_code_blocks(lines: list[str], name: str) -> None:
+    """Convert code blocks to CodeBlock components.
+
+    Modify lines in place to match Sphinx functionality.
+
+    Args:
+        lines: Lines in the docstring.
+        name: Name of the entity whose docstring we are processing.
+    """
+    code_snippet_start: None | int = None
+    code_snippet_end: None | int = None
+    num_triple_quotes: int = 0
+
+    # Find number of code snippets
+    code_snippet_indices: list[tuple[int, int]] = []
+    for idx, line in enumerate(lines):
+        if line.strip().startswith("```"):
+            num_triple_quotes += 1
+            if not code_snippet_start:
+                code_snippet_start = idx
+            elif not code_snippet_end:
+                code_snippet_end = idx
+                code_snippet_indices.append((code_snippet_start, code_snippet_end))
+
+            else:
+                code_snippet_start = idx
+                code_snippet_end = None
+
+    if not num_triple_quotes % 2 == 0:
+        raise ValueError(f"Triple quotes for code blocks in {name} must be matched.")
+
+    # Replace code snippets with CodeBlock components
+    for _ in range(len(code_snippet_indices)):
+
+        code_snippet_start = None
+        code_snippet_end = None
+
+        for idx, line in enumerate(lines):
+            if line.strip().startswith("```"):
+                if not code_snippet_start:
+                    code_snippet_start = idx
+                elif not code_snippet_end:
+                    code_snippet_end = idx
+
+                    # Create and replace snippet with CodeBlock
+                    language = lines[code_snippet_start].replace("```", "").strip()
+                    content = lines[code_snippet_start + 1 : code_snippet_end]
+                    stub = '<CodeBlock language="{language}">{{`{content}`}}</CodeBlock>'.format(
+                        language=language, content="{" + "\n".join(content) + "}"
+                    )
+                    lines[code_snippet_start] = stub
+                    del lines[code_snippet_start + 1 : code_snippet_end + 1]
+                    break
