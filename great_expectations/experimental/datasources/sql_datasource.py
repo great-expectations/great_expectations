@@ -39,10 +39,7 @@ except ImportError:
     pass
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import (
-        ExecutionEngine,
-        SqlAlchemyExecutionEngine,
-    )
+    from great_expectations.execution_engine import ExecutionEngine
 
 
 class SQLDatasourceError(Exception):
@@ -327,7 +324,7 @@ class SQLDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
-    connection_string: str = pydantic.Field(None)
+    connection_string: Optional[str] = pydantic.Field(None)
     engine: sqlalchemy.engine.Engine = pydantic.Field(None, exclude=True)
     assets: Dict[str, TableAsset] = {}
 

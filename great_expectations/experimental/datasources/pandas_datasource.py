@@ -23,10 +23,7 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import (
-        ExecutionEngine,
-        PandasExecutionEngine,
-    )
+    from great_expectations.execution_engine import ExecutionEngine
 
 LOGGER = logging.getLogger(__name__)
 
