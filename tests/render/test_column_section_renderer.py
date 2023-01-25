@@ -92,6 +92,7 @@ def test_render_profiling_results_column_section_renderer(titanic_validation_res
                 "./output/test_render_profiling_results_column_section_renderer__"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -126,6 +127,7 @@ def test_render_expectation_suite_column_section_renderer(titanic_expectations):
                 "./output/test_render_expectation_suite_column_section_renderer"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
