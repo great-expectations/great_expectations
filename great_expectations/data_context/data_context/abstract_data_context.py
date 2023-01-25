@@ -751,7 +751,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource = self._instantiate_datasource_from_config_and_update_project_config(
             config=datasource_config, initialize=True, save_changes=False
         )
-        assert datasource is not None
+        assert datasource is not None  # Invariant based on `initalize=True` above
         return datasource
 
     def add_or_update_datasource(
@@ -791,7 +791,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             result_datasource = self.add_datasource(name=name, **kwargs)
 
-        assert result_datasource is not None
+        assert (
+            result_datasource is not None
+        )  # Invariant based on `initialize=True` in both add/update branches
         self._save_project_config()
         return result_datasource
 
