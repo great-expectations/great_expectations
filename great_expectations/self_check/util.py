@@ -1197,10 +1197,19 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 ):
     """Utility to create datasets for json-formatted tests."""
 
+    # this is where we would have to add another column
+    data["pk_index"] = list(range(len(list(data.values())[0])))
     df = pd.DataFrame(data)
+    # if schemas:
+    """"
+    {'pandas': {'x': 'int', 'y': 'str', 'z': 'Int64Dtype', 'ts': 'datetime', 'alpha': 'object', 'numeric': 'int'}, 'spark': {'x': 'IntegerType', 'y': 'StringType', 'z': 'IntegerType', 'ts': 'TimestampType', 'alpha': 'StringType', 'numeric': 'IntegerType'}, 'sqlite': {'x': 'INTEGER', 'y': 'VARCHAR', 'z': 'INTEGER', 'ts': 'DATETIME', 'alpha': 'VARCHAR', 'numeric': 'INTEGER'}, 'postgresql': {'x': 'INTEGER', 'y': 'TEXT', 'z': 'INTEGER', 'ts': 'TIMESTAMP', 'alpha': 'TEXT', 'numeric': 'INTEGER'}, 'mysql': {'x': 'INTEGER', 'y': 'TEXT', 'z': 'INTEGER', 'ts': 'TIMESTAMP', 'alpha': 'TEXT', 'numeric': 'INTEGER'}, 'mssql': {'x': 'INTEGER', 'y': 'VARCHAR', 'z': 'INTEGER', 'ts': 'DATETIME2', 'alpha': 'VARCHAR', 'numeric': 'INTEGER'}}
+    """
+    # breakpoint()
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
             schema = schemas["pandas"]
+            # add the schema
+            schema["pk_index"] = "int"
             pandas_schema = {}
             for (key, value) in schema.items():
                 # Note, these are just names used in our internal schemas to build datasets *for internal tests*
@@ -1292,6 +1301,8 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
+            # adding the thing
+            schema["pk_index"] = "IntegerType"
             # sometimes first method causes Spark to throw a TypeError
             try:
                 spark_schema = sparktypes.StructType(
@@ -1525,6 +1536,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         and isinstance(engine.dialect, dialect_classes[sa_engine_name])
     ):
         schema = schemas[sa_engine_name]
+        schema["pk_index"] = "INTEGER"
 
         sql_dtypes = {
             col: dialect_types[sa_engine_name][dtype] for (col, dtype) in schema.items()
@@ -2848,7 +2860,10 @@ def evaluate_json_test_v3_api(
         # As well as keyword arguments
         else:
             runtime_kwargs = {
-                "result_format": "COMPLETE",
+                "result_format": {
+                    "result_format": "COMPLETE",
+                    "unexpected_index_columns": ["pk_index"],
+                },
                 "include_config": False,
             }
             runtime_kwargs.update(kwargs)
@@ -2884,6 +2899,14 @@ def evaluate_json_test_v3_api(
 
 def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901 - 49
     # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
+    # this is where we are going to work on the results
+    # if test["title"] == "negative_case_with_75percent_null_values_no_mostly":
+    #     breakpoint()
+    if not result["success"]:
+        # ensure that we have the output
+        if "unexpected_index_list" in result["result"]:
+            assert "unexpected_index_query" in result["result"]
+
     if "unexpected_list" in result["result"]:
         if ("result" in test["output"]) and (
             "unexpected_list" in test["output"]["result"]
