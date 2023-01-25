@@ -1517,7 +1517,7 @@ class Validator:
         discard_catch_exceptions_kwargs: bool = True,
         suppress_warnings: bool = False,
     ) -> None:
-        """Write the configuration to the Expectation Store associated with the Validator's Data Context.
+        """Write the Expectation Suite (e.g. from interactive evaluation) to the Expectation Store associated with the Validator's Data Context.
 
         If `filepath` is provided, the Data Context configuration will be ignored and the configuration will be written, as JSON, to the specified file.
 
