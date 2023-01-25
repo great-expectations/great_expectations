@@ -6,7 +6,6 @@ from typing import List
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.alias_types import PathStr
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
@@ -20,7 +19,7 @@ def pandas_datasource() -> PandasDatasource:
 
 
 @pytest.fixture
-def csv_path() -> PathStr:
+def csv_path() -> pathlib.Path:
     return pathlib.Path(
         file_relative_path(
             __file__,

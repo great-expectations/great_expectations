@@ -7,7 +7,6 @@ from typing import Callable, List
 import pydantic
 import pytest
 
-from great_expectations.alias_types import PathStr
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
@@ -348,7 +347,7 @@ def test_yaml_config_round_trip(
 
 
 def test_yaml_file_config_round_trip(
-    inject_engine_lookup_double, tmp_path: PathStr, from_yaml_gx_config: GxConfig
+    inject_engine_lookup_double, tmp_path: pathlib.Path, from_yaml_gx_config: GxConfig
 ):
     yaml_file = tmp_path / "test.yaml"
     assert not yaml_file.exists()
