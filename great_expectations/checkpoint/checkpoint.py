@@ -124,7 +124,7 @@ class BaseCheckpoint(ConfigPeer):
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
         """Validate against current Checkpoint.
-        
+
         Arguments allow for override of the current Checkpoint configuration.
 
         Args:
@@ -1339,7 +1339,7 @@ class SimpleCheckpoint(Checkpoint):
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
         """Validate against the current SimpleCheckpoint.
-        
+
         Arguments allow for override of the current SimpleCheckpoint configuration.
 
         Args:
