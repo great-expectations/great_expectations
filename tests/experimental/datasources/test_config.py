@@ -233,7 +233,7 @@ def test_catch_bad_asset_configs(
         "my_test_ds": {
             "type": "postgres",
             "name": "my_test_ds",
-            "connection_string": "postgres://userName:@hostname/dbName",
+            "connection_string": "postgresql://userName:@hostname/dbName",
             "assets": {bad_asset_config["name"]: bad_asset_config},
         }
     }
