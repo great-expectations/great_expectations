@@ -11,6 +11,7 @@ class MetricFunctionTypes(enum.Enum):
     """Enum type, whose members depict the nature of return value of a metric implementation function (defined for a specified "ExecutionEngine" subclass) that is the final result (rather than a Callable for deferred execution).
 
     The available types are:
+
     - `VALUE` -- metric implementation function returns a value computed over a dataset represented by "Domain" (e.g., a
       statistic on row values of a column).
     - `MAP_VALUES` (unused in current version) -- metric implementation function returns a mapping between every
@@ -32,6 +33,7 @@ class MetricPartialFunctionTypes(enum.Enum):
     """Enum type, whose members depict the nature of return value of a metric implementation function (defined for a specified "ExecutionEngine" subclass) that is a (partial) Callable to be executed once execution plan is complete.
 
     The available types are:
+
     - `MAP_FN` -- metric implementation function returns a mapping transformation for "Domain" values that evaluates to
       a quantity (rather than a condition statement, or a series, etc.).
     - `MAP_SERIES` -- metric implementation function returns a mapping transformation for "Domain" values that evaluates
