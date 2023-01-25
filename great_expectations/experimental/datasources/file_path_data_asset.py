@@ -2,10 +2,19 @@ from __future__ import annotations
 
 import copy
 import logging
-import os
 import pathlib
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Pattern,
+    Tuple,
+    Type,
+    Union,
+)
 
 import pydantic
 from typing_extensions import ClassVar, Literal
@@ -28,12 +37,16 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class FilePathDataAsset(DataAsset):
-    # FilePath specific attributes
-    path: pathlib.Path
+class PandasDatasourceError(Exception):
+    pass
+
+
+class FilePathAsset(DataAsset):
+    # The 2 (two) "File Path" specific attributes appear below.
+    base_directory: pathlib.Path
     regex: Pattern
 
-    # Internal attrs
+    # Internal attributes
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
@@ -56,9 +69,11 @@ class FilePathDataAsset(DataAsset):
         group_id_to_option = {v: k for k, v in option_to_group_id.items()}
         batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
 
-        file_name: str
-        for file_name in os.listdir(self.path):
-            match = self.regex.match(file_name)
+        all_files: Generator[pathlib.Path] = pathlib.Path(self.base_directory).iterdir()
+
+        file_name: pathlib.Path
+        for file_name in all_files:
+            match = self.regex.match(file_name.name)
             if match:
                 # Create the batch request that would correlate to this regex match
                 match_options = {}
@@ -78,10 +93,10 @@ class FilePathDataAsset(DataAsset):
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),
-                            self.path / file_name,
+                            self.base_directory / file_name,
                         )
                     )
-                    LOGGER.debug(f"Matching path: {self.path / file_name}")
+                    LOGGER.debug(f"Matching path: {self.base_directory / file_name}")
         if not batch_requests_with_path:
             LOGGER.warning(
                 f"Batch request {batch_request} corresponds to no data files."
@@ -167,3 +182,45 @@ class FilePathDataAsset(DataAsset):
             )
         self.sort_batches(batch_list)
         return batch_list
+
+
+class PandasDatasource(Datasource):
+    # class attrs
+    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset]
+
+    # instance attrs
+    type: Literal["pandas"] = "pandas"
+    name: str
+    assets: Dict[str, CSVAsset] = {}
+
+    @property
+    def execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Return the PandasExecutionEngine unless the override is set"""
+        from great_expectations.execution_engine.pandas_execution_engine import (
+            PandasExecutionEngine,
+        )
+
+        return PandasExecutionEngine
+
+    def add_file_path_asset(
+        self,
+        name: str,
+        base_directory: PathStr,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
+    ) -> FilePathAsset:
+        """Adds a "FilePathAsset" to this Pandas datasource object.
+
+        Args:
+            name: The name of the present File Path data asset
+            base_directory: base directory path, relative to which file paths will be collected
+            regex: regex pattern that matches csv filenames that is used to label the batches
+            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
+        """
+        asset = FilePathAsset(
+            name=name,
+            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
+            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+        )
+        return self.add_asset(asset)
