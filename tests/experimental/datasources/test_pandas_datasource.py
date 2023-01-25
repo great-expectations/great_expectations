@@ -1,13 +1,52 @@
+from __future__ import annotations
+
+import inspect
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
 
+import pandas as pd
+import pydantic
 import pytest
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources import PandasDatasource
 from great_expectations.experimental.datasources.interfaces import BatchRequestError
 from great_expectations.experimental.datasources.pandas_datasource import CSVAsset
+
+PANDAS_IO_METHODS: list[str] = [
+    member_tuple[0]
+    for member_tuple in inspect.getmembers(pd, predicate=inspect.isfunction)
+    if member_tuple[0].startswith("read_")
+]
+
+
+@pytest.mark.unit
+class TestDynamicPandasAssets:
+    def test_asset_types_and_asset_annotations_match(self):
+        asset_class_names: set[str] = {t.__name__ for t in PandasDatasource.asset_types}
+        assert asset_class_names
+
+        assets_field: pydantic.fields.ModelField = PandasDatasource.__dict__[
+            "__fields__"
+        ]["assets"]
+        asset_field_union_members: set[str] = {
+            t.__name__
+            for t in assets_field.type_.__args__  # accessing the `Union` members with `__args__`
+        }
+
+        assert asset_class_names == asset_field_union_members
+
+    @pytest.mark.parametrize("method_name", [*PANDAS_IO_METHODS])
+    def test_data_asset_defined_for_io_read_method(self, method_name: str):
+        _, type_name = method_name.split("read_")
+        assert type_name
+
+        asset_class_names: set[str] = {
+            t.__name__.lower().rstrip("asset") for t in PandasDatasource.asset_types
+        }
+        print(asset_class_names)
+
+        assert type_name in asset_class_names
 
 
 @pytest.fixture
