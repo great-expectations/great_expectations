@@ -140,6 +140,7 @@ class TableAsset(DataAsset):
     name: str
 
     def test_connection(self) -> None:
+        assert isinstance(self.datasource, SQLDatasource)
         sqlalchemy.inspect(self.datasource.engine).has_table(self.table_name)
 
     def batch_request_options_template(
@@ -264,9 +265,7 @@ class TableAsset(DataAsset):
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
-            execution_engine: SqlAlchemyExecutionEngine = (
-                self.datasource.get_execution_engine()
-            )
+            execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
             data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )

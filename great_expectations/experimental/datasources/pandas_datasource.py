@@ -26,7 +26,6 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import (
         ExecutionEngine,
         PandasExecutionEngine,
-        SparkDFExecutionEngine,
     )
 
 LOGGER = logging.getLogger(__name__)
@@ -153,9 +152,7 @@ class CSVAsset(DataAsset):
             batch_request
         ):
             batch_spec = PathBatchSpec(path=str(path))
-            execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (
-                self.datasource.get_execution_engine()
-            )
+            execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
             data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
