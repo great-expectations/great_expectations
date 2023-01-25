@@ -98,7 +98,6 @@ class ExpectColumnValuesToBeDateutilParseable(ColumnMapExpectation):
         Raises:
             InvalidExpectationConfigurationError: The configuration does not contain the values required by the
                                                   Expectation.
-
         """
         super().validate_configuration(configuration)
 
