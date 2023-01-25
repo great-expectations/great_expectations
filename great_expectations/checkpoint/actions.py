@@ -965,9 +965,9 @@ class StoreMetricsAction(ValidationAction):
 
             Dictionary should have the following structure:
                     ```yaml
-                    `expectation_suite_name:`
-                        `metric_name:`
-                            `- metric_kwargs_id`
+                    expectation_suite_name:
+                        metric_name:
+                            - metric_kwargs_id
                     ```
             You may use "*" to denote that any expectation suite should match.
 
