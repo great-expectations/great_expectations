@@ -874,8 +874,6 @@ class Expectation(metaclass=MetaExpectation):
                 },
             }
         )
-        print("this is result_dict")
-        print(result_dict)
         if result_dict.get("unexpected_index_query"):
             query = result_dict.get("unexpected_index_query")
             # in Pandas case, this is a list

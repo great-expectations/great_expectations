@@ -15,6 +15,36 @@
     },
     "suppress_test_for": ["snowflake"],
     "tests" : [
+      {
+      "title" : "basic_positive_test",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "regex_list": ["\\d+"]
+      },
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      },
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
+    {
+      "title" : "positive_test_with_multiple_regexes",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "regex_list": ["[123]+", "[456]+"],
+        "match_on": "any"
+      },
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      },
+      "suppress_test_for": ["sqlite", "mssql"]
+    },
     {
       "title" : "basic_negative_test",
       "include_in_gallery": true,

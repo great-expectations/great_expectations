@@ -7267,7 +7267,7 @@ def spark_dataframe_for_unexpected_rows_with_index(
                 "cat",
                 "fish",
                 "dog",
-                None,
+                "giraffe",
                 "lion",
                 "zebra",
             ],

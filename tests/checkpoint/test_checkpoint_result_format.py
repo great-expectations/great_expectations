@@ -79,16 +79,6 @@ def reference_sql_checkpoint_config_for_unexpected_column_names(
 
 
 @pytest.fixture()
-def expectation_config_expect_column_values_to_not_be_null() -> ExpectationConfiguration:
-    return ExpectationConfiguration(
-        expectation_type="expect_column_values_to_not_be_null",
-        kwargs={
-            "column": "animals",
-        },
-    )
-
-
-@pytest.fixture()
 def expectation_config_expect_column_values_to_be_in_set() -> ExpectationConfiguration:
     return ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -1368,54 +1358,6 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
         "partial_unexpected_index_list"
     ]
     assert first_result_partial_list == expected_unexpected_indices_output
-    unexpected_index_query: str = evrs[0]["results"][0]["result"][
-        "unexpected_index_query"
-    ]
-    assert unexpected_index_query == expected_spark_query_output
-
-
-@pytest.mark.integration
-def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_not_null(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_not_be_null,
-    expected_unexpected_indices_output,
-    expected_spark_query_output,
-):
-    """
-    What does this test?
-        - unexpected_index_column defined in Checkpoint only.
-        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
-        - 1 Expectations added to suite
-    """
-
-    dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
-    }
-    context: DataContext = _add_expectations_and_checkpoint(
-        data_context=in_memory_runtime_context,
-        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
-        expectations_list=[expectation_config_expect_column_values_to_not_be_null],
-        dict_to_update_checkpoint=dict_to_update_checkpoint,
-    )
-
-    result: CheckpointResult = context.run_checkpoint(
-        checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
-        batch_request=batch_request_for_spark_unexpected_rows_and_index,
-        runtime_configuration={"catch_exceptions": False},
-    )
-    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
-    first_result_full_list = evrs[0]["results"][0]["result"]["unexpected_index_list"]
-    assert first_result_full_list == [{"animals": None, "pk_1": 3}]
-    first_result_partial_list = evrs[0]["results"][0]["result"][
-        "partial_unexpected_index_list"
-    ]
-    assert first_result_partial_list == [{"animals": None, "pk_1": 3}]
     unexpected_index_query: str = evrs[0]["results"][0]["result"][
         "unexpected_index_query"
     ]

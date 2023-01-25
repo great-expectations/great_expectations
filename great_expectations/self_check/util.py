@@ -1197,14 +1197,9 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 ):
     """Utility to create datasets for json-formatted tests."""
 
-    # this is where we would have to add another column
+    # adding pk_index column for testing id/pk across Expectations
     data["pk_index"] = list(range(len(list(data.values())[0])))
     df = pd.DataFrame(data)
-    # if schemas:
-    """"
-    {'pandas': {'x': 'int', 'y': 'str', 'z': 'Int64Dtype', 'ts': 'datetime', 'alpha': 'object', 'numeric': 'int'}, 'spark': {'x': 'IntegerType', 'y': 'StringType', 'z': 'IntegerType', 'ts': 'TimestampType', 'alpha': 'StringType', 'numeric': 'IntegerType'}, 'sqlite': {'x': 'INTEGER', 'y': 'VARCHAR', 'z': 'INTEGER', 'ts': 'DATETIME', 'alpha': 'VARCHAR', 'numeric': 'INTEGER'}, 'postgresql': {'x': 'INTEGER', 'y': 'TEXT', 'z': 'INTEGER', 'ts': 'TIMESTAMP', 'alpha': 'TEXT', 'numeric': 'INTEGER'}, 'mysql': {'x': 'INTEGER', 'y': 'TEXT', 'z': 'INTEGER', 'ts': 'TIMESTAMP', 'alpha': 'TEXT', 'numeric': 'INTEGER'}, 'mssql': {'x': 'INTEGER', 'y': 'VARCHAR', 'z': 'INTEGER', 'ts': 'DATETIME2', 'alpha': 'VARCHAR', 'numeric': 'INTEGER'}}
-    """
-    # breakpoint()
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
             schema = schemas["pandas"]
@@ -2898,12 +2893,10 @@ def evaluate_json_test_v3_api(
 
 
 def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901 - 49
-    # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
-    # this is where we are going to work on the results
-    # if test["title"] == "negative_case_with_75percent_null_values_no_mostly":
-    #     breakpoint()
+
+    # check for id_pk results if cases when unexpected_index_list already exists
+    # this will work for testing since result_format is COMPLETE
     if not result["success"]:
-        # ensure that we have the output
         if "unexpected_index_list" in result["result"]:
             assert "unexpected_index_query" in result["result"]
 

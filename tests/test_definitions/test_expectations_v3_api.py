@@ -40,15 +40,11 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
-    expectation_dirs = ["column_map_expectations"]
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        # test_configuration_files = [
-        #     f"{dir_path}/{expectation_category}/expect_column_values_to_not_be_null.json"
-        # ]
         for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
@@ -79,7 +75,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                         if isinstance(d["data"], list):
                             sqlite_db_path = generate_sqlite_db_path()
                             for dataset in d["data"]:
-                                # add dataset here?
                                 datasets.append(
                                     get_test_validator_with_data(
                                         c,
@@ -95,7 +90,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 )
                             validator_with_data = datasets[0]
                         else:
-                            # refactor here. get data
                             schemas = d["schemas"] if "schemas" in d else None
                             validator_with_data = get_test_validator_with_data(
                                 c,
