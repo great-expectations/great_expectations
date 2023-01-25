@@ -330,6 +330,10 @@ class SQLDatasource(Datasource):
 
     @pydantic.root_validator()
     def _create_sqlalchemy_engine(cls, values: dict) -> dict:
+        """
+        Validates that SQL Alchemy was successfully imported and
+        creates an engine if a properly formed connection_string was passed.
+        """
         if "engine" not in values:
             if SQLALCHEMY_IMPORTED:
                 if "connection_string" in values:
