@@ -324,14 +324,20 @@ class Validator:
     def load_batch_list(self, batch_list: List[Batch]) -> None:
         self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
 
+    @public_api
     def get_metric(
         self,
         metric: MetricConfiguration,
     ) -> Any:
-        """
-        Convenience method that returns the value of the requested metric.
+        """Convenience method, return the value of the requested metric.
 
         (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+
+        Args:
+            metric: MetricConfiguration
+
+        Returns:
+            The value of the requested metric.
         """
         return self._metrics_calculator.get_metric(metric=metric)
 
@@ -1399,6 +1405,7 @@ class Validator:
             suppress_warnings,
         )
 
+    @public_api
     def get_expectation_suite(  # noqa: C901 - complexity 17
         self,
         discard_failed_expectations: bool = True,
@@ -1408,28 +1415,18 @@ class Validator:
         suppress_warnings: bool = False,
         suppress_logging: bool = False,
     ) -> ExpectationSuite:
-        """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
+        """Get a copy of the Expectation Suite from the Validator object.
 
         Args:
-            discard_failed_expectations (boolean): \
-                Only include expectations with success_on_last_run=True in the exported config.  Defaults to `True`.
-            discard_result_format_kwargs (boolean): \
-                In returned expectation objects, suppress the `result_format` parameter. Defaults to `True`.
-            discard_include_config_kwargs (boolean): \
-                In returned expectation objects, suppress the `include_config` parameter. Defaults to `True`.
-            discard_catch_exceptions_kwargs (boolean): \
-                In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.
-            suppress_warnings (boolean): \
-                If true, do not include warnings in logging information about the operation.
-            suppress_logging (boolean): \
-                If true, do not create a log entry (useful when using get_expectation_suite programmatically)
+            discard_failed_expectations: Omit Expectations which failed on their last run.
+            discard_result_format_kwargs: Omit `result_format` from each Expectation.
+            discard_include_config_kwargs: Omit `include_config` from each Expectation.
+            discard_catch_exceptions_kwargs: Omit `catch_exceptions` from each Expectation.
+            suppress_warnings: Do not log warnings.
+            suppress_logging: Do not log anything.
 
         Returns:
-            An expectation suite.
-
-        Note:
-            get_expectation_suite does not affect the underlying expectation suite at all. The returned suite is a \
-             copy of _expectation_suite, not the original object.
+            ExpectationSuite object.
         """
 
         expectation_suite = copy.deepcopy(self.expectation_suite)
