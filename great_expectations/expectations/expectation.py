@@ -1199,8 +1199,6 @@ class Expectation(metaclass=MetaExpectation):
         data_context: Optional[AbstractDataContext] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationValidationResult:
-        include_rendered_content: bool = validator._include_rendered_content or False
-
         if not configuration:
             configuration = deepcopy(self.configuration)
 
@@ -1215,14 +1213,13 @@ class Expectation(metaclass=MetaExpectation):
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )
-        evr: ExpectationValidationResult = validator.graph_validate(
+        expectation_validation_result_list: list[
+            ExpectationValidationResult
+        ] = validator.graph_validate(
             configurations=[configuration],
             runtime_configuration=runtime_configuration,
-        )[0]
-        if include_rendered_content:
-            evr.render()
-
-        return evr
+        )
+        return expectation_validation_result_list[0]
 
     @property
     def configuration(self) -> ExpectationConfiguration:
