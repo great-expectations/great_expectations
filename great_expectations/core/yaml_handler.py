@@ -54,7 +54,7 @@ class YAMLHandler:
         import pathlib
         yaml_handler = YAMLHandler()
         my_file_str = pathlib.Path("my_file.yaml").read_text()
-        dict_from_yaml = YAML_HANDLER.load(my_file_str)
+        dict_from_yaml = yaml_handler.load(my_file_str)
         ```
 
         Args:
