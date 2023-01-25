@@ -6,8 +6,6 @@ from pprint import pformat as pf
 
 import pytest
 
-from great_expectations.alias_types import PathStr
-
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
 
@@ -19,7 +17,7 @@ LOGGER = logging.getLogger(__file__)
 
 
 @pytest.fixture
-def db_file() -> PathStr:
+def db_file() -> pathlib.Path:
     db = pathlib.Path(
         __file__,
         "..",
@@ -73,7 +71,7 @@ def zep_only_config(zep_config_dict: dict) -> GxConfig:
 
 
 @pytest.fixture
-def file_dc_config_dir_init(tmp_path: PathStr) -> PathStr:
+def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     """
     Initialize an regular/old-style FileDataContext project config directory.
     Removed on teardown.
@@ -90,8 +88,8 @@ def file_dc_config_dir_init(tmp_path: PathStr) -> PathStr:
 
 @pytest.fixture
 def zep_yaml_config_file(
-    file_dc_config_dir_init: PathStr, zep_only_config: GxConfig
-) -> PathStr:
+    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+) -> pathlib.Path:
     """
     Dump the provided GxConfig to a temporary path. File is removed during test teardown.
 
@@ -114,7 +112,7 @@ def zep_yaml_config_file(
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def zep_file_context(zep_yaml_config_file: PathStr) -> FileDataContext:
+def zep_file_context(zep_yaml_config_file: pathlib.Path) -> FileDataContext:
     context = get_context(
         context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
     )
@@ -123,7 +121,7 @@ def zep_file_context(zep_yaml_config_file: PathStr) -> FileDataContext:
 
 
 def test_load_an_existing_config(
-    zep_yaml_config_file: PathStr, zep_only_config: GxConfig
+    zep_yaml_config_file: pathlib.Path, zep_only_config: GxConfig
 ):
     context = get_context(
         context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
@@ -172,7 +170,7 @@ def test_variables_save_config_does_not_break(zep_file_context: FileDataContext)
 
 
 def test_save_datacontext_persists_zep_config(
-    file_dc_config_dir_init: PathStr, zep_only_config: GxConfig
+    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
 ):
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
 
@@ -197,9 +195,9 @@ def test_save_datacontext_persists_zep_config(
 
 
 def test_add_and_save_zep_datasource(
-    file_dc_config_dir_init: PathStr,
+    file_dc_config_dir_init: pathlib.Path,
     zep_only_config: GxConfig,
-    db_file: PathStr,
+    db_file: pathlib.Path,
 ):
     datasource_name = "save_ds_test"
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML

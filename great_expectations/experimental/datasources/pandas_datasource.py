@@ -2,10 +2,19 @@ from __future__ import annotations
 
 import copy
 import logging
-import os
 import pathlib
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Pattern,
+    Tuple,
+    Type,
+    Union,
+)
 
 import pydantic
 from typing_extensions import ClassVar, Literal
@@ -63,9 +72,11 @@ class CSVAsset(DataAsset):
         group_id_to_option = {v: k for k, v in option_to_group_id.items()}
         batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
 
-        file_name: str
-        for file_name in os.listdir(self.path):
-            match = self.regex.match(file_name)
+        all_files: Generator[pathlib.Path] = pathlib.Path(self.path).iterdir()
+
+        file_name: pathlib.Path
+        for file_name in all_files:
+            match = self.regex.match(file_name.name)
             if match:
                 # Create the batch request that would correlate to this regex match
                 match_options = {}
