@@ -109,7 +109,7 @@ class CheckpointResult(SerializableDictDot):
         return self._run_id
 
     @property
-    def validation_result_url(self) -> str:
+    def validation_result_url(self) -> Optional[str]:
         return self._validation_result_url
 
     @property
