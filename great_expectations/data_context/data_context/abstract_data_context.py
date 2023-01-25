@@ -739,7 +739,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str,
         config: dict,
         save_changes: bool | None = None,
-    ):
+    ) -> Datasource | None:
         datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
 
@@ -747,8 +747,11 @@ class AbstractDataContext(ConfigPeer, ABC):
             self._datasource_store.update_by_name(  # type: ignore[attr-defined]
                 datasource_name=name, datasource_config=datasource_config
             )
-        self.config.datasources[name] = datasource_config  # type: ignore[assignment,index]
-        self._cached_datasources[name] = datasource_config
+
+        datasource = self._instantiate_datasource_from_config_and_update_project_config(
+            config=datasource_config, initialize=True, save_changes=False
+        )
+        return datasource
 
     def add_or_update_datasource(
         self,
@@ -767,11 +770,20 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if existing_datasource:
-            updated_datasource_config = existing_datasource.config.update(kwargs)
-            self._update_datasource(name=name, config=updated_datasource_config)
-            return existing_datasource
+            updated_datasource_config = copy.deepcopy(existing_datasource.config)
+            updated_datasource_config[
+                "class_name"
+            ] = existing_datasource.__class__.__name__
+            updated_datasource_config.update(kwargs)
+            result_datasource = self._update_datasource(
+                name=name, config=updated_datasource_config
+            )
+        else:
+            result_datasource = self.add_datasource(name=name, **kwargs)
 
-        return self.add_datasource(name=name, **kwargs)
+        assert result_datasource is not None
+        self._save_project_config()
+        return result_datasource
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
@@ -3358,7 +3370,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
-        # Note that the call to `DatasourcStore.set` may alter the config object's state
+        # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
         if save_changes:
             config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
