@@ -132,34 +132,36 @@ class NoOpAction(ValidationAction):
 class SlackNotificationAction(ValidationAction):
     """Sends a Slack notification to a given webhook.
 
-    YAML configuration example:: yaml
-
-        - name: send_slack_notification_on_validation_result
-        action:
-          class_name: SlackNotificationAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          # use slack_webhook when not using slack bot token
-          slack_webhook: ${validation_notification_slack_webhook}
-          slack_token:
-          slack_channel:
-          notify_on: all
-          notify_with:
-          renderer:
-            # the class that implements the message to be sent
-            # this is the default implementation, but you can
-            # implement a custom one
-            module_name: great_expectations.render.renderer.slack_renderer
-            class_name: SlackRenderer
-          show_failed_expectations: True
+    ```yaml
+    - name: send_slack_notification_on_validation_result
+    action:
+      class_name: SlackNotificationAction
+      # put the actual webhook URL in the uncommitted/config_variables.yml file
+      # or pass in as environment variable
+      # use slack_webhook when not using slack bot token
+      slack_webhook: ${validation_notification_slack_webhook}
+      slack_token:
+      slack_channel:
+      notify_on: all
+      notify_with:
+      renderer:
+        # the class that implements the message to be sent
+        # this is the default implementation, but you can
+        # implement a custom one
+        module_name: great_expectations.render.renderer.slack_renderer
+        class_name: SlackRenderer
+      show_failed_expectations: True
+    ```
 
     Args:
         data_context: Data Context that is used by the Action.
         renderer: Specifies the Renderer used to generate a query consumable by Slack API, e.g.:
-            dict(
+            ```python
+            {
                "module_name": "great_expectations.render.renderer.slack_renderer",
                "class_name": "SlackRenderer",
-           )
+           }
+           ```
         slack_webhook: The incoming Slack webhook to which to send notification.
         slack_token: Token from Slack app. Used when not using slack_webhook.
         slack_channel: Slack channel to receive notification. Used when not using slack_webhook.
@@ -294,14 +296,14 @@ class SlackNotificationAction(ValidationAction):
 class PagerdutyAlertAction(ValidationAction):
     """Sends a PagerDuty event.
 
-    YAML configuration example:: yaml
-
-        - name: send_pagerduty_alert_on_validation_result
-        action:
-          class_name: PagerdutyAlertAction
-          api_key: ${pagerduty_api_key}
-          routing_key: ${pagerduty_routing_key}
-          notify_on: failure
+    ```yaml
+    - name: send_pagerduty_alert_on_validation_result
+    action:
+      class_name: PagerdutyAlertAction
+      api_key: ${pagerduty_api_key}
+      routing_key: ${pagerduty_routing_key}
+      notify_on: failure
+    ```
 
     Args:
         data_context: Data Context that is used by the Action.
@@ -389,29 +391,31 @@ class PagerdutyAlertAction(ValidationAction):
 class MicrosoftTeamsNotificationAction(ValidationAction):
     """Sends a Microsoft Teams notification to a given webhook.
 
-    YAML configuration example:: yaml
-
-        - name: send_microsoft_teams_notification_on_validation_result
-        action:
-          class_name: MicrosoftTeamsNotificationAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}
-          notify_on: all
-          renderer:
-            # the class that implements the message to be sent
-            # this is the default implementation, but you can
-            # implement a custom one
-            module_name: great_expectations.render.renderer.microsoft_teams_renderer
-            class_name: MicrosoftTeamsRenderer
+    ```yaml
+    - name: send_microsoft_teams_notification_on_validation_result
+    action:
+      class_name: MicrosoftTeamsNotificationAction
+      # put the actual webhook URL in the uncommitted/config_variables.yml file
+      # or pass in as environment variable
+      microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}
+      notify_on: all
+      renderer:
+        # the class that implements the message to be sent
+        # this is the default implementation, but you can
+        # implement a custom one
+        module_name: great_expectations.render.renderer.microsoft_teams_renderer
+        class_name: MicrosoftTeamsRenderer
+    ```
 
     Args:
         data_context: Data Context that is used by the Action.
         renderer: Specifies the renderer used to generate a query consumable by teams API, e.g.:
-            dict(
+            ```python
+            {
                "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
                "class_name": "MicrosoftTeamsRenderer",
-           )
+            }
+            ```
         microsoft_teams_webhook: Incoming Microsoft Teams webhook to which to send notifications.
         notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
@@ -504,17 +508,17 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 class OpsgenieAlertAction(ValidationAction):
     """Sends an Opsgenie alert.
 
-    YAML configuration example:: yaml
-
-        - name: send_opsgenie_alert_on_validation_result
-        action:
-          class_name: OpsgenieAlertAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          api_key: ${opsgenie_api_key}
-          region:
-          priority: P2
-          notify_on: failure
+    ```yaml
+    - name: send_opsgenie_alert_on_validation_result
+    action:
+      class_name: OpsgenieAlertAction
+      # put the actual webhook URL in the uncommitted/config_variables.yml file
+      # or pass in as environment variable
+      api_key: ${opsgenie_api_key}
+      region:
+      priority: P2
+      notify_on: failure
+    ```
 
     Args:
         data_context: Data Context that is used by the Action.
@@ -620,37 +624,39 @@ class OpsgenieAlertAction(ValidationAction):
 class EmailAction(ValidationAction):
     """Sends an email to a given list of email addresses.
 
-    YAML configuration example:: yaml
-
-        - name: send_email_on_validation_result
-        action:
-          class_name: EmailAction
-          notify_on: all # possible values: "all", "failure", "success"
-          notify_with:
-          renderer:
-            # the class that implements the message to be sent
-            # this is the default implementation, but you can
-            # implement a custom one
-            module_name: great_expectations.render.renderer.email_renderer
-            class_name: EmailRenderer
-          # put the actual following information in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          smtp_address: ${smtp_address}
-          smtp_port: ${smtp_port}
-          sender_login: ${email_address}
-          sender_password: ${sender_password}
-          sender_alias: ${sender_alias} # useful to send an email as an alias
-          receiver_emails: ${receiver_emails}
-          use_tls: False
-          use_ssl: True
+    ```yaml
+    - name: send_email_on_validation_result
+    action:
+      class_name: EmailAction
+      notify_on: all # possible values: "all", "failure", "success"
+      notify_with:
+      renderer:
+        # the class that implements the message to be sent
+        # this is the default implementation, but you can
+        # implement a custom one
+        module_name: great_expectations.render.renderer.email_renderer
+        class_name: EmailRenderer
+      # put the actual following information in the uncommitted/config_variables.yml file
+      # or pass in as environment variable
+      smtp_address: ${smtp_address}
+      smtp_port: ${smtp_port}
+      sender_login: ${email_address}
+      sender_password: ${sender_password}
+      sender_alias: ${sender_alias} # useful to send an email as an alias
+      receiver_emails: ${receiver_emails}
+      use_tls: False
+      use_ssl: True
+    ```
 
     Args:
         data_context: Data Context that is used by the Action.
         renderer: Specifies the renderer used to generate an email, for example:
-            dict(
+            ```python
+            {
                "module_name": "great_expectations.render.renderer.email_renderer",
                "class_name": "EmailRenderer",
-            )
+            }
+            ```
         smtp_address: Address of the SMTP server used to send the email.
         smtp_address: Port of the SMTP server used to send the email.
         sender_login: Login used send the email.
