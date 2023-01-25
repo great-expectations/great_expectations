@@ -276,7 +276,7 @@ def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHa
     return handler
 
 
-ENABLED_METHODS = {}
+ENABLED_METHODS = []
 
 
 def usage_statistics_enabled_method(
@@ -289,7 +289,7 @@ def usage_statistics_enabled_method(
     A decorator for usage statistics which defaults to the less detailed payload schema.
     """
     if func:
-        ENABLED_METHODS[func.__qualname__] = func
+        ENABLED_METHODS.append(func.__qualname__)
     if callable(func):
         if event_name is None:
             event_name = func.__name__
