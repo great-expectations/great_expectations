@@ -90,8 +90,9 @@ def pandas_json_data(
         data_path=json_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.json",
         order_by=["year", "month"],
+        orient="records",
     )
-    batch_request = asset.get_batch_request({"year": "2018", "month": "08"})
+    batch_request = asset.get_batch_request({"year": "2019", "month": "08"})
     return context, panda_ds, asset, batch_request
 
 
@@ -276,7 +277,7 @@ def multibatch_sql_data(
     return context, datasource, asset, batch_request
 
 
-def multibatch_pandas_data(
+def multibatch_pandas_csv_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     csv_path = (
@@ -293,7 +294,30 @@ def multibatch_pandas_data(
     return context, panda_ds, asset, batch_request
 
 
-@pytest.fixture(params=[multibatch_sql_data, multibatch_pandas_data])
+def multibatch_pandas_json_data(
+    context: AbstractDataContext,
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    json_path: pathlib.Path = SAMPLE_JSON_DIR.resolve(strict=bool)
+
+    panda_ds = context.sources.add_pandas(name="my_pandas")
+    asset = panda_ds.add_json_asset(
+        name="json_asset",
+        data_path=json_path,
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.json",
+        order_by=["year", "month"],
+        orient="records",
+    )
+    batch_request = asset.get_batch_request({"year": "2019"})
+    return context, panda_ds, asset, batch_request
+
+
+@pytest.fixture(
+    params=[
+        multibatch_sql_data,
+        multibatch_pandas_csv_data,
+        multibatch_pandas_json_data,
+    ]
+)
 def multibatch_datasource_test_data(
     empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
