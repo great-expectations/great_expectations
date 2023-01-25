@@ -4,7 +4,7 @@ import copy
 import logging
 import pathlib
 import re
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import pydantic
 
@@ -14,7 +14,6 @@ from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
     BatchRequestOptions,
-    BatchSortersDefinition,
     DataAsset,
 )
 
@@ -35,36 +34,13 @@ class FilesystemDataAsset(DataAsset):
     # TODO: </Alex>
     """
 
-    base_directory: pathlib.Path
-    regex: Union[str, re.Pattern]
+    base_directory: pathlib.Path  # base directory path, relative to which file paths will be collected
+    regex: re.Pattern  # Regular Expressions pattern for matching filenames; its groups are used to label Batch samples
 
     # Internal attributes
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
-
-    def __init__(
-        self,
-        name: str,
-        base_directory: pathlib.Path,
-        regex: Union[str, re.Pattern],
-        order_by: Optional[BatchSortersDefinition] = None,
-    ):
-        """Constructs a "FilesystemDataAsset" object.
-
-        Args:
-            name: The name of the present File Path DataAsset
-            base_directory: base directory path, relative to which file paths will be collected
-            regex: regex pattern that matches filenames and whose groups are used to label the Batch samples
-            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
-        """
-        super().__init__(
-            name=name,
-            order_by=order_by,
-        )
-
-        self.base_directory = base_directory  # type: ignore[arg-type]  # str will be coerced to Path
-        self.regex = regex  # type: ignore[arg-type]  # str with will be coerced to Pattern
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest

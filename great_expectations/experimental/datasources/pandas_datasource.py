@@ -59,8 +59,8 @@ class PandasDatasource(Datasource):
         """
         asset = CsvDataAsset(
             name=name,
-            base_directory=base_directory,
-            regex=regex,
-            order_by=order_by,
+            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
+            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
         )
         return self.add_asset(asset=asset)
