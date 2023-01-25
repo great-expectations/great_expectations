@@ -688,7 +688,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         save_changes = self._determine_save_changes_flag(save_changes)
 
-        logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
+        logger.debug(f"Starting AbstractDataContext.add_datasource for {name}")
 
         module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
         verify_dynamic_loading_support(module_name=module_name)
@@ -720,7 +720,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def update_datasource(
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
-        save_changes: Optional[bool] = None,
+        save_changes: bool | None = None,
     ) -> None:
         """
         Updates a DatasourceConfig that already exists in the store.
@@ -730,28 +730,48 @@ class AbstractDataContext(ConfigPeer, ABC):
             save_changes: do I save changes to disk?
         """
         save_changes = self._determine_save_changes_flag(save_changes)
+        self._update_datasource(
+            name=datasource.name, config=datasource.config, save_changes=save_changes
+        )
 
-        datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
+    def _update_datasource(
+        self,
+        name: str,
+        config: dict,
+        save_changes: bool | None = None,
+    ):
+        datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
-        datasource_name: str = datasource.name
 
         if save_changes:
             self._datasource_store.update_by_name(  # type: ignore[attr-defined]
-                datasource_name=datasource_name, datasource_config=datasource_config
+                datasource_name=name, datasource_config=datasource_config
             )
-        self.config.datasources[datasource_name] = datasource_config  # type: ignore[assignment,index]
-        self._cached_datasources[datasource_name] = datasource_config
+        self.config.datasources[name] = datasource_config  # type: ignore[assignment,index]
+        self._cached_datasources[name] = datasource_config
 
     def add_or_update_datasource(
         self,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
-        **kwargs: Optional[dict],
+        name: str,
+        **kwargs,
     ) -> LegacyDatasource | BaseDatasource:
         """
         TODO
         """
-        pass
+        existing_datasource = None
+        try:
+            existing_datasource = self.get_datasource(name)
+        except ValueError:
+            logger.info(
+                f"Could not find an existing datasource named '{name}'; creating a new one."
+            )
+
+        if existing_datasource:
+            updated_datasource_config = existing_datasource.config.update(kwargs)
+            self._update_datasource(name=name, config=updated_datasource_config)
+            return existing_datasource
+
+        return self.add_datasource(name=name, **kwargs)
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
