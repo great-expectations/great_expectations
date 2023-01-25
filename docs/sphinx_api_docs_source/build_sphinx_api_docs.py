@@ -20,13 +20,16 @@ Typical usage example:
         doc_builder.build_docs(clean=clean)
         ...
 """
+from __future__ import annotations
+
 import ast
 import importlib
 import logging
 import os
 import pathlib
 import shutil
-from typing import Dict, Tuple
+import sys
+from typing import Dict
 from urllib.parse import urlparse
 
 import invoke
@@ -107,6 +110,11 @@ class SphinxInvokeDocsBuilder:
 
     def _build_html_api_docs_in_temp_folder(self):
         """Builds html api documentation in temporary folder."""
+
+        sphinx_api_docs_source_dir = pathlib.Path.cwd()
+        if sphinx_api_docs_source_dir not in sys.path:
+            sys.path.append(str(sphinx_api_docs_source_dir))
+
         cmd = f"sphinx-build -M html ./ {self.temp_sphinx_html_dir} -E"
         self.ctx.run(cmd, echo=True, pty=True)
         logger.debug("Raw Sphinx HTML generated.")
@@ -365,12 +373,12 @@ class SphinxInvokeDocsBuilder:
     def _remove_md_stubs(self):
         """Remove all markdown stub files."""
 
-        excluded_files: Tuple[pathlib.Path, ...] = (
+        excluded_files: tuple[pathlib.Path, ...] = (
             self.base_path / "index.md",
             self.base_path / "README.md",
         )
 
-        all_files: Tuple[pathlib.Path] = tuple(self.base_path.glob("*.md"))
+        all_files: tuple[pathlib.Path] = tuple(self.base_path.glob("*.md"))
 
         for file in all_files:
             if file not in excluded_files:
