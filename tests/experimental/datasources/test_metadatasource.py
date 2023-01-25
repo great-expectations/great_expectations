@@ -169,7 +169,7 @@ class TestMisconfiguredMetaDatasource:
                 ...
 
         with pytest.raises(NotImplementedError):
-            MissingExecEngineTypeDatasource(name="name")
+            MissingExecEngineTypeDatasource(name="name").get_execution_engine()
 
     def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
 
@@ -204,7 +204,7 @@ class TestMisconfiguredMetaDatasource:
                 return DummyExecutionEngine
 
         with pytest.raises(NotImplementedError):
-            MissingTestConnectionDatasource(name="name")
+            MissingTestConnectionDatasource(name="name").test_connection()
 
 
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):

@@ -260,7 +260,8 @@ class TableAsset(DataAsset):
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
-            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+            execution_engine = self.datasource.get_execution_engine()
+            data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
 

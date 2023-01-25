@@ -327,11 +327,6 @@ class Datasource(
     name: str
     assets: MutableMapping[str, DataAssetType] = {}
 
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        engine_kwargs = self.dict(exclude=self._excluded_eng_args)
-        return self._execution_engine_type()(**engine_kwargs)
-
     @pydantic.validator("assets", pre=True)
     @classmethod
     def _load_asset_subtype(cls, v: Dict[str, dict]):
@@ -353,6 +348,10 @@ class Datasource(
     def _execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
+
+    def get_execution_engine(self) -> ExecutionEngine:
+        engine_kwargs = self.dict(exclude=self._excluded_eng_args)
+        return self._execution_engine_type()(**engine_kwargs)
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest

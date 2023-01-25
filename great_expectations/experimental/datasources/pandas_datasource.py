@@ -149,7 +149,8 @@ class CSVAsset(DataAsset):
             batch_request
         ):
             batch_spec = PathBatchSpec(path=str(path))
-            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+            execution_engine = self.datasource.get_execution_engine()
+            data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
 
