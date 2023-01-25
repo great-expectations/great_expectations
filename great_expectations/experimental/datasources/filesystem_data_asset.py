@@ -3,7 +3,8 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import List, Optional, Pattern, Tuple
+import re
+from typing import List, Optional, Tuple, Union
 
 import pydantic
 
@@ -13,34 +14,55 @@ from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
     BatchRequestOptions,
+    BatchSortersDefinition,
     DataAsset,
 )
 
 LOGGER = logging.getLogger(__name__)
 
 
-class FilesystemAsset(DataAsset):
+class FilesystemDataAsset(DataAsset):
     """
     # TODO: <Alex>
-        This implementation is temporary placeholder.
-        Fully-functional implementation should be architecturally analogous to:
+        This temporary placeholder implementation of "Local Filestem based DataAsset" pertains to local filesystem only.
+        Fully-functional implementation should be architecturally analogous to general inheritance hierarchy similar to:
         - ConfiguredAssetFilesystemDataConnector<-ConfiguredAssetFilePathDataConnector<-FilePathDataConnector
         - ConfiguredAssetS3DataConnector<-ConfiguredAssetFilePathDataConnector<-FilePathDataConnector
         - ConfiguredAssetAzureDataConnector<-ConfiguredAssetFilePathDataConnector<-FilePathDataConnector
         - ConfiguredAssetGCSDataConnector<-ConfiguredAssetFilePathDataConnector<-FilePathDataConnector
-    with careful attention to (cloud storage access protocols and corresponding "ExecutionEngine" support for retrieving
-    "Batch" sample of data as depicted in "ExecutionEngine.resolve_data_reference()" as well as data reference caching.
+        with attention to cloud storage access protocols and corresponding "ExecutionEngine" support for retrieving
+        "Batch" data as depicted in "ExecutionEngine.resolve_data_reference()" as well as to data reference caching.
     # TODO: </Alex>
     """
-
-    # The 2 (two) "File Path" specific attributes appear below.
-    base_directory: pathlib.Path
-    regex: Pattern
 
     # Internal attributes
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
+
+    def __init__(
+        self,
+        name: str,
+        base_directory: pathlib.Path,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
+    ):
+        """Constructs a "FilesystemDataAsset" object.
+
+        Args:
+            name: The name of the present File Path data asset
+            base_directory: base directory path, relative to which file paths will be collected
+            regex: regex pattern that matches filenames and whose groups are used to label the Batch samples
+            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
+        """
+        super().__init__(
+            name=name,
+            type=self.type,
+        )
+
+        self.base_directory = base_directory  # type: ignore[arg-type]  # str will be coerced to Path
+        self.regex = regex  # type: ignore[arg-type]  # str with will be coerced to Pattern
+        self.order_by = (order_by or [],)  # type: ignore[arg-type]  # coerce list[str]
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
@@ -173,5 +195,7 @@ class FilesystemAsset(DataAsset):
                     legacy_batch_definition=batch_definition,
                 )
             )
+
         self.sort_batches(batch_list)
+
         return batch_list
