@@ -35,6 +35,9 @@ class FilesystemDataAsset(DataAsset):
     # TODO: </Alex>
     """
 
+    base_directory: pathlib.Path
+    regex: Union[str, re.Pattern]
+
     # Internal attributes
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -58,11 +61,11 @@ class FilesystemDataAsset(DataAsset):
         super().__init__(
             name=name,
             type=self.type,
+            order_by=order_by,
         )
 
         self.base_directory = base_directory  # type: ignore[arg-type]  # str will be coerced to Path
         self.regex = regex  # type: ignore[arg-type]  # str with will be coerced to Pattern
-        self.order_by = (order_by or [],)  # type: ignore[arg-type]  # coerce list[str]
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest

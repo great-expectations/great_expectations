@@ -46,7 +46,7 @@ def test_add_csv_asset_to_datasource(
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
     assert asset.name == "csv_asset"
-    assert asset.path == csv_path
+    assert asset.base_directory == csv_path
     assert asset.regex.match("random string") is None
     assert asset.regex.match("yellow_tripdata_sample_11D1-22.csv") is None
     m1 = asset.regex.match("yellow_tripdata_sample_1111-22.csv")
@@ -58,11 +58,11 @@ def test_construct_csv_asset_directly(csv_path: pathlib.Path):
     # noinspection PyTypeChecker
     asset = CsvDataAsset(
         name="csv_asset",
-        path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",  # Ignoring IDE warning (type declarations are consistent).
     )
     assert asset.name == "csv_asset"
-    assert asset.path == csv_path
+    assert asset.base_directory == csv_path
     assert asset.regex.match("random string") is None
     assert asset.regex.match("yellow_tripdata_sample_11D1-22.csv") is None
     m1 = asset.regex.match("yellow_tripdata_sample_1111-22.csv")
@@ -141,7 +141,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert batch.metadata == {
         "year": "2018",
         "month": "04",
-        "path": asset.path / "yellow_tripdata_sample_2018-04.csv",
+        "path": asset.base_directory / "yellow_tripdata_sample_2018-04.csv",
     }
     assert batch.id == "pandas_datasource-csv_asset-year_2018-month_04"
 
