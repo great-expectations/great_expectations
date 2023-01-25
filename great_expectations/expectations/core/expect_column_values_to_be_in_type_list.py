@@ -54,7 +54,7 @@ except ImportError as e:
         "Unable to load spark context; install optional spark dependency for support."
     )
 
-# to see if it works
+
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
     """
     Expect a column to contain values from a specified type list.

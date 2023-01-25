@@ -3,7 +3,6 @@
   "datasets": [
     {
       "data": {
-        "index": [0, 1, 2, 3],
         "one_null": [4, 5, null, 7],
         "two_null": [null, null, 5, 6],
         "three_null": [null, null, null, 5],
@@ -12,7 +11,6 @@
       },
       "schemas": {
         "spark": {
-          "index": "IntegerType",
           "one_null": "IntegerType",
           "two_null": "IntegerType",
           "three_null": "IntegerType",

@@ -277,7 +277,6 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             else "--",
         ]
 
-    # updated
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -304,7 +303,6 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
             success = success_ratio >= mostly
 
         nonnull_count = None
-        # breakpoint()
 
         return _format_map_output(
             result_format=parse_result_format(result_format),
