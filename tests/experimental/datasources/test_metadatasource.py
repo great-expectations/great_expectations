@@ -153,6 +153,9 @@ class TestMisconfiguredMetaDatasource:
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
+                def test_connection(self) -> None:
+                    ...
+
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
 
@@ -161,6 +164,9 @@ class TestMisconfiguredMetaDatasource:
     ):
         class MissingExecEngineTypeDatasource(Datasource):
             type: str = "valid"
+
+            def test_connection(self) -> None:
+                ...
 
         with pytest.raises(NotImplementedError):
             MissingExecEngineTypeDatasource(name="name")
@@ -183,8 +189,22 @@ class TestMisconfiguredMetaDatasource:
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
+                def test_connection(self) -> None:
+                    ...
+
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
+
+    def test_ds_test_connection_not_defined(self, empty_sources: _SourceFactories):
+        class MissingTestConnectionDatasource(Datasource):
+            type: str = "valid"
+
+            @property
+            def execution_engine_type(self) -> Type[ExecutionEngine]:
+                return DummyExecutionEngine
+
+        with pytest.raises(NotImplementedError):
+            MissingTestConnectionDatasource(name="name")
 
 
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):

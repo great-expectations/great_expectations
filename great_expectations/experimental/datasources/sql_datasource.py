@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import itertools
+import warnings
 from datetime import datetime
 from typing import (
     TYPE_CHECKING,
@@ -29,11 +30,11 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
 )
 
-SQLALCHEMY_IMPORTED: bool = False
+SQLALCHEMY_IMPORTED = False
 try:
     import sqlalchemy
 
-    SQLALCHEMY_IMPORTED: bool = True
+    SQLALCHEMY_IMPORTED = True
 except ImportError:
     pass
 
@@ -302,8 +303,13 @@ class SQLDatasource(Datasource):
 
     Args:
         name: The name of this datasource
-        connection_string: The SQLAlchemy connection string used to connect to the database.
+        connection_string: An optional SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
+            Either a connection_string or an engine must be provided.
+            If an engine is provided, connection_string will be ignored.
+        engine: An optional SQLAlchemy.engine.Engine used to connect to the database.
+            Either a connection_string or an engine must be provided.
+            If an engine is provided, connection_string will be ignored.
         assets: An optional dictionary whose keys are TableAsset names and whose values
             are TableAsset objects.
     """
@@ -314,9 +320,9 @@ class SQLDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
-    connection_string: str
+    connection_string: str = pydantic.Field(None)
+    engine: sqlalchemy.engine.Engine = pydantic.Field(None, exclude=True)
     assets: Dict[str, TableAsset] = {}
-    engine: Optional[sqlalchemy.engine.Engine] = pydantic.Field(None, exclude=True)
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
@@ -329,30 +335,55 @@ class SQLDatasource(Datasource):
         arbitrary_types_allowed = True
 
     @pydantic.root_validator()
-    def _create_sqlalchemy_engine(cls, values: dict) -> dict:
+    def _validate_sqlalchemy_engine_parameters(cls, values: dict) -> dict:
         """
-        Validates that SQL Alchemy was successfully imported and attempts to
+        If engine wasn't passed, validates that SQL Alchemy was successfully imported and attempts to
         create an engine if a properly formed connection_string was passed.
+
+        If an engine was passed, the connection_string associated with the engine will be used, and any
+        connection_string provided will be ignored.
         """
+        # engine will be set to None if it wasn't passed
         if values["engine"] is None:
             if SQLALCHEMY_IMPORTED:
+                # connection_string will not be in values if an invalid string was passed and failed pydantic validation
+                # in this case, the specific ValidationError will be raised by pydantic after this root_validator is run
                 if "connection_string" in values:
-                    try:
-                        values["engine"] = sqlalchemy.create_engine(
-                            values["connection_string"]
-                        )
-                    except Exception as e:
-                        # if connection_string passes pydantic validation,
-                        # but still fails to create a sqlalchemy engine
+                    if values["connection_string"] is not None:
+                        try:
+                            values["engine"] = sqlalchemy.create_engine(
+                                values["connection_string"]
+                            )
+                        except Exception as e:
+                            # connection_string has passed pydantic validation,
+                            # but still fails to create a sqlalchemy engine
+                            raise SQLDatasourceError(
+                                "Unable to create a SQLAlchemy engine from "
+                                f"connection_string: {values['connection_string']} due to the "
+                                f"following exception: {str(e)}"
+                            )
+                    else:
                         raise SQLDatasourceError(
-                            "Unable to create a SQLAlchemy engine from "
-                            f"connection_string: {values['connection_string']} due to the "
-                            f"following exception: {str(e)}"
+                            "Either a SQLAlchemy connection_string or engine must be provided."
                         )
             else:
                 raise SQLDatasourceError(
                     "Unable to create SQLDatasource due to missing sqlalchemy dependency."
                 )
+        # engine will always override connection_string if it is passed
+        else:
+            engine_url: str = values["engine"].url
+            if (
+                "connection_string" in values
+                and values["connection_string"] != engine_url
+            ):
+                warnings.warn(
+                    "Both connection_string and engine were provided, but connection_string does not match "
+                    "the URL of the engine. The engine will be used, and the connection_string will be "
+                    "ignored."
+                )
+            values["connection_string"] = engine_url
+
         return values
 
     def test_connection(self) -> None:
