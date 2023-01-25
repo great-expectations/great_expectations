@@ -114,13 +114,20 @@ class RuleStats(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
+@public_api
 @dataclass
 class DataAssistantResult(SerializableDictDot):
-    """
-    DataAssistantResult is a "dataclass" object, designed to hold results of executing "DataAssistant.run()" method.
-    Available properties are: "metrics_by_domain", "expectation_configurations", and configuration object
-    ("RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
-    Use "_batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
+    """Result from a Data Assistant run, plus plotting functionality.
+
+    Args:
+        profiler_config: Effective Rule-Based Profiler configuration.
+        profiler_execution_time: Effective Rule-Based Profiler overall execution time in seconds.
+        rule_domain_builder_execution_time: Effective Rule-Based Profiler per-Rule DomainBuilder execution time in seconds.
+        rule_execution_time: Effective Rule-Based Profiler per-Rule execution time in seconds.
+        metrics_by_domain: Metrics by Domain.
+        expectation_configurations: Expectation configurations.
+        citation: Citations.
+        _batch_id_to_batch_identifier_display_name_map: Mapping from "batch_id" values to friendly display names.
     """
 
     ALLOWED_KEYS = {
@@ -142,15 +149,9 @@ class DataAssistantResult(SerializableDictDot):
         Dict[str, Set[Tuple[str, Any]]]
     ] = field(default=None)
     profiler_config: Optional[RuleBasedProfilerConfig] = None
-    profiler_execution_time: Optional[
-        float
-    ] = None  # Effective Rule-Based Profiler overall execution time (in seconds).
-    rule_domain_builder_execution_time: Optional[
-        Dict[str, float]
-    ] = None  # Effective Rule-Based Profiler per-Rule DomainBuilder execution time (in seconds).
-    rule_execution_time: Optional[
-        Dict[str, float]
-    ] = None  # Effective Rule-Based Profiler per-Rule total execution time (in seconds).
+    profiler_execution_time: Optional[float] = None
+    rule_domain_builder_execution_time: Optional[Dict[str, float]] = None
+    rule_execution_time: Optional[Dict[str, float]] = None
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
