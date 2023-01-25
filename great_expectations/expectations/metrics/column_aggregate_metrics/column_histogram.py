@@ -123,7 +123,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             query = (
                 sa.select(case_conditions)
                 .where(
-                    sa.column(column) != None,
+                    sa.column(column) != None,  # noqa: E711
                 )
                 .select_from(selectable)
             )
@@ -216,7 +216,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
         query = (
             sa.select(case_conditions)
             .where(
-                sa.column(column) != None,
+                sa.column(column) != None,  # noqa: E711
             )
             .select_from(selectable)
         )
