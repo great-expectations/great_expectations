@@ -17,10 +17,10 @@ def generate_asset_files(
         source_csv_dir = TEST_ROOT / "test_sets" / "taxi_yellow_tripdata_samples"
     source_csv_dir = pathlib.Path(source_csv_dir).resolve(strict=True)
 
+    json_asset_dir = pathlib.Path.cwd() / "json_assets"
+    json_asset_dir.mkdir(exist_ok=True)
     for i, csv_file in enumerate(source_csv_dir.glob("*.csv"), start=1):
-        json_output_file = pathlib.Path.cwd().joinpath(
-            csv_file.with_suffix(".json").name
-        )
+        json_output_file = json_asset_dir / csv_file.with_suffix(".json").name
         print(i, json_output_file.name)
         df = pd.read_csv(csv_file)
         df.to_json(json_output_file)

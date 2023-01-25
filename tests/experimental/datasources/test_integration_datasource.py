@@ -34,11 +34,12 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import Batch
 
-
 SAMPLE_CSV_DIR: Final[pathlib.Path] = (
     pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
 ).resolve()
-SAMPLE_JSON_DIR: Final[pathlib.Path] = pathlib.Path("json_assets").resolve()
+SAMPLE_JSON_DIR: Final[pathlib.Path] = pathlib.Path(
+    __file__, "..", "json_assets"
+).resolve(strict=True)
 
 
 def sql_data(
