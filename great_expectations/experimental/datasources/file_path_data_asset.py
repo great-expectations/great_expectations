@@ -28,11 +28,8 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class CSVAsset(DataAsset):
-    # Overridden inherited instance fields
-    type: Literal["csv"] = "csv"
-
-    # Pandas specific attrs
+class FilePathDataAsset(DataAsset):
+    # FilePath specific attributes
     path: pathlib.Path
     regex: Pattern
 
