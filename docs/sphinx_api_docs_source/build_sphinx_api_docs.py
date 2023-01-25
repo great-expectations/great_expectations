@@ -399,7 +399,7 @@ class SphinxInvokeDocsBuilder:
             f"sidebar_label: {title}\n"
             "---\n"
             f"{import_code_block_content}"
-            "\n"
+            "\n\n"
         )
         doc = doc_front_matter + doc
 
@@ -412,6 +412,7 @@ class SphinxInvokeDocsBuilder:
         Also quotes use a different quote character. This method cleans up
         these items so that the code block is rendered appropriately.
         """
-        doc = doc.replace("&lt;", "<").replace("&gt;", ">").replace("”", '"')
+        doc = doc.replace("&lt;", "<").replace("&gt;", ">")
+        doc = doc.replace("”", '"').replace("‘", "'").replace("’", "'")
         doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
         return doc
