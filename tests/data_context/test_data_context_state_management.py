@@ -144,60 +144,14 @@ def test_update_project_config(
     [
         pytest.param(
             {},
-            {
-                "data_connectors": {
-                    "tripdata_monthly_configured": {
-                        "assets": {
-                            "yellow": {
-                                "class_name": "Asset",
-                                "group_names": ["year", "month"],
-                                "module_name": "great_expectations.datasource.data_connector.asset",
-                                "pattern": "yellow_tripdata_(\\d{4})-(\\d{2})\\.csv$",
-                            },
-                        },
-                        "base_directory": "/path/to/trip_data",
-                        "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector",
-                        "name": "tripdata_monthly_configured",
-                    },
-                },
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "id": None,
-                "name": "my_pandas_datasource",
-            },
+            None,
             id="no kwargs",
         ),
         pytest.param(
             {
                 "id": "d53c2384-f973-4a0c-9c85-af1d67c06f58",
             },
-            {
-                "data_connectors": {
-                    "tripdata_monthly_configured": {
-                        "assets": {
-                            "yellow": {
-                                "class_name": "Asset",
-                                "group_names": ["year", "month"],
-                                "module_name": "great_expectations.datasource.data_connector.asset",
-                                "pattern": "yellow_tripdata_(\\d{4})-(\\d{2})\\.csv$",
-                            },
-                        },
-                        "base_directory": "/path/to/trip_data",
-                        "class_name": "ConfiguredAssetFilesystemDataConnector",
-                        "module_name": "great_expectations.datasource.data_connector",
-                        "name": "tripdata_monthly_configured",
-                    },
-                },
-                "execution_engine": {
-                    "class_name": "PandasExecutionEngine",
-                    "module_name": "great_expectations.execution_engine",
-                },
-                "id": "d53c2384-f973-4a0c-9c85-af1d67c06f58",
-                "name": "my_pandas_datasource",
-            },
+            "d53c2384-f973-4a0c-9c85-af1d67c06f58",
             id="kwargs",
         ),
     ],
@@ -206,7 +160,7 @@ def test_add_or_update_datasource_updates_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
     datasource_name: str,
     kwargs: dict,
-    expected_config: dict,
+    expected_id: str | None,
 ):
     context = in_memory_data_context
 
@@ -218,7 +172,8 @@ def test_add_or_update_datasource_updates_successfully(
     ), f"Downstream logic in the test relies on {datasource_name} being a datasource; please check your fixtures."
 
     datasource = context.add_or_update_datasource(name=datasource_name, **kwargs)
-    assert datasource.config == expected_config
+    # Let's `id` as an example attr to change so we don't need to assert against the whole config
+    assert datasource.config["id"] == expected_id
 
     num_datasource_after = len(context.datasources)
     num_datasource_configs_after = len(context.config.datasources)

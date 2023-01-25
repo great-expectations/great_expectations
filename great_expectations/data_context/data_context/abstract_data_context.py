@@ -759,7 +759,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs,
     ) -> LegacyDatasource | BaseDatasource:
         """
-        TODO
+        Add a new Datasource or update an existing one on the context depending on whether
+        it already exists or not. The configuration is provided as kwargs.
+
+        Args:
+            name: The name of the Datasource to add or update.
+            kwargs: Any relevant keyword args to use when adding or updating the target Datasource.
+
+        Returns:
+            The Datasource added or updated by the input `kwargs`.
         """
         existing_datasource = None
         try:
@@ -771,6 +779,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         if existing_datasource:
             updated_datasource_config = copy.deepcopy(existing_datasource.config)
+            # `instantiate_class_from_config` requires `class_name`
             updated_datasource_config[
                 "class_name"
             ] = existing_datasource.__class__.__name__
