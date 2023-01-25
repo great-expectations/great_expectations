@@ -53,14 +53,13 @@ class FilesystemDataAsset(DataAsset):
         """Constructs a "FilesystemDataAsset" object.
 
         Args:
-            name: The name of the present File Path data asset
+            name: The name of the present File Path DataAsset
             base_directory: base directory path, relative to which file paths will be collected
             regex: regex pattern that matches filenames and whose groups are used to label the Batch samples
             order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
         """
         super().__init__(
             name=name,
-            type=self.type,
             order_by=order_by,
         )
 
