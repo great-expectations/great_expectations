@@ -280,13 +280,10 @@ def multibatch_sql_data(
 def multibatch_pandas_csv_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    csv_path = (
-        pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
-    ).resolve()
     panda_ds = context.sources.add_pandas(name="my_pandas")
     asset = panda_ds.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        data_path=SAMPLE_CSV_DIR,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
