@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 from typing_extensions import Final
 
 from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 
