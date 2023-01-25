@@ -324,14 +324,20 @@ class Validator:
     def load_batch_list(self, batch_list: List[Batch]) -> None:
         self._execution_engine.batch_manager.load_batch_list(batch_list=batch_list)
 
+    @public_api
     def get_metric(
         self,
         metric: MetricConfiguration,
     ) -> Any:
-        """
-        Convenience method that returns the value of the requested metric.
+        """Convenience method, return the value of the requested metric.
 
         (To be deprecated in favor of using methods in "MetricsCalculator" class.)
+
+        Args:
+            metric: MetricConfiguration
+
+        Returns:
+            The value of the requested metric.
         """
         return self._metrics_calculator.get_metric(metric=metric)
 

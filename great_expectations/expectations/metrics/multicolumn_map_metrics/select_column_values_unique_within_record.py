@@ -55,7 +55,8 @@ metric for wide tables using SQLAlchemy leads to long WHERE clauses for the unde
                 sa.or_(
                     column_list[idx_src] == column_list[idx_dest],
                     sa.and_(
-                        column_list[idx_src] == None, column_list[idx_dest] == None
+                        column_list[idx_src] == None,  # noqa: E711
+                        column_list[idx_dest] == None,  # noqa: E711
                     ),
                 )
                 for idx_src in range(num_columns - 1)
