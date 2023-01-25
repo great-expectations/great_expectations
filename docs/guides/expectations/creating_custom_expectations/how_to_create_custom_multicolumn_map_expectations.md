@@ -257,15 +257,14 @@ Completeness checklist for ExpectMulticolumnValuesToBeMultiplesOfThree:
 
 ### 7. Linting
 
-Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`. 
+Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, and `ruff`.
 
 If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
 ```console
 black <PATH/TO/YOUR/EXPECTATION.py>
 isort <PATH/TO/YOUR/EXPECTATION.py>
-flake8 <PATH/TO/YOUR/EXPECTATION.py>
-pyupgrade <PATH/TO/YOUR/EXPECTATION.py> --py3-plus
+ruff <PATH/TO/YOUR/EXPECTATION.py> --fix
 ```
 
 :::info

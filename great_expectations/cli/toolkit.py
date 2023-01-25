@@ -216,27 +216,26 @@ def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
     if expectation_suite_name.endswith(".json"):
         expectation_suite_name = expectation_suite_name[:-5]
 
-    suite: Optional[ExpectationSuite]
+    suite: Optional[ExpectationSuite] = None
     try:
         suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
         )
-        return suite
     except gx_exceptions.DataContextError:
         if create_if_not_exist:
             suite = data_context.create_expectation_suite(
                 expectation_suite_name=expectation_suite_name
             )
-            return suite
-        else:
-            suite = None
-            exit_with_failure_message_and_stats(
-                data_context=data_context,
-                usage_event=usage_event,
-                suppress_usage_message=suppress_usage_message,
-                message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check "
-                "the name by running `great_expectations suite list` and try again.",
-            )
+
+    if suite:
+        return suite
+    exit_with_failure_message_and_stats(
+        data_context=data_context,
+        usage_event=usage_event,
+        suppress_usage_message=suppress_usage_message,
+        message=f"<red>Could not find a suite named `{expectation_suite_name}`.</red> Please check "
+        "the name by running `great_expectations suite list` and try again.",
+    )
 
 
 def exit_with_failure_message_and_stats(
