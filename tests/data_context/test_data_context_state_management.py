@@ -140,7 +140,7 @@ def test_update_project_config(
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "kwargs,expected_config",
+    "kwargs,expected_id",
     [
         pytest.param(
             {},
