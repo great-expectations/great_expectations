@@ -3192,6 +3192,8 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
                 }
             ),
             value_type="StringValueType",
+            exception='Renderer "atomic.prescriptive.custom_renderer_type" failed to render Expectation '
+            '"expect_sky_to_be_color with exception message: This renderer is broken!".',
         ),
         RenderedAtomicContent(
             name=AtomicPrescriptiveRendererType.SUMMARY,
