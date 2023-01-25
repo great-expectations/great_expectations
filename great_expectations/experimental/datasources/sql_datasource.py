@@ -342,7 +342,7 @@ class SQLDatasource(Datasource):
     def test_connection(self) -> None:
         # test database connection
         self.engine.connect()
-        # if TableAssets are defined, also check if those exist
+        # if assets are defined, also check if those exist
         if self.assets:
             for asset in self.assets.values():
                 asset.test_connection()

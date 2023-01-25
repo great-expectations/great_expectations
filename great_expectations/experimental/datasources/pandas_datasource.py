@@ -53,7 +53,7 @@ class CSVAsset(DataAsset):
         success = False
         for filename in os.listdir(self.path):
             if self.regex.match(filename):
-                # if one file in the asset matches the regex, we consider this asset valid
+                # if one file in the path matches the regex, we consider this asset valid
                 success = True
                 break
         if not success:
