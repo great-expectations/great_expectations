@@ -46,9 +46,9 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        test_configuration_files = [
-            f"{dir_path}/{expectation_category}/expect_column_values_to_be_between.json"
-        ]
+        # test_configuration_files = [
+        #     f"{dir_path}/{expectation_category}/expect_column_values_to_not_be_null.json"
+        # ]
         for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)

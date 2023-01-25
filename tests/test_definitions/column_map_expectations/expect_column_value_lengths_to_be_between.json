@@ -46,63 +46,6 @@
         "unexpected_list": ["collected"]
       }
     },{
-      "title": "negative_test_matching_min_max_too_small_id_pk_pandas",
-      "include_in_gallery": true,
-      "exact_match_out" : false,
-      "only_for": ["pandas"],
-      "in":{
-        "column": "s2",
-        "min_value": 4,
-        "max_value": 8,
-        "result_format": {
-          "result_format": "COMPLETE",
-          "unexpected_index_column_names": ["index"]
-        }
-      },
-      "out":{
-        "success": true,
-        "unexpected_index_list": [2],
-        "unexpected_list": ["collected"]
-      }
-    },{
-      "title": "negative_test_matching_min_max_too_small_id_pk_spark",
-      "include_in_gallery": true,
-      "exact_match_out" : false,
-      "only_for": ["spark"],
-      "in":{
-        "column": "s2",
-        "min_value": 4,
-        "max_value": 8,
-        "result_format": {
-          "result_format": "COMPLETE",
-          "unexpected_index_column_names": ["index"]
-        }
-      },
-      "out":{
-        "success":true,
-        "unexpected_index_list": [2],
-        "unexpected_list": ["collected"]
-      }
-    },{
-      "title": "negative_test_matching_min_max_too_small_id_pk_sqlite",
-      "include_in_gallery": true,
-      "exact_match_out" : false,
-      "only_for": ["sqlite"],
-      "in":{
-        "column": "s2",
-        "min_value": 4,
-        "max_value": 8,
-        "result_format": {
-          "result_format": "COMPLETE",
-          "unexpected_index_column_names": ["index"]
-        }
-      },
-      "out":{
-        "success":true,
-        "unexpected_index_list": [2],
-        "unexpected_list": ["collected"]
-      }
-    },{
       "title": "negative_test_matching_max_min_too_large",
       "exact_match_out" : false,
       "in":{

@@ -1910,6 +1910,7 @@ def _pandas_map_condition_query(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
     domain_values_df_filtered = domain_records_df[boolean_mapped_unexpected_values]
+    # breakpoint()
     return domain_values_df_filtered.index.to_list()
 
 
