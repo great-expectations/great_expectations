@@ -245,7 +245,7 @@ class PandasDatasource(Datasource):
             order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
-        asset = CSVAsset(  # type: ignore[call-arg] # type has a default??
+        asset = CSVAsset(
             name=name,
             path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
@@ -270,7 +270,7 @@ class PandasDatasource(Datasource):
             regex: regex pattern that matches csv filenames that is used to label the batches
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
-        asset = JSONAsset(  # type: ignore[call-arg] # type has a default??
+        asset = JSONAsset(
             name=name,
             path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
@@ -295,7 +295,7 @@ class PandasDatasource(Datasource):
             regex: regex pattern that matches csv filenames that is used to label the batches
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
-        asset = ExcelAsset(  # type: ignore[call-arg] # type has a default??
+        asset = ExcelAsset(
             name=name,
             path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
@@ -320,7 +320,7 @@ class PandasDatasource(Datasource):
             regex: regex pattern that matches csv filenames that is used to label the batches
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
-        asset = ParquetAsset(  # type: ignore[call-arg] # type has a default??
+        asset = ParquetAsset(
             name=name,
             path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
