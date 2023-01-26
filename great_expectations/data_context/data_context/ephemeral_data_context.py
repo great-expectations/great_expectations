@@ -1,5 +1,5 @@
 import logging
-from typing import Mapping, Optional, Union
+from typing import Dict, Mapping, Optional, Union, cast
 
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -10,6 +10,7 @@ from great_expectations.data_context.data_context_variables import (
 )
 from great_expectations.data_context.types.base import (
     DataContextConfig,
+    DatasourceConfig,
     datasourceConfigSchema,
 )
 
@@ -67,7 +68,8 @@ class EphemeralDataContext(AbstractDataContext):
             serializer=DictConfigSerializer(schema=datasourceConfigSchema),
         )
         # As the store is in-memory, it needs to be populated immediately
-        for name, config in self.config.datasources.items():
+        datasources = cast(Dict[str, DatasourceConfig], self.config.datasources or {})
+        for name, config in datasources.items():
             datasource_store.set_by_name(datasource_name=name, datasource_config=config)
 
         self._datasource_store = datasource_store
