@@ -198,7 +198,6 @@ def _to_pydantic_fields(
     """
     fields_dict: Dict[str, _FieldSpec] = {}
     for param_name, param in sig_tuple.signature.parameters.items():
-        # print(type(param), param)
 
         no_annotation: bool = param.annotation is inspect._empty
         if no_annotation:
@@ -262,6 +261,8 @@ def _generate_data_asset_models(
             )
             logger.debug(f"{model_name}\n{pf(fields)}")
         except NameError as err:
+            # TODO: sql_table has a `schema` param that is a pydantic reserved attribute.
+            # Solution is to use an alias field.
             logger.debug(f"{model_name} - {type(err).__name__}:{err}")
             continue
         models[type_name] = model
