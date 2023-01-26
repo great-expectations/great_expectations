@@ -6,7 +6,7 @@ import pathlib
 from dataclasses import dataclass
 from pathlib import Path
 from pprint import pformat as pf
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 import pydantic
@@ -24,6 +24,9 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     PandasDatasource,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__file__)
 
@@ -50,8 +53,10 @@ def csv_path() -> pathlib.Path:
     )
 
 
-class SpyError(RuntimeError):
-    pass
+class SpyInterupt(RuntimeError):
+    def __init__(self, message: str, captured=None) -> None:
+        self.captured = captured
+        super().__init__(message)
 
 
 @pytest.fixture
@@ -62,13 +67,14 @@ def capture_reader_fn_params(monkeypatch: MonkeyPatch):
     Note this fixture is heavily reliant on the implementation details of `PandasExecutionEngine`,
     should this change this fixture will need to change.
     """
-    # NOTE: if
+    captured_args: list[list] = []
     captured_kwargs: list[dict[str, Any]] = []
 
     def reader_fn_spy(*args, **kwargs):
         logging.info(f"reader_fn_spy() called with...\n{args}\n{kwargs}")
+        captured_args.append(args)
         captured_kwargs.append(kwargs)
-        return kwargs
+        raise SpyInterupt("Spy is finished", {"args": args, "kwargs": kwargs})
 
     monkeypatch.setattr(
         great_expectations.execution_engine.pandas_execution_engine.PandasExecutionEngine,
@@ -77,7 +83,7 @@ def capture_reader_fn_params(monkeypatch: MonkeyPatch):
         raising=True,
     )
 
-    yield captured_kwargs
+    yield captured_args, captured_kwargs
 
 
 @pytest.mark.unit
@@ -134,19 +140,29 @@ class TestDynamicPandasAssets:
 
     def test_data_asset_reader_options_passthrough(
         self,
-        pandas_datasource: PandasDatasource,
+        empty_data_context: AbstractDataContext,
         csv_path: pathlib.Path,
-        capture_reader_fn_params: list[dict],
+        capture_reader_fn_params: tuple[list[list], list[dict]],
     ):
-        pandas_datasource.add_csv_asset(
-            "foo",
-            data_path=csv_path,
-            regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
-            sep="|",
-            decimal=",",
+        extra_kwargs = {"sep": "|", "decimal": ","}
+        batch_request = (
+            empty_data_context.sources.add_pandas("my_pandas")
+            .add_csv_asset(
+                "my_csv",
+                data_path=csv_path,
+                regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                **extra_kwargs,
+            )
+            .get_batch_request({"year": "2018"})
         )
-        print(pf(capture_reader_fn_params))
-        raise NotImplementedError("create this test")
+        with pytest.raises(SpyInterupt):
+            empty_data_context.get_validator(batch_request=batch_request)
+
+        captured_args, captured_kwargs = capture_reader_fn_params
+        print(pf(captured_args))
+        print(pf(captured_kwargs))
+
+        assert captured_kwargs[-1] == extra_kwargs
 
 
 @pytest.mark.unit
