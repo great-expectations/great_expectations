@@ -215,8 +215,8 @@ class UserConfigurableProfiler:
 
     @public_api
     def build_suite(self) -> ExpectationSuite:
-        """
-        Build an Expectation Suite based on the `semantic_types_dict` if one is provided.
+        """Build an Expectation Suite based on the `semantic_types_dict` if one is provided.
+        
         Otherwise, profile the dataset and build the suite based on the results.
 
         Returns:
