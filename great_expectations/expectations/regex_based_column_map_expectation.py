@@ -53,10 +53,12 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
     Metric Registration Example:
 
     ```python
+
     map_metric = RegexBasedColumnMapExpectation.register_metric(
         regex_camel_name="Vowel",
         regex_="^[aeiouyAEIOUY]*$",
     )
+
     ```
 
     In some cases, subclasses of MetricProvider, such as RegexColumnMapMetricProvider, will already
@@ -102,6 +104,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     Example Definition:
 
     ```python
+
     ExpectColumnValuesToOnlyContainVowels(SetBasedColumnMapExpectation):
         regex_camel_name = "Vowel"
         regex = "^[aeiouyAEIOUY]*$"
@@ -110,6 +113,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
             regex_camel_name=regex_camel_name,
             regex=regex
     )
+
     ```
 
     Attributes:
