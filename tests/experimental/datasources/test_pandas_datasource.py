@@ -21,7 +21,11 @@ from great_expectations.experimental.datasources.pandas_datasource import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.experimental.datasources.interfaces import (
+        BatchSortersDefinition,
+    )
 
 logger = logging.getLogger(__file__)
 
@@ -295,11 +299,16 @@ def test_get_batch_list_from_partially_specified_batch_request(
     pandas_datasource: PandasDatasource, csv_path: pathlib.Path
 ):
     # Verify test directory has files that don't match what we will query for
-    all_files = list(csv_path.iterdir())
+    file_name: PathStr
+    all_files: list[str] = [
+        file_name.stem for file_name in list(pathlib.Path(csv_path).iterdir())
+    ]
     # assert there are files that are not csv files
-    assert any([file.suffix != "csv" for file in all_files])
+    assert any([not file_name.endswith("csv") for file_name in all_files])
     # assert there are 12 files from 2018
-    files_for_2018 = [file for file in all_files if "2018" in file.name]
+    files_for_2018 = [
+        file_name for file_name in all_files if file_name.find("2018") >= 0
+    ]
     assert len(files_for_2018) == 12
 
     asset = pandas_datasource.add_csv_asset(
@@ -310,7 +319,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     request = asset.get_batch_request({"year": "2018"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert (len(batches)) == 12
-    batch_filenames = [pathlib.Path(batch.metadata["path"]) for batch in batches]
+    batch_filenames = [pathlib.Path(batch.metadata["path"]).stem for batch in batches]
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)
@@ -353,12 +362,17 @@ def test_get_batch_list_from_partially_specified_batch_request(
     ],
 )
 def test_pandas_sorter(
-    pandas_datasource: PandasDatasource, csv_path: pathlib.Path, order_by
+    pandas_datasource: PandasDatasource,
+    csv_path: pathlib.Path,
+    order_by: BatchSortersDefinition,
 ):
     # Verify test directory has files we expect
     years = ["2018", "2019", "2020"]
     months = [format(m, "02d") for m in range(1, 13)]
-    all_files = [p.name for p in csv_path.iterdir()]
+    file_name: PathStr
+    all_files: list[str] = [
+        file_name.stem for file_name in list(pathlib.Path(csv_path).iterdir())
+    ]
     # assert there are 12 files for each year
     for year in years:
         files_for_year = [
