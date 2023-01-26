@@ -98,6 +98,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "filepath_or_buffer": {"path": _FieldSpec(pathlib.Path, ...)},
     # JSONAsset
     "path_or_buf": {"path": _FieldSpec(pathlib.Path, ...)},
+    # misc
     "filepath": {"path": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},
@@ -122,11 +123,6 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "CompressionOptions": CompressionOptions,
     "StorageOptions": StorageOptions,
 }
-
-
-def _public_dir(obj: object) -> List[str]:
-    return [x for x in dir(obj) if not x.startswith("_")]
-
 
 # TODO: make these a generator pipeline
 
@@ -157,20 +153,6 @@ def _get_default_value(
     else:
         default = param.default
     return default
-
-
-def _evaluate_annotation_str(annotation_str: str) -> Type:
-    base_globals = None
-    try:
-        module = sys.modules["pandas.io.api"]
-    except KeyError as err:
-        # happens occasionally, see https://github.com/pydantic/pydantic/issues/2363
-        logger.error(f"{err.__class__.__name__}:{err}")
-    else:
-        base_globals = module.__dict__
-    type_ = _eval_type(annotation_str, base_globals, None)
-    # assert not isinstance(type_, str), type(type_)
-    return type_
 
 
 def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
