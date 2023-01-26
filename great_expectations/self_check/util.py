@@ -2788,7 +2788,7 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(
+def evaluate_json_test_v3_api(  # noqa: C901 - 16
     validator: Validator,
     expectation_type: str,
     test: Dict[str, Any],
@@ -2916,9 +2916,9 @@ def evaluate_json_test_v3_api(
     return (result, error_message, stack_trace)
 
 
-def check_json_test_result(
+def check_json_test_result(  # noqa: C901 - 52
     test, result, data_asset=None, pk_column=False
-) -> None:  # noqa: C901 - 49
+) -> None:
 
     # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists
     # this will work for testing since result_format is COMPLETE
