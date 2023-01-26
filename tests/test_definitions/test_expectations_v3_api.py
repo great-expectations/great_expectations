@@ -40,7 +40,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
-    pk_column: bool = False
     for expectation_category in expectation_dirs:
 
         test_configuration_files = glob.glob(
@@ -50,7 +49,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
             for filename in test_configuration_files:
                 file = open(filename)
                 test_configuration = json.load(file)
-
+                pk_column: bool = False
                 for d in test_configuration["datasets"]:
                     datasets = []
                     # optional only_for and suppress_test flag at the datasets-level that can prevent data being
