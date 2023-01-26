@@ -19,6 +19,7 @@ from great_expectations.experimental.datasources.postgres_datasource import (
     PostgresDatasource,
 )
 from great_expectations.experimental.datasources.sql_datasource import (
+    SQLDatasourceError,
     SqlYearMonthSplitter,
     TableAsset,
 )
@@ -655,3 +656,38 @@ def test_validate_invalid_postgres_connection_string(create_source, connection_s
             connection_string=connection_string,
         ):
             pass
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "connection_string,engine,error_message",
+    [
+        (
+            "postgresql://userName:@hostname/dbName",
+            MockSaEngine(dialect=Dialect("postgresql")),
+            (
+                "Unable to coerce engine into sqlalchemy.engine.Engine. Please provide a "
+                "valid SQLAlchemy engine or just pass a connection_string and one will be "
+                "created."
+            ),
+        ),
+        (
+            None,
+            None,
+            "Either a SQLAlchemy connection_string or engine must be provided.",
+        ),
+    ],
+)
+def test_instantiation_error_messages(
+    create_source, connection_string, engine, error_message
+):
+    with pytest.raises(SQLDatasourceError) as e:
+        with create_source(
+            validate_batch_spec=lambda _: None,
+            dialect="postgresql",
+            connection_string=connection_string,
+            engine=engine,
+        ):
+            pass
+
+    assert str(e.value) == error_message

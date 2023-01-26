@@ -306,7 +306,7 @@ class SQLDatasource(Datasource):
     """Adds a generic SQL datasource to the data context.
 
     Args:
-        name: The name of this datasource
+        name: The name of this datasource.
         connection_string: An optional SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
             Either a connection_string or an engine must be provided.
@@ -324,8 +324,8 @@ class SQLDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
-    connection_string: str = pydantic.Field("")
-    engine: sqlalchemy.engine.Engine = pydantic.Field(None, exclude=True)
+    connection_string: Optional[str]
+    engine: Optional[sqlalchemy.engine.Engine] = pydantic.Field(None, exclude=True)
     assets: Dict[str, TableAsset] = {}
 
     @property
@@ -344,9 +344,16 @@ class SQLDatasource(Datasource):
         If engine wasn't passed, validates that SQL Alchemy was successfully imported and attempts to
         create an engine if a properly formed connection_string was passed.
 
-        If an engine was passed, the connection_string associated with the engine will be used, and any
+        If a valid engine was passed, the connection_string associated with the engine will be used, and any
         connection_string provided will be ignored.
         """
+        # engine will not be in values if it was passed but unable to be coerced into sqlalchemy.engine.Engine
+        if "engine" not in values:
+            raise SQLDatasourceError(
+                "Unable to coerce engine into sqlalchemy.engine.Engine. Please provide a valid "
+                "SQLAlchemy engine or just pass a connection_string and one will be created."
+            )
+
         # engine will be set to None if it wasn't passed
         if values["engine"] is None:
             if SQLALCHEMY_IMPORTED:
