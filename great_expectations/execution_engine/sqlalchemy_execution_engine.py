@@ -793,12 +793,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         Args:
             domain_kwargs (dict): a dictionary consisting of the Domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would
-            like to be using, or a corresponding string value representing it.  String types include "identity",
-            "column", "column_pair", "table" and "other".  Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when describing
-            the Domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like \
+            to be using, or a corresponding string value representing it.  String types include "identity", "column", \
+            "column_pair", "table" and "other".  Enum types include capitalized versions of these from the class \
+            MetricDomainTypes.
+            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when \
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             SqlAlchemy column
