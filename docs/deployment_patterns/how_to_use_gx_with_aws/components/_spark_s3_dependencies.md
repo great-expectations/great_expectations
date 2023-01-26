@@ -1,7 +1,7 @@
 Spark possesses a few dependencies that need to be installed before it can be used with AWS.  You will need to install the `aws-java-sdk-bundle` and `hadoop-aws` files corresponding to your version of pySpark, and update your Spark configuration accordingly.  You can find the `.jar` files you need to install in the following MVN repositories:
 
 - [hadoop-aws jar that matches your Spark version](https://mvnrepository.com/artifact/org.apache.hadoop/hadoop-aws)
-- [aws-java-sdk-bundle jar that matches your Spark version](aws-java-sdk-bundle jar that matches your Spark version)
+- [aws-java-sdk-bundle jar that matches your Spark version](https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-bundle)
 
 Once the dependencies are  installed, you will need to update your Spark configuration from within Python.  First, import these necessary modules:
 
@@ -10,7 +10,7 @@ import pyspark as pyspark
 from pyspark import SparkContext
 ```
 
-Next, update the `pyspark.SparkConf` to match the dependency packages you downloaded:
+Next, update the `pyspark.SparkConf` to match the dependency packages you downloaded.  In this example, we are using the 3.3.1 version of `hadoop-aws`, but you will want to enter the version that corresponds to your installed dependency.
 
 ```python
 conf = pyspark.SparkConf()
