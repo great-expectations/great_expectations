@@ -42,7 +42,10 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.cloud_constants import (
+    CLOUD_APP_DEFAULT_BASE_URL,
+    GXCloudRESTResource,
+)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -121,7 +124,7 @@ class BaseCheckpoint(ConfigPeer):
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
         """Validate against current Checkpoint.
-        
+
         Arguments allow for override of the current Checkpoint configuration.
 
         Args:
@@ -261,7 +264,16 @@ class BaseCheckpoint(ConfigPeer):
 
                 checkpoint_run_results.update(run_results)
 
+        # Generate a URL to the validation result details page in GX Cloud
+        validation_result_url: str | None = None
+        for key in checkpoint_run_results:
+            if isinstance(key, GXCloudIdentifier) and key.cloud_id:
+                validation_result_url = (
+                    f"{CLOUD_APP_DEFAULT_BASE_URL}?validationResultId={key.cloud_id}"
+                )
+                break
         return CheckpointResult(
+            validation_result_url=validation_result_url,
             run_id=run_id,
             run_results=checkpoint_run_results,
             checkpoint_config=self.config,
@@ -1327,7 +1339,7 @@ class SimpleCheckpoint(Checkpoint):
         expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> CheckpointResult:
         """Validate against the current SimpleCheckpoint.
-        
+
         Arguments allow for override of the current SimpleCheckpoint configuration.
 
         Args:

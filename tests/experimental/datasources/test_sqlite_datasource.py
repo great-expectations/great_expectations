@@ -14,7 +14,12 @@ def test_connection_string_starts_with_sqlite():
     db_file = file_relative_path(
         __file__,
         pathlib.Path(
-            "../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
+            "..",
+            "..",
+            "test_sets",
+            "taxi_yellow_tripdata_samples",
+            "sqlite",
+            "yellow_tripdata.db",
         ),
     )
     name = "sqlite_datasource"

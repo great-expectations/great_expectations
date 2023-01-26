@@ -28,7 +28,7 @@ from dateutil.parser import parse
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import (
     Batch,
     BatchData,
@@ -161,7 +161,22 @@ ValidationStatistics = namedtuple(
 )
 
 
+@public_api
 class Validator:
+    """Validator is the key object used to create Expectations, validate Expectations, and get Metrics for Expectations.
+
+    Validators are used by Checkpoints to validate Expectations.
+
+    Args:
+        execution_engine: The Execution Engine to be used to perform validation.
+        interactive_evaluation: If True, the Validator will perform evaluation when Expectations are added.
+        expectation_suite: The Expectation Suite to validate.
+        expectation_suite_name: The name of the Expectation Suite to validate.
+        data_context: The Data Context associated with this Validator.
+        batches: The Batches for which to validate.
+        include_rendered_content: If True, the Rendered Content will be included in the ExpectationValidationResult.
+    """
+
     DEFAULT_RUNTIME_CONFIGURATION = {
         "include_config": True,
         "catch_exceptions": False,
@@ -181,21 +196,6 @@ class Validator:
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
-        """
-        Validator is the key object used to create Expectations, validate Expectations,
-        and get Metrics for Expectations.
-
-        Additionally, note that Validators are used by Checkpoints under-the-hood.
-
-        Args:
-            execution_engine: The ExecutionEngine to be used to perform validation.
-            interactive_evaluation: Whether the Validator should perform evaluation when Expectations are added.
-            expectation_suite: The ExpectationSuite to validate.
-            expectation_suite_name: The name of the ExpectationSuite to validate.
-            data_context: The DataContext associated with this Validator.
-            batches: The batches for which to validate.
-            include_rendered_content: Whether or not to include rendered_content in the ExpectationValidationResult.
-        """
         self._data_context: Optional[AbstractDataContext] = data_context
 
         self._metrics_calculator: MetricsCalculator = MetricsCalculator(
@@ -1405,6 +1405,7 @@ class Validator:
             suppress_warnings,
         )
 
+    @public_api
     def get_expectation_suite(  # noqa: C901 - complexity 17
         self,
         discard_failed_expectations: bool = True,
@@ -1414,28 +1415,18 @@ class Validator:
         suppress_warnings: bool = False,
         suppress_logging: bool = False,
     ) -> ExpectationSuite:
-        """Returns _expectation_config as a JSON object, and perform some cleaning along the way.
+        """Get a copy of the Expectation Suite from the Validator object.
 
         Args:
-            discard_failed_expectations (boolean): \
-                Only include expectations with success_on_last_run=True in the exported config.  Defaults to `True`.
-            discard_result_format_kwargs (boolean): \
-                In returned expectation objects, suppress the `result_format` parameter. Defaults to `True`.
-            discard_include_config_kwargs (boolean): \
-                In returned expectation objects, suppress the `include_config` parameter. Defaults to `True`.
-            discard_catch_exceptions_kwargs (boolean): \
-                In returned expectation objects, suppress the `catch_exceptions` parameter.  Defaults to `True`.
-            suppress_warnings (boolean): \
-                If true, do not include warnings in logging information about the operation.
-            suppress_logging (boolean): \
-                If true, do not create a log entry (useful when using get_expectation_suite programmatically)
+            discard_failed_expectations: Omit Expectations which failed on their last run.
+            discard_result_format_kwargs: Omit `result_format` from each Expectation.
+            discard_include_config_kwargs: Omit `include_config` from each Expectation.
+            discard_catch_exceptions_kwargs: Omit `catch_exceptions` from each Expectation.
+            suppress_warnings: Do not log warnings.
+            suppress_logging: Do not log anything.
 
         Returns:
-            An expectation suite.
-
-        Note:
-            get_expectation_suite does not affect the underlying expectation suite at all. The returned suite is a \
-             copy of _expectation_suite, not the original object.
+            ExpectationSuite object.
         """
 
         expectation_suite = copy.deepcopy(self.expectation_suite)
@@ -1507,6 +1498,7 @@ class Validator:
             logger.info(message + settings_message)
         return expectation_suite
 
+    @public_api
     def save_expectation_suite(
         self,
         filepath: Optional[str] = None,
@@ -1516,32 +1508,20 @@ class Validator:
         discard_catch_exceptions_kwargs: bool = True,
         suppress_warnings: bool = False,
     ) -> None:
-        """Writes ``_expectation_config`` to a JSON file.
+        """Write the Expectation Suite (e.g. from interactive evaluation) to the Expectation Store associated with the Validator's Data Context.
 
-           Writes the DataAsset's expectation config to the specified JSON ``filepath``. Failing expectations \
-           can be excluded from the JSON expectations config with ``discard_failed_expectations``. The kwarg key-value \
-           pairs :ref:`result_format`, :ref:`include_config`, and :ref:`catch_exceptions` are optionally excluded from \
-           the JSON expectations config.
+        If `filepath` is provided, the Data Context configuration will be ignored and the configuration will be written, as JSON, to the specified file.
 
-           Args:
-               filepath (string): \
-                   The location and name to write the JSON config file to.
-               discard_failed_expectations (boolean): \
-                   If True, excludes expectations that do not return ``success = True``. \
-                   If False, all expectations are written to the JSON config file.
-               discard_result_format_kwargs (boolean): \
-                   If True, the :ref:`result_format` attribute for each expectation is not written to the JSON config \
-                   file.
-               discard_include_config_kwargs (boolean): \
-                   If True, the :ref:`include_config` attribute for each expectation is not written to the JSON config \
-                   file.
-               discard_catch_exceptions_kwargs (boolean): \
-                   If True, the :ref:`catch_exceptions` attribute for each expectation is not written to the JSON \
-                   config file.
-               suppress_warnings (boolean): \
-                    If True, all warnings raised by Great Expectations, as a result of dropped expectations, are \
-                    suppressed.
+        Args:
+            filepath: The location and name to write the JSON config file to. This parameter overrides the Data Context configuration.
+            discard_failed_expectations: If True, excludes expectations that do not return `success = True`. If False, all expectations are saved.
+            discard_result_format_kwargs: If True, the `result_format` attribute for each expectation is not included in the saved configuration.
+            discard_include_config_kwargs: If True, the `include_config` attribute for each expectation is not included in the saved configuration.
+            discard_catch_exceptions_kwargs: If True, the `catch_exceptions` attribute for each expectation is not included in the saved configuration.
+            suppress_warnings: If True, all warnings raised by Great Expectations, as a result of dropped expectations, are suppressed.
 
+        Raises:
+            ValueError: Must configure a Data Context when instantiating the Validator or pass in `filepath`.
         """
         expectation_suite = self.get_expectation_suite(
             discard_failed_expectations,
@@ -1571,10 +1551,16 @@ class Validator:
             )
 
     # TODO: <Alex>Should "include_config" also be an argument of this method?</Alex>
+    @public_api
+    @deprecated_argument(
+        argument_name="run_id",
+        message="Only the str version of this argument is deprecated. run_id should be a RunIdentifier or dict. Support will be removed in 0.16.0.",
+        version="0.13.0",
+    )
     def validate(  # noqa: C901 - complexity 31
         self,
-        expectation_suite=None,
-        run_id=None,
+        expectation_suite: str | ExpectationSuite | None = None,
+        run_id: str | RunIdentifier | Dict[str, str] | None = None,
         data_context: Optional[
             Any
         ] = None,  # Cannot type DataContext due to circular import
@@ -1587,79 +1573,28 @@ class Validator:
         checkpoint_name: Optional[str] = None,
     ) -> Union[ExpectationValidationResult, ExpectationSuiteValidationResult]:
         # noinspection SpellCheckingInspection
-        """Generates a JSON-formatted report describing the outcome of all expectations.
-
-        Use the default expectation_suite=None to validate the expectations config associated with the DataAsset.
+        """Run all expectations and return the outcome of the run.
 
         Args:
-            expectation_suite (json or None): \
-                If None, uses the expectations config generated with the DataAsset during the current session. \
-                If a JSON file, validates those expectations.
-            run_id (str): \
-                Used to identify this validation result as part of a collection of validations. \
-                See DataContext for more information.
-            run_name (str): \
-                Used to identify this validation result as part of a collection of validations. \
-                See DataContext for more information.
-            run_time (str): \
-                Used to identify this validation result as part of a collection of validations. \
-                See DataContext for more information.
-            data_context (DataContext): \
-                A datacontext object to use as part of validation for binding evaluation parameters and \
-                registering validation results.
-            evaluation_parameters (dict or None): \
-                If None, uses the evaluation_paramters from the expectation_suite provided or as part of the \
-                data_asset. If a dict, uses the evaluation parameters in the dictionary.
-            catch_exceptions (boolean): \
-                If True, exceptions raised by tests will not end validation and will be described in the returned \
-                report.
-            result_format (string or None): \
-                If None, uses the default value ('BASIC' or as specified). \
-                If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', \
-                etc.).
-            only_return_failures (boolean): \
-                If True, expectation results are only returned when ``success = False`` \
-            checkpoint_name (string or None): \
-                Name of the Checkpoint which invoked this Validator.validate() call against an Expectation Suite. \
-                It will be added to `meta` field of the returned ExpectationSuiteValidationResult.
+            expectation_suite: If None, uses the Expectation Suite configuration generated during the current Validator session. If an `ExpectationSuite` object, uses it as the configuration. If a string, assumes it is a path to a JSON file, and loads it as the Expectation Sutie configuration.
+            run_id: Used to identify this validation result as part of a collection of validations.
+            run_name: Used to identify this validation result as part of a collection of validations. Only used if a `run_id` is not passed. See DataContext for more information.
+            run_time: Used to identify this validation result as part of a collection of validations. Only used if a `run_id` is not passed. See DataContext for more information.
+            data_context: A datacontext object to use as part of validation for binding evaluation parameters and registering validation results. Overrides the Data Context configured when the Validator is instantiated.
+            evaluation_parameters: If None, uses the evaluation_paramters from the Expectation Suite provided or as part of the Data Asset. If a dict, uses the evaluation parameters in the dictionary.
+            catch_exceptions: If True, exceptions raised by tests will not end validation and will be described in the returned report.
+            result_format: If None, uses the default value ('BASIC' or as specified). If string, the returned expectation output follows the specified format ('BOOLEAN_ONLY','BASIC', etc.).
+            only_return_failures: If True, expectation results are only returned when `success = False`.
+            checkpoint_name: Name of the Checkpoint which invoked this Validator.validate() call against an Expectation Suite. It will be added to `meta` field of the returned ExpectationSuiteValidationResult.
 
         Returns:
-            A JSON-formatted dictionary containing a list of the validation results. \
-            An example of the returned format::
-
-            {
-              "results": [
-                {
-                  "unexpected_list": [unexpected_value_1, unexpected_value_2],
-                  "expectation_type": "expect_*",
-                  "kwargs": {
-                    "column": "Column_Name",
-                    "output_format": "SUMMARY"
-                  },
-                  "success": true,
-                  "raised_exception: false.
-                  "exception_traceback": null
-                },
-                {
-                  ... (Second expectation results)
-                },
-                ... (More expectations results)
-              ],
-              "success": true,
-              "statistics": {
-                "evaluated_expectations": n,
-                "successful_expectations": m,
-                "unsuccessful_expectations": n - m,
-                "success_percent": m / n
-              }
-            }
-
-        Notes:
-           If the configuration object was built with a different version of great expectations then the \
-           current environment. If no version was found in the configuration file.
+            Object containg the results.
 
         Raises:
-           AttributeError - if 'catch_exceptions'=None and an expectation throws an AttributeError
+            Exception: Depending on the Data Context configuration and arguments, there are numerous possible exceptions that may be raised.
+            GreatExpectationsError: If `expectation_suite` is a string it must point to an existing and readable file.
+            ValidationError: If `expectation_suite` is a string, the file it points to must be valid JSON.
+
         """
         # noinspection PyUnusedLocal
         try:
