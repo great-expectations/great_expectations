@@ -672,6 +672,12 @@ def get_dbms_compatible_column_names(
     Returns:
         Single property-typed column name object or list of property-typed column name objects (depending on input).
     """
+    # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::get_dbms_compatible_column_names()] VERIFYING_COLUMN_NAMES:\n{column_names} ; TYPE: {str(type(column_names))}')
+    # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::get_dbms_compatible_column_names()] VERIFYING_BATCH_COLUMNS_LIST:\n{batch_columns_list} ; TYPE: {str(type(batch_columns_list))}')
+    # TODO: <Alex>ALEX</Alex>
+    # for a in batch_columns_list:
+    #     print(f'\n[ALEX_TEST] [METRICS/UTIL.py::get_dbms_compatible_column_names()] VERIFYING_BATCH_COLUMN:\n{a} ; TYPE: {str(type(a))}')
+    # TODO: <Alex>ALEX</Alex>
     verify_column_names_exist(
         column_names=column_names,
         batch_columns_list=batch_columns_list,
@@ -689,10 +695,13 @@ def get_dbms_compatible_column_names(
 
     typed_column_names_list: List[str | sqlalchemy.sql.quoted_name]
     if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+        # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::get_dbms_compatible_column_names()] COLUMN_NAMES_LIST:\n{column_names_list} ; TYPE: {str(type(column_names_list))}')
+        # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::get_dbms_compatible_column_names()] BATCH_COLUMNS_LIST:\n{batch_columns_list} ; TYPE: {str(type(batch_columns_list))}')
         column_name: str
         batch_columns_dict: Dict[str, str | sqlalchemy.sql.quoted_name] = {
             str(column_name): column_name for column_name in batch_columns_list
         }
+        # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::get_dbms_compatible_column_names()] BATCH_COLUMNS_DICT:\n{batch_columns_dict} ; TYPE: {str(type(batch_columns_dict))}')
         typed_column_names_list = [
             batch_columns_dict[column_name] for column_name in column_names_list
         ]
@@ -718,6 +727,37 @@ def verify_column_names_exist(
         batch_columns_list: Properly typed column names (output of "table.columns" metric)
         error_message_template: String template to output error message if any column cannot be found in "Batch" object.
     """
+
+    def _column_exists(
+        column_name: str, typed_columns_list: List[str | sqlalchemy.sql.quoted_name]
+    ) -> bool:
+        # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()::_column_exists()] COLUMN_NAME:\n{column_name} ; TYPE: {str(type(column_name))}')
+        # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()::_column_exists()] TYPED_COLUMNS_LIST:\n{typed_columns_list} ; TYPE: {str(type(typed_columns_list))}')
+        typed_column_cursor: str | sqlalchemy.sql.quoted_name
+        for typed_column_cursor in typed_columns_list:
+            # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()::_column_exists()] TYPED_COLUMN_CURSOR:\n{typed_column_cursor} ; TYPE: {str(type(typed_column_cursor))}')
+            # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()::_column_exists()] STR(TYPED_COLUMN_CURSOR):\n{str(typed_column_cursor)} ; TYPE: {str(type(str(typed_column_cursor)))}')
+            if column_name == str(typed_column_cursor):
+                # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()::_column_exists()] STR(TYPED_COLUMN_CURSOR)-SUCCESS=YES:\n{str(typed_column_cursor)} ; TYPE: {str(type(str(typed_column_cursor)))}')
+                return True
+
+            if isinstance(typed_column_cursor, str):
+                # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()::_column_exists()] TYPED_COLUMN_CURSOR.UPPER():\n{typed_column_cursor.upper()} ; TYPE: {str(type(typed_column_cursor.upper()))}')
+                # TODO: <Alex>ALEX</Alex>
+                # return column_name == typed_column_cursor or column_name == typed_column_cursor.upper()
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                a = (
+                    column_name == typed_column_cursor
+                    or column_name == typed_column_cursor.upper()
+                )
+                # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()::_column_exists()] TYPED_COLUMN_CURSOR.UPPER():\n{typed_column_cursor.upper()} ; TYPE: {str(type(typed_column_cursor.upper()))} ; SUCCESS={a}')
+                if a:
+                    return True
+                # TODO: <Alex>ALEX</Alex>
+
+        return False
+
     column_names_list: List[str]
     if isinstance(column_names, list):
         column_names_list = column_names
@@ -726,13 +766,44 @@ def verify_column_names_exist(
 
     column_name: str
 
-    batch_columns_list = [str(column_name) for column_name in batch_columns_list]
+    # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()] COLUMN_NAMES_LIST:\n{column_names_list} ; TYPE: {str(type(column_names_list))}')
+    # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()] BATCH_COLUMNS_LIST-0:\n{batch_columns_list} ; TYPE: {str(type(batch_columns_list))}')
+    # TODO: <Alex>ALEX</Alex>
+    # for a in batch_columns_list:
+    #     print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()] BATCH_COLUMN-0:\n{a} ; TYPE: {str(type(a))}')
+    # TODO: <Alex>ALEX</Alex>
+    # batch_columns_list = [str(column_name) for column_name in batch_columns_list]
+    # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()] BATCH_COLUMNS_LIST-1:\n{batch_columns_list} ; TYPE: {str(type(batch_columns_list))}')
 
     for column_name in column_names_list:
-        if column_name not in batch_columns_list:
-            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                message=error_message_template.format(column_name=column_name)
+        try:
+            # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()] CHECKING_COLUMN:\n{column_name} ; TYPE: {str(type(column_name))}')
+            a = _column_exists(
+                column_name=column_name, typed_columns_list=batch_columns_list
             )
+            # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()] EXISTENCE["{column_name}"]:\n{a} ; TYPE: {str(type(a))}')
+            # TODO: <Alex>ALEX</Alex>
+            if not a:
+                raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                    message=error_message_template.format(column_name=column_name)
+                )
+            # TODO: <Alex>ALEX</Alex>
+        except Exception as e:
+            # TODO: <Alex>ALEX</Alex>
+            pass
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # print(f'\n[ALEX_TEST] [METRICS/UTIL.py::verify_column_names_exist()] DAMN!!!:\n{e} ; TYPE: {str(type(e))}')
+            # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # if column_name not in batch_columns_list:
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # if not _column_exists(column_name=column_name, typed_columns_list=batch_columns_list):
+        #     raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+        #         message=error_message_template.format(column_name=column_name)
+        #     )
+        # TODO: <Alex>ALEX</Alex>
 
 
 def parse_value_set(value_set):

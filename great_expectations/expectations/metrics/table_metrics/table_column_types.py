@@ -73,7 +73,14 @@ class ColumnTypes(TableMetricProvider):
                 "the requested batch is not available; please load the batch into the execution engine."
             )
 
-        return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
+        # TODO: <Alex>ALEX</Alex>
+        # return _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        a = _get_sqlalchemy_column_metadata(execution_engine.engine, batch_data)
+        # print(f'\n[ALEX_TEST] [ColumnTypes._sqlalchemy()] TABLE_COLUMN_TYPES:\n{a} ; TYPE: {str(type(a))}')
+        return a
+        # TODO: <Alex>ALEX</Alex>
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
