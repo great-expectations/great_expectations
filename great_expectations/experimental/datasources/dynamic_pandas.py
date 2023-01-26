@@ -272,6 +272,10 @@ def _generate_data_asset_models(
             # Solution is to use an alias field.
             logger.debug(f"{model_name} - {type(err).__name__}:{err}")
             continue
+        except TypeError as err:
+            logger.error(f"{model_name} - {type(err).__name__}:{err}")
+            logger.warning(f"{model_name} fields\n{pf(fields)}")
+            continue
         models[type_name] = model
         model.update_forward_refs(**_TYPE_REF_LOCALS)
 
