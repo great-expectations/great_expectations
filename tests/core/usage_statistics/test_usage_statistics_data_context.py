@@ -17,17 +17,33 @@ def enable_usage_stats(monkeypatch):
 
 
 @pytest.fixture
-def usage_stats_decorated_methods_on_abstract_data_context() -> list[str]:
-    return sorted(
-        map(
-            lambda m: m.split(".")[1],
-            filter(
-                lambda m: m.startswith("AbstractDataContext")
-                and not m.endswith("__init__"),
-                ENABLED_METHODS,
-            ),
-        ),
-    )
+def usage_stats_decorated_methods_on_abstract_data_context() -> dict[
+    str, UsageStatsEvents
+]:
+    return {
+        k.split(".")[1]: v
+        for k, v in ENABLED_METHODS.items()
+        if k.startswith("AbstractDataContext") and not k.endswith("__init__")
+    }
+
+
+@pytest.mark.unit
+def test_enabled_methods_map_to_appropriate_usage_stats_events(
+    usage_stats_decorated_methods_on_abstract_data_context: dict[str, UsageStatsEvents]
+):
+    actual = usage_stats_decorated_methods_on_abstract_data_context
+    expected = {
+        "add_datasource": UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
+        "build_data_docs": UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
+        "get_batch_list": UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
+        "open_data_docs": UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
+        "run_checkpoint": UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
+        "run_profiler_on_data": UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
+        "run_profiler_with_dynamic_arguments": UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
+        "run_validation_operator": UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
+        "save_expectation_suite": UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+    }
+    assert actual == expected
 
 
 @mock.patch(
@@ -51,7 +67,7 @@ def usage_stats_decorated_methods_on_abstract_data_context() -> list[str]:
 @pytest.mark.integration
 def test_all_relevant_context_methods_emit_usage_stats(
     mock_emit: mock.MagicMock,
-    usage_stats_decorated_methods_on_abstract_data_context: list[str],
+    usage_stats_decorated_methods_on_abstract_data_context: dict[str, UsageStatsEvents],
     enable_usage_stats,  # Needs to be before context fixtures to ensure usage stats handlers are attached
     data_context_fixture_name: str,
     request,
@@ -68,22 +84,7 @@ def test_all_relevant_context_methods_emit_usage_stats(
     context = request.getfixturevalue(data_context_fixture_name)
 
     relevant_methods = usage_stats_decorated_methods_on_abstract_data_context
-    expected_events = (
-        UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
-        UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
-        UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
-        UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
-        UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
-        UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_ON_DATA,
-        UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
-        UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
-        UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-    )
-    assert len(relevant_methods) == len(
-        expected_events
-    ), "Please update the `expected_events` list to account for all usage stats decorated methods in AbstractDataContext"
-
-    for method_name, expected_event in zip(relevant_methods, expected_events):
+    for method_name, expected_event in relevant_methods.items():
         logger.info(f"Testing {context.__class__}.{method_name}")
 
         # As we only care about the decorator and not the underlying method being decorated,
