@@ -36,11 +36,14 @@ import GetLatestPip from '@site/docs/guides/setup/installation/components_local/
 
 import InstallBoto3WithPip from '@site/docs/guides/setup/configuring_metadata_stores/components/_install_boto3_with_pip.mdx'
 
-<!-- 1.2.5 Install Great Expectations -->
+<!-- 1.2.5 Install Spark dependencies for S3 -->
+import InstallSparkS3Dependencies from './components/_spark_s3_dependencies.md'
+
+<!-- 1.2.6 Install Great Expectations -->
 
 import InstallGxWithPip from '@site/docs/guides/setup/installation/components_local/_install_ge_with_pip.mdx'
 
-<!-- 1.2.6 Verify that Great Expectations installed successfully -->
+<!-- 1.2.7 Verify that Great Expectations installed successfully -->
 
 import VerifySuccessfulGxInstallation from '@site/docs/guides/setup/installation/components_local/_verify_ge_install_succeeded.mdx'
 
@@ -191,7 +194,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 #### 1.1.2 Verify that your AWS credentials are properly configured
 <VerifyAwsCredentials />
 
-### 1.2 Prepare a local installation of Great Expectations
+### 1.2 Prepare a local installation of Great Expectations and necessary dependencies
 
 #### 1.2.1 Verify that your Python version meets requirements
 <VerifyPythonVersion />
@@ -207,10 +210,13 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 #### 1.2.4 Install boto3
 <InstallBoto3WithPip />
 
-#### 1.2.5 Install Great Expectations
+#### 1.2.5 Install Spark dependencies for S3
+<InstallSparkS3Dependencies />
+
+#### 1.2.6 Install Great Expectations
 <InstallGxWithPip />
 
-#### 1.2.6 Verify that Great Expectations installed successfully
+#### 1.2.7 Verify that Great Expectations installed successfully
 <VerifySuccessfulGxInstallation />
 
 ### 1.3 Create your Data Context
