@@ -1868,7 +1868,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 `limit`, `index`, and `custom_filter_function`
             batch_identifiers: Any identifiers of batches for the BatchRequest
             batch_filter_parameters: Filter parameters used in the data connector query
-            limit: Part of the data_connector_query, limits the number of rows in a batch
+            limit: Part of the data_connector_query, limits the number of batches in the batch list
             index: Part of the data_connector_query, used to specify the index of which batch to return. Negative
                 numbers retrieve from the end of the list (ex: `-1` retrieves the last or latest batch)
             custom_filter_function: A `Callable` function that accepts `batch_identifiers` and returns a `bool`
