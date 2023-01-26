@@ -728,21 +728,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         save_changes: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
-        """Add a new Datasource to the data context, with configuration provided as kwargs.
-
-        --Documentation--
-            - https://docs.greatexpectations.io/docs/terms/datasource
-
-        Args:
-            name: the name of the new Datasource to add
-            initialize: if False, add the Datasource to the config, but do not
-                initialize it, for example if a user needs to debug database connectivity.
-            save_changes: should GX save the Datasource config?
-            kwargs: the configuration for the new Datasource
-
-        Returns:
-            Datasource instance added.
-        """
         save_changes = self._determine_save_changes_flag(save_changes)
 
         logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
