@@ -1,14 +1,8 @@
-<<<<<<< f/great-1505/zep-dynamic-pandas-assets
 from __future__ import annotations
 
 import inspect
 from dataclasses import dataclass
 from pathlib import Path
-=======
-import pathlib
-from dataclasses import dataclass
-from typing import List
->>>>>>> develop
 
 import pandas as pd
 import pydantic
@@ -222,7 +216,6 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
 @pytest.mark.unit
 def test_get_batch_list_from_partially_specified_batch_request(
-<<<<<<< f/great-1505/zep-dynamic-pandas-assets
     pandas_datasource, csv_path: Path
 ):
     # Verify test directory has files that don't match what we will query for
@@ -231,21 +224,6 @@ def test_get_batch_list_from_partially_specified_batch_request(
     assert any([file.suffix != "csv" for file in all_files])
     # assert there are 12 files from 2018
     files_for_2018 = [file for file in all_files if "2018" in file.name]
-=======
-    pandas_datasource: PandasDatasource, csv_path: pathlib.Path
-):
-    # Verify test directory has files that don't match what we will query for
-    file_name: PathStr
-    all_files: List[str] = [
-        file_name.stem for file_name in list(pathlib.Path(csv_path).iterdir())
-    ]
-    # assert there are files that are not csv files
-    assert any([not file_name.endswith("csv") for file_name in all_files])
-    # assert there are 12 files from 2018
-    files_for_2018 = [
-        file_name for file_name in all_files if file_name.find("2018") >= 0
-    ]
->>>>>>> develop
     assert len(files_for_2018) == 12
 
     asset = pandas_datasource.add_csv_asset(
@@ -256,11 +234,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     request = asset.get_batch_request({"year": "2018"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert (len(batches)) == 12
-<<<<<<< f/great-1505/zep-dynamic-pandas-assets
     batch_filenames = [Path(batch.metadata["path"]) for batch in batches]
-=======
-    batch_filenames = [pathlib.Path(batch.metadata["path"]).stem for batch in batches]
->>>>>>> develop
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)
@@ -302,26 +276,11 @@ def test_get_batch_list_from_partially_specified_batch_request(
         ["-month", "-year"],
     ],
 )
-<<<<<<< f/great-1505/zep-dynamic-pandas-assets
 def test_pandas_sorter(pandas_datasource, csv_path: Path, order_by):
     # Verify test directory has files we expect
     years = ["2018", "2019", "2020"]
     months = [format(m, "02d") for m in range(1, 13)]
     all_files = [p.name for p in csv_path.iterdir()]
-=======
-def test_pandas_sorter(
-    pandas_datasource: PandasDatasource,
-    csv_path: pathlib.Path,
-    order_by: BatchSortersDefinition,
-):
-    # Verify test directory has files we expect
-    years = ["2018", "2019", "2020"]
-    months = [format(m, "02d") for m in range(1, 13)]
-    file_name: PathStr
-    all_files: List[str] = [
-        file_name.stem for file_name in list(pathlib.Path(csv_path).iterdir())
-    ]
->>>>>>> develop
     # assert there are 12 files for each year
     for year in years:
         files_for_year = [
@@ -343,11 +302,7 @@ def test_pandas_sorter(
     @dataclass(frozen=True)
     class TimeRange:
         key: str
-<<<<<<< f/great-1505/zep-dynamic-pandas-assets
         range: list[int]
-=======
-        range: List[str]
->>>>>>> develop
 
     ordered_years = reversed(years) if "-year" in order_by else years
     ordered_months = reversed(months) if "-month" in order_by else months
