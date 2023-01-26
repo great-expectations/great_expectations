@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 import inspect
+import logging
+import pathlib
 from dataclasses import dataclass
 from pathlib import Path
+from pprint import pformat as pf
+from typing import Any
 
 import pandas as pd
 import pydantic
 import pytest
-from pytest import param
+from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
+import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.alias_types import PathStr
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources.interfaces import (
@@ -20,12 +25,59 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     PandasDatasource,
 )
 
+logger = logging.getLogger(__file__)
+
 # TODO: use this to parametrize `test_data_asset_defined_for_io_read_method`
 PANDAS_IO_METHODS: list[str] = [
     member_tuple[0]
     for member_tuple in inspect.getmembers(pd, predicate=inspect.isfunction)
     if member_tuple[0].startswith("read_")
 ]
+
+
+@pytest.fixture
+def pandas_datasource() -> PandasDatasource:
+    return PandasDatasource(name="pandas_datasource")
+
+
+@pytest.fixture
+def csv_path() -> pathlib.Path:
+    return pathlib.Path(
+        file_relative_path(
+            __file__,
+            pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples"),
+        )
+    )
+
+
+class SpyError(RuntimeError):
+    pass
+
+
+@pytest.fixture
+def capture_reader_fn_params(monkeypatch: MonkeyPatch):
+    """
+    Capture the `reader_options` arguments being passed to the `PandasExecutionEngine`.
+
+    Note this fixture is heavily reliant on the implementation details of `PandasExecutionEngine`,
+    should this change this fixture will need to change.
+    """
+    # NOTE: if
+    captured_kwargs: list[dict[str, Any]] = []
+
+    def reader_fn_spy(*args, **kwargs):
+        logging.info(f"reader_fn_spy() called with...\n{args}\n{kwargs}")
+        captured_kwargs.append(kwargs)
+        return kwargs
+
+    monkeypatch.setattr(
+        great_expectations.execution_engine.pandas_execution_engine.PandasExecutionEngine,
+        "_get_reader_fn",
+        reader_fn_spy,
+        raising=True,
+    )
+
+    yield captured_kwargs
 
 
 @pytest.mark.unit
@@ -80,23 +132,21 @@ class TestDynamicPandasAssets:
 
         assert type_name in asset_class_names
 
-    def test_data_asset_reader_options_passthrough(self):
-        raise NotImplementedError("create this test")
-
-
-@pytest.fixture
-def pandas_datasource() -> PandasDatasource:
-    return PandasDatasource(name="pandas_datasource")
-
-
-@pytest.fixture
-def csv_path() -> pathlib.Path:
-    return pathlib.Path(
-        file_relative_path(
-            __file__,
-            pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples"),
+    def test_data_asset_reader_options_passthrough(
+        self,
+        pandas_datasource: PandasDatasource,
+        csv_path: pathlib.Path,
+        capture_reader_fn_params: list[dict],
+    ):
+        pandas_datasource.add_csv_asset(
+            "foo",
+            data_path=csv_path,
+            regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+            sep="|",
+            decimal=",",
         )
-    )
+        print(pf(capture_reader_fn_params))
+        raise NotImplementedError("create this test")
 
 
 @pytest.mark.unit
