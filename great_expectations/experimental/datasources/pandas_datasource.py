@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
 from typing_extensions import ClassVar, Literal
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.experimental.datasources.csv_data_asset import CsvDataAsset
 from great_expectations.experimental.datasources.interfaces import (
