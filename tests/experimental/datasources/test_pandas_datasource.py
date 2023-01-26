@@ -53,7 +53,12 @@ def csv_path() -> pathlib.Path:
     )
 
 
-class SpyInterupt(RuntimeError):
+class SpyInterrupt(RuntimeError):
+    """
+    Exception that may be raised to interrupt the control flow of the program
+    when a spy has already captured everything needed.
+    """
+
     def __init__(self, message: str, captured=None) -> None:
         self.captured = captured
         super().__init__(message)
@@ -74,12 +79,14 @@ def capture_reader_fn_params(monkeypatch: MonkeyPatch):
         logging.info(f"reader_fn_spy() called with...\n{args}\n{kwargs}")
         captured_args.append(args)
         captured_kwargs.append(kwargs)
-        raise SpyInterupt("Spy is finished", {"args": args, "kwargs": kwargs})
+        raise SpyInterrupt(
+            "Reader options have been captured", {"args": args, "kwargs": kwargs}
+        )
 
     monkeypatch.setattr(
         great_expectations.execution_engine.pandas_execution_engine.PandasExecutionEngine,
         "_get_reader_fn",
-        reader_fn_spy,
+        lambda *_: reader_fn_spy,
         raising=True,
     )
 
@@ -155,12 +162,12 @@ class TestDynamicPandasAssets:
             )
             .get_batch_request({"year": "2018"})
         )
-        with pytest.raises(SpyInterupt):
+        with pytest.raises(SpyInterrupt):
             empty_data_context.get_validator(batch_request=batch_request)
 
         captured_args, captured_kwargs = capture_reader_fn_params
-        print(pf(captured_args))
-        print(pf(captured_kwargs))
+        print(f"positional args:\n{pf(captured_args[-1])}\n")
+        print(f"keyword args:\n{pf(captured_kwargs[-1])}")
 
         assert captured_kwargs[-1] == extra_kwargs
 
