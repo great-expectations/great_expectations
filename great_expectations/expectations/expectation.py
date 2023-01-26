@@ -2908,7 +2908,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
-
+        # this is hwere we are
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
@@ -2923,6 +2923,20 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
+            metric_kwargs = get_metric_kwargs(
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            validation_dependencies.set_metric_configuration(
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
+            )
+        # TODO : add spark and sql? or is it only Pandas
 
         return validation_dependencies
 

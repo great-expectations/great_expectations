@@ -36,6 +36,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
         for dir_ in os.listdir(dir_path)
         if os.path.isdir(os.path.join(dir_path, dir_))
     ]
+    expectation_dirs = ["column_pair_map_expectations"]
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
@@ -46,6 +47,9 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
+        test_configuration_files = [
+            f"{dir_path}/{expectation_category}/expect_column_pair_values_to_be_equal.json"
+        ]
         for c in backends:
             for filename in test_configuration_files:
                 file = open(filename)
@@ -91,7 +95,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 )
                             validator_with_data = datasets[0]
                         else:
-                            if expectation_category == "column_map_expectation":
+                            if expectation_category == "column_pair_map_expectations":
                                 pk_column: bool = True
 
                             schemas = d["schemas"] if "schemas" in d else None
