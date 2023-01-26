@@ -21,7 +21,10 @@ from great_expectations.data_context.data_context.serializable_data_context impo
     SerializableDataContext,
 )
 from great_expectations.data_context.types.base import GXCloudConfig
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import (
+    deprecated_argument,
+    public_api,
+)
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -64,6 +67,10 @@ def DataContext(
 # TODO: add additional overloads
 
 @public_api
+@deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
+@deprecated_argument(argument_name="ge_cloud_base_url", version="0.15.37")
+@deprecated_argument(argument_name="ge_cloud_access_token", version="0.15.37")
+@deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
 def DataContext(
     context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
