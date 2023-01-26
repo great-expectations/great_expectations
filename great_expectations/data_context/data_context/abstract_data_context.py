@@ -1646,8 +1646,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             ValueError: If more than one exclusive parameter is specified (ex: specifing more than one
                 of `batch_data`, `query` or `path`), or if the ExpectationSuite cannot be created or
                 retrieved using either the provided name or identifier
-
-        # noqa: DAR402
         """
         include_rendered_content = (
             self._determine_if_expectation_validation_result_include_rendered_content(
