@@ -97,11 +97,16 @@ def test_all_relevant_context_methods_emit_usage_stats(
         # and invoke the usage stats decorator without causing side-effects
         signature = inspect.signature(method)
         kwargs = {param: mock.Mock() for param in signature.parameters}
+        kwargs.pop("dry_run", None)
         method(**kwargs)
 
         mock_fn.assert_called_once()
 
     mock_calls = mock_emit.call_args_list
-    latest_call = mock_calls[-1]
+    assert len(mock_calls) == 2
+
+    init_call, latest_call = mock_calls
+    init_event = init_call.args[0]["event"]
     latest_event = latest_call.args[0]["event"]
+    assert init_event == UsageStatsEvents.DATA_CONTEXT___INIT__
     assert latest_event == expected_event
