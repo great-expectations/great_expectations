@@ -1039,11 +1039,9 @@ class UpdateDataDocsAction(ValidationAction):
     YAML configuration example:
 
     ```yaml
-
     - name: update_data_docs
     action:
       class_name: UpdateDataDocsAction
-
     ```
 
     You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
@@ -1154,7 +1152,6 @@ class SNSNotificationAction(ValidationAction):
     YAML configuration example:
 
         ```yaml
-
         - name: send_sns_notification_on_validation_result
         action:
           class_name: SNSNotificationAction
@@ -1163,7 +1160,6 @@ class SNSNotificationAction(ValidationAction):
           data_context:
           sns_topic_arn:
           sns_subject:
-
         ```
 
     Args:

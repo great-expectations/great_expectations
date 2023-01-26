@@ -54,8 +54,8 @@ class SetColumnMapMetricProvider(ColumnMapMetricProvider):
     ```python
 
     map_metric = SetBasedColumnMapExpectation.register_metric(
-        set_camel_name="SolfegeScale",
-        set_=["do", "re", "mi", "fa", "so", "la", "ti"],
+        set_camel_name='SolfegeScale',
+        set_=['do', 're', 'mi', 'fa', 'so', 'la', 'ti'],
     )
 
     ```
