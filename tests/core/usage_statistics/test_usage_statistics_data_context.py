@@ -96,8 +96,7 @@ def test_all_relevant_context_methods_emit_usage_stats(
         # Generate a set of dummy values to trigger the target method
         # and invoke the usage stats decorator without causing side-effects
         signature = inspect.signature(method)
-        kwargs = {param: mock.Mock() for param in signature.parameters}
-        kwargs.pop("dry_run", None)
+        kwargs = {param: None for param in signature.parameters}
         method(**kwargs)
 
         mock_fn.assert_called_once()
