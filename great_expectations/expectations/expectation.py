@@ -2912,6 +2912,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
+
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
