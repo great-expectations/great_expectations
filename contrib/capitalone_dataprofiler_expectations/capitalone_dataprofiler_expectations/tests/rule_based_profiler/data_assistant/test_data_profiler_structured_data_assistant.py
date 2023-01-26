@@ -195,7 +195,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
     ):
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
-    assert num_metrics == 14
+    assert num_metrics == 28
 
 
 @pytest.mark.integration
