@@ -25,7 +25,7 @@ import pandas as pd
 import pydantic
 
 # https://github.com/pandas-dev/pandas/blob/main/pandas/_typing.py
-from pandas._typing import CompressionOptions, CSVEngine, IndexLabel, StorageOptions
+from pandas._typing import CompressionOptions, IndexLabel, StorageOptions
 from pydantic import FilePath
 
 # from pydantic.typing import resolve_annotations
@@ -34,7 +34,7 @@ from typing_extensions import Final, Literal, TypeAlias
 from great_expectations.experimental.datasources.interfaces import DataAsset
 
 try:
-    from pandas._typing import CSVEngine  # noqa: F811 # redefinition of unused
+    from pandas._typing import CSVEngine
 except ImportError:
     CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]
 
