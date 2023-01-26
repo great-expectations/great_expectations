@@ -5,6 +5,7 @@ import logging
 from typing import Any, Callable, Dict, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
@@ -37,6 +38,7 @@ except ImportError:
     )
 
 
+@public_api
 class BatchDefinition(SerializableDictDot):
     """A BatchDefinition includes all the information required to precisely
     identify a set of data from the external data source that should be
