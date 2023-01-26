@@ -1605,10 +1605,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
-        """Retrieve a Validator with a Batch list and an Expectation Suite.
+        """Retrieve a Validator with a batch list and an `ExpectationSuite`.
 
         `get_validator` first calls `get_batch_list` to retrieve a batch list, then creates or retrieves
-        an ExpectationSuite used to validate the Batches in the list.
+        an `ExpectationSuite` used to validate the Batches in the list.
 
         Args:
             datasource_name: The name of the Datasource that defines the Data Asset to retrieve the batch for
@@ -1618,7 +1618,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_list: The List of Batches to use with the Validator
             batch_request: Encapsulates all the parameters used here to retrieve a BatchList. Use either
                 `batch_request` or the other params (but not both)
-            batch_request_list: A List of BatchRequest to use with the Validator
+            batch_request_list: A List of `BatchRequest` to use with the Validator
             batch_data: Provides runtime data for the batch; is added as the key `batch_data` to
                 the `runtime_parameters` dictionary of a BatchRequest
             query: Provides runtime data for the batch; is added as the key `query` to
@@ -1656,7 +1656,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             TypeError: If the specified types of the `batch_request` are not supported, or if the
                 `datasource_name` is not a `str`
             ValueError: If more than one exclusive parameter is specified (ex: specifing more than one
-                of `batch_data`, `query` or `path`), or if the ExpectationSuite cannot be created or
+                of `batch_data`, `query` or `path`), or if the `ExpectationSuite` cannot be created or
                 retrieved using either the provided name or identifier
         """
         include_rendered_content = (
