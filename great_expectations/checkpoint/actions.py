@@ -7,11 +7,12 @@ from __future__ import annotations
 
 import logging
 import warnings
-from typing import TYPE_CHECKING, Dict, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from typing_extensions import Final
 
 from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 
@@ -27,7 +28,6 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -1027,32 +1027,46 @@ class StoreMetricsAction(ValidationAction):
         )
 
 
+@public_api
+@deprecated_argument(
+    argument_name="target_site_names",
+    version="0.10.10",
+    message="target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
+)
 class UpdateDataDocsAction(ValidationAction):
-    """
-    UpdateDataDocsAction is a validation action that
-    notifies the site builders of all the data docs sites of the Data Context
-    that a validation result should be added to the data docs.
+    """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
 
-    **Configuration**
+    YAML configuration example:
 
-    .. code-block:: yaml
-
-        - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
+    ```yaml
+    - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+    ```
 
     You can also instruct ``UpdateDataDocsAction`` to build only certain sites by providing a ``site_names`` key with a
     list of sites to update:
 
-        - name: update_data_docs
-        action:
-          class_name: UpdateDataDocsAction
-          site_names:
-            - production_site
+    ```yaml
+    - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+      site_names:
+        - local_site
+    ```
 
+    Args:
+        data_context: Data Context that is used by the Action.
+        site_names: Optional. A list of the names of sites to update.
+        target_site_names: Optional. Deprecated. A list of the names of sites to update.
     """
 
-    def __init__(self, data_context, site_names=None, target_site_names=None) -> None:
+    def __init__(
+        self,
+        data_context: DataContext,
+        site_names: Optional[Union[List[str], str]] = None,
+        target_site_names: Optional[Union[List[str], str]] = None,
+    ) -> None:
         """
         :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
@@ -1131,14 +1145,36 @@ class UpdateDataDocsAction(ValidationAction):
         return data_docs_validation_results
 
 
+@public_api
 class SNSNotificationAction(ValidationAction):
-    """
-    Action that pushes validations results to an SNS topic with a subject of passed or failed.
+    """Action that pushes validations results to an SNS topic with a subject of passed or failed.
+
+    YAML configuration example:
+
+        ```yaml
+        - name: send_sns_notification_on_validation_result
+        action:
+          class_name: SNSNotificationAction
+          # put the actual SNS Arn in the uncommitted/config_variables.yml file
+          # or pass in as environment variable
+          data_context:
+          sns_topic_arn:
+          sns_subject:
+        ```
+
+    Args:
+        data_context: Data Context that is used by the Action.
+        sns_topic_arn: The SNS Arn to publish messages to.
+        sns_subject: Optional. The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name.
     """
 
     def __init__(
-        self, data_context: DataContext, sns_topic_arn: str, sns_message_subject
+        self,
+        data_context: DataContext,
+        sns_topic_arn: str,
+        sns_message_subject: Optional[str],
     ) -> None:
+        """Inits SNSNotificationAction."""
         super().__init__(data_context)
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
