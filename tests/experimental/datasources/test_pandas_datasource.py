@@ -15,11 +15,7 @@ from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
-from great_expectations.alias_types import PathStr
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.experimental.datasources.interfaces import (
-    BatchSortersDefinition,
-)
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     PandasDatasource,
