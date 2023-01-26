@@ -30,6 +30,7 @@ from great_expectations._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import convert_to_json_serializable
@@ -249,7 +250,38 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
+@public_api
 class SqlAlchemyExecutionEngine(ExecutionEngine):
+    """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
+
+    Constructor builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to \
+    access the desired database.
+
+    Also initializes the dialect to be used.
+
+    Args:
+        name (str): The name of the SqlAlchemyExecutionEngine
+        credentials: If the Execution Engine is not provided, the credentials can be used to build the \
+            ExecutionEngine object. If the Engine is provided, it will be used instead.
+        data_context (DataContext): An object representing a Great Expectations project that can be used to \
+            access ExpectationSuite objects and the Project Data itself.
+        engine (Engine): A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, \
+            useful if an Engine has already been configured and should be reused. Will override Credentials if \
+            provided.
+        connection_string (string): If neither the engines nor the credentials have been provided, a \
+            connection string can be used to access the data. This will be overridden by both the engine and \
+            credentials if those are provided.
+        url (string): If neither the engines, the credentials, nor the connection_string have been provided, a \
+            URL can be used to access the data. This will be overridden by all other configuration options if \
+            any are provided.
+        concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.
+
+    For example:
+    ```python
+        execution_engine: ExecutionEngine = SqlAlchemyExecutionEngine(connection_string="dbmstype://user:password@host:5432/database_name")
+    ```
+    """
+
     # noinspection PyUnusedLocal
     def __init__(  # noqa: C901 - 17
         self,
@@ -264,32 +296,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         concurrency: Optional[ConcurrencyConfig] = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
     ) -> None:
-        """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
-        desired database. Also initializes the dialect to be used and configures usage statistics.
-
-            Args:
-                name (str): \
-                    The name of the SqlAlchemyExecutionEngine
-                credentials: \
-                    If the Execution Engine is not provided, the credentials can be used to build the Execution
-                    Engine. If the Engine is provided, it will be used instead
-                data_context (DataContext): \
-                    An object representing a Great Expectations project that can be used to access Expectation
-                    Suites and the Project Data itself
-                engine (Engine): \
-                    A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
-                    Engine has already been configured and should be reused. Will override Credentials
-                    if provided.
-                connection_string (string): \
-                    If neither the engines nor the credentials have been provided, a connection string can be used
-                    to access the data. This will be overridden by both the engine and credentials if those are
-                    provided.
-                url (string): \
-                    If neither the engines, the credentials, nor the connection_string have been provided,
-                    a url can be used to access the data. This will be overridden by all other configuration
-                    options if any are provided.
-                concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.
-        """
         super().__init__(name=name, batch_data_dict=batch_data_dict)
         self._name = name
 
@@ -553,19 +559,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             create_engine_kwargs,
         )
 
+    @public_api
     def get_domain_records(  # noqa: C901 - 24
         self,
         domain_kwargs: dict,
     ) -> Selectable:
-        """
-        Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
-        obtain and/or query a batch. Returns in the format of an SqlAlchemy table/column(s) object.
+        """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a Batch of data.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_kwargs (dict) - A dictionary consisting of the Domain kwargs specifying which data to obtain
 
         Returns:
-            An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute)
+            An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute returned in the format of an SqlAlchemy table/column(s) object)
         """
         data_object: SqlAlchemyBatchData
 
@@ -780,22 +785,23 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return selectable
 
+    @public_api
     def get_compute_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[Selectable, dict, dict]:
-        """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
+        """Uses a given batch dictionary and Domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_kwargs (dict): a dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like \
+            to be using, or a corresponding string value representing it.  String types include "identity", "column", \
+            "column_pair", "table" and "other".  Enum types include capitalized versions of these from the class \
+            MetricDomainTypes.
+            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when \
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             SqlAlchemy column
@@ -813,11 +819,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for column Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -853,11 +859,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for column pair Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -899,11 +905,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for multicolumn Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -958,7 +964,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         res: List[Row]
 
-        # We need a different query for each domain (where clause).
+        # We need a different query for each Domain (where clause).
         queries: Dict[Tuple[str, str, str], dict] = {}
 
         query: dict
