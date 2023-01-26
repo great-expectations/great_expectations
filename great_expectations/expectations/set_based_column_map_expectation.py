@@ -52,12 +52,10 @@ class SetColumnMapMetricProvider(ColumnMapMetricProvider):
     Metric Registration Example:
 
     ```python
-
     map_metric = SetBasedColumnMapExpectation.register_metric(
         set_camel_name='SolfegeScale',
         set_=['do', 're', 'mi', 'fa', 'so', 'la', 'ti'],
     )
-
     ```
 
     In some cases, subclasses of MetricProvider, such as SetColumnMapMetricProvider, will already
@@ -95,16 +93,14 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     Example Definition:
 
     ```python
-
     ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
         set_camel_name = SolfegeScale
-        set_ = ["do", "re", "mi", "fa", "so", "la", "ti"]
+        set_ = ['do', 're', 'mi', 'fa', 'so', 'la', 'ti']
         set_semantic_name = "the Solfege scale"
         map_metric = SetBasedColumnMapExpectation.register_metric(
             set_camel_name=set_camel_name,
             set_=set_
     )
-
     ```
 
     Attributes:
