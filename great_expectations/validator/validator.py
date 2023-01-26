@@ -1406,7 +1406,7 @@ class Validator:
         )
 
     @public_api
-    def get_expectation_suite(  # noqa: C901 - complexit 17
+    def get_expectation_suite(  # noqa: C901 - complexity 17
         self,
         discard_failed_expectations: bool = True,
         discard_result_format_kwargs: bool = True,
