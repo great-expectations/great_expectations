@@ -1871,7 +1871,6 @@ def _pandas_map_condition_index(
         metrics=metrics,
         expectation_domain_column_name=expectation_domain_column_name,
     )
-    # breakpoint()
     if result_format["result_format"] == "COMPLETE":
         return unexpected_index_list
     return unexpected_index_list[: result_format["partial_unexpected_count"]]
@@ -1898,7 +1897,6 @@ def _pandas_map_condition_query(
     return_unexpected_index_query: bool = result_format.get(
         "return_unexpected_index_query"
     )
-    # breakpoint()
 
     if return_unexpected_index_query is False:
         return
@@ -1937,9 +1935,6 @@ def _pandas_map_condition_query(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
     domain_values_df_filtered = domain_records_df[boolean_mapped_unexpected_values]
-    # i think this is all going to work
-    print("query")
-    print(domain_values_df_filtered.index.to_list())
     return domain_values_df_filtered.index.to_list()
 
 
