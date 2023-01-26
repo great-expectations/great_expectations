@@ -234,7 +234,6 @@ class PandasDatasource(Datasource):
             name: The name of the csv asset
             data_path: Path to directory with csv files
             regex: regex pattern that matches csv filenames that is used to label the batches
-<<<<<<< f/great-1505/zep-dynamic-pandas-assets
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         asset = CSVAsset(  # type: ignore[call-arg] # type has a default??
@@ -311,9 +310,6 @@ class PandasDatasource(Datasource):
             data_path: Path to directory with csv files
             regex: regex pattern that matches csv filenames that is used to label the batches
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
-=======
-            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
->>>>>>> develop
         """
         asset = ParquetAsset(  # type: ignore[call-arg] # type has a default??
             name=name,
