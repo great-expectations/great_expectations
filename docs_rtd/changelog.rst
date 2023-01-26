@@ -7,7 +7,7 @@ Changelog
 0.15.45
 -----------------
 * [FEATURE] Experimental datasources `batch.head()` ([#6765](https://github.com/great-expectations/great_expectations/pull/6765))
-* [FEATURE] Add Validation Result URL to Checkpoint Result ([#6908](https://github.com/great-expectations/great_expectations/pull/6908)) (thanks @josectobar)
+* [FEATURE] Add Validation Result URL to Checkpoint Result ([#6908](https://github.com/great-expectations/great_expectations/pull/6908))
 * [BUGFIX] Fix issues rendering code blocks in API docs ([#6917](https://github.com/great-expectations/great_expectations/pull/6917))
 * [BUGFIX] Fix list_keys method for TupleS3StoreBackend ([#6901](https://github.com/great-expectations/great_expectations/pull/6901)) (thanks @enagovitsyn)
 * [BUGFIX] Fix rendering issue with api docs ([#6924](https://github.com/great-expectations/great_expectations/pull/6924))
@@ -61,7 +61,7 @@ Changelog
 * [MAINTENANCE] add validate_configuration docstring ([#6857](https://github.com/great-expectations/great_expectations/pull/6857))
 * [MAINTENANCE] docstring for expect_column_values_to_not_be_null#validate_configuration ([#6859](https://github.com/great-expectations/great_expectations/pull/6859))
 * [MAINTENANCE] Standardize project config CRUD ([#6837](https://github.com/great-expectations/great_expectations/pull/6837))
-* [MAINTENANCE] update docstring in validator.py and checkpoint_result.py ([#6875](https://github.com/great-expectations/great_expectations/pull/6875)) (thanks @allensallinger)
+* [MAINTENANCE] update docstring in validator.py and checkpoint_result.py ([#6875](https://github.com/great-expectations/great_expectations/pull/6875))
 * [MAINTENANCE] updated docstring on validate configuration ([#6871](https://github.com/great-expectations/great_expectations/pull/6871))
 * [MAINTENANCE] Exclude unit tests from `comprehensive` stage of `dev` CI ([#6903](https://github.com/great-expectations/great_expectations/pull/6903))
 * [MAINTENANCE] Refactor `file_relative_path` util ([#6778](https://github.com/great-expectations/great_expectations/pull/6778))
@@ -71,11 +71,11 @@ Changelog
 * [MAINTENANCE] Add exception message to `RenderedAtomicContent` failure renderer ([#6795](https://github.com/great-expectations/great_expectations/pull/6795))
 * [MAINTENANCE] Remove CloudNotificationAction ([#6881](https://github.com/great-expectations/great_expectations/pull/6881))
 * [MAINTENANCE] Use ruff linter for docstring linting ([#6913](https://github.com/great-expectations/great_expectations/pull/6913))
-* [MAINTENANCE] Add validate_configuration method docstrings ([#6899](https://github.com/great-expectations/great_expectations/pull/6899)) (thanks @elenajdanova)
+* [MAINTENANCE] Add validate_configuration method docstrings ([#6899](https://github.com/great-expectations/great_expectations/pull/6899))
 * [MAINTENANCE] docstring for expect_column_values_to_not_match_like_pattern_list's validate_configuration ([#6874](https://github.com/great-expectations/great_expectations/pull/6874))
 * [MAINTENANCE] docstring for expect_column_values_to_not_match_like_pattern validate_configuration ([#6876](https://github.com/great-expectations/great_expectations/pull/6876))
 * [MAINTENANCE] docstring for expect_compound_columns_to_be_unique validate_configuration ([#6878](https://github.com/great-expectations/great_expectations/pull/6878))
-* [MAINTENANCE] Add docstrings for Validator and its save_expectation_suite and validate methods ([#6885](https://github.com/great-expectations/great_expectations/pull/6885)) (thanks @wookasz)
+* [MAINTENANCE] Add docstrings for Validator and its save_expectation_suite and validate methods ([#6885](https://github.com/great-expectations/great_expectations/pull/6885))
 * [MAINTENANCE] Type Hints Correction in New Datasources; Additional DocStrings ([#6918](https://github.com/great-expectations/great_expectations/pull/6918))
 
 0.15.44
