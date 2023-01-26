@@ -101,6 +101,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "filepath": {"path": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},
+    "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
@@ -214,14 +215,14 @@ def _to_pydantic_fields(
         no_annotation: bool = param.annotation is inspect._empty
         if no_annotation:
             logger.debug(f"`{param_name}` has no type annotation")
-            FIELD_SKIPPED_NO_ANNOTATION.add(param_name)
-            continue
-        type_ = _get_annotation_type(param)
-        if type_ is UNSUPPORTED_TYPE or type_ == "None":
-            logger.debug(f"`{param_name}` has no supported types. Field skipped")
-            FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
-            continue
-            # type_ = Any
+            FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
+            type_ = Any
+        else:
+            type_ = _get_annotation_type(param)
+            if type_ is UNSUPPORTED_TYPE or type_ == "None":
+                logger.debug(f"`{param_name}` has no supported types. Field skipped")
+                FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
+                continue
 
         substitution = FIELD_SUBSTITUTIONS.get(param_name)
         if substitution:
