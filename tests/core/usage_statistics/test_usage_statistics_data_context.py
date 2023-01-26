@@ -95,4 +95,7 @@ def test_all_relevant_context_methods_emit_usage_stats(
         except Exception:
             pass
 
-        assert mock_emit.call_args_list[-1].args[0]["event"] == expected_event
+        mock_calls = mock_emit.call_args_list
+        latest_call = mock_calls[-1]
+        latest_event = latest_call.args[0]["event"]
+        assert latest_event == expected_event
