@@ -723,23 +723,25 @@ class AbstractDataContext(ConfigPeer, ABC):
         save_changes: bool | None = None,
     ) -> None:
         """
-        Updates a DatasourceConfig that already exists in the store.
+        Updates a Datasource that already exists in the store.
 
         Args:
-            datasource_config: The config object to persist using the DatasourceStore.
+            datasource: The Datasource object to update.
             save_changes: do I save changes to disk?
         """
         save_changes = self._determine_save_changes_flag(save_changes)
-        self._update_datasource(
-            name=datasource.name, config=datasource.config, save_changes=save_changes
-        )
+        self._update_datasource(datasource=datasource, save_changes=save_changes)
 
     def _update_datasource(
         self,
-        name: str,
-        config: dict,
+        datasource: Union[LegacyDatasource, BaseDatasource],
         save_changes: bool | None = None,
     ) -> Datasource:
+        name = datasource.name
+        config = datasource.config
+        # `instantiate_class_from_config` requires `class_name`
+        config["class_name"] = datasource.__class__.__name__
+
         datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
 
@@ -779,21 +781,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if existing_datasource:
-            updated_datasource_config = copy.deepcopy(existing_datasource.config)
-            # `instantiate_class_from_config` requires `class_name`
-            updated_datasource_config[
-                "class_name"
-            ] = existing_datasource.__class__.__name__
-            updated_datasource_config.update(kwargs)
-            result_datasource = self._update_datasource(
-                name=name, config=updated_datasource_config
-            )
+            result_datasource = self.update_datasource(datasource=existing_datasource)
         else:
             result_datasource = self.add_datasource(name=name, **kwargs)
 
-        assert (
-            result_datasource is not None
-        )  # Invariant based on `initialize=True` in both add/update branches
+        # Invariant based on `initialize=True` in both add/update branches
+        assert result_datasource is not None
+
         self._save_project_config()
         return result_datasource
 
