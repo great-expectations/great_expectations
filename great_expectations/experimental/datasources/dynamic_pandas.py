@@ -5,7 +5,7 @@ import re
 import sys
 from collections import defaultdict
 from pprint import pformat as pf
-from typing import (  # type: ignore[attr-defined]
+from typing import (  # _eval_type,
     Any,
     Callable,
     Dict,
@@ -19,12 +19,11 @@ from typing import (  # type: ignore[attr-defined]
     Type,
     TypeVar,
     Union,
-    _eval_type,
 )
 
 import pandas as pd
 import pydantic
-from pandas._typing import DtypeArg
+from pandas._typing import CompressionOptions, CSVEngine, IndexLabel, StorageOptions
 from pydantic import FilePath
 
 # from pydantic.typing import resolve_annotations
@@ -71,7 +70,12 @@ CAN_HANDLE: Final[Set[str]] = {
     "Pattern",  # re
     "Path",  # pathlib
     "FilePath",  # pydantic
-    "DtypeArg",  # pandas
+    # pandas
+    "DtypeArg",
+    "CSVEngine",
+    "IndexLabel",
+    "CompressionOptions",
+    "StorageOptions",
 }
 
 NEED_SPECIAL_HANDLING: Dict[str, Set[str]] = defaultdict(set)
@@ -96,6 +100,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "path_or_buf": {"path": _FieldSpec(pathlib.Path, ...)},
     "filepath": {"path": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},
+    "dialect": {"dialect": _FieldSpec(Optional[str], None)},
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
@@ -110,6 +115,10 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "Hashable": Hashable,
     "FilePath": FilePath,
     "Pattern": re.Pattern,
+    "CSVEngine": CSVEngine,
+    "IndexLabel": IndexLabel,
+    "CompressionOptions": CompressionOptions,
+    "StorageOptions": StorageOptions,
 }
 
 
