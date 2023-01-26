@@ -2362,35 +2362,38 @@ representation."""
         return {"success": success, "result": {"observed_value": metric_value}}
 
 
+@public_api
 class QueryExpectation(TableExpectation, ABC):
     """Base class for QueryExpectations.
 
-     QueryExpectations *must* have the following attributes set:
-         1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
-            expectation
-         2. `success_keys`: a tuple of the *keys* used to determine the success of
+    QueryExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
+
+    QueryExpectations must implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
+
+    Query Expectations may optionally provide implementations of:
+
+    1. `validate_configuration`, which should raise an error if the configuration will not be usable for the Expectation.
+
+    2. Data Docs rendering methods decorated with the @renderer decorator.
+
+    QueryExpectations may optionally define a `query` attribute, and specify that query as a default in `default_kwarg_values`.
+
+    Doing so precludes the need to pass a query into the Expectation. This default will be overridden if a query is passed in.
+
+    Args:
+        domain_keys (tuple): A tuple of the keys used to determine the domain of the
+            expectation.
+        success_keys (tuple): A tuple of the keys used to determine the success of
             the expectation.
-
-    QueryExpectations *may* specify a `query` attribute, and specify that query in `default_kwarg_values`.
-    Doing so precludes the need to pass a query into the Expectation, but will override the default query if a query
-    is passed in.
-
-     They *may* optionally override `runtime_keys` and `default_kwarg_values`;
-         1. runtime_keys lists the keys that can be used to control output but will
+        runtime_keys (optional[tuple]): Optional. A tuple of the keys that can be used to control output but will
             not affect the actual success value of the expectation (such as result_format).
-         2. default_kwarg_values is a dictionary that will be used to fill unspecified
+        default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
             kwargs from the Expectation Configuration.
-
-     QueryExpectations *must* implement the following:
-         1. `_validate`
-
-     Additionally, they *may* provide implementations of:
-         1. `validate_configuration`, which should raise an error if the configuration
-            will not be usable for the Expectation
-         2. Data Docs rendering methods decorated with the @renderer decorator. See the
+        query (optional[str]): Optional. A SQL or Spark-SQL query to be executed. If not provided, a query must be passed
+            into the QueryExpectation.
     """
 
-    default_kwarg_values = {
+    default_kwarg_values: Dict = {
         "result_format": "BASIC",
         "include_config": True,
         "catch_exceptions": False,
@@ -2399,7 +2402,7 @@ class QueryExpectation(TableExpectation, ABC):
         "condition_parser": None,
     }
 
-    domain_keys = (
+    domain_keys: Tuple = (
         "batch_id",
         "row_condition",
         "condition_parser",
