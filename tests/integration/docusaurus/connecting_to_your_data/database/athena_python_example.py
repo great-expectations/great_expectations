@@ -22,29 +22,8 @@ connection_string = f"awsathena+rest://@athena.us-east-1.amazonaws.com/{ATHENA_D
 
 # create datasource and add to DataContext
 context = gx.get_context()
-# <snippet name="tests/integration/db/awsathena.py Datasource YAML config">
-datasource_yaml = f"""
-name: my_awsathena_datasource
-class_name: Datasource
-execution_engine:
-  class_name: SqlAlchemyExecutionEngine
-  module_name: great_expectations.execution_engine
-  connection_string: {connection_string}
-data_connectors:
-  default_runtime_data_connector_name:
-    class_name: RuntimeDataConnector
-    batch_identifiers:
-      - default_identifier_name
-    module_name: great_expectations.datasource.data_connector
-  default_inferred_data_connector_name:
-    class_name: InferredAssetSqlDataConnector
-    module_name: great_expectations.datasource.data_connector
-    include_schema_name: true
-"""
-# </snippet>
-context.test_yaml_config(datasource_yaml)
 
-# <snippet name="tests/integration/db/awsathena.py Datasource dict config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Datasource dict config">
 datasource_dict = {
     "name": "my_awsathena_datasource",
     "class_name": "Datasource",
@@ -67,17 +46,18 @@ datasource_dict = {
     },
 }
 # </snippet>
+
 context.test_yaml_config(yaml.dump(datasource_dict))
 
-# <snippet name="tests/integration/db/awsathena.py Create Datasource from YAML>
-context.add_datasource(**yaml.load(datasource_yaml))
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Create Datasource from dict">
+context.add_datasource(**datasource_dict)
 # </snippet>
 
 # clean db to prepare for test
 clean_athena_db(connection_string, ATHENA_DB_NAME, "taxitable")
 
 # Test 1 : temp_table is not created (default)
-# <snippet name="tests/integration/db/awsathena.py Batch Request">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Batch Request">
 batch_request = {
     "datasource_name": "my_awsathena_datasource",
     "data_connector_name": "default_inferred_data_connector_name",
@@ -86,7 +66,7 @@ batch_request = {
 }
 # </snippet>
 
-# <snippet name="tests/integration/db/awsathena.py Create Expectation Suite">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Create Expectation Suite">
 expectation_suite_name = "my_awsathena_expectation_suite"
 try:
     suite = context.get_expectation_suite(expectation_suite_name=expectation_suite_name)
@@ -100,7 +80,7 @@ except DataContextError:
     print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
 # </snippet>
 
-# <snippet name="tests/integration/db/awsathena.py Test Datasource with Validator">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py Test Datasource with Validator">
 validator = context.get_validator(
     batch_request=BatchRequest(**batch_request),
     expectation_suite_name=expectation_suite_name,
