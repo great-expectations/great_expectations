@@ -7,11 +7,11 @@ import pytest
 import sqlalchemy
 from pydantic import ValidationError
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
-    BatchRequestError,
     BatchRequestOptions,
     BatchSorter,
 )
@@ -381,7 +381,7 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
         )
         with pytest.raises(
             (
-                BatchRequestError,
+                ge_exceptions.InvalidBatchRequestError,
                 LookupError,
             )
         ):
@@ -434,7 +434,7 @@ def test_get_batch_list_from_batch_request_with_malformed_batch_request(
             data_asset_name=ast or asset.name,
             options=op or {},
         )
-        with pytest.raises(BatchRequestError):
+        with pytest.raises(ge_exceptions.InvalidBatchRequestError):
             asset.get_batch_list_from_batch_request(batch_request)
 
 
@@ -444,7 +444,7 @@ def test_get_bad_batch_request(create_source):
     ) as source:
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter(column_name="my_col")
-        with pytest.raises(BatchRequestError):
+        with pytest.raises(ge_exceptions.InvalidBatchRequestError):
             asset.get_batch_request({"invalid_key": None})
 
 
