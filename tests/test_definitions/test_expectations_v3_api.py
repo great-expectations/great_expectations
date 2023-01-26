@@ -47,9 +47,10 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
         )
         for c in backends:
             for filename in test_configuration_files:
+                pk_column: bool = False
                 file = open(filename)
                 test_configuration = json.load(file)
-                pk_column: bool = False
+
                 for d in test_configuration["datasets"]:
                     datasets = []
                     # optional only_for and suppress_test flag at the datasets-level that can prevent data being

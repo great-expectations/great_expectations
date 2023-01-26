@@ -1871,6 +1871,7 @@ def _pandas_map_condition_index(
         metrics=metrics,
         expectation_domain_column_name=expectation_domain_column_name,
     )
+
     if result_format["result_format"] == "COMPLETE":
         return unexpected_index_list
     return unexpected_index_list[: result_format["partial_unexpected_count"]]
@@ -1897,7 +1898,6 @@ def _pandas_map_condition_query(
     return_unexpected_index_query: bool = result_format.get(
         "return_unexpected_index_query"
     )
-
     if return_unexpected_index_query is False:
         return
 
@@ -1910,7 +1910,6 @@ def _pandas_map_condition_query(
     domain_records_df: pd.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
     )
-
     if "column" in accessor_domain_kwargs:
         column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
