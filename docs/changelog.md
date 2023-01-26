@@ -24,7 +24,7 @@ title: Changelog
 * [DOCS] Add public API docstring for `expect_column_values_to_be_of_type` `validate_configuration` ([#6896](https://github.com/great-expectations/great_expectations/pull/6896))
 * [DOCS] Add public API docstring for `JsonSchemaProflier.validate` ([#6900](https://github.com/great-expectations/great_expectations/pull/6900))
 * [DOCS] Exclude DataAssistantRunner.run() ([#6919](https://github.com/great-expectations/great_expectations/pull/6919))
-* [DOCS] StoreValidationResultAction, StoreEvaluationParametersAction and StoreMetricsAction api docs ([#6879](https://github.com/great-expectations/great_expectations/pull/6879)) (thanks @josectobar)
+* [DOCS] StoreValidationResultAction, StoreEvaluationParametersAction and StoreMetricsAction api docs ([#6879](https://github.com/great-expectations/great_expectations/pull/6879))
 * [DOCS] Add public API docstring for `expect_column_values_to_be_dateutil_parseable` `validate_configuration` ([#6864](https://github.com/great-expectations/great_expectations/pull/6864))
 * [DOCS] YAML docs ([#6861](https://github.com/great-expectations/great_expectations/pull/6861))
 * [DOCS] Add public API docstring for `expect_column_values_to_be_decreasing` `validate_configuration` ([#6865](https://github.com/great-expectations/great_expectations/pull/6865))
