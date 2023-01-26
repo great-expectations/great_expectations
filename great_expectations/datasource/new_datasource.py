@@ -264,14 +264,15 @@ class BaseDatasource:
 
         Returns:
             dictionary consisting of sets of data assets available for the specified data connectors:
-            ::
 
-                {
-                  data_connector_name: {
-                    names: [ data_asset_1, data_asset_2 ... ]
-                  }
-                  ...
-                }
+            ```python
+            {
+              data_connector_name: {
+                names: [ data_asset_1, data_asset_2 ... ]
+              }
+              ...
+            }
+            ```
         """
         available_data_asset_names: dict = {}
         if data_connector_names is None:
