@@ -4,7 +4,7 @@ import pathlib
 import re
 from collections import defaultdict
 from pprint import pformat as pf
-from typing import (  # _eval_type,
+from typing import (
     Any,
     Callable,
     Dict,
@@ -128,12 +128,15 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "StorageOptions": StorageOptions,
 }
 
-# TODO: make these a generator pipeline
+# TODO: make these functions a generator pipeline
 
 
-def _extract_io_methods() -> List[Tuple[str, DataFrameFactoryFn]]:
-    # TODO: use blacklist/whitelist?
+def _extract_io_methods(
+    whitelist: Optional[Sequence[str]] = None,
+) -> List[Tuple[str, DataFrameFactoryFn]]:
     member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
+    if whitelist:
+        return [t for t in member_functions if t[0] in whitelist]
     return [t for t in member_functions if t[0].startswith("read_")]
 
 
@@ -143,7 +146,6 @@ def _extract_io_signatures(
     signatures = []
     for name, method in io_methods:
         sig = inspect.signature(method)
-        # print(f"  {name} -> {sig.return_annotation}\n{sig}\n")
         signatures.append(_SignatureTuple(name, sig))
     return signatures
 
@@ -151,7 +153,6 @@ def _extract_io_signatures(
 def _get_default_value(
     param: inspect.Parameter,
 ) -> object:
-    # print(param.name, param.default)
     if param.default is inspect.Parameter.empty:
         default = ...
     else:
@@ -166,7 +167,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     # TODO: parse the annotation string
     annotation = param.annotation
     if not isinstance(annotation, str):
-        print(type(annotation), annotation)
+        logger.debug(type(annotation), annotation)
         return annotation
 
     types: list = []
@@ -185,7 +186,6 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
         str_to_eval = f"Union[{', '.join(types)}]"
     else:
         str_to_eval = types[0]
-    # print(f"{str_to_eval=}")
     return str_to_eval
 
 
@@ -238,9 +238,9 @@ def _create_pandas_asset_model(
 
 
 def _generate_data_asset_models(
-    base_model_class: Type[M],
+    base_model_class: Type[M], whitelist: Optional[Sequence[str]] = None
 ) -> Dict[str, Type[M]]:
-    io_methods = _extract_io_methods()[:]
+    io_methods = _extract_io_methods(whitelist)
     io_method_sigs = _extract_io_signatures(io_methods)
 
     models: Dict[str, Type[M]] = {}
@@ -260,13 +260,13 @@ def _generate_data_asset_models(
                 type_field=(f"Literal['{type_name}']", type_name),
                 fields_dict=fields,
             )
-            print(f"{model_name}\n{pf(fields)}")
+            logger.debug(f"{model_name}\n{pf(fields)}")
         except NameError as err:
-            logger.exception(err)
+            logger.debug(f"{model_name} - {type(err).__name__}:{err}")
             continue
         models[type_name] = model
         model.update_forward_refs(**_TYPE_REF_LOCALS)
 
-    print(f"\nNeeds extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")
-    print(f"\nNo Annotation\n{FIELD_SKIPPED_NO_ANNOTATION}")
+    logger.debug(f"Needs extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")
+    logger.debug(f"No Annotation\n{FIELD_SKIPPED_NO_ANNOTATION}")
     return models
