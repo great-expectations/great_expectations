@@ -278,7 +278,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     For example:
     ```python
-        execution_engine: ExecutionEngine = SqlAlchemyExecutionEngine(connection_string="postgresql+psycopg2://user:password@host:5432/database_name")
+        execution_engine: ExecutionEngine = SqlAlchemyExecutionEngine(connection_string="dbmstype://user:password@host:5432/database_name")
     ```
     """
 
