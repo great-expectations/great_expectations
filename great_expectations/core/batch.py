@@ -5,6 +5,7 @@ import logging
 from typing import Any, Callable, Dict, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
@@ -533,7 +534,36 @@ BatchDataType = Union[BatchData, pd.DataFrame, SparkDataFrame]
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
 #  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
 # TODO: <Alex>See also "great_expectations/datasource/types/batch_spec.py".</Alex>
+@deprecated_argument(argument_name="data_context", version="0.14.0")
+@deprecated_argument(argument_name="datasource_name", version="0.14.0")
+@deprecated_argument(argument_name="batch_parameters", version="0.14.0")
+@deprecated_argument(argument_name="batch_kwargs", version="0.14.0")
 class Batch(SerializableDictDot):
+    """A Batch is a selection of records from a Data Asset.
+
+    A Datasource produces Batch objects to interact directly with data. Creating
+    a Batch does NOT require moving data; the Batch facilitates access to the
+    data and maintains metadata.
+
+    ---Documentation---
+            - https://docs.greatexpectations.io/docs/terms/batch/
+
+    Args:
+        data: A BatchDataType object which interacts directly with the
+            ExecutionEngine.
+        batch_request: BatchRequest that was used to obtain the data.
+        batch_definition: Complete BatchDefinition that describes the data.
+        batch_spec: Complete BatchSpec that describes the data.
+        batch_markers: Additional metadata that may be useful to understand
+            batch.
+        data_context: DataContext connected to the
+        datasource_name: name of datasource used to obtain the batch
+        batch_parameters: keyword arguments describing the batch data
+        batch_kwargs: keyword arguments used to request a batch from a Datasource
+
+    Returns:
+        Batch instance created.
+    """
     def __init__(
         self,
         data: Optional[BatchDataType] = None,
