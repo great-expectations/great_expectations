@@ -102,6 +102,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},
+    "skiprows": {"skiprows": _FieldSpec(Union[Sequence[int], int, None], None)},
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
