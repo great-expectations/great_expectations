@@ -100,7 +100,9 @@ def get_user_friendly_error_message(
             support_message.append(json.dumps(errors))
 
     except json.JSONDecodeError:
-        support_message.append(f"Please contact superconductive at {SUPPORT_EMAIL}")
+        support_message.append(
+            f"Please contact the Great Expectations team at {SUPPORT_EMAIL}"
+        )
     return " ".join(support_message)
 
 

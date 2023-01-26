@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from time import strptime
 from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -78,9 +79,9 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
         # get counts for dates
         query = (
             sa.select([sa.func.Date(column), sa.func.count()])
-            .group_by(column)
+            .group_by(sa.func.Date(column))
             .select_from(selectable)
-            .order_by(column.desc())
+            .order_by(sa.func.Date(column).desc())
             .limit(30)
         )
         results = sqlalchemy_engine.execute(query).fetchall()
@@ -115,6 +116,17 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                         DAYS_AGO[28]: 3,
                     }
                 ),
+                "column_datetime": generate_data_sample(
+                    {
+                        TODAY: 3,
+                        DAYS_AGO[7]: 2,
+                        DAYS_AGO[7].replace(hour=11): 1,
+                        DAYS_AGO[14]: 2,
+                        DAYS_AGO[14].replace(hour=10, minute=40): 1,
+                        DAYS_AGO[21]: 3,
+                        DAYS_AGO[28]: 3,
+                    }
+                ),
                 "column_current_zero": generate_data_sample(
                     {
                         TODAY: 0,
@@ -134,7 +146,6 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                     }
                 ),
             },
-            # "column_b": [today, yesterday, yesterday, two_days_ago]},
             "tests": [
                 {
                     "title": "positive test",
@@ -142,6 +153,17 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                     "include_in_gallery": False,
                     "in": {
                         "column": "column_a",
+                        "run_date": TODAY_STR,
+                        "threshold": default_kwarg_values["threshold"],
+                    },
+                    "out": {"success": True},
+                },
+                {
+                    "title": "positive test",
+                    "exact_match_out": False,
+                    "include_in_gallery": False,
+                    "in": {
+                        "column": "column_datetime",
                         "run_date": TODAY_STR,
                         "threshold": default_kwarg_values["threshold"],
                     },
@@ -177,6 +199,12 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnExpectation):
                     },
                     "out": {"success": False},
                 },
+            ],
+            "test_backends": [
+                {
+                    "backend": "sqlalchemy",
+                    "dialects": ["sqlite"],
+                }
             ],
         }
     ]
