@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 from unittest import mock
 
@@ -89,16 +90,18 @@ def test_all_relevant_context_methods_emit_usage_stats(
     # Every usage stats decorated method should have a corresponding private method for actual business logic
     method_to_patch = module_path.replace(method_name, f"_{method_name}")
 
-    with mock.patch(method_to_patch):
+    with mock.patch(method_to_patch) as mock_fn:
         method = getattr(context, method_name)
-        method()
+
+        # Generate a set of dummy values to trigger the target method
+        # and invoke the usage stats decorator without causing side-effects
+        signature = inspect.signature(method)
+        kwargs = {param: mock.Mock() for param in signature.parameters}
+        method(**kwargs)
+
+        mock_fn.assert_called_once()
 
     mock_calls = mock_emit.call_args_list
-    assert len(mock_calls) == 2
-
-    init_call, latest_call = mock_calls
-    init_event = init_call.args[0]["event"]
+    latest_call = mock_calls[-1]
     latest_event = latest_call.args[0]["event"]
-
-    assert init_event == UsageStatsEvents.DATA_CONTEXT___INIT__
     assert latest_event == expected_event

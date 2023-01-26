@@ -2869,7 +2869,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 open all docs found in the project.
             only_if_exists: Optionally specify flag to pass to "self.get_docs_sites_urls()".
         """
-        self._open_data_docs(
+        return self._open_data_docs(
             resource_identifier=resource_identifier,
             site_name=site_name,
             only_if_exists=only_if_exists,
