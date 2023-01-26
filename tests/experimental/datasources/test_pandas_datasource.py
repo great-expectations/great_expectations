@@ -145,13 +145,21 @@ class TestDynamicPandasAssets:
 
         assert type_name in asset_class_names
 
+    @pytest.mark.parametrize(
+        "extra_kwargs",
+        [
+            {"sep": "|", "decimal": ","},
+            {"usecols": [0, 1, 2], "names": ["foo", "bar"]},
+            {"dtype": {"col_1": "Int64"}},
+        ],
+    )
     def test_data_asset_reader_options_passthrough(
         self,
         empty_data_context: AbstractDataContext,
         csv_path: pathlib.Path,
         capture_reader_fn_params: tuple[list[list], list[dict]],
+        extra_kwargs: dict,
     ):
-        extra_kwargs = {"sep": "|", "decimal": ","}
         batch_request = (
             empty_data_context.sources.add_pandas("my_pandas")
             .add_csv_asset(
