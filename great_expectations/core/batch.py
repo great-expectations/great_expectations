@@ -5,6 +5,7 @@ import logging
 from typing import Any, Callable, Dict, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
@@ -390,10 +391,39 @@ is illegal.
             )
 
 
+@public_api
 class BatchRequest(BatchRequestBase):
-    """
-    This class contains all attributes of a batch_request.  See the comments in BatchRequestBase for design specifics.
-    limit: refers to the number of batches requested (not rows per batch)
+    """A BatchRequest is the way to specify which data Great
+    Expectations will validate. A Batch Request is provided to a Datasource in
+    order to create a Batch.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource/#1-construct-a-batchrequest
+        - https://docs.greatexpectations.io/docs/terms/batch_request
+
+    The `data_connector_query` parameter can include an index slice::
+        {
+            "index": "-3:"
+        }
+
+    or it can include a filter::
+        {
+            "batch_filter_parameters": {"year": "2020"}
+        }
+
+
+    Args:
+        datasource_name: name of the Datasource used to connect to the data
+        data_connector_name: name of the DataConnector used to connect to the data
+        data_asset_name: name of the DataAsset used to connect to the data
+        data_connector_query: a dictionary of query parameters the DataConnector
+            should use to
+        limit: if specified, the maximum number of *batches* to be returned
+            (limit does not affect the number of records in each batch)
+        batch_spec_passthrough: a dictionary of additional parameters that
+            the ExecutionEngine will use to obtain a specific set of data
+    Returns:
+        BatchRequest
     """
 
     include_field_names: Set[str] = {
@@ -431,7 +461,39 @@ class BatchRequest(BatchRequestBase):
         )
 
 
+@public_api
 class RuntimeBatchRequest(BatchRequestBase):
+    """A RuntimeBatchRequest creates a Batch for a RuntimeDataConnector.
+
+    Instead of serving as a description of what data Great Expectations should
+    fetch, a RuntimeBatchRequest serves as a wrapper for data that is passed in
+    at runtime (as an in-memory dataframe, file/S3 path, or SQL query), with
+    user-provided identifiers for uniquely identifying the data.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/terms/batch_request/#runtimedataconnector-and-runtimebatchrequest
+        - https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector/
+
+    runtime_parameters will vary depending on the Datasource used with the data.
+
+    For a dataframe::
+        {"batch_data": df}
+    For a path on a filesystem::
+        {"path": "/path/to/data/file.csv"}
+
+    Args:
+        datasource_name: name of the Datasource used to connect to the data
+        data_connector_name: name of the DataConnector used to connect to the data
+        data_asset_name: name of the DataAsset used to connect to the data
+        runtime_parameters: a dictionary containing the data to process,
+            a path to the data, or a query, depending on the associated Datasource
+        batch_identifiers: a dictionary to serve as a persistent, unique
+            identifier for the data included in the Batch
+        batch_spec_passthrough: a dictionary of additional parameters that
+            the ExecutionEngine will use to obtain a specific set of data
+    Returns:
+        BatchRequest
+    """
     include_field_names: Set[str] = {
         "datasource_name",
         "data_connector_name",
