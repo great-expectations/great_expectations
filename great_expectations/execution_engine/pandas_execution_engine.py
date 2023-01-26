@@ -71,16 +71,9 @@ except ImportError:
 HASH_THRESHOLD = 1e9
 
 
+@public_api
 class PandasExecutionEngine(ExecutionEngine):
     """PandasExecutionEngine instantiates the ExecutionEngine API to support computations using Pandas.
-
-    For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
-
-    Notes:
-        1. Samples and Subsets of PandaDataSet have ALL the expectations of the original data frame unless the user
-           specifies the ``discard_subset_failing_expectations = True`` property on the original data frame.
-        2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection is
-           performed by default).
 
     --ge-feature-maturity-info--
 
@@ -109,6 +102,17 @@ class PandasExecutionEngine(ExecutionEngine):
     }
 
     def __init__(self, *args, **kwargs) -> None:
+        """Builds a PandasExecutionEngine, using provided configuration options.
+
+        Args:
+            *args: Positional arguments for configuring PandasExecutionEngine
+            **kwargs: Keyword arguments for configuring PandasExecutionEngine
+
+        For example:
+        ```python
+            execution_engine: ExecutionEngine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+        ```
+        """
         self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )
@@ -590,13 +594,12 @@ Please use "neither" instead.
         is a single column, this is added to 'accessor domain kwargs' and used for later access.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "column",
-            "column_pair", "table", and "other".  Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_kwargs (dict): a dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric domain the user would like
+            to be using, or a corresponding string value representing it.  String types include "column", "column_pair",
+            "table", and "other".  Enum types include capitalized versions of these from the class MetricDomainTypes.
+            accessor_keys (str iterable): keys that are part of the compute domain but should be ignored when describing
+            the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:

@@ -250,6 +250,7 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
+@public_api
 class SqlAlchemyExecutionEngine(ExecutionEngine):
     """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform."""
 
@@ -269,7 +270,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     ) -> None:
         """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the desired database.
 
-        Also initializes the dialect to be used and configures usage statistics.
+        Also initializes the dialect to be used.
 
             Args:
                 name (str): The name of the SqlAlchemyExecutionEngine
@@ -286,6 +287,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 URL can be used to access the data. This will be overridden by all other configuration options if any
                 are provided.
                 concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.
+
+        For example:
+        ```python
+            execution_engine: ExecutionEngine = SqlAlchemyExecutionEngine(connection_string="snowflake://user:password@ab12345.us-central1.gcp/GE_DB/PUBLIC?warehouse=COMPUTE_WH&role=ge_read_only&application=great_expectations_oss")
+        ```
         """
         super().__init__(name=name, batch_data_dict=batch_data_dict)
         self._name = name
@@ -786,13 +792,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
+            domain_kwargs (dict): a dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric domain the user would
+            like to be using, or a corresponding string value representing it.  String types include "identity",
+            "column", "column_pair", "table" and "other".  Enum types include capitalized versions of these from the
             class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            accessor_keys (str iterable): keys that are part of the compute domain but should be ignored when describing
+            the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             SqlAlchemy column

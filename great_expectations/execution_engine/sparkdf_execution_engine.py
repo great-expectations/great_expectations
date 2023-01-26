@@ -87,6 +87,7 @@ def apply_dateutil_parse(column):
     return column.withColumn(col_name, _udf(col_name))
 
 
+@public_api
 class SparkDFExecutionEngine(ExecutionEngine):
     """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
 
@@ -176,7 +177,27 @@ class SparkDFExecutionEngine(ExecutionEngine):
         force_reuse_spark_context=False,
         **kwargs,
     ) -> None:
-        # Creation of the Spark DataFrame is done outside this class
+        """Builds a SparkDFExecutionEngine, using provided configuration parameters.
+
+        Args:
+            *args: Positional arguments for configuring SparkDFExecutionEngine
+            persist: If True (default), then creation of the Spark DataFrame is done outside this class
+            spark_config: Dictionary of Spark configuration options
+            force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
+            **kwargs: Keyword arguments for configuring SparkDFExecutionEngine
+
+        For example:
+        ```python
+            name: str = "great_expectations-ee-config"
+            spark_config: Dict[str, str] = {
+            "spark.app.name": name,
+            "spark.sql.catalogImplementation": "hive",
+            "spark.executor.memory": "512m",
+            }
+            execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
+            spark_session: SparkSession = execution_engine.spark
+        ```
+        """
         self._persist = persist
 
         if spark_config is None:
@@ -605,13 +626,13 @@ illegal.  Please check your config."""
         is a single column, this is added to 'accessor domain kwargs' and used for later access.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_kwargs (dict): a dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric domain the user would like to
+            be using, or a corresponding string value representing it.  String types include "identity", "column",
+            "column_pair", "table" and "other".  Enum types include capitalized versions of these from the class
+            MetricDomainTypes.
+            accessor_keys (str iterable): keys that are part of the compute domain but should be ignored when describing
+            the domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:

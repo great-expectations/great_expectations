@@ -50,6 +50,7 @@ if TYPE_CHECKING:
         BatchSpec,
     )
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
+    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -199,10 +200,11 @@ class SplitDomainKwargs:
     accessor: dict
 
 
+@public_api
 class ExecutionEngine(ABC):
     """ExecutionEngine defines interfaces and provides common methods for loading Batch of data and compute metrics.
 
-    ExecutionEngine is the parent class of every backend-specific computational class, tasked with loadsing Batch of
+    ExecutionEngine is the parent class of every backend-specific computational class, tasked with loading Batch of
     data and computing metrics.  Each subclass (corresponding to Pandas, Spark, SQLAlchemy, and any other computational
     components) utilizes generally-applicable methods defined herein, while implementing required backend-specific
     interfaces.  ExecutionEngine base class also performs the important task of translating cloud storage resource URLs
@@ -225,12 +227,21 @@ class ExecutionEngine(ABC):
 
     def __init__(
         self,
-        name=None,
-        caching=True,
-        batch_spec_defaults=None,
-        batch_data_dict=None,
-        validator=None,
+        name: Optional[str] = None,
+        caching: bool = True,
+        batch_spec_defaults: Optional[dict] = None,
+        batch_data_dict: Optional[dict] = None,
+        validator: Optional[Validator] = None,
     ) -> None:
+        """Builds an ExecutionEngine, using provided configuration options (instatiation is done by inherited classes).
+
+        Args:
+            name: (str) name of this ExecutionEngine
+            caching: (Boolean) if True (default), then resolved (computed) metrics are added to local in-memory cache.
+            batch_spec_defaults: dictionary of BatchSpec overrides (useful for amending configuration at runtime).
+            batch_data_dict: dictionary of Batch objects with corresponding IDs as keys supplied at initialization time
+            validator: Validator object (optional) -- not utilized in V3 and later versions
+        """
         self.name = name
         self._validator = validator
 
@@ -369,7 +380,7 @@ class ExecutionEngine(ABC):
     def resolve_metric_bundle(
         self, metric_fn_bundle
     ) -> Dict[Tuple[str, str, str], MetricValue]:
-        """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
+        """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
     @public_api
@@ -378,6 +389,9 @@ class ExecutionEngine(ABC):
         domain_kwargs: dict,
     ) -> Any:
         """get_domain_records() is an interface method, which computes the full-access data (dataframe or selectable) for computing metrics based on the given domain_kwargs and specific engine semantics.
+
+        Args:
+            domain_kwargs (dict) - A dictionary consisting of the Domain kwargs specifying which data to obtain
 
         Returns:
             data corresponding to the compute domain
@@ -390,14 +404,23 @@ class ExecutionEngine(ABC):
         self,
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
+        accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[Any, dict, dict]:
         """get_compute_domain() is an interface method, which computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs and specific engine semantics.
+
+        Args:
+            domain_kwargs (dict): a dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like
+            to be using, or a corresponding string value representing it.  String types include "column", "column_pair",
+            "table", and "other".  Enum types include capitalized versions of these from the class MetricDomainTypes.
+            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when describing
+            the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple consisting of three elements:
 
             1. data corresponding to the compute domain;
-            2. a modified copy of domain_kwargs describing the domain of the data returned in (1);
+            2. a modified copy of domain_kwargs describing the Domain of the data returned in (1);
             3. a dictionary describing the access instructions for data elements included in the compute domain
                 (e.g. specific column name).
 
@@ -415,7 +438,7 @@ class ExecutionEngine(ABC):
         Add a row condition for handling null filter.
 
         Args:
-            domain_kwargs: the domain kwargs to use as the base and to which to add the condition
+            domain_kwargs: the Domain kwargs to use as the base and to which to add the condition
             column_name: if provided, use this name to add the condition; otherwise, will use "column" key from
                 table_domain_kwargs
             filter_null: if true, add a filter for null values
@@ -662,16 +685,16 @@ class ExecutionEngine(ABC):
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for all domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for all Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using, or a corresponding string value representing it. String types include "identity",
             "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
             class MetricDomainTypes.
-            accessor_keys: keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            accessor_keys: keys that are part of the compute Domain but should be ignored when
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
@@ -680,7 +703,7 @@ class ExecutionEngine(ABC):
         # Extracting value from enum if it is given for future computation
         domain_type = MetricDomainTypes(domain_type)
 
-        # Warning user if accessor keys are in any domain that is not of type table, will be ignored
+        # Warning user if accessor keys are in any Domain that is not of type table, will be ignored
         if (
             domain_type != MetricDomainTypes.TABLE
             and accessor_keys is not None
@@ -728,14 +751,14 @@ class ExecutionEngine(ABC):
         domain_type: MetricDomainTypes,
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for table domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for table Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
-            accessor_keys: keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            accessor_keys: keys that are part of the compute Domain but should be ignored when
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             compute_domain_kwargs, accessor_domain_kwargs from domain_kwargs
@@ -766,7 +789,7 @@ class ExecutionEngine(ABC):
                     map(lambda element: f'"{element}"', unexpected_keys)
                 )
                 logger.warning(
-                    f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for domain type "{domain_type.value}"."""
+                    f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for Domain type "{domain_type.value}"."""
                 )
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
@@ -776,11 +799,11 @@ class ExecutionEngine(ABC):
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for column Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -808,11 +831,11 @@ class ExecutionEngine(ABC):
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for column pair Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -841,11 +864,11 @@ class ExecutionEngine(ABC):
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for multicolumn Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
