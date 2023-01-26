@@ -2359,16 +2359,17 @@ class QueryExpectation(TableExpectation, ABC):
     QueryExpectations must implement a `_validate(...)` method containing logic for determining whether data returned by the executed query is successfully validated.
 
     Query Expectations may optionally provide implementations of:
-        1. `validate_configuration`, which should raise an error if the configuration
-            will not be usable for the Expectation
-        2. Data Docs rendering methods decorated with the @renderer decorator.
+
+    1. `validate_configuration`, which should raise an error if the configuration will not be usable for the Expectation.
+
+    2. Data Docs rendering methods decorated with the @renderer decorator.
 
     QueryExpectations may optionally define a `query` attribute, and specify that query as a default in `default_kwarg_values`.
 
     Doing so precludes the need to pass a query into the Expectation, but will override the default query
     if a query is passed in.
 
-    Attributes:
+    Args:
         domain_keys (tuple): A tuple of the keys used to determine the domain of the
             expectation.
         success_keys (tuple): A tuple of the keys used to determine the success of
