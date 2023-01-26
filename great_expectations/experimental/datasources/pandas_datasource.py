@@ -234,6 +234,7 @@ class PandasDatasource(Datasource):
             name: The name of the csv asset
             data_path: Path to directory with csv files
             regex: regex pattern that matches csv filenames that is used to label the batches
+            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         asset = CSVAsset(  # type: ignore[call-arg] # type has a default??
