@@ -720,6 +720,15 @@ def test_validate_invalid_postgres_connection_string(create_source, connection_s
             None,
             "Either a SQLAlchemy connection_string or engine must be provided.",
         ),
+        (
+            "postgres://userName:@hostname/dbName",
+            None,
+            (
+                "Unable to create a SQLAlchemy engine from connection_string: "
+                "postgres://userName@hostname/dbName due to the following exception: Can't "
+                "load plugin: sqlalchemy.dialects:postgres"
+            ),
+        ),
     ],
 )
 def test_instantiation_error_messages(
