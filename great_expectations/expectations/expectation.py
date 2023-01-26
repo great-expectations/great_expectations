@@ -2366,8 +2366,7 @@ class QueryExpectation(TableExpectation, ABC):
 
     QueryExpectations may optionally define a `query` attribute, and specify that query as a default in `default_kwarg_values`.
 
-    Doing so precludes the need to pass a query into the Expectation, but will override the default query
-    if a query is passed in.
+    Doing so precludes the need to pass a query into the Expectation. This default will be overridden if a query is passed in.
 
     Args:
         domain_keys (tuple): A tuple of the keys used to determine the domain of the
