@@ -2936,7 +2936,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
-        # TODO : add spark and sql? or is it only Pandas
+        # add SQL and SPARk
 
         return validation_dependencies
 
@@ -2961,6 +2961,9 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         )
         unexpected_index_list: Optional[List[int]] = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
+        )
+        unexpected_index_query: Optional[str] = metrics.get(
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
         )
         filtered_row_count: Optional[int] = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT.value}"
@@ -2992,6 +2995,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             unexpected_count=unexpected_count,
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
+            unexpected_index_query=unexpected_index_query,
         )
 
 
