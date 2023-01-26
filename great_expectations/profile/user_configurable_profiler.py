@@ -108,6 +108,7 @@ class UserConfigurableProfiler:
         table_expectations_only: bool = False,
         value_set_threshold: str = "MANY",
     ) -> None:
+        """Initialize a UserConfigurableProfiler."""
 
         self.column_info: Dict = {}
         self.profile_dataset = profile_dataset
