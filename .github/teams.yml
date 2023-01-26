@@ -26,6 +26,9 @@ cloud:
   - '@rreinoldsc'      # Robby Reinold
   - '@joshua-stauffer' # Josh Stauffer
   - '@dctalbot'        # David Talbot
+  - '@wookasz'         # Łukasz Lempart
+  - '@josectobar'      # José Tobar
+  - '@elenajdanova'    # Elena Jdanova
 
 # Aggregates a few different teams
 core-team:
@@ -44,3 +47,5 @@ core-team:
   - '@jcampbell'       # James Campbell
   - '@donaldheppner'   # Don Heppner
   - '@Super-Tanner'    # Tanner Beam
+  - '@allensallinger'  # Allen Sallinger
+  - '@sujensen'        # Susan Jensen
