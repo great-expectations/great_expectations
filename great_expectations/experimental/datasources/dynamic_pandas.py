@@ -23,6 +23,8 @@ from typing import (
 
 import pandas as pd
 import pydantic
+
+# https://github.com/pandas-dev/pandas/blob/main/pandas/_typing.py
 from pandas._typing import CompressionOptions, CSVEngine, IndexLabel, StorageOptions
 from pydantic import FilePath
 
@@ -30,6 +32,11 @@ from pydantic import FilePath
 from typing_extensions import Final, Literal, TypeAlias
 
 from great_expectations.experimental.datasources.interfaces import DataAsset
+
+try:
+    from pandas._typing import CSVEngine  # noqa: F811 # redefinition of unused
+except ImportError:
+    CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]
 
 logger = logging.getLogger(__file__)
 
