@@ -17,16 +17,19 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+
 # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py TableColumnsUnique class_def">
 # This class defines a Metric to support your Expectation.
-
-
 class TableColumnsUnique(TableMetricProvider):
+    # </snippet>
 
     # This is the id string that will be used to reference your Metric.
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py metric_name">
     metric_name = "table.columns.unique"
+    # </snippet>
 
     # This method implements the core logic for the PandasExecutionEngine
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py pandas">
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
         cls,
@@ -43,6 +46,7 @@ class TableColumnsUnique(TableMetricProvider):
         unique_columns = set(df.T.drop_duplicates().T.columns)
 
         return unique_columns
+        # </snippet>
 
     # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
@@ -81,14 +85,16 @@ class TableColumnsUnique(TableMetricProvider):
         }
 
 
-# </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py ExpectTableColumnsToBeUnique class_def">
 class ExpectTableColumnsToBeUnique(TableExpectation):
     # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py docstring">
     """Expect table to contain columns with unique contents."""
+    # </snippet>
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py examples">
     examples = [
         {
             "data": {
@@ -130,9 +136,11 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
             ],
         },
     ]
-
+    # </snippet>
     # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py metric_dependencies">
     metric_dependencies = ("table.columns.unique", "table.columns")
+    # </snippet>
 
     # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ("strict",)
@@ -168,6 +176,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py validate">
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -190,17 +199,21 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
             "success": success,
             "result": {"observed_value": {"duplicate_columns": duplicate_columns}},
         }
+        # </snippet>
 
     # This dictionary contains metadata for display in the public gallery
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py library_metadata">
     library_metadata = {
         "tags": ["uniqueness"],
         "contributors": ["@joegargery"],
     }
+    # </snippet>
 
 
-# </snippet>
 if __name__ == "__main__":
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py diagnostics">
     ExpectTableColumnsToBeUnique().print_diagnostic_checklist()
+#     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
