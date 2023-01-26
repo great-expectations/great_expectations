@@ -54,8 +54,8 @@ PG_COMPLEX_CONFIG_DICT = {
                 },
                 "with_sorters": {
                     "order_by": [
-                        {"metadata_key": "year"},
-                        {"metadata_key": "month", "reverse": True},
+                        {"key": "year"},
+                        {"key": "month", "reverse": True},
                     ],
                     "name": "with_sorters",
                     "table_name": "yet_another_table",
@@ -401,7 +401,7 @@ def test_custom_sorter_serialization(
     ]["assets"]["with_dslish_sorters"]["order_by"]
 
     assert '"reverse": True' not in dumped
-    assert '{"metadata_key":' not in dumped
+    assert '{"key":' not in dumped
 
     for sorter_str in expected_sorter_strings:
         assert sorter_str in dumped, f"`{sorter_str}` not found in dumped json"

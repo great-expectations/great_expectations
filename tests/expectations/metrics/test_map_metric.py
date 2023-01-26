@@ -1,4 +1,3 @@
-import pandas
 import pandas as pd
 import pytest
 
@@ -9,6 +8,10 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import file_relative_path
@@ -18,9 +21,6 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.core import ExpectColumnValuesToBeInSet
 from great_expectations.expectations.metrics import (
@@ -244,7 +244,7 @@ def test_get_table_metric_provider_metric_dependencies(empty_sqlite_db):
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.value}"
+        == f"column.max.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}"
     )
 
     mp = ColumnMax()
@@ -281,7 +281,8 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
         metric, execution_engine=PandasExecutionEngine()
     )
     assert (
-        dependencies["unexpected_condition"].id[0] == "column_values.nonnull.condition"
+        dependencies["unexpected_condition"].id[0]
+        == f"column_values.nonnull.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
 
     metric = MetricConfiguration(
@@ -294,17 +295,18 @@ def test_get_aggregate_count_aware_metric_dependencies(basic_spark_df_execution_
     )
     assert (
         dependencies["metric_partial_fn"].id[0]
-        == f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}"
+        == f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypeSuffixes.AGGREGATE_FUNCTION.value}"
     )
 
     metric = MetricConfiguration(
-        metric_name=f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"column_values.nonnull.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
     assert (
-        dependencies["unexpected_condition"].id[0] == "column_values.nonnull.condition"
+        dependencies["unexpected_condition"].id[0]
+        == f"column_values.nonnull.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
 
 
@@ -316,7 +318,10 @@ def test_get_map_metric_dependencies():
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
-    assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+    assert (
+        dependencies["unexpected_condition"].id[0]
+        == f"foo.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
 
     metric = MetricConfiguration(
         metric_name="foo.unexpected_rows",
@@ -324,7 +329,10 @@ def test_get_map_metric_dependencies():
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
-    assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+    assert (
+        dependencies["unexpected_condition"].id[0]
+        == f"foo.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
 
     metric = MetricConfiguration(
         metric_name="foo.unexpected_values",
@@ -332,7 +340,10 @@ def test_get_map_metric_dependencies():
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
-    assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+    assert (
+        dependencies["unexpected_condition"].id[0]
+        == f"foo.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
 
     metric = MetricConfiguration(
         metric_name="foo.unexpected_value_counts",
@@ -340,7 +351,10 @@ def test_get_map_metric_dependencies():
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
-    assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+    assert (
+        dependencies["unexpected_condition"].id[0]
+        == f"foo.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
 
     metric = MetricConfiguration(
         metric_name="foo.unexpected_index_list",
@@ -348,7 +362,10 @@ def test_get_map_metric_dependencies():
         metric_value_kwargs=None,
     )
     dependencies = mp.get_evaluation_dependencies(metric)
-    assert dependencies["unexpected_condition"].id[0] == "foo.condition"
+    assert (
+        dependencies["unexpected_condition"].id[0]
+        == f"foo.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
 
 
 def test_is_sqlalchemy_metric_selectable():
@@ -1064,7 +1081,7 @@ def test_sqlite_single_column_complete_result_format_id_pk(
         "unexpected_index_query": "SELECT animals, pk_1 \n"
         "FROM animal_names \n"
         "WHERE animals IS NOT NULL AND (animals NOT IN "
-        "('cat', 'fish', 'dog'))",
+        "('cat', 'fish', 'dog'));",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,

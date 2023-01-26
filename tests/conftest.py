@@ -31,6 +31,7 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
@@ -69,9 +70,6 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.execution_engine.execution_engine import (
-    MetricPartialFunctionTypes,
-)
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
@@ -7120,7 +7118,7 @@ def table_row_count_metric_config() -> MetricConfiguration:
 @pytest.fixture
 def table_row_count_aggregate_fn_metric_config() -> MetricConfiguration:
     return MetricConfiguration(
-        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.value}",
+        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )

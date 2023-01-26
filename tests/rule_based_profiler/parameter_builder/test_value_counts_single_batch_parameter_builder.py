@@ -69,6 +69,7 @@ def test_value_counts_single_batch_parameter_builder_alice(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_node_as_dict: dict = {

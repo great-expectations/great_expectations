@@ -23,8 +23,10 @@ Typical usage example:
 import ast
 import importlib
 import logging
+import os
 import pathlib
 import shutil
+import urllib
 from typing import Tuple
 from urllib.parse import urlparse
 
@@ -171,6 +173,15 @@ class SphinxInvokeDocsBuilder:
 
                     external_ref.string = formatted_text
 
+                # Process internal links
+                # Note: Currently the docusaurus link checker does not work well with
+                # anchor links, so we need to make these links absolute.
+                internal_refs = doc.find_all(class_="reference internal")
+                for internal_ref in internal_refs:
+                    href = internal_ref["href"]
+                    absolute_href = self._get_base_url() + href
+                    internal_ref["href"] = absolute_href
+
                 doc_str = str(doc)
 
                 # Add front matter
@@ -193,6 +204,16 @@ class SphinxInvokeDocsBuilder:
 
         logger.info("Created mdx files for serving with docusaurus.")
 
+    def _get_base_url(self) -> str:
+        """The base url for use in generating absolute links.
+
+        Note, this will need to be modified if we begin to nest
+        directories inside of /docs/reference/api/
+        """
+        # URL is an environment variable provided by Netlify
+        base_url = os.getenv("URL", "https://localhost:3000")
+        return f"{base_url}/docs/reference/api/"
+
     def _remove_temp_html(self) -> None:
         """Remove the Sphinx-generated temporary html files + related files."""
         temp_dir = pathlib.Path(self.temp_sphinx_html_dir)
@@ -208,11 +229,16 @@ class SphinxInvokeDocsBuilder:
         for definition in definitions:
             if isinstance(definition.ast_definition, ast.ClassDef):
                 md_stub = self._create_class_md_stub(definition=definition)
-                self._write_stub(stub=md_stub, definition=definition)
+                self._write_stub(
+                    stub=md_stub,
+                    file_name=self._get_md_file_name_from_entity_name(
+                        definition=definition
+                    ),
+                )
 
-    def _write_stub(self, stub: str, definition: Definition) -> None:
+    def _write_stub(self, stub: str, file_name: str) -> None:
         """Write the markdown stub file with appropriate filename."""
-        filepath = self.base_path / self._get_md_file_name(definition=definition)
+        filepath = self.base_path / file_name
         with filepath.open("a") as f:
             f.write(stub)
 
@@ -223,16 +249,26 @@ class SphinxInvokeDocsBuilder:
 
         for definition in definitions:
             md_stub = self._create_module_md_stub(definition=definition)
-            self._write_stub(stub=md_stub, definition=definition)
+            self._write_stub(
+                stub=md_stub,
+                file_name=self._get_md_file_name_from_dotted_path_prefix(
+                    definition=definition
+                ),
+            )
 
     def _get_entity_name(self, definition: Definition):
         """Get the name of the entity (class, module, function)."""
         return definition.ast_definition.name
 
-    def _get_md_file_name(self, definition: Definition):
+    def _get_md_file_name_from_entity_name(self, definition: Definition):
         """Generate markdown file name from the entity definition."""
         snake_name = camel_to_snake(self._get_entity_name(definition=definition))
         return f"{snake_name}.md"
+
+    def _get_md_file_name_from_dotted_path_prefix(self, definition: Definition):
+        """Generate markdown file name from the dotted path prefix."""
+        dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
+        return f"{dotted_path_prefix}.md"
 
     def _get_dotted_path_to_class(self, definition: Definition):
         """Get the dotted path to a class.

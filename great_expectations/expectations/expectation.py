@@ -124,7 +124,7 @@ from great_expectations.validator.validator import ValidationDependencies, Valid
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.render.renderer_configuration import AddParamArgs, MetaNotes
+    from great_expectations.render.renderer_configuration import MetaNotes
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 logger = logging.getLogger(__name__)
@@ -1196,7 +1196,7 @@ class Expectation(metaclass=MetaExpectation):
         if not configuration:
             configuration = deepcopy(self.configuration)
 
-        # issue warnings if necesary
+        # issue warnings if necessary
         self._warn_if_result_format_config_in_runtime_configuration(
             runtime_configuration=runtime_configuration,
         )
@@ -1229,6 +1229,7 @@ class Expectation(metaclass=MetaExpectation):
         raise_exceptions_for_backends: bool = False,
         ignore_suppress: bool = False,
         ignore_only_for: bool = False,
+        for_gallery: bool = False,
         debug_logger: Optional[logging.Logger] = None,
         only_consider_these_backends: Optional[List[str]] = None,
         context: Optional[AbstractDataContext] = None,
@@ -1255,11 +1256,15 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         if debug_logger is not None:
-            _debug = lambda x: debug_logger.debug(f"(run_diagnostics) {x}")
-            _error = lambda x: debug_logger.error(f"(run_diagnostics) {x}")
+            _debug = lambda x: debug_logger.debug(  # noqa: E731
+                f"(run_diagnostics) {x}"
+            )
+            _error = lambda x: debug_logger.error(  # noqa: E731
+                f"(run_diagnostics) {x}"
+            )
         else:
-            _debug = lambda x: x
-            _error = lambda x: x
+            _debug = lambda x: x  # noqa: E731
+            _error = lambda x: x  # noqa: E731
 
         library_metadata: AugmentedLibraryMetadata = (
             self._get_augmented_library_metadata()
@@ -1376,6 +1381,14 @@ class Expectation(metaclass=MetaExpectation):
             if test_result.error_diagnostics
         ]
 
+        # If run for the gallery, don't include a bunch of stuff
+        if for_gallery:
+            examples = []
+            gallery_examples = []
+            renderers = []
+            test_results = []
+            errors = []
+
         return ExpectationDiagnostics(
             library_metadata=library_metadata,
             examples=examples,
@@ -1481,8 +1494,8 @@ class Expectation(metaclass=MetaExpectation):
             top_level_suppress_test_for = example.get("suppress_test_for")
             for test in example["tests"]:
                 if (
-                    test.get("include_in_gallery") == True
-                    or return_only_gallery_examples == False
+                    test.get("include_in_gallery") == True  # noqa: E712
+                    or return_only_gallery_examples == False  # noqa: E712
                 ):
                     copied_test = deepcopy(test)
                     if top_level_only_for:
@@ -1737,11 +1750,15 @@ class Expectation(metaclass=MetaExpectation):
         """Generate test results. This is an internal method for run_diagnostics."""
 
         if debug_logger is not None:
-            _debug = lambda x: debug_logger.debug(f"(_get_test_results) {x}")
-            _error = lambda x: debug_logger.error(f"(_get_test_results) {x}")
+            _debug = lambda x: debug_logger.debug(  # noqa: E731
+                f"(_get_test_results) {x}"
+            )
+            _error = lambda x: debug_logger.error(  # noqa: E731
+                f"(_get_test_results) {x}"
+            )
         else:
-            _debug = lambda x: x
-            _error = lambda x: x
+            _debug = lambda x: x  # noqa: E731
+            _error = lambda x: x  # noqa: E731
         _debug("Starting")
 
         test_results = []
@@ -1841,7 +1858,7 @@ class Expectation(metaclass=MetaExpectation):
 
         return test_results
 
-    def _get_rendered_result_as_string(self, rendered_result) -> str:
+    def _get_rendered_result_as_string(self, rendered_result) -> str:  # noqa: C901 - 16
         """Convenience method to get rendered results as strings."""
 
         result: str = ""
@@ -1887,7 +1904,7 @@ class Expectation(metaclass=MetaExpectation):
         elif isinstance(rendered_result, int):
             result = repr(rendered_result)
 
-        elif rendered_result == None:
+        elif rendered_result is None:
             result = ""
 
         else:
@@ -2232,7 +2249,7 @@ class TableExpectation(Expectation, ABC):
 
         return True
 
-    def _validate_metric_value_between(
+    def _validate_metric_value_between(  # noqa: C901 - 21
         self,
         metric_name,
         configuration: ExpectationConfiguration,
@@ -3176,7 +3193,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
 
 
-def _format_map_output(
+def _format_map_output(  # noqa: C901 - 22
     result_format: dict,
     success: bool,
     element_count: Optional[int] = None,
