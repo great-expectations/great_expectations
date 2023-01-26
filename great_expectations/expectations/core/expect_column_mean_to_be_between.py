@@ -265,8 +265,6 @@ class ExpectColumnMeanToBeBetween(ColumnExpectation):
         Raises:
             InvalidExpectationConfigurationError: The configuraton does not contain the values required by the
                 Expectation.
-
-        # noqa: DAR402
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
