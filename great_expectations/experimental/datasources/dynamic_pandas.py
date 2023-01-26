@@ -110,10 +110,10 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "path_or_buf": {"path": _FieldSpec(pathlib.Path, ...)},
     # misc
     "filepath": {"path": _FieldSpec(pathlib.Path, ...)},
-    "dtype": {"dtype": _FieldSpec(Optional[dict], None)},
-    "dialect": {"dialect": _FieldSpec(Optional[str], None)},
-    "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},
-    "skiprows": {"skiprows": _FieldSpec(Union[Sequence[int], int, None], None)},
+    "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
+    "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
+    "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
+    "skiprows": {"skiprows": _FieldSpec(Union[Sequence[int], int, None], None)},  # type: ignore[arg-type]
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
@@ -123,7 +123,7 @@ _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
 }
 
 _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
-    "Literal": Literal,
+    "Literal": Literal,  # type: ignore[dict-item]
     "Sequence": Sequence,
     "Hashable": Hashable,
     "Iterable": Iterable,
