@@ -103,7 +103,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     )
     ```
 
-    Attributes:
+    Args:
         set_camel_name (str): A name describing a set of values, in camel case.
         set_ (str): A value set.
         set_semantic_name (optional[str]): A name for the semantic type representing the set being validated..
