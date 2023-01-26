@@ -221,6 +221,15 @@ class ExecutionEngine(ABC):
     systems, such as SQLAlchemy and Spark; it is not available for Pandas, because Pandas computations are immediate).
 
     Finally, ExecutionEngine defines interfaces for Batch data sampling and splitting Batch of data along defined axes.
+
+    Constructor builds an ExecutionEngine, using provided configuration options (instatiation is done by child classes).
+
+    Args:
+        name: (str) name of this ExecutionEngine
+        caching: (Boolean) if True (default), then resolved (computed) metrics are added to local in-memory cache.
+        batch_spec_defaults: dictionary of BatchSpec overrides (useful for amending configuration at runtime).
+        batch_data_dict: dictionary of Batch objects with corresponding IDs as keys supplied at initialization time
+        validator: Validator object (optional) -- not utilized in V3 and later versions
     """
 
     recognized_batch_spec_defaults: Set[str] = set()
@@ -233,15 +242,6 @@ class ExecutionEngine(ABC):
         batch_data_dict: Optional[dict] = None,
         validator: Optional[Validator] = None,
     ) -> None:
-        """Builds an ExecutionEngine, using provided configuration options (instatiation is done by inherited classes).
-
-        Args:
-            name: (str) name of this ExecutionEngine
-            caching: (Boolean) if True (default), then resolved (computed) metrics are added to local in-memory cache.
-            batch_spec_defaults: dictionary of BatchSpec overrides (useful for amending configuration at runtime).
-            batch_data_dict: dictionary of Batch objects with corresponding IDs as keys supplied at initialization time
-            validator: Validator object (optional) -- not utilized in V3 and later versions
-        """
         self.name = name
         self._validator = validator
 

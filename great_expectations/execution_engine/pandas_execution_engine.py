@@ -75,6 +75,17 @@ HASH_THRESHOLD = 1e9
 class PandasExecutionEngine(ExecutionEngine):
     """PandasExecutionEngine instantiates the ExecutionEngine API to support computations using Pandas.
 
+    Constructor builds a PandasExecutionEngine, using provided configuration options.
+
+    Args:
+        *args: Positional arguments for configuring PandasExecutionEngine
+        **kwargs: Keyword arguments for configuring PandasExecutionEngine
+
+    For example:
+    ```python
+        execution_engine: ExecutionEngine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
+    ```
+
     --ge-feature-maturity-info--
 
         id: validation_engine_pandas
@@ -102,17 +113,6 @@ class PandasExecutionEngine(ExecutionEngine):
     }
 
     def __init__(self, *args, **kwargs) -> None:
-        """Builds a PandasExecutionEngine, using provided configuration options.
-
-        Args:
-            *args: Positional arguments for configuring PandasExecutionEngine
-            **kwargs: Keyword arguments for configuring PandasExecutionEngine
-
-        For example:
-        ```python
-            execution_engine: ExecutionEngine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
-        ```
-        """
         self.discard_subset_failing_expectations = kwargs.pop(
             "discard_subset_failing_expectations", False
         )

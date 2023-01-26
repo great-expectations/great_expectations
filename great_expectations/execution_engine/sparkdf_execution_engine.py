@@ -93,6 +93,27 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
     This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
+    Constructor builds a SparkDFExecutionEngine, using provided configuration parameters.
+
+    Args:
+        *args: Positional arguments for configuring SparkDFExecutionEngine
+        persist: If True (default), then creation of the Spark DataFrame is done outside this class
+        spark_config: Dictionary of Spark configuration options
+        force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
+        **kwargs: Keyword arguments for configuring SparkDFExecutionEngine
+
+    For example:
+    ```python
+        name: str = "great_expectations-ee-config"
+        spark_config: Dict[str, str] = {
+        "spark.app.name": name,
+        "spark.sql.catalogImplementation": "hive",
+        "spark.executor.memory": "512m",
+        }
+        execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
+        spark_session: SparkSession = execution_engine.spark
+    ```
+
     --ge-feature-maturity-info--
 
         id: validation_engine_pyspark_self_managed
@@ -177,27 +198,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
         force_reuse_spark_context=False,
         **kwargs,
     ) -> None:
-        """Builds a SparkDFExecutionEngine, using provided configuration parameters.
-
-        Args:
-            *args: Positional arguments for configuring SparkDFExecutionEngine
-            persist: If True (default), then creation of the Spark DataFrame is done outside this class
-            spark_config: Dictionary of Spark configuration options
-            force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
-            **kwargs: Keyword arguments for configuring SparkDFExecutionEngine
-
-        For example:
-        ```python
-            name: str = "great_expectations-ee-config"
-            spark_config: Dict[str, str] = {
-            "spark.app.name": name,
-            "spark.sql.catalogImplementation": "hive",
-            "spark.executor.memory": "512m",
-            }
-            execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
-            spark_session: SparkSession = execution_engine.spark
-        ```
-        """
         self._persist = persist
 
         if spark_config is None:
