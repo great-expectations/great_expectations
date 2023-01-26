@@ -449,7 +449,7 @@ not {batch_spec.__class__.__name__}"""
 
         reader_options = {}
         if reader_method is None:
-            path_guess = self.guess_reader_method_from_path(path)
+            path_guess = self.guess_reader_method_from_path(path)  # type: ignore[arg-type] # see overload
             reader_method = path_guess["reader_method"]
             reader_options = path_guess.get(
                 "reader_options"
