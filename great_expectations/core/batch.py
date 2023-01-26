@@ -5,6 +5,7 @@ import logging
 from typing import Any, Callable, Dict, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
@@ -668,7 +669,23 @@ class Batch(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @public_api
     def head(self, n_rows=5, fetch_all=False):
+        """Return the first n rows from the Batch.
+
+        This function returns the first n_rows rows. It is useful for quickly testing
+        if your object has the data you expected.
+
+        It will always obtain data from the Datasource and return a Pandas
+        DataFrame available locally.
+
+        Args:
+             n_rows: the number of rows to return
+             fetch_all: whether to fetch all rows; overrides n_rows if set to True
+
+        Returns:
+            A Pandas DataFrame
+        """
         # FIXME - we should use a Validator after resolving circularity
         # Validator(self._data.execution_engine, batches=(self,)).get_metric(MetricConfiguration("table.head", {"batch_id": self.id}, {"n_rows": n_rows, "fetch_all": fetch_all}))
         metric = MetricConfiguration(
