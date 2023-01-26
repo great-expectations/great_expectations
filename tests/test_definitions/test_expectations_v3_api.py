@@ -91,7 +91,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 )
                             validator_with_data = datasets[0]
                         else:
-                            if expectation_category == "column_map_expectation":
+                            if expectation_category == "column_map_expectations":
                                 pk_column: bool = True
 
                             schemas = d["schemas"] if "schemas" in d else None
