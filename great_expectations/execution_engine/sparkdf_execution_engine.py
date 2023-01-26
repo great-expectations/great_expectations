@@ -464,10 +464,10 @@ illegal.  Please check your config."""
         self,
         domain_kwargs: dict,
     ) -> DataFrame:
-        """Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
+        """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_kwargs (dict) - A dictionary consisting of the Domain kwargs specifying which data to obtain
 
         Returns:
             A DataFrame (the data on which to compute returned in the format of a Spark DataFrame)
@@ -620,26 +620,26 @@ illegal.  Please check your config."""
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[DataFrame, dict, dict]:
-        """Uses a DataFrame and domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
+        """Uses a DataFrame and Domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
 
         Returns in the format of a Spark DataFrame along with Domain arguments required for computing.  If the Domain
-        is a single column, this is added to 'accessor domain kwargs' and used for later access.
+        is a single column, this is added to 'accessor Domain kwargs' and used for later access.
 
         Args:
-            domain_kwargs (dict): a dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes): an Enum value indicating which metric domain the user would like to
+            domain_kwargs (dict): a dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like to
             be using, or a corresponding string value representing it.  String types include "identity", "column",
             "column_pair", "table" and "other".  Enum types include capitalized versions of these from the class
             MetricDomainTypes.
-            accessor_keys (str iterable): keys that are part of the compute domain but should be ignored when describing
-            the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when describing
+            the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
               - a DataFrame (the data on which to compute)
               - a dictionary of compute_domain_kwargs, describing the DataFrame
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
-                identify the domain within the compute domain
+                identify the Domain within the compute domain
         """
         table: str = domain_kwargs.get("table", None)
         if table:

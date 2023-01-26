@@ -451,7 +451,7 @@ not {batch_spec.__class__.__name__}"""
     def resolve_metric_bundle(
         self, metric_fn_bundle
     ) -> Dict[Tuple[str, str, str], Any]:
-        """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
+        """Resolve a bundle of metrics with the same compute Domain as part of a single trip to the compute engine."""
         return (
             {}
         )  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
@@ -461,10 +461,10 @@ not {batch_spec.__class__.__name__}"""
         self,
         domain_kwargs: dict,
     ) -> pd.DataFrame:
-        """Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a Batch of data.
+        """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a Batch of data.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_kwargs (dict) - A dictionary consisting of the Domain kwargs specifying which data to obtain
 
         Returns:
             A DataFrame (the data on which to compute returned in the format of a Pandas DataFrame)
@@ -588,17 +588,17 @@ Please use "neither" instead.
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[pd.DataFrame, dict, dict]:
-        """Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
+        """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
 
         Returns in the format of a Pandas DataFrame along with Domain arguments required for computing.  If the Domain
-        is a single column, this is added to 'accessor domain kwargs' and used for later access.
+        is a single column, this is added to 'accessor Domain kwargs' and used for later access.
 
         Args:
-            domain_kwargs (dict): a dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes): an Enum value indicating which metric domain the user would like
+            domain_kwargs (dict): a dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like
             to be using, or a corresponding string value representing it.  String types include "column", "column_pair",
             "table", and "other".  Enum types include capitalized versions of these from the class MetricDomainTypes.
-            accessor_keys (str iterable): keys that are part of the compute domain but should be ignored when describing
+            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when describing
             the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
@@ -606,7 +606,7 @@ Please use "neither" instead.
               - a DataFrame (the data on which to compute)
               - a dictionary of compute_domain_kwargs, describing the DataFrame
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
-                identify the domain within the compute domain
+                identify the Domain within the compute domain
         """
         table: str = domain_kwargs.get("table", None)
         if table:
