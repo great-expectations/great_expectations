@@ -310,7 +310,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     request = asset.get_batch_request({"year": "2018"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert (len(batches)) == 12
-    batch_filenames = [Path(batch.metadata["path"]) for batch in batches]
+    batch_filenames = [pathlib.Path(batch.metadata["path"]) for batch in batches]
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)
@@ -352,7 +352,9 @@ def test_get_batch_list_from_partially_specified_batch_request(
         ["-month", "-year"],
     ],
 )
-def test_pandas_sorter(pandas_datasource, csv_path: Path, order_by):
+def test_pandas_sorter(
+    pandas_datasource: PandasDatasource, csv_path: pathlib.Path, order_by
+):
     # Verify test directory has files we expect
     years = ["2018", "2019", "2020"]
     months = [format(m, "02d") for m in range(1, 13)]
