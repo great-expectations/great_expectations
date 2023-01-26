@@ -52,6 +52,7 @@ class SqliteTableAsset(TableAsset):
 @pydantic_dc.dataclass(frozen=True)
 class SqliteYearMonthSplitter(ColumnSplitter):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
+    # noinspection Pydantic
     param_names: List[Literal["year", "month"]] = pydantic.Field(
         default_factory=lambda: ["year", "month"]
     )

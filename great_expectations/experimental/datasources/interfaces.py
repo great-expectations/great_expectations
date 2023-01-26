@@ -24,6 +24,7 @@ from pydantic import dataclasses as pydantic_dc
 from pydantic import root_validator, validate_arguments
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
@@ -47,10 +48,10 @@ except ImportError:
     pyspark_sql_Row = None
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
-# Batches one wants returned. The keys represent dimensions one can slice the data along
+# Batches one wants as returned. The keys represent dimensions one can slice the data along
 # and the values are the realized. If a value is None or unspecified, the batch_request
 # will capture all data along this dimension. For example, if we have a year and month
-# splitter and we want to query all months in the year 2020, the batch request options
+# splitter, and we want to query all months in the year 2020, the batch request options
 # would look like:
 #   options = { "year": 2020 }
 BatchRequestOptions: TypeAlias = Dict[str, Any]
@@ -61,10 +62,6 @@ class BatchRequest:
     datasource_name: str
     data_asset_name: str
     options: BatchRequestOptions
-
-
-class BatchRequestError(Exception):
-    pass
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -93,10 +90,16 @@ def _is_str_sorter_list(sorters: BatchSortersDefinition) -> TypeGuard[list[str]]
 def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
     if _is_batch_sorter_list(sorters):
         return sorters
-    # mypy doesn't successfully type-narrow sorters to a List[str] here so we use
+
+    # mypy doesn't successfully type-narrow sorters to a List[str] here, so we use
     # another TypeGuard. We could cast instead which may be slightly faster.
+    sring_valued_sorter: str
     if _is_str_sorter_list(sorters):
-        return [_batch_sorter_from_str(sorter) for sorter in sorters]
+        return [
+            _batch_sorter_from_str(sring_valued_sorter)
+            for sring_valued_sorter in sorters
+        ]
+
     # This should never be reached because of static typing but is necessary because
     # mypy doesn't know of the if conditions must evaluate to True.
     raise ValueError(
@@ -138,10 +141,10 @@ class DataAsset(ExperimentalBaseModel):
     def datasource(self) -> Datasource:
         return self._datasource
 
+    @datasource.setter
     # TODO (kilo): remove setter and add custom init for DataAsset to inject datasource in constructor??
     # This setter is non-functional: https://github.com/pydantic/pydantic/issues/3395
     # There is some related discussion linked from that ticket which may be a workaround.
-    @datasource.setter
     def datasource(self, ds: Datasource):
         assert isinstance(ds, Datasource)
         self._datasource = ds
@@ -188,7 +191,7 @@ class DataAsset(ExperimentalBaseModel):
         if options is not None and not self._valid_batch_request_options(options):
             allowed_keys = set(self.batch_request_options_template().keys())
             actual_keys = set(options.keys())
-            raise BatchRequestError(
+            raise ge_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
@@ -220,7 +223,7 @@ class DataAsset(ExperimentalBaseModel):
                 data_asset_name=self.name,
                 options=self.batch_request_options_template(),
             )
-            raise BatchRequestError(
+            raise ge_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
                 f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
                 f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
@@ -328,7 +331,6 @@ class Datasource(
     assets: MutableMapping[str, DataAssetType] = {}
 
     @pydantic.validator("assets", pre=True)
-    @classmethod
     def _load_asset_subtype(cls, v: Dict[str, dict]):
         LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
         loaded_assets: Dict[str, DataAssetType] = {}
@@ -384,7 +386,7 @@ class Datasource(
         Args:
             asset: The DataAsset to be added to this datasource.
         """
-        # The setter for datasource is non-functional so we access _datasource directly.
+        # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
         asset.test_connection()
