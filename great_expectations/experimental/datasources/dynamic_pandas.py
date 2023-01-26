@@ -2,7 +2,6 @@ import inspect
 import logging
 import pathlib
 import re
-import sys
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import (  # _eval_type,
@@ -166,8 +165,9 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     """
     # TODO: parse the annotation string
     annotation = param.annotation
-    assert isinstance(annotation, str)
-    # print(type(annotation), annotation)
+    if not isinstance(annotation, str):
+        print(type(annotation), annotation)
+        return annotation
 
     types: list = []
 
