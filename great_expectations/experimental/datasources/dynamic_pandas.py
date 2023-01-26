@@ -6,11 +6,14 @@ import sys
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import (  # type: ignore[attr-defined]
+    Any,
     Callable,
     Dict,
     Hashable,
     List,
     NamedTuple,
+    Optional,
+    Sequence,
     Set,
     Tuple,
     Type,
@@ -21,6 +24,7 @@ from typing import (  # type: ignore[attr-defined]
 
 import pandas as pd
 import pydantic
+from pandas._typing import DtypeArg
 from pydantic import FilePath
 
 # from pydantic.typing import resolve_annotations
@@ -50,6 +54,8 @@ CAN_HANDLE: Final[Set[str]] = {
     "None",
     # typing
     "Hashable",
+    "Sequence[int]",
+    "Sequence[Hashable]",
     "typing.Sequence[Hashable]",
     "typing.Sequence[str]",
     "typing.Sequence[int]",
@@ -65,6 +71,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "Pattern",  # re
     "Path",  # pathlib
     "FilePath",  # pydantic
+    "DtypeArg",  # pandas
 }
 
 NEED_SPECIAL_HANDLING: Dict[str, Set[str]] = defaultdict(set)
@@ -88,6 +95,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     # JSONAsset
     "path_or_buf": {"path": _FieldSpec(pathlib.Path, ...)},
     "filepath": {"path": _FieldSpec(pathlib.Path, ...)},
+    "dtype": {"dtype": _FieldSpec(Optional[dict], None)},
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
@@ -98,7 +106,7 @@ _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
 
 _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "Literal": Literal,
-    # "Sequence": Sequence,
+    "Sequence": Sequence,
     "Hashable": Hashable,
     "FilePath": FilePath,
     "Pattern": re.Pattern,
@@ -180,7 +188,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     else:
         str_to_eval = types[0]
     # print(f"{str_to_eval=}")
-    return _evaluate_annotation_str(str_to_eval)
+    return str_to_eval
 
 
 def _to_pydantic_fields(
@@ -200,10 +208,11 @@ def _to_pydantic_fields(
             FIELD_SKIPPED_NO_ANNOTATION.add(param_name)
             continue
         type_ = _get_annotation_type(param)
-        if type_ is UNSUPPORTED_TYPE:
+        if type_ is UNSUPPORTED_TYPE or type_ == "None":
             logger.debug(f"`{param_name}` has no supported types. Field skipped")
             FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
             continue
+            # type_ = Any
 
         substitution = FIELD_SUBSTITUTIONS.get(param_name)
         if substitution:
@@ -260,5 +269,6 @@ def _generate_data_asset_models(
         models[type_name] = model
         model.update_forward_refs(**_TYPE_REF_LOCALS)
 
-    print(pf(dict(NEED_SPECIAL_HANDLING)))
+    print(f"\nNeeds extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")
+    print(f"\nNo Annotation\n{FIELD_SKIPPED_NO_ANNOTATION}")
     return models
