@@ -1404,6 +1404,11 @@ class CodeReferenceFilter:
                 "great_expectations/rule_based_profiler/data_assistant/data_assistant_runner.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="LegacyDatasource is not included in the public API",
+            name="get_available_data_asset_names",
+            filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
+        ),
     ]
 
     def __init__(
