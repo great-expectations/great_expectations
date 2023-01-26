@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 @public_api
 class UserConfigurableProfiler:
     """Build an Expectation Suite from a dataset.
-    
+
     The Expectations built are
     strict - they can be used to determine whether two tables are the same.
 
@@ -217,7 +217,7 @@ class UserConfigurableProfiler:
     @public_api
     def build_suite(self) -> ExpectationSuite:
         """Build an Expectation Suite based on the `semantic_types_dict` if one is provided.
-        
+
         Otherwise, profile the dataset and build the suite based on the results.
 
         Returns:
