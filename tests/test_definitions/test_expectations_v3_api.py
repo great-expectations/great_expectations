@@ -90,6 +90,11 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 )
                             validator_with_data = datasets[0]
                         else:
+                            if expectation_category == "column_map_expectation":
+                                add_pk_column: bool = True
+                            else:
+                                add_pk_column: bool = False
+
                             schemas = d["schemas"] if "schemas" in d else None
                             validator_with_data = get_test_validator_with_data(
                                 c,
@@ -98,6 +103,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 context=cast(
                                     DataContext, build_in_memory_runtime_context()
                                 ),
+                                add_pk_column=add_pk_column,
                             )
 
                     for test in d["tests"]:
@@ -368,6 +374,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 "expectation_type": test_configuration[
                                     "expectation_type"
                                 ],
+                                "expectation_category": expectation_category,
                                 "validator_with_data": validator_with_data,
                                 "test": test,
                                 "skip": skip_expectation or skip_test,
@@ -400,11 +407,13 @@ def test_case_runner_v3_api(test_case):
             evaluate_json_test_v3_api(
                 validator=test_case["validator_with_data"],
                 expectation_type=test_case["expectation_type"],
+                expectation_category=test_case["expectation_category"],
                 test=test_case["test"],
             )
     else:
         evaluate_json_test_v3_api(
             validator=test_case["validator_with_data"],
             expectation_type=test_case["expectation_type"],
+            expectation_category=test_case["expectation_category"],
             test=test_case["test"],
         )

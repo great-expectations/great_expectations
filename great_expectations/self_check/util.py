@@ -12,9 +12,11 @@ import time
 import traceback
 import warnings
 from functools import wraps
+from logging import Logger
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
+    Any,
     Dict,
     Iterable,
     List,
@@ -1194,17 +1196,19 @@ def get_test_validator_with_data(  # noqa: C901 - 31
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
     context: Optional[AbstractDataContext] = None,
+    add_pk_column: bool = False,
 ):
     """Utility to create datasets for json-formatted tests."""
 
     # adding pk_index column for testing id/pk across Expectations
-    data["pk_index"] = list(range(len(list(data.values())[0])))
+    if add_pk_column:
+        data["pk_index"] = list(range(len(list(data.values())[0])))
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
             schema = schemas["pandas"]
-            # add the schema
-            schema["pk_index"] = "int"
+            if add_pk_column:
+                schema["pk_index"] = "int"
             pandas_schema = {}
             for (key, value) in schema.items():
                 # Note, these are just names used in our internal schemas to build datasets *for internal tests*
@@ -1264,6 +1268,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
             debug_logger=debug_logger,
             batch_definition=None,
             context=context,
+            add_pk_column=add_pk_column,
         )
 
     elif execution_engine == "spark":
@@ -1296,8 +1301,8 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
-            # adding the thing
-            schema["pk_index"] = "IntegerType"
+            if add_pk_column:
+                schema["pk_index"] = "IntegerType"
             # sometimes first method causes Spark to throw a TypeError
             try:
                 spark_schema = sparktypes.StructType(
@@ -1426,6 +1431,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
     context: Optional[AbstractDataContext] = None,
+    add_pk_column: bool = False,
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
@@ -1531,7 +1537,8 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         and isinstance(engine.dialect, dialect_classes[sa_engine_name])
     ):
         schema = schemas[sa_engine_name]
-        schema["pk_index"] = "INTEGER"
+        if add_pk_column:
+            schema["pk_index"] = "INTEGER"
 
         sql_dtypes = {
             col: dialect_types[sa_engine_name][dtype] for (col, dtype) in schema.items()
@@ -2780,7 +2787,12 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
 
 
 def evaluate_json_test_v3_api(
-    validator, expectation_type, test, raise_exception=True, debug_logger=None
+    validator: Validator,
+    expectation_type: str,
+    expectation_category: str,
+    test: Dict[str, Any],
+    raise_exception: bool = True,
+    debug_logger: Optional[Logger] = None,
 ):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
@@ -2790,6 +2802,7 @@ def evaluate_json_test_v3_api(
 
     :param validator: (Validator) reference to "Validator" (key object that resolves Metrics and validates Expectations)
     :param expectation_type: (string) the name of the expectation to be run using the test input
+    :param expectation_category: (string) the category of the expectation (ie. ColumnMapExpectation) to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test
         - exact_match_out: (boolean) If true, match the 'out' dictionary exactly against the result of the expectation
@@ -2854,13 +2867,21 @@ def evaluate_json_test_v3_api(
             result = getattr(validator, expectation_type)(*kwargs)
         # As well as keyword arguments
         else:
-            runtime_kwargs = {
-                "result_format": {
-                    "result_format": "COMPLETE",
-                    "unexpected_index_columns": ["pk_index"],
-                },
-                "include_config": False,
-            }
+            if expectation_category == "column_map_expectation":
+                runtime_kwargs = {
+                    "result_format": {
+                        "result_format": "COMPLETE",
+                        "unexpected_index_columns": ["pk_index"],
+                    },
+                    "include_config": False,
+                }
+            else:
+                runtime_kwargs = {
+                    "result_format": {
+                        "result_format": "COMPLETE",
+                    },
+                    "include_config": False,
+                }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)
     except (
@@ -2877,6 +2898,7 @@ def evaluate_json_test_v3_api(
         try:
             check_json_test_result(
                 test=test,
+                expectation_category=expectation_category,
                 result=result,
                 data_asset=validator.execution_engine.batch_manager.active_batch_data,
             )
@@ -2892,13 +2914,16 @@ def evaluate_json_test_v3_api(
     return (result, error_message, stack_trace)
 
 
-def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901 - 49
+def check_json_test_result(
+    test, expectation_category, result, data_asset=None
+) -> None:  # noqa: C901 - 49
 
     # check for id_pk results if cases when unexpected_index_list already exists
     # this will work for testing since result_format is COMPLETE
-    if not result["success"]:
-        if "unexpected_index_list" in result["result"]:
-            assert "unexpected_index_query" in result["result"]
+    if expectation_category == "column_map_expectation":
+        if not result["success"]:
+            if "unexpected_index_list" in result["result"]:
+                assert "unexpected_index_query" in result["result"]
 
     if "unexpected_list" in result["result"]:
         if ("result" in test["output"]) and (
