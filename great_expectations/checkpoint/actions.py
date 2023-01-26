@@ -28,7 +28,6 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
