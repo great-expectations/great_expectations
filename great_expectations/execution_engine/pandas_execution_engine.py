@@ -261,7 +261,9 @@ Notes:
             logger.debug(
                 f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}"
             )
-            reader_fn: Callable = self._get_reader_fn(reader_method, s3_url.key)
+            reader_fn: DataFrameFactoryFn = self._get_reader_fn(
+                reader_method, s3_url.key
+            )
             buf = BytesIO(s3_object["Body"].read())
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
@@ -326,7 +328,7 @@ Bucket: {error}"""
             reader_method = batch_spec.reader_method
             reader_options = batch_spec.reader_options
             path = batch_spec.path
-            reader_fn: DataFrameFactoryFn = self._get_reader_fn(reader_method, path)
+            reader_fn = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
 
         else:
