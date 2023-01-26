@@ -1789,9 +1789,16 @@ pandas_integration_tests = [
 ]
 aws_integration_tests = [
     IntegrationTestFixture(
-        name="awsathena_test",
+        name="awsathena_test_yaml",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         user_flow_script="tests/integration/db/awsathena.py",
+        extra_backend_dependencies=BackendDependencies.AWS,
+        util_script="tests/test_utils.py",
+    ),
+    IntegrationTestFixture(
+        name="awsathena_test_python",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py",
         extra_backend_dependencies=BackendDependencies.AWS,
         util_script="tests/test_utils.py",
     ),
