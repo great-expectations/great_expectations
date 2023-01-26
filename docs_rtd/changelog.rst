@@ -4,6 +4,14 @@
 Changelog
 #########
 
+0.15.46
+-----------------
+* [BUGFIX] Disable `RendererConfiguration` constraint to support legacy renderer fallback behavior ([#6938](GxURL.PULL_REQUESTS/6938))
+* [DOCS] Remove the `great_expectations` path prefix for API docs ([#6934](GxURL.PULL_REQUESTS/6934))
+* [DOCS] Updates Custom Expectation docs w/ code snippets ([#6365](GxURL.PULL_REQUESTS/6365))
+* [DOCS] Regex-Based, Set-Based, Query-Based, & Actions Docstrings ([#6863](GxURL.PULL_REQUESTS/6863))
+* [DOCS] Documentation for classes and methods within ExecutionEngine class hierarchy ([#6936](GxURL.PULL_REQUESTS/6936))
+
 0.15.45
 -----------------
 * [FEATURE] Experimental datasources `batch.head()` ([#6765](https://github.com/great-expectations/great_expectations/pull/6765))
