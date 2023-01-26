@@ -324,7 +324,7 @@ class SQLDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
-    connection_string: Optional[str] = pydantic.Field(None)
+    connection_string: str = pydantic.Field("")
     engine: sqlalchemy.engine.Engine = pydantic.Field(None, exclude=True)
     assets: Dict[str, TableAsset] = {}
 
@@ -353,7 +353,7 @@ class SQLDatasource(Datasource):
                 # connection_string will not be in values if an invalid string was passed and failed pydantic validation
                 # in this case, the specific ValidationError will be raised by pydantic after this root_validator is run
                 if "connection_string" in values:
-                    if values["connection_string"] is not None:
+                    if values["connection_string"]:
                         try:
                             values["engine"] = sqlalchemy.create_engine(
                                 values["connection_string"]
