@@ -99,7 +99,7 @@ class _SourceFactories:
         The method name is pulled from the `Datasource.type` attribute.
         """
         method_name = f"add_{ds_type_name}"
-        LOGGER.info(
+        LOGGER.debug(
             f"2a. Registering {ds_type.__name__} as {ds_type_name} with {method_name}() factory"
         )
 
@@ -110,7 +110,7 @@ class _SourceFactories:
             )
 
         datasource_type_lookup[ds_type] = ds_type_name
-        LOGGER.info(f"'{ds_type_name}' added to `type_lookup`")
+        LOGGER.debug(f"'{ds_type_name}' added to `type_lookup`")
         cls.__source_factories[method_name] = factory_fn
         return ds_type_name
 
@@ -131,7 +131,7 @@ class _SourceFactories:
                     raise TypeError(
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
-                LOGGER.info(
+                LOGGER.debug(
                     f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
                 )
                 asset_type_lookup[t] = asset_type_name

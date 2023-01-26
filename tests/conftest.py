@@ -7164,6 +7164,18 @@ def taxi_test_file():
 
 
 @pytest.fixture
+def taxi_test_file_upcase():
+    return file_relative_path(
+        __file__,
+        os.path.join(
+            "test_sets",
+            "taxi_yellow_tripdata_samples_upcase",
+            "yellow_tripdata_sample_2019-01.CSV",
+        ),
+    )
+
+
+@pytest.fixture
 def taxi_test_file_directory():
     return file_relative_path(
         __file__,
