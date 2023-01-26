@@ -1877,7 +1877,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             ValueError: If more than one exclusive parameter is specified (ex: specifing more than one
                 of `batch_data`, `query` or `path`)
 
-        # noqa: DAR402
         """
         batch_request = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
