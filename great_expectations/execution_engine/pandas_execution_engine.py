@@ -10,6 +10,7 @@ from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -71,37 +72,35 @@ HASH_THRESHOLD = 1e9
 
 
 class PandasExecutionEngine(ExecutionEngine):
-    """
-PandasExecutionEngine instantiates the great_expectations Expectations API as a subclass of a pandas.DataFrame.
+    """PandasExecutionEngine instantiates the ExecutionEngine API to support computations using Pandas.
 
-For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
+    For the full API reference, please see :func:`Dataset <great_expectations.data_asset.dataset.Dataset>`
 
-Notes:
-    1. Samples and Subsets of PandaDataSet have ALL the expectations of the original \
-       data frame unless the user specifies the ``discard_subset_failing_expectations = True`` \
-       property on the original data frame.
-    2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection
-       is performed by default).
+    Notes:
+        1. Samples and Subsets of PandaDataSet have ALL the expectations of the original data frame unless the user
+           specifies the ``discard_subset_failing_expectations = True`` property on the original data frame.
+        2. Concatenations, joins, and merges of PandaDataSets contain NO expectations (since no autoinspection is
+           performed by default).
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
 
-    id: validation_engine_pandas
-    title: Validation Engine - Pandas
-    icon:
-    short_description: Use Pandas DataFrame to validate data
-    description: Use Pandas DataFrame to validate data
-    how_to_guide_url:
-    maturity: Production
-    maturity_details:
-        api_stability: Stable
-        implementation_completeness: Complete
-        unit_test_coverage: Complete
-        integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
-        documentation_completeness: Complete
-        bug_risk: Low
-        expectation_completeness: Complete
+        id: validation_engine_pandas
+        title: Validation Engine - Pandas
+        icon:
+        short_description: Use Pandas DataFrame to validate data
+        description: Use Pandas DataFrame to validate data
+        how_to_guide_url:
+        maturity: Production
+        maturity_details:
+            api_stability: Stable
+            implementation_completeness: Complete
+            unit_test_coverage: Complete
+            integration_infrastructure_test_coverage: N/A -> see relevant Datasource evaluation
+            documentation_completeness: Complete
+            bug_risk: Low
+            expectation_completeness: Complete
 
---ge-feature-maturity-info--
+    --ge-feature-maturity-info--
     """
 
     recognized_batch_spec_defaults = {
@@ -453,19 +452,18 @@ not {batch_spec.__class__.__name__}"""
             {}
         )  # This is NO-OP for "PandasExecutionEngine" (no bundling for direct execution computational backend).
 
+    @public_api
     def get_domain_records(  # noqa: C901 - 17
         self,
         domain_kwargs: dict,
     ) -> pd.DataFrame:
-        """
-        Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
-        obtain and/or query a batch. Returns in the format of a Pandas DataFrame.
+        """Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a Batch of data.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
 
         Returns:
-            A DataFrame (the data on which to compute)
+            A DataFrame (the data on which to compute returned in the format of a Pandas DataFrame)
         """
         table = domain_kwargs.get("table", None)
         if table:
@@ -579,16 +577,17 @@ Please use "neither" instead.
 
         return data
 
+    @public_api
     def get_compute_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[pd.DataFrame, dict, dict]:
-        """
-        Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
-        obtain and/or query a batch.  Returns in the format of a Pandas DataFrame. If the domain is a single column,
-        this is added to 'accessor domain kwargs' and used for later access
+        """Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
+
+        Returns in the format of a Pandas DataFrame along with Domain arguments required for computing.  If the Domain
+        is a single column, this is added to 'accessor domain kwargs' and used for later access.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain

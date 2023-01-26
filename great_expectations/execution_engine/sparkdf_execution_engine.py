@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, 
 
 from dateutil.parser import parse
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -87,7 +88,8 @@ def apply_dateutil_parse(column):
 
 
 class SparkDFExecutionEngine(ExecutionEngine):
-    """
+    """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
+
     This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
 
     --ge-feature-maturity-info--
@@ -436,19 +438,18 @@ illegal.  Please check your config."""
                 f"Unable to find reader_method {reader_method} in spark.",
             )
 
+    @public_api
     def get_domain_records(  # noqa: C901 - 18
         self,
         domain_kwargs: dict,
     ) -> DataFrame:
-        """
-        Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
-        obtain and/or query a batch. Returns in the format of a Spark DataFrame.
+        """Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
 
         Returns:
-            A DataFrame (the data on which to compute)
+            A DataFrame (the data on which to compute returned in the format of a Spark DataFrame)
         """
         table = domain_kwargs.get("table", None)
         if table:
@@ -591,14 +592,17 @@ illegal.  Please check your config."""
             condition=joined_condition, condition_type=RowConditionParserType.SPARK_SQL
         )
 
+    @public_api
     def get_compute_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[DataFrame, dict, dict]:
-        """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
-        to obtain and/or query a batch. Returns in the format of a Spark DataFrame.
+        """Uses a DataFrame and domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
+
+        Returns in the format of a Spark DataFrame along with Domain arguments required for computing.  If the Domain
+        is a single column, this is added to 'accessor domain kwargs' and used for later access.
 
         Args:
             domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain

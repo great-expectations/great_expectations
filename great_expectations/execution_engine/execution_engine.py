@@ -18,6 +18,7 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import (
@@ -87,12 +88,22 @@ class MetricComputationConfiguration(DictDot):
     compute_domain_kwargs: Optional[dict] = None
     accessor_domain_kwargs: Optional[dict] = None
 
+    @public_api
     def to_dict(self) -> dict:
-        """Returns: this MetricComputationConfiguration as a dictionary"""
+        """Returns: this MetricComputationConfiguration as a Python dictionary
+
+        Returns:
+            (dict) representation of present object
+        """
         return asdict(self)
 
+    @public_api
     def to_json_dict(self) -> dict:
-        """Returns: this MetricComputationConfiguration as a JSON dictionary"""
+        """Returns: this MetricComputationConfiguration as a JSON dictionary
+
+        Returns:
+            (dict) representation of present object as JSON-compatible Python dictionary
+        """
         return convert_to_json_serializable(data=self.to_dict())
 
 
@@ -189,6 +200,27 @@ class SplitDomainKwargs:
 
 
 class ExecutionEngine(ABC):
+    """ExecutionEngine defines interfaces and provides common methods for loading Batch of data and compute metrics.
+
+    ExecutionEngine is the parent class of every backend-specific computational class, tasked with loadsing Batch of
+    data and computing metrics.  Each subclass (corresponding to Pandas, Spark, SQLAlchemy, and any other computational
+    components) utilizes generally-applicable methods defined herein, while implementing required backend-specific
+    interfaces.  ExecutionEngine base class also performs the important task of translating cloud storage resource URLs
+    to format and protocol compatible with given computational mechanism (e.g, Pandas, Spark).  Then ExecutionEngine
+    subclasses access the referenced data according to their paritcular compatible protocol and return Batch of data.
+
+    In order to obtain Batch of data, ExecutionEngine (through implementation of key interface methods by subclasses)
+    gets data records and also provides access references so that different aspects of data can be loaded at once.
+    ExecutionEngine uses BatchManager for Batch caching in order to reduce load on computational backends.
+
+    Crucially, ExecutionEngine serves as focal point for resolving (i.e., computing) metrics.  Wherever opportunities
+    arize to bundle multiple metric computations (e.g., SQLAlchemy, Spark), ExecutionEngine utilizes subclasses in order
+    to provide specific functionality (bundling of computation is available only for "deferred execution" computational
+    systems, such as SQLAlchemy and Spark; it is not available for Pandas, because Pandas computations are immediate).
+
+    Finally, ExecutionEngine defines interfaces for Batch data sampling and splitting Batch of data along defined axes.
+    """
+
     recognized_batch_spec_defaults: Set[str] = set()
 
     def __init__(
@@ -340,13 +372,12 @@ class ExecutionEngine(ABC):
         """Resolve a bundle of metrics with the same compute domain as part of a single trip to the compute engine."""
         raise NotImplementedError
 
+    @public_api
     def get_domain_records(
         self,
         domain_kwargs: dict,
     ) -> Any:
-        """
-        get_domain_records computes the full-access data (dataframe or selectable) for computing metrics based on the
-        given domain_kwargs and specific engine semantics.
+        """get_domain_records() is an interface method, which computes the full-access data (dataframe or selectable) for computing metrics based on the given domain_kwargs and specific engine semantics.
 
         Returns:
             data corresponding to the compute domain
@@ -354,13 +385,13 @@ class ExecutionEngine(ABC):
 
         raise NotImplementedError
 
+    @public_api
     def get_compute_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
     ) -> Tuple[Any, dict, dict]:
-        """get_compute_domain computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs
-        and specific engine semantics.
+        """get_compute_domain() is an interface method, which computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs and specific engine semantics.
 
         Returns:
             A tuple consisting of three elements:
