@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, Dict, Optional, Union
 from typing_extensions import Final
 
 from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 
@@ -28,6 +27,7 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -43,15 +43,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class ValidationAction:
-    """
-    This is the base class for all actions that act on validation results
-    and are aware of a Data Context namespace structure.
+    """Base class for all Actions that act on Validation Results and are aware of a Data Context namespace structure.
 
-    The Data Context is passed to this class in its constructor.
+    Args:
+        data_context: Data Context that is used by the Action.
     """
 
-    def __init__(self, data_context) -> None:
+    def __init__(self, data_context: DataContext) -> None:
+        """Create a ValidationAction"""
         self.data_context = data_context
 
     @property
@@ -127,60 +128,60 @@ class NoOpAction(ValidationAction):
         print("Happily doing nothing")
 
 
+@public_api
 class SlackNotificationAction(ValidationAction):
-    """
-    SlackNotificationAction sends a Slack notification to a given webhook.
+    """Sends a Slack notification to a given webhook.
 
-    **Configuration**
+    ```yaml
+    - name: send_slack_notification_on_validation_result
+    action:
+      class_name: SlackNotificationAction
+      # put the actual webhook URL in the uncommitted/config_variables.yml file
+      # or pass in as environment variable
+      # use slack_webhook when not using slack bot token
+      slack_webhook: ${validation_notification_slack_webhook}
+      slack_token:
+      slack_channel:
+      notify_on: all
+      notify_with:
+      renderer:
+        # the class that implements the message to be sent
+        # this is the default implementation, but you can
+        # implement a custom one
+        module_name: great_expectations.render.renderer.slack_renderer
+        class_name: SlackRenderer
+      show_failed_expectations: True
+    ```
 
-    .. code-block:: yaml
-
-        - name: send_slack_notification_on_validation_result
-        action:
-          class_name: SlackNotificationAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          # use slack_webhook when not using slack bot token
-          slack_webhook: ${validation_notification_slack_webhook}
-          # pass slack token and slack channel when not using slack_webhook
-          slack_token: # token from slack app
-          slack_channel: # slack channel that messages should go to
-          notify_on: all # possible values: "all", "failure", "success"
-          notify_with: # optional list of DataDocs site names to display in Slack message. Defaults to showing all
-          renderer:
-            # the class that implements the message to be sent
-            # this is the default implementation, but you can
-            # implement a custom one
-            module_name: great_expectations.render.renderer.slack_renderer
-            class_name: SlackRenderer
-          show_failed_expectations: *Optional* (boolean) shows a list of failed expectation types. default is false.
+    Args:
+        data_context: Data Context that is used by the Action.
+        renderer: Specifies the Renderer used to generate a query consumable by Slack API, e.g.:
+            ```python
+            {
+               "module_name": "great_expectations.render.renderer.slack_renderer",
+               "class_name": "SlackRenderer",
+           }
+           ```
+        slack_webhook: The incoming Slack webhook to which to send notification.
+        slack_token: Token from Slack app. Used when not using slack_webhook.
+        slack_channel: Slack channel to receive notification. Used when not using slack_webhook.
+        notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
+        notify_with: List of DataDocs site names to display  in Slack messages. Defaults to all.
+        show_failed_expectations: Shows a list of failed expectation types.
     """
 
     def __init__(
         self,
-        data_context,
-        renderer,
-        slack_webhook=None,
-        slack_token=None,
-        slack_channel=None,
-        notify_on="all",
-        notify_with=None,
-        show_failed_expectations=False,
+        data_context: DataContext,
+        renderer: dict,
+        slack_webhook: Optional[str] = None,
+        slack_token: Optional[str] = None,
+        slack_channel: Optional[str] = None,
+        notify_on: str = "all",
+        notify_with: Optional[list[str]] = None,
+        show_failed_expectations: bool = False,
     ) -> None:
-        """Construct a SlackNotificationAction
-
-        Args:
-            data_context:
-            renderer: dictionary specifying the renderer used to generate a query consumable by Slack API, for example:
-                {
-                   "module_name": "great_expectations.render.renderer.slack_renderer",
-                   "class_name": "SlackRenderer",
-               }
-            slack_webhook: incoming Slack webhook to which to send notification
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            payload: *Optional* payload from other ValidationActions
-
-        """
+        """Create a SlackNotificationAction"""
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
@@ -291,38 +292,34 @@ class SlackNotificationAction(ValidationAction):
             return {"slack_notification_result": "none required"}
 
 
+@public_api
 class PagerdutyAlertAction(ValidationAction):
-    """
-    PagerdutyAlertAction sends a pagerduty event
+    """Sends a PagerDuty event.
 
-    **Configuration**
+    ```yaml
+    - name: send_pagerduty_alert_on_validation_result
+    action:
+      class_name: PagerdutyAlertAction
+      api_key: ${pagerduty_api_key}
+      routing_key: ${pagerduty_routing_key}
+      notify_on: failure
+    ```
 
-    .. code-block:: yaml
-
-        - name: send_pagerduty_alert_on_validation_result
-        action:
-          class_name: PagerdutyAlertAction
-          api_key: ${pagerduty_api_key} # Events API v2 key
-          routing_key: # The 32 character Integration Key for an integration on a service or on a global ruleset.
-          notify_on: failure # possible values: "all", "failure", "success"
-
+    Args:
+        data_context: Data Context that is used by the Action.
+        api_key: Events API v2 key for pagerduty.
+        routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
+        notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
     def __init__(
         self,
-        data_context,
-        api_key,
-        routing_key,
-        notify_on="failure",
+        data_context: DataContext,
+        api_key: str,
+        routing_key: str,
+        notify_on: str = "failure",
     ) -> None:
-        """Construct a PagerdutyAlertAction
-
-        Args:
-            data_context:
-            api_key: Events API v2 key for pagerduty.
-            routing_key: The 32 character Integration Key for an integration on a service or on a global ruleset.
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-        """
+        """Create a PagerdutyAlertAction"""
         super().__init__(data_context)
         if not pypd:
             raise DataContextError("ModuleNotFoundError: No module named 'pypd'")
@@ -390,50 +387,47 @@ class PagerdutyAlertAction(ValidationAction):
         return {"pagerduty_alert_result": "none sent"}
 
 
+@public_api
 class MicrosoftTeamsNotificationAction(ValidationAction):
-    """
-    MicrosoftTeamsNotificationAction sends a Microsoft Teams notification to a given webhook.
+    """Sends a Microsoft Teams notification to a given webhook.
 
-    **Configuration**
+    ```yaml
+    - name: send_microsoft_teams_notification_on_validation_result
+    action:
+      class_name: MicrosoftTeamsNotificationAction
+      # put the actual webhook URL in the uncommitted/config_variables.yml file
+      # or pass in as environment variable
+      microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}
+      notify_on: all
+      renderer:
+        # the class that implements the message to be sent
+        # this is the default implementation, but you can
+        # implement a custom one
+        module_name: great_expectations.render.renderer.microsoft_teams_renderer
+        class_name: MicrosoftTeamsRenderer
+    ```
 
-    .. code-block:: yaml
-
-        - name: send_microsoft_teams_notification_on_validation_result
-        action:
-          class_name: MicrosoftTeamsNotificationAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          microsoft_teams_webhook: ${validation_notification_microsoft_teams_webhook}
-          notify_on: all # possible values: "all", "failure", "success"
-          renderer:
-            # the class that implements the message to be sent
-            # this is the default implementation, but you can
-            # implement a custom one
-            module_name: great_expectations.render.renderer.microsoft_teams_renderer
-            class_name: MicrosoftTeamsRenderer
-
+    Args:
+        data_context: Data Context that is used by the Action.
+        renderer: Specifies the renderer used to generate a query consumable by teams API, e.g.:
+            ```python
+            {
+               "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
+               "class_name": "MicrosoftTeamsRenderer",
+            }
+            ```
+        microsoft_teams_webhook: Incoming Microsoft Teams webhook to which to send notifications.
+        notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
     """
 
     def __init__(
         self,
-        data_context,
-        renderer,
-        microsoft_teams_webhook,
-        notify_on="all",
+        data_context: DataContext,
+        renderer: dict,
+        microsoft_teams_webhook: str,
+        notify_on: str = "all",
     ) -> None:
-        """Construct a MicrosoftTeamsNotificationAction
-
-        Args:
-            data_context:
-            renderer: dictionary specifying the renderer used to generate a query consumable by teams API, for example:
-                {
-                   "module_name": "great_expectations.render.renderer.microsoft_teams_renderer",
-                   "class_name": "MicrosoftTeamsRenderer",
-               }
-            microsoft_teams_webhook: incoming Microsoft Teams webhook to which to send notifications
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            payload: *Optional* payload from other ValidationActions
-        """
+        """Create a MicrosoftTeamsNotificationAction"""
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
@@ -510,45 +504,42 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
             return {"microsoft_teams_notification_result": None}
 
 
+@public_api
 class OpsgenieAlertAction(ValidationAction):
-    """
-    OpsgenieAlertAction creates and sends an Opsgenie alert
+    """Sends an Opsgenie alert.
 
-    **Configuration**
+    ```yaml
+    - name: send_opsgenie_alert_on_validation_result
+    action:
+      class_name: OpsgenieAlertAction
+      # put the actual webhook URL in the uncommitted/config_variables.yml file
+      # or pass in as environment variable
+      api_key: ${opsgenie_api_key}
+      region:
+      priority: P2
+      notify_on: failure
+    ```
 
-    .. code-block:: yaml
-
-        - name: send_opsgenie_alert_on_validation_result
-        action:
-          class_name: OpsgenieAlertAction
-          # put the actual webhook URL in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          api_key: ${opsgenie_api_key} # Opsgenie API key
-          region: specifies the Opsgenie region. Populate 'EU' for Europe otherwise leave empty
-          priority: specify the priority of the alert (P1 - P5) defaults to P3
-          notify_on: failure # possible values: "all", "failure", "success"
-
+    Args:
+        data_context: Data Context that is used by the Action.
+        api_key: Opsgenie API key.
+        region: Specifies the Opsgenie region. Populate 'EU' for Europe otherwise do not set.
+        priority: Specifies the priority of the alert (P1 - P5).
+        notify_on: Specifies validation status that triggers notification. One of "all", "failure", "success".
+        tags: Tags to include in the alert
     """
 
     def __init__(
         self,
-        data_context,
-        renderer,
-        api_key,
-        region=None,
-        priority="P3",
-        notify_on="failure",
-        tags: Optional[list] = None,
+        data_context: DataContext,
+        renderer: dict,
+        api_key: str,
+        region: Optional[str] = None,
+        priority: str = "P3",
+        notify_on: str = "failure",
+        tags: Optional[list[str]] = None,
     ) -> None:
-        """Construct a OpsgenieAlertAction
-
-        Args:
-            data_context:
-            api_key: Opsgenie API key
-            region: specifies the Opsgenie region. Populate 'EU' for Europe otherwise do not set
-            priority: specify the priority of the alert (P1 - P5) defaults to P3
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-        """
+        """Create an OpsgenieAlertAction"""
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,
@@ -629,68 +620,71 @@ class OpsgenieAlertAction(ValidationAction):
             return {"opsgenie_alert_result": ""}
 
 
+@public_api
 class EmailAction(ValidationAction):
-    """
-    EmailAction sends an email to a given list of email addresses.
-    **Configuration**
-    .. code-block:: yaml
-        - name: send_email_on_validation_result
-        action:
-          class_name: EmailAction
-          notify_on: all # possible values: "all", "failure", "success"
-          notify_with: # optional list of DataDocs site names to display in the email message. Defaults to showing all
-          renderer:
-            # the class that implements the message to be sent
-            # this is the default implementation, but you can
-            # implement a custom one
-            module_name: great_expectations.render.renderer.email_renderer
-            class_name: EmailRenderer
-          # put the actual following information in the uncommitted/config_variables.yml file
-          # or pass in as environment variable
-          smtp_address: ${smtp_address}
-          smtp_port: ${smtp_port}
-          sender_login: ${email_address}
-          sender_password: ${sender_password}
-          sender_alias: ${sender_alias} # useful to send an email as an alias (default = sender_login)
-          receiver_emails: ${receiver_emails} # string containing email addresses separated by commas
-          use_tls: False
-          use_ssl: True
+    """Sends an email to a given list of email addresses.
+
+    ```yaml
+    - name: send_email_on_validation_result
+    action:
+      class_name: EmailAction
+      notify_on: all # possible values: "all", "failure", "success"
+      notify_with:
+      renderer:
+        # the class that implements the message to be sent
+        # this is the default implementation, but you can
+        # implement a custom one
+        module_name: great_expectations.render.renderer.email_renderer
+        class_name: EmailRenderer
+      # put the actual following information in the uncommitted/config_variables.yml file
+      # or pass in as environment variable
+      smtp_address: ${smtp_address}
+      smtp_port: ${smtp_port}
+      sender_login: ${email_address}
+      sender_password: ${sender_password}
+      sender_alias: ${sender_alias} # useful to send an email as an alias
+      receiver_emails: ${receiver_emails}
+      use_tls: False
+      use_ssl: True
+    ```
+
+    Args:
+        data_context: Data Context that is used by the Action.
+        renderer: Specifies the renderer used to generate an email, for example:
+            ```python
+            {
+               "module_name": "great_expectations.render.renderer.email_renderer",
+               "class_name": "EmailRenderer",
+            }
+            ```
+        smtp_address: Address of the SMTP server used to send the email.
+        smtp_address: Port of the SMTP server used to send the email.
+        sender_login: Login used send the email.
+        sender_password: Password used to send the email.
+        sender_alias: Optional. Alias used to send the email (default = sender_login).
+        receiver_emails: Email addresses that will receive the email (separated by commas).
+        use_tls: Optional. Use of TLS to send the email (using either TLS or SSL is highly recommended).
+        use_ssl: Optional. Use of SSL to send the email (using either TLS or SSL is highly recommended).
+        notify_on: "Specifies validation status that triggers notification. One of "all", "failure", "success".
+        notify_with: Optional list of DataDocs site names to display  in Slack messages. Defaults to all.
     """
 
     def __init__(
         self,
-        data_context,
-        renderer,
-        smtp_address,
-        smtp_port,
-        sender_login,
-        sender_password,
-        receiver_emails,
-        sender_alias=None,
-        use_tls=None,
-        use_ssl=None,
-        notify_on="all",
-        notify_with=None,
+        data_context: DataContext,
+        renderer: dict,
+        smtp_address: str,
+        smtp_port: str,
+        sender_login: str,
+        sender_password: str,
+        receiver_emails: str,
+        sender_alias: Optional[str] = None,
+        use_tls: Optional[bool] = None,
+        use_ssl: Optional[bool] = None,
+        notify_on: str = "all",
+        notify_with: Optional[list[str]] = None,
     ) -> None:
-        """Construct an EmailAction
-        Args:
-            data_context:
-            renderer: dictionary specifying the renderer used to generate an email, for example:
-                {
-                   "module_name": "great_expectations.render.renderer.email_renderer",
-                   "class_name": "EmailRenderer",
-               }
-            smtp_address: address of the SMTP server used to send the email
-            smtp_address: port of the SMTP server used to send the email
-            sender_login: login used send the email
-            sender_password: password used to send the email
-            sender_alias: optional alias used to send the email (default = sender_login)
-            receiver_emails: email addresses that will be receive the email (separated by commas)
-            use_tls: optional use of TLS to send the email (using either TLS or SSL is highly recommended)
-            use_ssl: optional use of SSL to send the email (using either TLS or SSL is highly recommended)
-            notify_on: "all", "failure", "success" - specifies validation status that will trigger notification
-            notify_with: optional list of DataDocs site names to display in the email message
-        """
+        """Create an EmailAction"""
         super().__init__(data_context)
         self.renderer = instantiate_class_from_config(
             config=renderer,

@@ -64,7 +64,7 @@ Datasource configurations can be written as YAML files or Python dictionaries.  
 <TabItem value="yaml">
 
 ```python
-datasource_yaml = fr"""
+datasource_yaml = f"""
 name: <name_of_your_datasource>
 class_name: Datasource
 execution_engine:
