@@ -1,9 +1,10 @@
 from contextlib import contextmanager
 from pprint import pprint
-from typing import Callable, ContextManager
+from typing import Callable, ContextManager, Optional
 from unittest import mock
 
 import pytest
+import sqlalchemy
 from pydantic import ValidationError
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -40,6 +41,7 @@ def _source(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
+    engine: Optional[sqlalchemy.engine.Engine] = None,
 ) -> PostgresDatasource:
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=validate_batch_spec, dialect=dialect
@@ -50,12 +52,14 @@ def _source(
         postgres_datasource = PostgresDatasource(
             name="my_datasource",
             connection_string=connection_string,
+            engine=engine,
         )
         postgres_datasource.engine = MockSaEngine(
             dialect=Dialect("postgresql+psycopg2")
         )
         with mock.patch("sqlalchemy.inspect"):
-            yield postgres_datasource
+            with mock.patch("sqlalchemy.create_engine"):
+                yield postgres_datasource
     finally:
         PostgresDatasource.execution_engine_override = original_override
 
