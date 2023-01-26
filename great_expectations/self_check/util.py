@@ -1200,9 +1200,11 @@ def get_test_validator_with_data(  # noqa: C901 - 31
 ):
     """Utility to create datasets for json-formatted tests."""
 
-    # adding pk_index column for testing id/pk across Expectations
+    # if pk_column is defined in our test, then we add a index column to our test set
     if pk_column:
-        data["pk_index"] = list(range(len(list(data.values())[0])))
+        first_column: List[Any] = list(data.values())[0]
+        data["pk_index"] = list(range(len(first_column)))
+
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
@@ -2802,7 +2804,6 @@ def evaluate_json_test_v3_api(
 
     :param validator: (Validator) reference to "Validator" (key object that resolves Metrics and validates Expectations)
     :param expectation_type: (string) the name of the expectation to be run using the test input
-    :param expectation_category: (string) the category of the expectation (ie. ColumnMapExpectation) to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test
         - exact_match_out: (boolean) If true, match the 'out' dictionary exactly against the result of the expectation
@@ -2817,6 +2818,7 @@ def evaluate_json_test_v3_api(
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :param raise_exception: (bool) If False, capture any failed AssertionError from the call to check_json_test_result and return with validation_result
     :param debug_logger: logger instance or None
+    :param pk_column: If True, then the primary-key column has been defined in the json test data.
     :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
     if debug_logger is not None:
@@ -2918,7 +2920,7 @@ def check_json_test_result(
     test, result, data_asset=None, pk_column=False
 ) -> None:  # noqa: C901 - 49
 
-    # check for id_pk results if cases when unexpected_index_list already exists
+    # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists
     # this will work for testing since result_format is COMPLETE
     if pk_column:
         if not result["success"]:
