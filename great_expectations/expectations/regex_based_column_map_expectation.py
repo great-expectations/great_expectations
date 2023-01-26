@@ -112,7 +112,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     )
     ```
 
-    Attributes:
+    Args:
         regex_camel_name (str): A name describing a regex pattern, in camel case.
         regex_ (str): A valid regex pattern.
         semantic_type_name_plural (optional[str]): The plural form of a semantic type being validated by a regex pattern.
