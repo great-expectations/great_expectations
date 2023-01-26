@@ -207,25 +207,21 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
     }
     args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 
-    """ A Column Map MetricProvider Decorator for the Maximum"""
-
     @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates configuration for the Expectation.
+        """Validates the configuration for the Expectation.
 
-        For `expect_column_max_to_be_between`, `configuraton.kwargs` may contain `min_value` and
-        `max_value` whose value is either a number or date.
+        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` whose value is either
+        a number or date.
 
         Args:
-            configuration: The configuration to be validated.
+            configuration (OPTIONAL[ExpectationConfiguration]): \
+                An optional Expectation Configuration entry that will be used to configure the expectation
 
         Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the
-                Expectation.
-
-        # noqa: DAR402
+            InvalidExpectationConfigurationError: if the config is not validated successfully
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)

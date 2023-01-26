@@ -221,7 +221,6 @@ def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
         suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
         )
-        return suite
     except gx_exceptions.DataContextError:
         if create_if_not_exist:
             suite = data_context.create_expectation_suite(
