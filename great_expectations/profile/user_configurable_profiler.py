@@ -39,8 +39,9 @@ if TYPE_CHECKING:
 
 @public_api
 class UserConfigurableProfiler:
-    """
-    Build an Expectation Suite from a dataset. The Expectations built are
+    """Build an Expectation Suite from a dataset.
+    
+    The Expectations built are
     strict - they can be used to determine whether two tables are the same.
 
     Instantiate with or without a number of configuration arguments.
