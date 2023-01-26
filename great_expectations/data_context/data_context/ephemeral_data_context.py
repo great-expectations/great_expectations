@@ -66,4 +66,8 @@ class EphemeralDataContext(AbstractDataContext):
             store_backend=store_backend,
             serializer=DictConfigSerializer(schema=datasourceConfigSchema),
         )
+        # As the store is in-memory, it needs to be populated immediately
+        for name, config in self.config.datasources.items():
+            datasource_store.set_by_name(datasource_name=name, datasource_config=config)
+
         self._datasource_store = datasource_store

@@ -751,11 +751,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
         save_changes: bool | None = None,
+        **kwargs,
     ) -> Datasource:
         name = datasource.name
         config = datasource.config
         # `instantiate_class_from_config` requires `class_name`
         config["class_name"] = datasource.__class__.__name__
+        config.update(kwargs)
 
         datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
@@ -796,7 +798,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if existing_datasource:
-            result_datasource = self.update_datasource(datasource=existing_datasource)
+            result_datasource = self._update_datasource(
+                datasource=existing_datasource, **kwargs
+            )
         else:
             result_datasource = self.add_datasource(name=name, **kwargs)
 
