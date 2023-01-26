@@ -772,9 +772,10 @@ class AbstractDataContext(ConfigPeer, ABC):
                 config=datasource_config, initialize=True, save_changes=False
             )
         )
-        assert (
-            updated_datasource is not None
-        )  # Invariant based on `initalize=True` above
+
+        # Invariant based on `initalize=True` above
+        assert updated_datasource is not None
+
         return updated_datasource
 
     def add_or_update_datasource(
