@@ -23,6 +23,7 @@ def add_values_with_json_schema_from_list_in_params(
     param_key_with_list: str,
     list_values_type: str = "string",
 ) -> dict:
+    # deprecated-v0.15.29
     warnings.warn(
         "The module great_expectations.expectations.util.py is deprecated as of v0.15.29 and will be removed in "
         "v0.18. Please import method add_values_with_json_schema_from_list_in_params from "
@@ -43,6 +44,7 @@ def add_values_with_json_schema_from_list_in_params(
     message="Use `import render_evaluation_parameter_string from great_expectations.expectations.expectation` instead.",
 )
 def render_evaluation_parameter_string(render_func) -> Callable:
+    # deprecated-v0.15.29
     warnings.warn(
         "The module great_expectations.expectations.util.py is deprecated as of v0.15.29 and will be removed in v0.18. "
         "Please import decorator render_evaluation_parameter_string from great_expectations.expectations.expectation.",
