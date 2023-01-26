@@ -4,7 +4,6 @@ import inspect
 import logging
 import pathlib
 from dataclasses import dataclass
-from pathlib import Path
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any
 
@@ -293,7 +292,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
 @pytest.mark.unit
 def test_get_batch_list_from_partially_specified_batch_request(
-    pandas_datasource, csv_path: Path
+    pandas_datasource: PandasDatasource, csv_path: pathlib.Path
 ):
     # Verify test directory has files that don't match what we will query for
     all_files = list(csv_path.iterdir())
@@ -379,7 +378,7 @@ def test_pandas_sorter(pandas_datasource, csv_path: Path, order_by):
     @dataclass(frozen=True)
     class TimeRange:
         key: str
-        range: list[int]
+        range: list[str]
 
     ordered_years = reversed(years) if "-year" in order_by else years
     ordered_months = reversed(months) if "-month" in order_by else months
