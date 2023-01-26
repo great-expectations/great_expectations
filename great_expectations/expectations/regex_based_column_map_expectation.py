@@ -50,6 +50,15 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
     RegexColumnMapMetric classes inheriting from RegexColumnMapMetricProvider are ephemeral,
     defined by their `regex` attribute, and registered during the execution of their associated RegexColumnMapExpectation.
 
+    Metric Registration Example:
+
+    ```python
+    map_metric = RegexBasedColumnMapExpectation.register_metric(
+        regex_camel_name="Vowel",
+        regex_="^[aeiouyAEIOUY]*$",
+    )
+    ```
+
     In some cases, subclasses of MetricProvider, such as RegexColumnMapMetricProvider, will already
     have correct values that may simply be inherited by Metric classes.
 
@@ -89,6 +98,19 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     """Base class for RegexBasedColumnMapExpectations.
 
     RegexBasedColumnMapExpectations facilitate regex parsing as the core logic for a Map Expectation.
+
+    Example Definition:
+
+    ```python
+    ExpectColumnValuesToOnlyContainVowels(SetBasedColumnMapExpectation):
+        regex_camel_name = "Vowel"
+        regex = "^[aeiouyAEIOUY]*$"
+        semantic_type_name_plural = "vowels"
+        map_metric = RegexBasedColumnMapExpectation.register_metric(
+            regex_camel_name=regex_camel_name,
+            regex=regex
+    )
+    ```
 
     Attributes:
         regex_camel_name (str): A name describing a regex pattern, in camel case.

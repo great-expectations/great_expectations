@@ -49,6 +49,15 @@ class SetColumnMapMetricProvider(ColumnMapMetricProvider):
     SetColumnMapMetric classes inheriting from SetColumnMapMetricProvider are ephemeral,
     defined by their `set` attribute, and registered during the execution of their associated SetColumnMapExpectation.
 
+    Metric Registration Example:
+
+    ```python
+    map_metric = SetBasedColumnMapExpectation.register_metric(
+        set_camel_name="SolfegeScale",
+        set_=["do", "re", "mi", "fa", "so", "la", "ti"],
+    )
+    ```
+
     In some cases, subclasses of MetricProvider, such as SetColumnMapMetricProvider, will already
     have correct values that may simply be inherited by Metric classes.
 
@@ -80,10 +89,23 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
     SetBasedColumnMapExpectations facilitate set-based comparisons as the core logic for a Map Expectation.
 
+    Example Definition:
+
+    ```python
+    ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
+        set_camel_name = SolfegeScale
+        set_ = ["do", "re", "mi", "fa", "so", "la", "ti"]
+        set_semantic_name = "the Solfege scale"
+        map_metric = SetBasedColumnMapExpectation.register_metric(
+            set_camel_name=set_camel_name,
+            set_=set_
+    )
+    ```
+
     Attributes:
         set_camel_name (str): A name describing a set of values, in camel case.
         set_ (str): A value set.
-        semantic_type_name_plural (optional[str]): The plural form of a semantic type being validated by a value set.
+        set_semantic_name (optional[str]): A name for the semantic type representing the set being validated..
         map_metric (str): The name of an ephemeral metric, as returned by `register_metric(...)`.
     """
 
