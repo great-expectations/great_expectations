@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import logging
-import os
 import pathlib
 import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
@@ -10,6 +9,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Un
 import pydantic
 from typing_extensions import ClassVar, Literal
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.experimental.datasources.dynamic_pandas import (
@@ -18,7 +18,6 @@ from great_expectations.experimental.datasources.dynamic_pandas import (
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
-    BatchRequestError,
     BatchRequestOptions,
     BatchSortersDefinition,
     DataAsset,
@@ -62,14 +61,18 @@ class _DataFrameAsset(DataAsset):
         option_to_group_id = self._option_name_to_regex_group_id()
         group_id_to_option = {v: k for k, v in option_to_group_id.items()}
         batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
-        for filename in os.listdir(self.path):
-            match = self.regex.match(filename)
+
+        all_files: List[pathlib.Path] = list(pathlib.Path(self.path).iterdir())
+
+        file_name: pathlib.Path
+        for file_name in all_files:
+            match = self.regex.match(file_name.name)
             if match:
                 # Create the batch request that would correlate to this regex match
                 match_options = {}
                 for group_id in range(1, self.regex.groups + 1):
                     match_options[group_id_to_option[group_id]] = match.group(group_id)
-                # Determine if this filename matches the batch_request
+                # Determine if this file_name matches the batch_request
                 allowed_match = True
                 for key, value in batch_request.options.items():
                     if match_options[key] != value:
@@ -83,10 +86,10 @@ class _DataFrameAsset(DataAsset):
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),
-                            self.path / filename,
+                            self.path / file_name,
                         )
                     )
-                    LOGGER.debug(f"Matching path: {self.path / filename}")
+                    LOGGER.debug(f"Matching path: {self.path / file_name}")
         if not batch_requests_with_path:
             LOGGER.warning(
                 f"Batch request {batch_request} corresponds to no data files."
@@ -109,14 +112,14 @@ class _DataFrameAsset(DataAsset):
         if options:
             for option, value in options.items():
                 if option in option_names_to_group and not isinstance(value, str):
-                    raise BatchRequestError(
+                    raise ge_exceptions.InvalidBatchRequestError(
                         f"All regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )
         return super().get_batch_request(options)
 
-    def _option_name_to_regex_group_id(self) -> Dict[str, int]:
-        option_to_group: Dict[str, int] = dict(self.regex.groupindex)
+    def _option_name_to_regex_group_id(self) -> BatchRequestOptions:
+        option_to_group: BatchRequestOptions = dict(self.regex.groupindex)
         named_groups = set(self.regex.groupindex.values())
         for i in range(1, self.regex.groups + 1):
             if i not in named_groups:
@@ -231,6 +234,7 @@ class PandasDatasource(Datasource):
             name: The name of the csv asset
             data_path: Path to directory with csv files
             regex: regex pattern that matches csv filenames that is used to label the batches
+<<<<<<< f/great-1505/zep-dynamic-pandas-assets
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         asset = CSVAsset(  # type: ignore[call-arg] # type has a default??
@@ -307,6 +311,9 @@ class PandasDatasource(Datasource):
             data_path: Path to directory with csv files
             regex: regex pattern that matches csv filenames that is used to label the batches
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
+=======
+            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
+>>>>>>> develop
         """
         asset = ParquetAsset(  # type: ignore[call-arg] # type has a default??
             name=name,
