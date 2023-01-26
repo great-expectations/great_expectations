@@ -189,7 +189,15 @@ class _DataFrameAsset(DataAsset):
         return batch_list
 
 
-_ASSET_MODELS = _generate_data_asset_models(_DataFrameAsset)
+_ASSET_MODELS = _generate_data_asset_models(
+    _DataFrameAsset,
+    whitelist=(
+        "read_csv",
+        "read_json",
+        "read_excel",
+        "read_parquet",
+    ),
+)
 
 CSVAsset = _ASSET_MODELS["csv"]
 ExcelAsset = _ASSET_MODELS["excel"]
