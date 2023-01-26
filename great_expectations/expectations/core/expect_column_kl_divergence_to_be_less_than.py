@@ -784,7 +784,13 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
                 chart = bars.to_dict()
             elif partition_object.get("values"):
-                values = partition_object["values"]
+                is_boolean_list = all(
+                    isinstance(value, bool) for value in partition_object["values"]
+                )
+                if is_boolean_list:
+                    values = [str(value) for value in partition_object["values"]]
+                else:
+                    values = partition_object["values"]
 
                 df = pd.DataFrame({"values": values, "fraction": weights})
 
@@ -880,7 +886,13 @@ class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
 
             chart = bars.to_dict()
         elif partition_object.get("values"):
-            values = partition_object["values"]
+            is_boolean_list = all(
+                isinstance(value, bool) for value in partition_object["values"]
+            )
+            if is_boolean_list:
+                values = [str(value) for value in partition_object["values"]]
+            else:
+                values = partition_object["values"]
 
             df = pd.DataFrame({"values": values, "fraction": weights})
 
