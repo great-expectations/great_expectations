@@ -1983,8 +1983,44 @@ class AbstractDataContext(ConfigPeer, ABC):
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
     ) -> ExpectationSuite:
-        """
-        TODO
+        """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
+
+        Note that this method can be called by itself or run within the get_validator workflow.
+
+        When run with create_expectation_suite()::
+
+            expectation_suite_name = "genres_movies.fkey"
+            context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
+            batch = context.get_batch(
+                expectation_suite_name=expectation_suite_name
+            )
+
+
+        When run as part of get_validator()::
+
+            validator = context.get_validator(
+                datasource_name="my_datasource",
+                data_connector_name="whole_table",
+                data_asset_name="my_table",
+                create_expectation_suite_with_name="my_expectation_suite",
+            )
+            validator.expect_column_values_to_be_in_set("c1", [4,5,6])
+
+
+        Args:
+            expectation_suite_name: The name of the suite to create.
+            id: Identifier to associate with this suite.
+            expectations: Expectation Configurations to associate with this suite.
+            evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+            data_asset_type: Type of data asset to associate with this suite.
+            execution_engine_type: Name of the execution engine type.
+            meta: Metadata related to the suite.
+
+        Returns:
+            A new ExpectationSuite built with provided input args.
+
+        Raises:
+            DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
         """
         return self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
