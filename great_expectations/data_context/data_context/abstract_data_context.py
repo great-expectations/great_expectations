@@ -2064,6 +2064,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"expectation_suite {expectation_suite_name} not found"
             )
 
+    @public_api
     def add_profiler(
         self,
         name: str,
@@ -2071,9 +2072,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         rules: Dict[str, dict],
         variables: Optional[dict] = None,
     ) -> RuleBasedProfiler:
-        """
-        Constructs a Profiler, persists it utilizing the context's underlying ProfilerStore,
-        and returns it to the user for subsequent usage.
+        """Constructs a Profiler, persists it using the context's ProfilerStore,
+        and returns it for subsequent usage.
 
         Args:
             name: The name of the RBP instance
