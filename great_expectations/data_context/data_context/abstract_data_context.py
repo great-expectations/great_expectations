@@ -1443,6 +1443,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return checkpoint
 
+    @public_api
     def delete_checkpoint(
         self,
         name: Optional[str] = None,
