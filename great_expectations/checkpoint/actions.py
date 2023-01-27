@@ -29,6 +29,7 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -65,6 +66,7 @@ class ValidationAction:
 
         return isinstance(self.data_context, CloudDataContext)
 
+    @public_api
     def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -76,16 +78,20 @@ class ValidationAction:
         checkpoint_identifier=None,
         **kwargs,
     ):
-        """Public entrypoint GX uses to trigger Action.
+        """Public entrypoint GX uses to trigger a ValidationAction.
+
+        When a ValidationAction is configured in a Checkpoint, this method gets called
+        after the Checkpoint produces an ExpectationSuiteValidationResult.
 
         Args:
-            validation_result_suite: An instance of ExpectationSuiteValidationResult
-            validation_result_suite_identifier: An identifier for the ExpectationSuiteValidationResult,
-                either a ValidationResultIdentifier, or a GXCloudIdentifier.
-            data_asset: Optionally, the DataAsset which was validated.
-            expectation_suite_identifier:  Optionally, the ExpectationSuiteIdentifier to use
+            validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
+            validation_result_suite_identifier: an instance of either the ValidationResultIdentifier
+                class (for open source Great Expectations) or the GeCloudIdentifier (from Great Expectations Cloud).
+            data_asset: An instance of the Validator class.
+            expectation_suite_identifier:  Optionally, an instance of the ExpectationSuiteIdentifier class..
             checkpoint_identifier:  Optionally, an Identifier for the Checkpoint
-            kwargs - any additional arguments the ValidationAction implementation might require.
+            kwargs - named parameters that are specific to a given Action, and need to be
+                assigned a value in the Action's configuration in a Checkpoint's action_list.
 
         Returns:
             A Dict describing the result of the Action.
@@ -99,6 +105,7 @@ class ValidationAction:
             **kwargs,
         )
 
+    @public_api
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -111,14 +118,20 @@ class ValidationAction:
     ):
         """Private method containing the logic specific to a ValidationAction's implementation.
 
+        The implementation details specific to this ValidationAction must live in this method.
+        Additional context required by the ValidationAction may be specified in the Checkpoint's
+        `action_list` under the `action` key. These arbitrary key/value pairs will be passed into
+        the ValidationAction as keyword arguments.
+
         Args:
-            validation_result_suite: An instance of ExpectationSuiteValidationResult
-            validation_result_suite_identifier: An identifier for the ExpectationSuiteValidationResult,
-                either a ValidationResultIdentifier, or a GXCloudIdentifier.
-            data_asset: Optionally, the DataAsset which was validated.
-            expectation_suite_identifier:  Optionally, the ExpectationSuiteIdentifier to use
+            validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
+            validation_result_suite_identifier: an instance of either the ValidationResultIdentifier
+                class (for open source Great Expectations) or the GeCloudIdentifier (from Great Expectations Cloud).
+            data_asset: An instance of the Validator class.
+            expectation_suite_identifier:  Optionally, an instance of the ExpectationSuiteIdentifier class..
             checkpoint_identifier:  Optionally, an Identifier for the Checkpoint
-            kwargs - any additional arguments the ValidationAction implementation might require.
+            kwargs - named parameters that are specific to a given Action, and need to be
+                assigned a value in the Action's configuration in a Checkpoint's action_list.
 
         Returns:
             A Dict describing the result of the Action.
