@@ -675,7 +675,7 @@ def get_dbms_compatible_column_names(
             batch_columns_list=batch_columns_list,
             error_message_template=error_message_template,
         )
-        or tuple()
+        or []
     )
 
     element: Tuple[str, str | sqlalchemy.sql.quoted_name]
