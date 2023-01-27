@@ -51,8 +51,8 @@ class CSVAsset(DataAsset):
 
     def test_connection(self) -> None:
         success = False
-        for filename in os.listdir(self.path):
-            if self.regex.match(filename):
+        for filepath in self.path.iterdir():
+            if self.regex.match(filepath.name):
                 # if one file in the path matches the regex, we consider this asset valid
                 success = True
                 break
