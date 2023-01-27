@@ -2413,6 +2413,9 @@ class QueryExpectation(TableExpectation, ABC):
             kwargs from the Expectation Configuration.
         query (optional[str]): Optional. A SQL or Spark-SQL query to be executed. If not provided, a query must be passed
             into the QueryExpectation.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
     """
 
     default_kwarg_values: Dict = {
