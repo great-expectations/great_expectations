@@ -62,7 +62,9 @@ class CSVAsset(DataAsset):
         group_id_to_option = {v: k for k, v in option_to_group_id.items()}
         batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
 
-        all_files: List[pathlib.Path] = list(pathlib.Path(self.path).iterdir())
+        all_files: List[pathlib.Path] = list(
+            pathlib.Path(self.base_directory).iterdir()
+        )
 
         file_name: pathlib.Path
         for file_name in all_files:
@@ -86,10 +88,10 @@ class CSVAsset(DataAsset):
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),
-                            self.path / file_name,
+                            self.base_directory / file_name,
                         )
                     )
-                    LOGGER.debug(f"Matching path: {self.path / file_name}")
+                    LOGGER.debug(f"Matching path: {self.base_directory / file_name}")
         if not batch_requests_with_path:
             LOGGER.warning(
                 f"Batch request {batch_request} corresponds to no data files."
