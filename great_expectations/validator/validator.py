@@ -1557,7 +1557,6 @@ class Validator:
         message="Only the str version of this argument is deprecated. run_id should be a RunIdentifier or dict. Support will be removed in 0.16.0.",
         version="0.13.0",
     )
-
     def validate(  # noqa: C901 - Complexity 31
         self,
         expectation_suite: str | ExpectationSuite | None = None,
