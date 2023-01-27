@@ -18,26 +18,33 @@ logger = logging.getLogger(__name__)
 
 
 # noinspection SpellCheckingInspection
+@public_api
 class DataConnector:
-    """
-    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
+    """The base class for all Data Connectors.
+
+    Data Connectors produce identifying information, called Batch Specs, that Execution Engines
     can use to get individual batches of data. They add flexibility in how to obtain data
     such as with time-based partitioning, downsampling, or other techniques appropriate
     for the Datasource.
 
     For example, a DataConnector could produce a SQL query that logically represents "rows in
-    the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource
-    could use to materialize a SqlAlchemyDataset corresponding to that batch of data and
+    the Events table with a timestamp on February 7, 2012," which an SqlAlchemy Datasource
+    could use to materialize a SqlAlchemy Dataset corresponding to that Batch of data and
     ready for validation.
 
-    A batch is a sample from a data asset, sliced according to a particular rule. For
-    example, an hourly slide of the Events table or “most recent `users` records.”
+    A Batch is a sample from a data asset, sliced according to a particular rule. For example,
+    an hourly slide of the Events table or “most recent Users records.” It is the primary
+    unit of validation in the Great Expectations Data Context. Batches include metadata that
+    identifies how they were constructed--the same Batch Spec assembled by the data connector.
+    While not every Datasource will enable re-fetching a specific batch of data, GX can store
+    snapshots of batches or store metadata from an external data version control system.
 
-    A Batch is the primary unit of validation in the Great Expectations DataContext.
-    Batches include metadata that identifies how they were constructed--the same “batch_spec”
-    assembled by the data connector, While not every Datasource will enable re-fetching a
-    specific batch of data, GX can store snapshots of batches or store metadata from an
-    external data version control system.
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
@@ -48,15 +55,6 @@ class DataConnector:
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        Base class for DataConnectors
-
-        Args:
-            name (str): required name for DataConnector
-            datasource_name (str): required name for datasource
-            execution_engine (ExecutionEngine): reference to ExecutionEngine
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         if execution_engine is None:
             raise gx_exceptions.DataConnectorError(
                 "A non-existent/unknown ExecutionEngine instance was referenced."
