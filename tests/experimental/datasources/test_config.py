@@ -297,7 +297,8 @@ def from_dict_gx_config() -> GxConfig:
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_json_gx_config() -> GxConfig:
-    gx_config = GxConfig.parse_raw(PG_COMPLEX_CONFIG_JSON)
+    with mock.patch("sqlalchemy.create_engine"):
+        gx_config = GxConfig.parse_raw(PG_COMPLEX_CONFIG_JSON)
     assert gx_config
     return gx_config
 
