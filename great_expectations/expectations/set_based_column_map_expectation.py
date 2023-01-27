@@ -61,7 +61,7 @@ class SetColumnMapMetricProvider(ColumnMapMetricProvider):
     In some cases, subclasses of MetricProvider, such as SetColumnMapMetricProvider, will already
     have correct values that may simply be inherited by Metric classes.
 
-    Attributes:
+    Args:
         set_ (union[list, set]): A value set.
         metric_name (str): The name of the registered metric. Must be globally unique in a great_expectations installation.
             Constructed by the `register_metric(...)` function during Expectation execution.
@@ -103,7 +103,7 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     )
     ```
 
-    Attributes:
+    Args:
         set_camel_name (str): A name describing a set of values, in camel case.
         set_ (str): A value set.
         set_semantic_name (optional[str]): A name for the semantic type representing the set being validated..

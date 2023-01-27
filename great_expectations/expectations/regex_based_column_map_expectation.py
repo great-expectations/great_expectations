@@ -62,7 +62,7 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
     In some cases, subclasses of MetricProvider, such as RegexColumnMapMetricProvider, will already
     have correct values that may simply be inherited by Metric classes.
 
-    Attributes:
+    Args:
         regex (str): A valid regex pattern.
         metric_name (str): The name of the registered metric. Must be globally unique in a great_expectations installation.
             Constructed by the `register_metric(...)` function during Expectation execution.
@@ -112,7 +112,7 @@ class RegexBasedColumnMapExpectation(ColumnMapExpectation, ABC):
     )
     ```
 
-    Attributes:
+    Args:
         regex_camel_name (str): A name describing a regex pattern, in camel case.
         regex_ (str): A valid regex pattern.
         semantic_type_name_plural (optional[str]): The plural form of a semantic type being validated by a regex pattern.

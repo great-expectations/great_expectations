@@ -2,6 +2,7 @@ import logging
 import re
 from typing import List, Optional
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.file_path_data_connector import (
@@ -24,17 +25,30 @@ except ImportError:
     )
 
 
+@public_api
 class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
-    """
-    Extension of InferredAssetFilePathDataConnector used to connect to Azure Blob Storage
+    """An Inferred Asset Data Connector used to connect to Azure Blob Storage.
 
-    The InferredAssetAzureDataConnector is one of two classes (ConfiguredAssetAzureDataConnector being the
-    other one) designed for connecting to filesystem-like data, more specifically files on Azure Blob Storage. It
-    connects to assets inferred from container, name_starts_with, and file name by default_regex.
+    This Data Connector uses regular expressions to traverse through Azure Blob Storage containers and implicitly
+    determine Data Asset name.
 
-    As much of the interaction with the SDK is done through a BlobServiceClient, please refer to the official
-    docs if a greater understanding of the supported authentication methods and general functionality is desired.
-    Source: https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python
+    Much of the interaction is performed using a BlobServiceClient. Please refer to
+    the `official Azure documentation <https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python>`_ for
+    more information.
+
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        container: The container for Azure Blob Storage.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        default_regex: A regex configuration for filtering data references. The dict can include a regex `pattern` and
+            a list of `group_names` for capture groups.
+        sorters: A list of sorters for sorting data references.
+        name_starts_with: Infer as Data Assets only blobs that begin with this prefix.
+        delimiter: When included, will remove any prefix up to the delimiter from the inferred Data Asset names.
+        azure_options: Options passed to the `BlobServiceClient`.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
@@ -51,21 +65,6 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        InferredAssetAzureDataConnector for connecting to Azure Blob Storage.
-
-        Args:
-            name (str): required name for data_connector
-            datasource_name (str): required name for datasource
-            container (str): container for Azure Blob Storage
-            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
-            default_regex (dict): optional regex configuration for filtering data_references
-            sorters (list): optional list of sorters for sorting data_references
-            name_starts_with (str): Azure prefix
-            delimiter (str): Azure delimiter
-            azure_options (dict): wrapper object for **kwargs
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         logger.debug(f'Constructing InferredAssetAzureDataConnector "{name}".')
 
         super().__init__(
