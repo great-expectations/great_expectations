@@ -29,13 +29,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__file__)
 
-# TODO: use this to parametrize `test_data_asset_defined_for_io_read_method`
-PANDAS_IO_METHODS: list[str] = [
-    member_tuple[0]
-    for member_tuple in inspect.getmembers(pd, predicate=inspect.isfunction)
-    if member_tuple[0].startswith("read_")
-]
-
 
 @pytest.fixture
 def pandas_datasource() -> PandasDatasource:
