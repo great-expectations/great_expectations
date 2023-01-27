@@ -53,16 +53,18 @@ class UserConfigurableProfiler:
         suite = profiler.build_suite()
 
 
-    Use a Profiler to build a suite with a semantic types dict, as follows::
+    Use a Profiler to build a suite with a semantic types dict, as follows:
 
-        semantic_types_dict = {
-                    "numeric": ["c_acctbal"],
-                    "string": ["c_address","c_custkey"],
-                    "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone'],
-                }
+    ```python
+    semantic_types_dict = {
+                "numeric": ["c_acctbal"],
+                "string": ["c_address","c_custkey"],
+                "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone'],
+            }
 
-        profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)
-        suite = profiler.build_suite()
+    profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)
+    suite = profiler.build_suite()
+    ```
 
     Args:
         profile_dataset: A Great Expectations Dataset or Validator object.
@@ -81,7 +83,9 @@ class UserConfigurableProfiler:
         semantic_types_dict: A dict where the keys are available semantic types
             (see `profiler.base.ProfilerSemanticTypes`) and the values are lists of columns for which you
             would like to create semantic-type-specific Expectations e.g.:
-            `"semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}`
+            ```python
+            "semantic_types": { "value_set": ["state","country"], "numeric":["age", "amount_due"]}
+            ```
         table_expectations_only: If `True`, this will only create the two table level
             Expectations available to this Profiler (`expect_table_columns_to_match_ordered_list` and
             `expect_table_row_count_to_be_between`). If `primary_or_compound_key` is specified, it will
