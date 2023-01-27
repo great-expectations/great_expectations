@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-class PandasDatasourceError(Exception):
+class SparkDatasourceError(Exception):
     pass
 
 
@@ -35,7 +35,7 @@ class CSVAsset(DataAsset):
     # Overridden inherited instance fields
     type: Literal["csv"] = "csv"
 
-    # Pandas specific attributes
+    # Spark specific attributes
     base_directory: pathlib.Path
     regex: Pattern
 
@@ -62,7 +62,9 @@ class CSVAsset(DataAsset):
         group_id_to_option = {v: k for k, v in option_to_group_id.items()}
         batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
 
-        all_files: List[pathlib.Path] = list(pathlib.Path(self.path).iterdir())
+        all_files: List[pathlib.Path] = list(
+            pathlib.Path(self.base_directory).iterdir()
+        )
 
         file_name: pathlib.Path
         for file_name in all_files:
@@ -86,10 +88,10 @@ class CSVAsset(DataAsset):
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),
-                            self.path / file_name,
+                            self.base_directory / file_name,
                         )
                     )
-                    LOGGER.debug(f"Matching path: {self.path / file_name}")
+                    LOGGER.debug(f"Matching path: {self.base_directory / file_name}")
         if not batch_requests_with_path:
             LOGGER.warning(
                 f"Batch request {batch_request} corresponds to no data files."
@@ -177,23 +179,23 @@ class CSVAsset(DataAsset):
         return batch_list
 
 
-class PandasDatasource(Datasource):
+class SparkDatasource(Datasource):
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset]
 
     # instance attrs
-    type: Literal["pandas"] = "pandas"
+    type: Literal["spark"] = "spark"
     name: str
     assets: Dict[str, CSVAsset] = {}
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
-        """Return the PandasExecutionEngine unless the override is set"""
-        from great_expectations.execution_engine.pandas_execution_engine import (
-            PandasExecutionEngine,
+        """Return the SparkDFExecutionEngine unless the override is set"""
+        from great_expectations.execution_engine.sparkdf_execution_engine import (
+            SparkDFExecutionEngine,
         )
 
-        return PandasExecutionEngine
+        return SparkDFExecutionEngine
 
     def add_csv_asset(
         self,
@@ -202,7 +204,7 @@ class PandasDatasource(Datasource):
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> CSVAsset:
-        """Adds a csv asset to this Pandas datasource
+        """Adds a csv asset to this Spark datasource
 
         Args:
             name: The name of the csv asset
