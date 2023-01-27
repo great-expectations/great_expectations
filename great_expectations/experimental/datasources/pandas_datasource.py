@@ -7,7 +7,7 @@ import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
 
 import pydantic
-from typing_extensions import ClassVar, Literal, TypeAlias
+from typing_extensions import ClassVar, Literal
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
