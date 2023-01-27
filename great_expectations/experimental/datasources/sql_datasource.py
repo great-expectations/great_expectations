@@ -145,7 +145,7 @@ class TableAsset(DataAsset):
         """Test the connection for the TableAsset.
 
         Raises:
-          TestConnectionError
+            TestConnectionError
         """
         assert isinstance(self.datasource, SQLDatasource)
         try:
@@ -419,10 +419,10 @@ class SQLDatasource(Datasource):
         """Test the connection for the SQLDatasource.
 
         Args:
-          test_assets: If assets have been passed to the SQLDatasource, an attempt can be made to test them as well.
+            test_assets: If assets have been passed to the SQLDatasource, an attempt can be made to test them as well.
 
         Raises:
-          TestConnectionError
+            TestConnectionError
         """
         try:
             self.engine.connect()

@@ -49,7 +49,7 @@ class CSVAsset(DataAsset):
         """Test the connection for the CSVAsset.
 
         Raises:
-          TestConnectionError
+            TestConnectionError
         """
         success = False
         for filepath in self.path.iterdir():
@@ -219,10 +219,10 @@ class PandasDatasource(Datasource):
         """Test the connection for the PandasDatasource.
 
         Args:
-          test_assets: If assets have been passed to the PandasDatasource, an attempt can be made to test them.
+            test_assets: If assets have been passed to the PandasDatasource, an attempt can be made to test them.
 
         Raises:
-          TestConnectionError
+            TestConnectionError
         """
         # Only self.assets can be tested for PandasDatasource
         if self.assets and test_assets:

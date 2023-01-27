@@ -158,7 +158,7 @@ class DataAsset(ExperimentalBaseModel):
         """Test the connection for the DataAsset.
 
         Raises:
-          TestConnectionError
+            TestConnectionError
         """
         raise NotImplementedError(
             "One needs to implement 'test_connection' on a DataAsset subclass"
@@ -414,10 +414,10 @@ class Datasource(
         """Test the connection for the Datasource.
 
         Args:
-          test_assets: If assets have been passed to the Datasource, an attempt can be made to test them as well.
+            test_assets: If assets have been passed to the Datasource, an attempt can be made to test them as well.
 
         Raises:
-          TestConnectionError
+            TestConnectionError
         """
         raise NotImplementedError(
             "One needs to implement 'test_connection' on a Datasource subclass"
