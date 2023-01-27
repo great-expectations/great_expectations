@@ -154,6 +154,7 @@ def substitute_none_for_missing(kwargs: dict[str, Any], kwarg_list: list[str]) -
 
 
 # NOTE: the method is pretty dirty
+@public_api
 def parse_row_condition_string_pandas_engine(
     condition_string: str, with_schema: bool = False
 ) -> tuple:
