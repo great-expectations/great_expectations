@@ -3141,7 +3141,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
 
 @public_api
 class MapMetricProvider(MetricProvider):
-    """Base class for defining metrics that are evaluated for every row. An example of a map metric is
+    """The base class for defining metrics that are evaluated for every row. An example of a map metric is
     `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of `MapMetricProvider`).
     """
 
@@ -3716,7 +3716,7 @@ class MapMetricProvider(MetricProvider):
 
 @public_api
 class ColumnMapMetricProvider(MapMetricProvider):
-    """Class for defining metrics that are evaluated for every row for a single column. An example of a column map
+    """Defines metrics that are evaluated for every row for a single column. An example of a column map
     metric is `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of
     `MapMetricProvider`).
 
@@ -3778,7 +3778,14 @@ class ColumnMapMetricProvider(MapMetricProvider):
         return dependencies
 
 
+@public_api
 class ColumnPairMapMetricProvider(MapMetricProvider):
+    """Defines metrics that are evaluated for every row for a column pair. All column pair metrics require domain
+    keys of `column_A` and `column_B`.
+
+    `expect_column_pair_values_to_be_equal` is an example of an Expectation that uses this metric.
+    """
+
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
