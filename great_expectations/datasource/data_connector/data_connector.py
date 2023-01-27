@@ -3,6 +3,7 @@ from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
@@ -181,6 +182,7 @@ class DataConnector:
     def get_unmatched_data_references(self) -> List[Any]:
         raise NotImplementedError
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
 
