@@ -335,10 +335,10 @@ illegal.  Please check your config."""
             elif isinstance(schema, str):
                 raise gx_exceptions.ExecutionEngineError(
                     """
-                                Spark schema was not properly serialized.
-                                Please run the .jsonValue() method on the schema object before loading into GX.
-                                schema: your_schema.jsonValue()
-                                """
+                    Spark schema was not properly serialized.
+                    Please run the .jsonValue() method on the schema object before loading into GX.
+                    schema: your_schema.jsonValue()
+                    """
                 )
             # noinspection PyUnresolvedReferences
             try:
