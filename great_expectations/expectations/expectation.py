@@ -2414,7 +2414,7 @@ class QueryExpectation(TableExpectation, ABC):
         query (optional[str]): Optional. A SQL or Spark-SQL query to be executed. If not provided, a query must be passed
             into the QueryExpectation.
 
-    ---Documentation---
+    --Documentation--
         - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations
     """
 
