@@ -33,8 +33,8 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
     determine Data Asset name.
 
     Much of the interaction is performed using a BlobServiceClient. Please refer to
-    the `official Azure documentation <https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python>`_
-    for more information.
+    the `official Azure documentation <https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python>`_ for
+    more information.
 
     Args:
         name: The name of the Data Connector.
