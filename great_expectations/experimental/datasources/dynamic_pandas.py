@@ -250,7 +250,7 @@ def _generate_data_asset_models(
     io_methods = _extract_io_methods(whitelist)
     io_method_sigs = _extract_io_signatures(io_methods)
 
-    models: Dict[str, Type[M]] = {}
+    data_asset_models: Dict[str, Type[M]] = {}
     for signature_tuple in io_method_sigs:
 
         fields = _to_pydantic_fields(signature_tuple)
@@ -261,7 +261,7 @@ def _generate_data_asset_models(
         )
 
         try:
-            model = _create_pandas_asset_model(
+            asset_model = _create_pandas_asset_model(
                 model_name=model_name,
                 model_base=base_model_class,
                 type_field=(f"Literal['{type_name}']", type_name),
@@ -277,9 +277,9 @@ def _generate_data_asset_models(
             logger.error(f"{model_name} - {type(err).__name__}:{err}")
             logger.warning(f"{model_name} fields\n{pf(fields)}")
             continue
-        models[type_name] = model
-        model.update_forward_refs(**_TYPE_REF_LOCALS)
+        data_asset_models[type_name] = asset_model
+        asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
 
     logger.debug(f"Needs extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")
     logger.debug(f"No Annotation\n{FIELD_SKIPPED_NO_ANNOTATION}")
-    return models
+    return data_asset_models
