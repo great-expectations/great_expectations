@@ -3,6 +3,7 @@ import json
 import pathlib
 from pprint import pformat as pf
 from typing import Callable, List
+from unittest import mock
 
 import pydantic
 import pytest
@@ -233,14 +234,15 @@ def test_catch_bad_asset_configs(
         "my_test_ds": {
             "type": "postgres",
             "name": "my_test_ds",
-            "connection_string": "postgresql://userName:@hostname/dbName",
+            "connection_string": "postgres://userName:@hostname/dbName",
             "assets": {bad_asset_config["name"]: bad_asset_config},
         }
     }
     print(f"  Config\n{pf(config)}\n")
 
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        GxConfig.parse_obj({"xdatasources": config})
+        with mock.patch("sqlalchemy.create_engine"):
+            GxConfig.parse_obj({"xdatasources": config})
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
