@@ -13,18 +13,21 @@ from great_expectations.execution_engine import ExecutionEngine
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class InferredAssetFilePathDataConnector(FilePathDataConnector):
-    """
-    The InferredAssetFilePathDataConnector is one of two classes (ConfiguredAssetFilePathDataConnector being the
-    other one) designed for connecting to filesystem-like data. This includes files on disk, but also things
-    like S3 object stores, etc:
+    """A base class for Inferred Asset Data Connectors designed to operate on file paths and implicitly determine Data Asset names through regular expressions.
 
-    InferredAssetFilePathDataConnector is a base class that operates on file paths and determines
-    the data_asset_name implicitly (e.g., through the combination of the regular expressions pattern and group names)
+    Note that `InferredAssetFilePathDataConnector` is not meant to be used on its own, but extended.
 
-    *Note*: InferredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
-    InferredAssetFilesystemDataConnector, InferredAssetS3DataConnector, InferredAssetAzureDataConnector, and
-    InferredAssetGCSDataConnector are subclasses of InferredAssetFilePathDataConnector.
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        default_regex: A regex configuration for filtering data references. The dict can include a regex `pattern` and
+            a list of `group_names` for capture groups.
+        sorters: A list of sorters for sorting data references.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
@@ -37,18 +40,6 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
-        and sorters for filtering and sorting data_references.
-
-        Args:
-            name (str): name of ConfiguredAssetFilePathDataConnector
-            datasource_name (str): Name of datasource that this DataConnector is connected to
-            execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
-            default_regex (dict): Optional dict the filter and organize the data_references.
-            sorters (list): Optional list if you want to sort the data_references
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         logger.debug(f'Constructing InferredAssetFilePathDataConnector "{name}".')
 
         super().__init__(
