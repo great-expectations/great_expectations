@@ -176,6 +176,7 @@ exclude = [
     'validator/validator\.py', # 54
     # tests
     'tests/experimental/datasources/conftest\.py',
+    'tests/experimental/datasources/tasks\.py',
     'tests/experimental/datasources/test_config\.py',
     'tests/experimental/datasources/test_integration_datasource\.py',
     'tests/experimental/datasources/test_pandas_datasource\.py',
