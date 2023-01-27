@@ -2170,14 +2170,25 @@ class Expectation(metaclass=MetaExpectation):
 
 @public_api
 class TableExpectation(Expectation, ABC):
-    """_summary_
+    """Base class for TableExpectations.
 
-    Args:
-        Expectation (_type_): _description_
-        ABC (_type_): _description_
+    TableExpectations answer a semantic question about the table itself.
+
+    For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer
+    how many columns and rows are in your table.
 
     Raises:
         InvalidExpectationConfigurationError: _description_
+
+    Args:
+        domain_keys (tuple): A tuple of the keys used to determine the domain of the
+            expectation.
+        success_keys (tuple): A tuple of the keys used to determine the success of
+            the expectation.
+        runtime_keys (optional[tuple]): Optional. A tuple of the keys that can be used to control output but will
+            not affect the actual success value of the expectation (such as result_format).
+        default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
+            kwargs from the Expectation Configuration.
 
     Returns:
         _type_: _description_
