@@ -115,12 +115,16 @@ def DataContext(
         - https://docs.greatexpectations.io/docs/terms/data_context
 
     Args:
-        context_root_dir: The context root directory
-        runtime_environment: The runtime environment
-        cloud_mode: The cloud mode
-        cloud_base_url: Your cloud base url
-        cloud_access_token: Your cloud access token
-        cloud_organization_id: Your cloud organization ID
+        context_root_dir: Path to directory that contains your data context related files
+        runtime_environment: A dictionary containing relevant runtime information (like class_name and module_name)
+        cloud_mode: Whether to run GX in Cloud mode (default is None).
+            If None, cloud mode is assumed if Cloud credentials are set up. Set to False to override.
+        cloud_base_url: Your cloud base url. Optional, you may provide this alternatively via
+                environment variable GX_CLOUD_BASE_URL or within a config file.
+        cloud_access_token: Your cloud access token. Optional, you may provide this alternatively
+                via environment variable GX_CLOUD_ACCESS_TOKEN or within a config file.
+        cloud_organization_id: Your cloud organization ID. Optional, you may provide this alternatively
+                via environment variable GX_CLOUD_ORGANIZATION_ID or within a config file.
         ge_cloud_mode: The deprecated cloud mode
         ge_cloud_base_url: Your deprecated cloud base url
         ge_cloud_access_token: Your deprecated cloud access token
