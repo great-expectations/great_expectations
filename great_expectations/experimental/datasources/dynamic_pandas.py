@@ -284,19 +284,13 @@ def _generate_data_asset_models(
             logger.debug(f"{model_name} - {type(err).__name__}:{err}")
             continue
         except TypeError as err:
-            # creation may fail on earlier versions of pandas
-            # in that case create a place holder model without any extra fields
-            # TODO: may need to up min pandas version for zep launch
-            logger.debug(
+            # may fail on python <3.10 due to use of builtin as generic
+            logger.warning(
                 f"{model_name} could not be created normally - {type(err).__name__}:{err}"
             )
-            logger.debug(f"{model_name} fields\n{pf(fields)}")
-            asset_model = _create_pandas_asset_model(
-                model_name=model_name,
-                model_base=base_model_class,
-                type_field=(f"Literal['{type_name}']", type_name),
-                fields_dict={},
-            )
+            logger.warning(f"{model_name} fields\n{pf(fields)}")
+            raise
+
         data_asset_models[type_name] = asset_model
         asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
 
