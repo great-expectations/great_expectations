@@ -58,7 +58,8 @@ def _source(
         postgres_datasource.engine = MockSaEngine(
             dialect=Dialect("postgresql+psycopg2")
         )
-        yield postgres_datasource
+        with mock.patch("sqlalchemy.create_engine"):
+            yield postgres_datasource
     finally:
         PostgresDatasource.execution_engine_override = original_override
 
