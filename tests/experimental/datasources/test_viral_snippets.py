@@ -59,6 +59,7 @@ def zep_config_dict(db_file, csv_path) -> dict:
                         "name": "my_csv_asset",
                         "type": "csv",
                         "path": csv_path,
+                        "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     }
                 },
             },
