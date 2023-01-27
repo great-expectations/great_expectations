@@ -240,27 +240,27 @@ def _to_pydantic_fields(
     return fields_dict
 
 
-M = TypeVar("M", bound=DataAsset)
+M = TypeVar("M", bound=Type[DataAsset])
 
 
 def _create_pandas_asset_model(
     model_name: str,
-    model_base: Type[M],
+    model_base: M,
     type_field: Tuple[Union[Type, str], str],
     fields_dict: Dict[str, _FieldSpec],
-) -> Type[M]:
+) -> M:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
     model = pydantic.create_model(model_name, __base__=model_base, type=type_field, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
     return model
 
 
 def _generate_data_asset_models(
-    base_model_class: Type[M], whitelist: Optional[Sequence[str]] = None
-) -> Dict[str, Type[M]]:
+    base_model_class: M, whitelist: Optional[Sequence[str]] = None
+) -> Dict[str, M]:
     io_methods = _extract_io_methods(whitelist)
     io_method_sigs = _extract_io_signatures(io_methods)
 
-    data_asset_models: Dict[str, Type[M]] = {}
+    data_asset_models: Dict[str, M] = {}
     for signature_tuple in io_method_sigs:
 
         fields = _to_pydantic_fields(signature_tuple)
