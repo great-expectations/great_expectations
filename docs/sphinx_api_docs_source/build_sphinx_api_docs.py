@@ -252,12 +252,19 @@ class SphinxInvokeDocsBuilder:
             # (if .parent is not used, then there will be a duplicate).
             path_prefix = pathlib.Path(shortest_dotted_path.replace(".", "/")).parent
 
+            # Remove the `great_expectations` top level
+            if path_prefix.parts[0] == "great_expectations":
+                path_prefix = pathlib.Path(*path_prefix.parts[1:])
+
             # Join the shortest path and write output
             output_path = (path_prefix / html_file_path.stem).with_suffix(".mdx")
         else:
             output_path = html_file_path.relative_to(static_html_file_path).with_suffix(
                 ".mdx"
             )
+            # Remove the `great_expectations` top level
+            if output_path.parts[0] == "great_expectations":
+                output_path = pathlib.Path(*output_path.parts[1:])
 
         return output_path
 
@@ -423,4 +430,5 @@ class SphinxInvokeDocsBuilder:
         doc = doc.replace("&lt;", "<").replace("&gt;", ">")
         doc = doc.replace("”", '"').replace("‘", "'").replace("’", "'")
         doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
+        doc = doc.replace("${", r"\${")
         return doc
