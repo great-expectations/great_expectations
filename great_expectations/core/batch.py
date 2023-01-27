@@ -445,7 +445,7 @@ class BatchRequest(BatchRequestBase):
         data_connector_name: name of the DataConnector used to connect to the data
         data_asset_name: name of the DataAsset used to connect to the data
         data_connector_query: a dictionary of query parameters the DataConnector
-            should use to
+            should use to filter the batches returned from a BatchRequest
         limit: if specified, the maximum number of *batches* to be returned
             (limit does not affect the number of records in each batch)
         batch_spec_passthrough: a dictionary of additional parameters that
@@ -505,10 +505,17 @@ class RuntimeBatchRequest(BatchRequestBase):
 
     runtime_parameters will vary depending on the Datasource used with the data.
 
-    For a dataframe::
-        {"batch_data": df}
-    For a path on a filesystem::
+    For a dataframe:
+
+    ```python
+    {"batch_data": df}
+    ```
+
+    For a path on a filesystem:
+
+    ```python
         {"path": "/path/to/data/file.csv"}
+    ```
 
     Args:
         datasource_name: name of the Datasource used to connect to the data
