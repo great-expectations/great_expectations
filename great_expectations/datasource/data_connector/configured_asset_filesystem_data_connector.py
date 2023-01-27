@@ -18,8 +18,7 @@ logger = logging.getLogger(__name__)
 
 @public_api
 class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnector):
-    """
-    Extension of ConfiguredAssetFilePathDataConnector used to connect to Filesystem
+    """Extension of ConfiguredAssetFilePathDataConnector used to connect to Filesystem.
 
     Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
     connect to. While this allows for fine-grained control over which Data Assets may be accessed,
