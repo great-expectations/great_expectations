@@ -38,7 +38,31 @@ except ImportError:
     )
 
 
+@public_api
 class BatchDefinition(SerializableDictDot):
+    """Precisely identifies a set of data from a data source.
+
+    More concretely, a BatchDefinition includes all the information required to precisely
+    identify a set of data from the external data source that should be
+    translated into a Batch. One or more BatchDefinitions should always be
+    *returned* from the Datasource, as a result of processing the Batch Request.
+
+    ---Documentation---
+            - https://docs.greatexpectations.io/docs/terms/batch/#batches-and-batch-requests-design-motivation
+
+    Args:
+        datasource_name: name of the Datasource used to connect to the data
+        data_connector_name: name of the DataConnector used to connect to the data
+        data_asset_name: name of the DataAsset used to connect to the data
+        batch_identifiers: key-value pairs that the DataConnector
+            will use to obtain a specific set of data
+        batch_spec_passthrough: a dictionary of additional parameters that
+            the ExecutionEngine will use to obtain a specific set of data
+
+    Returns:
+        BatchDefinition
+    """
+
     def __init__(
         self,
         datasource_name: str,
@@ -391,10 +415,45 @@ is illegal.
             )
 
 
+@public_api
 class BatchRequest(BatchRequestBase):
-    """
-    This class contains all attributes of a batch_request.  See the comments in BatchRequestBase for design specifics.
-    limit: refers to the number of batches requested (not rows per batch)
+    """A BatchRequest is the way to specify which data Great Expectations will validate.
+
+    A Batch Request is provided to a Datasource in order to create a Batch.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource/#1-construct-a-batchrequest
+        - https://docs.greatexpectations.io/docs/terms/batch_request
+
+    The `data_connector_query` parameter can include an index slice:
+
+    ```python
+    {
+        "index": "-3:"
+    }
+    ```
+
+    or it can include a filter:
+
+    ```python
+    {
+        "batch_filter_parameters": {"year": "2020"}
+    }
+    ```
+
+    Args:
+        datasource_name: name of the Datasource used to connect to the data
+        data_connector_name: name of the DataConnector used to connect to the data
+        data_asset_name: name of the DataAsset used to connect to the data
+        data_connector_query: a dictionary of query parameters the DataConnector
+            should use to filter the batches returned from a BatchRequest
+        limit: if specified, the maximum number of *batches* to be returned
+            (limit does not affect the number of records in each batch)
+        batch_spec_passthrough: a dictionary of additional parameters that
+            the ExecutionEngine will use to obtain a specific set of data
+
+    Returns:
+        BatchRequest
     """
 
     include_field_names: Set[str] = {
@@ -432,7 +491,47 @@ class BatchRequest(BatchRequestBase):
         )
 
 
+@public_api
 class RuntimeBatchRequest(BatchRequestBase):
+    """A RuntimeBatchRequest creates a Batch for a RuntimeDataConnector.
+
+    Instead of serving as a description of what data Great Expectations should
+    fetch, a RuntimeBatchRequest serves as a wrapper for data that is passed in
+    at runtime (as an in-memory dataframe, file/S3 path, or SQL query), with
+    user-provided identifiers for uniquely identifying the data.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/terms/batch_request/#runtimedataconnector-and-runtimebatchrequest
+        - https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector/
+
+    runtime_parameters will vary depending on the Datasource used with the data.
+
+    For a dataframe:
+
+    ```python
+    {"batch_data": df}
+    ```
+
+    For a path on a filesystem:
+
+    ```python
+        {"path": "/path/to/data/file.csv"}
+    ```
+
+    Args:
+        datasource_name: name of the Datasource used to connect to the data
+        data_connector_name: name of the DataConnector used to connect to the data
+        data_asset_name: name of the DataAsset used to connect to the data
+        runtime_parameters: a dictionary containing the data to process,
+            a path to the data, or a query, depending on the associated Datasource
+        batch_identifiers: a dictionary to serve as a persistent, unique
+            identifier for the data included in the Batch
+        batch_spec_passthrough: a dictionary of additional parameters that
+            the ExecutionEngine will use to obtain a specific set of data
+    Returns:
+        BatchRequest
+    """
+
     include_field_names: Set[str] = {
         "datasource_name",
         "data_connector_name",
@@ -565,6 +664,7 @@ class Batch(SerializableDictDot):
     Returns:
         Batch instance created.
     """
+
     def __init__(
         self,
         data: Optional[BatchDataType] = None,
@@ -699,7 +799,23 @@ class Batch(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @public_api
     def head(self, n_rows=5, fetch_all=False):
+        """Return the first n rows from the Batch.
+
+        This function returns the first n_rows rows. It is useful for quickly testing
+        if your object has the data you expected.
+
+        It will always obtain data from the Datasource and return a Pandas
+        DataFrame available locally.
+
+        Args:
+             n_rows: the number of rows to return
+             fetch_all: whether to fetch all rows; overrides n_rows if set to True
+
+        Returns:
+            A Pandas DataFrame
+        """
         # FIXME - we should use a Validator after resolving circularity
         # Validator(self._data.execution_engine, batches=(self,)).get_metric(MetricConfiguration("table.head", {"batch_id": self.id}, {"n_rows": n_rows, "fetch_all": fetch_all}))
         metric = MetricConfiguration(
