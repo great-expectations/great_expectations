@@ -201,7 +201,7 @@ def register_metric(
         metric_fn_type: The MetricFunctionType or MetricPartialFunctionType used to define the Metric class.
 
     Returns:
-        res: A dictionary containing warnings thrown during registration if applicable, and the success status of registration.
+        A dictionary containing warnings thrown during registration if applicable, and the success status of registration.
     """
     res: dict = {}
     execution_engine_name = execution_engine.__name__
