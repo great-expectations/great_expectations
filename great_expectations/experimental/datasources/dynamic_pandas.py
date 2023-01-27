@@ -179,10 +179,11 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
 
     types: list = []
 
-    union_parts = annotation.split(" | ")
+    union_parts = annotation.split("|")
     str_to_eval: str
-    # TODO: use eval'ed types and use subclass check
     for type_str in union_parts:
+        type_str = type_str.strip()
+
         if type_str in CAN_HANDLE:
             types.append(type_str)
         else:
