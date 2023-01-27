@@ -1,3 +1,8 @@
+import pathlib
+
+import pytest
+
+from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 from docs.sphinx_api_docs_source.conf import convert_code_blocks
 
 
@@ -62,3 +67,17 @@ def test_convert_code_blocks():
         ":raises TypeError: validation_result_id must be of type ValidationResultIdentifier or GeCloudIdentifier, not {}.",
         "",
     ]
+
+
+@pytest.fixture
+def mock_sphinx_invoke_docs_builder():
+    ctx = None
+    base_path = pathlib.Path("docs/api_docs")
+    return SphinxInvokeDocsBuilder(ctx=ctx, base_path=base_path)
+
+
+def test__get_mdx_file_path(mock_sphinx_invoke_docs_builder):
+    print(mock_sphinx_invoke_docs_builder.temp_sphinx_html_dir)
+    path = pathlib.Path.cwd() / "checkpoint.html"
+    print(mock_sphinx_invoke_docs_builder._get_mdx_file_path(html_file_path=path))
+    pass

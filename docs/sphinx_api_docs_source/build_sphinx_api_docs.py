@@ -141,6 +141,8 @@ class SphinxInvokeDocsBuilder:
             and "_static" not in str(p)
         ]
 
+        breakpoint()
+
         # Read the generated html and process the content for conversion to mdx
         # Write out to .mdx file using the relative file directory structure
         for html_file in files:
@@ -242,6 +244,9 @@ class SphinxInvokeDocsBuilder:
 
         # Get the definition
         definition = self.class_definitions.get(html_file_path.stem)
+
+        if "datasource" in str(html_file_path) or "Datasource" in str(html_file_path):
+            breakpoint()
 
         if definition:
             # Use definition to find the shortest path
