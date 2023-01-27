@@ -4,6 +4,7 @@ from typing import Callable, Dict, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
@@ -65,15 +66,16 @@ def metric_partial(
     return wrapper
 
 
+@public_api
 class MetricProvider(metaclass=MetaMetricProvider):
     """Base class for all metric providers.
 
     MetricProvider classes *must* have the following attributes set:
         1. `metric_name`: the name to use. Metric Name must be globally unique in
            a great_expectations installation.
-        1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
+        2. `domain_keys`: a tuple of the *keys* used to determine the domain of the
            metric
-        2. `value_keys`: a tuple of the *keys* used to determine the value of
+        3. `value_keys`: a tuple of the *keys* used to determine the value of
            the metric.
 
     In some cases, subclasses of Expectation, such as TableMetricProvider will already

@@ -1,6 +1,7 @@
 import json
 from typing import Optional, Tuple
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -137,7 +138,14 @@ class MetricConfiguration:
             self.metric_value_kwargs_id,
         )
 
+    @public_api
     def to_json_dict(self) -> dict:
+        """Returns a JSON-serializable dict representation of this MetricConfiguration.
+
+        Returns:
+            A JSON-serializable dict representation of this MetricConfiguration.
+
+        """
         json_dict: dict = convert_to_json_serializable(
             data={
                 "metric_name": self.metric_name,
