@@ -4,7 +4,7 @@ title: How to create a Custom Multicolumn Map Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-**`MulticolumnMapExpectations`** are one of the most common types of <TechnicalTag tag="expectation" text="Expectation" />. They are evaluated for a set of columns and ask a yes/no question about the row-wise relationship between those columns. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+**`MulticolumnMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="Expectation" />. They are evaluated for a set of columns and ask a yes/no question about the row-wise relationship between those columns. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
 This guide will walk you through the process of creating a custom `MulticolumnMapExpectation`.
 
@@ -87,7 +87,7 @@ By convention, your <TechnicalTag tag="metric" text="Metric" /> class is defined
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L64
+```python name="tests/integration/docusaurus/expectations/examples/multicolumn_map_expectation_template.py ExpectMulticolumnValuesToMatchSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -95,7 +95,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L67
+```python name="tests/integration/docusaurus/expectations/examples/multicolumn_map_expectation_template.py docstring"
 ```
 
 with something like:
@@ -104,7 +104,7 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L130
+```python name="tests/integration/docusaurus/expectations/examples/multicolumn_map_expectation_template.py diagnostics"
 ```
 
 with this one:
@@ -186,7 +186,7 @@ Metrics answer questions about your data posed by your Expectation, <br/> and al
 
 Your Metric function will have the `@multicolumn_condition_partial` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to calculate whether values across a set of columns are multiples of 3 using the `PandasExecutionEngine`.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py#L37-L39
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py _pandas"
 ```
 
 This is all that you need to define for now. The `MulticolumnMapMetricProvider` and `MulticolumnMapExpectation` classes have built-in logic to handle all the machinery of data validation, including standard parameters like `mostly`, generation of Validation Results, etc.
@@ -210,7 +210,7 @@ Next, choose a Metric Identifier for your Metric. By convention, Metric Identifi
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L30
+```python name="tests/integration/docusaurus/expectations/examples/multicolumn_map_expectation_template.py metric_name"
 ```
 
 with
@@ -220,7 +220,7 @@ with
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L77
+```python name="tests/integration/docusaurus/expectations/examples/multicolumn_map_expectation_template.py map_metric"
 ```
 
 with
@@ -234,7 +234,7 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L26
+```python name="tests/integration/docusaurus/expectations/examples/multicolumn_map_expectation_template.py MulticolumnValuesMatchSomeCriteria class_def"
 ```
 
 with 
@@ -302,7 +302,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/multicolumn_map_expectation_template.py#L119-L124
+```python name="tests/integration/docusaurus/expectations/examples/multicolumn_map_expectation_template.py library_metadata"
 ```
 
 would become

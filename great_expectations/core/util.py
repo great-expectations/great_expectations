@@ -765,12 +765,21 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
     force_reuse_spark_context: bool = False,
-) -> Any:
-    # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
-    # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
-    # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
-    # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
-    # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+) -> SparkSession:
+    """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
+
+    Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
+    Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
+    Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
+    This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
+    ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+
+    Args:
+        spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
+        force_reuse_spark_context: Boolean flag indicating (if True) that creating new Spark context is forbidden.
+
+    Returns: SparkSession (new or existing as per "isStopped()" status and "force_reuse_spark_context" directive).
+    """
     if spark_config is None:
         spark_config = {}
     else:
@@ -788,7 +797,7 @@ def get_or_create_spark_application(
     if spark_session is None:
         raise ValueError("SparkContext could not be started.")
 
-    # noinspection PyProtectedMember
+    # noinspection PyUnresolvedReferences
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     if not force_reuse_spark_context and spark_restart_required(
         current_spark_config=spark_session.sparkContext.getConf().getAll(),
@@ -818,13 +827,21 @@ def get_or_create_spark_application(
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
     spark_config: Optional[Dict[str, str]] = None,
-):
-    # Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
-    # Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
-    # Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
-    # This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
-    # ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+) -> SparkSession:
+    """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
+    Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
+    Attempts to circumvent this constraint cause "ValueError: Cannot run multiple SparkContexts at once" to be thrown.
+    Hence, SparkSession with SparkConf acceptable for all tests must be established at "pytest" collection time.
+    This is preferred to calling "return SparkSession.builder.getOrCreate()", which will result in the setting
+    ("spark.app.name", "pyspark-shell") remaining in SparkConf statically for the entire duration of the "pytest" run.
+
+    Args:
+        spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
+
+    Returns:
+
+    """
     spark_session: Optional[SparkSession]
     try:
         if spark_config is None:
@@ -859,6 +876,16 @@ def get_or_create_spark_session(
 def spark_restart_required(
     current_spark_config: List[Tuple[str, str]], desired_spark_config: dict
 ) -> bool:
+    """Determines whether or not Spark session should be restarted, based on supplied current and desired configuration.
+
+    Either new "App" name or configuration change necessitates Spark session restart.
+
+    Args:
+        current_spark_config: List of tuples containing Spark configuration string-valued key/property pairs.
+        desired_spark_config: List of tuples containing Spark configuration string-valued key/property pairs.
+
+    Returns: Boolean flag indicating (if True) that Spark session restart is required.
+    """
 
     # we can't change spark context config values within databricks runtimes
     if in_databricks():

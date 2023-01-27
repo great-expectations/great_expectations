@@ -44,6 +44,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
     def parse_yaml(cls: Type[_Self], f: Union[pathlib.Path, str]) -> _Self:
         loaded = yaml.load(f)
         LOGGER.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
+        # noinspection PyArgumentList
         config = cls(**loaded)
         return config
 
