@@ -11,7 +11,7 @@ This guide will walk you through the process of using a auto-initializing <Techn
 - Completed the [Getting started tutorial](../../tutorials/getting_started/tutorial_overview.md)
 - [Configured a Data Context](../../tutorials/getting_started/tutorial_setup.md).
 - [Configured a Data Source](../../tutorials/getting_started/tutorial_connect_to_data.md)
-- [An understanding of how to configure a BatchRequest](../../guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.md)
+- [An understanding of how to configure a BatchRequest](../../guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 - [An understanding of how to create and edit expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
 :::
 
