@@ -7282,6 +7282,19 @@ def pandas_column_pairs_dataframe_for_unexpected_rows_and_index():
 
 
 @pytest.fixture
+def pandas_multi_column_dataframe_for_testing():
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "col_1": [0, 11, 22, 33, 44, 55],
+            "col_2": [0, 11, 22, 33, 44, 55],
+            "col_3": [0, 11, 22, 33, 44, 55],
+        }
+    )
+
+
+@pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
 ) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821

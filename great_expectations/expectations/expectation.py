@@ -3279,6 +3279,20 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
+            metric_kwargs = get_metric_kwargs(
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                configuration=configuration,
+                runtime_configuration=runtime_configuration,
+            )
+            validation_dependencies.set_metric_configuration(
+                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                metric_configuration=MetricConfiguration(
+                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+                ),
+            )
+            # TODO: Add SQL and Spark to enable ID/PK for MultiColumnMapExpectations
 
         return validation_dependencies
 
@@ -3304,6 +3318,9 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         )
         filtered_row_count: Optional[int] = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.FILTERED_ROW_COUNT.value}"
+        )
+        unexpected_index_query: Optional[str] = metrics.get(
+            f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
         )
 
         if (
@@ -3332,6 +3349,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             unexpected_count=unexpected_count,
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
+            unexpected_index_query=unexpected_index_query,
         )
 
 

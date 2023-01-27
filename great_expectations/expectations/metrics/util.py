@@ -1194,7 +1194,6 @@ def get_unexpected_indices_for_single_pandas_named_index(
             primary_key_dict[column_name] = index
             unexpected_index_list.append(primary_key_dict)
     elif expectation_domain_column_list:
-        breakpoint()
         for index in unexpected_index_values_by_named_index:
             primary_key_dict: Dict[str, Any] = dict()
             for domain_column in expectation_domain_column_list:
