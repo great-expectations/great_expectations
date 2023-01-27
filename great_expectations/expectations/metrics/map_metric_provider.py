@@ -21,6 +21,7 @@ import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
@@ -3138,7 +3139,12 @@ def _spark_multicolumn_map_condition_filtered_row_count(
     return df.count()
 
 
+@public_api
 class MapMetricProvider(MetricProvider):
+    """Base class for defining metrics that are evaluated for every row. An example of a map metric is
+    `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of `MapMetricProvider`).
+    """
+
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
@@ -3708,7 +3714,16 @@ class MapMetricProvider(MetricProvider):
         )
 
 
+@public_api
 class ColumnMapMetricProvider(MapMetricProvider):
+    """Class for defining metrics that are evaluated for every row for a single column. An example of a column map
+    metric is `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of
+    `MapMetricProvider`).
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
+    """
+
     condition_domain_keys = (
         "batch_id",
         "table",

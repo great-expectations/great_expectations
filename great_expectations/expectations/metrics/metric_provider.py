@@ -4,6 +4,7 @@ from typing import Callable, Dict, Optional, Tuple, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
@@ -65,6 +66,7 @@ def metric_partial(
     return wrapper
 
 
+@public_api
 class MetricProvider(metaclass=MetaMetricProvider):
     """Base class for all metric providers.
 
