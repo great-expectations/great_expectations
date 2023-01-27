@@ -719,12 +719,6 @@ def verify_column_names_exist_and_get_normalized_typed_column_names_map(
     else:
         column_names_list = [column_names]
 
-    column_name: str
-
-    batch_columns_dict: Dict[str, str | sqlalchemy.sql.quoted_name] = {
-        str(column_name): column_name for column_name in batch_columns_list
-    }
-
     def _get_normalized_column_name_mapping_if_exists(
         column_name: str,
     ) -> Dict[str, str | sqlalchemy.sql.quoted_name] | None:
@@ -741,6 +735,7 @@ def verify_column_names_exist_and_get_normalized_typed_column_names_map(
     normalized_batch_columns_dict: Dict[str, str | sqlalchemy.sql.quoted_name] = {}
 
     normalized_column_name_mapping: Dict[str, str | sqlalchemy.sql.quoted_name] | None
+    column_name: str
     for column_name in column_names_list:
         normalized_column_name_mapping = _get_normalized_column_name_mapping_if_exists(
             column_name=column_name
