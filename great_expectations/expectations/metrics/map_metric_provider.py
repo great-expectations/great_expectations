@@ -1622,7 +1622,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     column_B_name = accessor_domain_kwargs["column_B"]
 
     column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
-    _ = verify_column_names_exist(
+    verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
 
@@ -1703,7 +1703,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
         )
 
     column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
-    _ = verify_column_names_exist(
+    verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
 
@@ -1831,7 +1831,7 @@ def _pandas_map_condition_index(
         column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
-        _ = verify_column_names_exist(
+        verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
 
@@ -1906,7 +1906,7 @@ def _pandas_map_condition_query(
         column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
-        _ = verify_column_names_exist(
+        verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
     domain_values_df_filtered = domain_records_df[boolean_mapped_unexpected_values]
@@ -2023,7 +2023,7 @@ def _pandas_map_condition_rows(
         column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
-        _ = verify_column_names_exist(
+        verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
 
@@ -2298,7 +2298,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     column_B_name = accessor_domain_kwargs["column_B"]
 
     column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
-    _ = verify_column_names_exist(
+    verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
 
@@ -2380,7 +2380,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
         )
 
     column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
-    _ = verify_column_names_exist(
+    verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
 
@@ -3002,7 +3002,7 @@ def _spark_column_pair_map_condition_filtered_row_count(
     column_B_name = accessor_domain_kwargs["column_B"]
 
     column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
-    _ = verify_column_names_exist(
+    verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
 
@@ -3097,7 +3097,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
         )
 
     column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
-    _ = verify_column_names_exist(
+    verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
 
