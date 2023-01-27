@@ -125,15 +125,22 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
         return run_name_filter.get("ne") != run_name
 
 
-def substitute_none_for_missing(kwargs, kwarg_list):
+@public_api
+def substitute_none_for_missing(kwargs: dict[str, Any], kwarg_list: list[str]) -> dict:
     """Utility function to plug Nones in when optional parameters are not specified in expectation kwargs.
 
-    Example:
-        Input:
-            kwargs={"a":1, "b":2},
-            kwarg_list=["c", "d"]
+    Args:
+        kwargs: A dictionary or mapping of keyword arguments.
+        kwargs_list: A list of strings representing all possible keyword parameters to a function.
 
-        Output: {"a":1, "b":2, "c": None, "d": None}
+    Example::
+
+        >>> result = substitute_none_for_missing(
+        ...    kwargs={"a":1, "b":2},
+        ...    kwarg_list=["c", "d"]
+        ... )
+        ... print(result)
+        {"a":1, "b":2, "c": None, "d": None}
 
     This is helpful for standardizing the input objects for rendering functions.
     The alternative is lots of awkward `if "some_param" not in kwargs or kwargs["some_param"] == None:` clauses in renderers.
