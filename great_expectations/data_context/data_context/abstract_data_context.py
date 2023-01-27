@@ -684,8 +684,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str,
         initialize: bool = True,
         save_changes: Optional[bool] = None,
-        **kwargs: Optional[dict],
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource | None:
         """Add a new Datasource to the data context, with configuration provided as kwargs.
 
         --Documentation--
@@ -749,7 +749,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _update_datasource(
         self,
-        datasource: Union[LegacyDatasource, BaseDatasource],
+        datasource: LegacyDatasource | BaseDatasource,
         save_changes: bool | None = None,
         **kwargs,
     ) -> Datasource:
