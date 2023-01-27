@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
@@ -13,6 +14,7 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
+
 
 @public_api
 class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnector):

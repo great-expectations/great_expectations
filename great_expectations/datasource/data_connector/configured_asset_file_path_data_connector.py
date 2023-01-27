@@ -14,6 +14,7 @@ from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
+
 @public_api
 class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     """

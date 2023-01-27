@@ -1,6 +1,7 @@
 import logging
 from typing import List, Optional
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.asset import Asset
@@ -21,6 +22,7 @@ except ImportError:
     logger.debug(
         "Unable to load GCS connection object; install optional Google dependency for support"
     )
+
 
 @public_api
 class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):

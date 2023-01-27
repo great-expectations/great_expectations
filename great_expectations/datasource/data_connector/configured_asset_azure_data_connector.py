@@ -2,6 +2,7 @@ import logging
 import re
 from typing import List, Optional
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.asset import Asset
@@ -23,6 +24,7 @@ except ImportError:
     logger.debug(
         "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
     )
+
 
 @public_api
 class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):

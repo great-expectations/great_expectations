@@ -45,6 +45,7 @@ try:
 except ImportError:
     Selectable = None
 
+
 @public_api
 class ConfiguredAssetSqlDataConnector(DataConnector):
     """

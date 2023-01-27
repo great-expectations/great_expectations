@@ -1,6 +1,7 @@
 import logging
 from typing import Optional
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
@@ -8,6 +9,7 @@ from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
+
 
 @public_api
 class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
