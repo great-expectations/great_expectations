@@ -1280,7 +1280,6 @@ def compute_unexpected_pandas_indices(
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                     error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
                 )
                 primary_key_dict[column_name] = domain_records_df.at[index, column_name]

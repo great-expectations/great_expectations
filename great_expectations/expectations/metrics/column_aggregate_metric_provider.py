@@ -79,7 +79,6 @@ def column_aggregate_value(
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 if filter_column_isnull:
@@ -153,7 +152,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
@@ -217,7 +215,6 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 column = data[column_name]
