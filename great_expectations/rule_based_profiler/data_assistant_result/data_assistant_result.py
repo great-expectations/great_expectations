@@ -107,9 +107,12 @@ class RuleStats(SerializableDictDot):
         """
         return asdict(self)
 
+    @public_api
     def to_json_dict(self) -> dict:
-        """
-        Returns JSON dictionary equivalent of this object.
+        """Returns JSON dictionary equivalent of this object.
+
+        Returns:
+            A JSON-serializable dictionary representation of the DataAssistantResult object.
         """
         return convert_to_json_serializable(data=self.to_dict())
 
