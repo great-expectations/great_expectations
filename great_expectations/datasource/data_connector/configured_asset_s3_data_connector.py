@@ -21,8 +21,7 @@ logger = logging.getLogger(__name__)
 
 @public_api
 class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
-    """
-    Extension of ConfiguredAssetFilePathDataConnector used to connect to S3
+    """Extension of ConfiguredAssetFilePathDataConnector used to connect to S3.
 
     Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
     connect to. While this allows for fine-grained control over which Data Assets may be accessed,
