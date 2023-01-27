@@ -195,7 +195,7 @@ class DataAssistantResult(SerializableDictDot):
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> None:
-        """Populates an `ExpectationSuite` and displays `ExpectationConfiguration` list grouped by `expectation_type`
+        """Populates an `ExpectationSuite` and displays `ExpectationConfiguration` list grouped by `expectation_type`.
 
         Args:
             expectation_suite_name: The name for the Expectation Suite. Default generated if none provided.
