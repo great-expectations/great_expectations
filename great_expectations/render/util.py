@@ -6,7 +6,7 @@ import decimal
 import locale
 import re
 import warnings
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, List, Mapping, Optional, Sequence, Tuple, Union
 
 import pandas as pd
 
@@ -126,12 +126,14 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
 
 
 @public_api
-def substitute_none_for_missing(kwargs: dict[str, Any], kwarg_list: list[str]) -> dict:
+def substitute_none_for_missing(
+    kwargs: Mapping[str, Any], kwarg_list: Sequence[str]
+) -> Mapping[str, Any]:
     """Utility function to plug Nones in when optional parameters are not specified in expectation kwargs.
 
     Args:
         kwargs: A dictionary or mapping of keyword arguments.
-        kwargs_list: A list of strings representing all possible keyword parameters to a function.
+        kwargs_list: A list or sequence of strings representing all possible keyword parameters to a function.
 
     Example::
 
@@ -157,7 +159,7 @@ def substitute_none_for_missing(kwargs: dict[str, Any], kwarg_list: list[str]) -
 @public_api
 def parse_row_condition_string_pandas_engine(
     condition_string: str, with_schema: bool = False
-) -> tuple:
+) -> tuple[str, dict]:
     if len(condition_string) == 0:
         condition_string = "True"
 
