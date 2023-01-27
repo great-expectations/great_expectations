@@ -2,6 +2,7 @@ from copy import deepcopy
 from typing import Dict, Iterator, List, Optional, Tuple, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -250,9 +251,9 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         return batch_definition_list
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
-        """
-        Return the list of asset names known by this DataConnector.
+        """Return the list of asset names known by this DataConnector.
 
         Returns:
             A list of available names
