@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -23,16 +24,21 @@ logger = logging.getLogger(__name__)
 DEFAULT_DELIMITER: str = "-"
 
 
+@public_api
 class RuntimeDataConnector(DataConnector):
-    """
-    A DataConnector that allows users to specify a Batch's data directly using a RuntimeBatchRequest that contains
-    either an in-memory Pandas or Spark DataFrame, a filesystem or S3 path, or an arbitrary SQL query
+    """A Data Connector that allows users to specify a Batch's data directly using a Runtime Batch Request.
+
+    A Runtime Batch Request contains either an in-memory Pandas or Spark DataFrame, a filesystem or S3 path,
+    or an arbitrary SQL query.
+
     Args:
-        name (str): The name of this DataConnector
-        datasource_name (str): The name of the Datasource that contains it
-        execution_engine (ExecutionEngine): An ExecutionEngine
-        batch_identifiers (list): a list of keys that must be defined in the batch_identifiers dict of RuntimeBatchRequest
-        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        batch_identifiers: A list of keys that must be defined in the batch identifiers dict of the Runtime Batch
+            Request.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
@@ -182,6 +188,7 @@ class RuntimeDataConnector(DataConnector):
     def get_unmatched_data_references(self) -> List[str]:
         return []
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
         """Returns a list of data_assets that are both defined at runtime, and defined in DataConnector configuration"""
         defined_assets: List[str] = list(self.assets.keys())

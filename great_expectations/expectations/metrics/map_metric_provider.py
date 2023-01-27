@@ -21,6 +21,7 @@ import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
@@ -299,6 +300,7 @@ def column_function_partial(  # noqa: C901 - 19
         )
 
 
+@public_api
 def column_condition_partial(  # noqa: C901 - 23
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
@@ -312,16 +314,13 @@ def column_condition_partial(  # noqa: C901 - 23
     A metric function that is decorated as a column_condition_partial will be called with the engine-specific column
     type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
-
-
     Args:
-        engine:
-        partial_fn_type:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        partial_fn_type: The metric function
+        **kwargs: Arguments passed to specified function
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-
     """
     domain_type = MetricDomainTypes.COLUMN
     if issubclass(engine, PandasExecutionEngine):
@@ -562,6 +561,7 @@ def column_condition_partial(  # noqa: C901 - 23
         )
 
 
+@public_api
 def column_pair_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
 ):
@@ -571,13 +571,12 @@ def column_pair_function_partial(  # noqa: C901 - 16
     column_list type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
     Args:
-        engine:
-        partial_fn_type:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        partial_fn_type: The metric function
+        **kwargs: Arguments passed to specified function
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-
     """
     domain_type = MetricDomainTypes.COLUMN_PAIR
     if issubclass(engine, PandasExecutionEngine):
@@ -1043,13 +1042,12 @@ def multicolumn_function_partial(  # noqa: C901 - 16
     column_list type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
     Args:
-        engine:
-        partial_fn_type:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        partial_fn_type: The metric function
+        **kwargs: Arguments passed to specified function
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-
     """
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
@@ -3162,7 +3160,12 @@ def _spark_multicolumn_map_condition_filtered_row_count(
     return df.count()
 
 
+@public_api
 class MapMetricProvider(MetricProvider):
+    """The base class for defining metrics that are evaluated for every row. An example of a map metric is
+    `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of `MapMetricProvider`).
+    """
+
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
@@ -3732,7 +3735,16 @@ class MapMetricProvider(MetricProvider):
         )
 
 
+@public_api
 class ColumnMapMetricProvider(MapMetricProvider):
+    """Defines metrics that are evaluated for every row for a single column. An example of a column map
+    metric is `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of
+    `MapMetricProvider`).
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
+    """
+
     condition_domain_keys = (
         "batch_id",
         "table",
@@ -3787,7 +3799,14 @@ class ColumnMapMetricProvider(MapMetricProvider):
         return dependencies
 
 
+@public_api
 class ColumnPairMapMetricProvider(MapMetricProvider):
+    """Defines metrics that are evaluated for every row for a column pair. All column pair metrics require domain
+    keys of `column_A` and `column_B`.
+
+    `expect_column_pair_values_to_be_equal` is an example of an Expectation that uses this metric.
+    """
+
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
@@ -3848,7 +3867,14 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
         return dependencies
 
 
+@public_api
 class MulticolumnMapMetricProvider(MapMetricProvider):
+    """Defines metrics that are evaluated for every row for a set of columns. All multi-column metrics require the
+    domain key `column_list`.
+
+    `expect_compound_columns_to_be_unique` is an example of an Expectation that uses this metric.
+    """
+
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",

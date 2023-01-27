@@ -6,7 +6,6 @@ from __future__ import annotations
 
 # -- Update syspath
 import os
-import pathlib
 import sys
 
 WHITELISTED_TAG = "--Public API--"
@@ -48,7 +47,7 @@ html_static_path = ["_static"]
 
 
 # Skip autodoc unless part of the Public API
-DOCUMENTATION_TAG = "--Documentation--"
+DOCUMENTATION_TAGS = ["---Documentation---", "--Documentation--"]
 
 
 def skip_if_not_whitelisted(app, what, name, obj, would_skip, options):
@@ -94,11 +93,12 @@ def _process_relevant_documentation_tag(app, what, name, obj, options, lines):
     Note: This method modifies lines in place per sphinx documentation.
     """
     for idx, line in enumerate(lines):
-        if DOCUMENTATION_TAG in line:
-            trimmed_line = line.replace(
-                DOCUMENTATION_TAG, "Relevant Documentation Links\n"
-            )
-            lines[idx] = trimmed_line
+        for DOCUMENTATION_TAG in DOCUMENTATION_TAGS:
+            if DOCUMENTATION_TAG in line:
+                trimmed_line = line.replace(
+                    DOCUMENTATION_TAG, "Relevant Documentation Links\n"
+                )
+                lines[idx] = trimmed_line
 
 
 FEATURE_MATURITY_INFO_TAG = "--ge-feature-maturity-info--"
@@ -159,7 +159,7 @@ def convert_code_blocks(lines: list[str], name: str) -> None:
     # Find number of code snippets
     code_snippet_indices: list[tuple[int, int]] = []
     for idx, line in enumerate(lines):
-        if line.strip().startswith("```"):
+        if "```" in line:
             num_triple_quotes += 1
             if not code_snippet_start:
                 code_snippet_start = idx
