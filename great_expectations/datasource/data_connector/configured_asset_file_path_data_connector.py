@@ -14,7 +14,7 @@ from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
-
+@public_api
 class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     """
     The ConfiguredAssetFilePathDataConnector is one of two classes (InferredAssetFilePathDataConnector being the

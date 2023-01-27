@@ -24,7 +24,7 @@ except ImportError:
         "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
     )
 
-
+@public_api
 class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
     """
     Extension of ConfiguredAssetFilePathDataConnector used to connect to Azure

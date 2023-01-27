@@ -9,7 +9,7 @@ from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
-
+@public_api
 class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
     """
     Extension of ConfiguredAssetFilesystemDataConnector used to connect to the DataBricks File System (DBFS).
