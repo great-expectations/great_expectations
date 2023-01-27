@@ -254,8 +254,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         ] = None,
         comment: Optional[str] = None,
     ) -> RuleBasedProfilerResult:
-        """
-        Run the Rule-Based Profiler.
+        """Run the Rule-Based Profiler.
 
         Args:
             variables: Attribute name/value pairs (overrides), commonly-used in `Builder` objects.
@@ -1355,8 +1354,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
 @public_api
 class RuleBasedProfiler(BaseRuleBasedProfiler):
-    """
-    Create a `RuleBasedProfiler` to profile one or more batches of data.
+    """Create a `RuleBasedProfiler` to profile one or more batches of data.
 
     For each rule in the `rules` configuration, instantiate the following if
     available: a domain builder, a parameter builder, and a configuration builder.
@@ -1450,6 +1448,8 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         data_context: Optional[AbstractDataContext] = None,
         id: Optional[str] = None,
     ) -> None:
+        """Initialize a RuleBasedProfiler."""
+
         profiler_config = RuleBasedProfilerConfig(
             name=name,
             id=id,
