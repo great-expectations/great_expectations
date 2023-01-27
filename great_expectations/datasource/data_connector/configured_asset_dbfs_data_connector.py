@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
     """
-    Extension of ConfiguredAssetFilesystemDataConnector used to connect to the DataBricks File System (DBFS). 
+    Extension of ConfiguredAssetFilesystemDataConnector used to connect to the DataBricks File System (DBFS).
 
     Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
     connect to. While this allows for fine-grained control over which Data Assets may be accessed,
