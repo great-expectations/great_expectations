@@ -19,20 +19,13 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     Datasource,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
 
 LOGGER = logging.getLogger(__name__)
-
-
-class PandasDatasourceError(Exception):
-    pass
-
-
-class CSVAssetError(Exception):
-    pass
 
 
 class CSVAsset(DataAsset):
@@ -49,6 +42,11 @@ class CSVAsset(DataAsset):
     )
 
     def test_connection(self) -> None:
+        """Test the connection for the CSVAsset.
+
+        Raises:
+          TestConnectionError
+        """
         success = False
         for filepath in self.path.iterdir():
             if self.regex.match(filepath.name):
@@ -56,7 +54,7 @@ class CSVAsset(DataAsset):
                 success = True
                 break
         if not success:
-            raise CSVAssetError(
+            raise TestConnectionError(
                 f"No file at path: {self.path} matched the regex: {self.regex}."
             )
 
@@ -213,8 +211,17 @@ class PandasDatasource(Datasource):
 
         return PandasExecutionEngine
 
-    def test_connection(self) -> None:
-        if self.assets:
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the PandasDatasource.
+
+        Args:
+          test_assets: If assets have been passed to the PandasDatasource, an attempt can be made to test them.
+
+        Raises:
+          TestConnectionError
+        """
+        # Only self.assets can be tested for PandasDatasource
+        if self.assets and test_assets:
             for asset in self.assets.values():
                 asset.test_connection()
 

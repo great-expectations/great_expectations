@@ -47,6 +47,11 @@ except ImportError:
     LOGGER.debug("No spark sql dataframe module available.")
     pyspark_sql_Row = None
 
+
+class TestConnectionError(Exception):
+    pass
+
+
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants as returned. The keys represent dimensions one can slice the data along
 # and the values are the realized. If a value is None or unspecified, the batch_request
@@ -150,7 +155,11 @@ class DataAsset(ExperimentalBaseModel):
         self._datasource = ds
 
     def test_connection(self) -> None:
-        """Test the connection for this DataAsset."""
+        """Test the connection for the DataAsset.
+
+        Raises:
+          TestConnectionError
+        """
         raise NotImplementedError(
             "One needs to implement 'test_connection' on a DataAsset subclass"
         )
@@ -401,8 +410,15 @@ class Datasource(
             "One needs to implement 'execution_engine_type' on a Datasource subclass"
         )
 
-    def test_connection(self) -> None:
-        """Test the connection for this Datasource."""
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the Datasource.
+
+        Args:
+          test_assets: If assets have been passed to the Datasource, an attempt can be made to test them as well.
+
+        Raises:
+          TestConnectionError
+        """
         raise NotImplementedError(
             "One needs to implement 'test_connection' on a Datasource subclass"
         )

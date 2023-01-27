@@ -28,6 +28,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     Datasource,
+    TestConnectionError,
 )
 
 SQLALCHEMY_IMPORTED = False
@@ -141,8 +142,19 @@ class TableAsset(DataAsset):
     name: str
 
     def test_connection(self) -> None:
+        """Test the connection for the TableAsset.
+
+        Raises:
+          TestConnectionError
+        """
         assert isinstance(self.datasource, SQLDatasource)
-        sqlalchemy.inspect(self.datasource.engine).has_table(self.table_name)
+        try:
+            sqlalchemy.inspect(self.datasource.engine).has_table(self.table_name)
+        except Exception as e:
+            raise TestConnectionError(
+                f"Attempt to connect to table: {self.table_name} failed with the "
+                f"following error message: {str(e)}"
+            )
 
     def batch_request_options_template(
         self,
@@ -403,11 +415,23 @@ class SQLDatasource(Datasource):
 
         return values
 
-    def test_connection(self) -> None:
-        # test database connection
-        self.engine.connect()
-        # if assets are defined, also check if those exist
-        if self.assets:
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the SQLDatasource.
+
+        Args:
+          test_assets: If assets have been passed to the SQLDatasource, an attempt can be made to test them as well.
+
+        Raises:
+          TestConnectionError
+        """
+        try:
+            self.engine.connect()
+        except Exception as e:
+            raise TestConnectionError(
+                "Attempt to connect to datasource failed with the following error message: "
+                f"{str(e)}"
+            )
+        if self.assets and test_assets:
             for asset in self.assets.values():
                 asset.test_connection()
 
