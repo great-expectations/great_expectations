@@ -163,6 +163,24 @@ def substitute_none_for_missing(
 def parse_row_condition_string_pandas_engine(
     condition_string: str, with_schema: bool = False
 ) -> tuple[str, dict]:
+    """Parses the row condition string into a pandas engine compatible format.
+
+    Args:
+        condition_string: A pandas row condition string.
+        with_schema: Return results in json schema format. Defaults to False.
+
+    Returns:
+        A tuple containing the template string and a `dict` of parameters.
+
+    Example::
+
+        >>> template_str, params = parse_row_condition_string_pandas_engine("Age in [0, 42]")
+        >>> print(template_str)
+        "if $row_condition__0"
+        >>> params
+        {"row_condition__0": "Age in [0, 42]"}
+
+    """
     if len(condition_string) == 0:
         condition_string = "True"
 
