@@ -222,6 +222,8 @@ def test_column_quoted_name_type_sa(sa):
 
     for column_name in [
         "non_existent_column",
+        '"NAMES"',
+        '"Names"',
     ]:
         with pytest.raises(
             gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
