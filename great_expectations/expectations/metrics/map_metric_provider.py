@@ -300,6 +300,7 @@ def column_function_partial(  # noqa: C901 - 19
         )
 
 
+@public_api
 def column_condition_partial(  # noqa: C901 - 23
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
@@ -313,16 +314,13 @@ def column_condition_partial(  # noqa: C901 - 23
     A metric function that is decorated as a column_condition_partial will be called with the engine-specific column
     type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
-
-
     Args:
-        engine:
-        partial_fn_type:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        partial_fn_type: The metric function
+        **kwargs: Arguments passed to specified function
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-
     """
     domain_type = MetricDomainTypes.COLUMN
     if issubclass(engine, PandasExecutionEngine):
@@ -563,6 +561,7 @@ def column_condition_partial(  # noqa: C901 - 23
         )
 
 
+@public_api
 def column_pair_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
 ):
@@ -572,13 +571,12 @@ def column_pair_function_partial(  # noqa: C901 - 16
     column_list type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
     Args:
-        engine:
-        partial_fn_type:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        partial_fn_type: The metric function
+        **kwargs: Arguments passed to specified function
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-
     """
     domain_type = MetricDomainTypes.COLUMN_PAIR
     if issubclass(engine, PandasExecutionEngine):
@@ -1044,13 +1042,12 @@ def multicolumn_function_partial(  # noqa: C901 - 16
     column_list type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
     Args:
-        engine:
-        partial_fn_type:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        partial_fn_type: The metric function
+        **kwargs: Arguments passed to specified function
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-
     """
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
