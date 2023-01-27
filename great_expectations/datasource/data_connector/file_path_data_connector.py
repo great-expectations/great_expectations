@@ -3,6 +3,7 @@ import os
 from typing import Iterator, List, Optional, cast
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchRequest,
@@ -27,14 +28,27 @@ from great_expectations.execution_engine import ExecutionEngine
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class FilePathDataConnector(DataConnector):
-    """
-    Base-class for DataConnector that are designed for connecting to filesystem-like data, which can include
-    files on disk, but also S3 and GCS.
+    """The base class for Data Connectors designed to access filesystem-like data.
 
-    *Note*: FilePathDataConnector is not meant to be used on its own, but extended. Currently
-    ConfiguredAssetFilePathDataConnector and InferredAssetFilePathDataConnector are subclasses of
-    FilePathDataConnector.
+    This can include traditional, disk-based filesystems or object stores such as S3, GCS, or Azure Blob Store.
+    This class supports the configuration of a default regular expression and sorters for filtering and sorting
+    Data Assets.
+
+    See the `DataConnector` base class for more information on the role of Data Connectors.
+
+    Note that `FilePathDataConnector` is not meant to be used on its own, but extended.
+
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        default_regex: A regex configuration for filtering data references. The dict can include a regex `pattern` and
+            a list of `group_names` for capture groups.
+        sorters: A list of sorters for sorting data references.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
@@ -47,18 +61,6 @@ class FilePathDataConnector(DataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
-        and sorters for filtering and sorting data_references.
-
-        Args:
-            name (str): name of FilePathDataConnector
-            datasource_name (str): Name of datasource that this DataConnector is connected to
-            execution_engine (ExecutionEngine): Execution Engine object to actually read the data
-            default_regex (dict): Optional dict the filter and organize the data_references.
-            sorters (list): Optional list if you want to sort the data_references
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         logger.debug(f'Constructing FilePathDataConnector "{name}".')
 
         super().__init__(
