@@ -200,9 +200,9 @@ _ASSET_MODELS = _generate_data_asset_models(
 )
 
 CSVAsset = _ASSET_MODELS["csv"]
-ExcelAsset = _ASSET_MODELS["excel"]
-JSONAsset = _ASSET_MODELS["json"]
-ParquetAsset = _ASSET_MODELS["parquet"]
+ExcelAsset = _ASSET_MODELS.get("excel", DataAsset)
+JSONAsset = _ASSET_MODELS.get("json", DataAsset)
+ParquetAsset = _ASSET_MODELS.get("parquet", DataAsset)
 
 
 class PandasDatasource(Datasource):
