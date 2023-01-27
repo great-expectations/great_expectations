@@ -26,8 +26,7 @@ except ImportError:
 
 @public_api
 class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
-    """
-    Extension of ConfiguredAssetFilePathDataConnector used to connect to GCS
+    """Extension of ConfiguredAssetFilePathDataConnector used to connect to GCS.
 
     A ConfiguredAssetGCSDataConnector requires an explicit specification of each DataAsset you want to connect to.
     This allows more fine-tuning, but also requires more setup. Please note that in order to maintain consistency
