@@ -9,6 +9,7 @@ import requests
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
     _ConfigurationProvider,
@@ -49,10 +50,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class CloudDataContext(SerializableDataContext):
-    """
-    Subclass of AbstractDataContext that contains functionality necessary to hydrate state from cloud
-    """
+    """Subclass of AbstractDataContext that contains functionality necessary to work in a GX Cloud-backed environment."""
 
     def __init__(
         self,
