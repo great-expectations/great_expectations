@@ -6,7 +6,7 @@ import decimal
 import locale
 import re
 import warnings
-from typing import Any, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import Any, List, Optional, Sequence, Tuple, Union
 
 import pandas as pd
 
@@ -127,13 +127,16 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
 
 @public_api
 def substitute_none_for_missing(
-    kwargs: Mapping[str, Any], kwarg_list: Sequence[str]
-) -> Mapping[str, Any]:
+    kwargs: dict[str, Any], kwarg_list: Sequence[str]
+) -> dict[str, Any]:
     """Utility function to plug Nones in when optional parameters are not specified in expectation kwargs.
 
     Args:
-        kwargs: A dictionary or mapping of keyword arguments.
+        kwargs: A dictionary of keyword arguments.
         kwargs_list: A list or sequence of strings representing all possible keyword parameters to a function.
+
+    Returns:
+        A copy of the original `kwargs` with missing keys from `kwarg_list` defaulted to `None`.
 
     Example::
 
