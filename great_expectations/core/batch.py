@@ -416,24 +416,29 @@ is illegal.
 
 @public_api
 class BatchRequest(BatchRequestBase):
-    """A BatchRequest is the way to specify which data Great
-    Expectations will validate. A Batch Request is provided to a Datasource in
-    order to create a Batch.
+    """A BatchRequest is the way to specify which data Great Expectations will validate.
+
+    A Batch Request is provided to a Datasource in order to create a Batch.
 
     ---Documentation---
         - https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource/#1-construct-a-batchrequest
         - https://docs.greatexpectations.io/docs/terms/batch_request
 
-    The `data_connector_query` parameter can include an index slice::
-        {
-            "index": "-3:"
-        }
+    The `data_connector_query` parameter can include an index slice:
 
-    or it can include a filter::
-        {
-            "batch_filter_parameters": {"year": "2020"}
-        }
+    ```python
+    {
+        "index": "-3:"
+    }
+    ```
 
+    or it can include a filter:
+
+    ```python
+    {
+        "batch_filter_parameters": {"year": "2020"}
+    }
+    ```
 
     Args:
         datasource_name: name of the Datasource used to connect to the data
@@ -445,6 +450,7 @@ class BatchRequest(BatchRequestBase):
             (limit does not affect the number of records in each batch)
         batch_spec_passthrough: a dictionary of additional parameters that
             the ExecutionEngine will use to obtain a specific set of data
+
     Returns:
         BatchRequest
     """
