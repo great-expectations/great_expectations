@@ -366,10 +366,10 @@ class Datasource(
 
         # only instantiate a new ExecutionEngine if engine_kwargs have changed
         @functools.lru_cache(maxsize=1)
-        def instantiate_execution_engine(**engine_kwargs) -> ExecutionEngine:
+        def _get_execution_engine(**engine_kwargs) -> ExecutionEngine:
             return self._execution_engine_type()(**engine_kwargs)
 
-        return instantiate_execution_engine(**engine_kwargs)
+        return _get_execution_engine(**engine_kwargs)
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
