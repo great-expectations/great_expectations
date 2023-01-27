@@ -47,11 +47,12 @@ class UserConfigurableProfiler:
     Instantiate with or without a number of configuration arguments.
     Once instantiated, if these arguments change, a new Profiler will be needed.
 
-    Build a suite without a config as follows::
+    Build a suite without a config as follows:
 
-        profiler = UserConfigurableProfiler(dataset)
-        suite = profiler.build_suite()
-
+    ```python
+    profiler = UserConfigurableProfiler(dataset)
+    suite = profiler.build_suite()
+    ```
 
     Use a Profiler to build a suite with a semantic types dict, as follows:
 
