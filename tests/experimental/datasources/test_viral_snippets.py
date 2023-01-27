@@ -110,16 +110,6 @@ def zep_yaml_config_file(
     return config_file_path
 
 
-def test_load_an_existing_config(
-    zep_yaml_config_file: pathlib.Path, zep_only_config: GxConfig
-):
-    context = get_context(
-        context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
-    )
-
-    assert context.zep_config == zep_only_config
-
-
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def zep_file_context(zep_yaml_config_file: pathlib.Path) -> FileDataContext:
@@ -128,6 +118,16 @@ def zep_file_context(zep_yaml_config_file: pathlib.Path) -> FileDataContext:
     )
     assert isinstance(context, FileDataContext)
     return context
+
+
+def test_load_an_existing_config(
+    zep_yaml_config_file: pathlib.Path, zep_only_config: GxConfig
+):
+    context = get_context(
+        context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
+    )
+
+    assert context.zep_config == zep_only_config
 
 
 def test_serialize_zep_config(zep_file_context: FileDataContext):
@@ -195,7 +195,9 @@ def test_save_datacontext_persists_zep_config(
 
 
 def test_add_and_save_zep_datasource(
-    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+    file_dc_config_dir_init: pathlib.Path,
+    zep_only_config: GxConfig,
+    db_file: pathlib.Path,
 ):
     datasource_name = "save_ds_test"
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML

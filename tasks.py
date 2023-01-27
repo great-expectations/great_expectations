@@ -15,6 +15,7 @@ import json
 import os
 import pathlib
 import shutil
+import sys
 from typing import TYPE_CHECKING
 
 import invoke
@@ -38,6 +39,8 @@ if TYPE_CHECKING:
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
 _PATH_HELP_DESC = "Target path. (Default: .)"
+# https://www.pyinvoke.org/faq.html?highlight=pty#why-is-my-command-behaving-differently-under-invoke-versus-being-run-by-hand
+_PTY_HELP_DESC = "Whether or not to use a pseudo terminal"
 
 
 @invoke.task(
@@ -45,18 +48,42 @@ _PATH_HELP_DESC = "Target path. (Default: .)"
         "check": _CHECK_HELP_DESC,
         "exclude": _EXCLUDE_HELP_DESC,
         "path": _PATH_HELP_DESC,
+        "isort": "Use `isort` to sort packages. Default behavior.",
+        "ruff": (
+            "Use `ruff` instead of `isort` to sort imports."
+            " This will eventually become the default."
+        ),
+        "pty": _PTY_HELP_DESC,
     }
 )
 def sort(
-    ctx: Context, path: str = ".", check: bool = False, exclude: str | None = None
+    ctx: Context,
+    path: str = ".",
+    check: bool = False,
+    exclude: str | None = None,
+    ruff: bool = False,
+    isort: bool = False,  # isort is the current default
+    pty: bool = True,
 ):
     """Sort module imports."""
-    cmds = ["isort", path]
-    if check:
-        cmds.append("--check-only")
-    if exclude:
-        cmds.extend(["--skip", exclude])
-    ctx.run(" ".join(cmds), echo=True)
+    if ruff and isort:
+        raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)
+    if ruff:
+        cmds = [
+            "ruff",
+            path,
+            "--select I",
+            "--diff" if check else "--fix",
+        ]
+        if exclude:
+            cmds.extend(["--extend-exclude", exclude])
+    else:
+        cmds = ["isort", path]
+        if check:
+            cmds.append("--check-only")
+        if exclude:
+            cmds.extend(["--skip", exclude])
+    ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
 @invoke.task(
@@ -65,6 +92,7 @@ def sort(
         "exclude": _EXCLUDE_HELP_DESC,
         "path": _PATH_HELP_DESC,
         "sort": "Disable import sorting. Runs by default.",
+        "pty": _PTY_HELP_DESC,
     }
 )
 def fmt(
@@ -73,33 +101,58 @@ def fmt(
     sort_: bool = True,
     check: bool = False,
     exclude: str | None = None,
+    pty: bool = True,
 ):
     """
     Run code formatter.
     """
     if sort_:
-        sort(ctx, path, check=check, exclude=exclude)
+        sort(ctx, path, check=check, exclude=exclude, pty=pty)
 
     cmds = ["black", path]
     if check:
         cmds.append("--check")
     if exclude:
         cmds.extend(["--exclude", exclude])
-    ctx.run(" ".join(cmds), echo=True)
+    ctx.run(" ".join(cmds), echo=True, pty=pty)
+
+
+@invoke.task(
+    help={
+        "path": _PATH_HELP_DESC,
+        "fix": "Attempt to automatically fix lint violations.",
+        "watch": "Run in watch mode by re-running whenever files change.",
+        "pty": _PTY_HELP_DESC,
+    }
+)
+def lint(
+    ctx: Context,
+    path: str = ".",
+    fix: bool = False,
+    watch: bool = False,
+    pty: bool = True,
+):
+    """Run code linter"""
+    cmds = ["ruff", path]
+    if fix:
+        cmds.append("--fix")
+    if watch:
+        cmds.append("--watch")
+    ctx.run(" ".join(cmds), echo=True, pty=pty)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
-def lint(ctx: Context, path: str = "."):
-    """Run code linter"""
-    cmds = ["flake8", path, "--statistics"]
-    ctx.run(" ".join(cmds), echo=True)
+def fix(ctx: Context, path: str = "."):
+    """Automatically fix all possible code issues."""
+    lint(ctx, path=path, fix=True)
+    fmt(ctx, path=path, sort_=True)
 
 
 @invoke.task(help={"path": _PATH_HELP_DESC})
 def upgrade(ctx: Context, path: str = "."):
     """Run code syntax upgrades."""
-    cmds = ["pyupgrade", path, "--py3-plus"]
-    ctx.run(" ".join(cmds))
+    cmds = ["ruff", path, "--select", "UP", "--fix"]
+    ctx.run(" ".join(cmds), echo=True, pty=True)
 
 
 @invoke.task(
@@ -130,11 +183,24 @@ def hooks(
         ctx.run(" ".join(["pre-commit", "install"]), echo=True)
 
 
-@invoke.task(aliases=["docstring"])
-def docstrings(ctx: Context):
-    """Check public API docstrings."""
+@invoke.task(aliases=["docstring"], iterable=("paths",))
+def docstrings(ctx: Context, paths: list[str] | None = None):
+    """
+    Check public API docstrings.
+
+    Optionally pass a directory or file.
+    To pass multiple items:
+        invoke docstrings -p=great_expectations/core -p=great_expectations/util.py
+    """
+    scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
+    sys.path.append(str(scripts_path))
+
+    if paths:
+        select_paths = [pathlib.Path(p) for p in paths]
+    else:
+        select_paths = None
     try:
-        check_public_api_docstrings.main()
+        check_public_api_docstrings.main(select_paths=select_paths)
     except AssertionError as err:
         raise invoke.Exit(
             message=f"{err}\n\nGenerated with {check_public_api_docstrings.__file__}",
