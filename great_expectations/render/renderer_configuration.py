@@ -158,7 +158,8 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         validate_assignment = True
         arbitrary_types_allowed = True
 
-    @root_validator(pre=True)
+    # TODO: Reintroduce this constraint once legacy renderers are deprecated/removed
+    # @root_validator(pre=True)
     def _validate_configuration_or_result(cls, values: dict) -> dict:
         if ("configuration" not in values or values["configuration"] is None) and (
             "result" not in values or values["result"] is None
@@ -299,9 +300,10 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                     if "_params" in values and values["_params"]
                     else renderer_params_args
                 )
-        else:
+        elif "configuration" in values and values["configuration"] is not None:
             values["expectation_type"] = values["configuration"].expectation_type
             values["kwargs"] = values["configuration"].kwargs
+
         return values
 
     @root_validator()

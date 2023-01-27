@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Mapping, Optional, Union, cast
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
@@ -17,11 +18,9 @@ from great_expectations.data_context.types.base import (
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class EphemeralDataContext(AbstractDataContext):
-    """
-    Will contain functionality to create DataContext at runtime (ie. passed in config object or from stores). Users will
-    be able to use EphemeralDataContext for having a temporary or in-memory DataContext
-    """
+    """Subclass of AbstractDataContext that uses runtime values to generate a temporary or in-memory DataContext."""
 
     def __init__(
         self,
