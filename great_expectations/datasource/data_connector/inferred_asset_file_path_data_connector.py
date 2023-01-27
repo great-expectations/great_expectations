@@ -2,6 +2,7 @@ import copy
 import logging
 from typing import List, Optional
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.file_path_data_connector import (
@@ -93,9 +94,9 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         """
         return [k for k, v in self._data_references_cache.items() if v is None]
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
-        """
-        Return the list of asset names known by this DataConnector
+        """Return the list of asset names known by this DataConnector
 
         Returns:
             A list of available names
