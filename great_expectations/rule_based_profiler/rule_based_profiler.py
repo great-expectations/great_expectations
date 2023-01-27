@@ -1354,18 +1354,22 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
 @public_api
 class RuleBasedProfiler(BaseRuleBasedProfiler):
-    """Create a RuleBasedProfiler to profile one or more batches of data.
+    """
+    Create a `RuleBasedProfiler` to profile one or more batches of data.
 
-        For each rule in the `rules` configuration, instantiate the following if
-        available: a domain builder, a parameter builder, and a configuration builder.
-        These will be used to define profiler computation patterns.
+    For each rule in the `rules` configuration, instantiate the following if
+    available: a domain builder, a parameter builder, and a configuration builder.
+    These will be used to define profiler computation patterns.
 
-        Args:
-            name: Give the Profiler a name.
-            config_version: Specify the version of the Profiler to use (currently only 1.0 is supported).
-            variables: Variables to be substituted within the rules.
-            rules: A collection of rule configurations, each having its own `domain_builder`, `parameter_builders`, and `expectation_configuration_builders`.
-            data_context: Define the full runtime environment (data access, etc.).
+    Args:
+        name: Give the Profiler a name.
+        config_version: Specify the version of the Profiler to use (currently only `1.0` is supported).
+        variables: Variables to be substituted within the rules.
+        rules: A collection of rule configurations, each having its own `domain_builder`, `parameter_builders`, and `expectation_configuration_builders`.
+        data_context: Define the full runtime environment (data access, etc.).
+
+    Returns:
+        A `RuleBasedProfiler` instance.
 
     --ge-feature-maturity-info--
 
@@ -1445,21 +1449,6 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         data_context: Optional[AbstractDataContext] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        Create a new Profiler using configured rules.
-        For a Rule or an item in a Rule configuration, instantiates the following if
-        available: a domain builder, a parameter builder, and a configuration builder.
-        These will be used to define profiler computation patterns.
-
-        Args:
-            name: The name of the RBP instance
-            id: Identifier specific to this RBP instance.
-            config_version: The version of the RBP (currently only 1.0 is supported)
-            variables: Any variables to be substituted within the rules
-            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
-            expectation_configuration_builders configuration components
-            data_context: AbstractDataContext object that defines full runtime environment (data access, etc.)
-        """
         profiler_config = RuleBasedProfilerConfig(
             name=name,
             id=id,
