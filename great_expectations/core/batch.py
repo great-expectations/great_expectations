@@ -38,7 +38,6 @@ except ImportError:
     )
 
 
-@public_api
 class BatchDefinition(SerializableDictDot):
     def __init__(
         self,
@@ -535,6 +534,7 @@ BatchDataType = Union[BatchData, pd.DataFrame, SparkDataFrame]
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
 #  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
 # TODO: <Alex>See also "great_expectations/datasource/types/batch_spec.py".</Alex>
+@public_api
 @deprecated_argument(argument_name="data_context", version="0.14.0")
 @deprecated_argument(argument_name="datasource_name", version="0.14.0")
 @deprecated_argument(argument_name="batch_parameters", version="0.14.0")
