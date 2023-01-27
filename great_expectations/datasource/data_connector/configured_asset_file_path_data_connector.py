@@ -2,6 +2,7 @@ import logging
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.datasource.data_connector.asset.asset import Asset
@@ -86,9 +87,9 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             )
             self.assets[name] = new_asset
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
-        """
-        Return the list of asset names known by this DataConnector.
+        """Return the list of asset names known by this DataConnector.
 
         Returns:
             A list of available names

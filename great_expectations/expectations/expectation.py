@@ -281,6 +281,7 @@ class MetaExpectation(ABCMeta):
         return newclass
 
 
+@public_api
 class Expectation(metaclass=MetaExpectation):
     """Base class for all Expectations.
 
@@ -1177,9 +1178,20 @@ class Expectation(metaclass=MetaExpectation):
             result_format = configuration_result_format
         return result_format
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration for the Expectation.
+
+        For all expectations, the configuration's `expectation_type` needs to match the type of the expectation being
+        configured. This method is meant to be overridden by specific expectations to provide additional validation
+        checks as required. Overriding methods should call `super().validate_configuration(configuration)`.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required
+                by the Expectation.
+        """
         if not configuration:
             configuration = self.configuration
         try:
