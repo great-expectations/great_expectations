@@ -2130,6 +2130,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ge_cloud_id=ge_cloud_id,
         )
 
+    @public_api
     def delete_profiler(
         self,
         name: Optional[str] = None,
