@@ -1114,10 +1114,16 @@ class Expectation(metaclass=MetaExpectation):
                 f"Missing domain kwargs: {list(missing_kwargs)}"
             )
         return domain_kwargs
-
+    @public_api
     def get_success_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> Dict[str, Any]:
+        """Retrieve the success kwargs
+
+        Args:
+            configuration: The `ExpectationConfiguration` that contains the kwargs. If no configuration is provided, it will be pulled
+                          from the configuration attribute of the Expectation instance.
+        """
         if not configuration:
             configuration = self.configuration
 
