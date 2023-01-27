@@ -45,7 +45,7 @@ try:
 except ImportError:
     Selectable = None
 
-
+@public_api
 class ConfiguredAssetSqlDataConnector(DataConnector):
     """
     A DataConnector that requires explicit listing of SQL assets you want to connect to.

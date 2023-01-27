@@ -22,7 +22,7 @@ except ImportError:
         "Unable to load GCS connection object; install optional Google dependency for support"
     )
 
-
+@public_api
 class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
     """
     Extension of ConfiguredAssetFilePathDataConnector used to connect to GCS
