@@ -135,7 +135,8 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
     ],
 )
 def test_load_config(inject_engine_lookup_double, load_method: Callable, input_):
-    loaded: GxConfig = load_method(input_)
+    with mock.patch("sqlalchemy.create_engine"):
+        loaded: GxConfig = load_method(input_)
     pp(loaded)
     assert loaded
 
