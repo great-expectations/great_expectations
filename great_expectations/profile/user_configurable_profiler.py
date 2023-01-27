@@ -60,9 +60,8 @@ class UserConfigurableProfiler:
     semantic_types_dict = {
                 "numeric": ["c_acctbal"],
                 "string": ["c_address","c_custkey"],
-                "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone'],
+                "value_set": ["c_nationkey","c_mktsegment", 'c_custkey', 'c_name', 'c_address', 'c_phone']
             }
-
     profiler = UserConfigurableProfiler(dataset, semantic_types_dict=semantic_types_dict)
     suite = profiler.build_suite()
     ```
