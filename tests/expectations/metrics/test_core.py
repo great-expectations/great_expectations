@@ -2883,7 +2883,7 @@ def test_table_metric_pd(caplog):
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 5}
     assert (
-        'Unexpected key(s) "column" found in domain_kwargs for domain type "table"'
+        'Unexpected key(s) "column" found in domain_kwargs for Domain type "table"'
         in caplog.text
     )
 
