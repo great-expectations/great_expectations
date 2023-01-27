@@ -183,7 +183,7 @@ class PandasDatasource(Datasource):
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset]
 
-    # instance attrs
+    # instance attributes
     type: Literal["pandas"] = "pandas"
     name: str
     assets: Dict[str, CSVAsset] = {}

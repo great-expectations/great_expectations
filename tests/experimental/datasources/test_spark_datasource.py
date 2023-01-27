@@ -10,12 +10,8 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
 )
-
-# TODO: <Alex>ALEX</Alex>
-from great_expectations.experimental.datasources.pandas_datasource import CSVAsset
-
-# TODO: <Alex>ALEX</Alex>
-from great_expectations.experimental.datasources.spark_datasource import (  # TODO: <Alex>ALEX</Alex>; CSVAsset,
+from great_expectations.experimental.datasources.spark_datasource import (
+    CSVSparkAsset,
     SparkDatasource,
 )
 
@@ -60,7 +56,7 @@ def test_add_csv_asset_to_datasource(
 @pytest.mark.unit
 def test_construct_csv_asset_directly(csv_path: pathlib.Path):
     # noinspection PyTypeChecker
-    asset = CSVAsset(
+    asset = CSVSparkAsset(
         name="csv_asset",
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",  # Ignoring IDE warning (type declarations are consistent).
