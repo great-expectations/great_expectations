@@ -40,7 +40,9 @@ except ImportError:
 
 @public_api
 class BatchDefinition(SerializableDictDot):
-    """A BatchDefinition includes all the information required to precisely
+    """Precisely identifies a set of data from a data source.
+
+    More concretely, a BatchDefinition includes all the information required to precisely
     identify a set of data from the external data source that should be
     translated into a Batch. One or more BatchDefinitions should always be
     *returned* from the Datasource, as a result of processing the Batch Request.
@@ -56,6 +58,7 @@ class BatchDefinition(SerializableDictDot):
             will use to obtain a specific set of data
         batch_spec_passthrough: a dictionary of additional parameters that
             the ExecutionEngine will use to obtain a specific set of data
+
     Returns:
         BatchDefinition
     """
