@@ -2,6 +2,7 @@ import copy
 import logging
 from typing import List, Optional
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.file_path_data_connector import (
@@ -34,6 +35,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        id: Optional[str] = None,
     ) -> None:
         """
         Base class for DataConnectors that connect to filesystem-like data. This class supports the configuration of default_regex
@@ -51,6 +53,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
 
         super().__init__(
             name=name,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             default_regex=default_regex,
@@ -66,7 +69,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         for data_reference in self._get_data_reference_list():
             mapped_batch_definition_list: List[
                 BatchDefinition
-            ] = self._map_data_reference_to_batch_definition_list(
+            ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
                 data_reference=data_reference, data_asset_name=None
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
@@ -91,9 +94,9 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
         """
         return [k for k, v in self._data_references_cache.items() if v is None]
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
-        """
-        Return the list of asset names known by this DataConnector
+        """Return the list of asset names known by this DataConnector
 
         Returns:
             A list of available names

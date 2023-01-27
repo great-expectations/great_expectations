@@ -3,13 +3,14 @@ title: 'Tutorial, Step 1: Setup'
 ---  
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
+import VersionSnippet from './tutorial_version_snippet.mdx'
 
 <UniversalMap setup='active' connect='inactive' create='inactive' validate='inactive'/> 
 
 :::note Prerequisites
 In order to work with Great Expectations, you will need:
 
-- A working Python install
+- A working Python install (3.7 to 3.10)
 - The ability to pip install for Python
   - Note: A best practice would be to do this in a virtual environment!
 - A working Git install
@@ -22,13 +23,13 @@ If you need assistance with setting up any of these utilities, we have links to 
 
 The first thing we'll need is a copy of the data that this tutorial will work with.  Fortunately, we've already put that data into a convenient repository that you can clone to your machine.
 
-Clone the [ge_tutorials](https://github.com/superconductive/ge_tutorials) repository to download the data.  This repository also contains directories with the final versions of the tutorial, which you can use for reference.
+Clone the [gx_tutorials](https://github.com/great-expectations/gx_tutorials) repository to download the data.  This repository also contains directories with the final versions of the tutorial, which you can use for reference.
 
 To clone the repository and go into the directory you'll be working from, start from your working directory and enter the following commands into your terminal:
 
 ```console
-git clone https://github.com/superconductive/ge_tutorials
-cd ge_tutorials
+git clone https://github.com/great-expectations/gx_tutorials
+cd gx_tutorials
 ```
 
 The repository you cloned contains several directories with final versions for this and our other tutorials. The final version for this tutorial is located in the `getting_started_tutorial_final_v3_api` folder. You can use the final version as a reference or to explore a complete deployment of Great Expectations, but **you do not need it for this tutorial**.
@@ -49,9 +50,7 @@ great_expectations --version
 
 This should return something like:
 
-```console
-great_expectations, version 0.13.46
-```
+<VersionSnippet />
 
 For detailed installation instructions, see [How to install Great Expectations locally](../../guides/setup/installation/local.md).
 
@@ -72,7 +71,7 @@ In Great Expectations, your <TechnicalTag relative="../../" tag="data_context" t
 
 When you installed Great Expectations, you also installed the Great Expectations command line interface (<TechnicalTag relative="../../" tag="cli" text="CLI" />). It provides helpful utilities for deploying and configuring Data Contexts, plus a few other convenience methods.
 
-To initialize your Great Expectations deployment for the project, run this command in the terminal from the `ge_tutorials` directory:
+To initialize your Great Expectations deployment for the project, run this command in the terminal from the `gx_tutorials` directory:
 
 ```console
 great_expectations init

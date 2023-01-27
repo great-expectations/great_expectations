@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.self_check.util import (
     expectationConfigurationSchema,
     expectationValidationResultSchema,
@@ -30,12 +30,12 @@ def duplicate_and_obfuscuate(df):
             df_b[column] = df_b[column].astype(str) + "__obfuscate"
             continue
 
-    return ge.from_pandas(pd.concat([df_a, df_b], ignore_index=True, sort=False))
+    return gx.from_pandas(pd.concat([df_a, df_b], ignore_index=True, sort=False))
 
 
 def test_expectation_decorator_summary_mode():
     df = duplicate_and_obfuscuate(
-        ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 7, None, None]})
+        gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 7, None, None]})
     )
 
     df.set_default_expectation_argument("result_format", "COMPLETE")
@@ -116,7 +116,7 @@ def test_expectation_decorator_summary_mode():
 
 def test_positional_arguments():
     df = duplicate_and_obfuscuate(
-        ge.dataset.PandasDataset(
+        gx.dataset.PandasDataset(
             {
                 "x": [1, 3, 5, 7, 9],
                 "y": [2, 4, 6, 8, 10],
@@ -231,7 +231,7 @@ def test_positional_arguments():
 
 def test_result_format_argument_in_decorators():
     df = duplicate_and_obfuscuate(
-        ge.dataset.PandasDataset(
+        gx.dataset.PandasDataset(
             {
                 "x": [1, 3, 5, 7, 9],
                 "y": [2, 4, 6, 8, 10],
@@ -277,17 +277,18 @@ def test_result_format_argument_in_decorators():
                 "element_count": 5,
                 "missing_count": 0,
                 "missing_percent": 0.0,
-                "partial_unexpected_counts": [
-                    {"count": 1, "value": 10},
-                    {"count": 1, "value": 8},
-                ],
-                "partial_unexpected_index_list": [3, 4],
-                "partial_unexpected_list": [8, 10],
                 "unexpected_count": 2,
-                "unexpected_index_list": [3, 4],
-                "unexpected_list": [8, 10],
                 "unexpected_percent": 40.0,
+                "unexpected_percent_total": 40.0,
                 "unexpected_percent_nonmissing": 40.0,
+                "partial_unexpected_list": [8, 10],
+                "partial_unexpected_index_list": [3, 4],
+                "partial_unexpected_counts": [
+                    {"count": 1, "value": 8},
+                    {"count": 1, "value": 10},
+                ],
+                "unexpected_list": [8, 10],
+                "unexpected_index_list": [3, 4],
             },
             "success": False,
         }
@@ -337,7 +338,7 @@ def test_result_format_argument_in_decorators():
 
 def test_ge_pandas_subsetting_with_conditionals():
     df = duplicate_and_obfuscuate(
-        ge.dataset.PandasDataset(
+        gx.dataset.PandasDataset(
             {
                 "A": [1, 2, 3, 4],
                 "B": [5, 6, 7, 8],
@@ -363,47 +364,47 @@ def test_ge_pandas_subsetting_with_conditionals():
 
     # The subsetted data frame should:
     #
-    #   1. Be a ge.dataset.PandaDataSet
+    #   1. Be a gx.dataset.PandaDataSet
     #   2. Inherit ALL the expectations of the parent data frame
 
     exp1 = df.get_expectation_suite().expectations
 
     sub1 = df[["A", "D"]]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, gx.dataset.PandasDataset)
     assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[["A"]]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, gx.dataset.PandasDataset)
     assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[:3]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, gx.dataset.PandasDataset)
     assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[1:2]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, gx.dataset.PandasDataset)
     assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[:-1]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, gx.dataset.PandasDataset)
     assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df[-1:]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, gx.dataset.PandasDataset)
     assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df.iloc[:3, 1:4]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, gx.dataset.PandasDataset)
     assert sub1.get_expectation_suite().expectations == exp1
 
     sub1 = df.loc[0:, "A":"B"]
-    assert isinstance(sub1, ge.dataset.PandasDataset)
+    assert isinstance(sub1, gx.dataset.PandasDataset)
     assert sub1.get_expectation_suite().expectations == exp1
 
 
 def test_row_condition_in_expectation_config():
     df = duplicate_and_obfuscuate(
-        ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 7, None, None]})
+        gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 7, None, None]})
     )
 
     df.set_default_expectation_argument("include_config", True)
@@ -460,7 +461,7 @@ def test_row_condition_in_expectation_config():
 # TODO: this test should be changed when other engines will be implemented
 def test_condition_parser_in_expectation_config():
     df = duplicate_and_obfuscuate(
-        ge.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 7, None, None]})
+        gx.dataset.PandasDataset({"x": [1, 2, 3, 4, 5, 6, 7, 7, None, None]})
     )
 
     df.set_default_expectation_argument("include_config", True)

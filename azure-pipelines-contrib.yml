@@ -27,6 +27,18 @@ stages:
                 [ExperimentalChanged]
                 contrib/experimental/**
 
+                [EthicalAIChanged]
+                contrib/great_expectations_ethical_ai_expectations/**
+
+                [GeospatialChanged]
+                contrib/great_expectations_geospatial_expectations/**
+
+                [SemanticTypesChanged]
+                contrib/great_expectations_semantic_types_expectations/**
+
+                [ZipcodeChanged]
+                contrib/great_expectations_zipcode_expectations/**
+
       - job: lint
         dependsOn: changes
         condition: eq(dependencies.changes.outputs['CheckChanges.ContribChanged'], true)
@@ -38,12 +50,10 @@ stages:
             displayName: 'Use Python $(python.version)'
 
           - script: |
-              pip install isort[requirements]==5.4.2 flake8==3.8.3 black==22.3.0 pyupgrade==2.7.2
+              pip install $(grep -E '^(black|invoke|isort|ruff)' reqs/requirements-dev-contrib.txt)
               EXIT_STATUS=0
-              isort . --check-only --skip docs/ || EXIT_STATUS=$?
-              black --check --exclude docs/ . || EXIT_STATUS=$?
-              flake8 great_expectations/core || EXIT_STATUS=$?
-              pyupgrade --py3-plus || EXIT_STATUS=$?
+              invoke fmt --check || EXIT_STATUS=$?
+              invoke lint || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
       - job: test
@@ -72,8 +82,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install twine
-              pip install wheel
+              pip install twine wheel
               git config --global user.email "team@greatexpectations.io"
               git config --global user.name "Great Expectations"
               echo '$(contrib_major).$(contrib_minor).$(Build.BuildNumber)' > ./PACKAGE_VERSION
@@ -97,3 +106,43 @@ stages:
               python -m twine upload -r great-expectations-experimental --verbose --config-file $(PYPIRC_PATH) dist/*
             workingDirectory: $(Build.SourcesDirectory)/contrib/experimental
             displayName: 'Upload'
+
+      - job: deploy_ethical_ai
+        dependsOn: [changes, test]
+        condition: and(succeeded(), eq(dependencies.changes.outputs['CheckChanges.EthicalAIChanged'], true), eq(variables.isDevelop, true))
+
+        steps:
+          - script: |
+              echo 'We should make a new pypi.org package and update it like https://pypi.org/project/great-expectations-experimental/#history'
+            workingDirectory: $(Build.SourcesDirectory)/contrib/great_expectations_ethical_ai_expectations
+            displayName: 'TODO ethical_ai'
+
+      - job: deploy_geospatial
+        dependsOn: [changes, test]
+        condition: and(succeeded(), eq(dependencies.changes.outputs['CheckChanges.GeospatialChanged'], true), eq(variables.isDevelop, true))
+
+        steps:
+          - script: |
+              echo 'We should make a new pypi.org package and update it like https://pypi.org/project/great-expectations-experimental/#history'
+            workingDirectory: $(Build.SourcesDirectory)/contrib/great_expectations_geospatial_expectations
+            displayName: 'TODO geospatial'
+
+      - job: deploy_semantic_types
+        dependsOn: [changes, test]
+        condition: and(succeeded(), eq(dependencies.changes.outputs['CheckChanges.SemanticTypesChanged'], true), eq(variables.isDevelop, true))
+
+        steps:
+          - script: |
+              echo 'We should make a new pypi.org package and update it like https://pypi.org/project/great-expectations-experimental/#history'
+            workingDirectory: $(Build.SourcesDirectory)/contrib/great_expectations_semantic_types_expectations
+            displayName: 'TODO semantic_types'
+
+      - job: deploy_zipcode
+        dependsOn: [changes, test]
+        condition: and(succeeded(), eq(dependencies.changes.outputs['CheckChanges.ZipcodeChanged'], true), eq(variables.isDevelop, true))
+
+        steps:
+          - script: |
+              echo 'We should make a new pypi.org package and update it like https://pypi.org/project/great-expectations-experimental/#history'
+            workingDirectory: $(Build.SourcesDirectory)/contrib/great_expectations_zipcode_expectations
+            displayName: 'TODO zipcode'

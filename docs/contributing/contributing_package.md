@@ -1,5 +1,5 @@
 ---
-title: Contributing a Package
+title: How to contribute a Package to Great Expectations
 ---
 import Prerequisites from './components/prerequisites.jsx'
 
@@ -12,6 +12,13 @@ This guide demonstrates how to bundle your own custom Expectations, Metrics, and
 </Prerequisites>
 
 ## Steps
+
+### 0. Reach out to our Developer Relations Team
+
+Before you embark on this journey, drop by and introduce yourself in the [`#integrations` channel of our Great Expectations Slack Community](https://greatexpectationstalk.slack.com/archives/C037YCYNF1Q) to let us know. 
+We would love to discuss your Custom Expectations Package, support your development, and help you navigate the publication and maintenance process.
+
+We're big believers in building strong relationships with our community and our ecosystem partners. Opening communication channels early in the process is essential to developing the best possible tools together.
 
 ### 1. Install the `great_expectations_contrib` CLI Tool
 
@@ -110,9 +117,9 @@ great_expectations_contrib check
 ```
 
 This command will run a series of checks on your package, including:
-* Whether or not your code is linted/formatted properly
-* Whether or not you've type annotated function sigantures
-* Whether or not your Expectations are properly documented
+* Whether your code is linted/formatted properly
+* Whether you've type annotated function signatures
+* Whether your Expectations are properly documented
 * And more!
 
 Using `great_expectations_contrib` as part of your development loop will help you

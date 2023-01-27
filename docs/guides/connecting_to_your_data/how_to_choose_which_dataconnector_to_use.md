@@ -10,7 +10,7 @@ This guide demonstrates how to choose which <TechnicalTag tag="data_connector" t
 
 <Prerequisites>
 
-- [Understand the basics of Datasources in the V3 (Batch Request) API](../../reference/datasources.md)
+- [Understand the basics of Datasources in the V3 (Batch Request) API](../../terms/datasource.md)
 - Learned how to configure a [Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
 </Prerequisites>
@@ -65,14 +65,14 @@ This configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L9-L27
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_yaml"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L40-L63
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config"
 ```
 
 </TabItem>
@@ -120,14 +120,14 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L95-L119
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_yaml_2"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py#L132-L158
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py datasource_config_2"
 ```
 
 </TabItem>

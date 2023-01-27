@@ -7,8 +7,8 @@ import pytest
 from ruamel import yaml
 
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.util import get_context
 from tests.core.usage_statistics.util import (
     usage_stats_exceptions_exist,
     usage_stats_invalid_messages_exist,
@@ -65,6 +65,7 @@ def in_memory_data_context_config_usage_stats_enabled():
     )
 
 
+@pytest.mark.slow  # 1.34s
 def test_common_usage_stats_are_sent_no_mocking(
     caplog, in_memory_data_context_config_usage_stats_enabled, monkeypatch
 ):
@@ -85,15 +86,13 @@ def test_common_usage_stats_are_sent_no_mocking(
     )  # Undo the project-wide test default
     assert os.getenv("GE_USAGE_STATS") is None
 
-    context: BaseDataContext = BaseDataContext(
-        in_memory_data_context_config_usage_stats_enabled
-    )
+    context = get_context(in_memory_data_context_config_usage_stats_enabled)
 
     # Note, we lose the `data_context.__init__` event because it was emitted before closing the worker
     context._usage_statistics_handler._close_worker()
 
     # Make sure usage stats are enabled
-    assert not context._check_global_usage_statistics_opt_out()
+    assert context._is_usage_stats_enabled()
     assert context.anonymous_usage_statistics.enabled
     assert context.anonymous_usage_statistics.data_context_id == DATA_CONTEXT_ID
 

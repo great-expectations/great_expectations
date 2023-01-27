@@ -5,7 +5,7 @@ import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
 Saving <TechnicalTag tag="metric" text="Metrics" /> during <TechnicalTag tag="validation" text="Validation" /> makes it easy to construct a new data series based on observed dataset characteristics computed by Great Expectations. That data series can serve as the source for a dashboard or overall data quality metrics, for example.
 
-Storing metrics is still a **beta** feature of Great Expectations, and we expect configuration and capability to evolve rapidly.
+Storing metrics is still an **experimental** feature of Great Expectations, and we expect configuration and capability to evolve rapidly.
 
 ## Steps
 
@@ -105,8 +105,8 @@ action_list:
 To test your `StoreMetricsAction`, run your Checkpoint from your code or the <TechnicalTag tag="cli" text="CLI" />:
 
 ```python
-import great_expectations as ge
-context = ge.get_context()
+import great_expectations as gx
+context = gx.get_context()
 checkpoint_name = "your checkpoint name here"
 context.run_checkpoint(checkpoint_name=checkpoint_name)
 ```

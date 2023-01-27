@@ -1,5 +1,5 @@
 import copy
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import nbformat
 import pytest
@@ -12,8 +12,12 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 from great_expectations.render.util import (
+    _convert_unexpected_indices_to_df,
+    build_count_and_index_table,
+    build_count_table,
     num_to_str,
     resource_key_passes_run_name_filter,
+    truncate_list_of_indices,
 )
 
 
@@ -284,3 +288,284 @@ def find_code_in_notebook(
     }
 
     return cells_of_interest_dict
+
+
+def test_convert_unexpected_indices_to_df():
+    unexpected_index_list = [
+        {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
+        {"animals": "lion", "pk_1": 4, "pk_2": "four"},
+        {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+    ]
+    unexpected_index_column_names = ["pk_1", "pk_2"]
+
+    partial_unexpected_counts = [
+        {"count": 1, "value": "giraffe"},
+        {"count": 1, "value": "lion"},
+        {"count": 1, "value": "zebra"},
+    ]
+
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=unexpected_index_list,
+        unexpected_index_column_names=unexpected_index_column_names,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == unexpected_index_column_names
+    print(res)
+    assert res.iloc[0].tolist() == ["3", "three"]
+    assert res.iloc[1].tolist() == ["4", "four"]
+    assert res.iloc[2].tolist() == ["5", "five"]
+
+
+def test_convert_unexpected_indices_to_df_multiple():
+    result = [
+        {"animals": "giraffe", "pk_1": 3},
+        {"animals": "lion", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+        {"animals": "zebra", "pk_1": 6},
+        {"animals": "zebra", "pk_1": 7},
+        {"animals": "zebra", "pk_1": 8},
+    ]
+    unexpected_index_column_names = ["pk_1"]
+    partial_unexpected_counts = [
+        {"count": 1, "value": "giraffe"},
+        {"count": 1, "value": "lion"},
+        {"count": 4, "value": "zebra"},
+    ]
+
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=result,
+        unexpected_index_column_names=unexpected_index_column_names,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == unexpected_index_column_names
+    assert res.iloc[0].tolist() == ["3"]
+    assert res.iloc[1].tolist() == ["4"]
+    assert res.iloc[2].tolist() == ["5, 6, 7, 8"]
+
+
+def test_convert_unexpected_indices_to_df_multiple_with_truncation():
+    result = [
+        {"animals": "zebra", "pk_1": 0},
+        {"animals": "zebra", "pk_1": 1},
+        {"animals": "zebra", "pk_1": 2},
+        {"animals": "zebra", "pk_1": 3},
+        {"animals": "zebra", "pk_1": 4},
+        {"animals": "zebra", "pk_1": 5},
+        {"animals": "zebra", "pk_1": 6},
+        {"animals": "zebra", "pk_1": 7},
+        {"animals": "zebra", "pk_1": 8},
+        {"animals": "zebra", "pk_1": 9},
+        {"animals": "zebra", "pk_1": 10},
+        {"animals": "zebra", "pk_1": 11},
+        {"animals": "zebra", "pk_1": 12},
+    ]
+    unexpected_index_column_names = ["pk_1"]
+    partial_unexpected_counts = [{"count": 13, "value": "zebra"}]
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=result,
+        unexpected_index_column_names=unexpected_index_column_names,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == unexpected_index_column_names
+    assert res.iloc[0].tolist() == ["0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ..."]
+
+
+def test_convert_unexpected_indices_to_df_actual_values():
+    """
+    Test if no index_column_names are specified, and we use Pandas' default unexpected indices
+    """
+    unexpected_index_list = [3, 4, 5]
+    unexpected_list = ["giraffe", "lion", "zebra"]
+    partial_unexpected_counts = [
+        {"count": 1, "value": "giraffe"},
+        {"count": 1, "value": "lion"},
+        {"count": 4, "value": "zebra"},
+    ]
+
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=unexpected_index_list,
+        unexpected_list=unexpected_list,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == ["Index"]
+    assert res.iloc[0].tolist() == ["3"]
+    assert res.iloc[1].tolist() == ["4"]
+    assert res.iloc[2].tolist() == ["5"]
+
+
+def test_truncate_list_of_indices():
+    int_indices: List[Union[int, str]] = [4, 5, 6, 7]
+    result: str = truncate_list_of_indices(indices=int_indices)
+    assert result == "4, 5, 6, 7"
+
+    result: str = truncate_list_of_indices(indices=int_indices, max_index=2)
+    assert result == "4, 5, ..."
+
+    str_indices: List[Union[int, str]] = ["four", "five", "six", "seven"]
+    result: str = truncate_list_of_indices(indices=str_indices)
+    assert result == "four, five, six, seven"
+
+    result: str = truncate_list_of_indices(indices=str_indices, max_index=2)
+    assert result == "four, five, ..."
+
+
+def test_build_count_and_index_table():
+    partial_unexpected_counts = [
+        {"count": 1, "value": "giraffe"},
+        {"count": 1, "value": "lion"},
+        {"count": 1, "value": "zebra"},
+    ]
+    unexpected_index_list = [
+        {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
+        {"animals": "lion", "pk_1": 4, "pk_2": "four"},
+        {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+    ]
+    unexpected_count = 3
+    unexpected_index_column_names = ["pk_1", "pk_2"]
+
+    header_row, table_rows = build_count_and_index_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_index_list=unexpected_index_list,
+        unexpected_count=unexpected_count,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert header_row == ["Unexpected Value", "Count", "pk_1", "pk_2"]
+    assert table_rows == [
+        ["giraffe", 1, "3", "three"],
+        ["lion", 1, "4", "four"],
+        ["zebra", 1, "5", "five"],
+    ]
+
+
+def test_build_count_and_index_table_sampled():
+    partial_unexpected_counts = [
+        {"count": 1, "value": "giraffe"},
+        {"count": 1, "value": "lion"},
+        {"count": 1, "value": "zebra"},
+    ]
+    unexpected_index_list = [
+        {"animals": "giraffe", "pk_1": 3, "pk_2": "three"},
+        {"animals": "lion", "pk_1": 4, "pk_2": "four"},
+        {"animals": "zebra", "pk_1": 5, "pk_2": "five"},
+    ]
+    unexpected_count = 100
+    unexpected_index_column_names = ["pk_1", "pk_2"]
+
+    header_row, table_rows = build_count_and_index_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_index_list=unexpected_index_list,
+        unexpected_count=unexpected_count,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert header_row == ["Sampled Unexpected Values", "Count", "pk_1", "pk_2"]
+    assert table_rows == [
+        ["giraffe", 1, "3", "three"],
+        ["lion", 1, "4", "four"],
+        ["zebra", 1, "5", "five"],
+    ]
+
+
+def test_build_count_and_index_table_with_empty_string():
+    partial_unexpected_counts = [
+        {"count": 1, "value": ""},
+    ]
+    unexpected_index_list = [
+        {"animals": "", "pk_1": 5, "pk_2": "five"},
+    ]
+    unexpected_count = 100
+    unexpected_index_column_names = ["pk_1", "pk_2"]
+
+    header_row, table_rows = build_count_and_index_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_index_list=unexpected_index_list,
+        unexpected_count=unexpected_count,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert header_row == ["Sampled Unexpected Values", "Count", "pk_1", "pk_2"]
+    assert table_rows == [
+        ["EMPTY", 1, "5", "five"],
+    ]
+
+
+def test_build_count_and_index_table_with_null():
+    partial_unexpected_counts = [
+        {"count": 1, "value": None},
+    ]
+    unexpected_index_list = [
+        {"animals": None, "pk_1": 5, "pk_2": "five"},
+    ]
+    unexpected_count = 100
+    unexpected_index_column_names = ["pk_1", "pk_2"]
+
+    header_row, table_rows = build_count_and_index_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_index_list=unexpected_index_list,
+        unexpected_count=unexpected_count,
+        unexpected_index_column_names=unexpected_index_column_names,
+    )
+    assert header_row == ["Sampled Unexpected Values", "Count", "pk_1", "pk_2"]
+    assert table_rows == [
+        ["null", 1, "5", "five"],
+    ]
+
+
+def test_build_count_table():
+    partial_unexpected_counts = [
+        {"count": 3, "value": "giraffe"},
+        {"count": 2, "value": "lion"},
+        {"count": 1, "value": "zebra"},
+    ]
+    unexpected_count = 6
+
+    header_row, table_rows = build_count_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_count=unexpected_count,
+    )
+    assert header_row == ["Unexpected Value", "Count"]
+    assert table_rows == [["giraffe", 3], ["lion", 2], ["zebra", 1]]
+
+
+def test_build_count_table_sampled():
+    partial_unexpected_counts = [
+        {"count": 3, "value": "giraffe"},
+        {"count": 2, "value": "lion"},
+        {"count": 1, "value": "zebra"},
+    ]
+    unexpected_count = 100
+
+    header_row, table_rows = build_count_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_count=unexpected_count,
+    )
+    assert header_row == ["Sampled Unexpected Values", "Count"]
+    assert table_rows == [["giraffe", 3], ["lion", 2], ["zebra", 1]]
+
+
+def test_build_count_table_with_empty_string():
+    partial_unexpected_counts = [
+        {"count": 1, "value": ""},
+    ]
+    unexpected_count = 100
+
+    header_row, table_rows = build_count_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_count=unexpected_count,
+    )
+    assert header_row == ["Sampled Unexpected Values", "Count"]
+    assert table_rows == [
+        ["EMPTY", 1],
+    ]
+
+
+def test_build_count_table_with_null():
+    partial_unexpected_counts = [
+        {"count": 1, "value": None},
+    ]
+    unexpected_count = 100
+
+    header_row, table_rows = build_count_table(
+        partial_unexpected_counts=partial_unexpected_counts,
+        unexpected_count=unexpected_count,
+    )
+    assert header_row == ["Sampled Unexpected Values", "Count"]
+    assert table_rows == [["null", 1]]

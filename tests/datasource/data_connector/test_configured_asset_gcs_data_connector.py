@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core import IDDict
 from great_expectations.core.batch import (
@@ -560,6 +560,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_gcs_data_connector.storage.Client"
 )
+@pytest.mark.slow  # 1.65s
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
 ):
@@ -1004,7 +1005,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
     assert len(my_batch_definition_list) == 1
     my_batch_definition = my_batch_definition_list[0]
-    expected_batch_definition: BatchDefinition = BatchDefinition(
+    expected_batch_definition = BatchDefinition(
         datasource_name="test_environment",
         data_connector_name="general_gcs_data_connector",
         data_asset_name="TestFiles",
@@ -1168,7 +1169,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
     ]
 
     # Raises error due to a sorter (for_me_Me_me) not matching a group_name in `FilePathDataConnector._validate_sorters_configuration()`
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
             runtime_environment={
@@ -1237,7 +1238,7 @@ def test_return_all_batch_definitions_too_many_sorters(
     ]
 
     # Raises error due to a non-existent sorter being specified in `FilePathDataConnector._validate_sorters_configuration()`
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
             runtime_environment={

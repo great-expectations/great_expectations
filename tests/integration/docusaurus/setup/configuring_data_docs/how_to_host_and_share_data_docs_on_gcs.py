@@ -3,9 +3,9 @@ import subprocess
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 
-context = ge.get_context()
+context = gx.get_context()
 
 # NOTE: The following code is only for testing and depends on an environment
 # variable to set the gcp_project. You can replace the value with your own
@@ -85,7 +85,7 @@ with open(requirements_txt_file_path, "w") as f:
     f.write(requirements_txt)
 
 main_py = """
-# <snippet>
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py imports">
 import logging
 import os
 from flask import Flask, request

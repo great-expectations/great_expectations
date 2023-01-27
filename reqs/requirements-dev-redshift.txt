@@ -1,0 +1,2 @@
+psycopg2-binary>=2.7.6
+sqlalchemy-redshift>=0.8.8

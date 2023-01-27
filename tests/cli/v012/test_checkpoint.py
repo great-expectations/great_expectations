@@ -249,6 +249,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.04s
 def test_checkpoint_new_happy_path_generates_checkpoint_yml_with_comments_with_ge_config_v2(
     mock_emit,
     caplog,
@@ -350,6 +351,7 @@ batches:
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.05s
 def test_checkpoint_new_specify_datasource_with_ge_config_v2(
     mock_emit,
     caplog,
@@ -436,7 +438,7 @@ def test_checkpoint_new_raises_error_if_checkpoints_directory_is_missing_with_ge
     stdout = result.stdout
     assert result.exit_code == 1
     assert (
-        'Attempted to access the "checkpoint_store_name" field with no `checkpoints` directory.'
+        "Attempted to access the 'checkpoint_store_name' field with no `checkpoints` directory."
         in stdout
     )
 
@@ -753,6 +755,7 @@ def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.40s
 def test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -799,6 +802,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.40s
 def test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -851,6 +855,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.01s
 def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -894,6 +899,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found_with_ge_config_v
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.01s
 def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -901,7 +907,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
     root_dir = context.root_directory
     assert context.list_checkpoints() == ["my_checkpoint"]
     script_path = os.path.join(
-        root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py"
+        root_dir, context.GX_UNCOMMITTED_DIR, "run_my_checkpoint.py"
     )
     with open(script_path, "w") as f:
         f.write("script here")
@@ -949,6 +955,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.03s
 def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
     mock_emit, caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -991,7 +998,7 @@ def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
         ),
     ]
     expected_script = os.path.join(
-        root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py"
+        root_dir, context.GX_UNCOMMITTED_DIR, "run_my_checkpoint.py"
     )
     assert os.path.isfile(expected_script)
 
@@ -1002,6 +1009,7 @@ def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
     )
 
 
+@pytest.mark.slow  # 6.96s
 def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_config_v2(
     caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -1033,7 +1041,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     )
 
     script_path = os.path.abspath(
-        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py")
+        os.path.join(root_dir, context.GX_UNCOMMITTED_DIR, "run_my_checkpoint.py")
     )
     assert os.path.isfile(script_path)
 
@@ -1055,6 +1063,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     assert "Validation succeeded!" in output
 
 
+@pytest.mark.slow  # 8.31s
 def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_config_v2(
     caplog, titanic_data_context_v2_with_checkpoint_suite_and_stats_enabled
 ):
@@ -1090,7 +1099,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
     )
 
     script_path = os.path.abspath(
-        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py")
+        os.path.join(root_dir, context.GX_UNCOMMITTED_DIR, "run_my_checkpoint.py")
     )
     assert os.path.isfile(script_path)
 

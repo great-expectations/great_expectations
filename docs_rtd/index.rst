@@ -12,7 +12,7 @@ communication between teams. Head over to the :ref:`intro` to learn more, or jum
 
 .. attention::
 
-   Welcome! In addition to perusing the documentation,  please feel free to ask questions on our `Slack channel <https://greatexpectations.io/slack>`__ or `discussion forum <https://discuss.greatexpectations.io>`__!
+   Welcome! In addition to perusing the documentation,  please feel free to ask questions on our `Slack channel <https://greatexpectations.io/slack>`__ or `discussion forum <https://github.com/great-expectations/great_expectations/discussions/>`__!
 
 .. toctree::
    :maxdepth: 2

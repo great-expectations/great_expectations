@@ -22,6 +22,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
     def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
         if obj and isinstance(obj, RuleBasedProfiler):
             return self._anonymize_profiler_info(**kwargs)
+
         return self._anonymize_profiler_run(obj=obj, **kwargs)
 
     def _anonymize_profiler_info(self, name: str, config: dict) -> dict:
@@ -87,7 +88,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
         for name, rule in rules.items():
             anonymized_rule: dict = self._anonymize_rule(name, rule)
             anonymized_rules.append(anonymized_rule)
-            logger.debug("Anonymized rule %s", name)
+            logger.debug(f"Anonymized rule {name}")
 
         return anonymized_rules
 
@@ -229,7 +230,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
             expectation_type (Optional[str]): The string name of the Expectation.
             info_dict (dict): A dictionary to update within this function.
         """
-        if expectation_type in self.CORE_GE_EXPECTATION_TYPES:
+        if expectation_type in self.CORE_GX_EXPECTATION_TYPES:
             info_dict["expectation_type"] = expectation_type
         else:
             info_dict["anonymized_expectation_type"] = self._anonymize_string(

@@ -4,13 +4,14 @@ from typing import Optional, Union
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.base import BaseYamlConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.data_context.util import load_class
 from great_expectations.util import (
@@ -44,7 +45,7 @@ class ConfigurationStore(Store):
         runtime_environment: Optional[dict] = None,
     ) -> None:
         if not issubclass(self._configuration_class, BaseYamlConfig):
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "Invalid configuration: A configuration_class needs to inherit from the BaseYamlConfig class."
             )
 
@@ -90,20 +91,20 @@ class ConfigurationStore(Store):
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
 
-    def serialize(self, key, value):
-        if self.ge_cloud_mode:
-            # GeCloudStoreBackend expects a json str
+    def serialize(self, value):
+        if self.cloud_mode:
+            # GXCloudStoreBackend expects a json str
             config_schema = value.get_schema_class()()
             return config_schema.dump(value)
         return value.to_yaml_str()
 
-    def deserialize(self, key, value):
+    def deserialize(self, value):
         config = value
         if isinstance(value, str):
             config: CommentedMap = yaml.load(value)
         try:
             return self._configuration_class.from_commented_map(commented_map=config)
-        except ge_exceptions.InvalidBaseYamlConfigError:
+        except gx_exceptions.InvalidBaseYamlConfigError:
             # Just to be explicit about what we intended to catch
             raise
 
@@ -119,7 +120,7 @@ class ConfigurationStore(Store):
     def config(self) -> dict:
         return self._config
 
-    def self_check(self, pretty_print: bool = True) -> dict:
+    def self_check(self, pretty_print: bool = True) -> dict:  # type: ignore[override]
         # Provide visibility into parameters that ConfigurationStore was instantiated with.
         report_object: dict = {"config": self.config}
 
@@ -127,17 +128,15 @@ class ConfigurationStore(Store):
             print("Checking for existing keys...")
 
         report_object["keys"] = sorted(
-            key.configuration_key for key in self.list_keys()
+            key.configuration_key for key in self.list_keys()  # type: ignore[attr-defined]
         )
 
         report_object["len_keys"] = len(report_object["keys"])
         len_keys: int = report_object["len_keys"]
 
         if pretty_print:
-            if report_object["len_keys"] == 0:
-                print(f"\t{len_keys} keys found")
-            else:
-                print(f"\t{len_keys} keys found:")
+            print(f"\t{len_keys} keys found")
+            if report_object["len_keys"] > 0:
                 for key in report_object["keys"][:10]:
                     print(f"		{str(key)}")
             if len_keys > 10:
@@ -151,18 +150,21 @@ class ConfigurationStore(Store):
     def serialization_self_check(self, pretty_print: bool) -> None:
         raise NotImplementedError
 
-    @staticmethod
     def determine_key(
-        name: Optional[str], ge_cloud_id: Optional[str]
-    ) -> Union[GeCloudIdentifier, ConfigurationIdentifier]:
+        self, name: Optional[str], ge_cloud_id: Optional[str]
+    ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
         assert bool(name) ^ bool(
             ge_cloud_id
         ), "Must provide either name or ge_cloud_id."
 
-        key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GeCloudIdentifier(resource_type="contract", ge_cloud_id=ge_cloud_id)
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
+        if ge_cloud_id or self.ge_cloud_mode:
+            key = GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.CHECKPOINT,
+                cloud_id=ge_cloud_id,
+                resource_name=name,
+            )
         else:
-            key = ConfigurationIdentifier(configuration_key=name)
+            key = ConfigurationIdentifier(configuration_key=name)  # type: ignore[arg-type]
 
         return key

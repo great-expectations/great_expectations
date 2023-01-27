@@ -51,10 +51,6 @@ The built-in Renderers for email and Slack messages provide a convenient way to 
 
 When looking for Renderers with Expectations, you will find them specified as part of the Python class defining the Expectation.  With alerts and messaging, however, you will specify the Renderer to use in an Action's configuration.  To do this, you will specify a `module_name` and `class_name` indicating the Renderer's Python class under the `renderer` key (found nested under the `action` key) in an Action entry in a Checkpoint's `action_list`.
 
-### How to create
-
-If you need to create a Renderer for a custom Expectation, please see [our guide on how to create renderers for Custom Expectations](../guides/expectations/advanced/how_to_create_renderers_for_custom_expectations.md).
-
 ### Configuration
 
 If you need instructions on how to configure the renderer portion of an Action to send a message or alert, please see the relevant guide:

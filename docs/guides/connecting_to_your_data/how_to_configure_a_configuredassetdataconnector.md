@@ -10,7 +10,7 @@ This guide demonstrates how to configure a ConfiguredAssetDataConnector, and pro
 
 <Prerequisites>
 
-- [Understand the basics of Datasources in 0.13 or later](../../reference/datasources.md)
+- [Understand the basics of Datasources in 0.13 or later](../../terms/datasource.md)
 - Learned how to configure a [Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
 </Prerequisites>
@@ -149,7 +149,7 @@ Later on we could retrieve the data in `yellow_tripdata_2019-02.csv` of `yellow_
 ```
 
 This ability to access specific Batches using `batch_identifiers` is very useful when validating Data Assets that span multiple files.
-For more information on `batches` and `batch_identifiers`, please refer to the [Core Concepts document](../../reference/dividing_data_assets_into_batches.md).
+For more information on `batches` and `batch_identifiers`, please refer to our [Batch documentation](../../terms/batch.md).
 
 A corresponding configuration for `ConfiguredAssetS3DataConnector` would look similar but would require `bucket` and `prefix` values instead of `base_directory`.
 

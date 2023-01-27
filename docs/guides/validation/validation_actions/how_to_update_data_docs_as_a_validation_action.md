@@ -71,8 +71,8 @@ Test that your new Action is configured correctly:
 Run the Checkpoint from your code or the <TechnicalTag tag="cli" text="CLI" /> and verify that no errors are thrown.
 
 ```python
-import great_expectations as ge
-context = ge.get_context()
+import great_expectations as gx
+context = gx.get_context()
 checkpoint_name = "your checkpoint name here"
 context.run_checkpoint(checkpoint_name=checkpoint_name)
 ```

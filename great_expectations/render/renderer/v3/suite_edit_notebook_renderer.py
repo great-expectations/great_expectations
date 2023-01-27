@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import jinja2
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.batch import (
     BatchRequest,
@@ -14,7 +15,6 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.types.base import (
     NotebookConfig,
     NotebookTemplateConfig,
-    notebookConfigSchema,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
@@ -25,6 +25,11 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class SuiteEditNotebookRenderer(BaseNotebookRenderer):
@@ -51,7 +56,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         footer_code: Optional[NotebookTemplateConfig] = None,
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
-        context: Optional[DataContext] = None,
+        context: Optional[AbstractDataContext] = None,
     ) -> None:
         super().__init__(context=context)
         custom_loader: list = []
@@ -103,12 +108,10 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self.table_expectation_code = table_expectation_code
 
     @staticmethod
-    def from_data_context(data_context: DataContext):
+    def from_data_context(data_context: AbstractDataContext):
         suite_edit_notebook_config: Optional[NotebookConfig] = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
-            suite_edit_notebook_config = notebookConfigSchema.load(
-                data_context.notebooks.get("suite_edit")
-            )
+            suite_edit_notebook_config = data_context.notebooks.get("suite_edit")
 
         if suite_edit_notebook_config:
             return instantiate_class_from_config(
@@ -169,9 +172,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def add_header(
         self,
         suite_name: str,
-        batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-        ] = None,
+        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
     ) -> None:
         markdown: str = self.render_with_overwrite(
             notebook_config=self.header_markdown,
@@ -194,9 +195,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def add_footer(
         self,
-        batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-        ] = None,
+        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
     ) -> None:
         markdown: str = self.render_with_overwrite(
             notebook_config=self.footer_markdown,
@@ -214,9 +213,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def add_expectation_cells_from_suite(
         self,
         expectations: List[ExpectationConfiguration],
-        batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-        ] = None,
+        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
     ) -> None:
         expectations_by_column: Dict[
             str, List[ExpectationConfiguration]
@@ -248,10 +245,8 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def _add_table_level_expectations(
         self,
         expectations_by_column: Dict[str, List[ExpectationConfiguration]],
-        batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-        ] = None,
-    ):
+        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
+    ) -> None:
         if not expectations_by_column["table_expectations"]:
             markdown: str = self.render_with_overwrite(
                 notebook_config=self.table_expectations_not_found_markdown,
@@ -281,10 +276,8 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def _add_column_level_expectations(
         self,
         expectations_by_column: Dict[str, List[ExpectationConfiguration]],
-        batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-        ] = None,
-    ):
+        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
+    ) -> None:
         if not expectations_by_column:
             markdown: str = self.render_with_overwrite(
                 notebook_config=self.column_expectations_not_found_markdown,
@@ -354,17 +347,16 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         return ""
 
-    # noinspection PyMethodOverriding
-    def render(
-        self,
-        suite: ExpectationSuite,
-        batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-        ] = None,
-    ) -> nbformat.NotebookNode:
+    def render(self, **kwargs: dict) -> nbformat.NotebookNode:
         """
         Render a notebook dict from an expectation suite.
         """
+        # noinspection PyTypeChecker
+        suite: ExpectationSuite = kwargs.get("suite")
+        batch_request: Optional[Union[str, Dict[str, Any]]] = kwargs.get(
+            "batch_request"
+        )
+
         if not isinstance(suite, ExpectationSuite):
             raise RuntimeWarning("render must be given an ExpectationSuite.")
 
@@ -392,24 +384,23 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
         return self._notebook
 
-    # noinspection PyMethodOverriding
-    def render_to_disk(
-        self,
-        suite: ExpectationSuite,
-        notebook_file_path: str,
-        batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-        ] = None,
-    ) -> None:
+    def render_to_disk(self, notebook_file_path: str, **kwargs: dict) -> None:
         """
         Render a notebook to disk from an expectation suite.
 
         If batch_request dictionary is passed, its properties will override any found in suite citations.
         """
+        # noinspection PyTypeChecker
+        suite: ExpectationSuite = kwargs.get("suite")
+        batch_request: Optional[Union[str, Dict[str, Any]]] = kwargs.get(
+            "batch_request"
+        )
+
         deep_filter_properties_iterable(
             properties=batch_request,
             inplace=True,
         )
+        # noinspection PyTypeChecker
         self.render(
             suite=suite,
             batch_request=batch_request,
@@ -420,9 +411,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def add_authoring_intro(
         self,
-        batch_request: Optional[
-            Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-        ] = None,
+        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
     ) -> None:
         markdown: str = self.render_with_overwrite(
             notebook_config=self.authoring_intro_markdown,

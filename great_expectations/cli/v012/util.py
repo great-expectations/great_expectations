@@ -2,10 +2,12 @@ import importlib
 import re
 import sys
 from types import ModuleType
-from typing import Optional
+from typing import Optional, Tuple
 
+import click
 import pkg_resources
 from pkg_resources import Distribution, WorkingSet
+from typing_extensions import Final
 
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.python_subprocess import (
@@ -13,36 +15,28 @@ from great_expectations.cli.v012.python_subprocess import (
 )
 from great_expectations.util import import_library_module, is_library_loadable
 
-try:
-    from termcolor import colored
-except ImportError:
-    colored = None
+SUPPORTED_CLI_COLORS: Final[Tuple[str, ...]] = (
+    "blue",
+    "cyan",
+    "green",
+    "yellow",
+    "red",
+)
 
 
-def cli_message(string) -> None:
+def cli_message(string: str) -> None:
     print(cli_colorize_string(string))
 
 
-def cli_colorize_string(string):
-    # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
-    flags = re.DOTALL
-    mod_string = re.sub(
-        "<blue>(.*?)</blue>", colored(r"\g<1>", "blue"), string, flags=flags
-    )
-    mod_string = re.sub(
-        "<cyan>(.*?)</cyan>", colored(r"\g<1>", "cyan"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<green>(.*?)</green>", colored(r"\g<1>", "green"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<yellow>(.*?)</yellow>", colored(r"\g<1>", "yellow"), mod_string, flags=flags
-    )
-    mod_string = re.sub(
-        "<red>(.*?)</red>", colored(r"\g<1>", "red"), mod_string, flags=flags
-    )
-
-    return colored(mod_string)
+def cli_colorize_string(string: str) -> str:
+    for color in SUPPORTED_CLI_COLORS:
+        string = re.sub(
+            f"<{color}>(.*?)</{color}>",
+            click.style(r"\g<1>", fg=color),
+            string,
+            flags=re.DOTALL,  # the DOTALL flag means that `.` includes newlines for multiline comments inside these tags
+        )
+    return string
 
 
 def cli_message_list(string_list, list_intro_string=None) -> None:
@@ -123,7 +117,9 @@ CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
 
 
 def verify_library_dependent_modules(
-    python_import_name: str, pip_library_name: str, module_names_to_reload: list = None
+    python_import_name: str,
+    pip_library_name: str,
+    module_names_to_reload: Optional[list] = None,
 ) -> bool:
     library_status_code: Optional[int]
 

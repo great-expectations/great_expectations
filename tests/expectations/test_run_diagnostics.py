@@ -1,16 +1,14 @@
 import json
 
-import pandas as pd
 import pytest
 
-from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationRendererDiagnostics,
 )
-from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    ExpectationConfiguration,
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
 )
+from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.registry import _registered_expectations
 from tests.expectations.fixtures.expect_column_values_to_equal_three import (
     ExpectColumnValuesToEqualThree,
@@ -44,14 +42,26 @@ def test_expectation_self_check():
             "docstring": "",
         },
         "execution_engines": {
-            "PandasExecutionEngine": True,
-            "SqlAlchemyExecutionEngine": True,
-            "SparkDFExecutionEngine": True,
+            "PandasExecutionEngine": False,
+            "SqlAlchemyExecutionEngine": False,
+            "SparkDFExecutionEngine": False,
         },
         "gallery_examples": [],
         "renderers": [
             {
+                "is_standard": False,
+                "is_supported": True,
+                "name": "atomic.diagnostic.failed",
+                "samples": [],
+            },
+            {
                 "name": "atomic.diagnostic.observed_value",
+                "is_supported": True,
+                "is_standard": False,
+                "samples": [],
+            },
+            {
+                "name": "atomic.prescriptive.failed",
                 "is_supported": True,
                 "is_standard": False,
                 "samples": [],
@@ -115,6 +125,7 @@ def test_expectation_self_check():
         "tests": [],
         "backend_test_result_counts": [],
         "errors": [],
+        "coverage_score": 0.0,
         "maturity_checklist": {
             "beta": [
                 {
@@ -271,8 +282,8 @@ def test_self_check_on_an_existing_expectation():
             "custom": [],
         },
         "metrics": [
-            "column_values.nonnull.unexpected_count",
-            "column_values.match_regex.unexpected_count",
+            f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+            f"column_values.match_regex.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             "table.row_count",
             "column_values.match_regex.unexpected_values",
         ],
@@ -538,7 +549,7 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "error_diagnostics",
         "validation_result",
     }
-    assert tests[3]["test_passed"] == False
+    assert tests[3]["test_passed"] is False
 
     assert set(tests[4].keys()) == {
         "test_title",
@@ -548,4 +559,4 @@ def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
         "error_diagnostics",
         "validation_result",
     }
-    assert tests[4]["test_passed"] == False
+    assert tests[4]["test_passed"] is False

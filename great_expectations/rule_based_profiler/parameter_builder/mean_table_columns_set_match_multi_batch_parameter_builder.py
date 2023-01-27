@@ -1,7 +1,10 @@
-from typing import Dict, List, Optional, Set, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
 import numpy as np
 
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -9,16 +12,22 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    Domain,
-    MetricValue,
-    MetricValues,
     ParameterContainer,
     ParameterNode,
 )
 from great_expectations.types.attributes import Attributes
+from great_expectations.validator.computed_metric import MetricValue
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.rule_based_profiler.metric_computation_result import (
+        MetricValues,
+    )
 
 
 class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
@@ -33,10 +42,11 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
     Step-4: Compute mean value of match scores as "success_ratio" (divide sum of scores by number of Batch objects).
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "metric_name",
+        "single_batch_mode",
         "enforce_numeric_metric",
         "replace_nan_with_zero",
         "reduce_scalar_metric",
@@ -50,8 +60,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        json_serialize: Union[str, bool] = True,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -63,8 +72,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            json_serialize: If True (default), convert computed value to JSON prior to saving results.
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -75,7 +83,6 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             replace_nan_with_zero=False,
             reduce_scalar_metric=True,
             evaluation_parameter_builder_configs=evaluation_parameter_builder_configs,
-            json_serialize=json_serialize,
             data_context=data_context,
         )
 
@@ -84,7 +91,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -98,14 +105,13 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            json_serialize=False,
-            recompute_existing_parameter_values=recompute_existing_parameter_values,
+            runtime_configuration=runtime_configuration,
         )
 
         # Retrieve "table.columns" metric values for all Batch objects.
         parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(
             domain=domain,
-            parameter_reference=self.fully_qualified_parameter_name,
+            parameter_reference=self.raw_fully_qualified_parameter_name,
             expected_return_type=None,
             variables=variables,
             parameters=parameters,
@@ -116,8 +122,8 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         one_batch_table_columns_names_value: MetricValue
         multi_batch_table_columns_names_sets_as_list: List[Set[str]] = [
-            set(one_batch_table_columns_names_value.tolist())
-            for one_batch_table_columns_names_value in table_columns_names_multi_batch_value
+            set(one_batch_table_columns_names_value)  # type: ignore[arg-type] # could be dict
+            for one_batch_table_columns_names_value in table_columns_names_multi_batch_value  # type: ignore[union-attr] # not all iterable
         ]
 
         multi_batch_table_columns_names_as_set: Set[str] = set().union(
@@ -126,7 +132,7 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
 
         one_batch_table_columns_names_set: Set[str]
         mean_table_columns_set_match: np.float64 = np.mean(
-            np.array(
+            np.asarray(
                 [
                     1
                     if one_batch_table_columns_names_set

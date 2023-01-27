@@ -1,5 +1,6 @@
 import logging
 import warnings
+from typing import Dict, Set
 
 from great_expectations.core.id_dict import BatchKwargs
 
@@ -24,7 +25,7 @@ class BatchKwargsGenerator:
         A Batch is the primary unit of validation in the Great Expectations DataContext.
         Batches include metadata that identifies how they were constructed--the same “batch_kwargs”
         assembled by the batch kwargs generator, While not every datasource will enable re-fetching a
-        specific batch of data, GE can store snapshots of batches or store metadata from an
+        specific batch of data, GX can store snapshots of batches or store metadata from an
         external data version control system.
 
         Example Generator Configurations follow::
@@ -162,12 +163,12 @@ class BatchKwargsGenerator:
     """
 
     _batch_kwargs_type = BatchKwargs
-    recognized_batch_parameters = set()
+    recognized_batch_parameters: Set = set()
 
     def __init__(self, name, datasource) -> None:
         self._name = name
         self._generator_config = {"class_name": self.__class__.__name__}
-        self._data_asset_iterators = {}
+        self._data_asset_iterators: Dict = {}
         if datasource is None:
             raise ValueError("datasource must be provided for a BatchKwargsGenerator")
         self._datasource = datasource
@@ -176,7 +177,7 @@ class BatchKwargsGenerator:
     def name(self):
         return self._name
 
-    def _get_iterator(self, data_asset_name, **kwargs) -> None:
+    def _get_iterator(self, data_asset_name, **kwargs):
         raise NotImplementedError
 
     def get_available_data_asset_names(self) -> None:
@@ -284,8 +285,7 @@ class BatchKwargsGenerator:
         )
         if not param_keys <= recognized_params:
             logger.warning(
-                "Unrecognized batch_parameter(s): %s"
-                % str(param_keys - recognized_params)
+                f"Unrecognized batch_parameter(s): {str(param_keys - recognized_params)}"
             )
 
         batch_kwargs = self._build_batch_kwargs(batch_parameters)

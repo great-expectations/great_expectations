@@ -1,15 +1,14 @@
 from typing import List, Optional, Union
 
 from great_expectations import DataContext
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.domain import Domain, SemanticDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
-    SemanticDomainTypes,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -61,6 +60,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.
@@ -75,7 +75,6 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
                     "batch_id": batch_ids[-1],  # active_batch_id
                 },
                 metric_value_kwargs=None,
-                metric_dependencies=None,
             )
         )
 

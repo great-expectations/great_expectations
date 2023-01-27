@@ -1,0 +1,9 @@
+:::tip
+
+A `ConfiguredAssetDataConnector` can also be configured to functionally duplicate the ability of an `InferredAssetDataConnector` to grant access to all files in a folder based on a regex match by defining a Data Asset that uses the same `pattern` as you would use in an `InferredAssetDataConnector`'s `default_regex`.  This will cause the Data Asset in question to have one Batch for each matched file, just as the `InferredAssetDataConnector` would have one Data Asset for each file.  Therefore, the only difference would be in how you accessed the data in question.
+
+With an `InferredAssetDataConnector`, you would need to provide your Batch Request the name of the Data Asset in question in order to retrieve it as a Batch from a Batch Request.
+
+With a `ConfiguredAssetDataConnector`, you would provide your Batch Request with the name of the Data Asset that was configured with an `InferredAssetDataConnector` style pattern, and then provide the same name as you would have used for an `InferredAssetDataConnector`'s Data Asset as a `batch_identifier` in your Batch Request.  This will result in the `ConfiguredAssetDataConnector` providing the same data in response to the Batch Request as an `InferredAssetDataConnector` requesting the data as a Data Asset would.
+
+:::

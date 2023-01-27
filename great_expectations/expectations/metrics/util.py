@@ -1,11 +1,25 @@
+from __future__ import annotations
+
 import logging
+import re
 import warnings
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, overload
 
 import numpy as np
+import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    PandasExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
+from great_expectations.execution_engine.sqlalchemy_batch_data import (
+    SqlAlchemyBatchData,
+)
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.util import get_sqlalchemy_inspector
 
@@ -23,7 +37,7 @@ except ImportError:
 try:
     import sqlalchemy as sa
     from sqlalchemy.dialects import registry
-    from sqlalchemy.engine import Engine, reflection
+    from sqlalchemy.engine import Connection, Engine, reflection
     from sqlalchemy.engine.interfaces import Dialect
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Insert, Select, TableClause
@@ -33,12 +47,14 @@ try:
         Label,
         TextClause,
         literal,
+        quoted_name,
     )
     from sqlalchemy.sql.operators import custom_op
 except ImportError:
     sa = None
     registry = None
     Engine = None
+    Connection = None
     reflection = None
     Dialect = None
     Insert = None
@@ -49,6 +65,7 @@ except ImportError:
     TableClause = None
     TextClause = None
     literal = None
+    quoted_name = None
     custom_op = None
     OperationalError = None
 
@@ -101,13 +118,13 @@ except ImportError:
             )
             from collections import namedtuple
 
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc] # cannot infer sorted return type
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
     except ImportError:
         sqla_bigquery = None
         bigquery_types_tuple = None
         pybigquery = None
-        namedtuple = None
+        namedtuple = None  # type: ignore[assignment]
 
 try:
     import teradatasqlalchemy.dialect
@@ -116,8 +133,13 @@ except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
 
+if TYPE_CHECKING:
+    import sqlalchemy
 
-def get_dialect_regex_expression(column, regex, dialect, positive=True):
+
+def get_dialect_regex_expression(  # noqa: C901 - 36
+    column, regex, dialect, positive=True
+):
     try:
         # postgres
         if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
@@ -131,7 +153,9 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
     try:
         # redshift
         # noinspection PyUnresolvedReferences
-        if issubclass(dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+        if hasattr(dialect, "RedshiftDialect") or issubclass(
+            dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
+        ):
             if positive:
                 return BinaryExpression(column, literal(regex), custom_op("~"))
             else:
@@ -158,10 +182,15 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
             dialect.dialect,
             snowflake.sqlalchemy.snowdialect.SnowflakeDialect,
         ):
-            if positive:
-                return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
-            else:
-                return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
+            # if positive:
+            #     return BinaryExpression(column, literal(regex), custom_op("RLIKE"))
+            # else:
+            #     return BinaryExpression(column, literal(regex), custom_op("NOT RLIKE"))
+
+            # While the snowflake docs mention having regex-related functions, they don't
+            # seem to work with the Python driver
+            # https://docs.snowflake.com/en/sql-reference/functions/regexp.html
+            return None
     except (
         AttributeError,
         TypeError,
@@ -187,6 +216,7 @@ def get_dialect_regex_expression(column, regex, dialect, positive=True):
 
     try:
         # Trino
+        # noinspection PyUnresolvedReferences
         if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
             if positive:
                 return sa.func.regexp_like(column, literal(regex))
@@ -312,10 +342,11 @@ def is_column_present_in_table(
     column_name: str,
     schema_name: Optional[str] = None,
 ) -> bool:
-    all_columns_metadata: Optional[
-        List[Dict[str, Any]]
-    ] = get_sqlalchemy_column_metadata(
-        engine=engine, table_selectable=table_selectable, schema_name=schema_name
+    all_columns_metadata: List[Dict[str, Any]] = (
+        get_sqlalchemy_column_metadata(
+            engine=engine, table_selectable=table_selectable, schema_name=schema_name
+        )
+        or []
     )
     # Purposefully do not check for a NULL "all_columns_metadata" to insure that it must never happen.
     column_names: List[str] = [col_md["name"] for col_md in all_columns_metadata]
@@ -332,7 +363,10 @@ def get_sqlalchemy_column_metadata(
         try:
             # if a custom query was passed
             if isinstance(table_selectable, TextClause):
-                columns = table_selectable.selected_columns.columns
+                if hasattr(table_selectable, "selected_columns"):
+                    columns = table_selectable.selected_columns.columns
+                else:
+                    columns = table_selectable.columns().columns
             else:
                 columns = inspector.get_columns(
                     table_selectable,
@@ -444,7 +478,7 @@ def column_reflection_fallback(
                 == types_table_query.columns.user_type_id,
             )
         )
-        col_info_query: Select = (
+        col_info_query = (
             sa.select(
                 [
                     tables_table_query.c.schema_name,
@@ -478,7 +512,7 @@ def column_reflection_fallback(
             col_info_query
         ).fetchall()
         # type_module = _get_dialect_type_module(dialect=dialect)
-        col_info_dict_list: List[Dict[str, str]] = [
+        col_info_dict_list = [
             {
                 "name": column_name,
                 # "type": getattr(type_module, column_data_type.upper())(),
@@ -491,13 +525,19 @@ def column_reflection_fallback(
             table_name = selectable.name
         except AttributeError:
             table_name = selectable
+            if str(table_name).lower().startswith("select"):
+                rx = re.compile(r"^.* from ([\S]+)", re.I)
+                match = rx.match(str(table_name).replace("\n", ""))
+                if match:
+                    table_name = match.group(1)
+        schema_name = sqlalchemy_engine.dialect.default_schema_name
 
         tables_table: sa.Table = sa.Table(
             "tables",
             sa.MetaData(),
             schema="information_schema",
         )
-        tables_table_query: Select = (
+        tables_table_query = (
             sa.select(
                 [
                     sa.column("table_schema").label("schema_name"),
@@ -512,7 +552,7 @@ def column_reflection_fallback(
             sa.MetaData(),
             schema="information_schema",
         )
-        columns_table_query: Select = (
+        columns_table_query = (
             sa.select(
                 [
                     sa.column("column_name").label("column_name"),
@@ -530,7 +570,7 @@ def column_reflection_fallback(
                 tables_table_query.c.schema_name == columns_table_query.c.schema_name,
             )
         )
-        col_info_query: Select = (
+        col_info_query = (
             sa.select(
                 [
                     tables_table_query.c.schema_name,
@@ -544,7 +584,14 @@ def column_reflection_fallback(
                     right=columns_table_query, onclause=conditions, isouter=False
                 )
             )
-            .where(tables_table_query.c.table_name == table_name)
+            .where(
+                sa.and_(
+                    *(
+                        tables_table_query.c.table_name == table_name,
+                        tables_table_query.c.schema_name == schema_name,
+                    )
+                )
+            )
             .order_by(
                 tables_table_query.c.schema_name.asc(),
                 tables_table_query.c.table_name.asc(),
@@ -552,11 +599,9 @@ def column_reflection_fallback(
             )
             .alias("column_info")
         )
-        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
-            col_info_query
-        ).fetchall()
+        col_info_tuples_list = sqlalchemy_engine.execute(col_info_query).fetchall()
         # type_module = _get_dialect_type_module(dialect=dialect)
-        col_info_dict_list: List[Dict[str, str]] = [
+        col_info_dict_list = [
             {
                 "name": column_name,
                 "type": column_data_type.upper(),
@@ -568,12 +613,126 @@ def column_reflection_fallback(
         if isinstance(selectable, TextClause):
             query: TextClause = selectable
         else:
-            query: Select = sa.select([sa.text("*")]).select_from(selectable).limit(1)
+            # noinspection PyUnresolvedReferences
+            if dialect.name.lower() == GXSqlDialect.REDSHIFT:
+                # Redshift needs temp tables to be declared as text
+                query = (
+                    sa.select([sa.text("*")]).select_from(sa.text(selectable)).limit(1)
+                )
+            else:
+                query = sa.select([sa.text("*")]).select_from(selectable).limit(1)
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
     return col_info_dict_list
+
+
+@overload
+def get_dbms_compatible_column_names(
+    column_names: str,
+    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
+    execution_engine: ExecutionEngine,
+    error_message_template: str = ...,
+) -> str | sqlalchemy.sql.quoted_name:
+    ...
+
+
+@overload
+def get_dbms_compatible_column_names(
+    column_names: List[str],
+    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
+    execution_engine: ExecutionEngine,
+    error_message_template: str = ...,
+) -> List[str | sqlalchemy.sql.quoted_name]:
+    ...
+
+
+def get_dbms_compatible_column_names(
+    column_names: List[str] | str,
+    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
+    execution_engine: ExecutionEngine,
+    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
+) -> List[str | sqlalchemy.sql.quoted_name] | str | sqlalchemy.sql.quoted_name:
+    """
+    Case non-sensitivity is expressed in upper case by common DBMS backends and in lower case by SQLAlchemy, with any
+    deviations enclosed with double quotes.
+
+    SQLAlchemy enables correct translation to/from DBMS backends through "sqlalchemy.sql.elements.quoted_name" class
+    where necessary by insuring that column names of correct type (i.e., "str" or "sqlalchemy.sql.elements.quoted_name")
+    are returned by "sqlalchemy.inspect(sqlalchemy.engine.Engine).get_columns(table_name, schema)" ("table.columns"
+    metric is based on this method).  Columns of precise type (string or "quoted_name" as appropriate) are returned.
+
+    Args:
+        column_names: Single string-valued column name or list of string-valued column names
+        batch_columns_list: Properly typed column names (output of "table.columns" metric)
+        execution_engine: "ExecutionEngine" (here, of interest is whether or not "SqlAlchemyExecutionEngine" is used)
+        error_message_template: String template to output error message if any column cannot be found in "Batch" object.
+
+    Returns:
+        Single property-typed column name object or list of property-typed column name objects (depending on input).
+    """
+    verify_column_names_exist(
+        column_names=column_names,
+        batch_columns_list=batch_columns_list,
+        error_message_template=error_message_template,
+    )
+
+    column_names_list: List[str]
+    is_list: bool
+    if isinstance(column_names, list):
+        column_names_list = column_names
+        is_list = True
+    else:
+        column_names_list = [column_names]
+        is_list = False
+
+    typed_column_names_list: List[str | sqlalchemy.sql.quoted_name]
+    if isinstance(execution_engine, SqlAlchemyExecutionEngine):
+        column_name: str
+        batch_columns_dict: Dict[str, str | sqlalchemy.sql.quoted_name] = {
+            str(column_name): column_name for column_name in batch_columns_list
+        }
+        typed_column_names_list = [
+            batch_columns_dict[column_name] for column_name in column_names_list
+        ]
+    else:
+        typed_column_names_list = column_names_list
+
+    if is_list:
+        return typed_column_names_list
+
+    return typed_column_names_list[0]
+
+
+def verify_column_names_exist(
+    column_names: List[str] | str,
+    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
+    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
+) -> None:
+    """
+    Insures that column name or column names (supplied as argument using "str" representation) exist in "Batch" object.
+
+    Args:
+        column_names: Single string-valued column name or list of string-valued column names
+        batch_columns_list: Properly typed column names (output of "table.columns" metric)
+        error_message_template: String template to output error message if any column cannot be found in "Batch" object.
+    """
+    column_names_list: List[str]
+    if isinstance(column_names, list):
+        column_names_list = column_names
+    else:
+        column_names_list = [column_names]
+
+    column_name: str
+
+    batch_columns_list = [str(column_name) for column_name in batch_columns_list]
+
+    for column_name in column_names_list:
+        if column_name not in batch_columns_list:
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                message=error_message_template.format(column_name=column_name)
+            )
 
 
 def parse_value_set(value_set):
@@ -583,7 +742,9 @@ def parse_value_set(value_set):
     return parsed_value_set
 
 
-def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=True):
+def get_dialect_like_pattern_expression(  # noqa: C901 - 28
+    column, dialect, like_pattern, positive=True
+):
     dialect_supported: bool = False
 
     try:
@@ -609,6 +770,12 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
             dialect_supported = True
 
     try:
+        if hasattr(dialect, "RedshiftDialect"):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+    try:
         # noinspection PyUnresolvedReferences
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
             dialect_supported = True
@@ -618,6 +785,12 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     try:
         # noinspection PyUnresolvedReferences
         if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+            dialect_supported = True
+    except (AttributeError, TypeError):
+        pass
+
+    try:
+        if hasattr(dialect, "SnowflakeDialect"):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass
@@ -646,7 +819,7 @@ def get_dialect_like_pattern_expression(column, dialect, like_pattern, positive=
     return None
 
 
-def validate_distribution_parameters(distribution, params):
+def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
@@ -782,7 +955,7 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
     return
@@ -856,3 +1029,240 @@ def is_valid_continuous_partition_object(partition_object):
         and np.all(np.diff(partition_object["bins"]) > 0)
         and np.allclose(np.sum(comb_weights), 1.0)
     )
+
+
+def sql_statement_with_post_compile_to_string(
+    engine: SqlAlchemyExecutionEngine, select_statement: sqlalchemy.sql.Select
+) -> str:
+    """
+    Util method to compile SQL select statement with post-compile parameters into a string. Logic lifted directly
+    from sqlalchemy documentation.
+
+    https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
+
+    Used by _sqlalchemy_map_condition_index() in map_metric_provider to build query that will allow you to
+    return unexpected_index_values.
+
+    Args:
+        engine (sqlalchemy.engine.Engine): Sqlalchemy engine used to do the compilation.
+        select_statement (sqlalchemy.sql.Select): Select statement to compile into string.
+    Returns:
+        String representation of select_statement
+
+    """
+    sqlalchemy_connection: "sa.engine.base.Connection" = engine.engine
+    compiled = select_statement.compile(
+        sqlalchemy_connection,
+        compile_kwargs={"render_postcompile": True},
+        dialect=engine.dialect,
+    )
+    dialect_name: str = engine.dialect_name
+
+    if dialect_name in ["sqlite", "trino", "mssql"]:
+        params = (repr(compiled.params[name]) for name in compiled.positiontup)
+        query_as_string = re.sub(r"\?", lambda m: next(params), str(compiled))
+
+    else:
+        params = (repr(compiled.params[name]) for name in list(compiled.params.keys()))
+        query_as_string = re.sub(r"%\(.*?\)s", lambda m: next(params), str(compiled))
+
+    query_as_string += ";"
+    return query_as_string
+
+
+def get_sqlalchemy_source_table_and_schema(
+    engine: SqlAlchemyExecutionEngine,
+) -> sqlalchemy.Table:
+    """
+    Util method to return table name that is associated with current batch.
+
+    This is used by `_sqlalchemy_map_condition_query()` which returns a query that allows users to return
+    unexpected_index_values.
+
+    Args:
+        engine (SqlAlchemyExecutionEngine): Engine that is currently being used to calculate the Metrics
+    Returns:
+        SqlAlchemy Table that is the source table and schema.
+    """
+    assert isinstance(
+        engine.batch_manager.active_batch_data, SqlAlchemyBatchData
+    ), "`active_batch_data` not SqlAlchemyBatchData"
+
+    schema_name = engine.batch_manager.active_batch_data.source_schema_name
+    table_name = engine.batch_manager.active_batch_data.source_table_name
+    if table_name:
+        return sa.Table(
+            table_name,
+            sa.MetaData(),
+            schema=schema_name,
+        )
+    else:
+        return engine.batch_manager.active_batch_data.selectable
+
+
+def get_unexpected_indices_for_multiple_pandas_named_indices(
+    domain_records_df: pd.DataFrame,
+    unexpected_index_column_names: List[str],
+    expectation_domain_column_name: str | None = None,
+) -> List[Dict[str, Any]]:
+    """
+    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    columns is also a named index. This method handles the case when there are multiple named indices.
+    Args:
+        domain_records_df: reference to Pandas dataframe
+        expectation_domain_column_name: column that Expectation is being run for
+        unexpected_index_column_names: column_names for indices, either named index or unexpected_index_columns
+
+    Returns:
+        List of Dicts that contain ID/PK values
+    """
+    if expectation_domain_column_name is None:
+        raise gx_exceptions.MetricResolutionError(
+            message="Error: The domain column is currently set to None. Please check your configuration.",
+            failed_metrics=["unexpected_index_list"],
+        )
+
+    domain_records_df_index_names: List[str] = domain_records_df.index.names
+    unexpected_indices: List[tuple[int | str, ...]] = list(domain_records_df.index)
+
+    tuple_index: Dict[str, int] = dict()
+    for column_name in unexpected_index_column_names:
+        if column_name not in domain_records_df_index_names:
+            raise gx_exceptions.MetricResolutionError(
+                message=f"Error: The column {column_name} does not exist in the named indices. Please check your configuration",
+                failed_metrics=["unexpected_index_list"],
+            )
+        else:
+            tuple_index[column_name] = domain_records_df_index_names.index(
+                column_name, 0
+            )
+
+    unexpected_index_list: List[Dict[str, Any]] = list()
+
+    for index in unexpected_indices:
+        primary_key_dict: Dict[str, Any] = dict()
+        # domain column first
+        primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
+            index, expectation_domain_column_name
+        ]
+        for column_name in unexpected_index_column_names:
+            primary_key_dict[column_name] = index[tuple_index[column_name]]
+        unexpected_index_list.append(primary_key_dict)
+    return unexpected_index_list
+
+
+def get_unexpected_indices_for_single_pandas_named_index(
+    domain_records_df: pd.DataFrame,
+    unexpected_index_column_names: List[str],
+    expectation_domain_column_name: str | None = None,
+) -> List[Dict[str, Any]]:
+    """
+    Builds unexpected_index list for Pandas Dataframe in situation where the named
+    columns is also a named index. This method handles the case when there is a single named index.
+    Args:
+        domain_records_df: reference to Pandas dataframe
+        expectation_domain_column_name: column that Expectation is being run on.
+        unexpected_index_column_names: column_names for indices, either named index or unexpected_index_columns
+
+    Returns:
+        List of Dicts that contain ID/PK values
+
+    """
+    if not expectation_domain_column_name:
+        return []
+    unexpected_index_values_by_named_index: List[int | str] = list(
+        domain_records_df.index
+    )
+    unexpected_index_list: List[Dict[str, Any]] = list()
+    if not (
+        len(unexpected_index_column_names) == 1
+        and unexpected_index_column_names[0] == domain_records_df.index.name
+    ):
+        raise gx_exceptions.MetricResolutionError(
+            message=f"Error: The column {unexpected_index_column_names[0] if unexpected_index_column_names else '<no column specified>'} does not exist in the named indices. Please check your configuration",
+            failed_metrics=["unexpected_index_list"],
+        )
+
+    for index in unexpected_index_values_by_named_index:
+        primary_key_dict: Dict[str, Any] = dict()
+        # domain column first
+        primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
+            index, expectation_domain_column_name
+        ]
+        column_name: str = unexpected_index_column_names[0]
+        primary_key_dict[column_name] = index
+        unexpected_index_list.append(primary_key_dict)
+    return unexpected_index_list
+
+
+def compute_unexpected_pandas_indices(
+    domain_records_df: pd.DataFrame,
+    result_format: Dict[str, Any],
+    execution_engine: PandasExecutionEngine,
+    metrics: Dict[str, Any],
+    expectation_domain_column_name: str | None = None,
+) -> List[int] | List[Dict[str, Any]]:
+    """
+    Helper method to compute unexpected_index_list for PandasExecutionEngine. Handles logic needed for named indices.
+
+    Args:
+        domain_records_df: DataFrame of data we are currently running Expectation on.
+        result_format: configuration that contains `unexpected_index_column_names`
+        expectation_domain_column_name: column that we are running Expectation on.
+        execution_engine: PandasExecutionEngine
+        metrics: dict of currently available metrics
+
+    Returns:
+        list of unexpected_index_list values. It can either be a list of dicts or a list of numbers (if using default index).
+
+    """
+    unexpected_index_column_names: List[str]
+    unexpected_index_list: List[Dict[str, Any]]
+    if domain_records_df.index.name is not None:
+        unexpected_index_column_names = result_format.get(
+            "unexpected_index_column_names", [domain_records_df.index.name]
+        )
+        unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
+            domain_records_df=domain_records_df,
+            unexpected_index_column_names=unexpected_index_column_names,
+            expectation_domain_column_name=expectation_domain_column_name,
+        )
+    # multiple named indices
+    elif domain_records_df.index.names[0] is not None:
+        unexpected_index_column_names = result_format.get(
+            "unexpected_index_column_names", list(domain_records_df.index.names)
+        )
+        unexpected_index_list = (
+            get_unexpected_indices_for_multiple_pandas_named_indices(
+                domain_records_df=domain_records_df,
+                unexpected_index_column_names=unexpected_index_column_names,
+                expectation_domain_column_name=expectation_domain_column_name,
+            )
+        )
+    # named columns
+    elif result_format.get("unexpected_index_column_names"):
+        unexpected_index_column_names = result_format["unexpected_index_column_names"]
+        unexpected_index_list = []
+        unexpected_indices: List[int | str] = list(domain_records_df.index)
+        for index in unexpected_indices:
+            primary_key_dict: Dict[str, Any] = dict()
+            assert (
+                expectation_domain_column_name
+            ), "`expectation_domain_column_name` was not provided"
+            primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
+                index, expectation_domain_column_name
+            ]
+            for column_name in unexpected_index_column_names:
+                column_name = get_dbms_compatible_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                    execution_engine=execution_engine,
+                    error_message_template='Error: The unexpected_index_column "{column_name:s}" does not exist in Dataframe. Please check your configuration and try again.',
+                )
+                primary_key_dict[column_name] = domain_records_df.at[index, column_name]
+            unexpected_index_list.append(primary_key_dict)
+    # or just the default indices
+    else:
+        unexpected_index_list = list(domain_records_df.index)
+
+    return unexpected_index_list

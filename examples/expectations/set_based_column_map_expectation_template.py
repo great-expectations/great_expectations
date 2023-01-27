@@ -4,12 +4,11 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations
 """
 
-from great_expectations.expectations.regex_based_column_map_expectation import (
+from great_expectations.expectations.set_based_column_map_expectation import (
     SetBasedColumnMapExpectation,
 )
 
 
-# <snippet>
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     """TODO: Add a docstring here"""
@@ -39,6 +38,5 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     }
 
 
-# </snippet>
 if __name__ == "__main__":
     ExpectColumnValuesToBeInSomeSet().print_diagnostic_checklist()

@@ -1,0 +1,33 @@
+schedules:
+# Runs at 1:00 AM PT (8:00 AM UTC) on every day-of-week from Monday through Friday
+# Since this is on UTC, lets set it to PT (UTC-7)
+# https://crontab.guru/#0_8_*_*_1-5
+- cron: "0 8 * * 1-5"
+  displayName: Partner Integration Tests
+  branches:
+    include:
+    - develop
+
+variables:
+  isScheduled: $[and(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.Reason'], 'Schedule'))]
+
+stages:
+  - stage: scope_check
+    pool:
+      vmImage: 'ubuntu-20.04'
+    jobs:
+      - job: partner_integration_anthony_db
+        condition: eq(variables.isScheduled, true)
+        steps:
+          - bash: cd assets/partners/anthonydb; ../common/run-2.sh;
+            name: RunDockerComposeUp
+            env:
+              DB_URL: $(ANTHONY_DB_URL)
+              DB_PASS: $(ANTHONY_DB_PASS)
+      - job: partner_integration_rubenshift
+        condition: eq(variables.isScheduled, true)
+        steps:
+          - bash: cd assets/partners/rubenshift; ../common/run-1.sh
+            name: RunDockerComposeUp
+            env:
+              DB_URL: $(REDSHIFT_URL)

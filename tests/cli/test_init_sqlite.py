@@ -6,10 +6,12 @@ import pytest
 from click.testing import CliRunner
 from freezegun import freeze_time
 
-from great_expectations import DataContext
 from great_expectations.cli import cli
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.util import gen_directory_tree_str
+from great_expectations.util import gen_directory_tree_str, get_context
 from tests.cli.test_cli import yaml
 from tests.cli.test_datasource_sqlite import _add_datasource_and_credentials_to_context
 from tests.cli.test_init_pandas import _delete_and_recreate_dir
@@ -94,7 +96,7 @@ def test_cli_init_on_new_project(
     assert "Data Docs" in stdout
     assert "Great Expectations is now set up" in stdout
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources()[0]["class_name"] == "SqlAlchemyDatasource"
     assert context.list_datasources()[0]["name"] == "titanic"
@@ -255,7 +257,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     assert "Data Docs" in stdout
     assert "Great Expectations is now set up" in stdout
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
         {
@@ -311,11 +313,11 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     sa,
 ):
     project_dir = initialized_sqlite_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
 
     _remove_all_datasources(ge_dir)
     os.remove(os.path.join(ge_dir, "expectations", "warning.json"))
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert not context.list_expectation_suites()
 
     runner = CliRunner(mix_stderr=False)
@@ -368,10 +370,10 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert "Great Expectations connected to your database" in stdout
     assert "This looks like an existing project that" not in stdout
 
-    config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
+    config = _load_config_file(os.path.join(ge_dir, FileDataContext.GX_YML))
     assert "sqlite" in config["datasources"].keys()
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert context.list_datasources() == [
         {
             "class_name": "SqlAlchemyDatasource",
@@ -391,7 +393,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
 
 def _remove_all_datasources(ge_dir):
-    config_path = os.path.join(ge_dir, DataContext.GE_YML)
+    config_path = os.path.join(ge_dir, FileDataContext.GX_YML)
 
     config = _load_config_file(config_path)
     config["datasources"] = {}
@@ -399,7 +401,7 @@ def _remove_all_datasources(ge_dir):
     with open(config_path, "w") as f:
         yaml.dump(config, f)
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert context.list_datasources() == []
 
 
@@ -452,8 +454,10 @@ def initialized_sqlite_project(
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
-    context = DataContext(os.path.join(project_dir, DataContext.GE_DIR))
-    assert isinstance(context, DataContext)
+    context = get_context(
+        context_root_dir=os.path.join(project_dir, FileDataContext.GX_DIR)
+    )
+    assert isinstance(context, FileDataContext)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources() == [
         {
@@ -485,9 +489,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     empty_sqlite_db,
 ):
     project_dir = initialized_sqlite_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     datasource_name = "wow_a_datasource"
     context = _add_datasource_and_credentials_to_context(
         context, datasource_name, empty_sqlite_db
@@ -616,7 +620,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     mock_webbrowser, caplog, monkeypatch, initialized_sqlite_project, sa
 ):
     project_dir = initialized_sqlite_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
 
     # mangle the setup to remove all traces of any suite
@@ -628,7 +632,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     _delete_and_recreate_dir(data_docs_dir)
     _delete_and_recreate_dir(validations_dir)
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
 
     # get the datasource from data context
     all_datasources = context.list_datasources()
@@ -689,5 +693,5 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
-    context = DataContext(ge_dir)
+    context = get_context(context_root_dir=ge_dir)
     assert len(context.list_expectation_suites()) == 1

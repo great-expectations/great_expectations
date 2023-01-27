@@ -1,0 +1,117 @@
+{
+  "expectation_type": "expect_column_value_z_scores_to_be_less_than",
+  "datasets" : [{
+    "data" : {
+      "dist1": [1, 1, 1, 3, 3],
+      "dist2": [-100000000000, -1, 0, 1,  1],
+      "mostly_zero": [1, 0, 0, 0, 0],
+      "missing": [-1, 0, 1, null, null]
+    },
+    "schemas": {
+      "spark": {
+        "dist1": "IntegerType",
+        "dist2": "LongType",
+        "mostly_zero": "IntegerType",
+        "missing": "IntegerType"
+      },
+      "sqlite": {
+        "dist1": "INTEGER",
+        "dist2": "INTEGER",
+        "mostly_zero": "INTEGER",
+        "missing": "INTEGER"
+      },
+      "postgresql": {
+        "dist1": "INTEGER",
+        "dist2": "BIGINT",
+        "mostly_zero": "INTEGER",
+        "missing": "INTEGER"
+      },
+      "mysql": {
+        "dist1": "INTEGER",
+        "dist2": "BIGINT",
+        "mostly_zero": "INTEGER",
+        "missing": "INTEGER"
+      },
+      "mssql": {
+        "dist1": "INTEGER",
+        "dist2": "BIGINT",
+        "mostly_zero": "BIGINT",
+        "missing": "INTEGER"
+      },
+      "trino": {
+        "dist1": "BIGINT",
+        "dist2": "BIGINT",
+        "mostly_zero": "BIGINT",
+        "missing": "REAL"
+      }
+    },
+    "tests": [
+      {
+        "title": "basic_successful_test",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "in":{
+          "column": "dist1",
+          "threshold": 1.96,
+          "double_sided": true
+          },
+          "out":{
+            "success": true
+          }
+      },
+      {
+        "title": "basic_unsuccessful_test",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "in":{
+          "column": "dist1",
+          "threshold": 0.1,
+          "double_sided": true
+        },
+        "out":{
+          "success": false
+        }
+      },
+      {
+        "title": "basic_test_with_outlier",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "in":{
+          "column": "dist2",
+          "threshold": 1,
+          "double_sided": true
+        },
+        "out":{
+          "success": false
+        }
+      },
+      {
+        "title": "basic_test_mostly_zero",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "in":{
+          "column": "mostly_zero",
+          "threshold": 1,
+          "double_sided": true
+        },
+        "out":{
+          "success": false
+           }
+      },
+      {
+        "title": "basic_test_with_missing",
+        "include_in_gallery": true,
+        "exact_match_out": false,
+        "in":{
+          "column": "missing",
+          "threshold": 1,
+          "double_sided": true
+        },
+        "out":{
+          "success": false
+        }
+      }
+    ]
+  }
+  ]
+}

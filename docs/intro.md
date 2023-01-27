@@ -5,11 +5,11 @@ slug: /
 
 Welcome to Great Expectations!
 
-Great Expectations is the leading tool for [validating](./reference/core_concepts.md#expectations), [documenting](./reference/core_concepts.md#data-docs), and [profiling](./reference/core_concepts.md#profiling) your data to maintain quality and improve communication between teams. Head over to our [getting started](./tutorials/getting_started/tutorial_overview.md) tutorial.
+Great Expectations is the leading tool for [validating](./terms/validation.md), [documenting](./terms/data_docs.md), and [profiling](./terms/profiler.md) your data to maintain quality and improve communication between teams. Head over to our [getting started](./tutorials/getting_started/tutorial_overview.md) tutorial.
 
 Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and data engineering teams.
 
-![overview](../docs/guides/images/GE_OSS_process.png)
+![overview](../docs/guides/images/gx_oss_process.png)
 
 ### Why would I use Great Expectations?
 
@@ -92,10 +92,10 @@ We’re committed to supporting and growing the community around Great Expectati
 Open source doesn’t always have the best reputation for being friendly and welcoming, and that makes us sad. Everyone belongs in open source, and Great Expectations is dedicated to making you feel welcome.
 
 #### Get in touch with the Great Expectations team
-Join our public slack channel here: [join slack](https://greatexpectations.io/slack). We’re not always available, but we’re there and responsive an awful lot of the time.
+Join our public slack channel here: [join slack](https://greatexpectations.io/slack). We’re not always available, but we’re there and responsive an awful lot of the time. Please read our [Slack Guidelines](https://github.com/great-expectations/great_expectations/blob/develop/SLACK_GUIDELINES.md)
 
 #### Ask a question
-Slack is good for that, too: [join slack](https://greatexpectations.io/slack).
+Slack is good for that, too: [join slack](https://greatexpectations.io/slack) and read [How to write a good question in Slack](https://github.com/great-expectations/great_expectations/discussions/4951). You can also use [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions/4951).
 
 #### File a bug report or feature request
 If you have bugfix or feature request, please [upvote an existing issue](https://github.com/great-expectations/great_expectations/issues) or [open a new issue](https://github.com/great-expectations/great_expectations/issues/new) on GitHub and we’ll see what we can do.

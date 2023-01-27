@@ -1,10 +1,11 @@
 parameters:
   vmImage: '' # Must be specified in primary YAML
-  pythonVersion: ["3.7", "3.8", "3.9"]
+  pythonVersion: ["3.7", "3.8", "3.9", "3.10"]
 
 jobs:
   - ${{ each pythonVersion in parameters.pythonVersion }}:
     - job:
+      timeoutInMinutes: 120
       displayName: full${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
@@ -14,6 +15,15 @@ jobs:
 
         - bash: python -m pip install --upgrade pip==21.3.1
           displayName: 'Update pip'
+
+        - script: |
+            # Get new tags from remote
+            git fetch --tags
+            # Get latest tag name
+            latest=$(git describe --tags `git rev-list --tags --max-count=1`)
+            # Checkout latest tag
+            git checkout $latest
+          displayName: 'Checkout latest tag'
 
         - script: |
             pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
@@ -38,6 +48,7 @@ jobs:
             reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
     - job:
+      timeoutInMinutes: 120
       displayName: lightweight${{ pythonVersion }}
       steps:
         - task: UsePythonVersion@0
@@ -49,7 +60,20 @@ jobs:
           displayName: 'Update pip'
 
         - script: |
-            pip install --requirement requirements.txt --requirement requirements-dev-contrib.txt --requirement requirements-dev-lite.txt --constraint constraints-dev.txt -e .
+            # Get new tags from remote
+            git fetch --tags
+            # Get latest tag name
+            latest=$(git describe --tags `git rev-list --tags --max-count=1`)
+            # Checkout latest tag
+            git checkout $latest
+          displayName: 'Checkout latest tag'
+
+        - script: |
+            pip install \
+              --requirement requirements.txt \
+              --requirement reqs/requirements-dev-test.txt \
+              --constraint constraints-dev.txt \
+              --editable .
           displayName: 'Install dependencies'
 
         - script: |

@@ -1,15 +1,15 @@
 
-Checking project...[0m
+Checking project...
 
 ================================================================================
-[0m
-[31m
-Your project appears to have an out-of-date config version (1.0) - the version number must be at least 3.[0m[0m
+
+
+Your project appears to have an out-of-date config version (1.0) - the version number must be at least 3.
 
 Would you like to run the Upgrade Helper to bring your project up-to-date? [Y/n]: 
 
 ================================================================================
-[0m
+
 ++=====================================================++
 || UpgradeHelperV11: Upgrade Overview (V2-API Version) ||
 ++=====================================================++
@@ -51,25 +51,24 @@ to learn more about the automated upgrade process:
 
 Would you like to proceed with the project upgrade? [Y/n]: 
 
-Upgrading project...[0m
+Upgrading project...
 
 ================================================================================
-[0m
-[36m++================++
-|| Upgrade Report ||
-++================++[0m
 
-[33mThe Upgrade Helper has completed the automated upgrade steps.
+++================++
+|| Upgrade Report ||
+++================++
+
+The Upgrade Helper has completed the automated upgrade steps.
 A log detailing the upgrade can be found here:
 
-    - GE_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json[0m[0m
+    - GX_PROJECT_DIR/uncommitted/logs/project_upgrades/UpgradeHelperV11_20190926T134241.000000Z.json
 
 ================================================================================
-[0m
-[31mThe Upgrade Helper was unable to perform a complete project upgrade. Next steps:[0m
+
+The Upgrade Helper was unable to perform a complete project upgrade. Next steps:
 
     - Please perform any manual steps outlined in the Upgrade Overview and/or Upgrade Report above
-    - When complete, increment the config_version key in your [36mgreat_expectations.yml[0m to [36m2.0[0m
+    - When complete, increment the config_version key in your great_expectations.yml to 2.0
 
-To learn more about the upgrade process, visit [36mhttps://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html[0m
-[0m
+To learn more about the upgrade process, visit https://docs.greatexpectations.io/en/latest/how_to_guides/migrating_versions.html

@@ -1,0 +1,20 @@
+## Docker Compose file for running e2e tests
+version: "3"
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: "$DB_PASS"
+    ports:
+      - 1433:1433
+  integration_test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bash -c "until cat provision.mssql | /opt/mssql-tools/bin/sqlcmd -S db -U sa -P $DB_PASS -i /dev/stdin; do sleep 1; done;" && pytest -vv run.py
+    environment:
+      DB_URL: ${DB_URL}
+    depends_on:
+      - db

@@ -30,16 +30,16 @@ If you call the `print_diagnostic_checklist()` method on your Custom Expectation
 ✔ Has at least one positive and negative example case, and all test cases pass
 ✔ Has core logic and passes tests on at least one Execution Engine
   ...
+✔ Passes all linting checks
 ✔ Has basic input validation and type checking
 ✔ Has both statement Renderers: prescriptive and diagnostic
 ✔ Has core logic that passes tests for all applicable Execution Engines and SQL dialects
   ...
-✔ Passes all linting checks
   Has a full suite of tests, as determined by project code standards
   Has passed a manual review by a code owner for code standards and style guides
 ```
 
-If you've satisified at least the first four checks, you're ready to make a contribution!
+If you've satisfied at least the first five checks, you're ready to make a contribution!
 
 :::info
 Not quite there yet? See our guides on [creating Custom Expectations](../creating_custom_expectations/overview.md) for help!
@@ -51,7 +51,7 @@ For more information on our code standards and contribution, see our guide on [L
 
 We want to verify that your Custom Expectation is properly credited and accurately described. 
 
-Ensure that your Custom Expectation's `library_metadata` has correct information for the following:
+Ensure that your Custom Expectation's `library_metadata` has the following keys, and verify that the information listed is correct:
 
 - `contributors`: You and anyone else who helped you create this Custom Expectation.
 - `tags`: These are simple descriptors of your Custom Expectation's functionality and domain (`statistics`, `flexible comparisons`, `geography`, etc.).
@@ -59,10 +59,12 @@ Ensure that your Custom Expectation's `library_metadata` has correct information
 
 <details>
 <summary>Packages?</summary>
-If you're interested in learning more about Custom Expectation Packages, see our <a href='/docs/contributing/contributing_package'>guide on packaging your Custom Expectations</a>.
+Great Expectations maintains a number of Custom Expectation Packages, containing thematically related Custom Expectations. 
+These packages can be explored in the <a href="https://github.com/great-expectations/great_expectations/tree/develop/contrib"><inlineCode>contrib</inlineCode> directory of Great Expectations,</a> and can be found on PyPI.
+Your Custom Expectation may fit one of these packages; if so, we encourage you to contribute your Custom Expectation directly to one of these packages.
 <br/><br/>
-Not contributing to a specifc package? Your Custom Expectation will be automatically published in the <a href="https://pypi.org/project/great-expectations-experimental/">PyPI package <inlineCode>great-expectations-experimental</inlineCode></a>. 
-This package contains all of our Experimental community-contributed Custom Expectations, and is separate from the core <inlineCode>great-expectations</inlineCode> package.
+Not contributing to a specific package? Your Custom Expectation will be automatically published in the <a href="https://pypi.org/project/great-expectations-experimental/">PyPI package <inlineCode>great-expectations-experimental</inlineCode></a>. 
+This package contains all of our Experimental community-contributed Custom Expectations not submitted to another extant package, and is separate from the core <inlineCode>great-expectations</inlineCode> package.
 </details>
 
 ### 3. Open a Pull Request
@@ -74,7 +76,7 @@ As a part of this process, we ask you to:
 - Sign our [Contributor License Agreement (CLA)](../../../contributing/contributing_misc.md#contributor-license-agreement-cla)
 - Provide some information for our reviewers to expedite your contribution process, including:
   - A `[CONTRIB]` tag in your title
-  - Titleing your Pull Request with the name of your Custom Expectation
+  - Titling your Pull Request with the name of your Custom Expectation
   - A brief summary of the functionality and use-cases for your Custom Expectation
   - A description of any previous discussion or coordination related to this Pull Request
 - Update your branch with the most recent code from the Great Expectations main repository

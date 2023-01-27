@@ -35,6 +35,7 @@ def is_valid_categorical_partition_object(partition_object):
         or ("values" not in partition_object)
     ):
         return False
+
     # Expect the same number of values as weights; weights should sum to one
     return len(partition_object["values"]) == len(
         partition_object["weights"]
@@ -61,7 +62,7 @@ def is_valid_continuous_partition_object(partition_object):
     else:
         comb_weights = partition_object["weights"]
 
-    ## TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
+    # TODO: Consider adding this check to migrate to the tail_weights structure of partition objects
     # if (partition_object['bins'][0] == -np.inf) or (partition_object['bins'][-1] == np.inf):
     #     return False
 
@@ -116,6 +117,7 @@ def build_continuous_partition_object(
         bins = bins.tolist()
     else:
         bins = list(bins)
+
     hist_metric_configuration = MetricConfiguration(
         "column.histogram",
         metric_domain_kwargs=domain_kwargs,
@@ -126,9 +128,7 @@ def build_continuous_partition_object(
     nonnull_configuration = MetricConfiguration(
         "column_values.nonnull.count",
         metric_domain_kwargs=domain_kwargs,
-        metric_value_kwargs={
-            "bins": tuple(bins),
-        },
+        metric_value_kwargs=None,
     )
     metrics = execution_engine.resolve_metrics(
         (hist_metric_configuration, nonnull_configuration)
@@ -176,6 +176,7 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
     nonnull_configuration = MetricConfiguration(
         "column_values.nonnull.count",
         metric_domain_kwargs=domain_kwargs,
+        metric_value_kwargs=None,
     )
     metrics = execution_engine.resolve_metrics(
         (counts_configuration, nonnull_configuration)
@@ -190,7 +191,7 @@ def build_categorical_partition_object(execution_engine, domain_kwargs, sort="va
     }
 
 
-def infer_distribution_parameters(data, distribution, params=None):
+def infer_distribution_parameters(data, distribution, params=None):  # noqa: C901 - 18
     """Convenience method for determining the shape parameters of a given distribution
 
     Args:
@@ -324,7 +325,7 @@ def _scipy_distribution_positional_args_from_dict(distribution, params):
         return params["loc"], params["scale"]
 
 
-def validate_distribution_parameters(distribution, params):
+def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
     """Ensures that necessary parameters for a distribution are present and that all parameters are sensical.
 
        If parameters necessary to construct a distribution are missing or invalid, this function raises ValueError\
@@ -460,7 +461,7 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
     return

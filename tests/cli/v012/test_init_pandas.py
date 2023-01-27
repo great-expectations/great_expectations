@@ -8,6 +8,9 @@ from freezegun import freeze_time
 
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str
 from tests.cli.v012.test_cli import yaml
@@ -72,7 +75,7 @@ def test_cli_init_on_new_project(
     assert "Generating example Expectation Suite..." in stdout
     assert "Building" in stdout
     assert "Data Docs" in stdout
-    assert "Done generating example Expectation Suite" in stdout
+    assert "Done generating example Expectation Suite" in stdout
     assert "Great Expectations is now set up" in stdout
 
     assert os.path.isdir(os.path.join(project_dir, "great_expectations"))
@@ -176,6 +179,7 @@ def test_cli_init_on_new_project(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.95s
 def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_and_add_one(
     mock_webbrowser,
     capsys,
@@ -183,7 +187,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     initialized_project,
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
 
     # mangle the project to remove all traces of a suite and validations
     _remove_all_datasources(ge_dir)
@@ -235,7 +239,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     )
     assert "Great Expectations is now set up." in stdout
 
-    config = _load_config_file(os.path.join(ge_dir, DataContext.GE_YML))
+    config = _load_config_file(os.path.join(ge_dir, FileDataContext.GX_YML))
     assert "data__dir" in config["datasources"].keys()
 
     context = DataContext(ge_dir)
@@ -249,7 +253,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
 
 
 def _remove_all_datasources(ge_dir):
-    config_path = os.path.join(ge_dir, DataContext.GE_YML)
+    config_path = os.path.join(ge_dir, FileDataContext.GX_YML)
 
     config = _load_config_file(config_path)
     config["datasources"] = {}
@@ -297,8 +301,8 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
         in mock_webbrowser.call_args[0][0]
     )
 
-    context = DataContext(os.path.join(project_dir, DataContext.GE_DIR))
-    assert isinstance(context, DataContext)
+    context = DataContext(os.path.join(project_dir, FileDataContext.GX_DIR))
+    assert isinstance(context, FileDataContext)
     assert len(context.list_datasources()) == 1
     return project_dir
 
@@ -307,11 +311,12 @@ def initialized_project(mock_webbrowser, tmp_path_factory):
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.32s
 def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     mock_webbrowser, caplog, initialized_project, filesystem_csv_2
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
 
     context = DataContext(ge_dir)
     context.add_datasource(
@@ -350,6 +355,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.20s
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_no(
     mock_webbrowser,
     caplog,
@@ -386,6 +392,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.66s
 def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_build_docs_answer_yes(
     mock_webbrowser,
     caplog,
@@ -428,13 +435,14 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     "ignore:DataAsset.remove_expectations*:DeprecationWarning:great_expectations.data_asset"
 )
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+@pytest.mark.slow  # 1.83s
 def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     mock_browser,
     caplog,
     initialized_project,
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, DataContext.GE_DIR)
+    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")
 
     data_folder_path = os.path.join(project_dir, "data")

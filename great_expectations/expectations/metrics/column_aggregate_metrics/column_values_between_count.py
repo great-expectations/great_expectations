@@ -2,13 +2,13 @@ from typing import Any, Dict
 
 import numpy as np
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import get_sql_dialect_floating_point_infinity_value
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
@@ -31,10 +31,10 @@ class ColumnValuesBetweenCount(MetricProvider):
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         min_value = metric_value_kwargs.get("min_value")
         max_value = metric_value_kwargs.get("max_value")
@@ -85,10 +85,10 @@ class ColumnValuesBetweenCount(MetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         min_value = metric_value_kwargs.get("min_value")
         max_value = metric_value_kwargs.get("max_value")
@@ -200,10 +200,10 @@ class ColumnValuesBetweenCount(MetricProvider):
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         min_value = metric_value_kwargs.get("min_value")
         max_value = metric_value_kwargs.get("max_value")

@@ -10,10 +10,6 @@ This guide will help you instantiate a <TechnicalTag tag="data_context" text="Da
 
 </Prerequisites>
 
-:::note
-- See also our companion video for this guide: [Data Contexts In Code](https://youtu.be/4VMOYpjHNhM).
-:::
-
 ## Steps
 
 ### 1. **Create a DataContextConfig**
@@ -229,8 +225,9 @@ data_context_config = DataContextConfig(
 ### 2. Pass this DataContextConfig as a project_config to BaseDataContext
 
 ```python
-from great_expectations.data_context import BaseDataContext
-context = BaseDataContext(project_config=data_context_config)
+import great_expectations as gx
+
+context = gx.get_context(project_config=data_context_config)
 ```
 
 ### 3. Use this BaseDataContext instance as your DataContext

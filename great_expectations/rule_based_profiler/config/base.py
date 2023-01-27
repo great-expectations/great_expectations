@@ -1,24 +1,20 @@
+from __future__ import annotations
+
 import json
 import logging
-from typing import Any, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
+from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, post_load
 from ruamel.yaml.comments import CommentedMap
 
+from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import BaseYamlConfig
-from great_expectations.marshmallow__shade import (
-    INCLUDE,
-    Schema,
-    ValidationError,
-    fields,
-    post_dump,
-    post_load,
-)
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_PREFIX,
     ParameterContainer,
 )
@@ -27,6 +23,12 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.rule_based_profiler.rule.rule import Rule
+    from great_expectations.rule_based_profiler.rule_based_profiler import (
+        RuleBasedProfiler,
+    )
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -70,7 +72,7 @@ class NotNullSchema(Schema):
     # noinspection PyUnusedLocal
     @post_dump(pass_original=True)
     def remove_nulls_and_keep_unknowns(
-        self, output: dict, original: Type[DictDot], **kwargs
+        self, output: dict, original: DictDot, **kwargs
     ) -> dict:
         """Hook to clear the config object of any null values before being written as a dictionary.
         Additionally, it bypasses strict schema validation before writing to dict to ensure that dynamic
@@ -99,7 +101,7 @@ class NotNullSchema(Schema):
             clean_falsy=False,
         )
 
-        return cleaned_output
+        return cleaned_output  # type: ignore[return-value] # filter_properties_dict could return None
 
 
 class DomainBuilderConfig(SerializableDictDot):
@@ -115,10 +117,7 @@ class DomainBuilderConfig(SerializableDictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".',
             )
 
     def to_json_dict(self) -> dict:
@@ -189,7 +188,6 @@ class ParameterBuilderConfig(SerializableDictDot):
         class_name: str,
         module_name: Optional[str] = None,
         evaluation_parameter_builder_configs: Optional[list] = None,
-        json_serialize: bool = True,
         **kwargs,
     ) -> None:
         self.module_name = module_name
@@ -199,15 +197,10 @@ class ParameterBuilderConfig(SerializableDictDot):
 
         self.evaluation_parameter_builder_configs = evaluation_parameter_builder_configs
 
-        self.json_serialize = json_serialize
-
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{ self.__class__.__name__}".',
             )
 
     def to_json_dict(self) -> dict:
@@ -282,11 +275,6 @@ class ParameterBuilderConfigSchema(NotNullSchema):
         required=False,
         allow_none=True,
     )
-    json_serialize = fields.Boolean(
-        required=False,
-        allow_none=True,
-        missing=True,
-    )
 
 
 class ExpectationConfigurationBuilderConfig(SerializableDictDot):
@@ -311,10 +299,7 @@ class ExpectationConfigurationBuilderConfig(SerializableDictDot):
         for k, v in kwargs.items():
             setattr(self, k, v)
             logger.debug(
-                'Setting unknown kwarg (%s, %s) provided to constructor as argument in "%s".',
-                k,
-                v,
-                self.__class__.__name__,
+                f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 
     def to_json_dict(self) -> dict:
@@ -499,53 +484,55 @@ class RuleConfigSchema(NotNullSchema):
     )
 
 
-class RuleBasedProfilerConfig(BaseYamlConfig):
+class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
     def __init__(
         self,
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
+        id: Optional[str] = None,
         variables: Optional[Dict[str, Any]] = None,
         commented_map: Optional[CommentedMap] = None,
     ) -> None:
         self.module_name = "great_expectations.rule_based_profiler"
         self.class_name = "RuleBasedProfiler"
 
-        self.name = name
-
         self.config_version = config_version
 
         self.variables = variables
         self.rules = rules
 
-        super().__init__(commented_map=commented_map)
+        AbstractConfig.__init__(self, id=id, name=name)
+        BaseYamlConfig.__init__(self, commented_map=commented_map)
 
     @classmethod
-    def get_config_class(cls) -> Type["RuleBasedProfilerConfig"]:  # noqa: F821
-        return cls
-
-    @classmethod
-    def get_schema_class(cls) -> Type["RuleBasedProfilerConfigSchema"]:  # noqa: F821
-        return RuleBasedProfilerConfigSchema
-
-    @classmethod
-    def from_commented_map(
-        cls, commented_map: CommentedMap
-    ) -> "RuleBasedProfilerConfig":
+    def from_commented_map(cls, commented_map: CommentedMap):  # type: ignore[override] # super type accepts Dict
         """Override parent implementation to pop unnecessary attrs from config.
 
         Please see parent BaseYamlConfig for more details.
         """
         try:
-            config: dict = cls._get_schema_instance().load(commented_map)
-            config.pop("class_name", None)
-            config.pop("module_name", None)
-            return cls.get_config_class()(commented_map=commented_map, **config)
+            schema_instance: Schema = cls._get_schema_instance()
+            config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
+            config.pop("class_name", None)  # type: ignore[union-attr] # BaseYamlConfig has no `.pop()`
+            config.pop("module_name", None)  # type: ignore[union-attr] # BaseYamlConfig has no `.pop()`
+            if isinstance(config, dict):
+                return cls.get_config_class()(commented_map=commented_map, **config)
+
+            return config
         except ValidationError:
             logger.error(
                 "Encountered errors during loading config.  See ValidationError for more details."
             )
             raise
+
+    @classmethod
+    def get_config_class(cls) -> Type[RuleBasedProfilerConfig]:
+        return cls
+
+    @classmethod
+    def get_schema_class(cls) -> Type[RuleBasedProfilerConfigSchema]:
+        return RuleBasedProfilerConfigSchema
 
     def to_json_dict(self) -> dict:
         """
@@ -593,10 +580,10 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
     @classmethod
     def resolve_config_using_acceptable_arguments(
         cls,
-        profiler: "RuleBasedProfiler",  # noqa: F821
+        profiler: RuleBasedProfiler,
         variables: Optional[Dict[str, Any]] = None,
         rules: Optional[Dict[str, Dict[str, Any]]] = None,
-    ) -> "RuleBasedProfilerConfig":  # noqa: F821
+    ) -> RuleBasedProfilerConfig:
         """Reconciles variables/rules by taking into account runtime overrides and variable substitution.
 
         Utilized in usage statistics to interact with the args provided in `RuleBasedProfiler.run()`.
@@ -620,24 +607,24 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
             variables=effective_variables
         )
 
-        effective_rules: List["Rule"] = profiler.reconcile_profiler_rules(  # noqa: F821
+        effective_rules: List[Rule] = profiler.reconcile_profiler_rules(
             rules=rules,
         )
 
-        rule: "Rule"  # noqa: F821
-        effective_rules_dict: Dict[str, "Rule"] = {  # noqa: F821
+        rule: Rule
+        effective_rules_dict: Dict[str, Rule] = {
             rule.name: rule for rule in effective_rules
         }
         runtime_rules: Dict[str, dict] = {
             name: RuleBasedProfilerConfig._substitute_variables_in_config(
                 rule=rule,
-                variables_container=effective_variables,
+                variables_container=effective_variables,  # type: ignore[arg-type] # could be None
             )
             for name, rule in effective_rules_dict.items()
         }
 
         return cls(
-            name=profiler.config.name,
+            name=profiler.config.name,  # type: ignore[arg-type] # name could be None
             config_version=profiler.config.config_version,
             variables=runtime_variables,
             rules=runtime_rules,
@@ -645,7 +632,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
 
     @staticmethod
     def _substitute_variables_in_config(
-        rule: "Rule",  # noqa: F821
+        rule: Rule,
         variables_container: ParameterContainer,
     ) -> dict:
         """Recursively updates a given rule to substitute $variable references.
@@ -679,7 +666,7 @@ class RuleBasedProfilerConfig(BaseYamlConfig):
         return rule_dict
 
 
-class RuleBasedProfilerConfigSchema(Schema):
+class RuleBasedProfilerConfigSchema(AbstractConfigSchema):
     """
     Schema classes for configurations which extend from BaseYamlConfig must extend top-level Marshmallow Schema class.
     Schema classes for their constituent configurations which extend DictDot leve must extend NotNullSchema class.
@@ -689,6 +676,7 @@ class RuleBasedProfilerConfigSchema(Schema):
         unknown = INCLUDE
         fields = (
             "name",
+            "id",
             "config_version",
             "module_name",
             "class_name",
@@ -700,6 +688,10 @@ class RuleBasedProfilerConfigSchema(Schema):
     name = fields.String(
         required=True,
         allow_none=False,
+    )
+    id = fields.String(
+        required=False,
+        allow_none=True,
     )
     config_version = fields.Float(
         required=True,

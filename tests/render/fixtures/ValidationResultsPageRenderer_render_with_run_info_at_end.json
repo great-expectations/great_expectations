@@ -207,8 +207,6 @@
                     "min_value": 0,
                     "max_value": null,
                     "result_format": "SUMMARY",
-                    "row_condition": null,
-                    "condition_parser": null,
                     "strict_min": null,
                     "strict_max": null
                   },
@@ -710,70 +708,30 @@
                       ]
                     }
                   },
-                  "table": [
-                    [
-                      1
-                    ],
-                    [
-                      2
-                    ],
-                    [
-                      3
-                    ],
-                    [
-                      4
-                    ],
-                    [
-                      5
-                    ],
-                    [
-                      6
-                    ],
-                    [
-                      7
-                    ],
-                    [
-                      8
-                    ],
-                    [
-                      9
-                    ],
-                    [
-                      10
-                    ],
-                    [
-                      11
-                    ],
-                    [
-                      12
-                    ],
-                    [
-                      13
-                    ],
-                    [
-                      14
-                    ],
-                    [
-                      15
-                    ],
-                    [
-                      16
-                    ],
-                    [
-                      17
-                    ],
-                    [
-                      18
-                    ],
-                    [
-                      19
-                    ],
-                    [
-                      20
-                    ]
+                  "table":[
+                    [1, 1],
+                    [2, 1],
+                    [3, 1],
+                    [4, 1],
+                    [5, 1],
+                    [6, 1],
+                    [7, 1],
+                    [8, 1],
+                    [9, 1],
+                    [10, 1],
+                    [11, 1],
+                    [12, 1],
+                    [13, 1],
+                    [14, 1],
+                    [15, 1],
+                    [16, 1],
+                    [17, 1],
+                    [18, 1],
+                    [19, 1],
+                    [20, 1]
                   ],
                   "header_row": [
-                    "Sampled Unexpected Values"
+                    "Sampled Unexpected Values", "Count"
                   ]
                 }
               ],
@@ -1258,68 +1216,68 @@
                   },
                   "table": [
                     [
-                      "Carlsson, Mr Frans Olof"
+                      "Carlsson, Mr Frans Olof", 2
                     ],
                     [
-                      "Connolly, Miss Kate"
+                      "Connolly, Miss Kate", 2
                     ],
                     [
-                      "Kelly, Mr James"
+                      "Kelly, Mr James", 2
                     ],
                     [
-                      "Allen, Miss Elisabeth Walton"
+                      "Allen, Miss Elisabeth Walton", 1
                     ],
                     [
-                      "Allison, Master Hudson Trevor"
+                      "Allison, Master Hudson Trevor", 1
                     ],
                     [
-                      "Allison, Miss Helen Loraine"
+                      "Allison, Miss Helen Loraine", 1
                     ],
                     [
-                      "Allison, Mr Hudson Joshua Creighton"
+                      "Allison, Mr Hudson Joshua Creighton", 1
                     ],
                     [
-                      "Allison, Mrs Hudson JC (Bessie Waldo Daniels)"
+                      "Allison, Mrs Hudson JC (Bessie Waldo Daniels)", 1
                     ],
                     [
-                      "Anderson, Mr Harry"
+                      "Anderson, Mr Harry", 1
                     ],
                     [
-                      "Andrews, Miss Kornelia Theodosia"
+                      "Andrews, Miss Kornelia Theodosia", 1
                     ],
                     [
-                      "Andrews, Mr Thomas, jr"
+                      "Andrews, Mr Thomas, jr", 1
                     ],
                     [
-                      "Appleton, Mrs Edward Dale (Charlotte Lamson)"
+                      "Appleton, Mrs Edward Dale (Charlotte Lamson)", 1
                     ],
                     [
-                      "Artagaveytia, Mr Ramon"
+                      "Artagaveytia, Mr Ramon", 1
                     ],
                     [
-                      "Astor, Colonel John Jacob"
+                      "Astor, Colonel John Jacob", 1
                     ],
                     [
-                      "Astor, Mrs John Jacob (Madeleine Talmadge Force)"
+                      "Astor, Mrs John Jacob (Madeleine Talmadge Force)", 1
                     ],
                     [
-                      "Aubert, Mrs Leontine Pauline"
+                      "Aubert, Mrs Leontine Pauline", 1
                     ],
                     [
-                      "Barkworth, Mr Algernon H"
+                      "Barkworth, Mr Algernon H", 1
                     ],
                     [
-                      "Baumann, Mr John D"
+                      "Baumann, Mr John D", 1
                     ],
                     [
-                      "Baxter, Mr Quigg Edmond"
+                      "Baxter, Mr Quigg Edmond", 1
                     ],
                     [
-                      "Baxter, Mrs James (Helene DeLaudeniere Chaput)"
+                      "Baxter, Mrs James (Helene DeLaudeniere Chaput)", 1
                     ]
                   ],
                   "header_row": [
-                    "Sampled Unexpected Values"
+                    "Sampled Unexpected Values", "Count"
                   ]
                 }
               ],
@@ -2412,70 +2370,30 @@
                       ]
                     }
                   },
-                  "table": [
-                    [
-                      22.0
-                    ],
-                    [
-                      21.0
-                    ],
-                    [
-                      30.0
-                    ],
-                    [
-                      18.0
-                    ],
-                    [
-                      36.0
-                    ],
-                    [
-                      24.0
-                    ],
-                    [
-                      26.0
-                    ],
-                    [
-                      27.0
-                    ],
-                    [
-                      28.0
-                    ],
-                    [
-                      19.0
-                    ],
-                    [
-                      20.0
-                    ],
-                    [
-                      23.0
-                    ],
-                    [
-                      25.0
-                    ],
-                    [
-                      32.0
-                    ],
-                    [
-                      45.0
-                    ],
-                    [
-                      29.0
-                    ],
-                    [
-                      31.0
-                    ],
-                    [
-                      33.0
-                    ],
-                    [
-                      35.0
-                    ],
-                    [
-                      39.0
-                    ]
+                  "table":[
+                      [22.0, 35],
+                      [21.0, 31],
+                      [30.0, 31],
+                      [18.0, 30],
+                      [36.0, 29],
+                      [24.0, 27],
+                      [26.0, 27],
+                      [27.0, 24],
+                      [28.0, 24],
+                      [19.0, 23],
+                      [20.0, 23],
+                      [23.0, 23],
+                      [25.0, 23],
+                      [32.0, 22],
+                      [45.0, 20],
+                      [29.0, 15],
+                      [31.0, 14],
+                      [33.0, 14],
+                      [35.0, 14],
+                      [39.0, 14]
                   ],
                   "header_row": [
-                    "Sampled Unexpected Values"
+                    "Sampled Unexpected Values", "Count"
                   ]
                 }
               ],
@@ -2815,11 +2733,22 @@
                 },
                 {
                   "content_block_type": "table",
-                  "header_row": [
-                    "Quantile",
-                    "Min Value",
-                    "Max Value"
-                  ],
+                  "styling": {
+                    "body": {
+                      "classes": [
+                        "table",
+                        "table-sm",
+                        "table-unbordered",
+                        "col-4",
+                        "mt-2"
+                      ]
+                    },
+                    "parent": {
+                      "styles": {
+                        "list-style-type": "none"
+                      }
+                    }
+                  },
                   "table": [
                     [
                       "0.05",
@@ -2847,22 +2776,11 @@
                       "Any"
                     ]
                   ],
-                  "styling": {
-                    "body": {
-                      "classes": [
-                        "table",
-                        "table-sm",
-                        "table-unbordered",
-                        "col-4",
-                        "mt-2"
-                      ]
-                    },
-                    "parent": {
-                      "styles": {
-                        "list-style-type": "none"
-                      }
-                    }
-                  }
+                  "header_row": [
+                    "Quantile",
+                    "Min Value",
+                    "Max Value"
+                  ]
                 }
               ],
               {
@@ -2981,7 +2899,143 @@
                         }
                       }
                     },
-                    "graph": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v4.8.1.json\",\n  \"autosize\": \"fit\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 400\n    }\n  },\n  \"data\": {\n    \"name\": \"data-239befdaa7503a2ed2cd7283306bb6f7\"\n  },\n  \"datasets\": {\n    \"data-239befdaa7503a2ed2cd7283306bb6f7\": [\n      {\n        \"bin_max\": 4.1,\n        \"bin_min\": 0.2,\n        \"fraction\": 0.04365079365079365\n      },\n      {\n        \"bin_max\": 8.0,\n        \"bin_min\": 4.1,\n        \"fraction\": 0.017195767195767195\n      },\n      {\n        \"bin_max\": 12.0,\n        \"bin_min\": 8.0,\n        \"fraction\": 0.015873015873015872\n      },\n      {\n        \"bin_max\": 15.9,\n        \"bin_min\": 12.0,\n        \"fraction\": 0.01984126984126984\n      },\n      {\n        \"bin_max\": 19.8,\n        \"bin_min\": 15.9,\n        \"fraction\": 0.10052910052910052\n      },\n      {\n        \"bin_max\": 23.8,\n        \"bin_min\": 19.8,\n        \"fraction\": 0.14814814814814814\n      },\n      {\n        \"bin_max\": 27.7,\n        \"bin_min\": 23.8,\n        \"fraction\": 0.1335978835978836\n      },\n      {\n        \"bin_max\": 31.7,\n        \"bin_min\": 27.7,\n        \"fraction\": 0.1111111111111111\n      },\n      {\n        \"bin_max\": 35.6,\n        \"bin_min\": 31.7,\n        \"fraction\": 0.082010582010582\n      },\n      {\n        \"bin_max\": 39.5,\n        \"bin_min\": 35.6,\n        \"fraction\": 0.08068783068783068\n      },\n      {\n        \"bin_max\": 43.5,\n        \"bin_min\": 39.5,\n        \"fraction\": 0.051587301587301584\n      },\n      {\n        \"bin_max\": 47.4,\n        \"bin_min\": 43.5,\n        \"fraction\": 0.05952380952380952\n      },\n      {\n        \"bin_max\": 51.3,\n        \"bin_min\": 47.4,\n        \"fraction\": 0.04894179894179894\n      },\n      {\n        \"bin_max\": 55.3,\n        \"bin_min\": 51.3,\n        \"fraction\": 0.0291005291005291\n      },\n      {\n        \"bin_max\": 59.2,\n        \"bin_min\": 55.3,\n        \"fraction\": 0.022486772486772486\n      },\n      {\n        \"bin_max\": 63.1,\n        \"bin_min\": 59.2,\n        \"fraction\": 0.017195767195767195\n      },\n      {\n        \"bin_max\": 67.1,\n        \"bin_min\": 63.1,\n        \"fraction\": 0.011904761904761904\n      },\n      {\n        \"bin_max\": 71.0,\n        \"bin_min\": 67.1,\n        \"fraction\": 0.006613756613756613\n      }\n    ]\n  },\n  \"encoding\": {\n    \"tooltip\": [\n      {\n        \"field\": \"bin_min\",\n        \"type\": \"quantitative\"\n      },\n      {\n        \"field\": \"bin_max\",\n        \"type\": \"quantitative\"\n      },\n      {\n        \"field\": \"fraction\",\n        \"type\": \"quantitative\"\n      }\n    ],\n    \"x\": {\n      \"field\": \"bin_min\",\n      \"type\": \"ordinal\"\n    },\n    \"x2\": {\n      \"field\": \"bin_max\"\n    },\n    \"y\": {\n      \"field\": \"fraction\",\n      \"type\": \"quantitative\"\n    }\n  },\n  \"height\": 400,\n  \"mark\": \"bar\",\n  \"width\": 250\n}"
+                    "graph": {
+                      "config": {
+                        "view": {
+                          "continuousWidth": 400,
+                          "continuousHeight": 300
+                        }
+                      },
+                      "data": {
+                        "name": "data-239befdaa7503a2ed2cd7283306bb6f7"
+                      },
+                      "mark": "bar",
+                      "autosize": "fit",
+                      "encoding": {
+                        "tooltip": [
+                          {
+                            "type": "quantitative",
+                            "field": "bin_min"
+                          },
+                          {
+                            "type": "quantitative",
+                            "field": "bin_max"
+                          },
+                          {
+                            "type": "quantitative",
+                            "field": "fraction"
+                          }
+                        ],
+                        "x": {
+                          "type": "ordinal",
+                          "field": "bin_min"
+                        },
+                        "x2": {
+                          "field": "bin_max"
+                        },
+                        "y": {
+                          "type": "quantitative",
+                          "field": "fraction"
+                        }
+                      },
+                      "height": 400,
+                      "width": 250,
+                      "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+                      "datasets": {
+                        "data-239befdaa7503a2ed2cd7283306bb6f7": [
+                          {
+                            "bin_min": 0.2,
+                            "bin_max": 4.1,
+                            "fraction": 0.04365079365079365
+                          },
+                          {
+                            "bin_min": 4.1,
+                            "bin_max": 8.0,
+                            "fraction": 0.017195767195767195
+                          },
+                          {
+                            "bin_min": 8.0,
+                            "bin_max": 12.0,
+                            "fraction": 0.015873015873015872
+                          },
+                          {
+                            "bin_min": 12.0,
+                            "bin_max": 15.9,
+                            "fraction": 0.01984126984126984
+                          },
+                          {
+                            "bin_min": 15.9,
+                            "bin_max": 19.8,
+                            "fraction": 0.10052910052910052
+                          },
+                          {
+                            "bin_min": 19.8,
+                            "bin_max": 23.8,
+                            "fraction": 0.14814814814814814
+                          },
+                          {
+                            "bin_min": 23.8,
+                            "bin_max": 27.7,
+                            "fraction": 0.1335978835978836
+                          },
+                          {
+                            "bin_min": 27.7,
+                            "bin_max": 31.7,
+                            "fraction": 0.1111111111111111
+                          },
+                          {
+                            "bin_min": 31.7,
+                            "bin_max": 35.6,
+                            "fraction": 0.082010582010582
+                          },
+                          {
+                            "bin_min": 35.6,
+                            "bin_max": 39.5,
+                            "fraction": 0.08068783068783068
+                          },
+                          {
+                            "bin_min": 39.5,
+                            "bin_max": 43.5,
+                            "fraction": 0.051587301587301584
+                          },
+                          {
+                            "bin_min": 43.5,
+                            "bin_max": 47.4,
+                            "fraction": 0.05952380952380952
+                          },
+                          {
+                            "bin_min": 47.4,
+                            "bin_max": 51.3,
+                            "fraction": 0.04894179894179894
+                          },
+                          {
+                            "bin_min": 51.3,
+                            "bin_max": 55.3,
+                            "fraction": 0.0291005291005291
+                          },
+                          {
+                            "bin_min": 55.3,
+                            "bin_max": 59.2,
+                            "fraction": 0.022486772486772486
+                          },
+                          {
+                            "bin_min": 59.2,
+                            "bin_max": 63.1,
+                            "fraction": 0.017195767195767195
+                          },
+                          {
+                            "bin_min": 63.1,
+                            "bin_max": 67.1,
+                            "fraction": 0.011904761904761904
+                          },
+                          {
+                            "bin_min": 67.1,
+                            "bin_max": 71.0,
+                            "fraction": 0.006613756613756613
+                          }
+                        ]
+                      }
+                    }
                   }
                 ]
               }
@@ -4689,7 +4743,6 @@
   ],
   "data_asset_name": null,
   "full_data_asset_identifier": null,
-  "ge_cloud_id": null,
   "renderer_type": "ValidationResultsPageRenderer",
   "page_title": "Validations / default / 2020-03-22T17:02:47.671855Z",
   "utm_medium": "validation-results-page",
@@ -4698,5 +4751,6 @@
   "batch_kwargs": {
     "ge_batch_id": "f499679e-6c5e-11ea-8d20-acde48001122"
   },
-  "batch_spec": null
+  "batch_spec": null,
+  "ge_cloud_id": null
 }

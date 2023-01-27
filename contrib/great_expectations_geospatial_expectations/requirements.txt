@@ -1,0 +1,13 @@
+geopandas
+geopy
+global_land_mask
+great_expectations
+pygeos
+python_geohash
+rtree
+scikit_learn
+scipy
+setuptools
+Shapely
+timezonefinder
+uszipcode

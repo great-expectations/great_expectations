@@ -1,0 +1,30 @@
+import TipRuntimeDataConnectorOverview from '../components/_tip_runtime_data_connector_overview.mdx'
+import PartNameTheDataConnector from '../components/_part_name_the_data_connector.mdx'
+import PartDataConnectorRequiredKeysOverview from '../sql_components/_part_data_connector_required_keys_overview.mdx'
+import TipCustomDataConnectorModuleName from '../components/_tip_custom_data_connector_module_name.mdx'
+
+<TipRuntimeDataConnectorOverview />
+
+<PartNameTheDataConnector data_connector_name="name_of_my_runtime_data_connector" />
+
+At this point, your configuration should look like:
+
+```python name="sql datasource configuration with empty runtime sql data_connector"
+```
+
+#### Required Data Connector configuration keys
+
+<PartDataConnectorRequiredKeysOverview data_connector_type="ConfiguredAssetSqlDataConnector" data_connector_name="name_of_my_configured_data_connector" inferred={false} configured={false} runtime={true} />
+
+
+For this example, you will be using the `RuntimeDataConnector` as your `class_name`.  This key/value entry will therefore look like:
+
+```python name="define data_connector class_name for runtime sql datasource"
+```
+
+After including an empty list for your `batch_identifiers` your full configuration should now look like:
+
+```python name="runtime sql datasource configuration with data_connector class_name defined"
+```
+
+<TipCustomDataConnectorModuleName />

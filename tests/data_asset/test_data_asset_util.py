@@ -8,7 +8,7 @@ from functools import wraps
 import numpy as np
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.self_check.util import expectationSuiteSchema
 
 
@@ -16,7 +16,7 @@ from great_expectations.self_check.util import expectationSuiteSchema
     "ignore:partition_data*:DeprecationWarning:great_expectations.dataset.util"
 )
 def test_recursively_convert_to_json_serializable(tmp_path):
-    asset = ge.dataset.PandasDataset(
+    asset = gx.dataset.PandasDataset(
         {
             "x": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         }
@@ -25,7 +25,7 @@ def test_recursively_convert_to_json_serializable(tmp_path):
         "x", [1, 2, 3, 4, 5, 6, 7, 8, 9], mostly=0.8
     )
 
-    part = ge.dataset.util.partition_data(asset.x)
+    part = gx.dataset.util.partition_data(asset.x)
     asset.expect_column_kl_divergence_to_be_less_than("x", part, 0.6)
 
     # Dumping this JSON object verifies that everything is serializable
@@ -61,7 +61,7 @@ def test_recursively_convert_to_json_serializable(tmp_path):
     if hasattr(np, "float128") and platform.system() != "Windows":
         x["np.float128"] = np.float128([5.999999999998786324399999999, 20.4])
 
-    x = ge.data_asset.util.recursively_convert_to_json_serializable(x)
+    x = gx.data_asset.util.recursively_convert_to_json_serializable(x)
     assert isinstance(x["x"], list)
 
     assert isinstance(x["np.bool"][0], bool)
@@ -94,7 +94,7 @@ def test_recursively_convert_to_json_serializable(tmp_path):
     # TypeError when non-serializable numpy object is in dataset.
     with pytest.raises(TypeError):
         y = {"p": np.DataSource(tmp_path)}
-        ge.data_asset.util.recursively_convert_to_json_serializable(y)
+        gx.data_asset.util.recursively_convert_to_json_serializable(y)
 
 
 """
@@ -129,7 +129,7 @@ class Child(Parent):
     Child class docstring
     """
 
-    @ge.data_asset.util.DocInherit
+    @gx.data_asset.util.DocInherit
     @Parent.expectation
     def override_me(self):
         """Child method docstring

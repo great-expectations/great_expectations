@@ -1,6 +1,9 @@
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from __future__ import annotations
 
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+
+from great_expectations.core.domain import Domain, SemanticDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     AbsoluteCardinalityLimit,
@@ -14,12 +17,17 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
-    SemanticDomainTypes,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.validator.validator import Validator
 
 
 class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
@@ -49,10 +57,10 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         allowed_semantic_types_passthrough: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
-        limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
+        cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
         max_unique_values: Optional[Union[str, int]] = None,
         max_proportion_unique: Optional[Union[str, float]] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """Create column domains where cardinality is within the specified limit.
 
@@ -60,7 +68,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         Categorical generally refers to columns with relatively limited
         number of unique values.
         Limit mode can be absolute (number of unique values) or relative
-        (proportion of unique values). You can choose one of: limit_mode,
+        (proportion of unique values). You can choose one of: cardinality_limit_mode,
         max_unique_values or max_proportion_unique to specify the cardinality
         limit.
         Note that the limit must be met for each Batch separately.
@@ -79,25 +87,28 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             to be excluded
             allowed_semantic_types_passthrough: single/multiple type specifications using SemanticDomainTypes
             (or str equivalents) to be allowed without processing, if encountered among available column_names
-            limit_mode: CardinalityLimitMode or string name of the mode
+            cardinality_limit_mode: CardinalityLimitMode or string name of the mode
                 defining the maximum allowable cardinality to use when
                 filtering columns.
                 Accessible for convenience via CategoricalColumnDomainBuilder.cardinality_limit_modes e.g.:
-                limit_mode=CategoricalColumnDomainBuilder.cardinality_limit_modes.VERY_FEW,
+                cardinality_limit_mode=CategoricalColumnDomainBuilder.cardinality_limit_modes.VERY_FEW,
             max_unique_values: number of max unique rows for a custom
                 cardinality limit to use when filtering columns.
             max_proportion_unique: proportion of unique values for a
                 custom cardinality limit to use when filtering columns.
-            data_context: BaseDataContext associated with this DomainBuilder
+            data_context: AbstractDataContext associated with this DomainBuilder
         """
         if exclude_column_names is None:
             exclude_column_names = [
                 "id",
+                "ID",
+                "Id",
             ]
 
         if exclude_column_name_suffixes is None:
             exclude_column_name_suffixes = [
                 "_id",
+                "_ID",
             ]
 
         if exclude_semantic_types is None:
@@ -126,7 +137,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             data_context=data_context,
         )
 
-        self._limit_mode = limit_mode
+        self._cardinality_limit_mode = cardinality_limit_mode
         self._max_unique_values = max_unique_values
         self._max_proportion_unique = max_proportion_unique
 
@@ -154,8 +165,16 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self._allowed_semantic_types_passthrough = value
 
     @property
-    def limit_mode(self) -> Optional[Union[str, CardinalityLimitMode, dict]]:
-        return self._limit_mode
+    def cardinality_limit_mode(
+        self,
+    ) -> Optional[Union[str, CardinalityLimitMode, dict]]:
+        return self._cardinality_limit_mode
+
+    @cardinality_limit_mode.setter
+    def cardinality_limit_mode(
+        self, value: Optional[Union[str, CardinalityLimitMode, dict]]
+    ) -> None:
+        self._cardinality_limit_mode = value
 
     @property
     def max_unique_values(self) -> Optional[Union[str, int]]:
@@ -173,19 +192,21 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
-        """Return domains matching the selected limit_mode.
+        """Return domains matching the selected cardinality_limit_mode.
 
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of domains that match the desired cardinality.
         """
         batch_ids: List[str] = self.get_batch_ids(variables=variables)
 
-        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
+        validator: Validator = self.get_validator(variables=variables)
 
         effective_column_names: List[str] = self.get_effective_column_names(
             batch_ids=batch_ids,
@@ -193,12 +214,12 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
         )
 
-        # Obtain limit_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        limit_mode: Optional[
+        # Obtain cardinality_limit_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        cardinality_limit_mode: Optional[
             Union[str, CardinalityLimitMode, dict]
         ] = get_parameter_value_and_validate_return_type(
             domain=None,
-            parameter_reference=self.limit_mode,
+            parameter_reference=self.cardinality_limit_mode,
             expected_return_type=None,
             variables=variables,
             parameters=None,
@@ -225,13 +246,13 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         validate_input_parameters(
-            limit_mode=limit_mode,
+            cardinality_limit_mode=cardinality_limit_mode,
             max_unique_values=max_unique_values,
             max_proportion_unique=max_proportion_unique,
         )
 
         self._cardinality_checker = CardinalityChecker(
-            limit_mode=limit_mode,
+            cardinality_limit_mode=cardinality_limit_mode,
             max_unique_values=max_unique_values,
             max_proportion_unique=max_proportion_unique,
         )
@@ -280,6 +301,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         ] = self._column_names_meeting_cardinality_limit(
             validator=validator,
             metrics_for_cardinality_check=metrics_for_cardinality_check,
+            runtime_configuration=runtime_configuration,
         )
         candidate_column_names.extend(allowed_column_names_passthrough)
 
@@ -310,21 +332,20 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             }
         """
 
-        limit_mode: Union[
+        cardinality_limit_mode: Union[
             AbsoluteCardinalityLimit, RelativeCardinalityLimit
-        ] = self.cardinality_checker.limit_mode
+        ] = self.cardinality_checker.cardinality_limit_mode
 
         batch_id: str
         metric_configurations: Dict[str, List[MetricConfiguration]] = {
             column_name: [
                 MetricConfiguration(
-                    metric_name=limit_mode.metric_name_defining_limit,
+                    metric_name=cardinality_limit_mode.metric_name_defining_limit,
                     metric_domain_kwargs={
                         "column": column_name,
                         "batch_id": batch_id,
                     },
                     metric_value_kwargs=None,
-                    metric_dependencies=None,
                 )
                 for batch_id in batch_ids
             ]
@@ -335,27 +356,30 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
     def _column_names_meeting_cardinality_limit(
         self,
-        validator: "Validator",  # noqa: F821
+        validator: Validator,
         metrics_for_cardinality_check: Dict[str, List[MetricConfiguration]],
+        runtime_configuration: Optional[dict] = None,
     ) -> List[str]:
         """Compute cardinality and return column names meeting cardinality limit.
 
         Args:
             validator: Validator used to compute column cardinality.
             metrics_for_cardinality_check: metric configurations used to compute cardinality.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of column names meeting cardinality.
         """
         column_name: str
-        resolved_metrics: Dict[Tuple[str, str, str], Any]
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         metric_value: Any
 
         resolved_metrics_by_column_name: Dict[
-            str, Dict[Tuple[str, str, str], Any]
+            str, Dict[Tuple[str, str, str], MetricValue]
         ] = get_resolved_metrics_by_key(
             validator=validator,
             metric_configurations_by_key=metrics_for_cardinality_check,
+            runtime_configuration=runtime_configuration,
         )
 
         candidate_column_names: List[str] = [

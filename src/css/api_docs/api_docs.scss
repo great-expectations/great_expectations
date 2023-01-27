@@ -1,0 +1,40 @@
+/*
+ * Styles to be applied only to sphinx generated API docs.
+ * These styles are only applied to elements with the sphinx-api-doc class.
+ * We apply that class to generated API docs during the build process.
+ */
+
+.sphinx-api-doc {
+
+    @import "pygments.scss";
+    @import "basic-modified.scss";
+    @import "pydata-sphinx-theme-modified.scss";
+
+    // Mirror `code` selector for `cite` for inline code snippets in docstrings using backticks: ``
+    cite {
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+      font-size: 1em;
+      font-style: normal;
+    }
+    cite {
+      word-wrap: break-word;
+      color: #474748;
+      font-size: 87.5%
+    }
+    cite {
+      background-color: var(--pst-color-surface);
+      border: 1px solid var(--pst-color-on-surface);
+      border-radius: .25rem;
+      padding: .1rem .25rem
+    }
+
+    // Manually set code background color to match the rest of the site
+    // This does not change for light or dark mode
+    pre.prism-code {
+      background-color: #1e1e1e;
+    }
+
+}
+
+
+

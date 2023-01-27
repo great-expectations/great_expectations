@@ -1,25 +1,50 @@
+from __future__ import annotations
+
 import copy
 import datetime
+import hashlib
 import logging
+import math
+import os
 import random
 import re
 import string
 import traceback
 import warnings
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 from great_expectations._version import get_versions  # isort:skip
 
+
 __version__ = get_versions()["version"]  # isort:skip
 
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.execution_engine.execution_engine import (
+    MetricComputationConfiguration,
+    SplitDomainKwargs,
+)
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sampler import (
     SqlAlchemyDataSampler,
 )
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
+from great_expectations.validator.computed_metric import MetricValue
 
 del get_versions  # isort:skip
 
@@ -30,7 +55,6 @@ from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import ConcurrencyConfig
 from great_expectations.exceptions import (
     DatasourceKeyPairAuthBadPassphraseError,
@@ -39,15 +63,12 @@ from great_expectations.exceptions import (
     InvalidBatchSpecError,
     InvalidConfigError,
 )
-from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    SplitDomainKwargs,
-)
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
@@ -81,17 +102,20 @@ try:
         TextClause,
         quoted_name,
     )
+    from sqlalchemy.sql.selectable import Select, TextualSelect
 except ImportError:
-    Row = None
-    Dialect = None
-    reflection = None
-    DefaultDialect = None
-    Selectable = None
     BooleanClauseList = None
-    TextClause = None
-    quoted_name = None
-    OperationalError = None
+    DefaultDialect = None
+    Dialect = None
     Label = None
+    OperationalError = None
+    reflection = None
+    Row = None
+    Select = None
+    Selectable = None
+    TextClause = None
+    TextualSelect = None
+    quoted_name = None
 
 
 try:
@@ -109,7 +133,9 @@ try:
     import sqlalchemy_dremio.pyodbc
 
     if sa:
-        sa.dialects.registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
+        sa.dialects.registry.register(
+            GXSqlDialect.DREMIO, "sqlalchemy_dremio.pyodbc", "dialect"
+        )
 except ImportError:
     sqlalchemy_dremio = None
 
@@ -119,7 +145,9 @@ try:
     if sa:
         # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sa.dialects.registry.register("snowflake", "snowflake.sqlalchemy", "dialect")
+        sa.dialects.registry.register(
+            GXSqlDialect.SNOWFLAKE, "snowflake.sqlalchemy", "dialect"
+        )
 except (ImportError, KeyError, AttributeError):
     snowflake = None
 
@@ -127,10 +155,13 @@ _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
     import sqlalchemy_bigquery as sqla_bigquery
 
-    sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+    sa.dialects.registry.register(
+        GXSqlDialect.BIGQUERY, _BIGQUERY_MODULE_NAME, "dialect"
+    )
     bigquery_types_tuple = None
 except ImportError:
     try:
+        # noinspection PyUnresolvedReferences
         import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
         # deprecated-v0.14.7
@@ -142,7 +173,9 @@ except ImportError:
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sa.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        sa.dialects.registry.register(
+            GXSqlDialect.BIGQUERY, _BIGQUERY_MODULE_NAME, "dialect"
+        )
         try:
             getattr(sqla_bigquery, "INTEGER")
             bigquery_types_tuple = None
@@ -153,7 +186,7 @@ except ImportError:
             )
             from collections import namedtuple
 
-            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))
+            BigQueryTypes = namedtuple("BigQueryTypes", sorted(sqla_bigquery._type_map))  # type: ignore[misc] # expect List/tuple, _type_map unknown
             bigquery_types_tuple = BigQueryTypes(**sqla_bigquery._type_map)
     except (ImportError, AttributeError):
         sqla_bigquery = None
@@ -165,6 +198,11 @@ try:
     import teradatasqlalchemy.types as teradatatypes
 except ImportError:
     teradatasqlalchemy = None
+    teradatatypes = None
+
+if TYPE_CHECKING:
+    import sqlalchemy as sa
+    from sqlalchemy.engine import Engine as SaEngine
 
 
 def _get_dialect_type_module(dialect):
@@ -178,6 +216,7 @@ def _get_dialect_type_module(dialect):
     try:
         # Redshift does not (yet) export types to top level; only recognize base SA types
         if isinstance(dialect, sqlalchemy_redshift.dialect.RedshiftDialect):
+            # noinspection PyUnresolvedReferences
             return dialect.sa
     except (TypeError, AttributeError):
         pass
@@ -211,13 +250,45 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
+@public_api
 class SqlAlchemyExecutionEngine(ExecutionEngine):
-    def __init__(
+    """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
+
+    Constructor builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to \
+    access the desired database.
+
+    Also initializes the dialect to be used.
+
+    Args:
+        name (str): The name of the SqlAlchemyExecutionEngine
+        credentials: If the Execution Engine is not provided, the credentials can be used to build the \
+            ExecutionEngine object. If the Engine is provided, it will be used instead.
+        data_context (DataContext): An object representing a Great Expectations project that can be used to \
+            access ExpectationSuite objects and the Project Data itself.
+        engine (Engine): A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, \
+            useful if an Engine has already been configured and should be reused. Will override Credentials if \
+            provided.
+        connection_string (string): If neither the engines nor the credentials have been provided, a \
+            connection string can be used to access the data. This will be overridden by both the engine and \
+            credentials if those are provided.
+        url (string): If neither the engines, the credentials, nor the connection_string have been provided, a \
+            URL can be used to access the data. This will be overridden by all other configuration options if \
+            any are provided.
+        concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.
+
+    For example:
+    ```python
+        execution_engine: ExecutionEngine = SqlAlchemyExecutionEngine(connection_string="dbmstype://user:password@host:5432/database_name")
+    ```
+    """
+
+    # noinspection PyUnusedLocal
+    def __init__(  # noqa: C901 - 17
         self,
         name: Optional[str] = None,
         credentials: Optional[dict] = None,
         data_context: Optional[Any] = None,
-        engine=None,
+        engine: Optional[SaEngine] = None,
         connection_string: Optional[str] = None,
         url: Optional[str] = None,
         batch_data_dict: Optional[dict] = None,
@@ -225,32 +296,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         concurrency: Optional[ConcurrencyConfig] = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
     ) -> None:
-        """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
-        desired database. Also initializes the dialect to be used and configures usage statistics.
-
-            Args:
-                name (str): \
-                    The name of the SqlAlchemyExecutionEngine
-                credentials: \
-                    If the Execution Engine is not provided, the credentials can be used to build the Execution
-                    Engine. If the Engine is provided, it will be used instead
-                data_context (DataContext): \
-                    An object representing a Great Expectations project that can be used to access Expectation
-                    Suites and the Project Data itself
-                engine (Engine): \
-                    A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
-                    Engine has already been configured and should be reused. Will override Credentials
-                    if provided.
-                connection_string (string): \
-                    If neither the engines nor the credentials have been provided, a connection string can be used
-                    to access the data. This will be overridden by both the engine and credentials if those are
-                    provided.
-                url (string): \
-                    If neither the engines, the credentials, nor the connection_string have been provided,
-                    a url can be used to access the data. This will be overridden by all other configuration
-                    options if any are provided.
-                concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.
-        """
         super().__init__(name=name, batch_data_dict=batch_data_dict)
         self._name = name
 
@@ -258,6 +303,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._connection_string = connection_string
         self._url = url
         self._create_temp_table = create_temp_table
+        os.environ["SF_PARTNER"] = "great_expectations_oss"
 
         if engine is not None:
             if credentials is not None:
@@ -267,13 +313,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             self.engine = engine
         else:
-            concurrency: ConcurrencyConfig
             if data_context is None or data_context.concurrency is None:
                 concurrency = ConcurrencyConfig()
             else:
                 concurrency = data_context.concurrency
 
-            concurrency.add_sqlalchemy_create_engine_parameters(kwargs)
+            concurrency.add_sqlalchemy_create_engine_parameters(kwargs)  # type: ignore[union-attr]
 
             if credentials is not None:
                 self.engine = self._build_engine(credentials=credentials, **kwargs)
@@ -289,43 +334,43 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
 
         # these are two backends where temp_table_creation is not supported we set the default value to False.
-        if self.engine.dialect.name.lower() in [
-            "trino",
-            "awsathena",  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
+        if self.dialect_name in [
+            GXSqlDialect.TRINO,
+            GXSqlDialect.AWSATHENA,  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
         ]:
             self._create_temp_table = False
 
         # Get the dialect **for purposes of identifying types**
-        if self.engine.dialect.name.lower() in [
-            "postgresql",
-            "mysql",
-            "sqlite",
-            "oracle",
-            "mssql",
+        if self.dialect_name in [
+            GXSqlDialect.POSTGRESQL,
+            GXSqlDialect.MYSQL,
+            GXSqlDialect.SQLITE,
+            GXSqlDialect.ORACLE,
+            GXSqlDialect.MSSQL,
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect_module = import_library_module(
                 module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
-        elif self.engine.dialect.name.lower() == "snowflake":
+        elif self.dialect_name == GXSqlDialect.SNOWFLAKE:
             self.dialect_module = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
-        elif self.engine.dialect.name.lower() == "dremio":
+        elif self.dialect_name == GXSqlDialect.DREMIO:
             # WARNING: Dremio Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_dremio.pyodbc"
             )
-        elif self.engine.dialect.name.lower() == "redshift":
+        elif self.dialect_name == GXSqlDialect.REDSHIFT:
             self.dialect_module = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
             )
-        elif self.engine.dialect.name.lower() == "bigquery":
+        elif self.dialect_name == GXSqlDialect.BIGQUERY:
             self.dialect_module = import_library_module(
                 module_name=_BIGQUERY_MODULE_NAME
             )
-        elif self.engine.dialect.name.lower() == "teradatasql":
+        elif self.dialect_name == GXSqlDialect.TERADATASQL:
             # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
@@ -338,12 +383,38 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # depending on the backend. This will need to be cleaned up in an upcoming refactor, so that Engine and
         # Connection can be handled separately.
         self._engine_backup = None
-        if self.engine and self.engine.dialect.name.lower() in [
-            "sqlite",
-            "mssql",
-            "snowflake",
-            "mysql",
+        if self.engine and self.dialect_name in [
+            GXSqlDialect.SQLITE,
+            GXSqlDialect.MSSQL,
+            GXSqlDialect.SNOWFLAKE,
+            GXSqlDialect.MYSQL,
         ]:
+            if self.engine.dialect.name.lower() == GXSqlDialect.SQLITE:
+
+                def _add_sqlite_functions(connection):
+                    logger.info(
+                        f"Adding custom sqlite functions to connection {connection}"
+                    )
+                    connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
+                    connection.create_function(
+                        "md5",
+                        2,
+                        lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[
+                            -1 * d :
+                        ],
+                    )
+
+                # Add sqlite functions to any future connections.
+                def _on_connect(dbapi_con, connection_record):
+                    logger.info(
+                        f"A new sqlite connection was created: {dbapi_con}, {connection_record}"
+                    )
+                    _add_sqlite_functions(dbapi_con)
+
+                sa.event.listen(self.engine, "connect", _on_connect)
+                # Also immediately add the sqlite functions in case there already exists an underlying
+                # sqlite3.Connection (distinct from a sqlalchemy Connection).
+                _add_sqlite_functions(self.engine.raw_connection())
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             self.engine = self.engine.connect()
@@ -354,7 +425,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
+                event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT,
                 event_payload={
                     "anonymized_name": handler.anonymizer.anonymize(self.name),
                     "sqlalchemy_dialect": self.engine.name,
@@ -378,7 +449,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-        self._data_splitter = SqlAlchemyDataSplitter()
+        self._data_splitter = SqlAlchemyDataSplitter(dialect=self.dialect_name)
         self._data_sampler = SqlAlchemyDataSampler()
 
     @property
@@ -436,9 +507,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
+    @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
-        self, drivername: str, credentials: dict
-    ) -> Tuple["sa.engine.url.URL", Dict]:
+        drivername: str,
+        credentials: dict,
+    ) -> Tuple["sa.engine.url.URL", dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -486,32 +559,37 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             create_engine_kwargs,
         )
 
-    def get_domain_records(
+    @public_api
+    def get_domain_records(  # noqa: C901 - 24
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
     ) -> Selectable:
-        """
-        Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
-        obtain and/or query a batch. Returns in the format of an SqlAlchemy table/column(s) object.
+        """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a Batch of data.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_kwargs (dict) - A dictionary consisting of the Domain kwargs specifying which data to obtain
 
         Returns:
-            An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute)
+            An SqlAlchemy table/column(s) (the selectable object for obtaining data on which to compute returned in the format of an SqlAlchemy table/column(s) object)
         """
-        batch_id = domain_kwargs.get("batch_id")
+        data_object: SqlAlchemyBatchData
+
+        batch_id: Optional[str] = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
-            if self.active_batch_data:
-                data_object = self.active_batch_data
+            if self.batch_manager.active_batch_data:
+                data_object = cast(
+                    SqlAlchemyBatchData, self.batch_manager.active_batch_data
+                )
             else:
                 raise GreatExpectationsError(
                     "No batch is specified, but could not identify a loaded batch."
                 )
         else:
-            if batch_id in self.loaded_batch_data_dict:
-                data_object = self.loaded_batch_data_dict[batch_id]
+            if batch_id in self.batch_manager.batch_data_cache:
+                data_object = cast(
+                    SqlAlchemyBatchData, self.batch_manager.batch_data_cache[batch_id]
+                )
             else:
                 raise GreatExpectationsError(
                     f"Unable to find batch with batch_id {batch_id}"
@@ -522,6 +600,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
             if domain_kwargs["table"] != data_object.selectable.name:
+                # noinspection PyProtectedMember
                 selectable = sa.Table(
                     domain_kwargs["table"],
                     sa.MetaData(),
@@ -573,7 +652,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             filter_condition = filter_conditions[0]
             assert (
                 filter_condition.condition_type == RowConditionParserType.GE
-            ), "filter_condition must be of type GE for SqlAlchemyExecutionEngine"
+            ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
 
             selectable = (
                 sa.select([sa.text("*")])
@@ -594,7 +673,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             and "column_B" in domain_kwargs
             and "ignore_row_if" in domain_kwargs
         ):
-            if self.active_batch_data.use_quoted_name:
+            if cast(
+                SqlAlchemyBatchData, self.batch_manager.active_batch_data
+            ).use_quoted_name:
                 # Checking if case-sensitive and using appropriate name
                 # noinspection PyPep8Naming
                 column_A_name = quoted_name(domain_kwargs["column_A"], quote=True)
@@ -614,8 +695,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.not_(
                             sa.and_(
-                                sa.column(column_A_name) == None,
-                                sa.column(column_B_name) == None,
+                                sa.column(column_A_name) == None,  # noqa: E711
+                                sa.column(column_B_name) == None,  # noqa: E711
                             )
                         )
                     )
@@ -627,8 +708,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.not_(
                             sa.or_(
-                                sa.column(column_A_name) == None,
-                                sa.column(column_B_name) == None,
+                                sa.column(column_A_name) == None,  # noqa: E711
+                                sa.column(column_B_name) == None,  # noqa: E711
                             )
                         )
                     )
@@ -643,7 +724,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     # deprecated-v0.13.29
                     warnings.warn(
                         f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use "neither" moving forward.
+"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use \
+"neither" moving forward.
 """,
                         DeprecationWarning,
                     )
@@ -651,7 +733,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             return selectable
 
         if "column_list" in domain_kwargs and "ignore_row_if" in domain_kwargs:
-            if self.active_batch_data.use_quoted_name:
+            if cast(
+                SqlAlchemyBatchData, self.batch_manager.active_batch_data
+            ).use_quoted_name:
                 # Checking if case-sensitive and using appropriate name
                 column_list = [
                     quoted_name(domain_kwargs[column_name], quote=True)
@@ -669,7 +753,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.not_(
                             sa.and_(
                                 *(
-                                    sa.column(column_name) == None
+                                    sa.column(column_name) == None  # noqa: E711
                                     for column_name in column_list
                                 )
                             )
@@ -684,7 +768,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                         sa.not_(
                             sa.or_(
                                 *(
-                                    sa.column(column_name) == None
+                                    sa.column(column_name) == None  # noqa: E711
                                     for column_name in column_list
                                 )
                             )
@@ -701,44 +785,45 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return selectable
 
+    @public_api
     def get_compute_domain(
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[Selectable, dict, dict]:
-        """Uses a given batch dictionary and domain kwargs to obtain a SqlAlchemy column object.
+        """Uses a given batch dictionary and Domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_kwargs (dict): a dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like \
+            to be using, or a corresponding string value representing it.  String types include "identity", "column", \
+            "column_pair", "table" and "other".  Enum types include capitalized versions of these from the class \
+            MetricDomainTypes.
+            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when \
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             SqlAlchemy column
         """
-        selectable = self.get_domain_records(domain_kwargs)
-
-        split_domain_kwargs = self._split_domain_kwargs(
+        split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
         )
 
+        selectable: Selectable = self.get_domain_records(domain_kwargs=domain_kwargs)
+
         return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
-    def _split_column_metric_domain_kwargs(
+    def _split_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for column Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -749,16 +834,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             domain_type == MetricDomainTypes.COLUMN
         ), "This method only supports MetricDomainTypes.COLUMN"
 
-        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs: Dict = {}
+        compute_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: dict = {}
 
         if "column" not in compute_domain_kwargs:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "Column not provided in compute_domain_kwargs"
             )
 
         # Checking if case-sensitive and using appropriate name
-        if self.active_batch_data.use_quoted_name:
+        if cast(
+            SqlAlchemyBatchData, self.batch_manager.active_batch_data
+        ).use_quoted_name:
             accessor_domain_kwargs["column"] = quoted_name(
                 compute_domain_kwargs.pop("column"), quote=True
             )
@@ -767,16 +854,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
-    def _split_column_pair_metric_domain_kwargs(
+    def _split_column_pair_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for column pair domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for column pair Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -787,18 +874,20 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             domain_type == MetricDomainTypes.COLUMN_PAIR
         ), "This method only supports MetricDomainTypes.COLUMN_PAIR"
 
-        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs: Dict = {}
+        compute_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: dict = {}
 
         if not (
             "column_A" in compute_domain_kwargs and "column_B" in compute_domain_kwargs
         ):
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "column_A or column_B not found within compute_domain_kwargs"
             )
 
         # Checking if case-sensitive and using appropriate name
-        if self.active_batch_data.use_quoted_name:
+        if cast(
+            SqlAlchemyBatchData, self.batch_manager.active_batch_data
+        ).use_quoted_name:
             accessor_domain_kwargs["column_A"] = quoted_name(
                 compute_domain_kwargs.pop("column_A"), quote=True
             )
@@ -811,16 +900,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return SplitDomainKwargs(compute_domain_kwargs, accessor_domain_kwargs)
 
-    def _split_multi_column_metric_domain_kwargs(
+    def _split_multi_column_metric_domain_kwargs(  # type: ignore[override] # ExecutionEngine method is static
         self,
-        domain_kwargs: Dict,
+        domain_kwargs: dict,
         domain_type: MetricDomainTypes,
     ) -> SplitDomainKwargs:
-        """Split domain_kwargs for multicolumn domain types into compute and accessor domain kwargs.
+        """Split domain_kwargs for multicolumn Domain types into compute and accessor Domain kwargs.
 
         Args:
-            domain_kwargs: A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type: an Enum value indicating which metric domain the user would
+            domain_kwargs: A dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type: an Enum value indicating which metric Domain the user would
             like to be using.
 
         Returns:
@@ -831,8 +920,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             domain_type == MetricDomainTypes.MULTICOLUMN
         ), "This method only supports MetricDomainTypes.MULTICOLUMN"
 
-        compute_domain_kwargs: Dict = copy.deepcopy(domain_kwargs)
-        accessor_domain_kwargs: Dict = {}
+        compute_domain_kwargs: dict = copy.deepcopy(domain_kwargs)
+        accessor_domain_kwargs: dict = {}
 
         if "column_list" not in domain_kwargs:
             raise GreatExpectationsError("column_list not found within domain_kwargs")
@@ -843,7 +932,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             raise GreatExpectationsError("column_list must contain at least 2 columns")
 
         # Checking if case-sensitive and using appropriate name
-        if self.active_batch_data.use_quoted_name:
+        if cast(
+            SqlAlchemyBatchData, self.batch_manager.active_batch_data
+        ).use_quoted_name:
             accessor_domain_kwargs["column_list"] = [
                 quoted_name(column_name, quote=True) for column_name in column_list
             ]
@@ -854,60 +945,75 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def resolve_metric_bundle(
         self,
-        metric_fn_bundle: Iterable[Tuple[MetricConfiguration, Any, dict, dict]],
-    ) -> Dict[Tuple[str, str, str], Any]:
+        metric_fn_bundle: Iterable[MetricComputationConfiguration],
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
 
             Args:
-                metric_fn_bundle (Iterable[Tuple[MetricConfiguration, Callable, dict]): \
-                    A Dictionary containing a MetricProvider's MetricConfiguration (its unique identifier), its metric provider function
-                    (the function that actually executes the metric), and the arguments to pass to the metric provider function.
-                    A dictionary of metrics defined in the registry and corresponding arguments
+                metric_fn_bundle (Iterable[MetricComputationConfiguration]): \
+                    "MetricComputationConfiguration" contains MetricProvider's MetricConfiguration (its unique identifier),
+                    its metric provider function (the function that actually executes the metric), and arguments to pass
+                    to metric provider function (dictionary of metrics defined in registry and corresponding arguments).
 
             Returns:
-                A dictionary of metric names and their corresponding now-queried values.
+                A dictionary of "MetricConfiguration" IDs and their corresponding now-queried (fully resolved) values.
         """
-        resolved_metrics = {}
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
-        # We need a different query for each domain (where clause).
-        queries: Dict[Tuple, dict] = {}
-        for (
-            metric_to_resolve,
-            engine_fn,
-            compute_domain_kwargs,
-            accessor_domain_kwargs,
-            metric_provider_kwargs,
-        ) in metric_fn_bundle:
+        res: List[Row]
+
+        # We need a different query for each Domain (where clause).
+        queries: Dict[Tuple[str, str, str], dict] = {}
+
+        query: dict
+
+        domain_id: Tuple[str, str, str]
+
+        bundled_metric_configuration: MetricComputationConfiguration
+        for bundled_metric_configuration in metric_fn_bundle:
+            metric_to_resolve: MetricConfiguration = (
+                bundled_metric_configuration.metric_configuration
+            )
+            metric_fn: Any = bundled_metric_configuration.metric_fn
+            compute_domain_kwargs: dict = (
+                bundled_metric_configuration.compute_domain_kwargs or {}
+            )
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
+
             domain_id = compute_domain_kwargs.to_id()
             if domain_id not in queries:
                 queries[domain_id] = {
                     "select": [],
-                    "ids": [],
+                    "metric_ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
+
             if self.engine.dialect.name == "clickhouse":
                 queries[domain_id]["select"].append(
-                    engine_fn.label(
+                    metric_fn.label(
                         metric_to_resolve.metric_name.join(
-                            random.choices(string.ascii_lowercase, k=2)
+                            random.choices(string.ascii_lowercase, k=4)
                         )
                     )
                 )
             else:
                 queries[domain_id]["select"].append(
-                    engine_fn.label(metric_to_resolve.metric_name)
+                    metric_fn.label(metric_to_resolve.metric_name)
                 )
-            queries[domain_id]["ids"].append(metric_to_resolve.id)
+
+            queries[domain_id]["metric_ids"].append(metric_to_resolve.id)
+
         for query in queries.values():
-            domain_kwargs = query["domain_kwargs"]
-            selectable = self.get_domain_records(
-                domain_kwargs=domain_kwargs,
+            domain_kwargs: dict = query["domain_kwargs"]
+            selectable: Selectable = self.get_domain_records(
+                domain_kwargs=domain_kwargs
             )
-            assert len(query["select"]) == len(query["ids"])
+
+            assert len(query["select"]) == len(query["metric_ids"])
+
             try:
                 """
                 If a custom query is passed, selectable will be TextClause and not formatted
@@ -915,17 +1021,24 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 to TextualSelect using sa.columns() before it can be converted to type Subquery
                 """
                 if TextClause and isinstance(selectable, TextClause):
-                    res = self.engine.execute(
-                        sa.select(query["select"]).select_from(
-                            selectable.columns().subquery()
-                        )
-                    ).fetchall()
+                    sa_query_object = sa.select(query["select"]).select_from(
+                        selectable.columns().subquery()
+                    )
+                elif (Select and isinstance(selectable, Select)) or (
+                    TextualSelect and isinstance(selectable, TextualSelect)
+                ):
+                    sa_query_object = sa.select(query["select"]).select_from(
+                        selectable.subquery()
+                    )
                 else:
-                    res = self.engine.execute(
-                        sa.select(query["select"]).select_from(selectable)
-                    ).fetchall()
+                    sa_query_object = sa.select(query["select"]).select_from(selectable)
+
+                logger.debug(f"Attempting query {str(sa_query_object)}")
+                res = self.engine.execute(sa_query_object).fetchall()
+
                 logger.debug(
-                    f"SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
+                    f"""SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id \
+{IDDict(domain_kwargs).to_id()}"""
                 )
             except OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
@@ -933,14 +1046,22 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 exception_message += f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
                 logger.error(exception_message)
                 raise ExecutionEngineError(message=exception_message)
+
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
-            assert len(query["ids"]) == len(
+            assert len(query["metric_ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
-            for idx, id in enumerate(query["ids"]):
-                resolved_metrics[id] = convert_to_json_serializable(res[0][idx])
+
+            idx: int
+            metric_id: Tuple[str, str, str]
+            for idx, metric_id in enumerate(query["metric_ids"]):
+                # Converting SQL query execution results into JSON-serializable format produces simple data types,
+                # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
+                resolved_metrics[metric_id] = convert_to_json_serializable(
+                    data=res[0][idx]
+                )
 
         return resolved_metrics
 
@@ -988,11 +1109,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         Returns:
             List of row results.
         """
-        if self.engine.dialect.name.lower() == "awsathena":
+        if self.dialect_name == "awsathena":
             # Note: Athena does not support casting to string, only to varchar
             # but sqlalchemy currently generates a query as `CAST(colname AS STRING)` instead
             # of `CAST(colname AS VARCHAR)` with other dialects.
-            split_query: str = str(
+            split_query = str(
                 split_query.compile(self.engine, compile_kwargs={"literal_binds": True})
             )
 
@@ -1036,35 +1157,28 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         else:
-            split_clause = True
+            if self.dialect_name == GXSqlDialect.SQLITE:
+                split_clause = sa.text("1 = 1")
+            else:
+                split_clause = sa.true()
 
         table_name: str = batch_spec["table_name"]
-        if "sampling_method" in batch_spec:
-            if batch_spec["sampling_method"] in [
+        sampling_method: Optional[str] = batch_spec.get("sampling_method")
+        if sampling_method is not None:
+            if sampling_method in [
                 "_sample_using_limit",
                 "sample_using_limit",
-            ]:
-                return self._data_sampler.sample_using_limit(
-                    execution_engine=self,
-                    batch_spec=batch_spec,
-                    where_clause=split_clause,
-                )
-            elif batch_spec["sampling_method"] in [
                 "_sample_using_random",
                 "sample_using_random",
             ]:
-                sampler_fn = self._data_sampler.get_sampler_method(
-                    batch_spec["sampling_method"]
-                )
+                sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
                 return sampler_fn(
                     execution_engine=self,
                     batch_spec=batch_spec,
                     where_clause=split_clause,
                 )
             else:
-                sampler_fn = self._data_sampler.get_sampler_method(
-                    batch_spec["sampling_method"]
-                )
+                sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
                 return (
                     sa.select("*")
                     .select_from(
@@ -1073,10 +1187,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     .where(
                         sa.and_(
                             split_clause,
-                            sampler_fn(**batch_spec["sampling_kwargs"]),
+                            sampler_fn(batch_spec),
                         )
                     )
                 )
+
         return (
             sa.select("*")
             .select_from(
@@ -1098,7 +1213,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         batch_data: Optional[SqlAlchemyBatchData] = None
-        batch_markers: BatchMarkers = BatchMarkers(
+        batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
                     "%Y%m%dT%H%M%S.%fZ"
@@ -1129,7 +1244,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
             query: str = batch_spec.query
 
-            batch_spec.query = "SQLQuery"
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 query=query,
@@ -1139,15 +1253,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            if self.engine.dialect.name.lower() == "oracle":
-                selectable: str = self._build_selectable_from_batch_spec(
-                    batch_spec=batch_spec
-                )
-            else:
-                selectable: Selectable = self._build_selectable_from_batch_spec(
-                    batch_spec=batch_spec
-                )
-
+            selectable: Union[Selectable, str] = self._build_selectable_from_batch_spec(
+                batch_spec=batch_spec
+            )
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,

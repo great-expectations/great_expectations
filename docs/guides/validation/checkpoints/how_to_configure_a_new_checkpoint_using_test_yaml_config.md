@@ -320,4 +320,3 @@ checkpoint_run_result: CheckpointResult = data_context.run_checkpoint(
     run_name=airflow_run_id,
 )
  ```
-

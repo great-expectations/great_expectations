@@ -29,8 +29,10 @@ class BatchRequestAnonymizer(BaseAnonymizer):
 
         self._aggregate_anonymizer = aggregate_anonymizer
 
-    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
-        anonymized_batch_request_properties_dict: Optional[Dict[str, List[str]]] = None
+    def anonymize(
+        self, obj: Optional[object] = None, **kwargs
+    ) -> Dict[str, Union[dict, List[str]]]:
+        anonymized_batch_request_properties_dict: Dict[str, Union[dict, List[str]]] = {}
 
         # noinspection PyBroadException
         try:
@@ -175,4 +177,5 @@ class BatchRequestAnonymizer(BaseAnonymizer):
         for kwarg in kwargs:
             if kwarg in attrs or kwarg == "batch_request":
                 return True
+
         return False

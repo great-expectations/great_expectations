@@ -3,35 +3,38 @@ from typing import Any, Collection, Dict, List, Optional, Set, cast
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.domain import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
+from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.parameter_builder.value_set_multi_batch_parameter_builder import (
     ValueSetMultiBatchParameterBuilder,
     _get_unique_values_from_nested_collection_of_sets,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.08s
 def test_instantiation_value_set_multi_batch_parameter_builder(
     alice_columnar_table_single_batch_context,
 ):
     data_context: DataContext = alice_columnar_table_single_batch_context
 
     # noinspection PyUnusedLocal
-    parameter_builder: ValueSetMultiBatchParameterBuilder = (
-        ValueSetMultiBatchParameterBuilder(
-            name="my_name",
-            data_context=data_context,
-        )
+    parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
+        name="my_name",
+        data_context=data_context,
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.07s
 def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
     alice_columnar_table_single_batch_context,
 ):
@@ -39,16 +42,16 @@ def test_instantiation_value_set_multi_batch_parameter_builder_no_name(
 
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyUnusedLocal,PyArgumentList
-        parameter_builder: ValueSetMultiBatchParameterBuilder = (
-            ValueSetMultiBatchParameterBuilder(
-                data_context=data_context,
-            )
+        parameter_builder: ParameterBuilder = ValueSetMultiBatchParameterBuilder(
+            data_context=data_context,
         )
     assert "__init__() missing 1 required positional argument: 'name'" in str(
         excinfo.value
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.19s
 def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     alice_columnar_table_single_batch_context,
 ):
@@ -61,17 +64,17 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     }
 
     metric_domain_kwargs: dict = {"column": "event_type"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
 
-    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = (
+    value_set_multi_batch_parameter_builder: ParameterBuilder = (
         ValueSetMultiBatchParameterBuilder(
             name="my_event_type_value_set",
             metric_domain_kwargs=metric_domain_kwargs,
@@ -87,6 +90,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (
@@ -95,14 +99,14 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
     )
 
     expected_value_set: List[int] = [19, 22, 73]
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": expected_value_set,
         "details": {
+            "parse_strings_as_datetimes": False,
             "metric_configuration": {
                 "domain_kwargs": {"column": "event_type"},
                 "metric_name": "column.distinct_values",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 1,
         },
@@ -117,10 +121,12 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_numeric(
         parameters=parameters,
     )
 
-    assert sorted(parameter_node.value) == expected_parameter_value["value"]
-    assert parameter_node.details == expected_parameter_value["details"]
+    assert sorted(parameter_node.value) == expected_parameter_node_as_dict["value"]
+    assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.20s
 def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     alice_columnar_table_single_batch_context,
 ):
@@ -137,17 +143,17 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     }
 
     metric_domain_kwargs: dict = {"column": "user_agent"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
 
-    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = (
+    value_set_multi_batch_parameter_builder: ParameterBuilder = (
         ValueSetMultiBatchParameterBuilder(
             name="my_user_agent_value_set",
             metric_domain_kwargs=metric_domain_kwargs,
@@ -163,6 +169,7 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (
@@ -173,14 +180,14 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
     expected_value_set: List[str] = [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
     ]
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": expected_value_set,
         "details": {
+            "parse_strings_as_datetimes": False,
             "metric_configuration": {
                 "domain_kwargs": {"column": "user_agent"},
                 "metric_name": "column.distinct_values",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 1,
         },
@@ -195,10 +202,11 @@ def test_value_set_multi_batch_parameter_builder_alice_single_batch_string(
         parameters=parameters,
     )
 
-    assert sorted(parameter_node.value) == expected_parameter_value["value"]
-    assert parameter_node.details == expected_parameter_value["details"]
+    assert sorted(parameter_node.value) == expected_parameter_node_as_dict["value"]
+    assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
+@pytest.mark.integration
 def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -213,7 +221,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     }
 
     metric_domain_kwargs_for_parameter_builder: str = "$domain.domain_kwargs"
-    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = (
+    value_set_multi_batch_parameter_builder: ParameterBuilder = (
         ValueSetMultiBatchParameterBuilder(
             name="my_passenger_count_value_set",
             metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
@@ -222,12 +230,12 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     )
 
     metric_domain_kwargs: dict = {"column": "passenger_count"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -240,6 +248,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (
@@ -248,14 +257,14 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
     )
 
     expected_value_set: List[int] = [0, 1, 2, 3, 4, 5, 6]
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": expected_value_set,
         "details": {
+            "parse_strings_as_datetimes": False,
             "metric_configuration": {
                 "metric_name": "column.distinct_values",
                 "domain_kwargs": {"column": "passenger_count"},
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -272,10 +281,11 @@ def test_value_set_multi_batch_parameter_builder_bobby_numeric(
         parameters=parameters,
     )
 
-    assert sorted(parameter_node.value) == expected_parameter_value["value"]
-    assert parameter_node.details == expected_parameter_value["details"]
+    assert sorted(parameter_node.value) == expected_parameter_node_as_dict["value"]
+    assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
+@pytest.mark.integration
 def test_value_set_multi_batch_parameter_builder_bobby_string(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -290,7 +300,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
     }
 
     metric_domain_kwargs_for_parameter_builder: str = "$domain.domain_kwargs"
-    value_set_multi_batch_parameter_builder: ValueSetMultiBatchParameterBuilder = (
+    value_set_multi_batch_parameter_builder: ParameterBuilder = (
         ValueSetMultiBatchParameterBuilder(
             name="my_store_and_fwd_flag_value_set",
             metric_domain_kwargs=metric_domain_kwargs_for_parameter_builder,
@@ -299,12 +309,12 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
     )
 
     metric_domain_kwargs: dict = {"column": "store_and_fwd_flag"}
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -317,6 +327,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (
@@ -325,14 +336,14 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
     )
 
     expected_value_set: List[str] = ["N", "Y"]
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": expected_value_set,
         "details": {
+            "parse_strings_as_datetimes": False,
             "metric_configuration": {
                 "metric_name": "column.distinct_values",
                 "domain_kwargs": {"column": "store_and_fwd_flag"},
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -349,8 +360,8 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         parameters=parameters,
     )
 
-    assert sorted(parameter_node.value) == expected_parameter_value["value"]
-    assert parameter_node.details == expected_parameter_value["details"]
+    assert sorted(parameter_node.value) == expected_parameter_node_as_dict["value"]
+    assert parameter_node.details == expected_parameter_node_as_dict["details"]
 
 
 @pytest.mark.parametrize(
@@ -374,6 +385,7 @@ def test_value_set_multi_batch_parameter_builder_bobby_string(
         ],
     ],
 )
+@pytest.mark.unit
 def test__get_unique_values_from_nested_collection_of_sets(test_input, expected):
     """
     What does this test and why?
