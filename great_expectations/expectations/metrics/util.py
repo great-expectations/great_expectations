@@ -669,13 +669,13 @@ def get_dbms_compatible_column_names(
     """
     normalized_typed_batch_columns_mappings: List[
         Tuple[str, str | sqlalchemy.sql.quoted_name]
-    ] | None = (
+    ] = (
         verify_column_names_exist_and_get_normalized_typed_column_names_map(
             column_names=column_names,
             batch_columns_list=batch_columns_list,
             error_message_template=error_message_template,
         )
-        or {}
+        or tuple()
     )
 
     element: Tuple[str, str | sqlalchemy.sql.quoted_name]
