@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import functools
 import logging
 from pprint import pformat as pf
 from typing import (
@@ -362,7 +363,14 @@ class Datasource(
 
     def get_execution_engine(self) -> ExecutionEngine:
         engine_kwargs = self.dict(exclude=self._excluded_eng_args)
-        return self._execution_engine_type()(**engine_kwargs)
+
+        # only instantiate a new ExecutionEngine if engine_kwargs have changed
+        # this is required to avoid changes in temp table names
+        @functools.lru_cache(maxsize=1)
+        def instantiate_execution_engine(engine_kwargs: dict):
+            return self._execution_engine_type()(**engine_kwargs)
+
+        return instantiate_execution_engine(engine_kwargs=engine_kwargs)
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
