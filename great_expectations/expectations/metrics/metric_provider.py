@@ -22,13 +22,27 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 
+@public_api
 def metric_value(
     engine: Type[ExecutionEngine],
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
     **kwargs,
 ):
-    """The metric decorator annotates a method"""
+    """Decorator used to register a specific function as a metric value function.
 
+    Metric value functions are used by MetricProviders to immediately return
+    the value of the requested metric.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+
+    Args:
+        engine: the *type* of ExecutionEngine that this partial supports
+        metric_fn_type: the type of metric function. Usually the default value should be maintained.
+
+    Returns:
+        Decorated function
+    """
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)
         def inner_func(*args, **kwargs):
@@ -41,14 +55,32 @@ def metric_value(
 
     return wrapper
 
-
+@public_api
 def metric_partial(
     engine: Type[ExecutionEngine],
     partial_fn_type: Union[str, MetricPartialFunctionTypes],
     domain_type: Union[str, MetricDomainTypes],
     **kwargs,
 ):
-    """The metric decorator annotates a method"""
+    """Decorator used to register a specific function as a metric partial.
+
+    Metric partial functions are used by MetricProviders to support batching of
+    requests for multiple metrics in an ExecutionEngine. Instead of returning
+    the metric value immediately, they return a different function that the
+    ExecutionEngine can execute locally on your data to obtain the metric value.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation
+        - https://docs.greatexpectations.io/docs/guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation
+
+    Args:
+        engine: the *type* of ExecutionEngine that this partial supports
+        partial_fn_type: the type of partial function
+        domain_type: the type of domain this metric function processes
+
+    Returns:
+        Decorated function
+    """
 
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)
