@@ -138,14 +138,14 @@ def substitute_none_for_missing(
     Returns:
         A copy of the original `kwargs` with missing keys from `kwarg_list` defaulted to `None`.
 
-    Example::
-
-        >>> result = substitute_none_for_missing(
-        ...    kwargs={"a":1, "b":2},
-        ...    kwarg_list=["c", "d"]
-        ... )
-        ... print(result)
-        {"a":1, "b":2, "c": None, "d": None}
+    ```python
+    >>> result = substitute_none_for_missing(
+    ...    kwargs={"a":1, "b":2},
+    ...    kwarg_list=["c", "d"]
+    ... )
+    ... print(result)
+    {"a":1, "b":2, "c": None, "d": None}
+    ```
 
     This is helpful for standardizing the input objects for rendering functions.
     The alternative is lots of awkward `if "some_param" not in kwargs or kwargs["some_param"] == None:` clauses in renderers.
@@ -172,13 +172,13 @@ def parse_row_condition_string_pandas_engine(
     Returns:
         A tuple containing the template string and a `dict` of parameters.
 
-    Example::
-
-        >>> template_str, params = parse_row_condition_string_pandas_engine("Age in [0, 42]")
-        >>> print(template_str)
-        "if $row_condition__0"
-        >>> params
-        {"row_condition__0": "Age in [0, 42]"}
+    ```python
+    >>> template_str, params = parse_row_condition_string_pandas_engine("Age in [0, 42]")
+    >>> print(template_str)
+    "if $row_condition__0"
+    >>> params
+    {"row_condition__0": "Age in [0, 42]"}
+    ```
 
     """
     if len(condition_string) == 0:
