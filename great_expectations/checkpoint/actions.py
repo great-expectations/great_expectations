@@ -109,6 +109,20 @@ class ValidationAction:
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
+        """Private method containing the logic specific to a ValidationAction's implementation.
+
+        Args:
+            validation_result_suite: An instance of ExpectationSuiteValidationResult
+            validation_result_suite_identifier: An identifier for the ExpectationSuiteValidationResult,
+                either a ValidationResultIdentifier, or a GXCloudIdentifier.
+            data_asset: Optionally, the DataAsset which was validated.
+            expectation_suite_identifier:  Optionally, the ExpectationSuiteIdentifier to use
+            checkpoint_identifier:  Optionally, an Identifier for the Checkpoint
+            kwargs - any additional arguments the ValidationAction implementation might require.
+
+        Returns:
+            A Dict describing the result of the Action.
+        """
         return NotImplementedError
 
 
