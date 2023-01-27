@@ -670,7 +670,7 @@ def get_dbms_compatible_column_names(
     normalized_typed_batch_columns_mappings: List[
         Tuple[str, str | sqlalchemy.sql.quoted_name]
     ] = (
-        verify_column_names_exist_and_get_normalized_typed_column_names_map(
+        _verify_column_names_exist_and_get_normalized_typed_column_names_map(
             column_names=column_names,
             batch_columns_list=batch_columns_list,
             error_message_template=error_message_template,
@@ -693,7 +693,7 @@ def verify_column_names_exist(
     batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> None:
-    _ = verify_column_names_exist_and_get_normalized_typed_column_names_map(
+    _ = _verify_column_names_exist_and_get_normalized_typed_column_names_map(
         column_names=column_names,
         batch_columns_list=batch_columns_list,
         error_message_template=error_message_template,
@@ -701,7 +701,7 @@ def verify_column_names_exist(
     )
 
 
-def verify_column_names_exist_and_get_normalized_typed_column_names_map(
+def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
     column_names: List[str] | str,
     batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
