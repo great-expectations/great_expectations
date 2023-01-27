@@ -24,7 +24,7 @@ except ImportError:
 class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
     """An Inferred Asset Data Connector used to connect to an SQL database.
 
-    This Data Connector dtermines Data Asset names by introspecting the database schema.
+    This Data Connector determines Data Asset names by introspecting the database schema.
 
     Args:
         name: The name of the Data Connector.
