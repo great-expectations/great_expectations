@@ -1155,6 +1155,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
     domain_records_df: pd.DataFrame,
     unexpected_index_column_names: List[str],
     expectation_domain_column_name: str | None = None,
+    expectation_domain_column_list: List[str | None] = None,
 ) -> List[Dict[str, Any]]:
     """
     Builds unexpected_index list for Pandas Dataframe in situation where the named
@@ -1168,7 +1169,7 @@ def get_unexpected_indices_for_single_pandas_named_index(
         List of Dicts that contain ID/PK values
 
     """
-    if not expectation_domain_column_name:
+    if not expectation_domain_column_name and not expectation_domain_column_list:
         return []
     unexpected_index_values_by_named_index: List[int | str] = list(
         domain_records_df.index
@@ -1182,16 +1183,27 @@ def get_unexpected_indices_for_single_pandas_named_index(
             message=f"Error: The column {unexpected_index_column_names[0] if unexpected_index_column_names else '<no column specified>'} does not exist in the named indices. Please check your configuration",
             failed_metrics=["unexpected_index_list"],
         )
-
-    for index in unexpected_index_values_by_named_index:
-        primary_key_dict: Dict[str, Any] = dict()
-        # domain column first
-        primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
-            index, expectation_domain_column_name
-        ]
-        column_name: str = unexpected_index_column_names[0]
-        primary_key_dict[column_name] = index
-        unexpected_index_list.append(primary_key_dict)
+    if expectation_domain_column_name:
+        for index in unexpected_index_values_by_named_index:
+            primary_key_dict: Dict[str, Any] = dict()
+            # domain column first
+            primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
+                index, expectation_domain_column_name
+            ]
+            column_name: str = unexpected_index_column_names[0]
+            primary_key_dict[column_name] = index
+            unexpected_index_list.append(primary_key_dict)
+    elif expectation_domain_column_list:
+        breakpoint()
+        for index in unexpected_index_values_by_named_index:
+            primary_key_dict: Dict[str, Any] = dict()
+            for domain_column in expectation_domain_column_list:
+                primary_key_dict[domain_column] = domain_records_df.at[
+                    index, domain_column
+                ]
+            column_name: str = unexpected_index_column_names[0]
+            primary_key_dict[column_name] = index
+            unexpected_index_list.append(primary_key_dict)
     return unexpected_index_list
 
 
@@ -1201,6 +1213,7 @@ def compute_unexpected_pandas_indices(
     execution_engine: PandasExecutionEngine,
     metrics: Dict[str, Any],
     expectation_domain_column_name: str | None = None,
+    expectation_domain_column_list: List[str | None] = None,
 ) -> List[int] | List[Dict[str, Any]]:
     """
     Helper method to compute unexpected_index_list for PandasExecutionEngine. Handles logic needed for named indices.
@@ -1226,6 +1239,7 @@ def compute_unexpected_pandas_indices(
             domain_records_df=domain_records_df,
             unexpected_index_column_names=unexpected_index_column_names,
             expectation_domain_column_name=expectation_domain_column_name,
+            expectation_domain_column_list=expectation_domain_column_list,
         )
     # multiple named indices
     elif domain_records_df.index.names[0] is not None:
@@ -1246,12 +1260,22 @@ def compute_unexpected_pandas_indices(
         unexpected_indices: List[int | str] = list(domain_records_df.index)
         for index in unexpected_indices:
             primary_key_dict: Dict[str, Any] = dict()
-            assert (
-                expectation_domain_column_name
-            ), "`expectation_domain_column_name` was not provided"
-            primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
-                index, expectation_domain_column_name
-            ]
+            if (
+                not expectation_domain_column_name
+                and not expectation_domain_column_list
+            ):
+                raise AssertionError(
+                    "Neither `expectation_domain_column_name` nor `expectation_domain_column_list` was provided."
+                )
+            if expectation_domain_column_name:
+                primary_key_dict[expectation_domain_column_name] = domain_records_df.at[
+                    index, expectation_domain_column_name
+                ]
+            elif expectation_domain_column_list:
+                for domain_column_name in expectation_domain_column_list:
+                    primary_key_dict[domain_column_name] = domain_records_df.at[
+                        index, domain_column_name
+                    ]
             for column_name in unexpected_index_column_names:
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
