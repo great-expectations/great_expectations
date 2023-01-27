@@ -198,7 +198,7 @@ class PandasDatasource(Datasource):
     def add_csv_asset(
         self,
         name: str,
-        data_path: PathStr,
+        base_directory: PathStr,
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> CSVAsset:
@@ -206,13 +206,13 @@ class PandasDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            data_path: Path to directory with csv files
+            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
             order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
         """
         asset = CSVAsset(
             name=name,
-            path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
+            path=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
         )
