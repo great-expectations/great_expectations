@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import re
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, overload
 
 import numpy as np
 import pandas as pd
@@ -667,7 +667,9 @@ def get_dbms_compatible_column_names(
     Returns:
         Single property-typed column name object or list of property-typed column name objects (depending on input).
     """
-    normalized_typed_batch_columns_dict: Dict[str, str | sqlalchemy.sql.quoted_name] = (
+    normalized_typed_batch_columns_mappings: List[
+        Tuple[str, str | sqlalchemy.sql.quoted_name]
+    ] | None = (
         verify_column_names_exist_and_get_normalized_typed_column_names_map(
             column_names=column_names,
             batch_columns_list=batch_columns_list,
@@ -676,9 +678,10 @@ def get_dbms_compatible_column_names(
         or {}
     )
 
-    typed_batch_column_names_list: List[str | sqlalchemy.sql.quoted_name] = list(
-        normalized_typed_batch_columns_dict.values()
-    )
+    element: Tuple[str, str | sqlalchemy.sql.quoted_name]
+    typed_batch_column_names_list: List[str | sqlalchemy.sql.quoted_name] = [
+        element[1] for element in normalized_typed_batch_columns_mappings
+    ]
     if isinstance(column_names, list):
         return typed_batch_column_names_list
 
@@ -703,7 +706,7 @@ def verify_column_names_exist_and_get_normalized_typed_column_names_map(
     batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
     verify_only: bool = False,
-) -> Optional[Dict[str, str | sqlalchemy.sql.quoted_name]]:
+) -> List[Tuple[str, str | sqlalchemy.sql.quoted_name]] | None:
     """
     Insures that column name or column names (supplied as argument using "str" representation) exist in "Batch" object.
 
@@ -712,6 +715,9 @@ def verify_column_names_exist_and_get_normalized_typed_column_names_map(
         batch_columns_list: Properly typed column names (output of "table.columns" metric)
         verify_only: Perform verification only (do not return normalized typed column names)
         error_message_template: String template to output error message if any column cannot be found in "Batch" object.
+
+    Returns:
+        List of tuples having mapping from string-valued column name to typed column name; None if "verify_only" is set.
     """
     column_names_list: List[str]
     if isinstance(column_names, list):
@@ -721,20 +727,22 @@ def verify_column_names_exist_and_get_normalized_typed_column_names_map(
 
     def _get_normalized_column_name_mapping_if_exists(
         column_name: str,
-    ) -> Dict[str, str | sqlalchemy.sql.quoted_name] | None:
+    ) -> Tuple[str, str | sqlalchemy.sql.quoted_name] | None:
         typed_column_name_cursor: str | sqlalchemy.sql.quoted_name
         for typed_column_name_cursor in batch_columns_list:
             if (
                 (type(typed_column_name_cursor) == str)
                 and (column_name.casefold() == typed_column_name_cursor.casefold())
             ) or (column_name == str(typed_column_name_cursor)):
-                return {column_name: typed_column_name_cursor}
+                return column_name, typed_column_name_cursor
 
         return None
 
-    normalized_batch_columns_dict: Dict[str, str | sqlalchemy.sql.quoted_name] = {}
+    normalized_batch_columns_mappings: List[
+        Tuple[str, str | sqlalchemy.sql.quoted_name]
+    ] = []
 
-    normalized_column_name_mapping: Dict[str, str | sqlalchemy.sql.quoted_name] | None
+    normalized_column_name_mapping: Tuple[str, str | sqlalchemy.sql.quoted_name] | None
     column_name: str
     for column_name in column_names_list:
         normalized_column_name_mapping = _get_normalized_column_name_mapping_if_exists(
@@ -746,9 +754,9 @@ def verify_column_names_exist_and_get_normalized_typed_column_names_map(
             )
         else:
             if not verify_only:
-                normalized_batch_columns_dict.update(normalized_column_name_mapping)
+                normalized_batch_columns_mappings.append(normalized_column_name_mapping)
 
-    return None if verify_only else normalized_batch_columns_dict
+    return None if verify_only else normalized_batch_columns_mappings
 
 
 def parse_value_set(value_set):
