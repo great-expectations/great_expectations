@@ -15,11 +15,22 @@ logger = logging.getLogger(__name__)
 def filter_enabled_methods(
     enabled_methods: dict[str, UsageStatsEvents]
 ) -> dict[str, UsageStatsEvents]:
-    return {
-        k.split(".")[1]: v
-        for k, v in enabled_methods.items()
-        if k.startswith("AbstractDataContext") and not k.endswith("__init__")
-    }
+    filtered = {}
+    for qualified_method_name, event in enabled_methods.items():
+        parts = qualified_method_name.split(".")
+        assert (
+            len(parts) == 2
+        ), "ENABLED_METHODS should contain keys representing qualified method names (i.e. AbstractDataContext.add_datasource)"
+
+        if not qualified_method_name.startswith(
+            "AbstractDataContext"
+        ) or qualified_method_name.endswith("__init__"):
+            continue
+
+        method_name = parts[-1]
+        filtered[method_name] = event
+
+    return filtered
 
 
 @pytest.fixture
