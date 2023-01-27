@@ -2106,6 +2106,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         return profiler
 
+    @public_api
     def get_profiler(
         self,
         name: Optional[str] = None,
