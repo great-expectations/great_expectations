@@ -2805,18 +2805,25 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
 @public_api
 class ColumnPairMapExpectation(TableExpectation, ABC):
-    """Expectation where comparison is made between two columsn.
+    """Base class for ColumnPairMapExpectations.
 
+    ColumnPairMapExpectations are evaluated for a pair of columns and ask a yes/no question about the row-wise
+    relationship between those two columns. Based on the result, they then calculate the percentage of rows
+    that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
     Args:
-        TableExpectation (_type_): _description_
-        ABC (_type_): _description_
-
+        domain_keys (tuple): A tuple of the keys used to determine the domain of the
+            expectation.
+        success_keys (tuple): A tuple of the keys used to determine the success of
+            the expectation.
+        runtime_keys (optional[tuple]): Optional. A tuple of the keys that can be used to control output but will
+            not affect the actual success value of the expectation (such as result_format).
+        default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
+            kwargs from the Expectation Configuration.
+        query (optional[str]): Optional. A SQL or Spark-SQL query to be executed. If not provided, a query must be passed
+            into the QueryExpectation.
     Raises:
-        InvalidExpectationConfigurationError: _description_
-
-    Returns:
-        _type_: _description_
+        InvalidExpectationConfigurationError:  If minimum and maximum values are not the proper format and type.
     """
 
     map_metric = None
@@ -3039,17 +3046,25 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
 
 @public_api
 class MulticolumnMapExpectation(TableExpectation, ABC):
-    """_summary_
+    """Base class for MulticolumnMapExpectations.
 
-    Args:
-        TableExpectation (_type_): _description_
-        ABC (_type_): _description_
+    MulticolumnMapExpectations are evaluated for a set of columns and ask a yes/no question about the
+    row-wise relationship between those columns. Based on the result, they then calculate the
+    percentage of rows that gave a positive answer. If the percentage is high enough,
+    the Expectation considers that data valid.
 
     Raises:
-        InvalidExpectationConfigurationError: _description_
+        InvalidExpectationConfigurationError: If minimum and maximum values are not the proper format and type.
 
-    Returns:
-        _type_: _description_
+    Args:
+        domain_keys (tuple): A tuple of the keys used to determine the domain of the
+            expectation.
+        success_keys (tuple): A tuple of the keys used to determine the success of
+            the expectation.
+        runtime_keys (optional[tuple]): Optional. A tuple of the keys that can be used to control output but will
+            not affect the actual success value of the expectation (such as result_format).
+        default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
+            kwargs from the Expectation Configuration.
     """
 
     map_metric = None
