@@ -36,8 +36,8 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         3. Manual creation of credentials from google.oauth2.service_account.Credentials.from_service_account_info
 
     Much of the interaction is performed using the `boto3` S3 client. Please refer to
-    the `official AWS documentation <https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html>`_
-    for more information.
+    the `official AWS documentation <https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html>`_ for
+    more information.
 
     Args:
         name: The name of the Data Connector.
