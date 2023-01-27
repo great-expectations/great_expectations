@@ -201,8 +201,11 @@ def test_column_quoted_name_type_sa(sa):
     )
     table_columns_metric_id: Tuple[str, str, str] = table_columns_metric.id
     batch_column_list = metrics[table_columns_metric_id]
+
+    column_name: str
     quoted_batch_column_list = [
-        quoted_name(value=str(element), quote=True) for element in batch_column_list
+        quoted_name(value=str(column_name), quote=True)
+        for column_name in batch_column_list
     ]
 
     column_name = "names"
@@ -237,6 +240,13 @@ def test_column_quoted_name_type_sa(sa):
             == f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
+    quoted_batch_column_list = [
+        quoted_name(value=str(column_name), quote=True)
+        for column_name in [
+            "Names",
+            "names",
+        ]
+    ]
     for column_name in [
         "non_existent_column",
         "NAMES",

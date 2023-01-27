@@ -725,36 +725,33 @@ def verify_column_names_exist_and_get_normalized_typed_column_names_map(
         str(column_name): column_name for column_name in batch_columns_list
     }
 
-    def _get_normalized_column_name_if_exists(column_name: str) -> str | None:
-        typed_column_cursor: str | sqlalchemy.sql.quoted_name
-        for typed_column_cursor in batch_columns_list:
-            if column_name == str(typed_column_cursor) or (
-                isinstance(typed_column_cursor, str)
-                and (
-                    column_name == typed_column_cursor
-                    or column_name == typed_column_cursor.upper()
-                )
-            ):
-                return column_name
+    def _get_normalized_column_name_mapping_if_exists(
+        column_name: str,
+    ) -> Dict[str, str | sqlalchemy.sql.quoted_name] | None:
+        typed_column_name_cursor: str | sqlalchemy.sql.quoted_name
+        for typed_column_name_cursor in batch_columns_list:
+            if (
+                (type(typed_column_name_cursor) == str)
+                and (column_name.casefold() == typed_column_name_cursor.casefold())
+            ) or (column_name == str(typed_column_name_cursor)):
+                return {column_name: typed_column_name_cursor}
 
         return None
 
     normalized_batch_columns_dict: Dict[str, str | sqlalchemy.sql.quoted_name] = {}
 
-    normalized_column_name: str
+    normalized_column_name_mapping: Dict[str, str | sqlalchemy.sql.quoted_name] | None
     for column_name in column_names_list:
-        normalized_column_name = _get_normalized_column_name_if_exists(
+        normalized_column_name_mapping = _get_normalized_column_name_mapping_if_exists(
             column_name=column_name
         )
-        if normalized_column_name is None:
+        if normalized_column_name_mapping is None:
             raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=error_message_template.format(column_name=column_name)
             )
         else:
             if not verify_only:
-                normalized_batch_columns_dict[
-                    normalized_column_name
-                ] = batch_columns_dict[column_name.lower()]
+                normalized_batch_columns_dict.update(normalized_column_name_mapping)
 
     return None if verify_only else normalized_batch_columns_dict
 
