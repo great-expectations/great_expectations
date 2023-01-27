@@ -326,7 +326,7 @@ Bucket: {error}"""
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 
-        # ZEP code path
+        # Experimental datasources will go down this code path
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method = batch_spec.reader_method
             reader_options = batch_spec.reader_options
