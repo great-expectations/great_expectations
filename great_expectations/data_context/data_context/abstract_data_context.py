@@ -1993,25 +1993,27 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Note that this method can be called by itself or run within the get_validator workflow.
 
-        When run with create_expectation_suite()::
+        When run with create_expectation_suite():
 
-            expectation_suite_name = "genres_movies.fkey"
-            context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-            batch = context.get_batch(
-                expectation_suite_name=expectation_suite_name
-            )
+        ```python
+        expectation_suite_name = "genres_movies.fkey"
+        context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
+        batch = context.get_batch(
+            expectation_suite_name=expectation_suite_name
+        )
+        ```
 
+        When run as part of get_validator():
 
-        When run as part of get_validator()::
-
-            validator = context.get_validator(
-                datasource_name="my_datasource",
-                data_connector_name="whole_table",
-                data_asset_name="my_table",
-                create_expectation_suite_with_name="my_expectation_suite",
-            )
-            validator.expect_column_values_to_be_in_set("c1", [4,5,6])
-
+        ```python
+        validator = context.get_validator(
+            datasource_name="my_datasource",
+            data_connector_name="whole_table",
+            data_asset_name="my_table",
+            create_expectation_suite_with_name="my_expectation_suite",
+        )
+        validator.expect_column_values_to_be_in_set("c1", [4,5,6])
+        ```
 
         Args:
             expectation_suite_name: The name of the suite to create.
