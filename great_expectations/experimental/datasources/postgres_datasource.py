@@ -23,4 +23,4 @@ class PostgresDatasource(SQLDatasource):
     """
 
     type: Literal["postgres"] = "postgres"  # type: ignore[assignment]
-    connection_string: Optional[PostgresDsn] = None
+    connection_string: Optional[PostgresDsn]

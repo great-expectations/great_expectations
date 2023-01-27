@@ -28,6 +28,10 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
+class PandasDatasourceError(Exception):
+    pass
+
+
 class CSVAsset(DataAsset):
     # Overridden inherited instance fields
     type: Literal["csv"] = "csv"
