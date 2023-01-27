@@ -1328,6 +1328,11 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self._rule_states
 
     def to_json_dict(self) -> dict:
+        """Returns a JSON-serializable dict representation of this RuleBasedProfiler.
+
+        Returns:
+            A JSON-serializable dict representation of this RuleBasedProfiler.
+        """
         variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
             variables=self.variables
         )
