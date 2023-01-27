@@ -19,12 +19,19 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
     """
     Extension of ConfiguredAssetFilePathDataConnector used to connect to Filesystem
 
-    The ConfiguredAssetFilesystemDataConnector is one of two classes (InferredAssetFilesystemDataConnector being the
-    other one) designed for connecting to data on a filesystem. It connects to assets
-    defined by the `assets` configuration.
+    Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
+    connect to. While this allows for fine-grained control over which Data Assets may be accessed,
+    it requires more setup.
 
-    A ConfiguredAssetFilesystemDataConnector requires an explicit listing of each DataAsset you want to connect to.
-    This allows more fine-tuning, but also requires more setup.
+    Args:
+        name (str): name of ConfiguredAssetFilesystemDataConnector
+        datasource_name (str): Name of datasource that this DataConnector is connected to
+        assets (dict): configured assets as a dictionary. These can each have their own regex and sorters
+        execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
+        default_regex (dict): Optional dict the filter and organize the data_references.
+        glob_directive (str): glob for selecting files in directory (defaults to **/*) or nested directories (e.g. */*/*.csv)
+        sorters (list): Optional list if you want to sort the data_references
+        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
     def __init__(
@@ -40,21 +47,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        Base class for DataConnectors that connect to data on a filesystem. This class supports the configuration of default_regex
-        and sorters for filtering and sorting data_references. It takes in configured `assets` as a dictionary.
 
-        Args:
-            name (str): name of ConfiguredAssetFilesystemDataConnector
-            datasource_name (str): Name of datasource that this DataConnector is connected to
-            assets (dict): configured assets as a dictionary. These can each have their own regex and sorters
-            execution_engine (ExecutionEngine): ExecutionEngine object to actually read the data
-            default_regex (dict): Optional dict the filter and organize the data_references.
-            glob_directive (str): glob for selecting files in directory (defaults to **/*) or nested directories (e.g. */*/*.csv)
-            sorters (list): Optional list if you want to sort the data_references
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-
-        """
         logger.debug(f'Constructing ConfiguredAssetFilesystemDataConnector "{name}".')
 
         super().__init__(
