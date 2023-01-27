@@ -7,6 +7,8 @@ import logging
 import sys
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
+from great_expectations.core._docs_decorators import public_api
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
@@ -1327,6 +1329,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def rule_states(self) -> List[RuleState]:
         return self._rule_states
 
+    @public_api
     def to_json_dict(self) -> dict:
         """Returns a JSON-serializable dict representation of this RuleBasedProfiler.
 

@@ -188,18 +188,19 @@ class DataAssistantResult(SerializableDictDot):
             send_usage_event=send_usage_event,
         ).show_expectations_by_domain_type()
 
+    @public_api
     def show_expectations_by_expectation_type(
         self,
         expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> None:
-        """Populates named "ExpectationSuite" with "ExpectationConfiguration" list stored in "DataAssistantResult"
-        object and displays this "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined order.
+        """Populates an `ExpectationSuite` and displays `ExpectationConfiguration` list grouped by `expectation_type`
 
         Args:
             expectation_suite_name: The name for the Expectation Suite. Default generated if none provided.
-            include_profiler_config: Whether to include the rule-based profiler config used by the data assistant to generate the Expectation Suite.
+            include_profiler_config: Whether to include the rule-based profiler config used by the data assistant to
+                generate the Expectation Suite.
             send_usage_event: Set to False to disable sending usage events for this method.
         """
         self.get_expectation_suite(
