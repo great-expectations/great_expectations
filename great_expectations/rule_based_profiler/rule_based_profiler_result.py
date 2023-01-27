@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -17,6 +18,7 @@ from great_expectations.rule_based_profiler.parameter_container import Parameter
 from great_expectations.types import SerializableDictDot
 
 
+@public_api
 @dataclass(frozen=True)
 class RuleBasedProfilerResult(SerializableDictDot):
     """
@@ -76,12 +78,14 @@ class RuleBasedProfilerResult(SerializableDictDot):
             "citation": self.citation,
         }
 
+    @public_api
     def to_json_dict(self) -> dict:
         """
         Returns: This RuleBasedProfilerResult as JSON-serializable dictionary.
         """
         return self.to_dict()
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE,
         args_payload_fn=get_expectation_suite_usage_statistics,
