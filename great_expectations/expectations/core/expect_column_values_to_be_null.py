@@ -4,6 +4,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_configuration import parse_result_format
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
@@ -84,21 +85,24 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
     map_metric = "column_values.null"
     args_keys = ("column",)
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
         """
         super().validate_configuration(configuration)
-        self.validate_metric_value_between_configuration(configuration=configuration)
 
     @classmethod
     def _prescriptive_template(
@@ -264,5 +268,8 @@ class ExpectColumnValuesToBeNull(ColumnMapExpectation):
             ),
             unexpected_index_list=metrics.get(
                 f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}"
+            ),
+            unexpected_index_query=metrics.get(
+                f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}"
             ),
         )

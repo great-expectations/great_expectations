@@ -114,13 +114,20 @@ class RuleStats(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
+@public_api
 @dataclass
 class DataAssistantResult(SerializableDictDot):
-    """
-    DataAssistantResult is a "dataclass" object, designed to hold results of executing "DataAssistant.run()" method.
-    Available properties are: "metrics_by_domain", "expectation_configurations", and configuration object
-    ("RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
-    Use "_batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
+    """Result from a Data Assistant run, plus plotting functionality.
+
+    Args:
+        profiler_config: Effective Rule-Based Profiler configuration.
+        profiler_execution_time: Effective Rule-Based Profiler overall execution time in seconds.
+        rule_domain_builder_execution_time: Effective Rule-Based Profiler per-Rule DomainBuilder execution time in seconds.
+        rule_execution_time: Effective Rule-Based Profiler per-Rule execution time in seconds.
+        metrics_by_domain: Metrics by Domain.
+        expectation_configurations: Expectation configurations.
+        citation: Citations.
+        _batch_id_to_batch_identifier_display_name_map: Mapping from "batch_id" values to friendly display names.
     """
 
     ALLOWED_KEYS = {
@@ -142,15 +149,9 @@ class DataAssistantResult(SerializableDictDot):
         Dict[str, Set[Tuple[str, Any]]]
     ] = field(default=None)
     profiler_config: Optional[RuleBasedProfilerConfig] = None
-    profiler_execution_time: Optional[
-        float
-    ] = None  # Effective Rule-Based Profiler overall execution time (in seconds).
-    rule_domain_builder_execution_time: Optional[
-        Dict[str, float]
-    ] = None  # Effective Rule-Based Profiler per-Rule DomainBuilder execution time (in seconds).
-    rule_execution_time: Optional[
-        Dict[str, float]
-    ] = None  # Effective Rule-Based Profiler per-Rule total execution time (in seconds).
+    profiler_execution_time: Optional[float] = None
+    rule_domain_builder_execution_time: Optional[Dict[str, float]] = None
+    rule_execution_time: Optional[Dict[str, float]] = None
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
@@ -276,9 +277,12 @@ class DataAssistantResult(SerializableDictDot):
             "citation": convert_to_json_serializable(data=self.citation),
         }
 
+    @public_api
     def to_json_dict(self) -> dict:
-        """
-        Returns: This DataAssistantResult as JSON-serializable dictionary.
+        """Returns JSON dictionary equivalent of this object.
+
+        Returns:
+            A JSON-serializable dictionary representation of the DataAssistantResult object.
         """
         return self.to_dict()
 
@@ -507,6 +511,7 @@ class DataAssistantResult(SerializableDictDot):
 
         return expectation_suite
 
+    @public_api
     def plot_metrics(
         self,
         sequential: bool = True,
@@ -514,17 +519,16 @@ class DataAssistantResult(SerializableDictDot):
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
-        """
-        Use contents of "DataAssistantResult" object to display metrics for visualization purposes.
+        """Use contents of `DataAssistantResult` object to display metrics for visualization purposes.
 
         Altair theme configuration reference:
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            sequential: Whether the batches are sequential or not
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: Columns to include in metrics plot
-            exclude_column_names: Columns to exclude from metrics plot
+            sequential: Whether the batches are sequential or not.
+            theme: Altair top-level chart configuration dictionary.
+            include_column_names: Columns to include in metrics plot.
+            exclude_column_names: Columns to exclude from metrics plot.
 
         Returns:
             PlotResult wrapper object around Altair charts.
@@ -537,6 +541,7 @@ class DataAssistantResult(SerializableDictDot):
             exclude_column_names=exclude_column_names,
         )
 
+    @public_api
     def plot_expectations_and_metrics(
         self,
         sequential: bool = True,
@@ -544,17 +549,16 @@ class DataAssistantResult(SerializableDictDot):
         include_column_names: Optional[List[str]] = None,
         exclude_column_names: Optional[List[str]] = None,
     ) -> PlotResult:
-        """
-        Use contents of "DataAssistantResult" object to display metrics and expectations for visualization purposes.
+        """Use contents of `DataAssistantResult` object to display metrics and expectations for visualization purposes.
 
         Altair theme configuration reference:
             https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
 
         Args:
-            sequential: Whether the batches are sequential or not
-            theme: Altair top-level chart configuration dictionary
-            include_column_names: Columns to include in expectations and metrics plot
-            exclude_column_names: Columns to exclude from expectations and metrics plot
+            sequential: Whether the batches are sequential or not.
+            theme: Altair top-level chart configuration dictionary.
+            include_column_names: Columns to include in expectations and metrics plot.
+            exclude_column_names: Columns to exclude from expectations and metrics plot.
 
         Returns:
             PlotResult wrapper object around Altair charts.
