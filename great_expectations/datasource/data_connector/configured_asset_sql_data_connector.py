@@ -48,8 +48,7 @@ except ImportError:
 
 @public_api
 class ConfiguredAssetSqlDataConnector(DataConnector):
-    """
-    A DataConnector that requires explicit listing of SQL assets you want to connect to.
+    """A DataConnector that requires explicit listing of SQL assets you want to connect to.
 
     Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
     connect to. While this allows for fine-grained control over which Data Assets may be accessed,
