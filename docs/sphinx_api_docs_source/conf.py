@@ -6,7 +6,6 @@ from __future__ import annotations
 
 # -- Update syspath
 import os
-import pathlib
 import sys
 
 WHITELISTED_TAG = "--Public API--"
@@ -159,7 +158,7 @@ def convert_code_blocks(lines: list[str], name: str) -> None:
     # Find number of code snippets
     code_snippet_indices: list[tuple[int, int]] = []
     for idx, line in enumerate(lines):
-        if line.strip().startswith("```"):
+        if "```" in line:
             num_triple_quotes += 1
             if not code_snippet_start:
                 code_snippet_start = idx
