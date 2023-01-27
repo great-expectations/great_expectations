@@ -253,26 +253,28 @@ class BaseDatasource:
     def get_available_data_asset_names(
         self, data_connector_names: Optional[Union[list, str]] = None
     ) -> Dict[str, List[str]]:
-        """Returns a dictionary of data_asset_names that the specified data
-        connector can provide. Note that some data_connectors may not be
+        """Returns a dictionary of data_asset_names that the specified dataconnector can provide.
+
+        Note that some data_connectors may not be
         capable of describing specific named data assets, and some (such as
         inferred_asset_data_connector) require the user to configure
         data asset names.
+
+        Example return value:
+        ```python
+        {
+          data_connector_name: {
+            names: [ data_asset_1, data_asset_2 ... ]
+          }
+          ...
+        }
+        ```
 
         Args:
             data_connector_names: the DataConnector for which to get available data asset names.
 
         Returns:
-            dictionary consisting of sets of data assets available for the specified data connectors:
-
-            ```python
-            {
-              data_connector_name: {
-                names: [ data_asset_1, data_asset_2 ... ]
-              }
-              ...
-            }
-            ```
+            Dictionary consisting of sets of data assets available for the specified data connectors.
         """
         available_data_asset_names: dict = {}
         if data_connector_names is None:
