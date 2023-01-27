@@ -148,10 +148,12 @@ class TableAsset(DataAsset):
             TestConnectionError
         """
         assert isinstance(self.datasource, SQLDatasource)
+        schema: Optional[str] = None
+        table_name: str
         if "." in self.table_name:
             schema, table_name = self.table_name.split(".")
         else:
-            schema, table_name = _, self.table_name
+            table_name = self.table_name
         exists = sqlalchemy.inspect(self.datasource.engine).has_table(
             table_name=table_name,
             schema=schema,
