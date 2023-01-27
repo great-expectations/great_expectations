@@ -2195,7 +2195,7 @@ class TableExpectation(Expectation, ABC):
     which should raise an error if the configuration will not be usable for the Expectation.
 
     Raises:
-        InvalidExpectationConfigurationError: If minimum and maximum values are not the proper format and type.
+        InvalidExpectationConfigurationError: The configuration does not contain the values required by the Expectation.
 
     Args:
         domain_keys (tuple): A tuple of the keys used to determine the domain of the
