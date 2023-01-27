@@ -47,7 +47,7 @@ class SQLDatasourceError(Exception):
     pass
 
 
-class SQLDatasourceWarning(Warning):
+class SQLDatasourceWarning(UserWarning):
     pass
 
 
@@ -399,19 +399,13 @@ class SQLDatasource(Datasource):
                 )
         # engine will always override connection_string if it is passed
         else:
-            engine_url: str = values["engine"].url
-            if (
-                "connection_string" in values
-                and values["connection_string"] != engine_url
-            ):
+            if "connection_string" in values and values["connection_string"]:
                 warnings.warn(
-                    SQLDatasourceWarning(
-                        "Both connection_string and engine were provided, but connection_string does not match "
-                        "the URL of the engine. The engine will be used, and the connection_string will be "
-                        "ignored."
-                    )
+                    "Both connection_string and engine were provided. The engine will be used, and the "
+                    "connection_string will be ignored.",
+                    SQLDatasourceWarning,
                 )
-            values["connection_string"] = engine_url
+                values["connection_string"] = None
 
         return values
 
