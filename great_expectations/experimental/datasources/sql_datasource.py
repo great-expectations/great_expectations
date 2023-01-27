@@ -46,6 +46,10 @@ class SQLDatasourceError(Exception):
     pass
 
 
+class SQLDatasourceWarning(Warning):
+    pass
+
+
 @pydantic_dc.dataclass(frozen=True)
 class ColumnSplitter:
     column_name: str
@@ -389,9 +393,11 @@ class SQLDatasource(Datasource):
                 and values["connection_string"] != engine_url
             ):
                 warnings.warn(
-                    "Both connection_string and engine were provided, but connection_string does not match "
-                    "the URL of the engine. The engine will be used, and the connection_string will be "
-                    "ignored."
+                    SQLDatasourceWarning(
+                        "Both connection_string and engine were provided, but connection_string does not match "
+                        "the URL of the engine. The engine will be used, and the connection_string will be "
+                        "ignored."
+                    )
                 )
             values["connection_string"] = engine_url
 
