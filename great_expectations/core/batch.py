@@ -62,6 +62,7 @@ class BatchDefinition(SerializableDictDot):
     Returns:
         BatchDefinition
     """
+
     def __init__(
         self,
         datasource_name: str,
@@ -530,6 +531,7 @@ class RuntimeBatchRequest(BatchRequestBase):
     Returns:
         BatchRequest
     """
+
     include_field_names: Set[str] = {
         "datasource_name",
         "data_connector_name",
@@ -662,6 +664,7 @@ class Batch(SerializableDictDot):
     Returns:
         Batch instance created.
     """
+
     def __init__(
         self,
         data: Optional[BatchDataType] = None,
