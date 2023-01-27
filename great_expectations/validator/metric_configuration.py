@@ -138,6 +138,12 @@ class MetricConfiguration:
         )
 
     def to_json_dict(self) -> dict:
+        """Returns a JSON-serializable dict representation of this MetricConfiguration.
+
+        Returns:
+            A JSON-serializable dict representation of this MetricConfiguration.
+
+        """
         json_dict: dict = convert_to_json_serializable(
             data={
                 "metric_name": self.metric_name,
