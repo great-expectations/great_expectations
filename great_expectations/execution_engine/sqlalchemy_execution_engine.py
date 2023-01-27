@@ -296,32 +296,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         concurrency: Optional[ConcurrencyConfig] = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
     ) -> None:
-        """Builds a SqlAlchemyExecutionEngine, using a provided connection string/url/engine/credentials to access the
-        desired database. Also initializes the dialect to be used and configures usage statistics.
-
-            Args:
-                name (str): \
-                    The name of the SqlAlchemyExecutionEngine
-                credentials: \
-                    If the Engine is not provided, the credentials can be used to build the Execution
-                    Engine. If the Engine is provided, it will be used instead
-                data_context (DataContext): \
-                    An object representing a Great Expectations project that can be used to access Expectation
-                    Suites and the Project Data itself
-                engine (Engine): \
-                    A SqlAlchemy Engine used to set the SqlAlchemyExecutionEngine being configured, useful if an
-                    Engine has already been configured and should be reused. Will override Credentials
-                    if provided.
-                connection_string (string): \
-                    If neither the engine nor the credentials have been provided, a connection string can be used
-                    to access the data. This will be overridden by both the engine and credentials if those are
-                    provided.
-                url (string): \
-                    If neither the engines, the credentials, nor the connection_string have been provided,
-                    a url can be used to access the data. This will be overridden by all other configuration
-                    options if any are provided.
-                concurrency (ConcurrencyConfig): Concurrency config used to configure the sqlalchemy engine.
-        """
         super().__init__(name=name, batch_data_dict=batch_data_dict)
         self._name = name
 
