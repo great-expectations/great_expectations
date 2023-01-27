@@ -105,7 +105,7 @@ def test_all_relevant_context_methods_emit_usage_stats(
     assert len(mock_calls) == 2
 
     init_call, latest_call = mock_calls
-    init_event = init_call.args[0]["event"]
-    latest_event = latest_call.args[0]["event"]
+    init_event = init_call[0][0]["event"]
+    latest_event = latest_call[0][0]["event"]
     assert init_event == UsageStatsEvents.DATA_CONTEXT___INIT__
     assert latest_event == expected_event
