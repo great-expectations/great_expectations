@@ -233,6 +233,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return domain_builder
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN,
         args_payload_fn=get_profiler_run_usage_statistics,
@@ -254,21 +255,21 @@ class BaseRuleBasedProfiler(ConfigPeer):
         comment: Optional[str] = None,
     ) -> RuleBasedProfilerResult:
         """
-        Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
+        Run the Rule-Based Profiler.
 
         Args:
-            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
-            rules: name/(configuration-dictionary) (overrides)
-            batch_list: Explicit list of Batch objects to supply data at runtime
-            batch_request: Explicit batch_request used to supply data at runtime
-            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
-            reconciliation_directives: directives for how each rule component should be overwritten
-            variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
-            domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
-            comment: Optional comment for "citation" of "ExpectationSuite" returned as part of "RuleBasedProfilerResult"
+            variables: Attribute name/value pairs (overrides), commonly-used in `Builder` objects.
+            rules: A collection of rule configurations (overrides).
+            batch_list: The batches of data supplied at runtime.
+            batch_request: An explicit Batch Request used to supply data at runtime.
+            runtime_configuration: Additional runtime settings (see `Validator.DEFAULT_RUNTIME_CONFIGURATION`).
+            reconciliation_directives: Directives for how each rule component should be overwritten.
+            variables_directives_list: Additional override runtime variables directives (modify `BaseRuleBasedProfiler`).
+            domain_type_directives_list: Additional override runtime domain directives (modify `BaseRuleBasedProfiler`).
+            comment: A citation for the Expectation Suite returned as part of the `RuleBasedProfilerResult`.
 
         Returns:
-            "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
+            A `RuleBasedProfilerResult` instance that contains the profiling output.
         """
         # Check to see if the user has disabled progress bars
         disable = False
