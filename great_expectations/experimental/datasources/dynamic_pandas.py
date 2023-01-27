@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import functools
 import inspect
 import logging
 import pathlib
@@ -101,6 +104,13 @@ class _SignatureTuple(NamedTuple):
 class _FieldSpec(NamedTuple):
     type: Type
     default_value: object  # ... for required value
+
+
+@functools.lru_cache(maxsize=64)
+def _replace_builtins(input_: str | type) -> str | type:
+    if not isinstance(input_, str):
+        return input_
+    return input_.replace("list", "List").replace("dict", "Dict")
 
 
 FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
@@ -224,7 +234,7 @@ def _to_pydantic_fields(
             fields_dict.update(substitution)
         else:
             fields_dict[param_name] = _FieldSpec(
-                type=type_, default_value=_get_default_value(param)  # type: ignore[arg-type]
+                type=_replace_builtins(type_), default_value=_get_default_value(param)  # type: ignore[arg-type]
             )
 
     return fields_dict
