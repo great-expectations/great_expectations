@@ -47,6 +47,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
         )
         for c in backends:
             for filename in test_configuration_files:
+                pk_column: bool = False
                 file = open(filename)
                 test_configuration = json.load(file)
 
@@ -90,6 +91,9 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 )
                             validator_with_data = datasets[0]
                         else:
+                            if expectation_category == "column_map_expectations":
+                                pk_column: bool = True
+
                             schemas = d["schemas"] if "schemas" in d else None
                             validator_with_data = get_test_validator_with_data(
                                 c,
@@ -98,6 +102,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 context=cast(
                                     DataContext, build_in_memory_runtime_context()
                                 ),
+                                pk_column=pk_column,
                             )
 
                     for test in d["tests"]:
@@ -368,6 +373,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 "expectation_type": test_configuration[
                                     "expectation_type"
                                 ],
+                                "pk_column": pk_column,
                                 "validator_with_data": validator_with_data,
                                 "test": test,
                                 "skip": skip_expectation or skip_test,
@@ -401,10 +407,12 @@ def test_case_runner_v3_api(test_case):
                 validator=test_case["validator_with_data"],
                 expectation_type=test_case["expectation_type"],
                 test=test_case["test"],
+                pk_column=test_case["pk_column"],
             )
     else:
         evaluate_json_test_v3_api(
             validator=test_case["validator_with_data"],
             expectation_type=test_case["expectation_type"],
             test=test_case["test"],
+            pk_column=test_case["pk_column"],
         )
