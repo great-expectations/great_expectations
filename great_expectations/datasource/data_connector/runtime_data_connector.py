@@ -188,6 +188,7 @@ class RuntimeDataConnector(DataConnector):
     def get_unmatched_data_references(self) -> List[str]:
         return []
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
         """Returns a list of data_assets that are both defined at runtime, and defined in DataConnector configuration"""
         defined_assets: List[str] = list(self.assets.keys())

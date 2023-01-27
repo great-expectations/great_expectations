@@ -180,6 +180,7 @@ class DataConnector:
     def get_unmatched_data_references(self) -> List[Any]:
         raise NotImplementedError
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
 
