@@ -6,7 +6,6 @@ We cannot stress enough that we want this to be a safe, comfortable and inclusiv
 ## Keep timezones in mind and be respectful of peoples’ time.
 People on Slack are distributed and might be in a very different time zone from you, so don't use @channel @here (this is reserved for admins anyways). Before you @-mention someone, think about what timezone they are in and if you are likely to disturb them. You can check someone's timezone in their profile. As of today, the core GX team is based solely in the United States but the community is world wide.
 
-For example: if you post a question during a weekday US evening (12:00AM-11:00AM GMT), it could take some time until you receive a reply from our team. If you post a question on a Friday evening or before a US Holiday, it could be 3-4 days until one of our team members sees your question. In any event we ask for your patience and bear in mind other community members might be able to help.
 
 ## Asking for help
 
