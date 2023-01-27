@@ -73,9 +73,9 @@ class MetricProvider(metaclass=MetaMetricProvider):
     MetricProvider classes *must* have the following attributes set:
         1. `metric_name`: the name to use. Metric Name must be globally unique in
            a great_expectations installation.
-        1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
+        2. `domain_keys`: a tuple of the *keys* used to determine the domain of the
            metric
-        2. `value_keys`: a tuple of the *keys* used to determine the value of
+        3. `value_keys`: a tuple of the *keys* used to determine the value of
            the metric.
 
     In some cases, subclasses of Expectation, such as TableMetricProvider will already
