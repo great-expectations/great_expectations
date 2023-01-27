@@ -38,7 +38,30 @@ except ImportError:
     )
 
 
+@public_api
 class BatchDefinition(SerializableDictDot):
+    """Precisely identifies a set of data from a data source.
+
+    More concretely, a BatchDefinition includes all the information required to precisely
+    identify a set of data from the external data source that should be
+    translated into a Batch. One or more BatchDefinitions should always be
+    *returned* from the Datasource, as a result of processing the Batch Request.
+
+    ---Documentation---
+            - https://docs.greatexpectations.io/docs/terms/batch/#batches-and-batch-requests-design-motivation
+
+    Args:
+        datasource_name: name of the Datasource used to connect to the data
+        data_connector_name: name of the DataConnector used to connect to the data
+        data_asset_name: name of the DataAsset used to connect to the data
+        batch_identifiers: key-value pairs that the DataConnector
+            will use to obtain a specific set of data
+        batch_spec_passthrough: a dictionary of additional parameters that
+            the ExecutionEngine will use to obtain a specific set of data
+
+    Returns:
+        BatchDefinition
+    """
     def __init__(
         self,
         datasource_name: str,
