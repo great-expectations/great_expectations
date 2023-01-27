@@ -58,10 +58,6 @@ class SpyInterrupt(RuntimeError):
     when a spy has already captured everything needed.
     """
 
-    def __init__(self, message: str, captured=None) -> None:
-        self.captured = captured
-        super().__init__(message)
-
 
 @pytest.fixture
 def capture_reader_fn_params(monkeypatch: MonkeyPatch):
@@ -78,9 +74,7 @@ def capture_reader_fn_params(monkeypatch: MonkeyPatch):
         logging.info(f"reader_fn_spy() called with...\n{args}\n{kwargs}")
         captured_args.append(args)
         captured_kwargs.append(kwargs)
-        raise SpyInterrupt(
-            "Reader options have been captured", {"args": args, "kwargs": kwargs}
-        )
+        raise SpyInterrupt("Reader options have been captured")
 
     monkeypatch.setattr(
         great_expectations.execution_engine.pandas_execution_engine.PandasExecutionEngine,
