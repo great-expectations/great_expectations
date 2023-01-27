@@ -3849,7 +3849,7 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
 @public_api
 class MulticolumnMapMetricProvider(MapMetricProvider):
     """Defines metrics that are evaluated for every row for a set of columns. All multi-column metrics require the
-    domain key `column_list.
+    domain key `column_list`.
 
     `expect_compound_columns_to_be_unique` is an example of an Expectation that uses this metric.
     """
