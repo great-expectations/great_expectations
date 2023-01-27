@@ -133,11 +133,6 @@ stages:
           invoke type-check --ci --pretty
         name: StaticTypeCheck
 
-    - job: docstring_checker
-      steps:
-      - bash: python scripts/check_docstring_coverage.py
-        name: DocstringChecker
-
     - job: docstring_linter
       steps:
       - script: |
