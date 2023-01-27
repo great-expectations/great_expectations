@@ -428,7 +428,9 @@ class SphinxInvokeDocsBuilder:
         these items so that the code block is rendered appropriately.
         """
         doc = doc.replace("&lt;", "<").replace("&gt;", ">")
-        doc = doc.replace("”", '"').replace("‘", "'").replace("’", "'")
+        doc = (
+            doc.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
+        )
         doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
         doc = doc.replace("${", r"\${")
         return doc
