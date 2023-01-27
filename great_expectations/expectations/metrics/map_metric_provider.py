@@ -132,7 +132,6 @@ def column_function_partial(  # noqa: C901 - 19
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 filter_column_isnull = kwargs.get(
@@ -204,7 +203,6 @@ def column_function_partial(  # noqa: C901 - 19
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 dialect = execution_engine.dialect_module
@@ -276,7 +274,6 @@ def column_function_partial(  # noqa: C901 - 19
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 column = data[column_name]
@@ -364,7 +361,6 @@ def column_condition_partial(  # noqa: C901 - 23
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 filter_column_isnull = kwargs.get(
@@ -432,7 +428,6 @@ def column_condition_partial(  # noqa: C901 - 23
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 sqlalchemy_engine: Engine = execution_engine.engine
@@ -517,7 +512,6 @@ def column_condition_partial(  # noqa: C901 - 23
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 column = data[column_name]
@@ -628,7 +622,6 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 values = metric_fn(
@@ -692,7 +685,6 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 column_pair_function = metric_fn(
@@ -760,7 +752,6 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 column_pair_function = metric_fn(
@@ -856,7 +847,6 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 meets_expectation_series = metric_fn(
@@ -928,7 +918,6 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 sqlalchemy_engine: Engine = execution_engine.engine
@@ -1008,7 +997,6 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 expected_condition = metric_fn(
@@ -1094,7 +1082,6 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 values = metric_fn(
@@ -1153,7 +1140,6 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=table_columns,
-                    execution_engine=execution_engine,
                 )
 
                 sqlalchemy_engine: Engine = execution_engine.engine
@@ -1225,7 +1211,6 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 multicolumn_function = metric_fn(
@@ -1314,7 +1299,6 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 meets_expectation_series = metric_fn(
@@ -1379,7 +1363,6 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 sqlalchemy_engine: Engine = execution_engine.engine
@@ -1455,7 +1438,6 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 expected_condition = metric_fn(
@@ -1520,7 +1502,6 @@ def _pandas_column_map_condition_values(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     ###
@@ -1589,7 +1570,6 @@ def _pandas_column_pair_map_condition_values(
     column_A_name, column_B_name = get_dbms_compatible_column_names(
         column_names=column_names,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     domain_values = df[column_names]
@@ -1642,7 +1622,7 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     column_B_name = accessor_domain_kwargs["column_B"]
 
     column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
-    verify_column_names_exist(
+    _ = verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
 
@@ -1682,7 +1662,6 @@ def _pandas_multicolumn_map_condition_values(
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     domain_values = df[column_list]
@@ -1724,7 +1703,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
         )
 
     column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
-    verify_column_names_exist(
+    _ = verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
 
@@ -1771,7 +1750,6 @@ def _pandas_column_map_series_and_domain_values(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     ###
@@ -1834,7 +1812,6 @@ def _pandas_map_condition_index(
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
             batch_columns_list=metrics["table.columns"],
-            execution_engine=execution_engine,
         )
 
         ###
@@ -1854,7 +1831,7 @@ def _pandas_map_condition_index(
         column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
-        verify_column_names_exist(
+        _ = verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
 
@@ -1916,7 +1893,6 @@ def _pandas_map_condition_query(
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
             batch_columns_list=metrics["table.columns"],
-            execution_engine=execution_engine,
         )
         filter_column_isnull = kwargs.get(
             "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -1930,7 +1906,7 @@ def _pandas_map_condition_query(
         column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
-        verify_column_names_exist(
+        _ = verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
     domain_values_df_filtered = domain_records_df[boolean_mapped_unexpected_values]
@@ -1965,7 +1941,6 @@ def _pandas_column_map_condition_value_counts(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     ###
@@ -2031,7 +2006,6 @@ def _pandas_map_condition_rows(
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
             batch_columns_list=metrics["table.columns"],
-            execution_engine=execution_engine,
         )
 
         ###
@@ -2049,7 +2023,7 @@ def _pandas_map_condition_rows(
         column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
-        verify_column_names_exist(
+        _ = verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
 
@@ -2217,7 +2191,6 @@ def _sqlalchemy_column_map_condition_values(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
@@ -2279,7 +2252,6 @@ def _sqlalchemy_column_pair_map_condition_values(
     column_A_name, column_B_name = get_dbms_compatible_column_names(
         column_names=column_names,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     query = sa.select(
@@ -2326,7 +2298,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     column_B_name = accessor_domain_kwargs["column_B"]
 
     column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
-    verify_column_names_exist(
+    _ = verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
 
@@ -2368,7 +2340,6 @@ def _sqlalchemy_multicolumn_map_condition_values(
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     column_selector = [sa.column(column_name) for column_name in column_list]
@@ -2409,7 +2380,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
         )
 
     column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
-    verify_column_names_exist(
+    _ = verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
 
@@ -2451,7 +2422,6 @@ def _sqlalchemy_column_map_condition_value_counts(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     column: sa.Column = sa.column(column_name)
@@ -2725,7 +2695,6 @@ def _spark_column_map_condition_values(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
@@ -2772,7 +2741,6 @@ def _spark_column_map_condition_value_counts(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     df: pyspark.sql.dataframe.DataFrame = execution_engine.get_domain_records(
@@ -2979,7 +2947,6 @@ def _spark_column_pair_map_condition_values(
     column_A_name, column_B_name = get_dbms_compatible_column_names(
         column_names=column_names,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
@@ -3035,7 +3002,7 @@ def _spark_column_pair_map_condition_filtered_row_count(
     column_B_name = accessor_domain_kwargs["column_B"]
 
     column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
-    verify_column_names_exist(
+    _ = verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
 
@@ -3075,7 +3042,6 @@ def _spark_multicolumn_map_condition_values(
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
@@ -3131,7 +3097,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
         )
 
     column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
-    verify_column_names_exist(
+    _ = verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
 

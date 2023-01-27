@@ -202,8 +202,7 @@ def test_column_quoted_name_type_sa(sa):
     table_columns_metric_id: Tuple[str, str, str] = table_columns_metric.id
     batch_column_list = metrics[table_columns_metric_id]
     quoted_batch_column_list = [
-        quoted_name(value=str(element), quote=True)
-        for element in metrics[table_columns_metric_id]
+        quoted_name(value=str(element), quote=True) for element in batch_column_list
     ]
 
     column_name = "names"
@@ -211,23 +210,18 @@ def test_column_quoted_name_type_sa(sa):
     str_column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=batch_column_list,
-        execution_engine=PandasExecutionEngine(),
     )
     assert isinstance(str_column_name, str)
 
     quoted_column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=quoted_batch_column_list,
-        execution_engine=engine,
     )
     assert isinstance(quoted_column_name, sa.sql.elements.quoted_name)
     assert quoted_column_name.quote is True
 
     for column_name in [
         "non_existent_column",
-        "NAMES",
-        '"NAMES"',
-        '"Names"',
     ]:
         with pytest.raises(
             gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
@@ -235,19 +229,22 @@ def test_column_quoted_name_type_sa(sa):
             _ = get_dbms_compatible_column_names(
                 column_names=column_name,
                 batch_columns_list=batch_column_list,
-                execution_engine=engine,
             )
         assert (
             str(eee.value)
             == f'Error: The column "{column_name}" in BatchData does not exist.'
         )
+
+    for column_name in [
+        "non_existent_column",
+        "NAMES",
+    ]:
         with pytest.raises(
             gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
         ) as eee:
             _ = get_dbms_compatible_column_names(
                 column_names=column_name,
                 batch_columns_list=quoted_batch_column_list,
-                execution_engine=engine,
             )
         assert (
             str(eee.value)
@@ -2883,7 +2880,7 @@ def test_table_metric_pd(caplog):
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 5}
     assert (
-        'Unexpected key(s) "column" found in domain_kwargs for domain type "table"'
+        'Unexpected key(s) "column" found in domain_kwargs for Domain type "table"'
         in caplog.text
     )
 

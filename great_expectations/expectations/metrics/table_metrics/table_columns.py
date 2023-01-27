@@ -44,16 +44,7 @@ class TableColumns(TableMetricProvider):
         runtime_configuration: dict,
     ):
         column_metadata = metrics["table.column_types"]
-        # TODO: <Alex>ALEX</Alex>
-        # return [col["name"] for col in column_metadata]
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        a = [col["name"] for col in column_metadata]
-        # print(f'\n[ALEX_TEST] TableColumns._sqlalchemy()] TABLE_COLUMN_NAMES:\n{a} ; TYPE: {str(type(a))}')
-        # for b in a:
-        #     print(f'\n[ALEX_TEST] TableColumns._sqlalchemy()] TABLE_COLUMN_NAME:\n{b} ; TYPE: {str(type(b))}')
-        return a
-        # TODO: <Alex>ALEX</Alex>
+        return [col["name"] for col in column_metadata]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
