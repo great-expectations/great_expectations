@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import logging
-import os
 import pathlib
 import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
