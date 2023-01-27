@@ -148,12 +148,18 @@ class TableAsset(DataAsset):
             TestConnectionError
         """
         assert isinstance(self.datasource, SQLDatasource)
-        try:
-            sqlalchemy.inspect(self.datasource.engine).has_table(self.table_name)
-        except Exception as e:
+        if "." in self.table_name:
+            schema, table_name = self.table_name.split(".")
+        else:
+            schema, table_name = _, self.table_name
+        exists = sqlalchemy.inspect(self.datasource.engine).has_table(
+            table_name=table_name,
+            schema=schema,
+        )
+        if not exists:
             raise TestConnectionError(
-                f"Attempt to connect to table: {self.table_name} failed with the "
-                f"following error message: {str(e)}"
+                f"Attempt to connect to table: {self.table_name} failed because the table "
+                "does not exist."
             )
 
     def batch_request_options_template(
