@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration, ExpectationSuite
 from great_expectations.core._docs_decorators import public_api
@@ -17,15 +19,30 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.parameter_container import ParameterNode
 from great_expectations.types import SerializableDictDot
 
+if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
+
 
 @public_api
 @dataclass(frozen=True)
 class RuleBasedProfilerResult(SerializableDictDot):
     """
-    "RuleBasedProfilerResult" is an immutable "dataclass" object, designed to hold results with auxiliary information of
-    executing "RuleBasedProfiler.run()" method.  Principal properties are: "fully_qualified_parameter_names_by_domain",
-    "parameter_values_for_fully_qualified_parameter_names_by_domain", "expectation_configurations", and "citation"
-    (which represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled).
+    ``RuleBasedProfilerResult`` is an immutable ``dataclass`` object, designed to hold results with
+    auxiliary information of executing ``RuleBasedProfiler.run()`` method.
+
+
+    Properties represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled.
+
+    Args:
+        fully_qualified_parameter_names_by_domain:
+            ``dict`` of ``Domain`` keys and a list of their parameter names.
+        parameter_values_for_fully_qualified_parameter_names_by_domain:
+            ``dict`` of ``Domain`` and nested `ParameterNode`` mappings.
+        expectation_configurations:
+            List of ``ExpectationConfiguration`` objects.
+        citation:
+            ``dict`` of citations.
+
     """
 
     fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]]
@@ -41,7 +58,8 @@ class RuleBasedProfilerResult(SerializableDictDot):
 
     def to_dict(self) -> dict:
         """
-        Returns: This RuleBasedProfilerResult as dictionary (JSON-serializable for RuleBasedProfilerResult objects).
+        Returns:
+            This RuleBasedProfilerResult as dictionary (JSON-serializable for RuleBasedProfilerResult objects).
         """
         domain: Domain
         fully_qualified_parameter_names: List[str]
@@ -79,9 +97,12 @@ class RuleBasedProfilerResult(SerializableDictDot):
         }
 
     @public_api
-    def to_json_dict(self) -> dict:
+    def to_json_dict(self) -> dict[str, JSONValues]:
         """
-        Returns: This RuleBasedProfilerResult as JSON-serializable dictionary.
+        Returns the RuleBasedProfilerResult as a JSON-serializable dictionary.
+
+        Returns:
+            Dictionary containing only JSON compatible python primitives.
         """
         return self.to_dict()
 
@@ -92,7 +113,13 @@ class RuleBasedProfilerResult(SerializableDictDot):
     )
     def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
         """
-        Returns: "ExpectationSuite" object, built from properties, populated into this "RuleBasedProfilerResult" object.
+        Retrieve an ``ExpectationSuite`` by name.
+
+        Args:
+            expectation_suite_name: The name of the desired ``ExpectationSuite``.
+
+        Returns:
+            ``ExpectationSuite`` object, built from properties, populated into this ``RuleBasedProfilerResult`` object.
         """
         expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
             data_context=None,
