@@ -24,16 +24,21 @@ logger = logging.getLogger(__name__)
 DEFAULT_DELIMITER: str = "-"
 
 
+@public_api
 class RuntimeDataConnector(DataConnector):
-    """
-    A DataConnector that allows users to specify a Batch's data directly using a RuntimeBatchRequest that contains
-    either an in-memory Pandas or Spark DataFrame, a filesystem or S3 path, or an arbitrary SQL query
+    """A Data Connector that allows users to specify a Batch's data directly using a Runtime Batch Request.
+
+    A Runtime Batch Request contains either an in-memory Pandas or Spark DataFrame, a filesystem or S3 path,
+    or an arbitrary SQL query.
+
     Args:
-        name (str): The name of this DataConnector
-        datasource_name (str): The name of the Datasource that contains it
-        execution_engine (ExecutionEngine): An ExecutionEngine
-        batch_identifiers (list): a list of keys that must be defined in the batch_identifiers dict of RuntimeBatchRequest
-        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        batch_identifiers: A list of keys that must be defined in the batch identifiers dict of the Runtime Batch
+            Request.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
