@@ -28,8 +28,7 @@ except ImportError:
 
 @public_api
 class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
-    """
-    Extension of ConfiguredAssetFilePathDataConnector used to connect to Azure
+    """Extension of ConfiguredAssetFilePathDataConnector used to connect to Azure.
 
     Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
     connect to. While this allows for fine-grained control over which Data Assets may be accessed,
