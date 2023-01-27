@@ -6,6 +6,7 @@ import json
 import logging
 import sys
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
+from great_expectations.core._docs_decorators import public_api
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
@@ -1351,10 +1352,20 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self.__repr__()
 
 
+@public_api
 class RuleBasedProfiler(BaseRuleBasedProfiler):
-    """
-    RuleBasedProfiler object serves to profile, or automatically evaluate a set of rules, upon a given
-    batch / multiple batches of data.
+    """Create a RuleBasedProfiler to profile one or more batches of data.
+
+        For each rule in the `rules` configuration, instantiate the following if
+        available: a domain builder, a parameter builder, and a configuration builder.
+        These will be used to define profiler computation patterns.
+
+        Args:
+            name: Give the Profiler a name.
+            config_version: Specify the version of the Profiler to use (currently only 1.0 is supported).
+            variables: Variables to be substituted within the rules.
+            rules: A collection of rule configurations, each having its own `domain_builder`, `parameter_builders`, and `expectation_configuration_builders`.
+            data_context: Define the full runtime environment (data access, etc.).
 
     --ge-feature-maturity-info--
 
