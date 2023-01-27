@@ -282,9 +282,12 @@ class DataAssistantResult(SerializableDictDot):
             "citation": convert_to_json_serializable(data=self.citation),
         }
 
+    @public_api
     def to_json_dict(self) -> dict:
-        """
-        Returns: This DataAssistantResult as JSON-serializable dictionary.
+        """Returns JSON dictionary equivalent of this object.
+
+        Returns:
+            A JSON-serializable dictionary representation of the DataAssistantResult object.
         """
         return self.to_dict()
 
