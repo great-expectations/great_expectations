@@ -21,6 +21,11 @@ from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from pyparsing import ParseResults
 from typing_extensions import TypedDict
 
+from great_expectations.core._docs_decorators import (
+    deprecated_argument,
+    new_argument,
+    public_api,
+)
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     build_evaluation_parameters,
@@ -111,8 +116,43 @@ class KWargDetailsDict(TypedDict):
     default_kwarg_values: dict[str, str | bool | float | RuleBasedProfilerConfig | None]
 
 
+@public_api
+@deprecated_argument(
+    argument_name="include_rendered_content",
+    version="0.15.14",
+)
+@new_argument(
+    argument_name="rendered_content",
+    version="0.15.14",
+    message="Used to include rendered content dictionary in expectation configuration.",
+)
+@new_argument(
+    argument_name="ge_cloud_id",
+    version="0.13.36",
+    message="Used in GX Cloud deployments.",
+)
+@new_argument(
+    argument_name="expectation_context",
+    version="0.13.44",
+    message="Used to support column descriptions in GX Cloud.",
+)
 class ExpectationConfiguration(SerializableDictDot):
-    """ExpectationConfiguration defines the parameters and name of a specific expectation."""
+    """Denies the parameters and name of a specific expectation.
+
+    Args:
+        expectation_type: The name of the expectation class to use.
+        kwargs: The keyword arguments to pass to the expectation class.
+        meta: A dictionary of metadata to attach to the expectation.
+        success_on_last_run: Whether the expectation succeeded on the last run.
+        ge_cloud_id: The corresponding GX Cloud ID for the expectation.
+        expectation_context: The context for the expectation.
+        rendered_content: Rendered content for the expectation.
+    Raises:
+        InvalidExpectationConfigurationError: If `expectation_type` arg is not a str.
+        InvalidExpectationConfigurationError: If `kwargs` arg is not a dict.
+        InvalidExpectationKwargsError: If domain kwargs are missing.
+        ValueError: If a `domain_type` cannot be determined.
+    """
 
     kwarg_lookup_dict: ClassVar[Mapping[str, KWargDetailsDict]] = {
         "expect_column_to_exist": {
