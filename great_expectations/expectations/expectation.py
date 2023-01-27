@@ -2178,7 +2178,7 @@ class TableExpectation(Expectation, ABC):
     how many columns and rows are in your table.
 
     Raises:
-        InvalidExpectationConfigurationError: _description_
+        InvalidExpectationConfigurationError: If minimum and maximum values are not the proper format and type.
 
     Args:
         domain_keys (tuple): A tuple of the keys used to determine the domain of the
@@ -2189,9 +2189,6 @@ class TableExpectation(Expectation, ABC):
             not affect the actual success value of the expectation (such as result_format).
         default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
             kwargs from the Expectation Configuration.
-
-    Returns:
-        _type_: _description_
     """
 
     domain_keys: Tuple[str, ...] = (
@@ -2808,7 +2805,8 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
 @public_api
 class ColumnPairMapExpectation(TableExpectation, ABC):
-    """_summary_
+    """Expectation where comparison is made between two columsn.
+
 
     Args:
         TableExpectation (_type_): _description_
