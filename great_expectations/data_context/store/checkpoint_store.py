@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import itertools
 import logging
 import os
@@ -8,21 +10,18 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from marshmallow import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfigDefaults,
 )
-from great_expectations.data_context.types.refs import (
-    GXCloudIDAwareRef,
-    GXCloudResourceRef,
-)
+from great_expectations.data_context.types.refs import GXCloudIDAwareRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GXCloudIdentifier,
 )
+from great_expectations.exceptions import exceptions as gx_exceptions
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -169,16 +168,29 @@ class CheckpointStore(ConfigurationStore):
         return checkpoint_config
 
     def add_checkpoint(
-        self, checkpoint: "Checkpoint", name: Optional[str], ge_cloud_id: Optional[str]
+        self, checkpoint: Checkpoint, name: Optional[str], ge_cloud_id: Optional[str]
     ) -> None:
         key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=ge_cloud_id
         )
         checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment]
+        self._add_checkpoint(key=key, checkpoint_config=checkpoint_config)
+
+    def _add_checkpoint(
+        self,
+        key: GXCloudIdentifier | ConfigurationIdentifier,
+        checkpoint_config: CheckpointConfig,
+    ) -> None:
         checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
             ge_cloud_id = checkpoint_ref.cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)  # type: ignore[misc]
+
+    def update_checkpoint(self, checkpoint_config: CheckpointConfig):
+        key = self._build_key_from_config(checkpoint_config)
+        if not self.has_key(key):
+            raise gx_exceptions.CheckpointNotFoundError("TODO")
+        self._add_checkpoint(key=key, checkpoint_config=checkpoint_config)
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
         """Create a checkpoint config in the store using a store_backend-specific key.

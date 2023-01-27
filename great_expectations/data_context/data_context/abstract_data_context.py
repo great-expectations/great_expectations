@@ -1411,6 +1411,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
         return checkpoint
 
+    def update_checkpoint(self, checkpoint: Checkpoint) -> None:
+        """
+        TODO
+        """
+        config = checkpoint.get_config()
+        self.checkpoint_store.update_checkpoint(config)
+
     def get_checkpoint(
         self,
         name: Optional[str] = None,
