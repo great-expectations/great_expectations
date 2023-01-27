@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional, Tuple, overload
 
 from typing_extensions import Literal
 
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -21,13 +22,10 @@ from great_expectations.data_context.data_context.serializable_data_context impo
     SerializableDataContext,
 )
 from great_expectations.data_context.types.base import GXCloudConfig
-from great_expectations.core._docs_decorators import (
-    deprecated_argument,
-    public_api,
-)
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+
 
 @overload
 def DataContext(
@@ -65,6 +63,7 @@ def DataContext(
 
 
 # TODO: add additional overloads
+
 
 @public_api
 @deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")

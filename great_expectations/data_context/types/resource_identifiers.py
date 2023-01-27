@@ -9,10 +9,10 @@ from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
-from great_expectations.core._docs_decorators import public_api
 
 if TYPE_CHECKING:
     from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -99,6 +99,7 @@ class BatchIdentifierSchema(Schema):
     @post_load
     def make_batch_identifier(self, data, **kwargs):
         return BatchIdentifier(**data)
+
 
 @public_api
 class ValidationResultIdentifier(DataContextKey):

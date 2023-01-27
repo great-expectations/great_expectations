@@ -41,6 +41,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
@@ -48,7 +49,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
-from great_expectations.core._docs_decorators import public_api
+
 try:
     from pyspark.sql.types import StructType
 except ImportError:
@@ -1893,6 +1894,7 @@ class BaseStoreBackendDefaults(DictDot):
         self.data_docs_sites = data_docs_sites
         self.data_docs_site_name = data_docs_site_name
 
+
 @public_api
 class S3StoreBackendDefaults(BaseStoreBackendDefaults):
     """Default store configs for s3 backends, with some accessible parameters.
@@ -2006,6 +2008,7 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
             }
         }
 
+
 @public_api
 class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
     """Default store configs for filesystem backends, with some accessible parameters.
@@ -2044,6 +2047,7 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             self.data_docs_sites[self.data_docs_site_name]["store_backend"][  # type: ignore[index]
                 "root_directory"
             ] = root_directory
+
 
 @public_api
 class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
@@ -2312,6 +2316,7 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
         }
+
 
 class DataContextConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
@@ -2669,6 +2674,7 @@ class CheckpointConfigSchema(Schema):
 
         return data
 
+
 @public_api
 class CheckpointConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
@@ -2700,6 +2706,7 @@ class CheckpointConfig(BaseYamlConfig):
         notify_with: The notify with
         expectation_suite_ge_cloud_id: Your expectation suite
     """
+
     def __init__(
         self,
         name: Optional[str] = None,
