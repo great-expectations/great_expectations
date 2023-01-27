@@ -7,7 +7,7 @@ import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
 
 import pydantic
-from typing_extensions import ClassVar, Literal
+from typing_extensions import ClassVar, Literal, TypeAlias
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
@@ -200,9 +200,9 @@ _ASSET_MODELS = _generate_data_asset_models(
 )
 
 CSVAsset = _ASSET_MODELS["csv"]
-ExcelAsset = _ASSET_MODELS.get("excel", DataAsset)
-JSONAsset = _ASSET_MODELS.get("json", DataAsset)
-ParquetAsset = _ASSET_MODELS.get("parquet", DataAsset)
+ExcelAsset = _ASSET_MODELS["excel"]
+JSONAsset = _ASSET_MODELS["json"]
+ParquetAsset = _ASSET_MODELS["parquet"]
 
 
 class PandasDatasource(Datasource):
