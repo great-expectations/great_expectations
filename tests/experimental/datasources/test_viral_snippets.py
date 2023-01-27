@@ -17,6 +17,21 @@ LOGGER = logging.getLogger(__file__)
 
 
 @pytest.fixture
+def csv_path() -> pathlib.Path:
+    csv_dir = pathlib.Path(
+        __file__,
+        "..",
+        "..",
+        "..",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+        "first_3_files",
+    ).resolve()
+    assert csv_dir.exists()
+    return csv_dir
+
+
+@pytest.fixture
 def db_file() -> pathlib.Path:
     db = pathlib.Path(
         __file__,
@@ -33,9 +48,20 @@ def db_file() -> pathlib.Path:
 
 
 @pytest.fixture
-def zep_config_dict(db_file) -> dict:
+def zep_config_dict(db_file, csv_path) -> dict:
     return {
         "xdatasources": {
+            "my_pandas_ds": {
+                "type": "pandas",
+                "name": "my_pandas_ds",
+                "assets": {
+                    "my_csv_asset": {
+                        "name": "my_csv_asset",
+                        "type": "csv",
+                        "path": csv_path,
+                    }
+                },
+            },
             "my_sql_ds": {
                 "connection_string": f"sqlite:///{db_file}",
                 "name": "my_sql_ds",
@@ -57,7 +83,7 @@ def zep_config_dict(db_file) -> dict:
                         ],
                     },
                 },
-            }
+            },
         }
     }
 
