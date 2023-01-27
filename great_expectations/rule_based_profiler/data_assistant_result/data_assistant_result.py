@@ -194,9 +194,13 @@ class DataAssistantResult(SerializableDictDot):
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> None:
-        """
-        Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
-        and displays this "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined order.
+        """Populates named "ExpectationSuite" with "ExpectationConfiguration" list stored in "DataAssistantResult"
+        object and displays this "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined order.
+
+        Args:
+            expectation_suite_name: The name for the Expectation Suite. Default generated if none provided.
+            include_profiler_config: Whether to include the rule-based profiler config used by the data assistant to generate the Expectation Suite.
+            send_usage_event: Set to False to disable sending usage events for this method.
         """
         self.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
