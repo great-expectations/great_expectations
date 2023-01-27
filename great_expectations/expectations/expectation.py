@@ -2177,18 +2177,18 @@ class TableExpectation(Expectation, ABC):
     For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer
     how many columns and rows are in your table.
 
+    TableExpectations must implement a `_validate(...)` method containing logic
+    for determining whether the Expectation is successfully validated.
+
+    TableExpectations may optionally provide implementations of `validate_configuration`,
+    which should raise an error if the configuration will not be usable for the Expectation.
+
     Raises:
         InvalidExpectationConfigurationError: If minimum and maximum values are not the proper format and type.
 
     Args:
         domain_keys (tuple): A tuple of the keys used to determine the domain of the
             expectation.
-        success_keys (tuple): A tuple of the keys used to determine the success of
-            the expectation.
-        runtime_keys (optional[tuple]): Optional. A tuple of the keys that can be used to control output but will
-            not affect the actual success value of the expectation (such as result_format).
-        default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
-            kwargs from the Expectation Configuration.
     """
 
     domain_keys: Tuple[str, ...] = (
@@ -2500,17 +2500,28 @@ class ColumnExpectation(TableExpectation, ABC):
 
 @public_api
 class ColumnMapExpectation(TableExpectation, ABC):
-    """_summary_
+    """Base class for ColumnMapExpectations.
 
-    Args:
-        TableExpectation (_type_): _description_
-        ABC (_type_): _description_
+    ColumnMapExpectations are evaluated for a column and ask a yes/no question about every row in the column.
+    Based on the result, they then calculate the percentage of rows that gave a positive answer.
+    If the percentage is high enough, the Expectation considers that data valid.
+
+    ColumnMapExpectations must implement a `_validate(...)` method containing logic
+    for determining whether the Expectation is successfully validated.
+
+    ColumnMapExpectations may optionally provide implementations of `validate_configuration`,
+    which should raise an error if the configuration will not be usable for the Expectation. By default,
+    the `validate_configuration` method will return an error if `column` is missing from the configuration.
 
     Raises:
-        InvalidExpectationConfigurationError: _description_
-
-    Returns:
-        _type_: _description_
+        InvalidExpectationConfigurationError: If `column` is missing from configuration.
+    Args:
+        domain_keys (tuple): A tuple of the keys used to determine the domain of the
+            expectation.
+        success_keys (tuple): A tuple of the keys used to determine the success of
+            the expectation.
+        default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
+            kwargs from the Expectation Configuration.
     """
 
     map_metric: Optional[str] = None
@@ -2811,19 +2822,23 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
     relationship between those two columns. Based on the result, they then calculate the percentage of rows
     that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
+    ColumnPairMapExpectations must implement a `_validate(...)` method containing logic
+    for determining whether the Expectation is successfully validated.
+
+    ColumnPairMapExpectations may optionally provide implementations of `validate_configuration`,
+    which should raise an error if the configuration will not be usable for the Expectation. By default,
+    the `validate_configuration` method will return an error if `column_A` and `column_B` are missing from the configuration.
+
+    Raises:
+        InvalidExpectationConfigurationError:  If `column_A` and `column_B` parameters are missing from the configuration.
+
     Args:
         domain_keys (tuple): A tuple of the keys used to determine the domain of the
             expectation.
         success_keys (tuple): A tuple of the keys used to determine the success of
             the expectation.
-        runtime_keys (optional[tuple]): Optional. A tuple of the keys that can be used to control output but will
-            not affect the actual success value of the expectation (such as result_format).
         default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
             kwargs from the Expectation Configuration.
-        query (optional[str]): Optional. A SQL or Spark-SQL query to be executed. If not provided, a query must be passed
-            into the QueryExpectation.
-    Raises:
-        InvalidExpectationConfigurationError:  If minimum and maximum values are not the proper format and type.
     """
 
     map_metric = None
@@ -3053,16 +3068,21 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
     percentage of rows that gave a positive answer. If the percentage is high enough,
     the Expectation considers that data valid.
 
+    MulticolumnMapExpectations must implement a `_validate(...)` method containing logic
+    for determining whether the Expectation is successfully validated.
+
+    MulticolumnMapExpectations may optionally provide implementations of `validate_configuration`,
+    which should raise an error if the configuration will not be usable for the Expectation. By default,
+    the `validate_configuration` method will return an error if `column_list` is missing from the configuration.
+
     Raises:
-        InvalidExpectationConfigurationError: If minimum and maximum values are not the proper format and type.
+        InvalidExpectationConfigurationError: If `column_list` is missing from configuration.
 
     Args:
         domain_keys (tuple): A tuple of the keys used to determine the domain of the
             expectation.
         success_keys (tuple): A tuple of the keys used to determine the success of
             the expectation.
-        runtime_keys (optional[tuple]): Optional. A tuple of the keys that can be used to control output but will
-            not affect the actual success value of the expectation (such as result_format).
         default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
             kwargs from the Expectation Configuration.
     """
