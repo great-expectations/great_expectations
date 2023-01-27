@@ -26,14 +26,14 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     connect to. While this allows for fine-grained control over which Data Assets may be accessed,
     it requires more setup.
 
-        Args:
-            name (str): name of ConfiguredAssetFilePathDataConnector
-            datasource_name (str): Name of datasource that this DataConnector is connected to
-            assets (dict): configured assets as a dictionary. These can each have their own regex and sorters
-            execution_engine (ExecutionEngine): Execution Engine object to actually read the data
-            default_regex (dict): Optional dict the filter and organize the data_references.
-            sorters (list): Optional list if you want to sort the data_references
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+    Args:
+        name (str): name of ConfiguredAssetFilePathDataConnector
+        datasource_name (str): Name of datasource that this DataConnector is connected to
+        assets (dict): configured assets as a dictionary. These can each have their own regex and sorters
+        execution_engine (ExecutionEngine): Execution Engine object to actually read the data
+        default_regex (dict): Optional dict the filter and organize the data_references.
+        sorters (list): Optional list if you want to sort the data_references
+        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
     def __init__(
