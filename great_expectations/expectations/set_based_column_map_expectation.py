@@ -108,6 +108,9 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
         set_ (str): A value set.
         set_semantic_name (optional[str]): A name for the semantic type representing the set being validated..
         map_metric (str): The name of an ephemeral metric, as returned by `register_metric(...)`.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations
     """
 
     @staticmethod
