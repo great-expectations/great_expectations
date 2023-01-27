@@ -281,6 +281,7 @@ class MetaExpectation(ABCMeta):
         return newclass
 
 
+@public_api
 class Expectation(metaclass=MetaExpectation):
     """Base class for all Expectations.
 
@@ -2167,7 +2168,21 @@ class Expectation(metaclass=MetaExpectation):
         )
 
 
+@public_api
 class TableExpectation(Expectation, ABC):
+    """_summary_
+
+    Args:
+        Expectation (_type_): _description_
+        ABC (_type_): _description_
+
+    Raises:
+        InvalidExpectationConfigurationError: _description_
+
+    Returns:
+        _type_: _description_
+    """
+
     domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
@@ -2475,7 +2490,21 @@ class ColumnExpectation(TableExpectation, ABC):
             raise InvalidExpectationConfigurationError(str(e))
 
 
+@public_api
 class ColumnMapExpectation(TableExpectation, ABC):
+    """_summary_
+
+    Args:
+        TableExpectation (_type_): _description_
+        ABC (_type_): _description_
+
+    Raises:
+        InvalidExpectationConfigurationError: _description_
+
+    Returns:
+        _type_: _description_
+    """
+
     map_metric: Optional[str] = None
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
@@ -2766,7 +2795,21 @@ class ColumnMapExpectation(TableExpectation, ABC):
         )
 
 
+@public_api
 class ColumnPairMapExpectation(TableExpectation, ABC):
+    """_summary_
+
+    Args:
+        TableExpectation (_type_): _description_
+        ABC (_type_): _description_
+
+    Raises:
+        InvalidExpectationConfigurationError: _description_
+
+    Returns:
+        _type_: _description_
+    """
+
     map_metric = None
     domain_keys = (
         "batch_id",
@@ -2985,7 +3028,21 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         )
 
 
+@public_api
 class MulticolumnMapExpectation(TableExpectation, ABC):
+    """_summary_
+
+    Args:
+        TableExpectation (_type_): _description_
+        ABC (_type_): _description_
+
+    Raises:
+        InvalidExpectationConfigurationError: _description_
+
+    Returns:
+        _type_: _description_
+    """
+
     map_metric = None
     domain_keys = (
         "batch_id",
