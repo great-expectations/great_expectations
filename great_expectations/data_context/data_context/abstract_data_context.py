@@ -700,8 +700,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str,
         initialize: bool = True,
         save_changes: Optional[bool] = None,
-        **kwargs: Optional[dict],
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource | None:
         """Add a new Datasource to the data context, with configuration provided as kwargs.
 
         --Documentation--
@@ -730,7 +730,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         save_changes = self._determine_save_changes_flag(save_changes)
 
-        logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
+        logger.debug(f"Starting AbstractDataContext.add_datasource for {name}")
 
         module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
         verify_dynamic_loading_support(module_name=module_name)
@@ -762,27 +762,85 @@ class AbstractDataContext(ConfigPeer, ABC):
     def update_datasource(
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
-        save_changes: Optional[bool] = None,
+        save_changes: bool | None = None,
     ) -> None:
         """
-        Updates a DatasourceConfig that already exists in the store.
+        Updates a Datasource that already exists in the store.
 
         Args:
-            datasource_config: The config object to persist using the DatasourceStore.
+            datasource: The Datasource object to update.
             save_changes: do I save changes to disk?
         """
         save_changes = self._determine_save_changes_flag(save_changes)
+        self._update_datasource(datasource=datasource, save_changes=save_changes)
 
-        datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
+    def _update_datasource(
+        self,
+        datasource: LegacyDatasource | BaseDatasource,
+        save_changes: bool | None = None,
+        **kwargs,
+    ) -> Datasource:
+        name = datasource.name
+        config = datasource.config
+        # `instantiate_class_from_config` requires `class_name`
+        config["class_name"] = datasource.__class__.__name__
+        config.update(kwargs)
+
+        datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
-        datasource_name: str = datasource.name
 
         if save_changes:
             self._datasource_store.update_by_name(  # type: ignore[attr-defined]
-                datasource_name=datasource_name, datasource_config=datasource_config
+                datasource_name=name, datasource_config=datasource_config
             )
-        self.config.datasources[datasource_name] = datasource_config  # type: ignore[assignment,index]
-        self._cached_datasources[datasource_name] = datasource_config
+
+        updated_datasource = (
+            self._instantiate_datasource_from_config_and_update_project_config(
+                config=datasource_config, initialize=True, save_changes=False
+            )
+        )
+
+        # Invariant based on `initalize=True` above
+        assert updated_datasource is not None
+
+        return updated_datasource
+
+    def add_or_update_datasource(
+        self,
+        name: str,
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource:
+        """
+        Add a new Datasource or update an existing one on the context depending on whether
+        it already exists or not. The configuration is provided as kwargs.
+
+        Args:
+            name: The name of the Datasource to add or update.
+            kwargs: Any relevant keyword args to use when adding or updating the target Datasource.
+
+        Returns:
+            The Datasource added or updated by the input `kwargs`.
+        """
+        existing_datasource = None
+        try:
+            existing_datasource = self.get_datasource(name)
+        except ValueError:
+            logger.info(
+                f"Could not find an existing datasource named '{name}'; creating a new one."
+            )
+
+        if existing_datasource:
+            result_datasource = self._update_datasource(
+                datasource=existing_datasource, **kwargs
+            )
+        else:
+            result_datasource = self.add_datasource(name=name, **kwargs)
+
+        # Invariant based on `initialize=True` in both add/update branches
+        assert result_datasource is not None
+
+        self._save_project_config()
+        return result_datasource
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
@@ -3595,7 +3653,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
-        # Note that the call to `DatasourcStore.set` may alter the config object's state
+        # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
         if save_changes:
             config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
