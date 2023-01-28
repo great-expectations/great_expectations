@@ -1,12 +1,10 @@
 import copy
 import logging
 from enum import Enum
-from typing import ClassVar, Dict, Optional, Set
+from typing import ClassVar, Optional, Set
 
 import pandas as pd
 
-from ..alias_types import JSONValues
-from ..core._docs_decorators import public_api
 from .base import SerializableDotDict
 from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig
@@ -238,18 +236,12 @@ class DictDot:
 
 
 class SerializableDictDot(DictDot):
-    def to_json_dict(self) -> Dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of the SerializableDictDot.
-
-        Subclasses must implement this abstract method.
-
-        Returns:
-            A JSON-serializable dict representation of the SerializableDictDot
+    def to_json_dict(self) -> dict:
         """
-
         # TODO: <Alex>2/4/2022</Alex>
-        # A reference implementation can be provided, once circular import dependencies, caused by relative locations of
-        # the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules are resolved.
+        A reference implementation can be provided, once circular import dependencies, caused by relative locations of
+        the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules are resolved.
+        """
         raise NotImplementedError
 
 

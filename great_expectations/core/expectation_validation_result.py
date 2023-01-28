@@ -12,7 +12,6 @@ from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
-from great_expectations.alias_types import JSONValues
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, BatchMarkers
 from great_expectations.core.expectation_configuration import (
@@ -302,13 +301,7 @@ class ExpectationValidationResult(SerializableDictDot):
             return False
         return True
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this ExpectationValidationResult.
-
-        Returns:
-            A JSON-serializable dict representation of this ExpectationValidationResult.
-        """
+    def to_json_dict(self):
         myself = expectationValidationResultSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
@@ -482,13 +475,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    @public_api
     def to_json_dict(self):
-        """Returns a JSON-serializable dict representation of this ExpectationSuiteValidationResult.
-
-        Returns:
-            A JSON-serializable dict representation of this ExpectationSuiteValidationResult.
-        """
         myself = deepcopy(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump

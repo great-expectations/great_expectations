@@ -9,8 +9,6 @@ from typing import TYPE_CHECKING, List, Optional, Union
 from marshmallow import Schema, fields, post_dump, post_load
 from typing_extensions import Final
 
-from great_expectations.alias_types import JSONValues
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
@@ -134,13 +132,7 @@ class LegacyDescriptiveRendererType(str, Enum):
 
 
 class RenderedContent:
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedContent.
-        """
+    def to_json_dict(self):
         return {}
 
     def __eq__(self, other):
@@ -193,13 +185,7 @@ class RenderedComponentContent(RenderedContent):
             styling = {}
         self.styling = styling
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedComponentContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedComponentContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         d["content_block_type"] = self.content_block_type
         if len(self.styling) > 0:
@@ -221,13 +207,7 @@ class RenderedHeaderContent(RenderedComponentContent):
         self.header_row = header_row
         self.subheader = subheader
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedHeaderContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedHeaderContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         if isinstance(self.header, RenderedContent):
             d["header"] = self.header.to_json_dict()
@@ -257,13 +237,7 @@ class RenderedGraphContent(RenderedComponentContent):
         self.header = header
         self.subheader = subheader
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedGraphContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedGraphContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         d["graph"] = self.graph
         if self.header is not None:
@@ -299,13 +273,7 @@ class RenderedTableContent(RenderedComponentContent):
         self.header_row = header_row
         self.header_row_options = header_row_options
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedTableContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedTableContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -338,13 +306,7 @@ class RenderedTabsContent(RenderedComponentContent):
         self.header = header
         self.subheader = subheader
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedTabsContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedTabsContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         d["tabs"] = RenderedContent.rendered_content_list_to_json(
             self.tabs, check_dicts=True
@@ -382,13 +344,7 @@ class RenderedBootstrapTableContent(RenderedComponentContent):
         self.header = header
         self.subheader = subheader
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedBootstrapTableContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedBootstrapTableContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         d["table_data"] = RenderedContent.rendered_content_list_to_json(
             self.table_data, check_dicts=True
@@ -423,13 +379,7 @@ class RenderedContentBlockContainer(RenderedComponentContent):
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.content_blocks = content_blocks
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedContentBlockContainer.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedContentBlockContainer.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
@@ -442,13 +392,7 @@ class RenderedMarkdownContent(RenderedComponentContent):
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.markdown = markdown
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedMarkdownContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedMarkdownContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         d["markdown"] = self.markdown
         return d
@@ -461,13 +405,7 @@ class RenderedStringTemplateContent(RenderedComponentContent):
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.string_template = string_template
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedStringTemplateContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedStringTemplateContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         d["string_template"] = self.string_template
         return d
@@ -496,13 +434,7 @@ class RenderedBulletListContent(RenderedComponentContent):
         self.subheader = subheader
         self.bullet_list = bullet_list
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedBulletListContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedBulletListContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         d["bullet_list"] = RenderedContent.rendered_content_list_to_json(
             self.bullet_list
@@ -534,13 +466,7 @@ class ValueListContent(RenderedComponentContent):
         self.subheader = subheader
         self.value_list = value_list
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this ValueListContent.
-
-        Returns:
-            A JSON-serializable dict representation of this ValueListContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -565,13 +491,7 @@ class TextContent(RenderedComponentContent):
         self.header = header
         self.subheader = subheader
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this TextContent.
-
-        Returns:
-            A JSON-serializable dict representation of this TextContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -606,13 +526,7 @@ class CollapseContent(RenderedComponentContent):
         self.collapse = collapse
         self.inline_link = inline_link
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this CollapseContent.
-
-        Returns:
-            A JSON-serializable dict representation of this CollapseContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -670,13 +584,7 @@ class RenderedDocumentContent(RenderedContent):
         self.batch_spec = batch_spec
         self.ge_cloud_id = ge_cloud_id
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedDocumentContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedDocumentContent.
-        """
+    def to_json_dict(self):
         d = super().to_json_dict()
         d["sections"] = RenderedContent.rendered_content_list_to_json(self.sections)
         d["data_asset_name"] = self.data_asset_name
@@ -707,13 +615,7 @@ class RenderedSectionContent(RenderedContent):
         self.content_blocks = content_blocks
         self.section_name = section_name
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedSectionContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedSectionContent.
-        """
+    def to_json_dict(self) -> dict:
         d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
@@ -756,13 +658,8 @@ class RenderedAtomicValue(DictDot):
     def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedAtomicValue.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedAtomicValue.
-        """
+    def to_json_dict(self) -> dict:
+        """Returns RenderedAtomicValue as a json dictionary."""
         d = renderedAtomicValueSchema.dump(self)
         json_dict: dict = {}
         for key in d:
@@ -786,13 +683,8 @@ class RenderedAtomicValueGraph(DictDot):
     def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    @public_api
-    def to_json_dict(self) -> Optional[dict[str, JSONValues]]:
-        """Returns a JSON-serializable dict representation of this RenderedAtomicValueGraph.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedAtomicValueGraph.
-        """
+    def to_json_dict(self) -> Optional[dict]:
+        """Returns RenderedAtomicValueGraph as a json dictionary."""
         return self.graph
 
 
@@ -865,13 +757,7 @@ class RenderedAtomicContent(RenderedContent):
     def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RenderedAtomicContent.
-
-        Returns:
-            A JSON-serializable dict representation of this RenderedAtomicContent.
-        """
+    def to_json_dict(self) -> dict:
         """Returns RenderedAtomicContent as a json dictionary."""
         d = renderedAtomicContentSchema.dump(self)
         d["value"] = self.value.to_json_dict()

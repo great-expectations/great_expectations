@@ -21,8 +21,6 @@ from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from pyparsing import ParseResults
 from typing_extensions import TypedDict
 
-from great_expectations.alias_types import JSONValues
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     build_evaluation_parameters,
@@ -1335,13 +1333,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    @public_api
-    def to_json_dict(self) -> Dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this ExpectationConfiguration.
-
-        Returns:
-            A JSON-serializable dict representation of this ExpectationConfiguration.
-        """
+    def to_json_dict(self) -> dict:
         myself = expectationConfigurationSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump

@@ -1,13 +1,11 @@
 import datetime
 import json
 import warnings
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load
 
-from great_expectations.alias_types import JSONValues
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey
 
 
@@ -79,13 +77,7 @@ class RunIdentifier(DataContextKey):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    @public_api
-    def to_json_dict(self) -> Dict[str, JSONValues]:
-        """Returns a JSON-serializable dict representation of this RunIdentifier.
-
-        Returns:
-            A JSON-serializable dict representation of this RunIdentifier.
-        """
+    def to_json_dict(self):
         myself = runIdentifierSchema.dump(self)
         return myself
 
