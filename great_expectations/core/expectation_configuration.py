@@ -22,11 +22,7 @@ from pyparsing import ParseResults
 from typing_extensions import TypedDict
 
 from great_expectations.alias_types import JSONValues
-from great_expectations.core._docs_decorators import (
-    deprecated_argument,
-    new_argument,
-    public_api,
-)
+from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
     build_evaluation_parameters,
@@ -118,10 +114,6 @@ class KWargDetailsDict(TypedDict):
 
 
 @public_api
-@deprecated_argument(
-    argument_name="include_rendered_content",
-    version="0.15.14",
-)
 @new_argument(
     argument_name="rendered_content",
     version="0.15.14",
