@@ -1,3 +1,4 @@
+import logging
 import pathlib
 from dataclasses import dataclass
 from typing import List
@@ -14,6 +15,16 @@ from great_expectations.experimental.datasources.spark_datasource import (
     CSVSparkAsset,
     SparkDatasource,
 )
+
+LOGGER = logging.getLogger(__name__)
+
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+    LOGGER.debug(
+        "Unable to load pyspark; install optional spark dependency for support."
+    )
 
 
 @pytest.fixture
