@@ -3040,6 +3040,17 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
         execution_engine: Optional[ExecutionEngine] = None,
     ):
         result_format: Union[
+            Dict[str, Union[int, str, bool, List[str], None]], str
+        ] = self.get_result_format(
+            configuration=configuration, runtime_configuration=runtime_configuration
+        )
+
+        unexpected_index_column_names = None
+        if isinstance(result_format, dict):
+            unexpected_index_column_names = result_format.get(
+                "unexpected_index_column_names", None
+            )
+        result_format: Union[
             Dict[str, Union[str, int, bool, List[str], None]], str
         ] = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
@@ -3088,6 +3099,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
             unexpected_index_query=unexpected_index_query,
+            unexpected_index_column_names=unexpected_index_column_names,
         )
 
 
@@ -3306,6 +3318,12 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
         result_format = self.get_result_format(
             configuration=configuration, runtime_configuration=runtime_configuration
         )
+        unexpected_index_column_names = None
+        if isinstance(result_format, dict):
+            unexpected_index_column_names = result_format.get(
+                "unexpected_index_column_names", None
+            )
+
         total_count: Optional[int] = metrics.get("table.row_count")
         unexpected_count: Optional[int] = metrics.get(
             f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
@@ -3350,6 +3368,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             unexpected_list=unexpected_values,
             unexpected_index_list=unexpected_index_list,
             unexpected_index_query=unexpected_index_query,
+            unexpected_index_column_names=unexpected_index_column_names,
         )
 
 
