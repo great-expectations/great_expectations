@@ -1872,8 +1872,7 @@ def _pandas_map_condition_index(
 
     result_format = metric_value_kwargs["result_format"]
     domain_records_df = domain_records_df[boolean_mapped_unexpected_values]
-    # just plain ol column map expectation
-    # expectation_domain_column_name: Union[str, None] = domain_kwargs["column"]
+
     unexpected_index_list: Union[
         List[int], List[Dict[str, Any]]
     ] = compute_unexpected_pandas_indices(
