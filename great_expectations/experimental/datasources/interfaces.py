@@ -346,31 +346,24 @@ class Datasource(
         # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
         arbitrary_types_allowed = True
 
-    @pydantic.validator("assets")
+    @pydantic.validator("assets", each_item=True)
     def _load_asset_subtype(
-        cls: Type[Datasource[DataAssetType]], v: Dict[str, DataAsset]
-    ):
+        cls: Type[Datasource[DataAssetType]], data_asset: DataAsset
+    ) -> DataAssetType:
         global CALLS
         CALLS.append(cls.__name__)
-        LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=4)}")
-        loaded_assets: Dict[str, DataAssetType] = {}
+        LOGGER.warning(f"Loading 'assets' ->\n{pf(data_asset, depth=4)}")
+        asset_type_name: str = data_asset.type
+        asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[asset_type_name]
 
-        # TODO (kilo59): catch key errors
-        for asset_name, pluripotent_asset in v.items():
-            LOGGER.info(asset_name)
-            asset_type_name: str = pluripotent_asset.type
-            asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[
-                asset_type_name
-            ]
-            LOGGER.info(f"Instantiating '{asset_type_name}' as {asset_type}")
-            kwargs = pluripotent_asset.dict(exclude_unset=True)
-            LOGGER.info(f"kwargs\n{pf(kwargs)}")
-            LOGGER.error(CALLS)
-            loaded_assets[asset_name] = asset_type(**kwargs)
+        kwargs = data_asset.dict(exclude_unset=True)
+        LOGGER.warning(f"kwargs\n{pf(kwargs)}")
 
-        LOGGER.info(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
+        polymorphed_asset = asset_type(**kwargs)
+        LOGGER.warning(f"{asset_type}\n{repr(polymorphed_asset)}")
+
         LOGGER.error(f"CALLS {CALLS}")
-        return loaded_assets
+        return polymorphed_asset
 
     def _execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the execution engine to be used"""
