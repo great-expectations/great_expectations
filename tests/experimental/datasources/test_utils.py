@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Dict, Tuple
 
 import pytest
@@ -34,6 +35,18 @@ from tests.expectations.test_util import get_table_columns_metric
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import Batch
+
+
+LOGGER = logging.getLogger(__name__)
+
+
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+    LOGGER.debug(
+        "Unable to load pyspark; install optional spark dependency for support."
+    )
 
 
 def run_checkpoint_and_data_doc(

@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import logging
 import pathlib
+from contextlib import contextmanager
 from datetime import datetime
 from typing import Callable, Dict, Tuple
 
 import pytest
 from pytest import MonkeyPatch
 
+from great_expectations.core.batch import BatchData
+from great_expectations.core.batch_spec import (
+    BatchMarkers,
+    SqlAlchemyDatasourceBatchSpec,
+)
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -19,17 +25,18 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
+from great_expectations.experimental.datasources.sources import _SourceFactories
 
 LOGGER = logging.getLogger(__name__)
 
-from contextlib import contextmanager
 
-from great_expectations.core.batch import BatchData
-from great_expectations.core.batch_spec import (
-    BatchMarkers,
-    SqlAlchemyDatasourceBatchSpec,
-)
-from great_expectations.experimental.datasources.sources import _SourceFactories
+try:
+    import pyspark
+except ImportError:
+    pyspark = None
+    LOGGER.debug(
+        "Unable to load pyspark; install optional spark dependency for support."
+    )
 
 # This is the default min/max time that we are using in our mocks.
 # They are made global so our tests can reference them directly.
