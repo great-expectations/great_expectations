@@ -137,6 +137,9 @@ class DataAsset(ExperimentalBaseModel):
     # non-field private attrs
     _datasource: Datasource = pydantic.PrivateAttr()
 
+    class Config:
+        extra = pydantic.Extra.allow
+
     @property
     def datasource(self) -> Datasource:
         return self._datasource

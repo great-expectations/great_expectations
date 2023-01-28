@@ -217,7 +217,7 @@ class PandasDatasource(Datasource):
     # instance attrs
     type: Literal["pandas"] = "pandas"
     name: str
-    assets: Dict[str, Union[CSVAsset, ExcelAsset, ParquetAsset, JSONAsset]] = {}  # type: ignore[valid-type]
+    assets: Dict[str, _DataFrameAsset] = {}  # type: ignore[valid-type]
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
