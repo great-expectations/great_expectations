@@ -248,9 +248,12 @@ def _create_pandas_asset_model(
     model_base: M,
     type_field: Tuple[Union[Type, str], str],
     fields_dict: Dict[str, _FieldSpec],
+    extra: pydantic.Extra,
 ) -> M:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
     model = pydantic.create_model(model_name, __base__=model_base, type=type_field, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
+    # can't set both __base__ & __config__ when dynamically creating model
+    model.__config__.extra = extra
     return model
 
 
@@ -276,6 +279,7 @@ def _generate_data_asset_models(
                 model_base=base_model_class,
                 type_field=(f"Literal['{type_name}']", type_name),
                 fields_dict=fields,
+                extra=pydantic.Extra.forbid,
             )
             logger.debug(f"{model_name}\n{pf(fields)}")
         except NameError as err:
