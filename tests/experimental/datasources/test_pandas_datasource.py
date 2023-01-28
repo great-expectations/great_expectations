@@ -383,15 +383,15 @@ def test_pandas_sorter(
 
     ordered_years = reversed(years) if "-year" in order_by else years
     ordered_months = reversed(months) if "-month" in order_by else months
-    if "year" in order_by[0]:
+    if "year" in order_by[0]:  # type: ignore[operator]
         ordered = [
-            TimeRange(key="year", range=ordered_years),
-            TimeRange(key="month", range=ordered_months),
+            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
+            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
         ]
     else:
         ordered = [
-            TimeRange(key="month", range=ordered_months),
-            TimeRange(key="year", range=ordered_years),
+            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
+            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
         ]
 
     batch_index = -1
