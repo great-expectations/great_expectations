@@ -149,14 +149,39 @@ class CheckpointResult(SerializableDictDot):
             )
         return self._expectation_suite_names
 
+    @public_api
     def list_validation_result_identifiers(self) -> List[ValidationResultIdentifier]:
+        """Obtain a list of all the ValidationResultIdentifiers used in this CheckpointResult.
+
+        Args:
+
+        Returns:
+            List of zero or more ValidationResultIdentifier instances.
+        """
         if self._validation_result_identifiers is None:
             self._validation_result_identifiers = list(self._run_results.keys())
         return self._validation_result_identifiers
 
+    @public_api
     def list_validation_results(
         self, group_by=None
     ) -> Union[List[ExpectationSuiteValidationResult], dict]:
+        """Obtain the ExpectationValidationResults belonging to this CheckpointResult.
+
+        Args:
+            group_by: Specify how the ExpectationValidationResults should be grouped.
+            Valid options are "validation_result_identifier", "expectation_suite_name",
+            "data_asset_name", or the default None. Providing an invalid group_by
+            value will cause this method to silently fail, and return None.
+
+        Returns:
+            A list of ExpectationSuiteValidationResult, when group_by=None
+            A dict of ValidationResultIdentifier keys and ExpectationValidationResults
+                values, when group_by="validation_result_identifier
+            A dict of str keys and ExpectationValidationResults values, when
+                group_by="expectation_suite_name" or group_by="data_asset_name"
+            None, when group_by is something other than the options described above
+        """
         if group_by is None:
             if self._validation_results is None:
                 self._validation_results = [
