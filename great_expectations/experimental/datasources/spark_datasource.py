@@ -31,7 +31,7 @@ class SparkDatasourceError(Exception):
     pass
 
 
-# TODO: <Alex>ALEX_NOTE: We did not add "_pandas" suffix (nor qualified class name) for CSVSparkAsset in PandasDatasource module (we might need to do that at a later date, or come up with a different, more general, solution altogether).</Alex>
+# TODO: <Alex>ALEX_NOTE-1/27/2023: We did not add "_pandas" suffix (nor qualified class name) for CSVSparkAsset in PandasDatasource module (we might need to do that at a later date, or come up with a different, more general, solution altogether).</Alex>
 class CSVSparkAsset(DataAsset):
     # Overridden inherited instance fields
     type: Literal["csv_spark"] = "csv_spark"
@@ -138,7 +138,14 @@ class CSVSparkAsset(DataAsset):
         for request, path in self._fully_specified_batch_requests_with_path(
             batch_request
         ):
-            batch_spec = PathBatchSpec(path=str(path))
+            # TODO: <Alex>ALEX_NOTE-1/27/2023: Adding "reader_options" is temporary work-around to enable integration tests to pass.  Ultimately, this layer will be replaced with fully-functional solution.</Alex>
+            batch_spec = PathBatchSpec(
+                path=str(path),
+                reader_options={
+                    "header": True,
+                    "inferSchema": True,
+                },
+            )
             data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )

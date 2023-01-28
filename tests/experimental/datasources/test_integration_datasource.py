@@ -10,7 +10,7 @@ from great_expectations.experimental.datasources.interfaces import (
     DataAsset,
     Datasource,
 )
-from tests.experimental.datasources.integration.test_utils import (
+from tests.experimental.datasources.test_utils import (
     run_batch_head,
     run_checkpoint_and_data_doc,
     run_data_assistant_and_checkpoint,
@@ -168,7 +168,6 @@ def test_run_data_assistant_and_checkpoint(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest
     ],
-    include_rendered_content: bool,
 ):
     run_data_assistant_and_checkpoint(datasource_test_data=datasource_test_data)
 
