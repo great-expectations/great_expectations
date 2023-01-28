@@ -276,6 +276,11 @@ def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHa
     return handler
 
 
+# Mapping between method's qualified name and the event name it emits
+# Used to esnure proper usage stats coverage in tests
+ENABLED_METHODS: dict[str, UsageStatsEvents] = {}
+
+
 def usage_statistics_enabled_method(
     func: Optional[Callable] = None,
     event_name: Optional[UsageStatsEvents] = None,
@@ -285,6 +290,8 @@ def usage_statistics_enabled_method(
     """
     A decorator for usage statistics which defaults to the less detailed payload schema.
     """
+    if func and event_name:
+        ENABLED_METHODS[func.__qualname__] = event_name
     if callable(func):
         if event_name is None:
             event_name = func.__name__

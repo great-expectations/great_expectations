@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import logging
 from abc import ABCMeta
-from typing import List
+from typing import Any, List
 
+from great_expectations.alias_types import PathStr
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
 
@@ -30,7 +33,17 @@ class BatchMarkers(BatchSpec):
 
 
 class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(
+        self,
+        *args,
+        path: PathStr = None,  # type: ignore[assignment] # error raised if not provided
+        reader_options: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> None:
+        if path:
+            kwargs["path"] = str(path)
+        if reader_options:
+            kwargs["reader_options"] = reader_options
         super().__init__(*args, **kwargs)
         if "path" not in self:
             raise InvalidBatchSpecError("PathBatchSpec requires a path element")
