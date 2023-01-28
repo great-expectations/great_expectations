@@ -295,6 +295,8 @@ class DataAsset(ExperimentalBaseModel):
 # If a Datasource can have more than 1 DataAssetType, this will need to change.
 DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
 
+CALLS = 0
+
 
 class Datasource(
     ExperimentalBaseModel, Generic[DataAssetType], metaclass=MetaDatasource
@@ -344,21 +346,27 @@ class Datasource(
         # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
         arbitrary_types_allowed = True
 
-    @pydantic.validator("assets", pre=True)
-    def _load_asset_subtype(cls, v: Dict[str, dict]):
-        LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
+    @pydantic.validator("assets")
+    def _load_asset_subtype(cls, v: Dict[str, DataAsset]):
+        global CALLS
+        CALLS += 1
+        LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=4)}")
         loaded_assets: Dict[str, DataAssetType] = {}
 
         # TODO (kilo59): catch key errors
-        for asset_name, config in v.items():
-            asset_type_name: str = config["type"]
+        for asset_name, pluripotent_asset in v.items():
+            LOGGER.info(asset_name)
+            asset_type_name: str = pluripotent_asset.type
             asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[
                 asset_type_name
             ]
-            LOGGER.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
-            loaded_assets[asset_name] = asset_type(**config)
+            LOGGER.info(f"Instantiating '{asset_type_name}' as {asset_type}")
+            kwargs = pluripotent_asset.dict(exclude_unset=True)
+            LOGGER.info(f"kwargs\n{pf(kwargs)}")
+            LOGGER.error(CALLS)
+            loaded_assets[asset_name] = asset_type(**kwargs)
 
-        LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
+        LOGGER.info(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
 
     def _execution_engine_type(self) -> Type[ExecutionEngine]:
