@@ -21,7 +21,6 @@ from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from pyparsing import ParseResults
 from typing_extensions import TypedDict
 
-from great_expectations.core import ExpectationValidationResult
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,
@@ -52,13 +51,13 @@ from great_expectations.render import RenderedAtomicContent, RenderedAtomicConte
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
+    from great_expectations.core import ExpectationValidationResult
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
     from great_expectations.validator.validator import Validator
-
 logger = logging.getLogger(__name__)
 
 
