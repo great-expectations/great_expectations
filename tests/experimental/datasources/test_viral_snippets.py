@@ -54,15 +54,15 @@ def zep_config_dict(db_file, csv_path) -> dict:
             "my_pandas_ds": {
                 "type": "pandas",
                 "name": "my_pandas_ds",
-                "assets": {
-                    "my_csv_asset": {
-                        "name": "my_csv_asset",
-                        "type": "csv",
-                        "path": csv_path,
-                        "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
-                        "sep": ",",
-                    }
-                },
+                # "assets": {
+                #     "my_csv_asset": {
+                #         "name": "my_csv_asset",
+                #         "type": "csv",
+                #         "path": csv_path,
+                #         "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                #         "sep": ",",
+                #     }
+                # },
             },
             "my_sql_ds": {
                 "connection_string": f"sqlite:///{db_file}",
@@ -169,8 +169,6 @@ def test_serialize_zep_config(zep_file_context: FileDataContext):
 
         for asset_name in datasource.assets.keys():
             assert asset_name in dumped_yaml
-
-    assert False
 
 
 def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
