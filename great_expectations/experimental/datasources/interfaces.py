@@ -496,7 +496,7 @@ class Batch(ExperimentalBaseModel):
             HeadData
         """
         self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
-        # TODO: <Alex>ALEX_NOTE-1/27/2023: This should be through calling "MetricsCalculator.head()"; however, circular-imports problem currently prevents this.</Alex>
+        # TODO: <Alex>ALEX_NOTE-1/27/2023: This should be accomplished through calling "MetricsCalculator.head()"; however, circular-imports problem currently prevents importing "MetricsCalculator".</Alex>
         metric = MetricConfiguration(
             metric_name="table.head",
             metric_domain_kwargs={"batch_id": self.id},
