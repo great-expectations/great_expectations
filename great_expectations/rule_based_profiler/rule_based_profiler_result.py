@@ -30,18 +30,17 @@ class RuleBasedProfilerResult(SerializableDictDot):
     ``RuleBasedProfilerResult`` is an immutable ``dataclass`` object, designed to hold results with
     auxiliary information of executing ``RuleBasedProfiler.run()`` method.
 
-
     Properties represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled.
 
     Args:
         fully_qualified_parameter_names_by_domain:
-            ``dict`` of ``Domain`` keys and a list of their parameter names.
+            `dict` of `Domain` keys and a list of their parameter names.
         parameter_values_for_fully_qualified_parameter_names_by_domain:
-            ``dict`` of ``Domain`` and nested `ParameterNode`` mappings.
+            `dict` of `Domain` and nested `ParameterNode` mappings.
         expectation_configurations:
-            List of ``ExpectationConfiguration`` objects.
+            List of `ExpectationConfiguration` objects.
         citation:
-            ``dict`` of citations.
+            `dict` of citations.
 
     """
 
@@ -59,7 +58,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
     def to_dict(self) -> dict:
         """
         Returns:
-            This RuleBasedProfilerResult as dictionary (JSON-serializable for RuleBasedProfilerResult objects).
+            This `RuleBasedProfilerResult` as dictionary (JSON-serializable for `RuleBasedProfilerResult` objects).
         """
         domain: Domain
         fully_qualified_parameter_names: List[str]
@@ -99,7 +98,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
     @public_api
     def to_json_dict(self) -> dict[str, JSONValues]:
         """
-        Returns the RuleBasedProfilerResult as a JSON-serializable dictionary.
+        Returns the `RuleBasedProfilerResult` as a JSON-serializable dictionary.
 
         Returns:
             Dictionary containing only JSON compatible python primitives.
@@ -113,13 +112,13 @@ class RuleBasedProfilerResult(SerializableDictDot):
     )
     def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
         """
-        Retrieve an ``ExpectationSuite`` by name.
+        Retrieve an `ExpectationSuite` by name.
 
         Args:
-            expectation_suite_name: The name of the desired ``ExpectationSuite``.
+            expectation_suite_name: The name of the desired `ExpectationSuite`.
 
         Returns:
-            ``ExpectationSuite`` object, built from properties, populated into this ``RuleBasedProfilerResult`` object.
+            `ExpectationSuite` object, built from properties, populated into this `RuleBasedProfilerResult` object.
         """
         expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
             data_context=None,
