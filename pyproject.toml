@@ -182,6 +182,7 @@ exclude = [
     'tests/experimental/datasources/test_integration_datasource\.py',
     'tests/experimental/datasources/test_pandas_datasource\.py',
     'tests/experimental/datasources/test_postgres_datasource\.py',
+    'tests/experimental/datasources/test_spark_datasource\.py',
 ]
 
 [tool.pydantic-mypy]
