@@ -2362,7 +2362,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
     in_memory_runtime_context,
     batch_request_for_pandas_unexpected_rows_and_index_multicolumn_sum,
     reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_pair_values_to_be_equal,
+    expectation_config_expect_multicolumn_sum_to_equal,
     expected_unexpected_indices_output,
 ):
     """ """
@@ -2375,7 +2375,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
         checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
-        expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
+        expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
 
@@ -2385,4 +2385,3 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         batch_request=batch_request_for_pandas_unexpected_rows_and_index_multicolumn_sum,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
-    print(evrs)

@@ -1825,7 +1825,8 @@ def _pandas_map_condition_index(
     domain_records_df: pd.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
     )
-
+    domain_column_name_list: List[str] = list()
+    # column map expectations
     if "column" in accessor_domain_kwargs:
         column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
@@ -1847,7 +1848,9 @@ def _pandas_map_condition_index(
             domain_records_df = domain_records_df[
                 domain_records_df[column_name].notnull()
             ]
+        domain_column_name_list.append(column_name)
 
+    # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
         column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
@@ -1855,45 +1858,31 @@ def _pandas_map_condition_index(
         verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
+        domain_column_name_list = column_list
+
     # column pair expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-
         column_list: List[Union[str, quoted_name]] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
+        domain_column_name_list = column_list
 
     result_format = metric_value_kwargs["result_format"]
     domain_records_df = domain_records_df[boolean_mapped_unexpected_values]
     # just plain ol column map expectation
-    if domain_kwargs.get("column"):
-        expectation_domain_column_name: Union[str, None] = domain_kwargs["column"]
-        unexpected_index_list: Union[
-            List[int], List[Dict[str, Any]]
-        ] = compute_unexpected_pandas_indices(
-            domain_records_df=domain_records_df,
-            result_format=result_format,
-            execution_engine=execution_engine,
-            metrics=metrics,
-            expectation_domain_column_name=expectation_domain_column_name,
-        )
-    # then we have a column_pair situation
-    elif domain_kwargs.get("column_A") and domain_kwargs.get("column_B"):
-        expectation_domain_column_list: List[Union[str, None]] = list()
-        expectation_domain_column_list.append(domain_kwargs["column_A"])
-        expectation_domain_column_list.append(domain_kwargs["column_B"])
-        unexpected_index_list: Union[
-            List[int], List[Dict[str, Any]]
-        ] = compute_unexpected_pandas_indices(
-            domain_records_df=domain_records_df,
-            result_format=result_format,
-            execution_engine=execution_engine,
-            metrics=metrics,
-            expectation_domain_column_list=expectation_domain_column_list,
-        )
-
+    # expectation_domain_column_name: Union[str, None] = domain_kwargs["column"]
+    unexpected_index_list: Union[
+        List[int], List[Dict[str, Any]]
+    ] = compute_unexpected_pandas_indices(
+        domain_records_df=domain_records_df,
+        result_format=result_format,
+        execution_engine=execution_engine,
+        metrics=metrics,
+        expectation_domain_column_list=domain_column_name_list,
+    )
     if result_format["result_format"] == "COMPLETE":
         return unexpected_index_list
     return unexpected_index_list[: result_format["partial_unexpected_count"]]
