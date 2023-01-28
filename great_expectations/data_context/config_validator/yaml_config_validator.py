@@ -470,7 +470,7 @@ class _YamlConfigValidator:
         anonymizer = Anonymizer(self._data_context.data_context_id)
 
         usage_stats_event_payload = anonymizer.anonymize(
-            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config  # type: ignore[arg-type]
+            obj=instantiated_class, name=checkpoint_name, config=checkpoint_config_dict  # type: ignore[arg-type]
         )
 
         return instantiated_class, usage_stats_event_payload
