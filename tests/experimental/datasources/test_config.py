@@ -68,7 +68,20 @@ PG_COMPLEX_CONFIG_DICT = {
                     "type": "table",
                 },
             },
-        }
+        },
+        "my_pandas_ds": {
+            "type": "pandas",
+            "name": "my_pandas_ds",
+            "assets": {
+                "my_csv_asset": {
+                    "name": "my_csv_asset",
+                    "type": "csv",
+                    "path": __file__,
+                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                    "sep": "|",
+                }
+            },
+        },
     }
 }
 PG_COMPLEX_CONFIG_JSON = json.dumps(PG_COMPLEX_CONFIG_DICT)
