@@ -44,6 +44,9 @@ class _DataFrameAsset(DataAsset):
         default="batch_request_param_"
     )
 
+    class Config:
+        extra = pydantic.Extra.allow
+
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
     ) -> List[Tuple[BatchRequest, pathlib.Path]]:

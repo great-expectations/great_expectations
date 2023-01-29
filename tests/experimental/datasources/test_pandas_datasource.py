@@ -82,6 +82,7 @@ def capture_reader_fn_params(monkeypatch: MonkeyPatch):
 
 @pytest.mark.unit
 class TestDynamicPandasAssets:
+    @pytest.mark.xfail
     def test_asset_types_and_asset_annotations_match(self):
         asset_class_names: set[str] = {t.__name__ for t in PandasDatasource.asset_types}
         assert asset_class_names

@@ -138,7 +138,7 @@ class DataAsset(ExperimentalBaseModel):
     _datasource: Datasource = pydantic.PrivateAttr()
 
     class Config:
-        extra = pydantic.Extra.allow
+        extra = pydantic.Extra.forbid
 
     @property
     def datasource(self) -> Datasource:
