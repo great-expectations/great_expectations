@@ -1,0 +1,86 @@
+{
+    "title": "ParquetAsset",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "parquet",
+            "enum": [
+                "parquet"
+            ],
+            "type": "string"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/BatchSorter"
+            }
+        },
+        "path": {
+            "title": "Path",
+            "format": "file-path",
+            "type": "string"
+        },
+        "regex": {
+            "title": "Regex",
+            "type": "string",
+            "format": "regex"
+        },
+        "engine": {
+            "title": "Engine",
+            "default": "auto",
+            "type": "string"
+        },
+        "columns": {
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        },
+        "use_nullable_dtypes": {
+            "title": "Use Nullable Dtypes",
+            "default": false,
+            "type": "boolean"
+        },
+        "kwargs": {
+            "title": "Kwargs"
+        }
+    },
+    "required": [
+        "name",
+        "path",
+        "regex",
+        "kwargs"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "BatchSorter": {
+            "title": "BatchSorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

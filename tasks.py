@@ -16,7 +16,7 @@ import os
 import pathlib
 import shutil
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final, Type
 
 import invoke
 
@@ -35,6 +35,8 @@ if TYPE_CHECKING:
     from great_expectations.experimental.datasources.experimental_base_model import (
         ExperimentalBaseModel,
     )
+
+GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
@@ -464,18 +466,20 @@ def docker(
 @invoke.task(
     aliases=("schema",),
     help={
-        "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class. Or '--list'",
+        "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class.",
+        "sync": "Update the json schemas at `great_expectations/experimental/datasources/schemas`",
+        "indent": "Indent size for nested json objects. Default: 4",
         "save_path": (
             "Filepath to write the schema to. Will overwrite or create the file if it does not exist."
             " If not provided the schema will be sent to the console."
         ),
-        "indent": "Indent size for nested json objects. Default: 4",
     },
 )
 def type_schema(
     ctx: Context,
-    type: str,
+    type_: str | None = None,
     save_path: str | pathlib.Path | None = None,
+    sync: bool = False,
     indent: int = 4,
 ):
     """
@@ -489,22 +493,30 @@ def type_schema(
 
     buffer = io.StringIO()
 
-    if type == "--list":
+    if not type_:
         buffer.write(
             "--------------------\nRegistered ZEP types\n--------------------\n"
         )
         buffer.write("\t" + "\n\t".join(_SourceFactories.type_lookup.type_names()))
-    elif type == "--help" or type == "-h":
-        ctx.run("invoke --help schema")
     else:
         try:
-            model: ExperimentalBaseModel = _SourceFactories.type_lookup[type]
+            model: Type[ExperimentalBaseModel] = _SourceFactories.type_lookup[type_]
             buffer.write(model.schema_json(indent=indent))
         except KeyError:
             raise invoke.Exit(
-                f"No '{type}' type found. Try 'invoke schema --list' to see available types",
+                f"No '{type_}' type found. Try 'invoke schema --list' to see available types",
                 code=1,
             )
+    if sync:
+        schema_dir = GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
+        for name in _SourceFactories.type_lookup.type_names():
+            model = _SourceFactories.type_lookup[name]
+            try:
+                schema_dir.joinpath(f"{model.__name__}.json").write_text(
+                    model.schema_json(indent=indent)
+                )
+            except TypeError as err:
+                print(f"Could not sync {name} schema - {err}")
 
     text: str = buffer.getvalue()
     if save_path:

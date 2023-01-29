@@ -1,0 +1,87 @@
+{
+    "title": "PandasDatasource",
+    "type": "object",
+    "properties": {
+        "type": {
+            "title": "Type",
+            "default": "pandas",
+            "enum": [
+                "pandas"
+            ],
+            "type": "string"
+        },
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "assets": {
+            "title": "Assets",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/_DataFrameAsset"
+            }
+        }
+    },
+    "required": [
+        "name"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "BatchSorter": {
+            "title": "BatchSorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        },
+        "_DataFrameAsset": {
+            "title": "_DataFrameAsset",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "type": "string"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchSorter"
+                    }
+                },
+                "path": {
+                    "title": "Path",
+                    "type": "string",
+                    "format": "path"
+                },
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                }
+            },
+            "required": [
+                "name",
+                "type",
+                "path",
+                "regex"
+            ]
+        }
+    }
+}
