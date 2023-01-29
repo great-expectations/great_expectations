@@ -15,11 +15,6 @@ from great_expectations.core.config_provider import (
     _ConfigurationProvider,
 )
 from great_expectations.core.serializer import JsonConfigSerializer
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    save_expectation_suite_usage_statistics,
-    usage_statistics_enabled_method,
-)
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudEnvironmentVariable,
@@ -566,11 +561,7 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite.render()
         return expectation_suite
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
-    )
-    def save_expectation_suite(
+    def _save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
@@ -578,18 +569,6 @@ class CloudDataContext(SerializableDataContext):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        """Save the provided expectation suite into the DataContext.
-
-        Args:
-            expectation_suite: The suite to save.
-            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
-                from the suite.
-            overwrite_existing: Whether to overwrite the suite if it already exists.
-            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
-
-        Returns:
-            None
-        """
         id = (
             str(expectation_suite.ge_cloud_id)
             if expectation_suite.ge_cloud_id

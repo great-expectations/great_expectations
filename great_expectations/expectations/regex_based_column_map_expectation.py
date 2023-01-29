@@ -68,6 +68,9 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
             Constructed by the `register_metric(...)` function during Expectation execution.
         domain_keys (tuple): A tuple of the keys used to determine the domain of the metric.
         condition_value_keys (tuple): A tuple of the keys used to determine the value of the metric.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations
     """
 
     condition_value_keys = ()
