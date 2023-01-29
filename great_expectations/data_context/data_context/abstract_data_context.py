@@ -355,6 +355,22 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: If a suite with the same name exists and `overwrite_existing` is set to `False`.
         """
+        return self._save_expectation_suite(
+            expectation_suite=expectation_suite,
+            expectation_suite_name=expectation_suite_name,
+            overwrite_existing=overwrite_existing,
+            include_rendered_content=include_rendered_content,
+            **kwargs,
+        )
+
+    def _save_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+        expectation_suite_name: Optional[str] = None,
+        overwrite_existing: bool = True,
+        include_rendered_content: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> None:
         if expectation_suite_name is None:
             key = ExpectationSuiteIdentifier(
                 expectation_suite_name=expectation_suite.expectation_suite_name
@@ -684,8 +700,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str,
         initialize: bool = True,
         save_changes: Optional[bool] = None,
-        **kwargs: Optional[dict],
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource | None:
         """Add a new Datasource to the data context, with configuration provided as kwargs.
 
         --Documentation--
@@ -701,9 +717,20 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             Datasource instance added.
         """
+        return self._add_datasource(
+            name=name, initialize=initialize, save_changes=save_changes, **kwargs
+        )
+
+    def _add_datasource(
+        self,
+        name: str,
+        initialize: bool = True,
+        save_changes: Optional[bool] = None,
+        **kwargs: Optional[dict],
+    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         save_changes = self._determine_save_changes_flag(save_changes)
 
-        logger.debug(f"Starting BaseDataContext.add_datasource for {name}")
+        logger.debug(f"Starting AbstractDataContext.add_datasource for {name}")
 
         module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
         verify_dynamic_loading_support(module_name=module_name)
@@ -735,27 +762,85 @@ class AbstractDataContext(ConfigPeer, ABC):
     def update_datasource(
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
-        save_changes: Optional[bool] = None,
+        save_changes: bool | None = None,
     ) -> None:
         """
-        Updates a DatasourceConfig that already exists in the store.
+        Updates a Datasource that already exists in the store.
 
         Args:
-            datasource_config: The config object to persist using the DatasourceStore.
+            datasource: The Datasource object to update.
             save_changes: do I save changes to disk?
         """
         save_changes = self._determine_save_changes_flag(save_changes)
+        self._update_datasource(datasource=datasource, save_changes=save_changes)
 
-        datasource_config_dict: dict = datasourceConfigSchema.dump(datasource.config)
+    def _update_datasource(
+        self,
+        datasource: LegacyDatasource | BaseDatasource,
+        save_changes: bool | None = None,
+        **kwargs,
+    ) -> Datasource:
+        name = datasource.name
+        config = datasource.config
+        # `instantiate_class_from_config` requires `class_name`
+        config["class_name"] = datasource.__class__.__name__
+        config.update(kwargs)
+
+        datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
-        datasource_name: str = datasource.name
 
         if save_changes:
             self._datasource_store.update_by_name(  # type: ignore[attr-defined]
-                datasource_name=datasource_name, datasource_config=datasource_config
+                datasource_name=name, datasource_config=datasource_config
             )
-        self.config.datasources[datasource_name] = datasource_config  # type: ignore[assignment,index]
-        self._cached_datasources[datasource_name] = datasource_config
+
+        updated_datasource = (
+            self._instantiate_datasource_from_config_and_update_project_config(
+                config=datasource_config, initialize=True, save_changes=False
+            )
+        )
+
+        # Invariant based on `initalize=True` above
+        assert updated_datasource is not None
+
+        return updated_datasource
+
+    def add_or_update_datasource(
+        self,
+        name: str,
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource:
+        """
+        Add a new Datasource or update an existing one on the context depending on whether
+        it already exists or not. The configuration is provided as kwargs.
+
+        Args:
+            name: The name of the Datasource to add or update.
+            kwargs: Any relevant keyword args to use when adding or updating the target Datasource.
+
+        Returns:
+            The Datasource added or updated by the input `kwargs`.
+        """
+        existing_datasource = None
+        try:
+            existing_datasource = self.get_datasource(name)
+        except ValueError:
+            logger.info(
+                f"Could not find an existing datasource named '{name}'; creating a new one."
+            )
+
+        if existing_datasource:
+            result_datasource = self._update_datasource(
+                datasource=existing_datasource, **kwargs
+            )
+        else:
+            result_datasource = self.add_datasource(name=name, **kwargs)
+
+        # Invariant based on `initialize=True` in both add/update branches
+        assert result_datasource is not None
+
+        self._save_project_config()
+        return result_datasource
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
@@ -1508,6 +1593,46 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             CheckpointResult
         """
+        return self._run_checkpoint(
+            checkpoint_name=checkpoint_name,
+            ge_cloud_id=ge_cloud_id,
+            template_name=template_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            run_id=run_id,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            **kwargs,
+        )
+
+    def _run_checkpoint(
+        self,
+        checkpoint_name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        template_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        run_id: Optional[Union[str, int, float]] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[datetime.datetime] = None,
+        result_format: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+        **kwargs,
+    ) -> CheckpointResult:
         checkpoint: Checkpoint = self.get_checkpoint(
             name=checkpoint_name,
             ge_cloud_id=ge_cloud_id,
@@ -1883,6 +2008,52 @@ class AbstractDataContext(ConfigPeer, ABC):
                 of `batch_data`, `query` or `path`)
 
         """
+        return self._get_batch_list(
+            datasource_name=datasource_name,
+            data_connector_name=data_connector_name,
+            data_asset_name=data_asset_name,
+            batch_request=batch_request,
+            batch_data=batch_data,
+            data_connector_query=data_connector_query,
+            batch_identifiers=batch_identifiers,
+            limit=limit,
+            index=index,
+            custom_filter_function=custom_filter_function,
+            sampling_method=sampling_method,
+            sampling_kwargs=sampling_kwargs,
+            splitter_method=splitter_method,
+            splitter_kwargs=splitter_kwargs,
+            runtime_parameters=runtime_parameters,
+            query=query,
+            path=path,
+            batch_filter_parameters=batch_filter_parameters,
+            batch_spec_passthrough=batch_spec_passthrough,
+            **kwargs,
+        )
+
+    def _get_batch_list(
+        self,
+        datasource_name: Optional[str] = None,
+        data_connector_name: Optional[str] = None,
+        data_asset_name: Optional[str] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        batch_data: Optional[Any] = None,
+        data_connector_query: Optional[dict] = None,
+        batch_identifiers: Optional[dict] = None,
+        limit: Optional[int] = None,
+        index: Optional[Union[int, list, tuple, slice, str]] = None,
+        custom_filter_function: Optional[Callable] = None,
+        sampling_method: Optional[str] = None,
+        sampling_kwargs: Optional[dict] = None,
+        splitter_method: Optional[str] = None,
+        splitter_kwargs: Optional[dict] = None,
+        runtime_parameters: Optional[dict] = None,
+        query: Optional[str] = None,
+        path: Optional[str] = None,
+        batch_filter_parameters: Optional[dict] = None,
+        batch_spec_passthrough: Optional[dict] = None,
+        **kwargs: Optional[dict],
+    ) -> List[Batch]:
         batch_request = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
@@ -1927,25 +2098,27 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Note that this method can be called by itself or run within the get_validator workflow.
 
-        When run with create_expectation_suite()::
+        When run with create_expectation_suite():
 
-            expectation_suite_name = "genres_movies.fkey"
-            context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
-            batch = context.get_batch(
-                expectation_suite_name=expectation_suite_name
-            )
+        ```python
+        expectation_suite_name = "genres_movies.fkey"
+        context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
+        batch = context.get_batch(
+            expectation_suite_name=expectation_suite_name
+        )
+        ```
 
+        When run as part of get_validator():
 
-        When run as part of get_validator()::
-
-            validator = context.get_validator(
-                datasource_name="my_datasource",
-                data_connector_name="whole_table",
-                data_asset_name="my_table",
-                create_expectation_suite_with_name="my_expectation_suite",
-            )
-            validator.expect_column_values_to_be_in_set("c1", [4,5,6])
-
+        ```python
+        validator = context.get_validator(
+            datasource_name="my_datasource",
+            data_connector_name="whole_table",
+            data_asset_name="my_table",
+            create_expectation_suite_with_name="my_expectation_suite",
+        )
+        validator.expect_column_values_to_be_in_set("c1", [4,5,6])
+        ```
 
         Args:
             expectation_suite_name: The name of the suite to create.
@@ -2172,6 +2345,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             AssertionError if both a `name` and `ge_cloud_id` are provided.
             AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
         """
+        return self._run_profiler_with_dynamic_arguments(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+            variables=variables,
+            rules=rules,
+        )
+
+    def _run_profiler_with_dynamic_arguments(
+        self,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+        variables: Optional[dict] = None,
+        rules: Optional[dict] = None,
+    ) -> RuleBasedProfilerResult:
         return RuleBasedProfiler.run_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
@@ -2209,6 +2400,20 @@ class AbstractDataContext(ConfigPeer, ABC):
             AssertionError if both a `name` and `ge_cloud_id` are provided.
             AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
         """
+        return self._run_profiler_on_data(
+            batch_list=batch_list,
+            batch_request=batch_request,
+            name=name,
+            ge_cloud_id=ge_cloud_id,
+        )
+
+    def _run_profiler_on_data(
+        self,
+        batch_list: Optional[List[Batch]] = None,
+        batch_request: Optional[BatchRequestBase] = None,
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> RuleBasedProfilerResult:
         return RuleBasedProfiler.run_profiler_on_data(
             data_context=self,
             profiler_store=self.profiler_store,
@@ -2287,6 +2492,28 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             ValidationOperatorResult
         """
+        return self._run_validation_operator(
+            validation_operator_name=validation_operator_name,
+            assets_to_validate=assets_to_validate,
+            run_id=run_id,
+            evaluation_parameters=evaluation_parameters,
+            run_name=run_name,
+            run_time=run_time,
+            result_format=result_format,
+            **kwargs,
+        )
+
+    def _run_validation_operator(
+        self,
+        validation_operator_name: str,
+        assets_to_validate: List,
+        run_id: Optional[Union[str, RunIdentifier]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[Union[str, datetime.datetime]] = None,
+        result_format: Optional[Union[str, dict]] = None,
+        **kwargs,
+    ):
         result_format = result_format or {"result_format": "SUMMARY"}
 
         if not assets_to_validate:
@@ -2695,6 +2922,18 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 open all docs found in the project.
             only_if_exists: Optionally specify flag to pass to "self.get_docs_sites_urls()".
         """
+        return self._open_data_docs(
+            resource_identifier=resource_identifier,
+            site_name=site_name,
+            only_if_exists=only_if_exists,
+        )
+
+    def _open_data_docs(
+        self,
+        resource_identifier: Optional[str] = None,
+        site_name: Optional[str] = None,
+        only_if_exists: bool = True,
+    ) -> None:
         data_docs_urls: List[Dict[str, str]] = self.get_docs_sites_urls(
             resource_identifier=resource_identifier,
             site_name=site_name,
@@ -3406,7 +3645,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
-        # Note that the call to `DatasourcStore.set` may alter the config object's state
+        # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
         if save_changes:
             config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
@@ -3999,6 +4238,20 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             ClassInstantiationError: Site config in your Data Context config is not valid.
         """
+        return self._build_data_docs(
+            site_names=site_names,
+            resource_identifiers=resource_identifiers,
+            dry_run=dry_run,
+            build_index=build_index,
+        )
+
+    def _build_data_docs(
+        self,
+        site_names=None,
+        resource_identifiers=None,
+        dry_run=False,
+        build_index: bool = True,
+    ):
         logger.debug("Starting DataContext.build_data_docs")
 
         index_page_locator_infos = {}

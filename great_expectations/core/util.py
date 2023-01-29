@@ -33,6 +33,7 @@ from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.alias_types import JSONValues
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.types import SerializableDictDot
@@ -254,19 +255,20 @@ def convert_to_json_serializable(
     ...
 
 
-def convert_to_json_serializable(  # noqa: C901 - complexity 28
+@public_api  # noqa: C901 - complexity 32
+def convert_to_json_serializable(  # noqa: C901 - complexity 32
     data: JSONConvertable,
 ) -> JSONValues:
-    """
-    Helper function to convert an object to one that is json serializable
+    """Converts an object to one that is JSON-serializable.
+
+    WARNING, data may be converted in place.
 
     Args:
-        data: an object to attempt to convert a corresponding json-serializable object
+        data: an object to convert to a JSON-serializable object
+
     Returns:
-        converted object
-    Warning:
-        data may also be converted in place
-    Examples:
+        A JSON-serializable object. For example:
+
         >>> convert_to_json_serializable(1)
         1
 
@@ -276,9 +278,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 28
         >>> convert_to_json_serializable(Polygon([(0, 0), (2, 0), (2, 2), (0, 2)]))
         "POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"
 
-
+    Raises:
+        TypeError: A non-JSON-serializable field was found.
     """
-
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):

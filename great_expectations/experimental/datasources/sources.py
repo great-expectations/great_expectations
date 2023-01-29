@@ -125,6 +125,11 @@ class _SourceFactories:
             )
 
         for t in asset_types:
+            if t.__name__.startswith("_"):
+                LOGGER.debug(
+                    f"{t} is private, assuming not intended as a public concrete type. Skipping registration"
+                )
+                continue
             try:
                 asset_type_name = t.__fields__["type"].default
                 if asset_type_name is None:
