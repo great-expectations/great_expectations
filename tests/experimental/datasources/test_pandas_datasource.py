@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import logging
 import pathlib
+import re
 from dataclasses import dataclass
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Type
 
 import pydantic
 import pytest
@@ -15,7 +16,9 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
+    JSONAsset,
     PandasDatasource,
+    _DataFrameAsset,
 )
 
 if TYPE_CHECKING:
@@ -128,6 +131,32 @@ class TestDynamicPandasAssets:
         print(asset_class_names)
 
         assert type_name in asset_class_names
+
+    @pytest.mark.parametrize(
+        ["asset_model", "extra_kwargs"],
+        [
+            (CSVAsset, {"sep": "|", "names": ["col1", "col2", "col3"]}),
+            (JSONAsset, {"orient": "records", "encoding_errors": "strict"}),
+        ],
+    )
+    def test_data_asset_defaults(
+        self,
+        asset_model: Type[_DataFrameAsset],
+        extra_kwargs: dict,
+    ):
+        """
+        Test that an asset dictionary can be dumped with only the original passed keys
+        present.
+        """
+        kwargs: dict[str, Any] = {
+            "name": "test",
+            "path": pathlib.Path(__file__),
+            "regex": re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
+        }
+        kwargs.update(extra_kwargs)
+        print(f"extra_kwargs\n{pf(extra_kwargs)}")
+        asset_instance = asset_model(**kwargs)
+        assert asset_instance.dict(exclude_unset=True) == kwargs
 
     @pytest.mark.parametrize(
         "extra_kwargs",
