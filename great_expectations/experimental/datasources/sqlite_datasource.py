@@ -97,13 +97,8 @@ class SqliteDatasource(SQLDatasource):
 
     Args:
         name: The name of this sqlite datasource.
-        connection_string: An optional SQLAlchemy connection string used to connect to the sqlite database.
+        connection_string: The SQLAlchemy connection string used to connect to the sqlite database.
             For example: "sqlite:///path/to/file.db"
-            Either a connection_string or an engine must be provided.
-            If an engine is provided, connection_string will be ignored.
-        engine: An optional SQLAlchemy.engine.Engine used to connect to the database.
-            Either a connection_string or an engine must be provided.
-            If an engine is provided, connection_string will be ignored.
         assets: An optional dictionary whose keys are TableAsset names and whose values
             are TableAsset objects.
     """
@@ -115,7 +110,7 @@ class SqliteDatasource(SQLDatasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
-    connection_string: Optional[SqliteDsn]
+    connection_string: SqliteDsn
     assets: Dict[str, SqliteTableAsset] = {}  # type: ignore[assignment]
 
     def add_table_asset(

@@ -219,7 +219,7 @@ class PandasDatasource(Datasource):
         """Test the connection for the PandasDatasource.
 
         Args:
-            test_assets: If assets have been passed to the PandasDatasource, an attempt can be made to test them.
+            test_assets: If assets have been passed to the PandasDatasource, whether to test them as well.
 
         Raises:
             TestConnectionError
