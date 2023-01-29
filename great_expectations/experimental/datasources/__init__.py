@@ -10,4 +10,4 @@ from great_expectations.experimental.datasources.sqlite_datasource import (
     SqliteDatasource,
 )
 
-SCHEMAS_DIR = pathlib.Path(__file__).parent / "schemas"
+_SCHEMAS_DIR = pathlib.Path(__file__).parent / "schemas"

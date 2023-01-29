@@ -3,7 +3,7 @@ from typing import Type
 import pydantic
 import pytest
 
-from great_expectations.experimental.datasources import SCHEMAS_DIR
+from great_expectations.experimental.datasources import _SCHEMAS_DIR
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
 
@@ -27,7 +27,7 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     If this test is failing run `invoke schema --sync` to update schemas and commit the
     changes.
     """
-    schema_path = SCHEMAS_DIR.joinpath(f"{zep_ds_or_asset_model.__name__}.json")
+    schema_path = _SCHEMAS_DIR.joinpath(f"{zep_ds_or_asset_model.__name__}.json")
 
     # TODO: remove this logic and make this fail once all json schemas are working
     if schema_path.name in (
