@@ -512,11 +512,11 @@ def type_schema(
         for name in _SourceFactories.type_lookup.type_names():
             model = _SourceFactories.type_lookup[name]
             try:
-                schema_dir.joinpath(f"{model.__name__}.json").write_text(
-                    model.schema_json(indent=indent) + "\n"
-                )
+                schema_path = schema_dir.joinpath(f"{model.__name__}.json")
+                schema_path.write_text(model.schema_json(indent=indent) + "\n")
+                print(f"  {name} - {schema_path.name} schema updated")
             except TypeError as err:
-                print(f"Could not sync {name} schema - {err}")
+                print(f"  Could not sync {name} schema - {type(err).__name__}:{err}")
 
     text: str = buffer.getvalue()
     if save_path:
