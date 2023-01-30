@@ -43,6 +43,7 @@ def metric_value(
     Returns:
         Decorated function
     """
+
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)
         def inner_func(*args, **kwargs):
@@ -54,6 +55,7 @@ def metric_value(
         return inner_func
 
     return wrapper
+
 
 @public_api
 def metric_partial(
