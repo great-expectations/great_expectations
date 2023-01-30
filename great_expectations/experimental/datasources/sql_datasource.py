@@ -343,8 +343,9 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: str
-    engine: sqlalchemy.engine.Engine = None
     assets: Dict[str, TableAsset] = {}
+
+    _engine: sqlalchemy.engine.Engine = pydantic.PrivateAttr()
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
