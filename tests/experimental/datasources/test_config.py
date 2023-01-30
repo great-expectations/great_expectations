@@ -79,7 +79,14 @@ PG_COMPLEX_CONFIG_DICT = {
                     "path": __file__,
                     "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
-                }
+                    "names": ["col1", "col2"],
+                },
+                "my_json_asset": {
+                    "name": "my_json_asset",
+                    "type": "json",
+                    "path": __file__,
+                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                },
             },
         },
     }
