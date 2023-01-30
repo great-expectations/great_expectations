@@ -4,7 +4,6 @@ from typing import Callable, ContextManager, Optional
 from unittest import mock
 
 import pytest
-import sqlalchemy
 from pydantic import ValidationError
 
 import great_expectations.exceptions as ge_exceptions
@@ -41,7 +40,6 @@ def _source(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
-    engine: Optional[sqlalchemy.engine.Engine] = None,
 ) -> PostgresDatasource:
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=validate_batch_spec, dialect=dialect

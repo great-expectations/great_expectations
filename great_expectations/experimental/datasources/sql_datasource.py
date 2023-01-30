@@ -110,7 +110,8 @@ def _query_for_year_and_month(
     ],
 ) -> Dict[str, List]:
     assert isinstance(table_asset.datasource, SQLDatasource)
-    with table_asset.datasource.engine.connect() as conn:
+    engine: sqlalchemy.engine.Engine = table_asset.datasource.get_engine()
+    with engine.connect() as conn:
         datetimes: DatetimeRange = query_datetime_range(
             conn,
             table_asset.table_name,
@@ -153,7 +154,8 @@ class TableAsset(DataAsset):
             schema, table_name = self.table_name.split(".")
         else:
             table_name = self.table_name
-        exists = sqlalchemy.inspect(self.datasource.engine).has_table(
+        engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
+        exists = sqlalchemy.inspect(engine).has_table(
             table_name=table_name,
             schema=schema,
         )
@@ -361,8 +363,8 @@ class SQLDatasource(Datasource):
     class Config:
         arbitrary_types_allowed = True
 
-    @pydantic.root_validator
-    def _validate_sqlalchemy_engine_parameters(cls, values: dict) -> dict:
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
         """
         Validates that SQL Alchemy was successfully imported and attempts to
         create an engine if a properly formed connection_string was passed.
@@ -370,17 +372,15 @@ class SQLDatasource(Datasource):
         if SQLALCHEMY_IMPORTED:
             # connection_string will not be in values if an invalid string was passed and failed pydantic validation
             # in this case, the specific ValidationError will be raised by pydantic after this root_validator is run
-            if "connection_string" in values and values["connection_string"]:
+            if "connection_string" in kwargs and kwargs["connection_string"]:
                 try:
-                    values["_engine"] = sqlalchemy.create_engine(
-                        values["connection_string"]
-                    )
+                    self._engine = sqlalchemy.create_engine(kwargs["connection_string"])
                 except Exception as e:
                     # connection_string has passed pydantic validation,
                     # but still fails to create a sqlalchemy engine
                     raise SQLDatasourceError(
                         "Unable to create a SQLAlchemy engine from "
-                        f"connection_string: {values['connection_string']} due to the "
+                        f"connection_string: {kwargs['connection_string']} due to the "
                         f"following exception: {str(e)}"
                     )
         else:
@@ -388,7 +388,8 @@ class SQLDatasource(Datasource):
                 "Unable to create SQLDatasource due to missing sqlalchemy dependency."
             )
 
-        return values
+    def get_engine(self) -> sqlalchemy.engine.Engine:
+        return self._engine
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SQLDatasource.
@@ -400,7 +401,8 @@ class SQLDatasource(Datasource):
             TestConnectionError
         """
         try:
-            self._engine.connect()
+            engine: sqlalchemy.engine.Engine = self.get_engine()
+            engine.connect()
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
