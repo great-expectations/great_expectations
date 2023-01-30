@@ -13,7 +13,7 @@ class MetricConfiguration:
     """The MetricConfiguration class provides a interface for configuring Metrics, including domain information,
     dependencies and additional metric-specific configurations.  Metrics are computed attributes of data, and
     are derived from one or more Batches that can then be used to evaluate Expectations or to summarize the
-    result of Validation.
+    result of the Validation.
 
         Args:
             metric_name: name of the Metric defined by the current MetricConfiguration.
