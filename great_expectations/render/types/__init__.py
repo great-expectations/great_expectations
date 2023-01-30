@@ -68,7 +68,7 @@ def _get_deprecation_warning_message(classname: str) -> str:
 
 @deprecated_method_or_class(
     version="0.15.32",
-    message=f"Importing the class CollapseContent from "
+    message="Importing the class CollapseContent from "
     "great_expectations.render.types is deprecated as of v0.15.32 "
     "in v0.18. Please import class CollapseContent "
     "from great_expectations.render.",
@@ -391,7 +391,7 @@ class RenderedSectionContent(RenderedSectionContentRender):
 
 @deprecated_method_or_class(
     version="0.15.32",
-    message=f"Importing the class RenderedStringTemplateContent from "
+    message="Importing the class RenderedStringTemplateContent from "
     "great_expectations.render.types is deprecated as of v0.15.32 "
     "in v0.18. Please import class RenderedStringTemplateContent "
     "from great_expectations.render.",
@@ -425,7 +425,7 @@ class RenderedStringTemplateContent(RenderedStringTemplateContentRender):
 
 @deprecated_method_or_class(
     version="0.15.32",
-    message=f"Importing the class RenderedTableContent from "
+    message="Importing the class RenderedTableContent from "
     "great_expectations.render.types is deprecated as of v0.15.32 "
     "in v0.18. Please import class RenderedTableContent "
     "from great_expectations.render.",
