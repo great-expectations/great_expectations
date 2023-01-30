@@ -1,9 +1,3 @@
-"""
-This is a template for creating custom MulticolumnMapExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations
-"""
-
 from typing import Optional
 
 import numpy as np
@@ -23,13 +17,12 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 # This class defines a Metric to support your Expectation.
 # For most MulticolumnMapExpectations, the main business logic for calculation will live in this class.
-# <snippet>
 class MulticolumnValuesNotAllNull(MulticolumnMapMetricProvider):
-    # </snippet>
+
     # This is the id string that will be used to reference your metric.
-    # <snippet>
+
     condition_metric_name = "multicolumn_values.not_all_null"
-    # </snippet>
+
     # These point your metric at the provided keys to facilitate calculation
     condition_domain_keys = (
         "batch_id",
@@ -42,13 +35,13 @@ class MulticolumnValuesNotAllNull(MulticolumnMapMetricProvider):
     condition_value_keys = ()
 
     # This method implements the core logic for the PandasExecutionEngine
-    # <snippet>
+
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, **kwargs):
         row_wise_cond = column_list.isna().sum(axis=1) < len(column_list)
         return row_wise_cond
 
-    # </snippet>
+
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @multicolumn_condition_partial(engine=SqlAlchemyExecutionEngine)
@@ -62,29 +55,35 @@ class MulticolumnValuesNotAllNull(MulticolumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-# <snippet>
 class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
-    # </snippet>
-    # <snippet>
-    """Expect the certain set of columns not to be null at the same time"""
-    # </snippet>
+    """Expect the certain set of columns not to be null at the same time."""
+
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "col_a": [5, 6, 5, 12, -3],
-                "col_b": [np.nan, -3, np.nan, np.nan, -9],
-                "col_c": [np.nan, 2, np.nan, np.nan, np.nan],
-                "col_d": [np.nan, np.nan, np.nan, np.nan, np.nan],
+                "no_nulls": [5, 6, 5, 12, -3],
+                "some_nulls": [np.nan, -3, np.nan, np.nan, -9],
+                "one_non_null": [np.nan, 2, np.nan, np.nan, np.nan],
+                "all_nulls": [np.nan, np.nan, np.nan, np.nan, np.nan],
             },
             "tests": [
                 {
                     "title": "basic_positive_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column_list": ["col_b", "col_c"], "mostly": 0.4},
+                    "in": {"column_list": ["no_nulls", "some_nulls"]},
+                    "out": {
+                        "success": True,
+                    },
+                },
+                {
+                    "title": "basic_positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column_list": ["some_nulls", "one_non_null"], "mostly": 0.4},
                     "out": {
                         "success": True,
                     },
@@ -93,7 +92,7 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column_list": ["col_b", "col_c", "col_d"], "mostly": 1},
+                    "in": {"column_list": ["some_nulls", "one_non_null", "all_nulls"], "mostly": 1},
                     "out": {
                         "success": False,
                     },
@@ -110,9 +109,9 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    # <snippet>
+
     map_metric = "multicolumn_values.not_all_null"
-    # </snippet>
+
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = (
@@ -152,17 +151,16 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     # This object contains metadata for display in the public Gallery
-    # <snippet>
+
     library_metadata = {
         "tags": ["null_check"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@liyusa",  # Don't forget to add your github handle here!
         ],
     }
-    # </snippet>
+
 
 
 if __name__ == "__main__":
-    # <snippet>
+
     ExpectMulticolumnValuesNotToBeAllNull().print_diagnostic_checklist()
-# </snippet>
