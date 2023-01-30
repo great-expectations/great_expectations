@@ -386,10 +386,22 @@ class RenderedSectionContent(RenderedSectionContentRender):
         )
 
 
+@deprecated_method_or_class
 class RenderedStringTemplateContent(RenderedStringTemplateContentRender):
     # deprecated-v0.15.32
+    """RenderedStringTemplateContent is RenderedComponentContent that represents a templated string.
+
+    Args:
+        string_template: A dictionary containing:
+            template: The string to perform substitution on. Variables are denoted with a preceeding $.
+            params: A dictionary with keys that match variable names and values which will be substituted.
+            styling: A dictionary containing styling information.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+    """
+
     def __init__(
-        self, string_template, styling=None, content_block_type="string_template"
+        self, string_template: dict, styling=None, content_block_type="string_template"
     ):
         warnings.warn(
             _get_deprecation_warning_message(classname=self.__class__.__name__),

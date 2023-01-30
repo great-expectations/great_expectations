@@ -454,9 +454,24 @@ class RenderedMarkdownContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedStringTemplateContent(RenderedComponentContent):
+    """RenderedStringTemplateContent is RenderedComponentContent that represents a templated string.
+
+    Args:
+        string_template: A dictionary containing:
+            template: The string to perform substitution on. Variables are denoted with a preceeding $.
+            params: A dictionary with keys that match variable names and values which will be substituted.
+            styling: A dictionary containing styling information.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+    """
+
     def __init__(
-        self, string_template, styling=None, content_block_type="string_template"
+        self,
+        string_template: dict,
+        styling: Optional[dict] = None,
+        content_block_type: str = "string_template",
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.string_template = string_template
