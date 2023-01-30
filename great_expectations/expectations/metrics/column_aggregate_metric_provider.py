@@ -36,9 +36,8 @@ from great_expectations.expectations.metrics.util import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 try:
-    from polars import DataFrame
+    from polars import DataFrame as polars_DataFrame
 
-    polars_DataFrame = DataFrame
 except ImportError:
     polars_DataFrame = None
 

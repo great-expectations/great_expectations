@@ -24,10 +24,10 @@ try:
     from sqlalchemy.sql.elements import TextClause
 except ImportError:
     TextClause = None
-try:
-    from polars import DataFrame
 
-    polars_DataFrame = DataFrame
+try:
+    from polars import DataFrame as polars_DataFrame
+
 except ImportError:
     polars_DataFrame = None
 
