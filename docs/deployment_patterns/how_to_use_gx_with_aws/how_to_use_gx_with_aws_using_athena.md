@@ -4,7 +4,7 @@ title: How to use Great Expectations with Amazon Web Services using Athena
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import Congratulations from './components/_congratulations_aws_s3_pandas.md'
+import Congratulations from './components/_congratulations_aws_athena.md'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <!-- Part 1: Setup -->
@@ -169,7 +169,7 @@ import RunCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws
 <!-- 4.2 Build and view Data Docs -->
 import BuildAndViewDataDocs from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_data_docs_build_and_view.md'
 
-Great Expectations can work within many frameworks.  In this guide you will be shown a workflow for using Great Expectations with AWS and cloud storage.  You will configure a local Great Expectations project to store Expectations, Validation Results, and Data Docs in Amazon S3 buckets.  You will further configure Great Expectations to use Pandas and access data stored in another Amazon S3 bucket.
+Great Expectations can work within many frameworks.  In this guide you will be shown a workflow for using Great Expectations with AWS and cloud storage.  You will configure a local Great Expectations project to store Expectations, Validation Results, and Data Docs in Amazon S3 buckets.  You will further configure Great Expectations to access data stored in an Athena database.
 
 This guide will demonstrate each of the steps necessary to go from installing a new instance of Great Expectations to Validating your data for the first time and viewing your Validation Results as Data Docs.
 
