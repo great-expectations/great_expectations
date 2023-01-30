@@ -40,15 +40,6 @@ if TYPE_CHECKING:
 LOGGER = logging.getLogger(__name__)
 
 
-try:
-    import pyspark
-except ImportError:
-    pyspark = None
-    LOGGER.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
-
-
 def run_checkpoint_and_data_doc(
     datasource_test_data: tuple[
         AbstractDataContext, Datasource, DataAsset, BatchRequest

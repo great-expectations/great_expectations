@@ -42,10 +42,12 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
 
 try:
+    import pyspark
     from pyspark.sql import Row as pyspark_sql_Row
 except ImportError:
-    LOGGER.debug("No spark sql dataframe module available.")
+    pyspark = None
     pyspark_sql_Row = None
+    LOGGER.debug("No spark sql dataframe module available.")
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants as returned. The keys represent dimensions one can slice the data along

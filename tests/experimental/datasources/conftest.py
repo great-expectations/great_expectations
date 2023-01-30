@@ -30,14 +30,6 @@ from great_expectations.experimental.datasources.sources import _SourceFactories
 LOGGER = logging.getLogger(__name__)
 
 
-try:
-    import pyspark
-except ImportError:
-    pyspark = None
-    LOGGER.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
-
 # This is the default min/max time that we are using in our mocks.
 # They are made global so our tests can reference them directly.
 DEFAULT_MIN_DT = datetime(2021, 1, 1, 0, 0, 0)
