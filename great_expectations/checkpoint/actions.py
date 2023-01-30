@@ -85,7 +85,7 @@ class ValidationAction:
 
         Args:
             validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
-            validation_result_suite_identifier: an instance of either the ValidationResultIdentifier class (for open source Great Expectations) or the GeCloudIdentifier (from Great Expectations Cloud).
+            validation_result_suite_identifier: an instance of either the ValidationResultIdentifier class (for open source Great Expectations) or the GXCloudIdentifier (from Great Expectations Cloud).
             data_asset: An instance of the Validator class.
             expectation_suite_identifier: Optionally, an instance of the ExpectationSuiteIdentifier class.
             checkpoint_identifier: Optionally, an Identifier for the Checkpoint.
