@@ -115,13 +115,6 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-    - job: type_hint_checker
-      steps:
-      - script: |
-          pip install $(grep -E '^(invoke|mypy|pytest-cov)' reqs/requirements-dev-contrib.txt)
-          invoke type-coverage
-        name: TypeHintChecker
-
     - job: static_type_check
       steps:
       - task: UsePythonVersion@0
@@ -132,11 +125,6 @@ stages:
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
         name: StaticTypeCheck
-
-    - job: docstring_checker
-      steps:
-      - bash: python scripts/check_docstring_coverage.py
-        name: DocstringChecker
 
     - job: docstring_linter
       steps:

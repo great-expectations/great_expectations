@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from pydantic import ValidationError
+from typing_extensions import Final
 
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -33,6 +34,13 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import Batch
 
+SAMPLE_CSV_DIR: Final[pathlib.Path] = (
+    pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
+).resolve()
+SAMPLE_JSON_DIR: Final[pathlib.Path] = pathlib.Path(
+    __file__, "..", "json_assets"
+).resolve(strict=True)
+
 
 def sql_data(
     context: AbstractDataContext,
@@ -57,16 +65,13 @@ def sql_data(
     return context, datasource, asset, batch_request
 
 
-def pandas_data(
+def pandas_csv_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    csv_path = (
-        pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
-    ).resolve()
     panda_ds = context.sources.add_pandas(name="my_pandas")
     asset = panda_ds.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        data_path=SAMPLE_CSV_DIR,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
@@ -74,7 +79,24 @@ def pandas_data(
     return context, panda_ds, asset, batch_request
 
 
-@pytest.fixture(params=[sql_data, pandas_data])
+def pandas_json_data(
+    context: AbstractDataContext,
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    json_path: pathlib.Path = SAMPLE_JSON_DIR.resolve(strict=bool)
+
+    panda_ds = context.sources.add_pandas(name="my_pandas")
+    asset = panda_ds.add_json_asset(
+        name="json_asset",
+        data_path=json_path,
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.json",
+        order_by=["year", "month"],
+        orient="records",
+    )
+    batch_request = asset.get_batch_request({"year": "2019", "month": "08"})
+    return context, panda_ds, asset, batch_request
+
+
+@pytest.fixture(params=[sql_data, pandas_csv_data, pandas_json_data])
 def datasource_test_data(
     empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
@@ -255,16 +277,13 @@ def multibatch_sql_data(
     return context, datasource, asset, batch_request
 
 
-def multibatch_pandas_data(
+def multibatch_pandas_csv_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    csv_path = (
-        pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
-    ).resolve()
     panda_ds = context.sources.add_pandas(name="my_pandas")
     asset = panda_ds.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        data_path=SAMPLE_CSV_DIR,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
@@ -272,7 +291,30 @@ def multibatch_pandas_data(
     return context, panda_ds, asset, batch_request
 
 
-@pytest.fixture(params=[multibatch_sql_data, multibatch_pandas_data])
+def multibatch_pandas_json_data(
+    context: AbstractDataContext,
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    json_path: pathlib.Path = SAMPLE_JSON_DIR.resolve(strict=bool)
+
+    panda_ds = context.sources.add_pandas(name="my_pandas")
+    asset = panda_ds.add_json_asset(
+        name="json_asset",
+        data_path=json_path,
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.json",
+        order_by=["year", "month"],
+        orient="records",
+    )
+    batch_request = asset.get_batch_request({"year": "2019"})
+    return context, panda_ds, asset, batch_request
+
+
+@pytest.fixture(
+    params=[
+        multibatch_sql_data,
+        multibatch_pandas_csv_data,
+        multibatch_pandas_json_data,
+    ]
+)
 def multibatch_datasource_test_data(
     empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
