@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Union
 
 from marshmallow import Schema, fields, post_load, pre_dump
 
+from great_expectations.alias_types import JSONValues
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -298,14 +299,19 @@ class CheckpointResult(SerializableDictDot):
             }
         return self._validation_statistics
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this CheckpointResult.
+
+        Returns:
+            A JSON-serializable dict representation of this CheckpointResult.
         """
         # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # make this refactoring infeasible at the present time.
+
         serializable_dict: dict = {
             "validation_result_url": self.validation_result_url,
             "run_id": self.run_id.to_json_dict(),
