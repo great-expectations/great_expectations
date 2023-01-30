@@ -26,6 +26,7 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.util import is_library_loadable
 
 LOGGER = logging.getLogger(__name__)
 
@@ -240,6 +241,10 @@ def multibatch_spark_data(
 
 
 @pytest.fixture(params=[pandas_data, sql_data, spark_data])
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
+)
 def datasource_test_data(
     empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
@@ -248,6 +253,10 @@ def datasource_test_data(
 
 @pytest.fixture(
     params=[multibatch_pandas_data, multibatch_sql_data, multibatch_spark_data]
+)
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
 )
 def multibatch_datasource_test_data(
     empty_data_context, request

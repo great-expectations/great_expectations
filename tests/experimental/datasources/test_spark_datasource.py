@@ -15,18 +15,16 @@ from great_expectations.experimental.datasources.spark_datasource import (
     CSVSparkAsset,
     SparkDatasource,
 )
+from great_expectations.util import is_library_loadable
 
 LOGGER = logging.getLogger(__name__)
 
-try:
-    _ = pytest.importorskip("pyspark")
-except ImportError:
-    LOGGER.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
-
 
 @pytest.fixture
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
+)
 def spark_datasource(test_backends) -> SparkDatasource:
     return SparkDatasource(name="spark_datasource")
 
