@@ -111,7 +111,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
     )
     def get_expectation_suite(self, expectation_suite_name: str) -> ExpectationSuite:
         """
-        Retrieve an `ExpectationSuite` by name.
+        Retrieve the `ExpectationSuite` generated during the `RuleBasedProfiler` run.
 
         Args:
             expectation_suite_name: The name of the desired `ExpectationSuite`.
