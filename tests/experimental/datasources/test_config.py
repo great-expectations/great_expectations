@@ -68,28 +68,7 @@ PG_COMPLEX_CONFIG_DICT = {
                     "type": "table",
                 },
             },
-        },
-        "my_pandas_ds": {
-            "type": "pandas",
-            "name": "my_pandas_ds",
-            "assets": {
-                "my_csv_asset": {
-                    "name": "my_csv_asset",
-                    "type": "csv",
-                    "path": __file__,
-                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
-                    "sep": "|",
-                    "names": ["col1", "col2"],
-                },
-                "my_json_asset": {
-                    "name": "my_json_asset",
-                    "type": "json",
-                    "path": __file__,
-                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
-                    "orient": "records",
-                },
-            },
-        },
+        }
     }
 }
 PG_COMPLEX_CONFIG_JSON = json.dumps(PG_COMPLEX_CONFIG_DICT)
@@ -209,7 +188,7 @@ def test_catch_bad_top_level_config(
     [
         p(
             {"name": "missing `table_name`", "type": "table"},
-            ("xdatasources", "assets", "missing `table_name`", "table_name"),
+            ("xdatasources", "assets", "table_name"),
             "field required",
             id="missing `table_name`",
         ),
@@ -223,13 +202,7 @@ def test_catch_bad_top_level_config(
                     "column_name": "foo",
                 },
             },
-            (
-                "xdatasources",
-                "assets",
-                "unknown splitter",
-                "column_splitter",
-                "method_name",
-            ),
+            ("xdatasources", "assets", "column_splitter", "method_name"),
             "unexpected value; permitted: 'split_on_year_and_month'",
             id="unknown splitter method",
         ),
@@ -244,14 +217,7 @@ def test_catch_bad_top_level_config(
                     "param_names": ["year", "month", "INVALID"],
                 },
             },
-            (
-                "xdatasources",
-                "assets",
-                "bad splitter param",
-                "column_splitter",
-                "param_names",
-                2,
-            ),
+            ("xdatasources", "assets", "column_splitter", "param_names", 2),
             "unexpected value; permitted: 'year', 'month'",
             id="invalid splitter param_name",
         ),
@@ -377,7 +343,7 @@ def test_yaml_config_round_trip(
     pp(re_loaded)
     assert re_loaded
 
-    assert from_yaml_gx_config.dict() == re_loaded.dict()
+    assert from_yaml_gx_config == re_loaded
 
 
 def test_yaml_file_config_round_trip(
