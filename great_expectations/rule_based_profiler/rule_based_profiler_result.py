@@ -27,8 +27,7 @@ if TYPE_CHECKING:
 @dataclass(frozen=True)
 class RuleBasedProfilerResult(SerializableDictDot):
     """
-    ``RuleBasedProfilerResult`` is an immutable ``dataclass`` object, designed to hold results with
-    auxiliary information of executing ``RuleBasedProfiler.run()`` method.
+    ``RuleBasedProfilerResult`` is an immutable ``dataclass`` object which holds the results of executing the ``RuleBasedProfiler.run()`` method.
 
     Properties represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled.
 
