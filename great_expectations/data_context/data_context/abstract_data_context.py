@@ -2409,6 +2409,25 @@ class AbstractDataContext(ConfigPeer, ABC):
             ge_cloud_id=ge_cloud_id,
         )
 
+    def update_profiler(self, profiler: RuleBasedProfiler) -> None:
+        """
+        TODO
+        """
+        pass
+
+    def add_or_update_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: Dict[str, dict],
+        variables: Optional[dict] = None,
+        id: Optional[str] = None,
+    ) -> RuleBasedProfiler:
+        """
+        TODO
+        """
+        pass
+
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
     )
