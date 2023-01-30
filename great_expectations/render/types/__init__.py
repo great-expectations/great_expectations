@@ -1,6 +1,7 @@
 import warnings
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
+from great_expectations.core._docs_decorators import deprecated_method_or_class
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -56,6 +57,9 @@ from great_expectations.render.renderer_configuration import (
     RendererTableValue as RendererTableValueRender,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.render import RenderedContent
+
 
 # TODO: Remove this entire module for release 0.18.0
 def _get_deprecation_warning_message(classname: str) -> str:
@@ -65,17 +69,30 @@ def _get_deprecation_warning_message(classname: str) -> str:
     )
 
 
+@deprecated_method_or_class
 class CollapseContent(CollapseContentRender):
     # deprecated-v0.15.32
+    """CollapseContent is RenderedComponentContent that can be collapsed.
+
+    Args:
+        collapse: The content to be collapsed. If a list is provided, it can recursively contain RenderedContent.
+        collpase_toggle_link: The toggle link for this CollapseContent.
+        header: The header for this content block.
+        subheader: The subheader for this content block.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+        inline_link: Whether to include a link inline.
+    """
+
     def __init__(
         self,
-        collapse,
-        collapse_toggle_link=None,
-        header=None,
-        subheader=None,
-        styling=None,
-        content_block_type="collapse",
-        inline_link=False,
+        collapse: Union[RenderedContent, list],
+        collapse_toggle_link: Optional[Union[RenderedContent, dict]] = None,
+        header: Optional[Union[RenderedContent, dict]] = None,
+        subheader: Optional[Union[RenderedContent, dict]] = None,
+        styling: Optional[dict] = None,
+        content_block_type: str = "collapse",
+        inline_link: bool = False,
     ):
         warnings.warn(
             _get_deprecation_warning_message(classname=self.__class__.__name__),
