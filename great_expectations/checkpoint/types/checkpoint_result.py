@@ -170,9 +170,9 @@ class CheckpointResult(SerializableDictDot):
 
         Args:
             group_by: Specify how the ExpectationValidationResults should be grouped.
-            Valid options are "validation_result_identifier", "expectation_suite_name",
-            "data_asset_name", or the default None. Providing an invalid group_by
-            value will cause this method to silently fail, and return None.
+                Valid options are "validation_result_identifier", "expectation_suite_name",
+                "data_asset_name", or the default None. Providing an invalid group_by
+                value will cause this method to silently fail, and return None.
 
         Returns:
             A list of ExpectationSuiteValidationResult, when group_by=None
