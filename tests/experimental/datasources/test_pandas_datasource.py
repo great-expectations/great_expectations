@@ -54,6 +54,7 @@ class SpyInterrupt(RuntimeError):
 def capture_reader_fn_params(monkeypatch: MonkeyPatch):
     """
     Capture the `reader_options` arguments being passed to the `PandasExecutionEngine`.
+
     Note this fixture is heavily reliant on the implementation details of `PandasExecutionEngine`,
     should this change this fixture will need to change.
     """
