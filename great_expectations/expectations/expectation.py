@@ -1115,9 +1115,16 @@ class Expectation(metaclass=MetaExpectation):
             )
         return domain_kwargs
 
+    @public_api
     def get_success_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> Dict[str, Any]:
+        """Retrieve the success kwargs
+
+        Args:
+            configuration: The `ExpectationConfiguration` that contains the kwargs. If no configuration arg is provided,
+            the success kwargs from the configuration attribute of the Expectation instance will be returned.
+        """
         if not configuration:
             configuration = self.configuration
 
@@ -1445,6 +1452,7 @@ class Expectation(metaclass=MetaExpectation):
                 UserWarning,
             )
 
+    @public_api
     def print_diagnostic_checklist(
         self,
         diagnostics: Optional[ExpectationDiagnostics] = None,
@@ -1454,6 +1462,10 @@ class Expectation(metaclass=MetaExpectation):
 
         This output from this method is a thin wrapper for ExpectationDiagnostics.generate_checklist()
         This method is experimental.
+
+        Args:
+            diagnostics (optional[ExpectationDiagnostics]): If diagnostics are not provided, diagnostics will be ran on self.
+            show_failed_tests (bool): If true, failing tests will be printed.
         """
 
         if diagnostics is None:
