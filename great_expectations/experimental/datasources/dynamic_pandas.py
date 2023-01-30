@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import functools
 import inspect
 import logging
@@ -40,6 +41,14 @@ try:
     from pandas._typing import CSVEngine
 except ImportError:
     CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]
+
+try:
+    from pandas._libs.lib import _NoDefault
+except ImportError:
+
+    class _NoDefault(enum.Enum):  # type: ignore[no-redef]
+        no_default = "NO_DEFAULT"
+
 
 logger = logging.getLogger(__file__)
 
@@ -172,6 +181,8 @@ def _get_default_value(
 ) -> object:
     if param.default is inspect.Parameter.empty:
         default = ...
+    elif param.default is _NoDefault.no_default:
+        default = None
     else:
         default = param.default
     return default
