@@ -3,9 +3,7 @@ from typing import Optional
 import numpy as np
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
