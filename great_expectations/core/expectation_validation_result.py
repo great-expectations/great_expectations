@@ -470,7 +470,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
           "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612"
         },
         "batch_spec": {
-          "path": "/Users/josh/work/gx_example_projects/great_expectations/../data/taxi_data_1.csv"
+          "path": "/Users/username/work/gx_example_projects/great_expectations/../data/taxi_data_1.csv"
         },
         "checkpoint_name": "single_validation_checkpoint",
         "expectation_suite_name": "taxi_suite_1",
