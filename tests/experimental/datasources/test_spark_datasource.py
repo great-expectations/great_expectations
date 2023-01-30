@@ -18,9 +18,16 @@ from great_expectations.experimental.datasources.spark_datasource import (
 
 LOGGER = logging.getLogger(__name__)
 
+try:
+    _ = pytest.importorskip("pyspark")
+except ImportError:
+    LOGGER.debug(
+        "Unable to load pyspark; install optional spark dependency for support."
+    )
+
 
 @pytest.fixture
-def spark_datasource() -> SparkDatasource:
+def spark_datasource(test_backends) -> SparkDatasource:
     return SparkDatasource(name="spark_datasource")
 
 

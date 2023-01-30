@@ -862,20 +862,11 @@ def get_or_create_spark_session(
         if spark_session.sparkContext._jsc.sc().isStopped():
             raise ValueError("SparkContext stopped unexpectedly.")
 
-    # TODO: <Alex>ALEX</Alex>
-    # except AttributeError:
-    #     logger.error(
-    #         "Unable to load spark context; install optional spark dependency for support."
-    #     )
-    #     spark_session = None
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    except AttributeError as e:
+    except AttributeError:
         logger.error(
-            f"Unable to load spark context; install optional spark dependency for support: '{e}'"
+            "Unable to load spark context; install optional spark dependency for support."
         )
         spark_session = None
-    # TODO: <Alex>ALEX</Alex>
 
     return spark_session
 
