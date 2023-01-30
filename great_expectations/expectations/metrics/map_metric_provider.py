@@ -422,7 +422,7 @@ def column_condition_partial(  # noqa: C901 - 23
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                    raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 
@@ -1632,7 +1632,7 @@ def _polars_column_map_condition_values(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -1649,7 +1649,7 @@ def _polars_column_map_condition_values(
 
     domain_values = df[column_name]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[boolean_mapped_unexpected_values is True]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1761,13 +1761,13 @@ def _polars_column_pair_map_condition_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
     domain_values = df[column_list]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[boolean_mapped_unexpected_values is True]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1855,7 +1855,7 @@ def _polars_column_pair_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -1948,7 +1948,7 @@ def _polars_multicolumn_map_condition_values(
 
     domain_values = df[column_list]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[boolean_mapped_unexpected_values is True]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -2021,7 +2021,7 @@ def _pandas_column_map_series_and_domain_values(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2058,7 +2058,7 @@ def _polars_multicolumn_map_condition_filtered_row_count(
 
     for column_name in column_list:
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2177,7 +2177,7 @@ def _polars_column_map_series_and_domain_values(
     column_name = accessor_domain_kwargs["column"]
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -2194,8 +2194,8 @@ def _polars_column_map_series_and_domain_values(
 
     domain_values = df[column_name]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
-    map_series = map_series[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[boolean_mapped_unexpected_values is True]
+    map_series = map_series[boolean_mapped_unexpected_values is True]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -2307,7 +2307,7 @@ def _polars_map_condition_index(
         column_name = accessor_domain_kwargs["column"]
 
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2327,7 +2327,7 @@ def _polars_map_condition_index(
 
         for column_name in column_list:
             if column_name not in metrics["table.columns"]:
-                raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 
@@ -2560,7 +2560,7 @@ def _polars_column_map_condition_value_counts(
         )
 
     if column_name not in metrics["table.columns"]:
-        raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
 
@@ -2592,7 +2592,7 @@ def _polars_column_map_condition_value_counts(
             pass
 
     if not value_counts:
-        raise ge_exceptions.MetricComputationError("Unable to compute value counts")
+        raise gx_exceptions.MetricComputationError("Unable to compute value counts")
 
     if result_format["result_format"] == "COMPLETE":
         return value_counts
@@ -2685,7 +2685,7 @@ def _polars_map_condition_rows(
         column_name = accessor_domain_kwargs["column"]
 
         if column_name not in metrics["table.columns"]:
-            raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
@@ -2705,7 +2705,7 @@ def _polars_map_condition_rows(
 
         for column_name in column_list:
             if column_name not in metrics["table.columns"]:
-                raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 

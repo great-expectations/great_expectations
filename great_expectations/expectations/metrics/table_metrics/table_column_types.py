@@ -24,6 +24,12 @@ try:
     from sqlalchemy.sql.elements import TextClause
 except ImportError:
     TextClause = None
+try:
+    from polars import DataFrame
+
+    polars_DataFrame = DataFrame
+except ImportError:
+    polars_DataFrame = None
 
 
 class ColumnTypes(TableMetricProvider):
@@ -57,6 +63,7 @@ class ColumnTypes(TableMetricProvider):
         metrics: Dict[str, Any],
         runtime_configuration: Dict,
     ):
+        df: polars_DataFrame
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )

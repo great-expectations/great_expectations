@@ -34,6 +34,13 @@ from great_expectations.expectations.metrics.util import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+try:
+    from polars import DataFrame
+
+    polars_DataFrame = DataFrame
+except ImportError:
+    polars_DataFrame = None
+
 logger = logging.getLogger(__name__)
 
 
@@ -127,7 +134,7 @@ def column_aggregate_value(
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
                 )
-
+                df: polars_DataFrame
                 df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
@@ -135,7 +142,7 @@ def column_aggregate_value(
                 column_name = accessor_domain_kwargs["column"]
 
                 if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                    raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                         message=f'Error: The column "{column_name}" in BatchData does not exist.'
                     )
 

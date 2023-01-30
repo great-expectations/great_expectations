@@ -2,12 +2,10 @@ import hashlib
 import random  # noqa: F401
 
 try:
-    import polars as pl
+    from polars import DataFrame as pl_DataFrame
 
-    DataFrame = pl.DataFrame
 except ImportError:
-    polars = None
-    DataFrame = None
+    pl_DataFrame = None
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec
@@ -19,7 +17,9 @@ from great_expectations.execution_engine.split_and_sample.data_sampler import (
 class PolarsDataSampler(DataSampler):
     """Methods for sampling a polars dataframe."""
 
-    def sample_using_limit(self, df: DataFrame, batch_spec: BatchSpec) -> DataFrame:
+    def sample_using_limit(
+        self, df: pl_DataFrame, batch_spec: BatchSpec
+    ) -> pl_DataFrame:
         """Sample the first n rows of data.
 
         Args:
@@ -41,9 +41,9 @@ class PolarsDataSampler(DataSampler):
 
     def sample_using_random(
         self,
-        df: DataFrame,
+        df: pl_DataFrame,
         batch_spec: BatchSpec,
-    ) -> DataFrame:
+    ) -> pl_DataFrame:
         """Take a random sample of rows, retaining proportion p.
 
         Args:
@@ -65,9 +65,9 @@ class PolarsDataSampler(DataSampler):
 
     def sample_using_mod(
         self,
-        df: DataFrame,
+        df: pl_DataFrame,
         batch_spec: BatchSpec,
-    ) -> DataFrame:
+    ) -> pl_DataFrame:
         """Take the mod of named column, and only keep rows that match the given value.
 
         Args:
@@ -94,9 +94,9 @@ class PolarsDataSampler(DataSampler):
 
     def sample_using_a_list(
         self,
-        df: DataFrame,
+        df: pl_DataFrame,
         batch_spec: BatchSpec,
-    ) -> DataFrame:
+    ) -> pl_DataFrame:
         """Match the values in the named column against value_list, and only keep the matches.
 
         Args:
@@ -122,9 +122,9 @@ class PolarsDataSampler(DataSampler):
 
     def sample_using_hash(
         self,
-        df: DataFrame,
+        df: pl_DataFrame,
         batch_spec: BatchSpec,
-    ) -> DataFrame:
+    ) -> pl_DataFrame:
         """Hash the values in the named column, and only keep rows that match the given hash_value.
 
         Args:

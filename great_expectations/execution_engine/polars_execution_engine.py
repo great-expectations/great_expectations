@@ -65,11 +65,11 @@ except ImportError:
 
 try:
     import polars as pl
+    from polars import DataFrame as pl_DataFrame
 
-    DataFrame = pl.DataFrame
 except ImportError:
-    polars = None
-    DataFrame = None
+    pl_DataFrame = None
+    pl = None
 
 HASH_THRESHOLD = 1e9
 
@@ -191,9 +191,9 @@ Notes:
         validator.expose_dataframe_methods = True
 
     def load_batch_data(
-        self, batch_id: str, batch_data: Union[PolarsBatchData, DataFrame]
+        self, batch_id: str, batch_data: Union[PolarsBatchData, pl_DataFrame]
     ) -> None:
-        if isinstance(batch_data, DataFrame):
+        if isinstance(batch_data, pl_DataFrame):
             batch_data = PolarsBatchData(self, batch_data)
         elif not isinstance(batch_data, PolarsBatchData):
             raise ge_exceptions.GreatExpectationsError(
@@ -224,7 +224,7 @@ Notes:
                     illegal. Please check your config."""
                 )
 
-            if isinstance(batch_spec.batch_data, DataFrame):
+            if isinstance(batch_spec.batch_data, pl_DataFrame):
                 df = batch_spec.batch_data
             elif isinstance(batch_spec.batch_data, PolarsBatchData):
                 df = batch_spec.batch_data.dataframe
@@ -365,7 +365,7 @@ Notes:
         return batch_data
 
     @property
-    def dataframe(self) -> DataFrame:
+    def dataframe(self) -> pl_DataFrame:
         """Tests whether or not a Batch has been loaded. If the loaded batch does not exist, raises a
         ValueError Exception
         """
@@ -455,7 +455,7 @@ Notes:
     def get_domain_records(  # noqa: C901
         self,
         domain_kwargs: dict,
-    ) -> DataFrame:
+    ) -> pl_DataFrame:
         """
         Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
         obtain and/or query a batch. Returns in the format of a Polars DataFrame.
@@ -580,7 +580,7 @@ Please use "neither" instead.
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[DataFrame, dict, dict]:
+    ) -> Tuple[pl_DataFrame, dict, dict]:
         """
         Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
         obtain and/or query a batch.  Returns in the format of a Polars DataFrame. If the domain is a single column,
