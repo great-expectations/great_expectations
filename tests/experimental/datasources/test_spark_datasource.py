@@ -15,17 +15,15 @@ from great_expectations.experimental.datasources.spark_datasource import (
     CSVSparkAsset,
     SparkDatasource,
 )
-from great_expectations.util import is_library_loadable
 
 LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
-@pytest.mark.skipif(
-    not is_library_loadable(library_name="pyspark"),
-    reason="pyspark must be installed",
-)
 def spark_datasource(test_backends) -> SparkDatasource:
+    if "spark" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
     return SparkDatasource(name="spark_datasource")
 
 
