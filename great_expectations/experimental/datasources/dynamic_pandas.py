@@ -189,6 +189,9 @@ def _get_default_value(
 ) -> object:
     if param.default is inspect.Parameter.empty:
         default = ...
+    # this is the pandas sentinel value for determining if a parameter has been passed
+    # we can treat it as `None` because we only pass down kwargs that have been explicitly
+    # set by the user
     elif param.default is _NoDefault.no_default:
         default = None
     else:
