@@ -26,9 +26,6 @@ from typing import (
 
 import pandas as pd
 import pydantic
-
-# https://github.com/pandas-dev/pandas/blob/main/pandas/_typing.py
-from pandas._typing import CompressionOptions, IndexLabel, StorageOptions
 from pydantic import FilePath
 
 # from pydantic.typing import resolve_annotations
@@ -37,9 +34,20 @@ from typing_extensions import Final, Literal, TypeAlias
 from great_expectations.experimental.datasources.interfaces import DataAsset
 
 try:
-    from pandas._typing import CSVEngine
+    # https://github.com/pandas-dev/pandas/blob/main/pandas/_typing.py
+    from pandas._typing import CompressionOptions, CSVEngine, IndexLabel, StorageOptions
 except ImportError:
+    # Types may not exist on earlier version of pandas (current min ver is v.1.1.0)
+    # https://github.com/pandas-dev/pandas/blob/v1.1.0/pandas/_typing.py
+    CompressionDict = Dict[str, Any]
+    CompressionOptions = Optional[
+        Union[
+            Literal["infer", "gzip", "bz2", "zip", "xz", "zstd", "tar"], CompressionDict
+        ]
+    ]
     CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]
+    IndexLabel = Union[Hashable, Sequence[Hashable]]
+    StorageOptions = Optional[Dict[str, Any]]
 
 logger = logging.getLogger(__file__)
 
