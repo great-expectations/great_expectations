@@ -2,6 +2,7 @@ import logging
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, Type, Union
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
