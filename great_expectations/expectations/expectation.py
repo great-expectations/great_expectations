@@ -1247,6 +1247,7 @@ class Expectation(metaclass=MetaExpectation):
             )
         return self._configuration
 
+    @public_api
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
@@ -1276,6 +1277,18 @@ class Expectation(metaclass=MetaExpectation):
         If errors are encountered in the process of running the diagnostics, they are assumed to be due to
         incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
         that do not exist). These errors are added under "errors" key in the report.
+
+        Args:
+            raise_exceptions_for_backends (bool)
+            ignore_suppress (bool)
+            ignore_only_for (bool)
+            for_gallery (bool)
+            debug_logger (optional[logging.Logger])
+            only_consider_these_backends (optional[List[str]])
+            context (optional[AbstractDataContext])
+
+        Returns:
+            An Expectation Diagnostics report object
         """
 
         if debug_logger is not None:
