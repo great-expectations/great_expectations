@@ -50,8 +50,7 @@ class CheckpointResult(SerializableDictDot):
 
     Args:
         run_id: An instance of the RunIdentifier class.
-        run_results: A Dict with ValidationResultIdentifier keys and Dict values, which contains
-            at minimum a `validation_result` key and an `action_results` key.
+        run_results: A Dict with ValidationResultIdentifier keys and Dict values, which contains at minimum a `validation_result` key and an `action_results` key.
         checkpoint_config: The CheckpointConfig instance used to create this CheckpointResult.
         success: An optional boolean describing the success of all run_results in this CheckpointResult.
     """
