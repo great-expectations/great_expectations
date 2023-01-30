@@ -57,9 +57,6 @@ from great_expectations.render.renderer_configuration import (
     RendererTableValue as RendererTableValueRender,
 )
 
-if TYPE_CHECKING:
-    from great_expectations.render import RenderedContent
-
 
 # TODO: Remove this entire module for release 0.18.0
 def _get_deprecation_warning_message(classname: str) -> str:
