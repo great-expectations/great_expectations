@@ -331,7 +331,8 @@ def test_json_config_round_trip(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    re_loaded: GxConfig = GxConfig.parse_raw(dumped)
+    with mock.patch("sqlalchemy.create_engine"):
+        re_loaded: GxConfig = GxConfig.parse_raw(dumped)
     pp(re_loaded)
     assert re_loaded
 
@@ -344,7 +345,8 @@ def test_yaml_config_round_trip(
     dumped: str = from_yaml_gx_config.yaml()
     print(f"  Dumped YAML ->\n\n{dumped}\n")
 
-    re_loaded: GxConfig = GxConfig.parse_yaml(dumped)
+    with mock.patch("sqlalchemy.create_engine"):
+        re_loaded: GxConfig = GxConfig.parse_yaml(dumped)
     pp(re_loaded)
     assert re_loaded
 
@@ -363,7 +365,8 @@ def test_yaml_file_config_round_trip(
 
     print(f"  yaml_file -> \n\n{yaml_file.read_text()}")
 
-    re_loaded: GxConfig = GxConfig.parse_yaml(yaml_file)
+    with mock.patch("sqlalchemy.create_engine"):
+        re_loaded: GxConfig = GxConfig.parse_yaml(yaml_file)
     pp(re_loaded)
     assert re_loaded
 
