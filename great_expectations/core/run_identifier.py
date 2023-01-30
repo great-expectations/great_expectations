@@ -11,8 +11,14 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey
 
 
+@public_api
 class RunIdentifier(DataContextKey):
-    """A RunIdentifier identifies a run (collection of validations) by run_name and run_time."""
+    """A RunIdentifier identifies a run (collection of validations) by run_name and run_time.
+
+    Args:
+        run_name: a string or None.
+        run_time: a Datetime.datetime instance, a string, or None.
+    """
 
     def __init__(
         self,
