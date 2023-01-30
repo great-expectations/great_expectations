@@ -47,10 +47,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import pyspark
-
-    if TYPE_CHECKING:
-        from pyspark.sql import SparkSession  # noqa: F401
-
+    from pyspark.sql import SparkSession  # noqa: F401
 except ImportError:
     pyspark = None
     SparkSession = None
