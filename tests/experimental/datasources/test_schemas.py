@@ -1,4 +1,5 @@
 import json
+import sys
 from typing import Type
 
 import pandas
@@ -29,6 +30,7 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     If this test is failing run `invoke schema --sync` to update schemas and commit the
     changes.
     """
+    print(f"python version: {sys.version.split()[0]}")
     print(f"pandas version: {pandas.__version__}\n")
 
     schema_path = _SCHEMAS_DIR.joinpath(f"{zep_ds_or_asset_model.__name__}.json")
