@@ -1463,6 +1463,7 @@ class ExpectationConfiguration(SerializableDictDot):
         Args:
             validator: Object responsible for running an Expectation against data.
             runtime_configuration: A dictionary of configuration arguments to be used by the expectation.
+
         Raises:
             ExpectationNotFoundError: If the expectation implementation is not found.
 
