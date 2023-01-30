@@ -514,7 +514,14 @@ def type_schema(
             model = _SourceFactories.type_lookup[name]
             try:
                 schema_path = schema_dir.joinpath(f"{model.__name__}.json")
-                schema_path.write_text(model.schema_json(indent=indent) + "\n")
+                json_str: str = model.schema_json(indent=indent) + "\n"
+
+                if schema_path.exists():
+                    if json_str == schema_path.read_text():
+                        print(f"  {name} - {schema_path.name} unchanged")
+                        continue
+
+                schema_path.write_text(json_str)
                 print(f"  {name} - {schema_path.name} schema updated")
             except TypeError as err:
                 print(f"  Could not sync {name} schema - {type(err).__name__}:{err}")
