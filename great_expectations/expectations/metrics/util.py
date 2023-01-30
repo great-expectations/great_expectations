@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import re
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, overload
 
 import numpy as np
 import pandas as pd
@@ -12,7 +12,6 @@ from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     PandasExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
@@ -632,7 +631,6 @@ def column_reflection_fallback(
 def get_dbms_compatible_column_names(
     column_names: str,
     batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
-    execution_engine: ExecutionEngine,
     error_message_template: str = ...,
 ) -> str | sqlalchemy.sql.quoted_name:
     ...
@@ -642,7 +640,6 @@ def get_dbms_compatible_column_names(
 def get_dbms_compatible_column_names(
     column_names: List[str],
     batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
-    execution_engine: ExecutionEngine,
     error_message_template: str = ...,
 ) -> List[str | sqlalchemy.sql.quoted_name]:
     ...
@@ -651,7 +648,6 @@ def get_dbms_compatible_column_names(
 def get_dbms_compatible_column_names(
     column_names: List[str] | str,
     batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
-    execution_engine: ExecutionEngine,
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> List[str | sqlalchemy.sql.quoted_name] | str | sqlalchemy.sql.quoted_name:
     """
@@ -666,43 +662,30 @@ def get_dbms_compatible_column_names(
     Args:
         column_names: Single string-valued column name or list of string-valued column names
         batch_columns_list: Properly typed column names (output of "table.columns" metric)
-        execution_engine: "ExecutionEngine" (here, of interest is whether or not "SqlAlchemyExecutionEngine" is used)
         error_message_template: String template to output error message if any column cannot be found in "Batch" object.
 
     Returns:
         Single property-typed column name object or list of property-typed column name objects (depending on input).
     """
-    verify_column_names_exist(
-        column_names=column_names,
-        batch_columns_list=batch_columns_list,
-        error_message_template=error_message_template,
+    normalized_typed_batch_columns_mappings: List[
+        Tuple[str, str | sqlalchemy.sql.quoted_name]
+    ] = (
+        _verify_column_names_exist_and_get_normalized_typed_column_names_map(
+            column_names=column_names,
+            batch_columns_list=batch_columns_list,
+            error_message_template=error_message_template,
+        )
+        or []
     )
 
-    column_names_list: List[str]
-    is_list: bool
+    element: Tuple[str, str | sqlalchemy.sql.quoted_name]
+    typed_batch_column_names_list: List[str | sqlalchemy.sql.quoted_name] = [
+        element[1] for element in normalized_typed_batch_columns_mappings
+    ]
     if isinstance(column_names, list):
-        column_names_list = column_names
-        is_list = True
-    else:
-        column_names_list = [column_names]
-        is_list = False
+        return typed_batch_column_names_list
 
-    typed_column_names_list: List[str | sqlalchemy.sql.quoted_name]
-    if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-        column_name: str
-        batch_columns_dict: Dict[str, str | sqlalchemy.sql.quoted_name] = {
-            str(column_name): column_name for column_name in batch_columns_list
-        }
-        typed_column_names_list = [
-            batch_columns_dict[column_name] for column_name in column_names_list
-        ]
-    else:
-        typed_column_names_list = column_names_list
-
-    if is_list:
-        return typed_column_names_list
-
-    return typed_column_names_list[0]
+    return typed_batch_column_names_list[0]
 
 
 def verify_column_names_exist(
@@ -710,13 +693,31 @@ def verify_column_names_exist(
     batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> None:
+    _ = _verify_column_names_exist_and_get_normalized_typed_column_names_map(
+        column_names=column_names,
+        batch_columns_list=batch_columns_list,
+        error_message_template=error_message_template,
+        verify_only=True,
+    )
+
+
+def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
+    column_names: List[str] | str,
+    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
+    error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
+    verify_only: bool = False,
+) -> List[Tuple[str, str | sqlalchemy.sql.quoted_name]] | None:
     """
     Insures that column name or column names (supplied as argument using "str" representation) exist in "Batch" object.
 
     Args:
         column_names: Single string-valued column name or list of string-valued column names
         batch_columns_list: Properly typed column names (output of "table.columns" metric)
+        verify_only: Perform verification only (do not return normalized typed column names)
         error_message_template: String template to output error message if any column cannot be found in "Batch" object.
+
+    Returns:
+        List of tuples having mapping from string-valued column name to typed column name; None if "verify_only" is set.
     """
     # this is what we want to imitate, and then we will be ok
     column_names_list: List[str]
@@ -725,15 +726,38 @@ def verify_column_names_exist(
     else:
         column_names_list = [column_names]
 
+    def _get_normalized_column_name_mapping_if_exists(
+        column_name: str,
+    ) -> Tuple[str, str | sqlalchemy.sql.quoted_name] | None:
+        typed_column_name_cursor: str | sqlalchemy.sql.quoted_name
+        for typed_column_name_cursor in batch_columns_list:
+            if (
+                (type(typed_column_name_cursor) == str)
+                and (column_name.casefold() == typed_column_name_cursor.casefold())
+            ) or (column_name == str(typed_column_name_cursor)):
+                return column_name, typed_column_name_cursor
+
+        return None
+
+    normalized_batch_columns_mappings: List[
+        Tuple[str, str | sqlalchemy.sql.quoted_name]
+    ] = []
+
+    normalized_column_name_mapping: Tuple[str, str | sqlalchemy.sql.quoted_name] | None
     column_name: str
-
-    batch_columns_list = [str(column_name) for column_name in batch_columns_list]
-
     for column_name in column_names_list:
-        if column_name not in batch_columns_list:
+        normalized_column_name_mapping = _get_normalized_column_name_mapping_if_exists(
+            column_name=column_name
+        )
+        if normalized_column_name_mapping is None:
             raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
                 message=error_message_template.format(column_name=column_name)
             )
+        else:
+            if not verify_only:
+                normalized_batch_columns_mappings.append(normalized_column_name_mapping)
+
+    return None if verify_only else normalized_batch_columns_mappings
 
 
 def parse_value_set(value_set):

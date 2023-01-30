@@ -5,9 +5,10 @@ import pickle
 import warnings
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast, overload
 
 import pandas as pd
+from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
@@ -69,6 +70,8 @@ except ImportError:
 
 
 HASH_THRESHOLD = 1e9
+
+DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 
 
 @public_api
@@ -261,7 +264,9 @@ class PandasExecutionEngine(ExecutionEngine):
             logger.debug(
                 f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}"
             )
-            reader_fn: Callable = self._get_reader_fn(reader_method, s3_url.key)
+            reader_fn: DataFrameFactoryFn = self._get_reader_fn(
+                reader_method, s3_url.key
+            )
             buf = BytesIO(s3_object["Body"].read())
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
@@ -321,6 +326,7 @@ Bucket: {error}"""
             buf.seek(0)
             df = reader_fn(buf, **reader_options)
 
+        # Experimental datasources will go down this code path
         elif isinstance(batch_spec, PathBatchSpec):
             reader_method = batch_spec.reader_method
             reader_options = batch_spec.reader_options
@@ -413,7 +419,21 @@ not {batch_spec.__class__.__name__}"""
                 f'Unable to determine reader method from path: "{path}".'
             )
 
-    def _get_reader_fn(self, reader_method=None, path=None):
+    @overload
+    def _get_reader_fn(
+        self, reader_method: str = ..., path: Optional[str] = ...
+    ) -> DataFrameFactoryFn:
+        ...
+
+    @overload
+    def _get_reader_fn(
+        self, reader_method: None = ..., path: str = ...
+    ) -> DataFrameFactoryFn:
+        ...
+
+    def _get_reader_fn(
+        self, reader_method: Optional[str] = None, path: Optional[str] = None
+    ) -> DataFrameFactoryFn:
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
         correct reader_method.
 
@@ -432,7 +452,7 @@ not {batch_spec.__class__.__name__}"""
 
         reader_options = {}
         if reader_method is None:
-            path_guess = self.guess_reader_method_from_path(path)
+            path_guess = self.guess_reader_method_from_path(path)  # type: ignore[arg-type] # see overload
             reader_method = path_guess["reader_method"]
             reader_options = path_guess.get(
                 "reader_options"
