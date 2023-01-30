@@ -21,7 +21,7 @@ your data at various levels of granularity:
 <Prerequisites>
 
 - [Configured and loaded a Data Context](../../../tutorials/getting_started/tutorial_setup.md)
-- [Configured a Datasource and Data Connector](../../../reference/datasources.md)
+- [Configured a Datasource and Data Connector](../../../terms/datasource.md)
 - Reviewed [How to configure a DataConnector to introspect and partition tables in SQL](../how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md)
 
 </Prerequisites>
@@ -103,7 +103,7 @@ Note: Splitter methods can be specified with or without a preceding underscore.
 | `split_on_mod_integer`            | `table_name='table', column_name='col', mod=<int>`                       | Rows where value of column_name divided (using modular division) by the given mod are same                                                                                                                 |
 | `split_on_multi_column_values`    | `table_name='table', column_names='<list[col]>'`                         | Rows where values of column_names are same                                                                                                                                                                 |
 | `split_on_converted_datetime`     | `table_name='table', column_name='col', date_format_string=<'%Y-%m-%d'>` | Rows where value of column_name converted to datetime using the given date_format_string are same                                                                                                          |
-| `split_on_hashed_column`          | `column_name='col'`                                                      | Rows where value of column_name hashed (using "md5" hash function) are same (experimental)                                                                                                                 |
+| `split_on_hashed_column`          | `column_name='col', hash_digits=<int>`                                   | Rows where value of column_name hashed (using "md5" hash function) and retaining the stated number of hash_digits are same (experimental)     |
     
 
 

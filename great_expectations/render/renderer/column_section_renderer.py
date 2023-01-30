@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 import traceback
@@ -10,18 +9,18 @@ from great_expectations.core.expectation_validation_result import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.render.renderer.content_block import (
-    ExceptionListContentBlockRenderer,
-)
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
+    LegacyDescriptiveRendererType,
     RenderedBulletListContent,
     RenderedHeaderContent,
     RenderedSectionContent,
     RenderedStringTemplateContent,
     RenderedTableContent,
-    TextContent,
 )
+from great_expectations.render.renderer.content_block import (
+    ExceptionListContentBlockRenderer,
+)
+from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 logger = logging.getLogger(__name__)
@@ -293,16 +292,16 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         quantile_table_renderer = get_renderer_impl(
             object_name="expect_column_quantile_values_to_be_between",
-            renderer_type="renderer.descriptive.quantile_table",
+            renderer_type=LegacyDescriptiveRendererType.QUANTILE_TABLE,
         )[1]
         return quantile_table_renderer(result=quantile_evr)
 
     @classmethod
     def _render_stats_table(cls, evrs):
         expectation_renderers = {
-            "expect_column_mean_to_be_between": "renderer.descriptive.stats_table.mean_row",
-            "expect_column_min_to_be_between": "renderer.descriptive.stats_table.min_row",
-            "expect_column_max_to_be_between": "renderer.descriptive.stats_table.max_row",
+            "expect_column_mean_to_be_between": LegacyDescriptiveRendererType.STATS_TABLE_MEAN_ROW,
+            "expect_column_min_to_be_between": LegacyDescriptiveRendererType.STATS_TABLE_MIN_ROW,
+            "expect_column_max_to_be_between": LegacyDescriptiveRendererType.STATS_TABLE_MAX_ROW,
         }
 
         table_rows = []
@@ -352,7 +351,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         return get_renderer_impl(
             object_name="expect_column_values_to_be_in_set",
-            renderer_type="renderer.descriptive.example_values_block",
+            renderer_type=LegacyDescriptiveRendererType.EXAMPLE_VALUES_BLOCK,
         )[1](result=set_evr)
 
     def _render_histogram(self, evrs):
@@ -370,7 +369,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         return get_renderer_impl(
             object_name="expect_column_kl_divergence_to_be_less_than",
-            renderer_type="renderer.descriptive.histogram",
+            renderer_type=LegacyDescriptiveRendererType.HISTOGRAM,
         )[1](result=kl_divergence_evr)
 
     @classmethod
@@ -386,46 +385,12 @@ diagnose and repair the underlying issue.  Detailed information follows:
 
         return get_renderer_impl(
             object_name="expect_column_distinct_values_to_be_in_set",
-            renderer_type="renderer.descriptive.value_counts_bar_chart",
+            renderer_type=LegacyDescriptiveRendererType.VALUE_COUNTS_BAR_CHART,
         )[1](result=distinct_values_set_evr)
 
     @classmethod
     def _render_failed(cls, evrs):
         return ExceptionListContentBlockRenderer.render(evrs, include_column_name=False)
-
-    @classmethod
-    def _render_unrecognized(cls, evrs, content_blocks) -> None:
-        unrendered_blocks = []
-        new_block = None
-        for evr in evrs:
-            if evr.expectation_config.expectation_type not in [
-                "expect_column_to_exist",
-                "expect_column_values_to_be_of_type",
-                "expect_column_values_to_be_in_set",
-                "expect_column_unique_value_count_to_be_between",
-                "expect_column_proportion_of_unique_values_to_be_between",
-                "expect_column_values_to_not_be_null",
-                "expect_column_max_to_be_between",
-                "expect_column_mean_to_be_between",
-                "expect_column_min_to_be_between",
-            ]:
-                new_block = TextContent(**{"content_block_type": "text", "text": []})
-                new_block["content"].append(
-                    """
-    <div class="alert alert-primary" role="alert">
-        Warning! Unrendered EVR:<br/>
-    <pre>"""
-                    + json.dumps(evr, indent=2)
-                    + """</pre>
-    </div>
-                """
-                )
-
-        if new_block is not None:
-            unrendered_blocks.append(new_block)
-
-        # print(unrendered_blocks)
-        content_blocks += unrendered_blocks
 
 
 class ValidationResultsColumnSectionRenderer(ColumnSectionRenderer):

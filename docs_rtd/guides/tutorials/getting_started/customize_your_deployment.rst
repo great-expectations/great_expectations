@@ -89,7 +89,7 @@ Great Expectations generates and provides notebooks as interactive development e
 Additional Datasources
 -----------------------
 
-Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up in `the public discussion forum <https://discuss.greatexpectations.io/>`_.
+Great Expectations plugs into a wide variety of Datasources, and the list is constantly getting longer. If you have an idea for a Datasource not listed here, please speak up in `the public discussion forum <https://github.com/great-expectations/great_expectations/discussions/>`_.
 
 * :ref:`how_to_guides__configuring_datasources__how_to_configure_a_pandas_filesystem_datasource`
 * :ref:`how_to_guides__configuring_datasources__how_to_configure_a_pandas_s3_datasource`

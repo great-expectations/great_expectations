@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import logging
 from abc import ABCMeta
+from typing import Any, List
 
+from great_expectations.alias_types import PathStr
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
 
@@ -29,18 +33,28 @@ class BatchMarkers(BatchSpec):
 
 
 class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(
+        self,
+        *args,
+        path: PathStr = None,  # type: ignore[assignment] # error raised if not provided
+        reader_options: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> None:
+        if path:
+            kwargs["path"] = str(path)
+        if reader_options:
+            kwargs["reader_options"] = reader_options
         super().__init__(*args, **kwargs)
         if "path" not in self:
             raise InvalidBatchSpecError("PathBatchSpec requires a path element")
 
     @property
     def path(self) -> str:
-        return self.get("path")
+        return self.get("path")  # type: ignore[return-value]
 
     @property
     def reader_method(self) -> str:
-        return self.get("reader_method")
+        return self.get("reader_method")  # type: ignore[return-value]
 
     @property
     def reader_options(self) -> dict:
@@ -107,3 +121,40 @@ class RuntimeQueryBatchSpec(BatchSpec):
     @query.setter
     def query(self, query) -> None:
         self["query"] = query
+
+
+class GlueDataCatalogBatchSpec(BatchSpec):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        if "database_name" not in self:
+            raise InvalidBatchSpecError(
+                "GlueDataCatalogBatchSpec requires a database_name"
+            )
+        if "table_name" not in self:
+            raise InvalidBatchSpecError(
+                "GlueDataCatalogBatchSpec requires a table_name"
+            )
+
+    @property
+    def reader_method(self) -> str:
+        return "table"
+
+    @property
+    def database_name(self) -> str:
+        return self["database_name"]
+
+    @property
+    def table_name(self) -> str:
+        return self["table_name"]
+
+    @property
+    def path(self) -> str:
+        return f"{self.database_name}.{self.table_name}"
+
+    @property
+    def reader_options(self) -> dict:
+        return self.get("reader_options", {})
+
+    @property
+    def partitions(self) -> List[str]:
+        return self.get("partitions", [])

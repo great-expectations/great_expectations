@@ -1,0 +1,9 @@
+:::caution
+
+We stated above that the names that you use for your `batch_identifiers` in a Runtime Data Connector's configuration can be completely arbitrary, and will be used as keys for the `batch_identifiers` dictionary in future Batch Requests.
+
+However, the same holds true for the _values_ you pass in for each key in your Batch Request's `batch_identifiers`!
+
+Always make sure that your Batch Requests utilizing Runtime Data Connectors are providing meaningful identifying information, consistent with the keys that are derived from the `batch_identifiers` you have defined in your Runtime Data Connector's configuration.
+
+:::

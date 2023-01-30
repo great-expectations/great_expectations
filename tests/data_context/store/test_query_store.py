@@ -44,6 +44,7 @@ def sqlalchemy_query_store_specified_return_type(titanic_sqlite_db):
     )
 
 
+@pytest.mark.integration
 def test_basic_query(basic_sqlalchemy_query_store):
     assert (
         basic_sqlalchemy_query_store.get("q1") == "SELECT DISTINCT PClass FROM titanic;"
@@ -57,6 +58,7 @@ def test_basic_query(basic_sqlalchemy_query_store):
     assert res == ["1st", "2nd", "*", "3rd"]
 
 
+@pytest.mark.integration
 def test_query_connection_string(test_basic_sqlalchemy_query_store_connection_string):
     assert (
         test_basic_sqlalchemy_query_store_connection_string.get("q1")
@@ -64,6 +66,7 @@ def test_query_connection_string(test_basic_sqlalchemy_query_store_connection_st
     )
 
 
+@pytest.mark.integration
 def test_queries_with_return_types(sqlalchemy_query_store_specified_return_type):
     default_result = sqlalchemy_query_store_specified_return_type.get_query_result("q1")
     list_result = sqlalchemy_query_store_specified_return_type.get_query_result("q2")
@@ -76,6 +79,7 @@ def test_queries_with_return_types(sqlalchemy_query_store_specified_return_type)
         sqlalchemy_query_store_specified_return_type.get_query_result("error_query")
 
 
+@pytest.mark.integration
 def test_query_store_store_backend_id(basic_sqlalchemy_query_store):
     """
     What does this test and why?

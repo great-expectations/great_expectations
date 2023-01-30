@@ -83,6 +83,22 @@
                     "c": "INTEGER"
                 }
             }
+        },
+        "d4": {
+            "data": {
+                "a": [0, 0, 0, 0, 0]
+            },
+            "schemas": {
+                "SparkDFDataset": {
+                    "a": "IntegerType"
+                },
+                "mysql": {
+                    "a": "INTEGER"
+                },
+                "mssql": {
+                    "a": "INTEGER"
+                }
+            }
         }
     },
     "tests": [
@@ -176,7 +192,8 @@
             "kwargs": {
                 "column": "a"
             },
-            "expected": 5.5
+            "expected": 5.5,
+            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_median",
@@ -363,7 +380,8 @@
             "kwargs": {
                 "column": "y"
             },
-            "expected": [5]
+            "expected": [5],
+            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_modes",
@@ -371,7 +389,8 @@
             "kwargs": {
                 "column": "b"
             },
-            "expected": ["d"]
+            "expected": ["d"],
+            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_modes",
@@ -379,7 +398,8 @@
             "kwargs": {
                 "column": "d"
             },
-            "expected": ["a", "b", "c", "d", "e", "f", "g"]
+            "expected": ["a", "b", "c", "d", "e", "f", "g"],
+            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_modes",
@@ -387,7 +407,8 @@
             "kwargs": {
                 "column": "c"
             },
-            "expected": [2, 3]
+            "expected": [2, 3],
+            "suppress_test_for": ["trino"]
         },
         {
             "func": "get_column_stdev",
@@ -406,6 +427,15 @@
                 "column": "c"
             },
             "expected": 0.8366600265340755
+        },
+        {
+            "func": "get_column_stdev",
+            "dataset": "d4",
+            "tolerance": 0,
+            "kwargs": {
+                "column": "a"
+            },
+            "expected": 0
         },
         {
             "func": "get_column_hist",
@@ -527,7 +557,7 @@
                 "n_bins": 2
             },
             "expected": [1.0, 5.0, 10.0],
-            "suppress_test_for": ["sqlite"]
+            "suppress_test_for": ["sqlite", "trino"]
         }
     ]
 }

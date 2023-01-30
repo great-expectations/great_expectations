@@ -1,10 +1,12 @@
 import json
 import os
 
+import pytest
 from click.testing import CliRunner
 
 from great_expectations import DataContext
 from great_expectations.cli.v012 import cli
+from tests.cli.utils import escape_ansi
 from tests.cli.v012.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
@@ -299,18 +301,19 @@ def test_validation_operator_list_with_zero_validation_operators(
     )
 
 
+@pytest.mark.slow  # 1.03s
 def test_validation_operator_list_with_one_validation_operator(
     caplog, filesystem_csv_data_context_with_validation_operators
 ):
     project_dir = filesystem_csv_data_context_with_validation_operators.root_directory
     runner = CliRunner(mix_stderr=False)
 
-    expected_result = """[33mHeads up! This feature is Experimental. It may change. Please give us your feedback![0m[0m
-1 Validation Operator found:[0m
-[0m
- - [36mname:[0m action_list_operator[0m
-   [36mclass_name:[0m ActionListValidationOperator[0m
-   [36maction_list:[0m store_validation_result (StoreValidationResultAction) => store_evaluation_params (StoreEvaluationParametersAction) => update_data_docs (UpdateDataDocsAction)[0m"""
+    expected_result = """Heads up! This feature is Experimental. It may change. Please give us your feedback!
+1 Validation Operator found:
+
+ - name: action_list_operator
+   class_name: ActionListValidationOperator
+   action_list: store_validation_result (StoreValidationResultAction) => store_evaluation_params (StoreEvaluationParametersAction) => update_data_docs (UpdateDataDocsAction)"""
 
     result = runner.invoke(
         cli,
@@ -319,7 +322,7 @@ def test_validation_operator_list_with_one_validation_operator(
     )
     assert result.exit_code == 0
     # _capture_ansi_codes_to_file(result)
-    assert result.output.strip() == expected_result
+    assert escape_ansi(result.output).strip() == expected_result.strip()
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
@@ -328,6 +331,7 @@ def test_validation_operator_list_with_one_validation_operator(
     )
 
 
+@pytest.mark.slow  # 1.53s
 def test_validation_operator_list_with_multiple_validation_operators(
     caplog, filesystem_csv_data_context_with_validation_operators
 ):
@@ -357,18 +361,18 @@ def test_validation_operator_list_with_multiple_validation_operators(
         },
     )
     context._save_project_config()
-    expected_result = """[33mHeads up! This feature is Experimental. It may change. Please give us your feedback![0m[0m
-2 Validation Operators found:[0m
-[0m
- - [36mname:[0m action_list_operator[0m
-   [36mclass_name:[0m ActionListValidationOperator[0m
-   [36maction_list:[0m store_validation_result (StoreValidationResultAction) => store_evaluation_params (StoreEvaluationParametersAction) => update_data_docs (UpdateDataDocsAction)[0m
-[0m
- - [36mname:[0m my_validation_operator[0m
-   [36mclass_name:[0m WarningAndFailureExpectationSuitesValidationOperator[0m
-   [36maction_list:[0m store_validation_result (StoreValidationResultAction) => store_evaluation_params (StoreEvaluationParametersAction) => update_data_docs (UpdateDataDocsAction)[0m
-   [36mbase_expectation_suite_name:[0m new-years-expectations[0m
-   [36mslack_webhook:[0m https://hooks.slack.com/services/dummy[0m"""
+    expected_result = """Heads up! This feature is Experimental. It may change. Please give us your feedback!
+2 Validation Operators found:
+
+ - name: action_list_operator
+   class_name: ActionListValidationOperator
+   action_list: store_validation_result (StoreValidationResultAction) => store_evaluation_params (StoreEvaluationParametersAction) => update_data_docs (UpdateDataDocsAction)
+
+ - name: my_validation_operator
+   class_name: WarningAndFailureExpectationSuitesValidationOperator
+   action_list: store_validation_result (StoreValidationResultAction) => store_evaluation_params (StoreEvaluationParametersAction) => update_data_docs (UpdateDataDocsAction)
+   base_expectation_suite_name: new-years-expectations
+   slack_webhook: https://hooks.slack.com/services/dummy"""
 
     result = runner.invoke(
         cli,
@@ -376,20 +380,10 @@ def test_validation_operator_list_with_multiple_validation_operators(
         catch_exceptions=False,
     )
     assert result.exit_code == 0
-    # _capture_ansi_codes_to_file(result)
-    assert result.output.strip() == expected_result
+    assert escape_ansi(result.output).strip() == expected_result.strip()
 
     assert_no_logging_messages_or_tracebacks(
         my_caplog=caplog,
         click_result=result,
         allowed_deprecation_message=VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     )
-
-
-def _capture_ansi_codes_to_file(result):
-    """
-    Use this to capture the ANSI color codes when updating snapshots.
-    NOT DEAD CODE.
-    """
-    with open("ansi.txt", "w") as f:
-        f.write(result.output.strip())

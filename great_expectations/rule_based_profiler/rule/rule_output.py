@@ -1,16 +1,16 @@
 from typing import Dict, List, Optional
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.domain import Domain
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
-    RuleState,
     get_fully_qualified_parameter_names,
     get_parameter_values_for_fully_qualified_parameter_names,
 )
+from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 
 
 class RuleOutput:
@@ -40,9 +40,18 @@ class RuleOutput:
         domain: Domain
         expectation_configuration_builder: ExpectationConfigurationBuilder
         for domain in domains:
-            for (
-                expectation_configuration_builder
-            ) in self.rule_state.rule.expectation_configuration_builders:
+            expectation_configuration_builders: List[ExpectationConfigurationBuilder]
+            if (
+                self.rule_state.rule
+                and self.rule_state.rule.expectation_configuration_builders
+            ):
+                expectation_configuration_builders = (
+                    self.rule_state.rule.expectation_configuration_builders
+                )
+            else:
+                expectation_configuration_builders = []
+
+            for expectation_configuration_builder in expectation_configuration_builders:
                 expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
                         domain=domain,

@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
@@ -16,7 +16,7 @@ load_data_into_test_database(
     load_full_dataset=True,
 )
 
-context = ge.get_context()
+context = gx.get_context()
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(

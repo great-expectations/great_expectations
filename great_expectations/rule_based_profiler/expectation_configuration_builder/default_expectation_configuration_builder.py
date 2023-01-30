@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional, Set, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Set, Union
 
 from pyparsing import Combine
 from pyparsing import Optional as ppOptional
@@ -15,7 +17,8 @@ from pyparsing import (
     opAssoc,
 )
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -24,13 +27,21 @@ from great_expectations.rule_based_profiler.expectation_configuration_builder im
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import Domain, ParameterContainer
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 text = Suppress("'") + Word(alphas, alphanums) + Suppress("'")
 integer = Word(nums).setParseAction(lambda t: int(t[0]))
 var = Combine(Word("$" + alphas, alphanums + "_.") + ppOptional("[" + integer + "]"))
 comparison_operator = oneOf(">= <= != > < ==")
-binary_operator = oneOf("~ & |")
+binary_operator = oneOf("& |")
 operand = text | integer | var
 
 expr = infixNotation(
@@ -43,7 +54,7 @@ expr = infixNotation(
 
 
 class ExpectationConfigurationConditionParserError(
-    ge_exceptions.GreatExpectationsError
+    gx_exceptions.GreatExpectationsError
 ):
     pass
 
@@ -56,8 +67,8 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     ExpectationConfigurations can be optionally filtered if a supplied condition is met.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = ExpectationConfigurationBuilder.exclude_field_names | {
         "kwargs",
     }
@@ -70,7 +81,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         validation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
         **kwargs,
     ) -> None:
         """
@@ -82,7 +93,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
             validation_parameter_builder_configs: ParameterBuilder configurations, having whose outputs available (as
             fully-qualified parameter names) is pre-requisite for present ExpectationConfigurationBuilder instance
             These "ParameterBuilder" configurations help build kwargs needed for this "ExpectationConfigurationBuilder"
-            data_context: BaseDataContext associated with this ExpectationConfigurationBuilder
+            data_context: AbstractDataContext associated with this ExpectationConfigurationBuilder
             kwargs: additional arguments
         """
 
@@ -99,14 +110,14 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self._meta = meta
 
         if not isinstance(meta, dict):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{meta}" in "{self.__class__.__name__}" must be of type "dictionary" \
 (value of type "{str(type(meta))}" was encountered).
 """
             )
 
         if condition and (not isinstance(condition, str)):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{condition}" in "{self.__class__.__name__}" must be of type "string" \
 (value of type "{str(type(condition))}" was encountered).
 """
@@ -337,6 +348,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Optional[ExpectationConfiguration]:
         """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""
         parameter_name: str

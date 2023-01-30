@@ -1,10 +1,10 @@
 # Required imports for this script's purpose:
 # Import and setup for working with YAML strings:
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py imports">
 from ruamel import yaml
 
 # </snippet>
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 
 # Imports used for testing purposes (and can be left out of typical scripts):
@@ -17,14 +17,14 @@ from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py yaml">
 yaml = yaml.YAML(typ="safe")
 # </snippet>
 
 
 # Initialize your data context.
-# <snippet>
-context = ge.get_context()
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py get_context">
+context = gx.get_context()
 # </snippet>
 
 # Add datasource for all tests
@@ -57,7 +57,7 @@ context.create_expectation_suite("my_expectation_suite")
 # Define your checkpoint's configuration.
 # NOTE: Because we are directly using the Checkpoint class, we do not need to
 # specify the parameters `module_name` and `class_name`.
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py checkpoint_config">
 my_checkpoint_name = "in_memory_checkpoint"
 yaml_config = f"""
 name: {my_checkpoint_name}
@@ -85,12 +85,12 @@ validations:
 
 # Initialize your checkpoint with the Data Context and Checkpoint configuration
 # from before.
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py checkpoint">
 my_checkpoint = Checkpoint(data_context=context, **yaml.load(yaml_config))
 # </snippet>
 
 # Run your Checkpoint.
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py checkpoint_run">
 results = my_checkpoint.run()
 # </snippet>
 
@@ -108,6 +108,6 @@ assert (
 )
 assert isinstance(results.checkpoint_config, CheckpointConfig)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py open_data_docs">
 # context.open_data_docs()
 # </snippet>

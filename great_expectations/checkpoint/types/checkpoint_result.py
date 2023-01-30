@@ -2,6 +2,10 @@ import copy
 import json
 from typing import Dict, List, Optional, Union
 
+from marshmallow import Schema, fields, post_load, pre_dump
+
+from great_expectations.alias_types import JSONValues
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
@@ -12,7 +16,6 @@ from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.marshmallow__shade import Schema, fields, post_load, pre_dump
 from great_expectations.types import SerializableDictDot, safe_deep_copy
 
 
@@ -55,8 +58,10 @@ class CheckpointResult(SerializableDictDot):
             Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
         ],
         checkpoint_config: CheckpointConfig,
+        validation_result_url: Optional[str] = None,
         success: Optional[bool] = None,
     ) -> None:
+        self._validation_result_url = validation_result_url
         self._run_id = run_id
         self._run_results = run_results
         self._checkpoint_config = checkpoint_config
@@ -105,6 +110,10 @@ class CheckpointResult(SerializableDictDot):
         return self._run_id
 
     @property
+    def validation_result_url(self) -> Optional[str]:
+        return self._validation_result_url
+
+    @property
     def success(self) -> bool:
         return self._success
 
@@ -128,7 +137,16 @@ class CheckpointResult(SerializableDictDot):
             )
         return self._data_asset_names
 
+    @public_api
     def list_expectation_suite_names(self) -> List[str]:
+        """Return the list of expecation suite names for a checkpoint.
+
+        Args:
+            None
+
+        Returns:
+            self._expectation_suite_names: The list of expectation suite names.
+        """
         if self._expectation_suite_names is None:
             self._expectation_suite_names = list(
                 {
@@ -204,7 +222,7 @@ class CheckpointResult(SerializableDictDot):
         return self._validation_results_by_data_asset_name
 
     def list_data_assets_validated(
-        self, group_by: str = None
+        self, group_by: Optional[str] = None
     ) -> Union[List[dict], dict]:
         if group_by is None:
             if self._data_assets_validated is None:
@@ -281,15 +299,21 @@ class CheckpointResult(SerializableDictDot):
             }
         return self._validation_statistics
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this CheckpointResult.
+
+        Returns:
+            A JSON-serializable dict representation of this CheckpointResult.
         """
         # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
-        serializeable_dict: dict = {
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # make this refactoring infeasible at the present time.
+
+        serializable_dict: dict = {
+            "validation_result_url": self.validation_result_url,
             "run_id": self.run_id.to_json_dict(),
             "run_results": convert_to_json_serializable(
                 data=recursively_convert_to_json_serializable(test_obj=self.run_results)
@@ -297,10 +321,9 @@ class CheckpointResult(SerializableDictDot):
             "checkpoint_config": self.checkpoint_config.to_json_dict(),
             "success": convert_to_json_serializable(data=self.success),
         }
-        serializeable_dict = recursively_convert_to_json_serializable(
-            test_obj=serializeable_dict
-        )
-        return serializeable_dict
+        if not self.validation_result_url:
+            serializable_dict.pop("validation_result_url")
+        return serializable_dict
 
     def __getstate__(self):
         """
@@ -333,8 +356,8 @@ class CheckpointResult(SerializableDictDot):
         location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules make this
         refactoring infeasible at the present time.
         """
-        serializeable_dict: dict = self.to_json_dict()
-        return json.dumps(serializeable_dict, indent=2)
+        serializable_dict: dict = self.to_json_dict()
+        return json.dumps(serializable_dict, indent=2)
 
     def __str__(self) -> str:
         """

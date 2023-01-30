@@ -4,13 +4,13 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
@@ -36,10 +36,10 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         (
             selectable,
@@ -55,10 +55,11 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         nonnull_count = metrics.get("column_values.nonnull.count")
         if not nonnull_count:
             return None
+
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)
-            .where(column != None)
+            .where(column != None)  # noqa: E711
             .offset(max(nonnull_count // 2 - 1, 0))
             .limit(2)
             .select_from(selectable)
@@ -79,17 +80,21 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             )  # Average center values
         else:
             # An odd number of column values, we can just take the center value
-            column_median = column_values[1][0]  # True center value
+            if len(column_values) == 1:
+                column_median = column_values[0][0]  # The only value
+            else:
+                column_median = column_values[1][0]  # True center value
+
         return column_median
 
     @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
     def _spark(
         cls,
-        execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        execution_engine: SparkDFExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         (
             df,

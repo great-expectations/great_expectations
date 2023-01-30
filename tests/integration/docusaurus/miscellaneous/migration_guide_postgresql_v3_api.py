@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 
 CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
@@ -16,7 +16,7 @@ load_data_into_test_database(
     load_full_dataset=True,
 )
 
-context = ge.get_context()
+context = gx.get_context()
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
@@ -38,10 +38,12 @@ expected_existing_datasource_yaml = r"""
       connection_string: postgresql+psycopg2://postgres:@localhost/test_ci
     data_connectors:
       default_runtime_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
         class_name: RuntimeDataConnector
         batch_identifiers:
           - default_identifier_name
       default_inferred_data_connector_name:
+        module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetSqlDataConnector
         include_schema_name: true
 """

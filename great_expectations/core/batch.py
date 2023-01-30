@@ -1,12 +1,18 @@
+import dataclasses
 import datetime
 import json
 import logging
 from typing import Any, Callable, Dict, Optional, Set, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.alias_types import JSONValues
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
+from great_expectations.experimental.datasources.interfaces import (
+    BatchRequest as XBatchRequest,
+)
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -14,15 +20,50 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 logger = logging.getLogger(__name__)
 
 try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
+    logger.debug(
+        "Unable to load pandas; install optional pandas dependency for support."
+    )
+
+try:
     import pyspark
+    from pyspark.sql import DataFrame as SparkDataFrame
 except ImportError:
     pyspark = None
+    SparkDataFrame = None
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
 
 
+@public_api
 class BatchDefinition(SerializableDictDot):
+    """Precisely identifies a set of data from a data source.
+
+    More concretely, a BatchDefinition includes all the information required to precisely
+    identify a set of data from the external data source that should be
+    translated into a Batch. One or more BatchDefinitions should always be
+    *returned* from the Datasource, as a result of processing the Batch Request.
+
+    ---Documentation---
+            - https://docs.greatexpectations.io/docs/terms/batch/#batches-and-batch-requests-design-motivation
+
+    Args:
+        datasource_name: name of the Datasource used to connect to the data
+        data_connector_name: name of the DataConnector used to connect to the data
+        data_asset_name: name of the DataAsset used to connect to the data
+        batch_identifiers: key-value pairs that the DataConnector
+            will use to obtain a specific set of data
+        batch_spec_passthrough: a dictionary of additional parameters that
+            the ExecutionEngine will use to obtain a specific set of data
+
+    Returns:
+        BatchDefinition
+    """
+
     def __init__(
         self,
         datasource_name: str,
@@ -46,21 +87,29 @@ class BatchDefinition(SerializableDictDot):
         self._batch_identifiers = batch_identifiers
         self._batch_spec_passthrough = batch_spec_passthrough
 
-    def to_json_dict(self) -> dict:
-        return convert_to_json_serializable(
-            {
-                "datasource_name": self.datasource_name,
-                "data_connector_name": self.data_connector_name,
-                "data_asset_name": self.data_asset_name,
-                "batch_identifiers": self.batch_identifiers,
-            }
-        )
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this BatchDefinition.
+
+        Returns:
+            A JSON-serializable dict representation of this BatchDefinition.
+        """
+        fields_dict: dict = {
+            "datasource_name": self._datasource_name,
+            "data_connector_name": self._data_connector_name,
+            "data_asset_name": self._data_asset_name,
+            "batch_identifiers": self._batch_identifiers,
+        }
+        if self._batch_spec_passthrough:
+            fields_dict["batch_spec_passthrough"] = self._batch_spec_passthrough
+
+        return convert_to_json_serializable(data=fields_dict)
 
     def __repr__(self) -> str:
         doc_fields_dict: dict = {
             "datasource_name": self._datasource_name,
             "data_connector_name": self._data_connector_name,
-            "data_asset_name": self.data_asset_name,
+            "data_asset_name": self._data_asset_name,
             "batch_identifiers": self._batch_identifiers,
         }
         return str(doc_fields_dict)
@@ -260,14 +309,20 @@ class BatchRequestBase(SerializableDictDot):
             batch_request=super().to_dict()
         )
 
-    def to_json_dict(self) -> dict:
+    # While this class is private, it is inherited from and this method is part
+    # of the public api on the child.
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this BatchRequestBase.
+
+        Returns:
+            A JSON-serializable dict representation of this BatchRequestBase.
         """
         # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # make this refactoring infeasible at the present time.
 
         # if batch_data appears in BatchRequest, temporarily replace it with
         # str placeholder before calling convert_to_json_serializable so that
@@ -373,10 +428,45 @@ is illegal.
             )
 
 
+@public_api
 class BatchRequest(BatchRequestBase):
-    """
-    This class contains all attributes of a batch_request.  See the comments in BatchRequestBase for design specifics.
-    limit: refers to the number of batches requested (not rows per batch)
+    """A BatchRequest is the way to specify which data Great Expectations will validate.
+
+    A Batch Request is provided to a Datasource in order to create a Batch.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource/#1-construct-a-batchrequest
+        - https://docs.greatexpectations.io/docs/terms/batch_request
+
+    The `data_connector_query` parameter can include an index slice:
+
+    ```python
+    {
+        "index": "-3:"
+    }
+    ```
+
+    or it can include a filter:
+
+    ```python
+    {
+        "batch_filter_parameters": {"year": "2020"}
+    }
+    ```
+
+    Args:
+        datasource_name: name of the Datasource used to connect to the data
+        data_connector_name: name of the DataConnector used to connect to the data
+        data_asset_name: name of the DataAsset used to connect to the data
+        data_connector_query: a dictionary of query parameters the DataConnector
+            should use to filter the batches returned from a BatchRequest
+        limit: if specified, the maximum number of *batches* to be returned
+            (limit does not affect the number of records in each batch)
+        batch_spec_passthrough: a dictionary of additional parameters that
+            the ExecutionEngine will use to obtain a specific set of data
+
+    Returns:
+        BatchRequest
     """
 
     include_field_names: Set[str] = {
@@ -414,7 +504,47 @@ class BatchRequest(BatchRequestBase):
         )
 
 
+@public_api
 class RuntimeBatchRequest(BatchRequestBase):
+    """A RuntimeBatchRequest creates a Batch for a RuntimeDataConnector.
+
+    Instead of serving as a description of what data Great Expectations should
+    fetch, a RuntimeBatchRequest serves as a wrapper for data that is passed in
+    at runtime (as an in-memory dataframe, file/S3 path, or SQL query), with
+    user-provided identifiers for uniquely identifying the data.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/terms/batch_request/#runtimedataconnector-and-runtimebatchrequest
+        - https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector/
+
+    runtime_parameters will vary depending on the Datasource used with the data.
+
+    For a dataframe:
+
+    ```python
+    {"batch_data": df}
+    ```
+
+    For a path on a filesystem:
+
+    ```python
+        {"path": "/path/to/data/file.csv"}
+    ```
+
+    Args:
+        datasource_name: name of the Datasource used to connect to the data
+        data_connector_name: name of the DataConnector used to connect to the data
+        data_asset_name: name of the DataAsset used to connect to the data
+        runtime_parameters: a dictionary containing the data to process,
+            a path to the data, or a query, depending on the associated Datasource
+        batch_identifiers: a dictionary to serve as a persistent, unique
+            identifier for the data included in the Batch
+        batch_spec_passthrough: a dictionary of additional parameters that
+            the ExecutionEngine will use to obtain a specific set of data
+    Returns:
+        BatchRequest
+    """
+
     include_field_names: Set[str] = {
         "datasource_name",
         "data_connector_name",
@@ -494,19 +624,67 @@ class BatchMarkers(BatchKwargs):
         return self.get("ge_load_time")
 
 
+class BatchData:
+    def __init__(self, execution_engine) -> None:
+        self._execution_engine = execution_engine
+
+    @property
+    def execution_engine(self):
+        return self._execution_engine
+
+    # noinspection PyMethodMayBeStatic
+    def head(self, *args, **kwargs):
+        # CONFLICT ON PURPOSE. REMOVE.
+        return pd.DataFrame({})
+
+
+BatchDataType = Union[BatchData, pd.DataFrame, SparkDataFrame]
+
+
 # TODO: <Alex>This module needs to be cleaned up.
 #  We have Batch used for the legacy design, and we also need Batch for the new design.
 #  However, right now, the Batch from the legacy design is imported into execution engines of the new design.
 #  As a result, we have multiple, inconsistent versions of BatchMarkers, extending legacy/new classes.</Alex>
 # TODO: <Alex>See also "great_expectations/datasource/types/batch_spec.py".</Alex>
+@public_api
+@deprecated_argument(argument_name="data_context", version="0.14.0")
+@deprecated_argument(argument_name="datasource_name", version="0.14.0")
+@deprecated_argument(argument_name="batch_parameters", version="0.14.0")
+@deprecated_argument(argument_name="batch_kwargs", version="0.14.0")
 class Batch(SerializableDictDot):
+    """A Batch is a selection of records from a Data Asset.
+
+    A Datasource produces Batch objects to interact directly with data. Creating
+    a Batch does NOT require moving data; the Batch facilitates access to the
+    data and maintains metadata.
+
+    ---Documentation---
+            - https://docs.greatexpectations.io/docs/terms/batch/
+
+    Args:
+        data: A BatchDataType object which interacts directly with the
+            ExecutionEngine.
+        batch_request: BatchRequest that was used to obtain the data.
+        batch_definition: Complete BatchDefinition that describes the data.
+        batch_spec: Complete BatchSpec that describes the data.
+        batch_markers: Additional metadata that may be useful to understand
+            batch.
+        data_context: DataContext connected to the
+        datasource_name: name of datasource used to obtain the batch
+        batch_parameters: keyword arguments describing the batch data
+        batch_kwargs: keyword arguments used to request a batch from a Datasource
+
+    Returns:
+        Batch instance created.
+    """
+
     def __init__(
         self,
-        data,
+        data: Optional[BatchDataType] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        batch_definition: BatchDefinition = None,
-        batch_spec: BatchSpec = None,
-        batch_markers: BatchMarkers = None,
+        batch_definition: Optional[BatchDefinition] = None,
+        batch_spec: Optional[BatchSpec] = None,
+        batch_markers: Optional[BatchMarkers] = None,
         # The remaining parameters are for backward compatibility.
         data_context=None,
         datasource_name=None,
@@ -516,12 +694,17 @@ class Batch(SerializableDictDot):
         self._data = data
         if batch_request is None:
             batch_request = {}
+
         self._batch_request = batch_request
+
         if batch_definition is None:
             batch_definition = IDDict()
+
         self._batch_definition = batch_definition
+
         if batch_spec is None:
             batch_spec = BatchSpec()
+
         self._batch_spec = batch_spec
 
         if batch_markers is None:
@@ -532,6 +715,7 @@ class Batch(SerializableDictDot):
                     ).strftime("%Y%m%dT%H%M%S.%fZ")
                 }
             )
+
         self._batch_markers = batch_markers
 
         # The remaining parameters are for backward compatibility.
@@ -541,8 +725,14 @@ class Batch(SerializableDictDot):
         self._batch_kwargs = batch_kwargs or BatchKwargs()
 
     @property
-    def data(self):
+    def data(self) -> BatchDataType:
+        """Getter for Batch data"""
         return self._data
+
+    @data.setter
+    def data(self, value: BatchDataType) -> None:
+        """Setter for Batch data"""
+        self._data = value
 
     @property
     def batch_request(self):
@@ -597,7 +787,13 @@ class Batch(SerializableDictDot):
         }
         return dict_obj
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this Batch.
+
+        Returns:
+            A JSON-serializable dict representation of this Batch.
+        """
         json_dict: dict = self.to_dict()
         deep_filter_properties_iterable(
             properties=json_dict["batch_request"],
@@ -608,16 +804,37 @@ class Batch(SerializableDictDot):
     @property
     def id(self):
         batch_definition = self._batch_definition
-        return (
-            batch_definition.id
-            if isinstance(batch_definition, BatchDefinition)
-            else batch_definition.to_id()
-        )
+        if isinstance(batch_definition, BatchDefinition):
+            return batch_definition.id
+
+        if isinstance(batch_definition, IDDict):
+            return batch_definition.to_id()
+
+        if isinstance(batch_definition, dict):
+            return IDDict(batch_definition).to_id()
+
+        return IDDict({}).to_id()
 
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @public_api
     def head(self, n_rows=5, fetch_all=False):
+        """Return the first n rows from the Batch.
+
+        This function returns the first n_rows rows. It is useful for quickly testing
+        if your object has the data you expected.
+
+        It will always obtain data from the Datasource and return a Pandas
+        DataFrame available locally.
+
+        Args:
+             n_rows: the number of rows to return
+             fetch_all: whether to fetch all rows; overrides n_rows if set to True
+
+        Returns:
+            A Pandas DataFrame
+        """
         # FIXME - we should use a Validator after resolving circularity
         # Validator(self._data.execution_engine, batches=(self,)).get_metric(MetricConfiguration("table.head", {"batch_id": self.id}, {"n_rows": n_rows, "fetch_all": fetch_all}))
         metric = MetricConfiguration(
@@ -639,7 +856,11 @@ def materialize_batch_request(
         return None
 
     batch_request_class: type
-    if batch_request_contains_runtime_parameters(batch_request=effective_batch_request):
+    if "options" in effective_batch_request:
+        batch_request_class = XBatchRequest
+    elif batch_request_contains_runtime_parameters(
+        batch_request=effective_batch_request
+    ):
         batch_request_class = RuntimeBatchRequest
     else:
         batch_request_class = BatchRequest
@@ -667,7 +888,7 @@ def batch_request_contains_runtime_parameters(
 
 
 def get_batch_request_as_dict(
-    batch_request: Optional[Union[BatchRequestBase, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, XBatchRequest, dict]] = None
 ) -> Optional[dict]:
     if batch_request is None:
         return None
@@ -675,10 +896,13 @@ def get_batch_request_as_dict(
     if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
         batch_request = batch_request.to_dict()
 
+    if isinstance(batch_request, XBatchRequest):
+        batch_request = dataclasses.asdict(batch_request)
+
     return batch_request
 
 
-def get_batch_request_from_acceptable_arguments(
+def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     datasource_name: Optional[str] = None,
     data_connector_name: Optional[str] = None,
     data_asset_name: Optional[str] = None,
@@ -737,17 +961,19 @@ def get_batch_request_from_acceptable_arguments(
     """
 
     if batch_request:
-        if not isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
+        if not isinstance(
+            batch_request, (BatchRequest, RuntimeBatchRequest, XBatchRequest)
+        ):
             raise TypeError(
-                f"""batch_request must be an instance of BatchRequest or RuntimeBatchRequest object, not \
-{type(batch_request)}"""
+                "batch_request must be a BatchRequest, RuntimeBatchRequest, or a "
+                f"experimental.datasources.interfaces.BatchRequest object, not {type(batch_request)}"
             )
         datasource_name = batch_request.datasource_name
 
     # ensure that the first parameter is datasource_name, which should be a str. This check prevents users
     # from passing in batch_request as an unnamed parameter.
     if not isinstance(datasource_name, str):
-        raise ge_exceptions.GreatExpectationsTypeError(
+        raise gx_exceptions.GreatExpectationsTypeError(
             f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
         )
 

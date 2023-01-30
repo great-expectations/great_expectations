@@ -18,7 +18,7 @@ A Checkpoint is the primary means for validating data in a production deployment
 
 ### Features and promises
 
-Checkpoints provide a convenient abstraction for bundling the <TechnicalTag relative="../" tag="validation" text="Validation" /> of a <TechnicalTag relative="../" tag="batch" text="Batch (or Batches)" /> of data against an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> (or several), as well as the <TechnicalTag relative="../" tag="action" text="Actions" /> that should be taken after the validation. 
+Checkpoints provide a convenient abstraction for bundling the <TechnicalTag relative="../" tag="validation" text="Validation" /> of a <TechnicalTag relative="../" tag="batch" text="Batch (or Batches)" /> of data against an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> (or several), as well as the <TechnicalTag relative="../" tag="action" text="Actions" /> that should be taken after the validation.
 
 Like Expectation Suites and <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, Checkpoints are managed using a <TechnicalTag relative="../" tag="data_context" text="Data Context" />, and have their own Store which is used to persist their configurations to YAML files. These configurations can be committed to version control and shared with your team.
 
@@ -86,7 +86,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
    Each validation dictionary has three required and three optional keys:
     * #### Required keys
         1. `batch_request`: a dictionary describing the batch of data to validate (learn more about specifying Batches
-           here: [Dividing data assets into Batches](../reference/dividing_data_assets_into_batches.md))
+           here: [Batches](../terms/batch.md))
         1. `expectation_suite_name`: the name of the Expectation Suite to validate the batch of data against
         1. `action_list`: a list of actions to perform after each batch is validated
 
@@ -94,7 +94,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
         1. `name`: providing a name will allow referencing the validation inside the run by name (e.g. "
            user_table_validation")
         1. `evaluation_parameters`: used to define named parameters using Great
-           Expectations [Evaluation Parameter syntax](../reference/evaluation_parameters.md)
+           Expectations [Evaluation Parameter syntax](../terms/evaluation_parameter.md)
         1. `runtime_configuration`: provided to the Validator's `runtime_configuration` (e.g. `result_format`)
 
 #### Optional keys
@@ -150,7 +150,7 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 **runtime**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L181
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint"
 ```
 
 </TabItem>
@@ -164,12 +164,12 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 
 **Runtime**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L234
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2"
 ```
 
 **Results**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L239-L254
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets"
 ```
 
 ```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L258-L268
@@ -186,12 +186,12 @@ This configuration omits the "validations" key from the YAML, which means a "val
 
 **Runtime**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L301-L321
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_3"
 ```
 
 **Results**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L325-L340
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_2"
 ```
 
 ```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L345-L355
@@ -208,12 +208,12 @@ This configuration references the Checkpoint detailed in the previous example ("
 
 **Runtime**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L383
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_4"
 ```
 
 **Results**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L387-L402
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_3"
 ```
 
 ```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L407-L417
@@ -235,12 +235,12 @@ This configuration specifies the SimpleCheckpoint class under the "class_name" k
 
 **Runtime**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L501
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_6"
 ```
 
 **Results**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L507-L511
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite_2"
 ```
 
 ```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L516-L520
@@ -274,7 +274,7 @@ Below is an example of a `CheckpointResult` object which itself contains `Valida
 
 #### Example CheckpointResult
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L101-L115
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py results"
 ```
 
 ### Example script

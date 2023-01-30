@@ -18,7 +18,7 @@ def store(ctx: click.Context) -> None:
         end_event_name,
     ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
         noun=cli_event_noun,
-        verb=ctx.invoked_subcommand,
+        verb=ctx.invoked_subcommand,  # type: ignore[arg-type]
     )
     send_usage_message(
         data_context=ctx.obj.data_context,
@@ -48,7 +48,7 @@ def store_list(ctx: click.Context):
         )
     except Exception as e:
         toolkit.exit_with_failure_message_and_stats(
-            context=context,
+            data_context=context,
             usage_event=usage_event_end,
             message=f"<red>{e}</red>",
         )

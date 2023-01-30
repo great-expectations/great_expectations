@@ -2,7 +2,7 @@
 
 import logging
 import warnings
-from typing import Any, List
+from typing import Any, List, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -209,7 +209,7 @@ def build_continuous_partition_object(
     """Convenience method for building a partition object on continuous data from a dataset and column
 
     Args:
-        dataset (GE Dataset): the dataset for which to compute the partition
+        dataset (GX Dataset): the dataset for which to compute the partition
         column (string): The name of the column for which to construct the estimate.
         bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto'
             (for automatically spaced bins)
@@ -252,7 +252,7 @@ def build_categorical_partition_object(dataset, column, sort="value"):
     """Convenience method for building a partition object on categorical data from a dataset and column
 
     Args:
-        dataset (GE Dataset): the dataset for which to compute the partition
+        dataset (GX Dataset): the dataset for which to compute the partition
         column (string): The name of the column for which to construct the estimate.
         sort (string): must be one of "value", "count", or "none".
             - if "value" then values in the resulting partition object will be sorted lexigraphically
@@ -545,7 +545,7 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
     return
@@ -600,3 +600,21 @@ def check_sql_engine_dialect(
         return isinstance(actual_sql_engine_dialect, candidate_sql_engine_dialect)
     except (AttributeError, TypeError):
         return False
+
+
+def validate_mostly(mostly: Optional[Union[int, float]]) -> None:
+    """Validate mostly parameter is a number between 0 and 1 or None.
+
+    Args:
+        mostly: The mostly parameter for an expectation configuration.
+
+    Raises:
+        AssertionError: Raised is mostly is defined and not a number between 0 and 1.
+    """
+    if mostly is not None:
+        # Even though we type mostly as an int or float, we can't typecheck this whole project and
+        # need to verify the type.
+        assert isinstance(
+            mostly, (int, float)
+        ), "'mostly' parameter must be an integer or float"
+        assert 0 <= mostly <= 1, "'mostly' parameter must be between 0 and 1"

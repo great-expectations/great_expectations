@@ -1,0 +1,5 @@
+In a Configured Asset Data Connector for filesystem data, each entry in the `assets` dictionary will correspond to an explicitly defined Data Asset.  The key provided will be used as the name of the Data Asset, while the value will be a dictionary that contains two additional keys:
+- `pattern`: This is the regex pattern that will define your Data Asset's potential Batch or Batches.
+- `group_names`: This is a list of names that correspond to the groups you defined in `pattern`'s regular expression.
+
+The `pattern` in each `assets` entry will be matched against the files in your `base_directory`, and everything that matches against the `pattern`'s value will become a Batch in a Data Asset with a name matching the key for this entry in the `assets` dictionary.

@@ -91,7 +91,8 @@ Each example is a dictionary with two keys:
 
 In our example, `data` will have two columns, "x" and "y", each with five rows. If you define multiple columns, make sure that they have the same number of rows. When possible, include test data and tests that includes null values (`None` in the Python test definition).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L88
+```python
+"data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
 ```
 
 When you define data in your examples, we will mostly guess the type of the columns. 
@@ -134,9 +135,9 @@ You will need to:
 3. Decide how precisely you want to test the output of your tests (`exact_match_out`)
 4. Define the expected output for your tests (`out`)
 
-If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publically displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
+If you are interested in contributing your Custom Expectation back to Great Expectations, you will also need to decide if you want these tests publicly displayed to demonstrate the functionality of your Custom Expectation (`include_in_gallery`).
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L132
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
@@ -188,5 +189,5 @@ If you believe your Custom Expectation is otherwise ready for contribution at a 
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
 :::

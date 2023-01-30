@@ -2,16 +2,18 @@ from typing import Optional
 
 import pytest
 
-from great_expectations.rule_based_profiler.helpers.util import (
-    integer_semantic_domain_type,
-)
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     SemanticDomainTypes,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.helpers.util import (
+    integer_semantic_domain_type,
+)
 
 
+@pytest.mark.unit
 def test_semantic_domain_consistency():
     domain: Domain
 
@@ -36,6 +38,7 @@ def test_semantic_domain_consistency():
     )
 
 
+@pytest.mark.unit
 def test_semantic_domain_serialization():
     domain: Domain
 
@@ -116,6 +119,7 @@ def test_semantic_domain_serialization():
     }
 
 
+@pytest.mark.unit
 def test_semantic_domain_equivalence():
     domain_a: Domain
     domain_b: Domain
@@ -189,7 +193,7 @@ def test_semantic_domain_equivalence():
     assert not (domain_a == domain_b)
     assert domain_b == domain_c
 
-    domain_d: Domain = Domain(
+    domain_d = Domain(
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={
@@ -209,7 +213,7 @@ def test_semantic_domain_equivalence():
         in str(excinfo.value)
     )
 
-    domain_e: Domain = Domain(
+    domain_e = Domain(
         domain_type="column",
         domain_kwargs={"column": "passenger_count"},
         details={
@@ -232,9 +236,53 @@ def test_semantic_domain_equivalence():
     )
 
 
+@pytest.mark.unit
 def test_semantic_domain_comparisons_inclusion():
     domain_a: Optional[Domain]
     domain_b: Optional[Domain]
+
+    domain_a = Domain(
+        domain_type=MetricDomainTypes.TABLE,
+        domain_kwargs={
+            "table": "animal_names",
+        },
+        rule_name="my_rule",
+    )
+
+    domain_b = Domain(
+        domain_type="table",
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_a = Domain(
+        domain_type="column_pair",
+        domain_kwargs={"column_A": "w", "column_B": "x"},
+        details={
+            INFERRED_SEMANTIC_TYPE_KEY: {
+                "w": SemanticDomainTypes.NUMERIC,
+                "x": SemanticDomainTypes.NUMERIC,
+            },
+        },
+        rule_name="my_rule",
+    )
+
+    domain_b = Domain(
+        domain_type="column_pair",
+        domain_kwargs={
+            "column_A": "w",
+            "column_B": "x",
+        },
+    )
+    assert domain_a.is_superset(other=domain_b)
+
+    domain_b = Domain(
+        domain_type="column_pair",
+        domain_kwargs={
+            "column_B": "x",
+            "column_A": "w",
+        },
+    )
+    assert domain_a.is_superset(other=domain_b)
 
     domain_a = Domain(
         domain_type="column",
@@ -381,6 +429,7 @@ def test_semantic_domain_comparisons_inclusion():
     assert not domain_a.is_superset(other=domain_b)
 
 
+@pytest.mark.unit
 def test_integer_semantic_domain_type():
     domain: Domain
 

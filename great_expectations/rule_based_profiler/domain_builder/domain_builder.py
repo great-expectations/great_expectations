@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
 from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.core.domain import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
 )
@@ -12,12 +16,17 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
 )
-from great_expectations.rule_based_profiler.types import (
-    Builder,
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.validator.validator import Validator
 
 
 class DomainBuilder(ABC, Builder):
@@ -27,11 +36,11 @@ class DomainBuilder(ABC, Builder):
 
     def __init__(
         self,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
-            data_context: BaseDataContext associated with DomainBuilder
+            data_context: AbstractDataContext associated with DomainBuilder
         """
         super().__init__(data_context=data_context)
 
@@ -41,6 +50,7 @@ class DomainBuilder(ABC, Builder):
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         Args:
@@ -48,6 +58,7 @@ class DomainBuilder(ABC, Builder):
             variables: attribute name/value pairs
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of Domain objects.
@@ -55,12 +66,16 @@ class DomainBuilder(ABC, Builder):
         Note: Please do not overwrite the public "get_domains()" method.  If a child class needs to check parameters,
         then please do so in its implementation of the (private) "_get_domains()" method, or in a utility method.
         """
-        self.set_batch_list_or_batch_request(
+        self.set_batch_list_if_null_batch_request(
             batch_list=batch_list,
             batch_request=batch_request,
         )
 
-        return self._get_domains(rule_name=rule_name, variables=variables)
+        return self._get_domains(
+            rule_name=rule_name,
+            variables=variables,
+            runtime_configuration=runtime_configuration,
+        )
 
     @property
     @abstractmethod
@@ -72,6 +87,7 @@ class DomainBuilder(ABC, Builder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         _get_domains is the primary workhorse for the DomainBuilder
@@ -81,9 +97,10 @@ class DomainBuilder(ABC, Builder):
 
     def get_table_row_counts(
         self,
-        validator: Optional["Validator"] = None,  # noqa: F821
+        validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Dict[str, int]:
         if validator is None:
             validator = self.get_validator(variables=variables)
@@ -103,24 +120,23 @@ class DomainBuilder(ABC, Builder):
                     metric_value_kwargs={
                         "include_nested": True,
                     },
-                    metric_dependencies=None,
                 )
             ]
-            for batch_id in batch_ids
+            for batch_id in batch_ids  # type: ignore[union-attr] # could be None
         }
 
         resolved_metrics_by_batch_id: Dict[
-            str, Dict[Tuple[str, str, str], Any]
+            str, Dict[Tuple[str, str, str], MetricValue]
         ] = get_resolved_metrics_by_key(
-            validator=validator,
+            validator=validator,  # type: ignore[arg-type] # could be None
             metric_configurations_by_key=metric_configurations_by_batch_id,
+            runtime_configuration=runtime_configuration,
         )
 
-        batch_id: str
-        resolved_metrics: Dict[Tuple[str, str, str], Any]
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         metric_value: Any
         table_row_count_lists_by_batch_id: Dict[str, List[int]] = {
-            batch_id: [metric_value for metric_value in resolved_metrics.values()]
+            batch_id: [metric_value for metric_value in resolved_metrics.values()]  # type: ignore[misc] # incompatible values
             for batch_id, resolved_metrics in resolved_metrics_by_batch_id.items()
         }
         table_row_counts_by_batch_id: Dict[str, int] = {
@@ -133,7 +149,7 @@ class DomainBuilder(ABC, Builder):
     def get_validator(
         self,
         variables: Optional[ParameterContainer] = None,
-    ) -> Optional["Validator"]:  # noqa: F821
+    ) -> Optional[Validator]:
         return get_validator_using_batch_list_or_batch_request(
             purpose="domain_builder",
             data_context=self.data_context,

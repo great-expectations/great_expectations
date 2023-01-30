@@ -1,17 +1,21 @@
+from __future__ import annotations
+
 import importlib
 import logging
 from typing import List, Optional
 
 import click
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations import DataContext
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import (
-    FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE,
+    FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE,
 )
 
 try:
@@ -27,7 +31,7 @@ class CLIState:
         self,
         v3_api: bool = True,
         config_file_location: Optional[str] = None,
-        data_context: Optional[DataContext] = None,
+        data_context: Optional[FileDataContext] = None,
         assume_yes: bool = False,
     ) -> None:
         self.v3_api = v3_api
@@ -35,23 +39,27 @@ class CLIState:
         self._data_context = data_context
         self.assume_yes = assume_yes
 
-    def get_data_context_from_config_file(self) -> DataContext:
-        directory: str = toolkit.parse_cli_config_file_location(
-            config_file_location=self.config_file_location
-        ).get("directory")
-        context: DataContext = toolkit.load_data_context_with_error_handling(
+    def get_data_context_from_config_file(self) -> FileDataContext:
+        directory: str = toolkit.parse_cli_config_file_location(  # type: ignore[assignment] # could be None
+            config_file_location=self.config_file_location  # type: ignore[arg-type] # could be None
+        ).get(
+            "directory"
+        )
+        context: FileDataContext = toolkit.load_data_context_with_error_handling(  # type: ignore[assignment] # will exit if error
             directory=directory,
             from_cli_upgrade_command=False,
         )
         return context
 
     @property
-    def data_context(self) -> Optional[DataContext]:
+    def data_context(self) -> Optional[FileDataContext]:
         return self._data_context
 
     @data_context.setter
-    def data_context(self, data_context: DataContext) -> None:
-        assert isinstance(data_context, DataContext)
+    def data_context(self, data_context: FileDataContext) -> None:
+        assert isinstance(
+            data_context, FileDataContext
+        ), "GX CLI interaction requires a FileDataContext"
         self._data_context = data_context
 
     def __repr__(self) -> str:
@@ -74,7 +82,7 @@ class CLI(click.MultiCommand):
 
         return commands
 
-    def get_command(self, ctx: click.Context, name: str) -> Optional[str]:
+    def get_command(self, ctx: click.Context, name: str) -> Optional[str]:  # type: ignore[override] # MultiCommand returns `Optional[Command]`
         module_name = name.replace("-", "_")
         legacy_module = ""
         if not self.is_v3_api(ctx):
@@ -87,7 +95,7 @@ class CLI(click.MultiCommand):
 
         except ModuleNotFoundError:
             cli_message(
-                f"<red>The command `{name}` does not exist.\nPlease use one of: {self.list_commands(None)}</red>"
+                f"<red>The command `{name}` does not exist.\nPlease use one of: {self.list_commands(None)}</red>"  # type: ignore[arg-type] # expects click Context
             )
             return None
 
@@ -106,11 +114,11 @@ class CLI(click.MultiCommand):
     def is_v3_api(ctx: click.Context) -> bool:
         """Determine if v3 api is requested by searching context params."""
         if ctx.params:
-            return ctx.params and "v3_api" in ctx.params.keys() and ctx.params["v3_api"]
+            return ctx.params and "v3_api" in ctx.params.keys() and ctx.params["v3_api"]  # type: ignore[return-value]  # could be non-bool
 
         root_ctx_params = ctx.find_root().params
         return (
-            root_ctx_params
+            root_ctx_params  # type: ignore[return-value]  # could be non-bool
             and "v3_api" in root_ctx_params.keys()
             and root_ctx_params["v3_api"]
         )
@@ -178,10 +186,10 @@ def cli(
         cli_message("Using v2 (Batch Kwargs) API")
 
         ge_config_version: float = (
-            ctx.obj.get_data_context_from_config_file().get_config().config_version
+            ctx.obj.get_data_context_from_config_file().get_config().config_version  # type: ignore[union-attr]  # config_version
         )
-        if ge_config_version >= FIRST_GE_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
-            raise ge_exceptions.InvalidDataContextConfigError(
+        if ge_config_version >= FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
+            raise gx_exceptions.InvalidDataContextConfigError(
                 f"Using the legacy v2 (Batch Kwargs) API with a recent config version ({ge_config_version}) is illegal."
             )
 

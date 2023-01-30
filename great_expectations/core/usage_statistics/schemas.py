@@ -2,17 +2,20 @@
 # These schemas are used to ensure that we *never* take unexpected usage stats message and provide full transparency
 # about usage statistics. Please reach out to the Great Expectations with any questions!
 ###
+from typing import List
 
-
-# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
 )
+
+# An anonymized string *must* be an md5 hash, so must have exactly 32 characters
+from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.execution_environment import (
     InstallEnvironment,
 )
 
-SCHEMA: str = "http://json-schema.org/draft-04/schema#"
+SCHEMA: str = "https://json-schema.org/draft/2020-12/schema"
+ALLOWED_VERSIONS: List[str] = ["1.0.0", "1.0.1"]
 
 anonymized_string_schema = {
     "$schema": SCHEMA,
@@ -295,7 +298,7 @@ anonymized_init_payload_schema = {
     },
     "type": "object",
     "properties": {
-        "version": {"enum": ["1.0.0"]},
+        "version": {"enum": ALLOWED_VERSIONS},
         "platform.system": {"type": "string", "maxLength": 256},
         "platform.release": {"type": "string", "maxLength": 256},
         "version_info": {"type": "string", "maxLength": 256},
@@ -906,6 +909,17 @@ anonymized_rule_based_profiler_run_schema = {
     ],
 }
 
+cloud_migrate_schema = {
+    "$schema": SCHEMA,
+    "title": "cloud-migrate",
+    "type": "object",
+    "properties": {
+        "organization_id": {"type": "string", "maxLength": 256},
+    },
+    "required": ["organization_id"],
+    "additionalProperties": False,
+}
+
 anonymized_usage_statistics_record_schema = {
     "$schema": SCHEMA,
     "title": "anonymized-usage-statistics-record",
@@ -943,10 +957,11 @@ anonymized_usage_statistics_record_schema = {
         "anonymized_rule": anonymized_rule_schema,
         "anonymized_rule_based_profiler_run": anonymized_rule_based_profiler_run_schema,
         "package_info": package_info_schema,
+        "cloud_migrate": cloud_migrate_schema,
     },
     "type": "object",
     "properties": {
-        "version": {"enum": ["1.0.0"]},
+        "version": {"enum": ALLOWED_VERSIONS},
         "ge_version": {"type": "string", "maxLength": 32},
         "data_context_id": {"type": "string", "format": "uuid"},
         "data_context_instance_id": {"type": "string", "format": "uuid"},
@@ -1117,6 +1132,13 @@ anonymized_usage_statistics_record_schema = {
                 "event_payload": {
                     "$ref": "#/definitions/anonymized_rule_based_profiler_run"
                 },
+            },
+        },
+        {
+            "type": "object",
+            "properties": {
+                "event": {"enum": [UsageStatsEvents.CLOUD_MIGRATE]},
+                "event_payload": {"$ref": "#/definitions/cloud_migrate"},
             },
         },
         {

@@ -4,13 +4,13 @@ import shutil
 import nbformat
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.render.renderer.checkpoint_new_notebook_renderer import (
     CheckpointNewNotebookRenderer,
 )
+from great_expectations.util import get_context
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def assetless_dataconnector_context(
         ),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-    context = ge.data_context.DataContext(context_path)
+    context = gx.get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     datasource_config = f"""
@@ -97,6 +97,7 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_no_datacon
     assert obs is None
 
 
+@pytest.mark.slow  # 2.27s
 def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconnector_that_has_no_assets(
     assetless_dataconnector_context,
 ):
@@ -109,7 +110,7 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconn
     config = context.get_config_with_variables_substituted()
     root_directory = context.root_directory
 
-    context = BaseDataContext(project_config=config, context_root_dir=root_directory)
+    context = get_context(project_config=config, context_root_dir=root_directory)
 
     renderer = CheckpointNewNotebookRenderer(context, "foo")
     obs = renderer._find_datasource_with_asset()
@@ -171,7 +172,7 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "from ruamel.yaml import YAML\nimport great_expectations as ge\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = ge.get_context()",
+            "source": "from ruamel.yaml import YAML\nimport great_expectations as gx\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = gx.get_context()",
             "outputs": [],
         },
     ]
@@ -310,6 +311,7 @@ validations:
     }
 
 
+@pytest.mark.slow  # 1.10s
 def test_render_checkpoint_new_notebook_with_available_data_asset(
     deterministic_asset_dataconnector_context,
     titanic_expectation_suite,

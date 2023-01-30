@@ -3,7 +3,7 @@ import uuid
 from pathlib import Path
 from typing import Dict, Tuple
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.util import (
     filter_properties_dict,
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseStoreBackend(StoreBackend):
-    def __init__(
+    def __init__(  # noqa: C901 - 16
         self,
         table_name,
         key_columns,
@@ -48,12 +48,12 @@ class DatabaseStoreBackend(StoreBackend):
             store_name=store_name,
         )
         if not sa:
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "ModuleNotFoundError: No module named 'sqlalchemy'"
             )
 
         if not self.fixed_length_key:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "DatabaseStoreBackend requires use of a fixed-length-key"
             )
 
@@ -78,7 +78,7 @@ class DatabaseStoreBackend(StoreBackend):
             self.drivername = parsed_url.drivername
             self.engine = sa.create_engine(url, **kwargs)
         else:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."
             )
 
@@ -86,12 +86,12 @@ class DatabaseStoreBackend(StoreBackend):
         self.key_columns = key_columns
         # Dynamically construct a SQLAlchemy table with the name and column names we'll use
         cols = []
-        for column in key_columns:
-            if column == "value":
-                raise ge_exceptions.InvalidConfigError(
+        for column_ in key_columns:
+            if column_ == "value":
+                raise gx_exceptions.InvalidConfigError(
                     "'value' cannot be used as a key_element name"
                 )
-            cols.append(Column(column, String, primary_key=True))
+            cols.append(Column(column_, String, primary_key=True))
         cols.append(Column("value", String))
         try:
             table = Table(table_name, meta, autoload=True, autoload_with=self.engine)
@@ -99,7 +99,7 @@ class DatabaseStoreBackend(StoreBackend):
             if {str(col.name).lower() for col in table.columns} != (
                 set(key_columns) | {"value"}
             ):
-                raise ge_exceptions.StoreBackendError(
+                raise gx_exceptions.StoreBackendError(
                     f"Unable to use table {table_name}: it exists, but does not have the expected schema."
                 )
         except NoSuchTableError:
@@ -111,7 +111,7 @@ class DatabaseStoreBackend(StoreBackend):
                     )
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
-                raise ge_exceptions.StoreBackendError(
+                raise gx_exceptions.StoreBackendError(
                     f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {str(e)}"
                 )
         self._table = table
@@ -181,8 +181,9 @@ class DatabaseStoreBackend(StoreBackend):
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
+    @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
-        self, drivername: str, credentials: dict
+        drivername: str, credentials: dict
     ) -> Tuple["URL", Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
@@ -212,7 +213,7 @@ class DatabaseStoreBackend(StoreBackend):
                 )
             except ValueError as e:
                 if "incorrect password" in str(e).lower():
-                    raise ge_exceptions.DatasourceKeyPairAuthBadPassphraseError(
+                    raise gx_exceptions.DatasourceKeyPairAuthBadPassphraseError(
                         datasource_name="SqlAlchemyDatasource",
                         message="Decryption of key failed, was the passphrase incorrect?",
                     ) from e
@@ -248,14 +249,14 @@ class DatabaseStoreBackend(StoreBackend):
             return self.engine.execute(sel).fetchone()[0]
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error fetching value: {str(e)}")
-            raise ge_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
+            raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
     def _set(self, key, value, allow_update=True, **kwargs) -> None:
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
 
         if allow_update:
-            if self.has_key(key):
+            if self.has_key(key):  # noqa: W601
                 ins = (
                     self._table.update()
                     .where(getattr(self._table.columns, self.key_columns[0]) == key[0])
@@ -272,11 +273,11 @@ class DatabaseStoreBackend(StoreBackend):
             if self._get(key) == value:
                 logger.info(f"Key {str(key)} already exists with the same value.")
             else:
-                raise ge_exceptions.StoreBackendError(
+                raise gx_exceptions.StoreBackendError(
                     f"Integrity error {str(e)} while trying to store key"
                 )
 
-    def _move(self) -> None:
+    def _move(self) -> None:  # type: ignore[override]
         raise NotImplementedError
 
     def get_url_for_key(self, key):
@@ -344,12 +345,10 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             return self.engine.execute(delete_statement)
         except SQLAlchemyError as e:
-            raise ge_exceptions.StoreBackendError(
+            raise gx_exceptions.StoreBackendError(
                 f"Unable to delete key: got sqlalchemy error {str(e)}"
             )
 
     @property
     def config(self) -> dict:
         return self._config
-
-    _move = None

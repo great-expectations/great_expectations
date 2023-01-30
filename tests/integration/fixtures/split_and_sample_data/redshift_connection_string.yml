@@ -1,0 +1,2 @@
+connection_string: unsupported_see_get_redshift_connection_url
+dialect: redshift

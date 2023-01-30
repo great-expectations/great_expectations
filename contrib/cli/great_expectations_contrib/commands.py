@@ -4,10 +4,11 @@ import os
 import subprocess
 import sys
 from collections import namedtuple
-from dataclasses import asdict
 
 import click
 from cookiecutter.main import cookiecutter
+
+from great_expectations.core.util import convert_to_json_serializable
 
 from .package import GreatExpectationsContribPackageManifest
 
@@ -177,7 +178,8 @@ def write_package_to_disk(
         path: The relative path to the target package JSON file.
     """
     json_dict = package.to_json_dict()
-    data = json.dumps(json_dict, indent=4)
+    json_dict_serialized = convert_to_json_serializable(json_dict)
+    data = json.dumps(json_dict_serialized, indent=4)
     with open(path, "w") as f:
         f.write(data)
         logger.info(f"Succesfully wrote state to {path}.")

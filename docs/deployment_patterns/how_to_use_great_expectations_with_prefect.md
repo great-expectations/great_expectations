@@ -82,8 +82,8 @@ Here is an example with an in memory `DataContext`:
 import os
 from pathlib import Path
 
-import great_expectations as ge
-from great_expectations.data_context import BaseDataContext
+import great_expectations as gx
+
 from great_expectations.data_context.types.base import (
     DataContextConfig,
 )
@@ -92,7 +92,7 @@ from prefect.tasks.great_expectations import RunGreatExpectationsValidation
 
 @task
 def create_in_memory_data_context(project_path: Path, data_path: Path):
-    data_context = BaseDataContext(
+    data_context = gx.get_context(
         project_config=DataContextConfig(
             **{
                 "config_version": 3.0,
@@ -254,6 +254,6 @@ flow.run(parameters={"checkpoint_name": "my_checkpoint"})
 
 ## Where to go for more information
 
-The flexibility that Prefect and the `RunGreatExpectationsValidation` task offer makes it easy to incorporate data validation into your dataflows with Great Expectations. 
+The flexibility that Prefect and the `RunGreatExpectationsValidation` task offer makes it easy to incorporate data validation into your dataflows with Great Expectations.
 
 For more info about the `RunGreatExpectationsValidation` task, refer to the [Prefect documentation](https://docs.prefect.io/api/latest/tasks/great_expectations.html#rungreatexpectationsvalidation).

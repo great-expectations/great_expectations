@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 import logging
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
 
@@ -12,6 +13,11 @@ try:
 except ImportError:
     black = None
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 logger = logging.getLogger(__name__)
 
 
@@ -19,9 +25,11 @@ class DatasourceNewNotebookRenderer(BaseNotebookRenderer):
     SQL_DOCS = """\
 ### For SQL based Datasources:
 
-Here we are creating an example configuration based on the database backend you specified in the CLI.  The configuration contains an **InferredAssetSqlDataConnector**, which will add a Data Asset for each table in the database, and a **RuntimeDataConnector** which can accept SQL queries. This is just an example, and you may customize this as you wish!
+Here we are creating an example configuration based on the database backend you specified in the CLI.  The configuration contains an **InferredAssetSqlDataConnector**, which will add a Data Asset for each table in the database, a **ConfiguredAssetDataConnector**, which will add explicitly defined Data Assets, and a **RuntimeDataConnector**, which can accept SQL queries.
 
-Also, if you would like to learn more about the **DataConnectors** used in this configuration, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector) and [RuntimeDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector).
+If any of these configuration options are not applicable, they can be removed. This is just an example, and you may customize this as you wish!
+
+Also, if you would like to learn more about the **DataConnectors** used in this configuration, please see our docs on [InferredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector), [ConfiguredAssetDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector), and [RuntimeDataConnectors](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector).
 
 Credentials will not be saved until you run the last cell. The credentials will be saved in `uncommitted/config_variables.yml` which should not be added to source control."""
 
@@ -42,7 +50,7 @@ Give your datasource a unique name:"""
 
     def __init__(
         self,
-        context: DataContext,
+        context: AbstractDataContext,
         datasource_type: DatasourceTypes,
         datasource_yaml: str,
         datasource_name: str = "my_datasource",
@@ -62,9 +70,9 @@ Give your datasource a unique name:"""
 Use this notebook to configure a new {self.datasource_type.value} Datasource and add it to your project."""
         )
         self.add_code_cell(
-            """import great_expectations as ge
+            """import great_expectations as gx
 from great_expectations.cli.datasource import sanitize_yaml_and_save_datasource, check_if_datasource_name_exists
-context = ge.get_context()""",
+context = gx.get_context()""",
         )
 
     def _add_docs_cell(self) -> None:
@@ -138,6 +146,7 @@ context.list_datasources()""",
     def render_to_disk(
         self,
         notebook_file_path: str,
+        **kwargs: dict,
     ) -> None:
         self.render()
         self.write_notebook_to_disk(self._notebook, notebook_file_path)

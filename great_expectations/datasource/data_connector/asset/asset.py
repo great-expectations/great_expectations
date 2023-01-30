@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 class Asset:
     """
-    A typed data asset class that maintains data asset specific properties (to override data connector level proprties with
+    A typed data asset class that maintains data asset specific properties (to override data connector level properties with
     the same name and/or semantics, such as "partitioner_name", "base_directory", and "glob_directive").
     """
 
@@ -32,6 +32,7 @@ class Asset:
         prefix: Optional[str] = None,
         # Both S3/Azure
         delimiter: Optional[str] = None,
+        reader_options: Optional[dict] = None,
     ) -> None:
         self._name = name
         self._base_directory = base_directory
@@ -59,6 +60,8 @@ class Asset:
 
         # Both S3/Azure
         self._delimiter = delimiter
+
+        self._reader_options = reader_options
 
     @property
     def name(self) -> str:

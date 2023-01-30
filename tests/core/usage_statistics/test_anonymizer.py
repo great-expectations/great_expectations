@@ -9,7 +9,7 @@ from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anon
 
 @pytest.fixture
 def anonymizer_with_consistent_salt() -> Anonymizer:
-    anonymizer: Anonymizer = Anonymizer(salt="00000000-0000-0000-0000-00000000a004")
+    anonymizer = Anonymizer(salt="00000000-0000-0000-0000-00000000a004")
     return anonymizer
 
 

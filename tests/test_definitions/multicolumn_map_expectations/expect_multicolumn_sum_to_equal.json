@@ -1,6 +1,78 @@
 {
   "expectation_type" : "expect_multicolumn_sum_to_equal",
   "datasets" : [{
+    "data": {
+        "a": [1,2,3,4],
+        "b": [3,2,1,0],
+        "c": [3,2,1,1]
+      },
+      "tests": [{
+          "title": "mostly_default_successful_expectation",
+          "include_in_gallery": true,
+          "exact_match_out" : false,
+          "in": {
+            "column_list": ["a", "b"],
+            "sum_total": 4
+          },
+          "out": {
+              "unexpected_list": [],
+              "unexpected_index_list": [],
+              "success": true
+          }
+        }, {
+          "title": "mostly_default_fails_expectation",
+          "include_in_gallery": true,
+          "exact_match_out" : false,
+          "in": {
+            "column_list": ["a", "c"],
+            "sum_total": 4
+          },
+          "out": {
+            "unexpected_list": [ {"a": 4.0, "c": 1.0 } ],
+            "success": false
+          }
+        }, {
+          "title": "mostly_set_successful_expectation",
+          "include_in_gallery": true,
+          "exact_match_out" : false,
+          "in": {
+            "column_list": ["a", "c"],
+            "sum_total": 4,
+            "mostly": 0.7
+          },
+          "out": {
+            "unexpected_list": [ {"a": 4.0, "c": 1.0 } ],
+            "success": true
+          }
+        }, {
+          "title": "mostly_set_fails_expectation",
+          "include_in_gallery": true,
+          "exact_match_out" : false,
+          "in": {
+            "column_list": ["a", "c"],
+            "sum_total": 4,
+            "mostly": 0.8
+          },
+          "out": {
+            "unexpected_list": [ {"a": 4.0, "c": 1.0 } ],
+            "success": false
+          }
+        }, {
+          "title": "mostly_set_incorrectly",
+          "include_in_gallery": true,
+          "exact_match_out" : false,
+          "in": {
+            "column_list": ["a", "c"],
+            "sum_total": 4,
+            "mostly": "One",
+            "catch_exceptions": true
+          },
+          "out": {
+            "traceback_substring": "must be an integer or float"
+          }
+        }
+      ]
+    }, {
     "data" : {
       "w": [0.2, 0.4, 0.3, 0.5, 0.8, 0.7, 0.71, 0.56, 0.45, 1.0],
       "x": [0.8, 0.6, 0.7, 0.5, 0.2, 0.3, 0.29, 0.44, 0.55, 0.0],

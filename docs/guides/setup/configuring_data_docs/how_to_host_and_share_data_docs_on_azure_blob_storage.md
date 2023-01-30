@@ -56,7 +56,7 @@ data_docs_sites:
     store_backend:
        class_name: TupleAzureBlobStoreBackend
        container: \$web
-       connection_string: ${AZURE_STORAGE_WEB_CONNECTION_STRING}
+       connection_string: ${AZURE_STORAGE_CONNECTION_STRING}
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
 ```
@@ -64,12 +64,30 @@ data_docs_sites:
 You may also replace the default ``local_site`` if you would only like to maintain a single Azure Data Docs site.
 
 :::note
- Since the container is called ``$web``, if we simply set ``container: $web`` in ``great_expectations.yml`` then Great Expectations would unsuccefully try to find the variable called ``web`` in ``config_variables.yml``. 
+ Since the container is called ``$web``, if we simply set ``container: $web`` in ``great_expectations.yml`` then Great Expectations would unsuccessfully try to find the variable called ``web`` in ``config_variables.yml``. 
  We use an escape char ``\`` before the ``$`` so the [substitute_config_variable](https://legacy.docs.greatexpectations.io/en/latest/autoapi/great_expectations/data_context/util/index.html?highlight=substitute_config_variable#great_expectations.data_context.util.substitute_config_variable) method will allow us to reach the ``$web`` container.
 :::
 
 You also may configure Great Expectations to store your <TechnicalTag relative="../../../" tag="expectation" text="Expectations" /> and <TechnicalTag relative="../../../" tag="validation_result" text="Validation Results" /> in this Azure Storage account.
 You can follow the documentation from the guides for [Expectations](../../setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md) and [Validation Results](../../setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_azure_blob_storage.md) but be sure you set ``container: \$web`` in place of the other container name.
+
+The following options are available for this backend:
+
+  * ``container``: The name of the Azure Blob container to store your data in.
+  * ``connection_string``: The Azure Storage connection string.
+  This can also be supplied by setting the ``AZURE_STORAGE_CONNECTION_STRING`` environment variable.
+  * ``prefix``: All paths on blob storage will be prefixed with this string.
+  * ``account_url``: The URL to the blob storage account. Any other entities included in the URL path (e.g. container or blob) will be discarded.
+  This URL can be optionally authenticated with a SAS token.
+  This can only be used if you don't configure the ``connection_string``. 
+  You can also configure this by setting the ``AZURE_STORAGE_ACCOUNT_URL`` environment variable.
+
+The most common authentication methods are supported:
+
+* SAS token authentication: append the SAS token to ``account_url`` or make sure it is set in the ``connection_string``.
+* Account key authentication: include the account key in the ``connection_string``.
+* When none of the above authentication methods are specified, the [DefaultAzureCredential](https://docs.microsoft.com/en-us/python/api/azure-identity/azure.identity.defaultazurecredential?view=azure-python) will be used which supports most common authentication methods.
+  You still need to provide the account url either through the config file or environment variable.
 
 
 ### 4. Build the Azure Blob Data Docs site

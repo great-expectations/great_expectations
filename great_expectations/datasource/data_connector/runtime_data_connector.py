@@ -1,8 +1,8 @@
 import logging
-import warnings
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, RuntimeBatchRequest
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -24,31 +24,38 @@ logger = logging.getLogger(__name__)
 DEFAULT_DELIMITER: str = "-"
 
 
+@public_api
 class RuntimeDataConnector(DataConnector):
-    """
-    A DataConnector that allows users to specify a Batch's data directly using a RuntimeBatchRequest that contains
-    either an in-memory Pandas or Spark DataFrame, a filesystem or S3 path, or an arbitrary SQL query
+    """A Data Connector that allows users to specify a Batch's data directly using a Runtime Batch Request.
+
+    A Runtime Batch Request contains either an in-memory Pandas or Spark DataFrame, a filesystem or S3 path,
+    or an arbitrary SQL query.
+
     Args:
-        name (str): The name of this DataConnector
-        datasource_name (str): The name of the Datasource that contains it
-        execution_engine (ExecutionEngine): An ExecutionEngine
-        batch_identifiers (list): a list of keys that must be defined in the batch_identifiers dict of RuntimeBatchRequest
-        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        batch_identifiers: A list of keys that must be defined in the batch identifiers dict of the Runtime Batch
+            Request.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
         self,
         name: str,
         datasource_name: str,
-        execution_engine: Optional[ExecutionEngine] = None,
+        execution_engine: ExecutionEngine,
         batch_identifiers: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
         assets: Optional[dict] = None,
+        id: Optional[str] = None,
     ) -> None:
         logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
         super().__init__(
             name=name,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             batch_spec_passthrough=batch_spec_passthrough,
@@ -64,7 +71,7 @@ class RuntimeDataConnector(DataConnector):
 
         # add batch_identifiers defined at the DataConnector level.
         self._add_batch_identifiers(
-            batch_identifiers=batch_identifiers, data_asset_name=None
+            batch_identifiers=batch_identifiers, data_asset_name=None  # type: ignore[arg-type]
         )
         self._refresh_data_references_cache()
 
@@ -95,7 +102,7 @@ class RuntimeDataConnector(DataConnector):
             )
             self.assets[name] = new_asset
             self._add_batch_identifiers(
-                batch_identifiers=new_asset.batch_identifiers,
+                batch_identifiers=new_asset.batch_identifiers,  # type: ignore[arg-type]
                 data_asset_name=new_asset.name,
             )
 
@@ -119,25 +126,20 @@ class RuntimeDataConnector(DataConnector):
         """
         if data_asset_name:
             if not batch_identifiers:
-                raise ge_exceptions.DataConnectorError(
+                raise gx_exceptions.DataConnectorError(
                     f"""RuntimeDataConnector "{self.name}" requires batch_identifiers to be configured when specifying Assets."""
                 )
             self._batch_identifiers[data_asset_name] = batch_identifiers
         else:
             if not batch_identifiers and len(self.assets) == 0:
-                raise ge_exceptions.DataConnectorError(
+                raise gx_exceptions.DataConnectorError(
                     f"""RuntimeDataConnector "{self.name}" requires batch_identifiers to be configured, either at the DataConnector or Asset-level."""
                 )
             if batch_identifiers:
-                # deprecated-v0.15.1
-                warnings.warn(
-                    "Specifying batch_identifiers as part of the RuntimeDataConnector config is deprecated as of v0.15.1 and will be removed by v0.18. Please configure batch_identifiers as part of Assets instead.",
-                    DeprecationWarning,
-                )
                 self._batch_identifiers[self.name] = batch_identifiers
 
     def _refresh_data_references_cache(self) -> None:
-        self._data_references_cache = {}
+        self._data_references_cache: dict = {}
 
     def _get_data_reference_list(
         self, data_asset_name: Optional[str] = None
@@ -158,7 +160,7 @@ class RuntimeDataConnector(DataConnector):
                 )
                 for data_asset_name in self.get_available_data_asset_names()
             ]
-            return data_reference_list
+            return data_reference_list  # type: ignore[return-value] # could be list of lists
 
     def get_data_reference_list_count(self) -> int:
         """
@@ -186,6 +188,7 @@ class RuntimeDataConnector(DataConnector):
     def get_unmatched_data_references(self) -> List[str]:
         return []
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
         """Returns a list of data_assets that are both defined at runtime, and defined in DataConnector configuration"""
         defined_assets: List[str] = list(self.assets.keys())
@@ -196,12 +199,12 @@ class RuntimeDataConnector(DataConnector):
         return sorted_available_assets
 
     # noinspection PyMethodOverriding
-    def get_batch_data_and_metadata(
+    def get_batch_data_and_metadata(  # type: ignore[override]
         self,
         batch_definition: BatchDefinition,
         runtime_parameters: dict,
-    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
-        batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(
+    ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
+        batch_spec: RuntimeDataBatchSpec = self.build_batch_spec(  # type: ignore[assignment]
             batch_definition=batch_definition,
             runtime_parameters=runtime_parameters,
         )
@@ -210,12 +213,12 @@ class RuntimeDataConnector(DataConnector):
         )
         self._execution_engine.load_batch_data(batch_definition.id, batch_data)
         return (
-            batch_data,
+            batch_data,  # type: ignore[return-value]
             batch_spec,
             batch_markers,
         )
 
-    def get_batch_definition_list_from_batch_request(
+    def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BatchRequestBase
         self,
         batch_request: RuntimeBatchRequest,
     ) -> List[BatchDefinition]:
@@ -248,12 +251,12 @@ class RuntimeDataConnector(DataConnector):
             batch_identifiers = batch_request.batch_identifiers
 
         if not batch_identifiers:
-            ge_exceptions.DataConnectorError(
+            raise gx_exceptions.DataConnectorError(
                 "Passed in a RuntimeBatchRequest with no batch_identifiers"
             )
 
         batch_definition_list: List[BatchDefinition]
-        batch_definition: BatchDefinition = BatchDefinition(
+        batch_definition = BatchDefinition(
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
             data_asset_name=batch_request.data_asset_name,
@@ -262,7 +265,9 @@ class RuntimeDataConnector(DataConnector):
         )
         batch_definition_list = [batch_definition]
         self._update_data_references_cache(
-            batch_request.data_asset_name, batch_definition_list, batch_identifiers
+            batch_request.data_asset_name,
+            batch_definition_list,
+            IDDict(batch_identifiers),
         )
         return batch_definition_list
 
@@ -300,7 +305,7 @@ class RuntimeDataConnector(DataConnector):
 
     # This method is currently called called only in tests.
     # noinspection PyMethodOverriding
-    def build_batch_spec(
+    def build_batch_spec(  # type: ignore[return,override]
         self,
         batch_definition: BatchDefinition,
         runtime_parameters: dict,
@@ -314,6 +319,9 @@ class RuntimeDataConnector(DataConnector):
             return RuntimeDataBatchSpec(batch_spec)
         elif "query" in runtime_parameters:
             batch_spec["query"] = runtime_parameters.get("query")
+            batch_spec["temp_table_schema_name"] = runtime_parameters.get(
+                "temp_table_schema_name"
+            )
             return RuntimeQueryBatchSpec(batch_spec)
         elif "path" in runtime_parameters:
             path: str = runtime_parameters["path"]
@@ -337,9 +345,7 @@ class RuntimeDataConnector(DataConnector):
         return data_reference_name
 
     @staticmethod
-    def _validate_runtime_parameters(
-        runtime_parameters: Union[dict, type(None)]
-    ) -> None:
+    def _validate_runtime_parameters(runtime_parameters: Union[dict, None]) -> None:
         if not isinstance(runtime_parameters, dict):
             raise TypeError(
                 f"""The type of runtime_parameters must be a dict object. The type given is
@@ -352,12 +358,12 @@ class RuntimeDataConnector(DataConnector):
             if val is not None and key in ["batch_data", "query", "path"]
         ]
         if len(keys_present) != 1:
-            raise ge_exceptions.InvalidBatchRequestError(
+            raise gx_exceptions.InvalidBatchRequestError(
                 "The runtime_parameters dict must have one (and only one) of the following keys: 'batch_data', "
                 "'query', 'path'."
             )
 
-    def _validate_batch_request(self, batch_request: RuntimeBatchRequest) -> None:
+    def _validate_batch_request(self, batch_request: RuntimeBatchRequest) -> None:  # type: ignore[override]
         super()._validate_batch_request(batch_request=batch_request)
 
         runtime_parameters = batch_request.runtime_parameters
@@ -367,7 +373,7 @@ class RuntimeDataConnector(DataConnector):
             (not runtime_parameters and not batch_identifiers)
             or (runtime_parameters and batch_identifiers)
         ):
-            raise ge_exceptions.DataConnectorError(
+            raise gx_exceptions.DataConnectorError(
                 f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both
                 present and non-empty or
                 both absent in the batch_request parameter.
@@ -416,10 +422,14 @@ class RuntimeDataConnector(DataConnector):
         """
         asset: Asset = self.assets[data_asset_name]
         batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
-        if not set(batch_identifiers_keys) == set(asset.batch_identifiers):
-            raise ge_exceptions.DataConnectorError(
+        if not set(batch_identifiers_keys) == set(asset.batch_identifiers):  # type: ignore[arg-type]
+            raise gx_exceptions.DataConnectorError(
                 f"""
-                Data Asset {data_asset_name} was invoked with one or more batch_identifiers that were not configured for the asset.
+                Data Asset {data_asset_name} was invoked with one or more batch_identifiers
+                that were not configured for the asset.
+
+                The Data Asset was configured with : {asset.batch_identifiers}
+                It was invoked with : {batch_identifiers_keys}
                 """
             )
 
@@ -431,9 +441,12 @@ class RuntimeDataConnector(DataConnector):
         """
         batch_identifiers_keys: List[str] = list(batch_identifiers.keys())
         if not set(batch_identifiers_keys) <= set(self._batch_identifiers[self.name]):
-            raise ge_exceptions.DataConnectorError(
-                f"""RuntimeDataConnector "{self.name}" was invoked with one or more batch identifiers that do not
+            raise gx_exceptions.DataConnectorError(
+                f"""RuntimeDataConnector {self.name} was invoked with one or more batch identifiers that do not
         appear among the configured batch identifiers.
+
+                The RuntimeDataConnector was configured with : {self._batch_identifiers[self.name]}
+                It was invoked with : {batch_identifiers_keys}
                 """
             )
 

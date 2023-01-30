@@ -1,20 +1,21 @@
 import logging
 import warnings
 from collections import OrderedDict
-from typing import Union
+from typing import Optional, Union
 
 from dateutil.parser import parse
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.async_executor import AsyncExecutor
 from great_expectations.core.batch import Batch
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import parse_result_format
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
     ValidationResultIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -227,12 +228,22 @@ class ActionListValidationOperator(ValidationOperator):
                 config_defaults={"module_name": module_name},
             )
             if not new_action:
-                raise ge_exceptions.ClassInstantiationError(
+                raise gx_exceptions.ClassInstantiationError(
                     module_name=module_name,
                     package_name=None,
                     class_name=config["class_name"],
                 )
             self.actions[action_config["name"]] = new_action
+
+    @property
+    def _using_cloud_context(self) -> bool:
+        # Chetan - 20221216 - This is a temporary property to encapsulate any Cloud leakage
+        # Upon refactoring this class to decouple Cloud-specific branches, this should be removed
+        from great_expectations.data_context.data_context.cloud_data_context import (
+            CloudDataContext,
+        )
+
+        return isinstance(self.data_context, CloudDataContext)
 
     @property
     def validation_operator_config(self) -> dict:
@@ -285,7 +296,9 @@ class ActionListValidationOperator(ValidationOperator):
         run_time=None,
         catch_exceptions=None,
         result_format=None,
-        checkpoint_identifier=None,
+        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
+        checkpoint_name: Optional[str] = None,
+        validation_id: Optional[str] = None,
     ) -> ValidationOperatorResult:
         assert not (run_id and run_name) and not (
             run_id and run_time
@@ -352,6 +365,9 @@ class ActionListValidationOperator(ValidationOperator):
                 if catch_exceptions is not None:
                     batch_validate_arguments["catch_exceptions"] = catch_exceptions
 
+                if checkpoint_name is not None:
+                    batch_validate_arguments["checkpoint_name"] = checkpoint_name
+
                 batch_and_async_result_tuples.append(
                     (
                         batch,
@@ -364,13 +380,13 @@ class ActionListValidationOperator(ValidationOperator):
 
             run_results = {}
             for batch, async_batch_validation_result in batch_and_async_result_tuples:
-                if self.data_context.ge_cloud_mode:
-                    expectation_suite_identifier = GeCloudIdentifier(
-                        resource_type="expectation_suite",
-                        ge_cloud_id=batch._expectation_suite.ge_cloud_id,
+                if self._using_cloud_context:
+                    expectation_suite_identifier = GXCloudIdentifier(
+                        resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+                        cloud_id=batch._expectation_suite.ge_cloud_id,
                     )
-                    validation_result_id = GeCloudIdentifier(
-                        resource_type="suite_validation_result"
+                    validation_result_id = GXCloudIdentifier(
+                        resource_type=GXCloudRESTResource.VALIDATION_RESULT
                     )
                 else:
                     expectation_suite_identifier = ExpectationSuiteIdentifier(
@@ -382,18 +398,24 @@ class ActionListValidationOperator(ValidationOperator):
                         run_id=run_id,
                     )
 
+                validation_result = async_batch_validation_result.result()
+                validation_result.meta["validation_id"] = validation_id
+                validation_result.meta["checkpoint_id"] = (
+                    checkpoint_identifier.cloud_id if checkpoint_identifier else None
+                )
+
                 batch_actions_results = self._run_actions(
                     batch=batch,
                     expectation_suite_identifier=expectation_suite_identifier,
                     expectation_suite=batch._expectation_suite,
-                    batch_validation_result=async_batch_validation_result.result(),
+                    batch_validation_result=validation_result,
                     run_id=run_id,
                     validation_result_id=validation_result_id,
                     checkpoint_identifier=checkpoint_identifier,
                 )
 
                 run_result_obj = {
-                    "validation_result": async_batch_validation_result.result(),
+                    "validation_result": validation_result,
                     "actions_results": batch_actions_results,
                 }
                 run_results[validation_result_id] = run_result_obj
@@ -755,7 +777,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
 
         return query
 
-    def run(
+    def run(  # noqa: C901 - complexity 18
         self,
         assets_to_validate,
         run_id=None,
@@ -802,8 +824,8 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             batch_id = batch.batch_id
             run_id = run_id
 
-            assert not batch_id is None
-            assert not run_id is None
+            assert batch_id is not None
+            assert run_id is not None
 
             failure_expectation_suite_identifier = ExpectationSuiteIdentifier(
                 expectation_suite_name=base_expectation_suite_name

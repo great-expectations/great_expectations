@@ -1,8 +1,12 @@
-import abc
-from typing import Any, Callable, Optional
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
+import abc
+from typing import Any, Callable, Optional, TypeVar
+
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import BatchSpec
+
+T = TypeVar("T")
 
 
 class DataSampler(abc.ABC):
@@ -17,7 +21,7 @@ class DataSampler(abc.ABC):
         Returns:
             sampler method.
         """
-        sampler_method_name: str = self._get_sampler_method_name(sampler_method_name)
+        sampler_method_name = self._get_sampler_method_name(sampler_method_name)
 
         return getattr(self, sampler_method_name)
 
@@ -48,7 +52,7 @@ class DataSampler(abc.ABC):
             SamplerError
         """
         if batch_spec.get("sampling_kwargs") is None:
-            raise ge_exceptions.SamplerError(
+            raise gx_exceptions.SamplerError(
                 "Please make sure to provide sampling_kwargs in addition to your sampling_method."
             )
 
@@ -67,16 +71,16 @@ class DataSampler(abc.ABC):
             SamplerError
         """
         if batch_spec["sampling_kwargs"].get(key) is None:
-            raise ge_exceptions.SamplerError(
+            raise gx_exceptions.SamplerError(
                 f"Please make sure to provide the {key} key in sampling_kwargs in addition to your sampling_method."
             )
 
+    @staticmethod
     def get_sampling_kwargs_value_or_default(
-        self,
         batch_spec: BatchSpec,
         sampling_kwargs_key: str,
-        default_value: Optional[Any] = None,
-    ) -> Optional[Any]:
+        default_value: Optional[T] = None,
+    ) -> T | Any:
         """Get value from batch_spec or default if provided and key doesn't exist.
 
         Args:

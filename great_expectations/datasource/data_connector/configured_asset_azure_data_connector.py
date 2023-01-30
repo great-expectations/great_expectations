@@ -2,6 +2,7 @@ import logging
 import re
 from typing import List, Optional
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.asset import Asset
@@ -25,25 +26,26 @@ except ImportError:
     )
 
 
+@public_api
 class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
-    """
-    Extension of ConfiguredAssetFilePathDataConnector used to connect to Azure
+    """Extension of ConfiguredAssetFilePathDataConnector used to connect to Azure.
 
-    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
-    can use to get individual batches of data. They add flexibility in how to obtain data
-    such as with time-based partitioning, splitting and sampling, or other techniques appropriate
-    for obtaining batches of data.
+    Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
+    connect to. While this allows for fine-grained control over which Data Assets may be accessed,
+    it requires more setup.
 
-    The ConfiguredAssetAzureDataConnector is one of two classes (InferredAssetAzureDataConnector being the
-    other one) designed for connecting to data on Azure.
-
-    A ConfiguredAssetAzureDataConnector requires an explicit specification of each DataAsset you want to connect to.
-    This allows more fine-tuning, but also requires more setup. Please note that in order to maintain consistency
-    with Azure's official SDK, we utilize terms like "container" and "name_starts_with".
-
-    As much of the interaction with the SDK is done through a BlobServiceClient, please refer to the official
-    docs if a greater understanding of the supported authentication methods and general functionality is desired.
-    Source: https://docs.microsoft.com/en-us/python/api/azure-storage-blob/azure.storage.blob.blobserviceclient?view=azure-python
+    Args:
+        name (str): required name for DataConnector
+        datasource_name (str): required name for datasource
+        container (str): container name for Azure Blob Storage
+        assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
+        execution_engine (ExecutionEngine): optional reference to ExecutionEngine
+        default_regex (dict): optional regex configuration for filtering data_references
+        sorters (list): optional list of sorters for sorting data_references
+        name_starts_with (str): Azure prefix
+        delimiter (str): Azure delimiter
+        azure_options (dict): wrapper object for **kwargs
+        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
     def __init__(
@@ -59,27 +61,13 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
         delimiter: str = "/",
         azure_options: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        id: Optional[str] = None,
     ) -> None:
-        """
-        ConfiguredAssetDataConnector for connecting to Azure.
-
-        Args:
-            name (str): required name for DataConnector
-            datasource_name (str): required name for datasource
-            container (str): container name for Azure Blob Storage
-            assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
-            execution_engine (ExecutionEngine): optional reference to ExecutionEngine
-            default_regex (dict): optional regex configuration for filtering data_references
-            sorters (list): optional list of sorters for sorting data_references
-            name_starts_with (str): Azure prefix
-            delimiter (str): Azure delimiter
-            azure_options (dict): wrapper object for **kwargs
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         logger.debug(f'Constructing ConfiguredAssetAzureDataConnector "{name}".')
 
         super().__init__(
             name=name,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             assets=assets,
@@ -105,12 +93,12 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
 
         try:
             if conn_str is not None:
-                self._account_name = re.search(
+                self._account_name = re.search(  # type: ignore[union-attr]
                     r".*?AccountName=(.+?);.*?", conn_str
                 ).group(1)
                 self._azure = BlobServiceClient.from_connection_string(**azure_options)
             elif account_url is not None:
-                self._account_name = re.search(
+                self._account_name = re.search(  # type: ignore[union-attr]
                     r"(?:https?://)?(.+?).blob.core.windows.net", account_url
                 ).group(1)
                 self._azure = BlobServiceClient(**azure_options)

@@ -1,8 +1,9 @@
 import logging
 from copy import deepcopy
-from typing import Any, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     BatchDefinition,
     BatchMarkers,
@@ -17,26 +18,33 @@ logger = logging.getLogger(__name__)
 
 
 # noinspection SpellCheckingInspection
+@public_api
 class DataConnector:
-    """
-    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
+    """The base class for all Data Connectors.
+
+    Data Connectors produce identifying information, called Batch Specs, that Execution Engines
     can use to get individual batches of data. They add flexibility in how to obtain data
     such as with time-based partitioning, downsampling, or other techniques appropriate
     for the Datasource.
 
     For example, a DataConnector could produce a SQL query that logically represents "rows in
-    the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource
-    could use to materialize a SqlAlchemyDataset corresponding to that batch of data and
+    the Events table with a timestamp on February 7, 2012," which an SqlAlchemy Datasource
+    could use to materialize a SqlAlchemy Dataset corresponding to that Batch of data and
     ready for validation.
 
-    A batch is a sample from a data asset, sliced according to a particular rule. For
-    example, an hourly slide of the Events table or “most recent `users` records.”
+    A Batch is a sample from a data asset, sliced according to a particular rule. For example,
+    an hourly slide of the Events table or “most recent Users records.” It is the primary
+    unit of validation in the Great Expectations Data Context. Batches include metadata that
+    identifies how they were constructed--the same Batch Spec assembled by the data connector.
+    While not every Datasource will enable re-fetching a specific batch of data, GX can store
+    snapshots of batches or store metadata from an external data version control system.
 
-    A Batch is the primary unit of validation in the Great Expectations DataContext.
-    Batches include metadata that identifies how they were constructed--the same “batch_spec”
-    assembled by the data connector, While not every Datasource will enable re-fetching a
-    specific batch of data, GE can store snapshots of batches or store metadata from an
-    external data version control system.
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
@@ -45,29 +53,22 @@ class DataConnector:
         datasource_name: str,
         execution_engine: ExecutionEngine,
         batch_spec_passthrough: Optional[dict] = None,
+        id: Optional[str] = None,
     ) -> None:
-        """
-        Base class for DataConnectors
-
-        Args:
-            name (str): required name for DataConnector
-            datasource_name (str): required name for datasource
-            execution_engine (ExecutionEngine): reference to ExecutionEngine
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         if execution_engine is None:
-            raise ge_exceptions.DataConnectorError(
+            raise gx_exceptions.DataConnectorError(
                 "A non-existent/unknown ExecutionEngine instance was referenced."
             )
 
         self._name = name
+        self._id = id
         self._datasource_name = datasource_name
         self._execution_engine = execution_engine
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache = {}
+        self._data_references_cache: Dict = {}
 
-        self._data_context_root_directory = None
+        self._data_context_root_directory: Optional[str] = None
         self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
@@ -79,6 +80,10 @@ class DataConnector:
         return self._name
 
     @property
+    def id(self) -> Optional[str]:
+        return self._id
+
+    @property
     def datasource_name(self) -> str:
         return self._datasource_name
 
@@ -88,7 +93,7 @@ class DataConnector:
 
     @property
     def data_context_root_directory(self) -> str:
-        return self._data_context_root_directory
+        return self._data_context_root_directory  # type: ignore[return-value]
 
     @data_context_root_directory.setter
     def data_context_root_directory(self, data_context_root_directory: str) -> None:
@@ -97,7 +102,7 @@ class DataConnector:
     def get_batch_data_and_metadata(
         self,
         batch_definition: BatchDefinition,
-    ) -> Tuple[Any, BatchSpec, BatchMarkers,]:  # batch_data
+    ) -> Tuple[Any, BatchSpec, BatchMarkers]:  # batch_data
         """
         Uses batch_definition to retrieve batch_data and batch_markers by building a batch_spec from batch_definition,
         then using execution_engine to return batch_data and batch_markers
@@ -140,7 +145,7 @@ class DataConnector:
             batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
 
         batch_spec_params.update(batch_spec_passthrough)
-        batch_spec: BatchSpec = BatchSpec(**batch_spec_params)
+        batch_spec = BatchSpec(**batch_spec_params)
         return batch_spec
 
     def _refresh_data_references_cache(
@@ -175,6 +180,7 @@ class DataConnector:
     def get_unmatched_data_references(self) -> List[Any]:
         raise NotImplementedError
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
 
@@ -355,7 +361,7 @@ class DataConnector:
 
         batch_definition_list: List[
             BatchDefinition
-        ] = self._map_data_reference_to_batch_definition_list(
+        ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
             data_reference=example_data_reference,
             data_asset_name=data_asset_name,
         )
@@ -374,7 +380,7 @@ class DataConnector:
         # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
         # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
         # resolve metrics.
-        validator: Validator = Validator(execution_engine=batch_data.execution_engine)
+        validator = Validator(execution_engine=batch_data.execution_engine)
         data: Any = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.head",

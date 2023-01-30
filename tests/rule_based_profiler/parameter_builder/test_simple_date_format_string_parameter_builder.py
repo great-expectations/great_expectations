@@ -2,9 +2,10 @@ from typing import Dict
 
 import pytest
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -15,13 +16,14 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 from great_expectations.rule_based_profiler.parameter_builder.simple_date_format_string_parameter_builder import (
     DEFAULT_CANDIDATE_STRINGS,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     ParameterNode,
 )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.11s
 def test_simple_date_format_parameter_builder_instantiation(
     alice_columnar_table_single_batch_context,
 ):
@@ -38,6 +40,8 @@ def test_simple_date_format_parameter_builder_instantiation(
     assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.08s
 def test_simple_date_format_parameter_builder_zero_batch_id_error(
     alice_columnar_table_single_batch_context,
 ):
@@ -50,19 +54,20 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
         )
     )
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as e:
         date_format_string_parameter.build_parameters(
             domain=domain,
             parameters=parameters,
+            runtime_configuration=None,
         )
 
     assert (
@@ -71,6 +76,8 @@ def test_simple_date_format_parameter_builder_zero_batch_id_error(
     )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.44s
 def test_simple_date_format_parameter_builder_alice(
     alice_columnar_table_single_batch_context,
 ):
@@ -95,12 +102,12 @@ def test_simple_date_format_parameter_builder_alice(
     assert date_format_string_parameter.candidate_strings == DEFAULT_CANDIDATE_STRINGS
     assert date_format_string_parameter._threshold == 1.0
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -111,13 +118,14 @@ def test_simple_date_format_parameter_builder_alice(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     # noinspection PyTypeChecker
     assert len(parameter_container.parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.my_date_format"
-    expected_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": "%Y-%m-%d %H:%M:%S",
         "details": {
             "success_ratio": 1.0,
@@ -192,9 +200,11 @@ def test_simple_date_format_parameter_builder_alice(
         parameters=parameters,
     )
 
-    assert parameter_node == expected_value
+    assert parameter_node == expected_parameter_node_as_dict
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.76s
 def test_simple_date_format_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -227,12 +237,12 @@ def test_simple_date_format_parameter_builder_bobby(
     assert date_format_string_parameter._candidate_strings == set(candidate_strings)
     assert date_format_string_parameter._threshold == 0.9
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -243,6 +253,7 @@ def test_simple_date_format_parameter_builder_bobby(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     assert (

@@ -1,22 +1,23 @@
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, Type
+from typing import Any, Callable, Dict, Optional, Type, Union
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import (
+    MetricFunctionTypes,
     MetricPartialFunctionTypes,
 )
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
-    sa,
 )
 from great_expectations.expectations.metrics import DeprecatedMetaMetricProvider
+from great_expectations.expectations.metrics.import_manager import quoted_name, sa
 from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
     metric_value,
@@ -24,25 +25,37 @@ from great_expectations.expectations.metrics.metric_provider import (
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
+from great_expectations.expectations.metrics.util import (
+    get_dbms_compatible_column_names,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
 
+@public_api
 def column_aggregate_value(
     engine: Type[ExecutionEngine],
-    metric_fn_type="value",
-    domain_type="column",
+    metric_fn_type=MetricFunctionTypes.VALUE,
+    domain_type=MetricDomainTypes.COLUMN,
     **kwargs,
 ):
-    """Return the column aggregate metric decorator for the specified engine.
+    """Provides Pandas support for authoring a metric_fn with a simplified signature.
+
+    A column_aggregate_value must provide an aggregate function; it will be executed by Pandas
+    to provide a value for validation.
+
+    A metric function that is decorated as a column_aggregate_partial will be called with a specified Pandas column
+    and any value_kwargs associated with the Metric for which the provider function is being declared.
 
     Args:
-        engine:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        metric_fn_type: The metric function type
+        domain_type: The domain over which the metric will operate
+        **kwargs: Arguments passed to specified function
 
     Returns:
-
+        An annotated metric_function which will be called with a simplified signature.
     """
     if issubclass(engine, PandasExecutionEngine):
 
@@ -56,10 +69,10 @@ def column_aggregate_value(
             def inner_func(
                 cls,
                 execution_engine: PandasExecutionEngine,
-                metric_domain_kwargs: Dict,
-                metric_value_kwargs: Dict,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
                 metrics: Dict[str, Any],
-                runtime_configuration: Dict,
+                runtime_configuration: dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -69,12 +82,12 @@ def column_aggregate_value(
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
-                    )
+                column_name = get_dbms_compatible_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                )
 
                 if filter_column_isnull:
                     df = df[df[column_name].notnull()]
@@ -95,15 +108,24 @@ def column_aggregate_value(
         )
 
 
+@public_api
 def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
-    """Return the column aggregate metric decorator for the specified engine.
+    """Provides engine-specific support for authoring a metric_fn with a simplified signature.
+
+    A column_aggregate_partial must provide an aggregate function; it will be executed with the specified engine
+    to provide a value for validation.
+
+    A metric function that is decorated as a column_aggregate_partial will be called with the engine-specific column
+    type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
     Args:
-        engine:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        partial_fn_type: The metric function type
+        domain_type: The domain over which the metric will operate
+        **kwargs: Arguments passed to specified function
 
     Returns:
-
+        An annotated metric_function which will be called with a simplified signature.
     """
     partial_fn_type = MetricPartialFunctionTypes.AGGREGATE_FN
     domain_type = MetricDomainTypes.COLUMN
@@ -119,10 +141,10 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: SqlAlchemyExecutionEngine,
-                metric_domain_kwargs: Dict,
-                metric_value_kwargs: Dict,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
                 metrics: Dict[str, Any],
-                runtime_configuration: Dict,
+                runtime_configuration: dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -142,14 +164,14 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: str = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+
+                column_name = get_dbms_compatible_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                )
 
                 sqlalchemy_engine: sa.engine.Engine = execution_engine.engine
-
-                if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
-                    )
 
                 dialect = sqlalchemy_engine.dialect
                 metric_aggregate = metric_fn(
@@ -180,10 +202,10 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
             def inner_func(
                 cls,
                 execution_engine: SparkDFExecutionEngine,
-                metric_domain_kwargs: Dict,
-                metric_value_kwargs: Dict,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
                 metrics: Dict[str, Any],
-                runtime_configuration: Dict,
+                runtime_configuration: dict,
             ):
                 filter_column_isnull = kwargs.get(
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -205,12 +227,12 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name = accessor_domain_kwargs["column"]
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
-                if column_name not in metrics["table.columns"]:
-                    raise ge_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                        message=f'Error: The column "{column_name}" in BatchData does not exist.'
-                    )
+                column_name = get_dbms_compatible_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                )
 
                 column = data[column_name]
                 metric_aggregate = metric_fn(
@@ -231,7 +253,27 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
         raise ValueError("Unsupported engine for column_aggregate_partial")
 
 
+@public_api
 class ColumnAggregateMetricProvider(TableMetricProvider):
+    """Base class for all Column Aggregate Metrics,
+    which define metrics to be calculated in aggregate from a given column.
+
+    An example of this is `column.mean`,
+    which returns the mean of a given column.
+
+    Args:
+        metric_name (str): A name identifying the metric. Metric Name must be globally unique in
+            a great_expectations installation.
+        domain_keys (tuple): A tuple of the keys used to determine the domain of the metric.
+        value_keys (tuple): A tuple of the keys used to determine the value of the metric.
+
+    In some cases, subclasses of MetricProvider, such as ColumnAggregateMetricProvider, will already
+    have correct values that may simply be inherited by Metric classes.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations
+    """
+
     domain_keys = (
         "batch_id",
         "table",
@@ -264,19 +306,16 @@ class ColumnAggregateMetricProvider(TableMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies
 

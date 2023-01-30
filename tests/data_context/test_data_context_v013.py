@@ -9,7 +9,6 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
@@ -20,6 +19,7 @@ from great_expectations.execution_engine.pandas_batch_data import PandasBatchDat
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.util import get_context
 from great_expectations.validator.validator import Validator
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -114,7 +114,7 @@ def test_ConfigOnlyDataContext_v013__initialization(
     config_path = str(
         tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
     )
-    context = BaseDataContext(
+    context = get_context(
         basic_data_context_v013_config,
         config_path,
     )
@@ -139,25 +139,23 @@ def test_ConfigOnlyDataContext_v013__initialization(
     )
 
 
+@pytest.mark.unit
 def test__normalize_absolute_or_relative_path(
     tmp_path_factory, basic_data_context_v013_config
 ):
-    config_path = str(
-        tmp_path_factory.mktemp("test__normalize_absolute_or_relative_path__dir")
+    full_test_path = tmp_path_factory.mktemp(
+        "test__normalize_absolute_or_relative_path__dir"
     )
-    context = BaseDataContext(
+    test_dir = full_test_path.parts[-1]
+    config_path = str(full_test_path)
+    context = get_context(
         basic_data_context_v013_config,
         config_path,
     )
 
-    pattern_string = os.path.join(
-        "^.*test__normalize_absolute_or_relative_path__dir\\d*", "yikes$"
+    assert context._normalize_absolute_or_relative_path("yikes").endswith(
+        f"{test_dir}/yikes"
     )
-    pattern = re.compile(pattern_string)
-    assert (
-        pattern.match(context._normalize_absolute_or_relative_path("yikes")) is not None
-    )
-
     assert (
         "test__normalize_absolute_or_relative_path__dir"
         not in context._normalize_absolute_or_relative_path("/yikes")
@@ -186,16 +184,16 @@ def test_load_config_variables_file(
     try:
         # We should be able to load different files based on an environment variable
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
-        context = BaseDataContext(
+        context = get_context(
             basic_data_context_v013_config, context_root_dir=base_path
         )
-        config_vars = context._load_config_variables_file()
+        config_vars = context.config_variables
         assert config_vars["env"] == "dev"
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
-        context = BaseDataContext(
+        context = get_context(
             basic_data_context_v013_config, context_root_dir=base_path
         )
-        config_vars = context._load_config_variables_file()
+        config_vars = context.config_variables
         assert config_vars["env"] == "prod"
     except Exception:
         raise
@@ -231,6 +229,7 @@ def test_get_config(empty_data_context):
         "checkpoint_store_name",
         "data_docs_sites",
         "anonymous_usage_statistics",
+        "include_rendered_content",
     }
 
 
@@ -504,6 +503,7 @@ data_connectors:
     )
 
 
+@pytest.mark.slow  # 1.06s
 def test_in_memory_data_context_configuration(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -536,7 +536,7 @@ def test_in_memory_data_context_configuration(
     project_config_dict = dataContextConfigSchema.load(project_config_dict)
 
     project_config: DataContextConfig = DataContextConfig(**project_config_dict)
-    data_context = BaseDataContext(
+    data_context = get_context(
         project_config=project_config,
         context_root_dir=titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.root_directory,
     )
@@ -589,7 +589,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
     selectable_count_sql_str = f"select count(*) from {selectable_table_name}"
     sa_engine = batch.data.execution_engine.engine
 
-    assert sa_engine.execute(selectable_count_sql_str).scalar() == 120
+    assert sa_engine.execute(selectable_count_sql_str).scalar() == 123
     assert batch.batch_markers.get("ge_load_time") is not None
     # since create_temp_table defaults to True, there should be 1 temp table
     assert len(get_sqlite_temp_table_names(batch.data.execution_engine.engine)) == 1

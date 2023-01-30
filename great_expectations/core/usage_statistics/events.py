@@ -9,7 +9,7 @@ programmatically create new enum values if run as a module.
         In send_usage_message() as an event name:
 
         handler.send_usage_message(
-            event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT.value,
+            event=UsageStatsEvents.EXECUTION_ENGINE_SQLALCHEMY_CONNECT,
             event_payload={
                 "anonymized_name": handler.anonymizer.anonymize(self.name),
                 "sqlalchemy_dialect": self.engine.name,
@@ -36,7 +36,7 @@ import enum
 from typing import List, Optional
 
 
-class UsageStatsEvents(enum.Enum):
+class UsageStatsEvents(str, enum.Enum):
     """Event names for all Great Expectations usage stats events.
 
     Note: These should be used in place of strings, or retrieved
@@ -129,6 +129,7 @@ class UsageStatsEvents(enum.Enum):
     DATA_ASSISTANT_RESULT_GET_EXPECTATION_SUITE = (
         "data_assistant.result.get_expectation_suite"
     )
+    CLOUD_MIGRATE = "cloud_migrator.migrate"
 
     @classmethod
     def get_all_event_names(cls):
@@ -165,7 +166,7 @@ class UsageStatsEvents(enum.Enum):
                 f"_{'_'.join([item.upper() for item in other_items])}"
             )
         else:
-            other_items_str: str = ""
+            other_items_str = ""
         enum_name: str = f"CLI_{noun.upper()}_{verb.upper()}{other_items_str}"
 
         return getattr(cls, enum_name).value

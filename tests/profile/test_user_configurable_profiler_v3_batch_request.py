@@ -2,12 +2,13 @@ import logging
 import os
 import random
 import string
+from typing import List
 from unittest import mock
 
 import pandas as pd
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
@@ -183,7 +184,7 @@ def titanic_validator(titanic_data_context_modular_api):
     What does this test do and why?
     Ensures that all available expectation types work as expected
     """
-    df = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
+    df = gx.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
 
     return get_pandas_runtime_validator(titanic_data_context_modular_api, df)
 
@@ -195,7 +196,7 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
     Ensures that all available expectation types work as expected
     """
 
-    df = ge.read_csv(
+    df = gx.read_csv(
         file_relative_path(
             __file__,
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
@@ -212,7 +213,7 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
     What does this test do and why?
     Ensures that all available expectation types work as expected
     """
-    df = ge.read_csv(
+    df = gx.read_csv(
         file_relative_path(
             __file__,
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
@@ -228,7 +229,7 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     What does this test do and why?
     Ensures that all available expectation types work as expected
     """
-    df = ge.read_csv(
+    df = gx.read_csv(
         file_relative_path(
             __file__,
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
@@ -416,6 +417,7 @@ def test__validate_config(cardinality_validator):
     assert e.typename == "AssertionError"
 
 
+@pytest.mark.slow  # 1.18s
 def test__validate_semantic_types_dict(cardinality_validator):
     """
     What does this test do and why?
@@ -453,13 +455,14 @@ def test__validate_semantic_types_dict(cardinality_validator):
         )
     assert e.value.args[0] == (
         "Column col_few is specified in both the semantic_types_dict and the list of ignored columns. Please remove "
-        f"one of these entries to proceed."
+        "one of these entries to proceed."
     )
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.76s
 def test_build_suite_no_config(
     mock_emit,
     titanic_validator,
@@ -484,9 +487,9 @@ def test_build_suite_no_config(
     ]
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -511,6 +514,7 @@ def test_build_suite_no_config(
     assert actual_events == expected_events
 
 
+@pytest.mark.slow  # 1.32s
 def test_all_table_columns_populates(taxi_validator_pandas):
     taxi_profiler = UserConfigurableProfiler(taxi_validator_pandas)
 
@@ -558,6 +562,7 @@ def test_profiler_works_with_batch_object(cardinality_validator):
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.37s
 def test_build_suite_with_config_and_no_semantic_types_dict(
     mock_emit, titanic_validator, possible_expectations_set
 ):
@@ -591,9 +596,9 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     ]
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -621,6 +626,7 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 1.18s
 def test_build_suite_with_semantic_types_dict(
     mock_emit,
     cardinality_validator,
@@ -671,9 +677,9 @@ def test_build_suite_with_semantic_types_dict(
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -729,9 +735,9 @@ def test_build_suite_when_suite_already_exists(
     assert mock_emit.call_count == 2
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -773,6 +779,7 @@ def test_build_suite_when_suite_already_exists(
     assert actual_events == expected_events
 
 
+@pytest.mark.slow  # 1.01s
 def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
     """
     What does this test do and why?
@@ -787,7 +794,7 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
     # key includes a non-existent column, should fail
     with pytest.raises(ValueError) as e:
         # noinspection PyUnusedLocal
-        bad_key_profiler = UserConfigurableProfiler(
+        bad_key_profiler = UserConfigurableProfiler(  # noqa: F841
             cardinality_validator,
             primary_or_compound_key=["col_unique", "col_that_does_not_exist"],
         )
@@ -806,6 +813,7 @@ like to use it as a primary_or_compound_key.
     assert ignored_column_profiler.primary_or_compound_key == ["col_unique", "col_one"]
 
 
+@pytest.mark.slow  # 1.28s
 def test_config_with_not_null_only(nulls_validator, possible_expectations_set):
     """
     What does this test do and why?
@@ -859,6 +867,7 @@ def test_nullity_expectations_mostly_tolerance(
         assert i["kwargs"]["mostly"] == 0.66
 
 
+@pytest.mark.slow  # 2.44s
 def test_profiled_dataset_passes_own_validation(
     cardinality_validator, titanic_data_context
 ):
@@ -911,6 +920,7 @@ def test_column_cardinality_functions(cardinality_validator):
     assert cardinality_with_large_pct_and_no_num.name == "NONE"
 
 
+@pytest.mark.slow  # 1.94s
 def test_profiler_all_expectation_types_pandas(
     titanic_data_context_modular_api,
     taxi_validator_pandas,
@@ -1035,6 +1045,7 @@ def test_profiler_all_expectation_types_spark(
     not is_library_loadable(library_name="sqlalchemy"),
     reason="requires sqlalchemy to be installed",
 )
+@pytest.mark.slow  # 4.70s
 def test_profiler_all_expectation_types_sqlalchemy(
     titanic_data_context_modular_api,
     taxi_validator_sqlalchemy,
@@ -1188,6 +1199,7 @@ def test_expect_compound_columns_to_be_unique(
 
 
 @mock.patch("great_expectations.profile.user_configurable_profiler.tqdm")
+@pytest.mark.slow  # 1.28s
 def test_user_configurable_profiler_progress_bar_config_enabled(
     mock_tqdm, cardinality_validator
 ):
@@ -1208,6 +1220,7 @@ def test_user_configurable_profiler_progress_bar_config_enabled(
 
 
 @mock.patch("great_expectations.data_context.data_context.DataContext")
+@pytest.mark.slow  # 1.34s
 def test_user_configurable_profiler_progress_bar_config_disabled(
     mock_tqdm, cardinality_validator
 ):

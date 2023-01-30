@@ -1,24 +1,43 @@
-from typing import Iterable, List, Optional, Set, Tuple, Union, cast
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+    cast,
+)
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain, SemanticDomainTypes
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
     build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
 )
-from great_expectations.rule_based_profiler.types import (
-    Domain,
+from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
-    SemanticDomainTypes,
+)
+from great_expectations.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.validator.validator import Validator
+
 
 class ColumnDomainBuilder(DomainBuilder):
-    exclude_field_names: Set[str] = DomainBuilder.exclude_field_names | {
+    exclude_field_names: ClassVar[Set[str]] = DomainBuilder.exclude_field_names | {
         "semantic_type_filter",
     }
 
@@ -36,7 +55,7 @@ class ColumnDomainBuilder(DomainBuilder):
         exclude_semantic_types: Optional[
             Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         A semantic type is distinguished from the structured column type;
@@ -53,7 +72,7 @@ class ColumnDomainBuilder(DomainBuilder):
             to be included
             exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
             to be excluded
-            data_context: BaseDataContext associated with this DomainBuilder
+            data_context: AbstractDataContext associated with this DomainBuilder
 
         Inclusion/Exclusion Logic:
         (include_column_names|table_columns - exclude_column_names) + (include_semantic_types - exclude_semantic_types)
@@ -176,7 +195,7 @@ class ColumnDomainBuilder(DomainBuilder):
     def get_effective_column_names(
         self,
         batch_ids: Optional[List[str]] = None,
-        validator: Optional["Validator"] = None,  # noqa: F821
+        validator: Optional[Validator] = None,
         variables: Optional[ParameterContainer] = None,
     ) -> List[str]:
         """
@@ -192,19 +211,19 @@ class ColumnDomainBuilder(DomainBuilder):
         )
 
         if batch_ids is None:
-            batch_ids: List[str] = self.get_batch_ids(variables=variables)
+            batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[no-redef]
 
         if validator is None:
             validator = self.get_validator(variables=variables)
 
-        table_columns: List[str] = validator.get_metric(
+        table_columns: List[str] = validator.get_metric(  # type: ignore[union-attr] # could be None
             metric=MetricConfiguration(
                 metric_name="table.columns",
                 metric_domain_kwargs={
-                    "batch_id": batch_ids[-1],  # active_batch_id
+                    # active_batch_id
+                    "batch_id": batch_ids[-1],  # type: ignore[index]
                 },
                 metric_value_kwargs=None,
-                metric_dependencies=None,
             )
         )
 
@@ -229,7 +248,7 @@ class ColumnDomainBuilder(DomainBuilder):
 
         for column_name in effective_column_names:
             if column_name not in table_columns:
-                raise ge_exceptions.ProfilerExecutionError(
+                raise gx_exceptions.ProfilerExecutionError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
 
@@ -307,9 +326,9 @@ class ColumnDomainBuilder(DomainBuilder):
             },
             config_defaults={},
         )
-        self._semantic_type_filter = semantic_type_filter
+        self._semantic_type_filter = semantic_type_filter  # type: ignore[assignment] # could be None
 
-        include_semantic_types: Union[List[Union[str, SemanticDomainTypes]]] = cast(
+        include_semantic_types: List[Union[str, SemanticDomainTypes]] = cast(
             List[Union[str, SemanticDomainTypes]],
             self._resolve_list_type_property(
                 property_name="include_semantic_types",
@@ -317,16 +336,14 @@ class ColumnDomainBuilder(DomainBuilder):
                 variables=variables,
             ),
         )
-        include_semantic_types = (
-            self.semantic_type_filter.parse_semantic_domain_type_argument(
-                semantic_types=include_semantic_types
-            )
+        include_semantic_types = self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
+            semantic_types=include_semantic_types
         )
 
         if include_semantic_types:
             effective_column_names = list(
                 filter(
-                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
+                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr,arg-type]
                         candidate_column_name
                     ]
                     in include_semantic_types,
@@ -334,7 +351,7 @@ class ColumnDomainBuilder(DomainBuilder):
                 )
             )
 
-        exclude_semantic_types: Union[List[Union[str, SemanticDomainTypes]]] = cast(
+        exclude_semantic_types: List[Union[str, SemanticDomainTypes]] = cast(
             List[Union[str, SemanticDomainTypes]],
             self._resolve_list_type_property(
                 property_name="exclude_semantic_types",
@@ -342,16 +359,14 @@ class ColumnDomainBuilder(DomainBuilder):
                 variables=variables,
             ),
         )
-        exclude_semantic_types = (
-            self.semantic_type_filter.parse_semantic_domain_type_argument(
-                semantic_types=exclude_semantic_types
-            )
+        exclude_semantic_types = self.semantic_type_filter.parse_semantic_domain_type_argument(  # type: ignore[union-attr,assignment] # could be None
+            semantic_types=exclude_semantic_types
         )
 
         if exclude_semantic_types:
             effective_column_names = list(
                 filter(
-                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[
+                    lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr,arg-type] # lambda missing type details
                         candidate_column_name
                     ]
                     not in exclude_semantic_types,
@@ -365,13 +380,22 @@ class ColumnDomainBuilder(DomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         Obtains and returns domains for all columns of a table (or for configured columns, if they exist in the table).
-        """
-        batch_ids: List[str] = self.get_batch_ids(variables=variables)
 
-        validator: "Validator" = self.get_validator(variables=variables)  # noqa: F821
+        Args:
+            rule_name: name of Rule object, for which "Domain" objects are obtained.
+            variables: Optional variables to substitute when evaluating.
+            runtime_configuration: Optional[dict] = None,
+
+        Returns:
+            List of domains that match the desired columns and filtering criteria.
+        """
+        batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[assignment] # could be None
+
+        validator: Validator = self.get_validator(variables=variables)  # type: ignore[assignment] # could be None
 
         effective_column_names: List[str] = self.get_effective_column_names(
             batch_ids=batch_ids,
@@ -384,7 +408,7 @@ class ColumnDomainBuilder(DomainBuilder):
             rule_name=rule_name,
             column_names=effective_column_names,
             domain_type=self.domain_type,
-            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,
+            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,  # type: ignore[union-attr] # could be None
         )
 
         return domains
@@ -395,7 +419,7 @@ class ColumnDomainBuilder(DomainBuilder):
         property_value_type: Union[type, Tuple[type, ...]],
         variables: Optional[ParameterContainer] = None,
     ) -> List[type]:
-        property_value: Optional[property_value_type] = getattr(self, property_name, [])
+        property_value = getattr(self, property_name, [])
         if property_value is None:
             property_value = []
         elif isinstance(property_value, str):

@@ -206,12 +206,6 @@ data_context_init_with_dependencies: dict = {
             },
             {
                 "install_environment": "required",
-                "package_name": "termcolor",
-                "installed": True,
-                "version": "1.1.0",
-            },
-            {
-                "install_environment": "required",
                 "package_name": "tqdm",
                 "installed": True,
                 "version": "4.63.0",

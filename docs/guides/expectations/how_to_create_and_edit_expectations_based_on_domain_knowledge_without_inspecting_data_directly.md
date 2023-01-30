@@ -120,4 +120,4 @@ You can see all the available Expectations in the [Expectation Gallery](https://
 
 Run the final cell in the helper notebook to save your Expectation Suite.
 
-This will create a JSON file with your Expectation Suite in the <TechnicalTag tag="store" text="Store" /> you have configured, which you can then load and use for [Validation](../../reference/validation.md).
+This will create a JSON file with your Expectation Suite in the <TechnicalTag tag="store" text="Store" /> you have configured, which you can then load and use for <TechnicalTag tag="validation" text="Validation"/>.

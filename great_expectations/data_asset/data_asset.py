@@ -10,9 +10,10 @@ import warnings
 from collections import Counter, defaultdict, namedtuple
 from collections.abc import Hashable
 from functools import wraps
-from typing import List
+from typing import Any, Dict, List, Optional, Union
 
 from dateutil.parser import parse
+from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core.evaluation_parameters import build_evaluation_parameters
@@ -33,7 +34,6 @@ from great_expectations.data_asset.util import (
     recursively_convert_to_json_serializable,
 )
 from great_expectations.exceptions import GreatExpectationsError
-from great_expectations.marshmallow__shade import ValidationError
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -143,8 +143,8 @@ class DataAsset:
             self
         )
 
-    @classmethod
-    def expectation(cls, method_arg_names):
+    @classmethod  # noqa: C901 - complexity 24
+    def expectation(cls, method_arg_names):  # noqa: C901
         """Manages configuration and running of expectation objects.
 
         Expectation builds and saves a new expectation configuration to the DataAsset object. It is the core decorator \
@@ -176,9 +176,9 @@ class DataAsset:
                     modification. For more detail, see :ref:`meta`.
         """
 
-        def outer_wrapper(func):
+        def outer_wrapper(func):  # noqa: C901 - 22
             @wraps(func)
-            def wrapper(self, *args, **kwargs):
+            def wrapper(self, *args, **kwargs):  # noqa: C901 - 21
 
                 # Get the name of the method
                 method_name = func.__name__
@@ -328,19 +328,16 @@ class DataAsset:
                 if meta is not None:
                     return_obj.meta = meta
 
-                return_obj = recursively_convert_to_json_serializable(return_obj)
-
-                if self._data_context is not None:
-                    return_obj = self._data_context.update_return_obj(self, return_obj)
-
-                return return_obj
+                return recursively_convert_to_json_serializable(return_obj)
 
             return wrapper
 
         return outer_wrapper
 
     def _initialize_expectations(
-        self, expectation_suite=None, expectation_suite_name=None
+        self,
+        expectation_suite: Union[Dict, ExpectationSuite, None] = None,
+        expectation_suite_name: Optional[str] = None,
     ) -> None:
         """Instantiates `_expectation_suite` as empty by default or with a specified expectation `config`.
         In addition, this always sets the `default_expectation_args` to:
@@ -369,7 +366,7 @@ class DataAsset:
                 expectation_suite_dict: dict = expectationSuiteSchema.load(
                     expectation_suite
                 )
-                expectation_suite: ExpectationSuite = ExpectationSuite(
+                expectation_suite = ExpectationSuite(
                     **expectation_suite_dict, data_context=self._data_context
                 )
             else:
@@ -556,7 +553,7 @@ class DataAsset:
             suppress_warnings,
         )
 
-    def get_expectation_suite(
+    def get_expectation_suite(  # noqa: C901 - complexity 17
         self,
         discard_failed_expectations=True,
         discard_result_format_kwargs=True,
@@ -613,9 +610,8 @@ class DataAsset:
 
         if discards["failed_expectations"] > 0 and not suppress_warnings:
             message += (
-                " Omitting %d expectation(s) that failed when last run; set "
+                f" Omitting {discards['failed_expectations']} expectation(s) that failed when last run; set "
                 "discard_failed_expectations=False to include them."
-                % discards["failed_expectations"]
             )
 
         for expectation in expectations:
@@ -717,7 +713,7 @@ class DataAsset:
                 "Unable to save config: filepath or data_context must be available."
             )
 
-    def validate(
+    def validate(  # noqa: C901 - complexity 36
         self,
         expectation_suite=None,
         run_id=None,
@@ -846,19 +842,18 @@ class DataAsset:
                         expectation_suite_dict: dict = expectationSuiteSchema.loads(
                             infile.read()
                         )
-                        expectation_suite: ExpectationSuite = ExpectationSuite(
+                        expectation_suite = ExpectationSuite(
                             **expectation_suite_dict, data_context=self._data_context
                         )
                 except ValidationError:
                     raise
                 except OSError:
                     raise GreatExpectationsError(
-                        "Unable to load expectation suite: IO error while reading %s"
-                        % expectation_suite
+                        f"Unable to load expectation suite: IO error while reading {expectation_suite}"
                     )
             elif isinstance(expectation_suite, dict):
                 expectation_suite_dict: dict = expectation_suite
-                expectation_suite: ExpectationSuite = ExpectationSuite(
+                expectation_suite = ExpectationSuite(
                     **expectation_suite_dict, data_context=None
                 )
             elif not isinstance(expectation_suite, ExpectationSuite):
@@ -869,7 +864,7 @@ class DataAsset:
                 if getattr(data_context, "_usage_statistics_handler", None):
                     handler = data_context._usage_statistics_handler
                     handler.send_usage_message(
-                        event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
+                        event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                         event_payload=handler.anonymizer.anonymize(obj=self),
                         success=False,
                     )
@@ -902,9 +897,6 @@ class DataAsset:
 
             # Warn if our version is different from the version in the configuration
             # TODO: Deprecate "great_expectations.__version__"
-            suite_ge_version = expectation_suite.meta.get(
-                "great_expectations_version"
-            ) or expectation_suite.meta.get("great_expectations.__version__")
 
             ###
             # This is an early example of what will become part of the ValidationOperator
@@ -1029,7 +1021,7 @@ class DataAsset:
             if getattr(data_context, "_usage_statistics_handler", None):
                 handler = data_context._usage_statistics_handler
                 handler.send_usage_message(
-                    event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
+                    event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                     event_payload=handler.anonymizer.anonymize(obj=self),
                     success=False,
                 )
@@ -1040,7 +1032,7 @@ class DataAsset:
         if getattr(data_context, "_usage_statistics_handler", None):
             handler = data_context._usage_statistics_handler
             handler.send_usage_message(
-                event=UsageStatsEvents.DATA_ASSET_VALIDATE.value,
+                event=UsageStatsEvents.DATA_ASSET_VALIDATE,
                 event_payload=handler.anonymizer.anonymize(obj=self),
                 success=True,
             )
@@ -1111,7 +1103,7 @@ class DataAsset:
     #
     ###
 
-    def _format_map_output(
+    def _format_map_output(  # noqa: C901 - complexity 21
         self,
         result_format,
         success,
@@ -1173,16 +1165,32 @@ class DataAsset:
         if result_format["result_format"] == "BASIC":
             return return_obj
 
+        if unexpected_list is not None:
+            if len(unexpected_list) and isinstance(unexpected_list[0], dict):
+                # in the case of multicolumn map expectations `unexpected_list` contains dicts,
+                # which will throw an exception when we hash it to count unique members.
+                # As a workaround, we flatten the values out to tuples.
+                immutable_unexpected_list = [
+                    tuple([val for val in item.values()]) for item in unexpected_list
+                ]
+            else:
+                immutable_unexpected_list = unexpected_list
+
         # Try to return the most common values, if possible.
-        if 0 < result_format.get("partial_unexpected_count"):
+        partial_unexpected_count: Optional[int] = result_format.get(
+            "partial_unexpected_count"
+        )
+        partial_unexpected_counts: Optional[List[Dict[str, Any]]] = None
+
+        if partial_unexpected_count is not None and 0 < partial_unexpected_count:
             try:
                 partial_unexpected_counts = [
                     {"value": key, "count": value}
                     for key, value in sorted(
-                        Counter(unexpected_list).most_common(
+                        Counter(immutable_unexpected_list).most_common(
                             result_format["partial_unexpected_count"]
                         ),
-                        key=lambda x: (-x[1], str(x[0])),
+                        key=lambda x: (-x[1], x[0]),
                     )
                 ]
             except TypeError:

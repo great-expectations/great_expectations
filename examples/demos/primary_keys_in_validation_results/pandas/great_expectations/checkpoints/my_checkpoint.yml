@@ -1,0 +1,28 @@
+name: my_checkpoint
+config_version: 1.0
+template_name:
+module_name: great_expectations.checkpoint
+class_name: Checkpoint
+run_name_template: '%Y-%M-foo-bar-template'
+expectation_suite_name: visitors_exp
+batch_request: {}
+action_list:
+  - name: store_validation_result
+    action:
+      class_name: StoreValidationResultAction
+  - name: store_evaluation_params
+    action:
+      class_name: StoreEvaluationParametersAction
+  - name: update_data_docs
+    action:
+      class_name: UpdateDataDocsAction
+evaluation_parameters: {}
+runtime_configuration: {}
+validations:
+  - batch_request:
+      datasource_name: my_datasource
+      data_connector_name: my_pandas_data_connector
+      data_asset_name: visits.csv
+profilers: []
+ge_cloud_id:
+expectation_suite_ge_cloud_id:

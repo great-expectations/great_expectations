@@ -2,6 +2,7 @@ import logging
 from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.datasource.data_connector.asset.asset import Asset
@@ -14,19 +15,25 @@ from great_expectations.execution_engine import ExecutionEngine
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
     """
     The ConfiguredAssetFilePathDataConnector is one of two classes (InferredAssetFilePathDataConnector being the
     other) designed for connecting to filesystem-like data. This includes files on disk, but also things
     like S3 object stores, etc:
 
-    A ConfiguredAssetFilePathDataConnector requires an explicit listing of each DataAsset you want to connect to.
-    This allows more fine-tuning, but also requires more setup.
+    Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
+    connect to. While this allows for fine-grained control over which Data Assets may be accessed,
+    it requires more setup.
 
-    *Note*: ConfiguredAssetFilePathDataConnector is not meant to be used on its own, but extended. Currently
-    ConfiguredAssetFilesystemDataConnector, ConfiguredAssetS3DataConnector, ConfiguredAssetAzureDataConnector, and
-    ConfiguredAssetGCSDataConnector are subclasses of ConfiguredAssetFilePathDataConnector.
-
+    Args:
+        name (str): name of ConfiguredAssetFilePathDataConnector
+        datasource_name (str): Name of datasource that this DataConnector is connected to
+        assets (dict): configured assets as a dictionary. These can each have their own regex and sorters
+        execution_engine (ExecutionEngine): Execution Engine object to actually read the data
+        default_regex (dict): Optional dict the filter and organize the data_references.
+        sorters (list): Optional list if you want to sort the data_references
+        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
     """
 
     def __init__(
@@ -38,24 +45,13 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        id: Optional[str] = None,
     ) -> None:
-        """
-        Base class for DataConnectors that connect to filesystem-like data by taking in
-        configured `assets` as a dictionary. This class supports the configuration of default_regex and
-        sorters for filtering and sorting data_references.
 
-        Args:
-            name (str): name of ConfiguredAssetFilePathDataConnector
-            datasource_name (str): Name of datasource that this DataConnector is connected to
-            assets (dict): configured assets as a dictionary. These can each have their own regex and sorters
-            execution_engine (ExecutionEngine): Execution Engine object to actually read the data
-            default_regex (dict): Optional dict the filter and organize the data_references.
-            sorters (list): Optional list if you want to sort the data_references
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         logger.debug(f'Constructing ConfiguredAssetFilePathDataConnector "{name}".')
         super().__init__(
             name=name,
+            id=id,
             datasource_name=datasource_name,
             execution_engine=execution_engine,
             default_regex=default_regex,
@@ -84,9 +80,9 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             )
             self.assets[name] = new_asset
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
-        """
-        Return the list of asset names known by this DataConnector.
+        """Return the list of asset names known by this DataConnector.
 
         Returns:
             A list of available names
@@ -106,7 +102,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             ):
                 mapped_batch_definition_list: List[
                     BatchDefinition
-                ] = self._map_data_reference_to_batch_definition_list(
+                ] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
                     data_reference=data_reference,
                     data_asset_name=data_asset_name,
                 )
@@ -189,14 +185,14 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
                 regex_config["group_names"] = asset.group_names
         return regex_config
 
-    def _get_asset(self, data_asset_name: str) -> Asset:
+    def _get_asset(self, data_asset_name: Optional[str]) -> Union[Asset, None]:
         asset: Optional[Asset] = None
         if (
             data_asset_name is not None
             and self.assets
             and data_asset_name in self.assets
         ):
-            asset = self.assets[data_asset_name]
+            asset = self.assets[data_asset_name]  # type: ignore[assignment]
         return asset
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
@@ -219,12 +215,12 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         data_asset_name: str = batch_definition.data_asset_name
         if (
             data_asset_name in self.assets
-            and self.assets[data_asset_name].batch_spec_passthrough
-            and isinstance(self.assets[data_asset_name].batch_spec_passthrough, dict)
+            and self.assets[data_asset_name].batch_spec_passthrough  # type: ignore[union-attr]
+            and isinstance(self.assets[data_asset_name].batch_spec_passthrough, dict)  # type: ignore[union-attr]
         ):
             # batch_spec_passthrough from data_asset
             batch_spec_passthrough = deepcopy(
-                self.assets[data_asset_name]["batch_spec_passthrough"]
+                self.assets[data_asset_name]["batch_spec_passthrough"]  # type: ignore[index]
             )
             batch_definition_batch_spec_passthrough = (
                 deepcopy(batch_definition.batch_spec_passthrough) or {}

@@ -1,7 +1,12 @@
 import logging
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Type
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
+
+if TYPE_CHECKING:
+    from great_expectations.core import ExpectationSuite
+    from great_expectations.data_context.store import Store
+    from great_expectations.validation_operators import ValidationOperator
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +73,7 @@ class Anonymizer(BaseAnonymizer):
             for strategy in self._strategies
         }
 
-    def anonymize(self, obj: Optional[object] = None, **kwargs) -> Any:
+    def anonymize(self, obj: Optional[object] = None, **kwargs: Optional[dict]) -> Any:
         anonymizer: Optional[BaseAnonymizer] = self._get_anonymizer(obj=obj, **kwargs)
 
         if anonymizer is not None:
@@ -82,7 +87,7 @@ class Anonymizer(BaseAnonymizer):
             f"The type {type(obj)} cannot be handled by the Anonymizer; no suitable strategy found."
         )
 
-    def can_handle(self, obj: object, **kwargs) -> bool:
+    def can_handle(self, obj: object, **kwargs: Optional[dict]) -> bool:
         return self._get_anonymizer(obj=obj, **kwargs) is not None
 
     def _get_anonymizer(self, obj: object, **kwargs) -> Optional[BaseAnonymizer]:
@@ -92,9 +97,9 @@ class Anonymizer(BaseAnonymizer):
 
         return None
 
-    def anonymize_init_payload(self, init_payload: dict) -> dict:
-        anonymized_init_payload = {}
-        anonymizer_funcs = {
+    def anonymize_init_payload(self, init_payload: Dict[str, Any]) -> Dict[str, Any]:
+        anonymized_init_payload: Dict[str, Any] = {}
+        anonymizer_funcs: Dict[str, Any] = {
             "datasources": self._anonymize_datasources_init_payload,
             "stores": self._anonymize_stores_init_payload,
             "validation_operators": self._anonymize_validation_operator_init_payload,
@@ -110,7 +115,6 @@ class Anonymizer(BaseAnonymizer):
                 anonymized_init_payload[anonymized_key] = anonymizer_func(val)
             else:
                 anonymized_init_payload[key] = val
-
         return anonymized_init_payload
 
     def _anonymize_datasources_init_payload(self, payload: dict) -> List[dict]:
@@ -129,9 +133,7 @@ class Anonymizer(BaseAnonymizer):
 
         return anonymized_values
 
-    def _anonymize_stores_init_payload(
-        self, payload: Dict[str, "Store"]  # noqa: F821
-    ) -> List[dict]:
+    def _anonymize_stores_init_payload(self, payload: Dict[str, "Store"]) -> List[dict]:
         from great_expectations.core.usage_statistics.anonymizers.store_anonymizer import (
             StoreAnonymizer,
         )
@@ -149,11 +151,15 @@ class Anonymizer(BaseAnonymizer):
         return anonymized_values
 
     def _anonymize_validation_operator_init_payload(
-        self, payload: Dict[str, "ValidationOperator"]  # noqa: F821
+        self, payload: Optional[Dict[str, "ValidationOperator"]] = None
     ) -> List[dict]:
+
         from great_expectations.core.usage_statistics.anonymizers.validation_operator_anonymizer import (
             ValidationOperatorAnonymizer,
         )
+
+        if payload is None:
+            return []
 
         anonymizer = self._anonymizers[ValidationOperatorAnonymizer]
 
@@ -186,7 +192,7 @@ class Anonymizer(BaseAnonymizer):
         return anonymized_values
 
     def _anonymize_expectation_suite_init_payload(
-        self, payload: List["ExpectationSuite"]  # noqa: F821
+        self, payload: List["ExpectationSuite"]
     ) -> List[dict]:
         from great_expectations.core.usage_statistics.anonymizers.expectation_anonymizer import (
             ExpectationSuiteAnonymizer,
@@ -196,7 +202,7 @@ class Anonymizer(BaseAnonymizer):
 
         anonymized_values: List[dict] = []
         for suite in payload:
-            anonymize_value: dict = anonymizer.anonymize(expectation_suite=suite)
+            anonymize_value: dict = anonymizer.anonymize(obj=suite)
             anonymized_values.append(anonymize_value)
 
         return anonymized_values

@@ -214,7 +214,7 @@ for how to profile a single batch of data and build documentation from the valid
 .. code-block:: python
 
   import os
-  import great_expectations as ge
+  import great_expectations as gx
 
   from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
   from great_expectations.render.renderer import ProfilingResultsPageRenderer, ExpectationSuitePageRenderer
@@ -223,7 +223,7 @@ for how to profile a single batch of data and build documentation from the valid
   profiling_html_filepath = '/path/into/which/to/save/results.html'
 
   # obtain the DataContext object
-  context = ge.data_context.DataContext()
+  context = gx.get_context()
 
   # load a batch to profile
   context.create_expectation_suite('default')
@@ -441,11 +441,11 @@ appropriately typed and structured dictionary for that View.
 
 Built-in Views and corresponding input types:
 
-  * :py:class:`great_expectations.render.view.DefaultJinjaPageView`: :py:class:`great_expectations.render.types.RenderedDocumentContent`
+  * :py:class:`great_expectations.render.view.DefaultJinjaPageView`: :py:class:`great_expectations.render.RenderedDocumentContent`
 
-  * :py:class:`great_expectations.render.view.DefaultJinjaSectionView`: :py:class:`great_expectations.render.types.RenderedSectionContent`
+  * :py:class:`great_expectations.render.view.DefaultJinjaSectionView`: :py:class:`great_expectations.render.RenderedSectionContent`
 
-  * :py:class:`great_expectations.render.view.DefaultJinjaComponentView`: :py:class:`great_expectations.render.types.RenderedComponentContent`
+  * :py:class:`great_expectations.render.view.DefaultJinjaComponentView`: :py:class:`great_expectations.render.RenderedComponentContent`
 
 An example of a custom page Renderer, using all built-in UI elements is provided below.
 

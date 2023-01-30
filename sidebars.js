@@ -81,13 +81,6 @@ module.exports = {
             'guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_amazon_s3'
           ]
         },
-        {
-          type: 'category',
-          label: 'Miscellaneous',
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectation_docker_images' }
-          ]
-        },
         { type: 'doc', id: 'guides/setup/index', label: 'Index' }
       ]
     },
@@ -101,13 +94,17 @@ module.exports = {
           label: 'Core skills',
           items: [
             'guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use',
+            'guides/connecting_to_your_data/how_to_choose_between_working_with_a_single_or_multiple_batches_of_data',
+            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource',
+            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource',
+            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource',
             'guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector',
             'guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector',
             'guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector',
             'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
             'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
             'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-            'guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource'
+            'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource'
           ]
         },
         {
@@ -129,7 +126,8 @@ module.exports = {
             'guides/connecting_to_your_data/database/postgres',
             'guides/connecting_to_your_data/database/redshift',
             'guides/connecting_to_your_data/database/snowflake',
-            'guides/connecting_to_your_data/database/sqlite'
+            'guides/connecting_to_your_data/database/sqlite',
+            'guides/connecting_to_your_data/database/trino'
           ]
         },
         {
@@ -173,10 +171,9 @@ module.exports = {
           label: 'Core skills',
           items: [
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
-            'guides/expectations/how_to_create_and_edit_expectations_in_bulk',
             'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
-            { type: 'doc', id: 'guides/miscellaneous/how_to_quickly_explore_expectations_in_a_notebook' },
+            { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' }
           ]
         },
@@ -184,9 +181,9 @@ module.exports = {
           type: 'category',
           label: 'Profilers and Data Assistants',
           items: [
+            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
             'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file',
-            'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant'
+            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file'
           ]
         },
         {
@@ -195,7 +192,7 @@ module.exports = {
           items: [
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler',
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler'
           ]
         },
         {
@@ -207,21 +204,20 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations',
+            'guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
+            'guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
             'guides/expectations/creating_custom_expectations/how_to_add_support_for_the_auto_initializing_framework_to_a_custom_expectation',
             'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
-            // 'guides/expectations/creating_custom_expectations/how_to_create_custom_metrics',
             {
               type: 'category',
               label: 'Adding Features to Custom Expectations',
               items: [
                 'guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs',
-                // 'guides/expectations/features_custom_expectations/how_to_add_data_visualization_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_example_cases_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_input_validation_for_an_expectation',
-                // 'guides/expectations/features_custom_expectations/how_to_add_statement_renderers_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation',
                 'guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation'
               ]
@@ -269,7 +265,7 @@ module.exports = {
           label: 'Advanced',
           items: [
             'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
-            'guides/validation/advanced/how_to_implement_custom_notifications',
+            'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
             'guides/validation/advanced/how_to_validate_data_without_a_checkpoint',
             'guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint'
           ]
@@ -279,18 +275,32 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Reference Architectures',
-      link: { type: 'doc', id: 'deployment_patterns/reference_architecture_overview' },
+      label: 'Integration guides',
+      link: { type: 'doc', id: 'deployment_patterns/integrations_and_howtos_overview' },
       items: [
+        {
+          type: 'category',
+          label: 'Using Great Expectations with AWS',
+          items: [
+            'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
+            { label: 'How to use Great Expectations with AWS using S3 and Pandas', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas' },
+            { label: 'How to use Great Expectations with AWS using S3 and Spark', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_s3_and_spark' },
+            { label: 'How to use Great Expectations with AWS using Athena', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_athena' }
+          ]
+        },
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',
-        'deployment_patterns/how_to_use_great_expectations_in_databricks',
-        'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster',
         'deployment_patterns/how_to_use_great_expectations_with_airflow',
-        'deployment_patterns/how_to_use_great_expectations_in_flyte',
+        'deployment_patterns/how_to_use_great_expectations_in_databricks',
+        { type: 'doc', id: 'integrations/integration_datahub' },
         'deployment_patterns/how_to_use_great_expectations_in_deepnote',
-        'deployment_patterns/how_to_use_great_expectations_with_prefect',
+        'deployment_patterns/how_to_use_great_expectations_in_flyte',
+        'deployment_patterns/how_to_use_great_expectations_with_google_cloud_platform_and_bigquery',
         'deployment_patterns/how_to_use_great_expectations_with_meltano',
+        'deployment_patterns/how_to_use_great_expectations_with_prefect',
+        'deployment_patterns/how_to_use_great_expectations_with_ydata_synthetic',
+        'deployment_patterns/how_to_use_great_expectations_in_emr_serverless',
+        { type: 'doc', id: 'integrations/integration_zenml' },
         { type: 'doc', id: 'deployment_patterns/index', label: 'Index' }
       ]
     },
@@ -308,7 +318,7 @@ module.exports = {
             { type: 'doc', id: 'contributing/contributing_github' },
             { type: 'doc', id: 'contributing/contributing_test' },
             { type: 'doc', id: 'contributing/contributing_maturity' },
-            { type: 'doc', id: 'contributing/contributing_misc' },
+            { type: 'doc', id: 'contributing/contributing_misc' }
           ]
         },
         {
@@ -360,7 +370,6 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
             { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/data_discovery' },
             { type: 'doc', id: 'reference/anonymous_usage_statistics' }
           ]
         },
@@ -370,13 +379,8 @@ module.exports = {
           link: { type: 'doc', id: 'reference/api_reference' },
           items: [
             {
-              type: 'category',
-              label: 'Class DataContext',
-              link: { type: 'doc', id: 'api_docs/classes/great_expectations-data_context-data_context-data_context-DataContext' },
-              items: [
-                { label: '  .create(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-create' },
-                { label: '  .test_yaml_config(...)', type: 'doc', id: 'api_docs/methods/great_expectations-data_context-data_context-data_context-DataContext-test_yaml_config' }
-              ]
+              type: 'autogenerated',
+              dirName: 'reference/api'
             }
           ]
         },
@@ -394,6 +398,7 @@ module.exports = {
             'terms/datasource',
             'terms/data_context',
             'terms/data_asset',
+            'terms/data_assistant',
             'terms/data_connector',
             'terms/data_docs',
             'terms/evaluation_parameter',

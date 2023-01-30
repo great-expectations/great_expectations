@@ -49,7 +49,7 @@ In order to contribute to Great Expectations, you will need the following:
 ### Install Python dependencies
 ### (Easy version of steps 5-7 below for Mac/Linux users)
 
-Create a virtual environment in your locally cloned repo, use the same version of `pip` that we use in our CI/CD pipelines (for Python 3.7 - 3.9), and install the fewest dependencies needed for a dev environment (to minimize potential setup headaches).
+Create a virtual environment in your locally cloned repo, use the same version of `pip` that we use in our CI/CD pipelines (for Python 3.7 - 3.10), and install the fewest dependencies needed for a dev environment (to minimize potential setup headaches).
 
 ```
 python3 -m venv ge_dev
@@ -58,8 +58,38 @@ source ge_dev/bin/activate
 
 pip install --upgrade pip==21.3.1
 
-pip install -r requirements.txt -r requirements-dev-lite.txt -c constraints-dev.txt -e .
+pip install -c constraints-dev.txt -e ".[test]"
 ```
+
+> Note: You may specify other "extras" in the square brackets next to "test" if you separate with a comma (i.e. `-e ".[test,postgresql,trino]"`)
+>
+> Allowed extras currently include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `dev`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `sqlalchemy`, `teradata`, `test`, `trino`, `vertica`
+>
+> Before `pip install`, you may need to install some system packages.
+
+- For extras that will install `psycopg2-binary` **(`postgresql` and `redshift`)**, the `pg_config` executable must be on the system already
+
+    ```
+    sudo apt-get install -y libpq-dev
+
+    or
+
+    brew install postgresql
+    ```
+- For extras that will install `pyodbc` **(`dremio` and `mssql`)**, you will need `unixodbc`
+
+    ```
+    sudo apt-get install -y unixodbc-dev
+
+    or
+
+    brew install unixodbc
+
+    Macs with M1 ARM chips may need additional compiler/linker options as well
+
+    export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"
+    export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"
+    ```
 
 Confirm that tests are passing (only against pandas and sqlalchemy with sqlite), without the need for running any Docker containers.
 

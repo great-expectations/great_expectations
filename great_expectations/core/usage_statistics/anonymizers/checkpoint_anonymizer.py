@@ -63,7 +63,9 @@ class CheckpointAnonymizer(BaseAnonymizer):
         return anonymized_info_dict
 
     # noinspection PyUnusedLocal
-    def _anonymize_checkpoint_run(self, obj: object, **kwargs) -> dict:
+    def _anonymize_checkpoint_run(  # noqa: C901 - complexity 21
+        self, obj: object, **kwargs
+    ) -> dict:
         """
         Traverse the entire Checkpoint configuration structure (as per its formal, validated Marshmallow schema) and
         anonymize every field that can be customized by a user (public fields are recorded as their original names).

@@ -29,7 +29,7 @@ To avoid surprises and help clearly define your Custom Expectation, it can be he
 
 Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
     
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L132
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
@@ -70,7 +70,7 @@ The decorated method takes in a Spark `Column` object and will either return a `
 
 For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to leverage PySpark's `max` SQL Function and the `@column_aggregate_partial` decorator.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L76-L79
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py _spark"
 ```
 
 If we need a builtin function from `pyspark.sql.functions`, usually aliased to `F`, the import logic in 
@@ -114,7 +114,7 @@ While this approach can result in extra roundtrips to your database, it can also
 For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to implement the `@metric_partial` decorator, 
 specifying the type of value we're computing (`MAP_CONDITION_FN`) and the domain over which we're computing (`COLUMN`):
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L53-L65
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_definition"
 ```
 
 The decorated method takes in a valid Execution Engine and relevant `kwargs`,
@@ -127,12 +127,12 @@ These will be used to execute our query and compute the results of our metric.
 
 To do this, we need to access our Compute Domain directly:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L66-L75
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_selectable"
 ```
 
 This allows us to build and return a query to be executed, providing the result of our metric:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L77-L79
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py spark_query"
 ```
 
 :::note
@@ -179,6 +179,6 @@ If you believe your Custom Expectation is otherwise ready for contribution at a 
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full scripts used in this page, see them on GitHub:
-- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
-- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
+- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
 :::

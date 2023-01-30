@@ -93,8 +93,8 @@ Python files are treated as <TechnicalTag relative="../" tag="plugin" text="Plug
 That's all there is to the Setup step.  Once you have your Data Context initialized you will almost always start from your Data Context (as illustrated below) for everything else you do through Great Expectations.
 
 ```markdown title="Python code:"
-import great_expectations as ge
-context = ge.get_context()
+import great_expectations as gx
+context = gx.get_context()
 ```
 
 From here you will move on to the next step of working with Great Expectations: Connecting to Data.

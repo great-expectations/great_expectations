@@ -9,15 +9,12 @@ from great_expectations.util import filter_properties_dict
 logger = logging.getLogger(__name__)
 
 
-class ConfigOutputModes(Enum):
+class ConfigOutputModes(str, Enum):
     TYPED = "typed"
     COMMENTED_MAP = "commented_map"
     YAML = "yaml"
     DICT = "dict"
     JSON_DICT = "json_dict"
-
-
-ConfigOutputModeType = Union[ConfigOutputModes, str]
 
 
 class ConfigPeer(ABC):
@@ -44,7 +41,7 @@ class ConfigPeer(ABC):
 
     def get_config(
         self,
-        mode: ConfigOutputModeType = ConfigOutputModes.TYPED,
+        mode: ConfigOutputModes = ConfigOutputModes.TYPED,
         **kwargs,
     ) -> Union[BaseYamlConfig, dict, str]:
         if isinstance(mode, str):
@@ -64,7 +61,7 @@ class ConfigPeer(ABC):
         if mode == ConfigOutputModes.DICT:
             config_kwargs: dict = config.to_dict()
         elif mode == ConfigOutputModes.JSON_DICT:
-            config_kwargs: dict = config.to_json_dict()
+            config_kwargs: dict = config.to_json_dict()  # type: ignore[no-redef]
         else:
             raise ValueError(f'Unknown mode {mode} in "BaseCheckpoint.get_config()".')
 

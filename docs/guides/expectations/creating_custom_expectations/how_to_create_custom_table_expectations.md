@@ -2,8 +2,9 @@
 title: How to create a Custom Table Expectation
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-**`TableExpectations`** are one of the most common types of [**Expectation**](../../../reference/expectations/expectations.md). 
+**`TableExpectations`** are one of the most common types of <TechnicalTag tag="expectation" text="Expectation"/>. 
 They are evaluated for an entire table, and answer a semantic question about the table itself. For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer how many columns and rows are in your table.
 
 This guide will walk you through the process of creating your own custom `TableExpectation`.
@@ -83,32 +84,32 @@ When in doubt, the next step to implement is the first one that doesn't have a â
 
 ### 4. Change the Expectation class name and add a docstring
 
-By convention, your [**Metric**](../../../reference/metrics.md) class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
+By convention, your <TechnicalTag tag="metric" text="Metric"/> class is defined first in a Custom Expectation. For now, we're going to skip to the Expectation class and begin laying the groundwork for the functionality of your Custom Expectation.
 
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/table_expectation_template.py#L85
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py ExpectTableToMeetSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L94
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py ExpectTableColumnsToBeUnique class_def"
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/table_expectation_template.py#L86
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py docstring"
 ```
 
 with something like:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L95
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py docstring"
 ```
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
-```python file=../../../../examples/expectations/table_expectation_template.py#L150
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py diagnostics"
 ```
 
 with this one:
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L211
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py diagnostics"
 ```
 
 Later, you can go back and write a more thorough docstring.
@@ -137,12 +138,12 @@ Next, we're going to search for `examples = []` in your file, and replace it wit
 
 Your examples will look something like this:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L99-L139
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py examples"
 ```
 
 Here's a quick overview of how to create test cases to populate `examples`. The overall structure is a list of dictionaries. Each dictionary has two keys:
 
-* `data`: defines the input data of the example as a table/data frame. In this example the table has one column named `x` and a second column named `y`. Both columns have 5 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
+* `data`: defines the input data of the example as a table/data frame. In these examples the table has three columns (`col1`, `col2` and `col3`). These columns have 5 rows. (Note: if you define multiple columns, make sure that they have the same number of rows.)
 * `tests`: a list of test cases to validate against the data frame defined in the corresponding `data`.
 	* `title` should be a descriptive name for the test case. Make sure to have no spaces.
 	* `include_in_gallery`: This must be set to `True` if you want this test case to be visible in the Gallery as an example.
@@ -179,7 +180,7 @@ see our guide on [creating example cases for a Custom Expectation](../features_c
 ### 6. Implement your Metric and connect it to your Expectation
 
 This is the stage where you implement the actual business logic for your Expectation. 
-To do so, you'll need to implement a function within a [**Metric**](../../../reference/metrics.md) class, and link it to your Expectation.
+To do so, you'll need to implement a function within a <TechnicalTag tag="metric" text="Metric"/> class, and link it to your Expectation.
 By the time your Expectation is complete, your Metric will have functions for all three Execution Engines (Pandas, Spark, and SQLAlchemy) supported by Great Expectations. For now, we're only going to define one.
 
 :::note
@@ -188,7 +189,7 @@ Metrics answer questions about your data posed by your Expectation, <br/> and al
 
 Your Metric function will have the `@metric_value` decorator, with the appropriate `engine`. Metric functions can be as complex as you like, but they're often very short. For example, here's the definition for a Metric function to find the unique columns of a table with the PandasExecutionEngine.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L38-L53
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py pandas"
 ```
 
 :::note
@@ -219,22 +220,22 @@ The remainder of the Metric Identifier simply describes what the Metric computes
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python file=../../../../examples/expectations/table_expectation_template.py#L32
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py metric_name"
 ```
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L35
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py metric_name"
 ```
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/table_expectation_template.py#L93
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py metric_dependencies"
 ```
 
 with
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L142
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py metric_dependencies"
 ```
 
 It's essential to make sure to use matching Metric Identifier strings across your Metric class and Expectation class. This is how the Expectation knows which Metric to use for its internal logic.
@@ -243,12 +244,12 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python file=../../../../examples/expectations/table_expectation_template.py#L29
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py TableMeetsSomeCriteria class_def"
 ```
 
 with 
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L32
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py TableColumnsUnique class_def"
 ```
 
 ### 7. Validate
@@ -257,7 +258,7 @@ In this step, we simply need to validate that the results of our Metrics meet ou
 
 The validate method is implemented as `_validate(...)`:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L179-L185
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py validate"
 ```
 
 This method takes a dictionary named `metrics`, which contains all Metrics requested by your Metric dependencies, 
@@ -266,7 +267,7 @@ and performs a simple validation against your success keys (i.e. important thres
 To do so, we'll be accessing our success keys, as well as the result of our previously-calculated Metrics.
 For example, here is the definition of a `_validate(...)` method to validate the results of our `table.columns.unique` Metric against our success keys:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L179-L200
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py validate"
 ```
 
 Running your diagnostic checklist at this point should return something like this:
@@ -284,15 +285,14 @@ Completeness checklist for ExpectTableColumnsToBeUnique:
 
 ### 8. Linting
 
-Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`. 
+Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, and `ruff`.
 
 If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
 ```console
 black <PATH/TO/YOUR/EXPECTATION.py>
 isort <PATH/TO/YOUR/EXPECTATION.py>
-flake8 <PATH/TO/YOUR/EXPECTATION.py>
-pyupgrade <PATH/TO/YOUR/EXPECTATION.py> --py3-plus
+ruff <PATH/TO/YOUR/EXPECTATION.py> --fix
 ```
 
 :::info
@@ -325,12 +325,12 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/table_expectation_template.py#L141-L146
+```python name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py library_metadata"
 ```
 
 would become
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py#L203-L206
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
@@ -339,5 +339,5 @@ This is particularly important because ***we*** want to make sure that ***you***
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full script used in this page, see it on GitHub:
-- [expect_table_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py)
+- [expect_table_columns_to_be_unique.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py)
 :::

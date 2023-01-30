@@ -2,13 +2,13 @@ from typing import List
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+from great_expectations.util import get_context
 
 # NOTE: InMemoryStoreBackendDefaults SHOULD NOT BE USED in normal settings. You
 # may experience data loss as it persists nothing. It is used here for testing.
@@ -18,7 +18,7 @@ data_context_config = DataContextConfig(
     store_backend_defaults=store_backend_defaults,
     checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
 )
-context = BaseDataContext(project_config=data_context_config)
+context = get_context(project_config=data_context_config)
 
 datasource_config = {
     "name": "my_s3_datasource",
@@ -78,7 +78,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 # Here is a BatchRequest naming a data_asset
 batch_request = BatchRequest(
@@ -103,7 +103,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_s3_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_s3_datasource"][

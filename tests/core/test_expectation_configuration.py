@@ -77,6 +77,7 @@ def config7():
     )
 
 
+@pytest.mark.unit
 def test_expectation_configuration_equality(config1, config2, config3, config4):
     """Equality should depend on all defined properties of a configuration object, but not on whether the *instances*
     are the same."""
@@ -89,6 +90,7 @@ def test_expectation_configuration_equality(config1, config2, config3, config4):
     assert config3 != config4  # different result format
 
 
+@pytest.mark.unit
 def test_expectation_configuration_equivalence(
     config1, config2, config3, config4, config5
 ):
@@ -107,6 +109,7 @@ def test_expectation_configuration_equivalence(
     )  # different result format
 
 
+@pytest.mark.unit
 def test_expectation_configuration_get_evaluation_parameter_dependencies():
     # Getting evaluation parameter dependencies relies on pyparsing, but the expectation
     # configuration is responsible for ensuring that it only returns one copy of required metrics.
@@ -151,6 +154,7 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies():
     } == dependencies
 
 
+@pytest.mark.unit
 def test_expectation_configuration_get_evaluation_parameter_dependencies_with_query_store_formatted_urns():
     ec = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_in_set",
@@ -168,6 +172,7 @@ def test_expectation_configuration_get_evaluation_parameter_dependencies_with_qu
     assert dependencies == {}
 
 
+@pytest.mark.unit
 def test_expectation_configuration_patch(config4, config5, config6, config7):
     assert not config5.isEquivalentTo(config4, match_type="runtime")
     assert config5.patch("replace", "/value_set", [1, 2, 3]).isEquivalentTo(

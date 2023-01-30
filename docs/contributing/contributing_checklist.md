@@ -58,7 +58,6 @@ If your PR contains **only** changes to `contrib` directory (community contribut
 If your PR contains **only** changes to `contrib` directory (community contributed Expectations), please skip this step.
 :::
 
-* Please add a bullet point to `docs/changelog.md`, in the develop section.
 * Please group in the following order:  [FEATURE], [BUGFIX], [DOCS], [MAINTENANCE]
 
 * You can see the [Newer Changelog](../changelog.md) here:

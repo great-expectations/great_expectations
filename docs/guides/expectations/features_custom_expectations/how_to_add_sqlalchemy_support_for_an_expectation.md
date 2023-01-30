@@ -31,7 +31,7 @@ To avoid surprises, it can be helpful to determine beforehand what backends and 
 
 Within the `examples` defined inside your Expectation class, the `test_backends` key specifies which backends and SQLAlchemy dialects to run tests for. Add entries corresponding to the functionality you want to add: 
     
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L86-L132
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples"
 ```
 
 :::note
@@ -69,7 +69,7 @@ The decorated method takes in an SQLAlchemy `Column` object and will either retu
   
 For our Custom Column Map Expectation `ExpectColumnValuesToEqualThree`, we're going to leverage SQLAlchemy's `in_` ColumnOperator and the `@column_condition_partial` decorator.
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py#L81-L83
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py sqlalchemy"
 ```
 
 <details>
@@ -81,7 +81,12 @@ giving us the flexibility to not have write that targeted code ourselves!
 <br/><br/>
 Here's an example from <a href="https://greatexpectations.io/expectations/expect_column_sum_to_be_between">ExpectColumnSumToBeBetween</a>:
 
-```python file=../../../../great_expectations/expectations/metrics/column_aggregate_metrics/column_sum.py#L21-L23
+```python
+
+@column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
+def _sqlalchemy(cls, column, **kwargs):
+    return sa.func.sum(column)
+
 ```
 
 For more on <code>func</code> and the <code>func</code>-tionality it provides, see <a href="https://docs.sqlalchemy.org/en/14/core/functions.html">SQLAlchemy's Functions documentation</a>.
@@ -105,20 +110,20 @@ While this approach can result in extra roundtrips to your database, it can also
 For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, we're going to implement the `@metric_value` decorator, 
 specifying the type of value we're computing (`AGGREGATE_VALUE`) and the domain over which we're computing (`COLUMN`):
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L46-L58
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_def"
 ```
 
-The decorated method takes in a valid [Execution Engine](../../../reference/execution_engine.md) and relevant key word arguments,
+The decorated method takes in a valid <TechnicalTag tag="execution_engine" text="Execution Engine"/> and relevant key word arguments,
 and will return a computed value.
 
 To do this, we need to access our Compute Domain directly:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L59-L69
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_selectable"
 ```
 
 This allows us to build a query and use our Execution Engine to execute that query against our data to return the actual value we're looking for, instead of returning a query to find that value:
 
-```python file=../../../../tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py#L71-L74
+```python name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_query"
 ```
 
 <details>
@@ -171,6 +176,6 @@ If you believe your Custom Expectation is otherwise ready for contribution at a 
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 
 To view the full scripts used in this page, see them on GitHub:
-- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
-- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/hackathon-docs/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
+- [expect_column_max_to_be_between_custom.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py)
+- [expect_column_values_to_equal_three.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py)
 :::

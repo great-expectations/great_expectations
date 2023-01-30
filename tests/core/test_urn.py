@@ -6,6 +6,7 @@ from pyparsing import ParseException
 from great_expectations.core.urn import ge_urn
 
 
+@pytest.mark.unit
 def test_ge_validations_urn():
     # We should be able to parse validations urns
     urn = (
@@ -30,6 +31,7 @@ def test_ge_validations_urn():
     assert "metric_kwargs" not in res
 
 
+@pytest.mark.unit
 def test_ge_metrics_urn():
     urn = "urn:great_expectations:metrics:20200403T1234.324Z:my_suite:expect_something.observed_value:column=mycol"
     res = ge_urn.parseString(urn)
@@ -52,6 +54,7 @@ def test_ge_metrics_urn():
     assert "kwargs_dict" not in res
 
 
+@pytest.mark.unit
 def test_ge_stores_urn():
     urn = "urn:great_expectations:stores:my_store:mymetric:kw=param"
     res = ge_urn.parseString(urn)
@@ -74,6 +77,7 @@ def test_ge_stores_urn():
     assert "metric_kwargs" not in res
 
 
+@pytest.mark.unit
 def test_invalid_urn():
     # Must start with "urn:great_expectations"
     with pytest.raises(ParseException) as e:

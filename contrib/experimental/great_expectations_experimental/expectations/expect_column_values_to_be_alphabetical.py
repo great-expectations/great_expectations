@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, Tuple
 import pandas
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
@@ -14,14 +15,11 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
-)
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     Expectation,
     ExpectationConfiguration,
+    render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -44,9 +42,8 @@ from great_expectations.expectations.registry import (
     _registered_metrics,
     _registered_renderers,
 )
-from great_expectations.expectations.util import render_evaluation_parameter_string
+from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.types import RenderedStringTemplateContent
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -193,13 +190,17 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
 class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
-    """
+    """Expect values to be alphabetical.
+
     Given a list of string values, check if the list is alphabetical, either forwards or backwards (specified with the
     `reverse` parameter). Comparison is case-insensitive. Using `mostly` will give you how many items are alphabetical
     relative to the immediately previous item in the list.
 
-    conditions:
-        reverse: Checks for Z to A alphabetical if True, otherwise checks A to Z
+    Args:
+        column (str): The column name
+
+    Keyword Args:
+        reverse (boolean): Checks for Z to A alphabetical if True, otherwise checks A to Z
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -369,7 +370,7 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.question")
 #     def _question_renderer(
-#         cls, configuration, result=None, language=None, runtime_configuration=None
+#         cls, configuration, result=None, runtime_configuration=None
 #     ):
 #         column = configuration.kwargs.get("column")
 #         mostly = configuration.kwargs.get("mostly")
@@ -381,7 +382,7 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
 #     @classmethod
 #     @renderer(renderer_type="renderer.answer")
 #     def _answer_renderer(
-#         cls, configuration=None, result=None, language=None, runtime_configuration=None
+#         cls, configuration=None, result=None, runtime_configuration=None
 #     ):
 #         column = result.expectation_config.kwargs.get("column")
 #         mostly = result.expectation_config.kwargs.get("mostly")
@@ -399,16 +400,12 @@ class ExpectColumnValuesToBeAlphabetical(ColumnMapExpectation):
 #         cls,
 #         configuration=None,
 #         result=None,
-#         language=None,
 #         runtime_configuration=None,
 #         **kwargs,
 #     ):
 #!!! This example renderer should be shorter
 #         runtime_configuration = runtime_configuration or {}
-#         include_column_name = runtime_configuration.get("include_column_name", True)
-#         include_column_name = (
-#             include_column_name if include_column_name is not None else True
-#         )
+#         include_column_name = False if runtime_configuration.get("include_column_name") is False else True
 #         styling = runtime_configuration.get("styling")
 #         params = substitute_none_for_missing(
 #             configuration.kwargs,
