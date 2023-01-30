@@ -1,3 +1,4 @@
+import json
 from typing import Type
 
 import pydantic
@@ -39,6 +40,10 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     ):
         pytest.xfail(f"{schema_path.name} does not exist")
 
-    assert schema_path.read_text().rstrip() == zep_ds_or_asset_model.schema_json(
+    json_str = schema_path.read_text().rstrip()
+
+    assert json.loads(json_str) == zep_ds_or_asset_model.schema()
+
+    assert json_str == zep_ds_or_asset_model.schema_json(
         indent=4
     ), "Schemas are out of sync. Run `invoke schema --sync`"
