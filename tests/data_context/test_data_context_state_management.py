@@ -10,7 +10,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
@@ -20,7 +20,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 
 
-class StoreSpy(Store):
+class ExpectationsStoreSpy(ExpectationsStore):
     def __init__(self) -> None:
         self.save_count = 0
         super().__init__()
@@ -41,7 +41,7 @@ class EphemeralDataContextSpy(EphemeralDataContext):
     ) -> None:
         super().__init__(project_config)
         self.save_count = 0
-        self._expectations_store = StoreSpy()
+        self._expectations_store = ExpectationsStoreSpy()
 
     @property
     def expectations_store(self):
@@ -375,6 +375,6 @@ def test_add_or_update_expectation_suite_updates_successfully(
             kwargs={"column": "x", "value_set": [1, 2, 4]},
         ),
     ]
-    context.add_or_update_expectation_suite(suite)
+    context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
 
     assert context.expectations_store.save_count == 2
