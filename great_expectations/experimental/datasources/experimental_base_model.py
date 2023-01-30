@@ -40,6 +40,12 @@ class ExperimentalBaseModel(pydantic.BaseModel):
     class Config:
         extra = pydantic.Extra.forbid
 
+    def __key(self):
+        return tuple(self.dict())
+
+    def __hash__(self):
+        return hash(self.__key())
+
     @classmethod
     def parse_yaml(cls: Type[_Self], f: Union[pathlib.Path, str]) -> _Self:
         loaded = yaml.load(f)

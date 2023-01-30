@@ -361,15 +361,15 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
+    @functools.lru_cache(maxsize=1)
+    def _get_execution_engine(self, **engine_kwargs) -> ExecutionEngine:
+        # lru_cache will cause this method to only instantiate a new ExecutionEngine if engine_kwargs have changed
+        # this is required to avoid losing temp table references
+        return self._execution_engine_type()(**engine_kwargs)
+
     def get_execution_engine(self) -> ExecutionEngine:
         engine_kwargs = self.dict(exclude=self._excluded_eng_args)
-
-        # only instantiate a new ExecutionEngine if engine_kwargs have changed
-        @functools.lru_cache(maxsize=1)
-        def _get_execution_engine(**engine_kwargs) -> ExecutionEngine:
-            return self._execution_engine_type()(**engine_kwargs)
-
-        return _get_execution_engine(**engine_kwargs)
+        return self._get_execution_engine(**engine_kwargs)
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
