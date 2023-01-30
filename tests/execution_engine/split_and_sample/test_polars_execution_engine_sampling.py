@@ -1,7 +1,6 @@
 import datetime
 import random
 
-import polars as pl
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
@@ -12,8 +11,10 @@ from great_expectations.execution_engine.polars_execution_engine import (
 
 try:
     polars = pytest.importorskip("polars")
+    import polars as pl
 except ImportError:
     polars = None
+    pl = None
 
 pytestmark = pytest.mark.polars
 

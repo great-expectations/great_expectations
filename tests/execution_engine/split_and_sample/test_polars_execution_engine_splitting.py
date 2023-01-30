@@ -3,8 +3,6 @@ import os
 from typing import List
 from unittest import mock
 
-import polars as pl
-import polars.datatypes as ptypes
 import pytest
 
 import great_expectations.exceptions as ge_exceptions
@@ -33,8 +31,12 @@ from tests.execution_engine.split_and_sample.split_and_sample_test_cases import 
 
 try:
     polars = pytest.importorskip("polars")
+    import polars as pl
+    import polars.datatypes as ptypes
 except ImportError:
     polars = None
+    pl = None
+    ptypes = None
 
 pytestmark = pytest.mark.polars
 

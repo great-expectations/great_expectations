@@ -1,7 +1,6 @@
 import os
 from unittest import mock
 
-import polars as pl
 import pytest
 
 # noinspection PyBroadException
@@ -25,8 +24,10 @@ from tests.expectations.test_util import get_table_columns_metric
 
 try:
     polars = pytest.importorskip("polars")
+    import polars as pl
 except ImportError:
     polars = None
+    pl = None
 
 pytestmark = pytest.mark.polars
 
