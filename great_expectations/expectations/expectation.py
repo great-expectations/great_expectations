@@ -1488,7 +1488,6 @@ class Expectation(metaclass=MetaExpectation):
             for test in diagnostics.tests:
                 if test.test_passed is False:
                     print(f"=== {test.test_title} ({test.backend}) ===\n")
-                    print(test.stack_trace)
                     print(f"{80 * '='}\n")
 
         checklist: str = diagnostics.generate_checklist()
