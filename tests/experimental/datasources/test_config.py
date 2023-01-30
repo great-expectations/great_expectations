@@ -317,7 +317,8 @@ def test_dict_config_round_trip(
     dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
-    re_loaded: GxConfig = GxConfig.parse_obj(dumped)
+    with mock.patch("sqlalchemy.create_engine"):
+        re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
     assert re_loaded
 
