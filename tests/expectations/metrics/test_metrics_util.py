@@ -164,13 +164,13 @@ def test_get_unexpected_indices_for_single_pandas_named_index_named_unexpected_i
 ):
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1"])
-    expectation_domain_column_name: str = "animals"
+    expectation_domain_column_list: List[str] = ["animals"]
     unexpected_index_column_names: List[str] = ["pk_1"]
 
     unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
         domain_records_df=updated_dataframe,
-        expectation_domain_column_name=expectation_domain_column_name,
         unexpected_index_column_names=unexpected_index_column_names,
+        expectation_domain_column_list=expectation_domain_column_list,
     )
     assert unexpected_index_list == unexpected_index_list_one_index_column
 
@@ -182,13 +182,13 @@ def test_get_unexpected_indices_for_single_pandas_named_index(
 ):
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1"])
-    expectation_domain_column_name = "animals"
-    unexpected_index_column_names = [updated_dataframe.index.name]
+    expectation_domain_column_list: List[str] = ["animals"]
+    unexpected_index_column_names: List[str] = [updated_dataframe.index.name]
 
     unexpected_index_list = get_unexpected_indices_for_single_pandas_named_index(
         domain_records_df=updated_dataframe,
-        expectation_domain_column_name=expectation_domain_column_name,
         unexpected_index_column_names=unexpected_index_column_names,
+        expectation_domain_column_list=expectation_domain_column_list,
     )
     assert unexpected_index_list == unexpected_index_list_one_index_column
 
@@ -200,13 +200,13 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices(
 ):
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
-    expectation_domain_column_name = "animals"
-    unexpected_index_column_names = list(updated_dataframe.index.names)
+    expectation_domain_column_list: List[str] = ["animals"]
+    unexpected_index_column_names: List[str] = list(updated_dataframe.index.names)
 
     unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
         domain_records_df=updated_dataframe,
-        expectation_domain_column_name=expectation_domain_column_name,
         unexpected_index_column_names=unexpected_index_column_names,
+        expectation_domain_column_list=expectation_domain_column_list,
     )
     assert unexpected_index_list == unexpected_index_list_two_index_columns
 
@@ -218,13 +218,13 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 ):
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
-    expectation_domain_column_name = "animals"
-    unexpected_index_column_names = ["pk_1", "pk_2"]
+    expectation_domain_column_list: List[str] = ["animals"]
+    unexpected_index_column_names: List[str] = ["pk_1", "pk_2"]
 
     unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
         domain_records_df=updated_dataframe,
-        expectation_domain_column_name=expectation_domain_column_name,
         unexpected_index_column_names=unexpected_index_column_names,
+        expectation_domain_column_list=expectation_domain_column_list,
     )
     assert unexpected_index_list == unexpected_index_list_two_index_columns
 
@@ -236,13 +236,13 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 ):
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
-    expectation_domain_column_name = "animals"
-    unexpected_index_column_names = ["pk_1"]
+    expectation_domain_column_list: List[str] = ["animals"]
+    unexpected_index_column_names: List[str] = ["pk_1"]
 
     unexpected_index_list = get_unexpected_indices_for_multiple_pandas_named_indices(
         domain_records_df=updated_dataframe,
-        expectation_domain_column_name=expectation_domain_column_name,
         unexpected_index_column_names=unexpected_index_column_names,
+        expectation_domain_column_list=expectation_domain_column_list,
     )
     assert unexpected_index_list == unexpected_index_list_one_index_column
 
@@ -253,17 +253,17 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 ):
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
-    expectation_domain_column_name = "animals"
-    unexpected_index_column_names = ["i_dont_exist"]
+    expectation_domain_column_list: List[str] = ["animals"]
+    unexpected_index_column_names: List[str] = ["i_dont_exist"]
     with pytest.raises(MetricResolutionError) as e:
         get_unexpected_indices_for_multiple_pandas_named_indices(
             domain_records_df=updated_dataframe,
-            expectation_domain_column_name=expectation_domain_column_name,
             unexpected_index_column_names=unexpected_index_column_names,
+            expectation_domain_column_list=expectation_domain_column_list,
         )
     assert e.value.message == (
         "Error: The column i_dont_exist does not exist in the named indices. Please "
-        "check your configuration"
+        "check your configuration."
     )
 
 
@@ -273,15 +273,15 @@ def test_get_unexpected_indices_for_multiple_pandas_named_indices_named_unexpect
 ):
     dataframe: pd.DataFrame = pandas_animals_dataframe_for_unexpected_rows_and_index
     updated_dataframe: pd.DataFrame = dataframe.set_index(["pk_1", "pk_2"])
-    expectation_domain_column_name = None
+    expectation_domain_column_list = []
     unexpected_index_column_names = ["pk_1"]
     with pytest.raises(MetricResolutionError) as e:
         get_unexpected_indices_for_multiple_pandas_named_indices(
             domain_records_df=updated_dataframe,
-            expectation_domain_column_name=expectation_domain_column_name,
             unexpected_index_column_names=unexpected_index_column_names,
+            expectation_domain_column_list=expectation_domain_column_list,
         )
     assert e.value.message == (
-        "Error: The domain column is currently set to None. Please check your "
+        "Error: The list of domain columns is currently empty. Please check your "
         "configuration."
     )

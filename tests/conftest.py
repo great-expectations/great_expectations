@@ -7296,6 +7296,45 @@ def pandas_animals_dataframe_for_unexpected_rows_and_index():
 
 
 @pytest.fixture
+def pandas_column_pairs_dataframe_for_unexpected_rows_and_index():
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "ordered_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "eraser",
+                "eraser",
+                "eraser",
+            ],
+            "received_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "desk",
+                "desk",
+                "desk",
+            ],
+        }
+    )
+
+
+@pytest.fixture
+def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index():
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "a": [10, 20, 30, 40, 50, 60],
+            "b": [10, 20, 30, 40, 50, 60],
+            "c": [10, 20, 30, 40, 50, 60],
+        }
+    )
+
+
+@pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
 ) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
