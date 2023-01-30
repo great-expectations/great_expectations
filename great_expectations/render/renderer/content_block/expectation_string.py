@@ -27,7 +27,7 @@ class ExpectationStringRenderer(ContentBlockRenderer):
         )
         return [
             RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "styling": {"parent": {"classes": ["alert", "alert-warning"]}},
                     "string_template": {
