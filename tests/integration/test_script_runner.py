@@ -342,6 +342,7 @@ local_tests = [
     IntegrationTestFixture(
         name="expect_column_values_to_only_contain_vowels",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py",
+        extra_backend_dependencies=BackendDependencies.MSSQL,
     ),
     IntegrationTestFixture(
         name="expect_queried_column_value_frequency_to_meet_threshold",
