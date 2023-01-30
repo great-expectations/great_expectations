@@ -41,6 +41,8 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.alias_types import JSONValues
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
@@ -160,9 +162,12 @@ class BaseYamlConfig(SerializableDictDot):
         """
         return object_to_yaml_str(obj=self.commented_map)
 
-    def to_json_dict(self) -> dict:
-        """
-        :returns a JSON-serializable dict containing the project configuration
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict containing this DataContextConfig.
+
+        Returns:
+            A JSON-serializable dict representation of this project configuration.
         """
         commented_map: CommentedMap = self.commented_map
         return convert_to_json_serializable(data=commented_map)
@@ -360,14 +365,18 @@ class AssetConfig(SerializableDictDot):
     def module_name(self) -> Optional[str]:
         return self._module_name
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this AssetConfig.
+
+        Returns:
+            A JSON-serializable dict representation of this AssetConfig.
         """
         # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # make this refactoring infeasible at the present time.
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
@@ -599,14 +608,18 @@ class DataConnectorConfig(AbstractConfig):
     def module_name(self):
         return self._module_name
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this DataConnectorConfig.
+
+        Returns:
+            A JSON-serializable dict representation of this DataConnectorConfig.
         """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
+        # # TODO: <Alex>2/4/2022</Alex>
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # make this refactoring infeasible at the present time.
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
@@ -1149,14 +1162,18 @@ class DatasourceConfig(AbstractConfig):
     def module_name(self):
         return self._module_name
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this DatasourceConfig.
+
+        Returns:
+            A JSON-serializable dict representation of this DatasourceConfig.
         """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
+        # # TODO: <Alex>2/4/2022</Alex>
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # make this refactoring infeasible at the present time.
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
@@ -1583,7 +1600,13 @@ class GXCloudConfig(DictDot):
         self.organization_id = organization_id
         self.access_token = access_token
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this GXCloudConfig.
+
+        Returns:
+            A JSON-serializable dict representation of this GXCloudConfig.
+        """
         # postpone importing to avoid circular imports
         from great_expectations.data_context.util import PasswordMasker
 
@@ -1894,9 +1917,10 @@ class BaseStoreBackendDefaults(DictDot):
         self.data_docs_site_name = data_docs_site_name
 
 
+@public_api
 class S3StoreBackendDefaults(BaseStoreBackendDefaults):
-    """
-    Default store configs for s3 backends, with some accessible parameters
+    """Default store configs for s3 backends, with some accessible parameters.
+
     Args:
         default_bucket_name: Use this bucket name for stores that do not have a bucket name provided
         expectations_store_bucket_name: Overrides default_bucket_name if supplied
@@ -2007,9 +2031,10 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
         }
 
 
+@public_api
 class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
-    """
-    Default store configs for filesystem backends, with some accessible parameters
+    """Default store configs for filesystem backends, with some accessible parameters.
+
     Args:
         root_directory: Absolute directory prepended to the base_directory for each store
         plugins_directory: Overrides default if supplied
@@ -2046,9 +2071,9 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
             ] = root_directory
 
 
+@public_api
 class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
-    """
-    Default store configs for in memory backends.
+    """Default store configs for in memory backends.
 
     This is useful for testing without persistence.
     """
@@ -2430,14 +2455,18 @@ class DataContextConfig(BaseYamlConfig):
     def config_version(self, config_version: float) -> None:
         self._config_version = config_version
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this DataContextConfig.
+
+        Returns:
+            A JSON-serializable dict representation of this DataContextConfig.
         """
         # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # make this refactoring infeasible at the present time.
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict
@@ -2672,9 +2701,37 @@ class CheckpointConfigSchema(Schema):
         return data
 
 
+@public_api
 class CheckpointConfig(BaseYamlConfig):
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = CheckpointConfigSchema
+    """Initializes the CheckpointConfig using a BaseYamlConfig.
+
+    Args:
+        name: The name of the checkpoint.
+        config_version: Your config version
+        template_name: The template name of your checkpoint
+        module_name: The module name used for your checkpoint
+        class_name: The class name of your checkpoint
+        run_name_template: The run template name
+        expectation_suite_name: The expectation suite name of your checkpoint
+        batch_request: The batch request
+        action_list: The action list
+        evaluation_parameters: The evaluation parameters
+        runtime_configuration: The runtime configuration for your checkpoint
+        validations: An optional list of validations in your checkpoint
+        default_validation_id: The default validation id of your checkpoint
+        profilers: An optional list of profilers in your checkpoint
+        validation_operator_name: The validation operator name
+        batches: An optional list of batches
+        commented_map: The commented map
+        ge_cloud_id: Your GE Cloud ID
+        site_names: The site names
+        slack_webhook: The slack webhook
+        notify_on: The notify on
+        notify_with: The notify with
+        expectation_suite_ge_cloud_id: Your expectation suite
+    """
 
     def __init__(
         self,
@@ -2937,14 +2994,18 @@ class CheckpointConfig(BaseYamlConfig):
 
         return result
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this CheckpointConfig.
+
+        Returns:
+            A JSON-serializable dict representation of this CheckpointConfig.
         """
-        # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
+        # # TODO: <Alex>2/4/2022</Alex>
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # make this refactoring infeasible at the present time.
         dict_obj: dict = self.to_dict()
         serializeable_dict: dict = convert_to_json_serializable(data=dict_obj)
         return serializeable_dict

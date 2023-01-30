@@ -769,6 +769,27 @@ class CodeReferenceFilter:
                 "great_expectations/data_context/data_context/cloud_data_context.py"
             ),
         ),
+        IncludeExcludeDefinition(
+            reason="Map metric providers are part of the public API",
+            name="MapMetricProvider",
+            filepath=pathlib.Path(
+                "great_expectations/expectations/metrics/map_metric_provider.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Map metric providers are part of the public API",
+            name="MetricProvider",
+            filepath=pathlib.Path(
+                "great_expectations/expectations/metrics/metric_provider.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="Checkpoint CRUD is part of the public API",
+            name="delete_checkpoint",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/abstract_data_context.py"
+            ),
+        ),
     ]
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
         IncludeExcludeDefinition(
