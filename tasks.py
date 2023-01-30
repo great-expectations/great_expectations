@@ -16,9 +16,10 @@ import os
 import pathlib
 import shutil
 import sys
-from typing import TYPE_CHECKING, Final, Type
+from typing import TYPE_CHECKING, Type
 
 import invoke
+from typing_extensions import Final
 
 from scripts import check_public_api_docstrings
 
