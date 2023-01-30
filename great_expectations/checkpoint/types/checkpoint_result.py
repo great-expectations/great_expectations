@@ -195,7 +195,7 @@ class CheckpointResult(SerializableDictDot):
         Returns:
             A list of ExpectationSuiteValidationResult, when group_by=None
             A dict of ValidationResultIdentifier keys and ExpectationValidationResults
-                values, when group_by="validation_result_identifier
+                values, when group_by="validation_result_identifier"
             A dict of str keys and ExpectationValidationResults values, when
                 group_by="expectation_suite_name" or group_by="data_asset_name"
             None, when group_by is something other than the options described above
