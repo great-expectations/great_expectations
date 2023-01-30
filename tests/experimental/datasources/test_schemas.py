@@ -33,6 +33,7 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     if schema_path.name in (
         "CSVAsset.json",
         "ExcelAsset.json",
+        "PandasDatasource.json",
         "SqliteDatasource.json",
         "SqliteTableAsset.json",
     ):
