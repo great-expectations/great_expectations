@@ -1269,7 +1269,6 @@ def compute_unexpected_pandas_indices(
         unexpected_indices: List[int | str] = list(domain_records_df.index)
         for index in unexpected_indices:
             primary_key_dict: Dict[str, Any] = dict()
-            # TODO change this up. ExpectationDomainColumName
             assert (
                 expectation_domain_column_list
             ), "`expectation_domain_column_list` was not provided"
