@@ -133,7 +133,7 @@ class ExpectationConfiguration(SerializableDictDot):
     """Denies the parameters and name of a specific expectation.
 
     Args:
-        expectation_type: The name of the expectation class to use.
+        expectation_type: The name of the expectation class to use in snake case, e.g. `expect_column_values_to_not_be_null`.
         kwargs: The keyword arguments to pass to the expectation class.
         meta: A dictionary of metadata to attach to the expectation.
         success_on_last_run: Whether the expectation succeeded on the last run.
