@@ -260,7 +260,7 @@ class PandasDatasource(Datasource):
         # Only self.assets can be tested for PandasDatasource
         if self.assets and test_assets:
             for asset in self.assets.values():
-                asset.test_connection()
+                asset.test_connection()  # type: ignore[union-attr]
 
     def add_csv_asset(
         self,
