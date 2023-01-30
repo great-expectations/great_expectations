@@ -224,6 +224,7 @@ stages:
               # Run pytest
               pytest $(pytest_args) \
                 --no-sqlalchemy \
+                --no-spark \
                 --ignore 'tests/cli' \
                 --ignore 'tests/integration/usage_statistics' \
                 --napoleon-docstrings \
@@ -337,7 +338,7 @@ stages:
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest --no-sqlalchemy --no-spark --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
             env:
