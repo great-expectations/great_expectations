@@ -5,6 +5,7 @@ import logging
 from typing import Any, Callable, Dict, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.alias_types import JSONValues
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
@@ -86,7 +87,13 @@ class BatchDefinition(SerializableDictDot):
         self._batch_identifiers = batch_identifiers
         self._batch_spec_passthrough = batch_spec_passthrough
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this BatchDefinition.
+
+        Returns:
+            A JSON-serializable dict representation of this BatchDefinition.
+        """
         fields_dict: dict = {
             "datasource_name": self._datasource_name,
             "data_connector_name": self._data_connector_name,
@@ -302,14 +309,20 @@ class BatchRequestBase(SerializableDictDot):
             batch_request=super().to_dict()
         )
 
-    def to_json_dict(self) -> dict:
+    # While this class is private, it is inherited from and this method is part
+    # of the public api on the child.
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this BatchRequestBase.
+
+        Returns:
+            A JSON-serializable dict representation of this BatchRequestBase.
         """
         # TODO: <Alex>2/4/2022</Alex>
-        This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
-        reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
-        due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
-        make this refactoring infeasible at the present time.
-        """
+        # This implementation of "SerializableDictDot.to_json_dict() occurs frequently and should ideally serve as the
+        # reference implementation in the "SerializableDictDot" class itself.  However, the circular import dependencies,
+        # due to the location of the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules
+        # make this refactoring infeasible at the present time.
 
         # if batch_data appears in BatchRequest, temporarily replace it with
         # str placeholder before calling convert_to_json_serializable so that
@@ -774,7 +787,13 @@ class Batch(SerializableDictDot):
         }
         return dict_obj
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this Batch.
+
+        Returns:
+            A JSON-serializable dict representation of this Batch.
+        """
         json_dict: dict = self.to_dict()
         deep_filter_properties_iterable(
             properties=json_dict["batch_request"],
