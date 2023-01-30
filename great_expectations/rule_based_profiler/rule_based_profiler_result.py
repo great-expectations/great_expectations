@@ -117,7 +117,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
             expectation_suite_name: The name of the desired `ExpectationSuite`.
 
         Returns:
-            `ExpectationSuite` object, built from properties, populated into this `RuleBasedProfilerResult` object.
+            `ExpectationSuite`
         """
         expectation_suite: ExpectationSuite = get_or_create_expectation_suite(
             data_context=None,
