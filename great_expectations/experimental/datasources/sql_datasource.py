@@ -361,7 +361,7 @@ class SQLDatasource(Datasource):
     class Config:
         arbitrary_types_allowed = True
 
-    @pydantic.root_validator()
+    @pydantic.root_validator
     def _validate_sqlalchemy_engine_parameters(cls, values: dict) -> dict:
         """
         Validates that SQL Alchemy was successfully imported and attempts to
