@@ -348,6 +348,10 @@ class SQLDatasource(Datasource):
     _engine: sqlalchemy.engine.Engine = pydantic.PrivateAttr()
 
     @property
+    def engine(self) -> sqlalchemy.engine.Engine:
+        return self._engine
+
+    @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the default execution engine type."""
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -368,7 +372,7 @@ class SQLDatasource(Datasource):
             # in this case, the specific ValidationError will be raised by pydantic after this root_validator is run
             if "connection_string" in values and values["connection_string"]:
                 try:
-                    values["engine"] = sqlalchemy.create_engine(
+                    values["_engine"] = sqlalchemy.create_engine(
                         values["connection_string"]
                     )
                 except Exception as e:
