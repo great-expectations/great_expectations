@@ -137,7 +137,6 @@ class DataAsset(ExperimentalBaseModel):
     # non-field private attrs
     _datasource: Datasource = pydantic.PrivateAttr()
 
-
     @property
     def datasource(self) -> Datasource:
         return self._datasource
@@ -293,8 +292,6 @@ class DataAsset(ExperimentalBaseModel):
 # If a Datasource can have more than 1 DataAssetType, this will need to change.
 DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
 
-CALLS = []
-
 
 class Datasource(
     ExperimentalBaseModel, Generic[DataAssetType], metaclass=MetaDatasource
@@ -344,24 +341,22 @@ class Datasource(
         # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
         arbitrary_types_allowed = True
 
-    @pydantic.validator("assets", each_item=True)
-    def _load_asset_subtype(
-        cls: Type[Datasource[DataAssetType]], data_asset: DataAsset
-    ) -> DataAssetType:
-        global CALLS
-        CALLS.append(cls.__name__)
-        LOGGER.warning(f"Loading 'assets' ->\n{pf(data_asset, depth=4)}")
-        asset_type_name: str = data_asset.type
-        asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[asset_type_name]
+    @pydantic.validator("assets", pre=True)
+    def _load_asset_subtype(cls, v: Dict[str, dict]):
+        LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
+        loaded_assets: Dict[str, DataAssetType] = {}
 
-        kwargs = data_asset.dict(exclude_unset=True)
-        LOGGER.warning(f"kwargs\n{pf(kwargs)}")
+        # TODO (kilo59): catch key errors
+        for asset_name, config in v.items():
+            asset_type_name: str = config["type"]
+            asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[
+                asset_type_name
+            ]
+            LOGGER.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
+            loaded_assets[asset_name] = asset_type(**config)
 
-        polymorphed_asset = asset_type(**kwargs)
-        LOGGER.warning(f"{asset_type}\n{repr(polymorphed_asset)}")
-
-        LOGGER.error(f"CALLS {CALLS}")
-        return polymorphed_asset
+        LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
+        return loaded_assets
 
     def _execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the execution engine to be used"""
