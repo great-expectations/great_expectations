@@ -22,9 +22,7 @@
             }
         },
         "path": {
-            "title": "Path",
-            "format": "file-path",
-            "type": "string"
+            "title": "Path"
         },
         "regex": {
             "title": "Regex",
@@ -37,11 +35,7 @@
             "type": "string"
         },
         "columns": {
-            "title": "Columns",
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+            "title": "Columns"
         },
         "storage_options": {
             "title": "Storage Options",
