@@ -10,10 +10,10 @@ from great_expectations.core.util import convert_to_json_serializable
 
 @public_api
 class MetricConfiguration:
-    """Metrics are computed attributes of data, and are derived from one or more Batches that can
-    then be used to evaluate Expectations or to summarize the result of Validation. The MetricConfiguration
-    class provides a interface for configuring metrics, including domain information, dependencies
-    and additional metric-specific configurations.
+    """The MetricConfiguration class provides a interface for configuring Metrics, including domain information,
+    dependencies and additional metric-specific configurations.  Metrics are computed attributes of data, and
+    are derived from one or more Batches that can then be used to evaluate Expectations or to summarize the
+    result of Validation.
 
         Args:
             metric_name: name of the Metric defined by the current MetricConfiguration.
