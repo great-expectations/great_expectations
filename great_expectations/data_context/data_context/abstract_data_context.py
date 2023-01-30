@@ -2209,7 +2209,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         expectation_suite_name: str,
         id: str | None = None,
-        expectations: list[dict | ExpectationConfiguration] | None = None,
+        expectations: Sequence[dict | ExpectationConfiguration] | None = None,
         evaluation_parameters: dict | None = None,
         data_asset_type: str | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
