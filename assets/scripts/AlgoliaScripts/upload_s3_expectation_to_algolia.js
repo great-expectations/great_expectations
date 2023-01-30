@@ -36,7 +36,7 @@ const replicaIndexAndSettings = [
 ]
 
 // Main Index setSettings
-const attributesForFaceting = ['searchable(library_metadata.tags)', 'searchable(engineSupported)', 'searchable(exp_type)']
+const attributesForFaceting = ['searchable(library_metadata.tags)', 'searchable(engineSupported)', 'searchable(exp_type)', 'searchable(package)']
 const maxFacetHits = 100
 const searchableAttributes = ['description.snake_name', 'description.short_description']
 const customRanking = ['asc(description.snake_name)']
@@ -92,6 +92,7 @@ function formatExpectation (ExpecData) {
     data.created_at = ExpecData[key].created_at
     data.updated_at = ExpecData[key].updated_at
     data.exp_type = ExpecData[key].exp_type
+    data.package = ExpecData[key].package
     dataset.push(data)
   })
   return dataset
