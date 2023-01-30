@@ -1459,6 +1459,7 @@ class ExpectationConfiguration(SerializableDictDot):
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationValidationResult:
         """Runs the expectation against a `Validator`.
+
         Args:
             validator: Object responsible for running an Expectation against data.
             runtime_configuration: A dictionary of configuration arguments to be used by the expectation.
