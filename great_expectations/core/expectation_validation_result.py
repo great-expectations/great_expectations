@@ -433,7 +433,6 @@ class ExpectationSuiteValidationResultMeta(TypedDict):
     validation_time: str
 
 
-@public_api
 class ExpectationSuiteValidationResult(SerializableDictDot):
     """The result of a batch of data validated against an Expectation Suite.
 
