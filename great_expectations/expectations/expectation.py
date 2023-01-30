@@ -2530,7 +2530,7 @@ class ColumnExpectation(TableExpectation, ABC):
     number of unique values, column type, etc.
 
     --Documentation--
-    - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/
 
     Args:
      domain_keys (tuple): A tuple of the keys used to determine the domain of the
