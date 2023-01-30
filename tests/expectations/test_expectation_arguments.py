@@ -5,7 +5,7 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -234,7 +234,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
 
     # Test calling "validator.validate()" explicitly.
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as e:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as e:
         # noinspection PyUnusedLocal
         validator_validation: ExpectationSuiteValidationResult = validator.validate(
             **runtime_environment_arguments
@@ -252,7 +252,7 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         **expectation_arguments_without_meta, **expectation_meta
     )
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as e:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as e:
         # noinspection PyUnusedLocal
         result: ExpectationValidationResult = (
             validator.expect_column_values_to_not_be_null(**expectation_parameters)
@@ -507,7 +507,6 @@ def test_result_format_configured_no_set_default_override(
         "unexpected_count": 0,
         "unexpected_percent": 0.0,
         "partial_unexpected_list": [],
-        "partial_unexpected_index_list": None,
         "partial_unexpected_counts": [],
     }
 
@@ -842,7 +841,6 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
         usage_statistics_url="http://fakeendpoint.com",
     )
     context._usage_statistics_handler = handler
-    context._data_context._usage_statistics_handler = handler
 
     catch_exceptions: bool = False  # expect exceptions to be raised
     result_format: dict = {

@@ -25,7 +25,7 @@ except ImportError:
         "Unable to load pandas; install optional pandas dependency for support."
     )
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
@@ -827,7 +827,7 @@ introspection:
         ]
     }
 
-    with pytest.raises(ge_exceptions.DatasourceInitializationError):
+    with pytest.raises(gx_exceptions.DatasourceInitializationError):
         # noinspection PyUnusedLocal
         my_sql_datasource = context.test_yaml_config(
             f"""
@@ -891,7 +891,7 @@ def test_batch_request_sql_with_schema(
         "runtime_parameters": {"query": "SELECT * FROM main.table_2"},
         "batch_identifiers": {
             "pipeline_stage_name": "core_processing",
-            "airflow_run_id": 1234567890,
+            "airflow_run_id": 1234567891,
         },
     }
     validator = context.get_validator(

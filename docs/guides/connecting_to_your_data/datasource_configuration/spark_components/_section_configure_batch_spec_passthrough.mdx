@@ -17,87 +17,20 @@ And your full configuration will look like:
 
   <TabItem value="inferred">
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",  
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_inferred_data_connector": {
-            "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "./data",
-            "default_regex": {}
-            "bass_spec_passthrough": {
-                "reader_method": "csv",
-                "reader_options": {
-                    "header": True,
-                    "inferSchema": True,
-                }
-            }
-        }
-    }
-}
+```python name="inferred spark datasource_config post batch_spec_passthrough definition"
 ```
 
   </TabItem>
   <TabItem value="configured">
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",  
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_configured_data_connector": {
-            "class_name": "ConfiguredAssetFilesystemDataConnector",
-            "base_directory": "./data",
-            "assets": {}
-            "batch_spec_passthrough": {
-                "reader_method": "csv",
-                "reader_options": {
-                    "header": True,
-                    "inferSchema": True,
-                }
-            }
-        }
-    }
-}
+```python name="configured spark datasource_config post batch_spec_passthrough definition"
 ```
 
       
   </TabItem>
   <TabItem value="runtime">
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_runtime_data_connector": {
-            "class_name": "RuntimeDataConnector",
-            "batch_spec_passthrought": {
-                "reader_method": "csv",
-                "reader_options": {
-                    "header": True,
-                    "inferSchema": True,
-            },
-            "batch_identifiers": [],
-        }
-    }
-}
+```python name="runtime spark datasource_config post batch_spec_passthrough definition"
 ```
 
 

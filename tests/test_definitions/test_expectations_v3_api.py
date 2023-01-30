@@ -1,10 +1,12 @@
 import glob
 import json
 import os
+from typing import cast
 
 import pandas as pd
 import pytest
 
+from great_expectations import DataContext
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -22,10 +24,11 @@ from great_expectations.self_check.util import (
     sqliteDialect,
     trinoDialect,
 )
+from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
 
 
-def pytest_generate_tests(metafunc):
+def pytest_generate_tests(metafunc):  # noqa C901 - 35
     # Load all the JSON files in the directory
     dir_path = os.path.dirname(os.path.realpath(__file__))
     expectation_dirs = [
@@ -44,6 +47,7 @@ def pytest_generate_tests(metafunc):
         )
         for c in backends:
             for filename in test_configuration_files:
+                pk_column: bool = False
                 file = open(filename)
                 test_configuration = json.load(file)
 
@@ -79,13 +83,31 @@ def pytest_generate_tests(metafunc):
                                         dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
+                                        context=cast(
+                                            DataContext,
+                                            build_in_memory_runtime_context(),
+                                        ),
                                     )
                                 )
                             validator_with_data = datasets[0]
                         else:
+                            if expectation_category in [
+                                "column_map_expectations",
+                                "column_pair_map_expectations",
+                                "multicolumn_map_expectations",
+                            ]:
+
+                                pk_column: bool = True
+
                             schemas = d["schemas"] if "schemas" in d else None
                             validator_with_data = get_test_validator_with_data(
-                                c, d["data"], schemas=schemas
+                                c,
+                                d["data"],
+                                schemas=schemas,
+                                context=cast(
+                                    DataContext, build_in_memory_runtime_context()
+                                ),
+                                pk_column=pk_column,
                             )
 
                     for test in d["tests"]:
@@ -356,6 +378,7 @@ def pytest_generate_tests(metafunc):
                                 "expectation_type": test_configuration[
                                     "expectation_type"
                                 ],
+                                "pk_column": pk_column,
                                 "validator_with_data": validator_with_data,
                                 "test": test,
                                 "skip": skip_expectation or skip_test,
@@ -389,10 +412,12 @@ def test_case_runner_v3_api(test_case):
                 validator=test_case["validator_with_data"],
                 expectation_type=test_case["expectation_type"],
                 test=test_case["test"],
+                pk_column=test_case["pk_column"],
             )
     else:
         evaluate_json_test_v3_api(
             validator=test_case["validator_with_data"],
             expectation_type=test_case["expectation_type"],
             test=test_case["test"],
+            pk_column=test_case["pk_column"],
         )

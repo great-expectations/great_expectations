@@ -1573,7 +1573,7 @@ def test_suite_scaffold_creates_notebook_and_opens_jupyter(
     root_dir = context.root_directory
     suite_name = "foop"
     expected_notebook_path = os.path.join(
-        root_dir, context.GE_EDIT_NOTEBOOK_DIR, f"scaffold_{suite_name}.ipynb"
+        root_dir, context.GX_EDIT_NOTEBOOK_DIR, f"scaffold_{suite_name}.ipynb"
     )
     assert not os.path.isfile(expected_notebook_path)
 
@@ -1633,7 +1633,7 @@ def test_suite_scaffold_creates_notebook_with_no_jupyter_flag(
     root_dir = context.root_directory
     suite_name = "foop"
     expected_notebook_path = os.path.join(
-        root_dir, context.GE_EDIT_NOTEBOOK_DIR, f"scaffold_{suite_name}.ipynb"
+        root_dir, context.GX_EDIT_NOTEBOOK_DIR, f"scaffold_{suite_name}.ipynb"
     )
     assert not os.path.isfile(expected_notebook_path)
 

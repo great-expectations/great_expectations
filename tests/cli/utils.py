@@ -1,3 +1,4 @@
+import re
 import traceback
 
 from _pytest.logging import LogCaptureFixture
@@ -128,3 +129,9 @@ def assert_no_tracebacks(click_result):
     except ValueError as ve:
         # sometimes stderr is not captured separately
         pass
+
+
+def escape_ansi(line: str) -> str:
+    # https://stackoverflow.com/a/38662876
+    ansi_escape = re.compile(r"(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]")
+    return ansi_escape.sub("", line)

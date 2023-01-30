@@ -1,13 +1,16 @@
+from __future__ import annotations
+
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Type
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.configuration import AbstractConfig
 from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudStoreBackend,
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
@@ -67,8 +70,8 @@ class Store:
 
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
         return response_json
 
@@ -82,8 +85,13 @@ class Store:
             )
 
     @property
+    def cloud_mode(self) -> bool:
+        return isinstance(self._store_backend, GXCloudStoreBackend)
+
+    @property
     def ge_cloud_mode(self) -> bool:
-        return isinstance(self._store_backend, GeCloudStoreBackend)
+        # <GX_RENAME> Deprecated 0.15.37
+        return self.cloud_mode
 
     @property
     def store_backend(self) -> StoreBackend:
@@ -104,8 +112,8 @@ class Store:
 
     @property
     def key_class(self) -> Type[DataContextKey]:
-        if self.ge_cloud_mode:
-            return GeCloudIdentifier
+        if self.cloud_mode:
+            return GXCloudIdentifier
         return self._key_class
 
     @property
@@ -145,7 +153,8 @@ class Store:
     def get(self, key: DataContextKey) -> Optional[Any]:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
-        elif self.ge_cloud_mode:
+
+        if self.cloud_mode:
             self._validate_key(key)
             value = self._store_backend.get(self.key_to_tuple(key))
             # TODO [Robby] MER-285: Handle non-200 http errors
@@ -157,8 +166,8 @@ class Store:
 
         if value:
             return self.deserialize(value)
-        else:
-            return None
+
+        return None
 
     def set(self, key: DataContextKey, value: Any, **kwargs) -> None:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
@@ -206,3 +215,40 @@ class Store:
             name = config.name
 
         return self.store_backend.build_key(name=name, id=id)
+
+    @staticmethod
+    def build_store_from_config(
+        store_name: Optional[str] = None,
+        store_config: Optional[dict] = None,
+        module_name: str = "great_expectations.data_context.store",
+        runtime_environment: Optional[dict] = None,
+    ) -> Store:
+        if store_config is None or module_name is None:
+            raise gx_exceptions.StoreConfigurationError(
+                "Cannot build a store without both a store_config and a module_name"
+            )
+
+        try:
+            config_defaults: dict = {
+                "store_name": store_name,
+                "module_name": module_name,
+            }
+            new_store = instantiate_class_from_config(
+                config=store_config,
+                runtime_environment=runtime_environment,
+                config_defaults=config_defaults,
+            )
+        except gx_exceptions.DataContextError as e:
+            new_store = None
+            logger.critical(
+                f"Error {e} occurred while attempting to instantiate a store."
+            )
+        if not new_store:
+            class_name: str = store_config["class_name"]
+            module_name = store_config["module_name"]
+            raise gx_exceptions.ClassInstantiationError(
+                module_name=module_name,
+                package_name=None,
+                class_name=class_name,
+            )
+        return new_store

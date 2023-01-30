@@ -4,7 +4,7 @@
 We cannot stress enough that we want this to be a safe, comfortable and inclusive environment. Please read our [code of conduct](https://github.com/great-expectations/great_expectations/blob/develop/CODE_OF_CONDUCT.md) if you need more information on this guideline.
 
 ## Keep timezones in mind and be respectful of peoples’ time.
-People on Slack are distributed and might be in a very different time zone from you, so don't use @channel @here (this is reserved for admins anyways). Before you @-mention someone, think about what timezone they are in and if you are likely to disturb them. You can check someone's timezone in their profile. As of today, the core GE team is based solely in the United States but the community is world wide.
+People on Slack are distributed and might be in a very different time zone from you, so don't use @channel @here (this is reserved for admins anyways). Before you @-mention someone, think about what timezone they are in and if you are likely to disturb them. You can check someone's timezone in their profile. As of today, the core GX team is based solely in the United States but the community is world wide.
 
 If you post in off hours be patient, Someone will get back to you once the sun comes up.
 
@@ -13,7 +13,7 @@ If you post in off hours be patient, Someone will get back to you once the sun c
 - Do your best to try and solve the problem first as your efforts will help us more easily answer the question.
 - [Read "How to write a good question in Slack"](https://github.com/great-expectations/great_expectations/discussions/4951)
 - Head over to our [Documentation](https://docs.greatexpectations.io/en/latest/)
-- Checkout [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions) this is where we want most of our problem solving, discussion, updates, etc to go because it helps keep a more visible record for GE users.
+- Checkout [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions) this is where we want most of our problem solving, discussion, updates, etc to go because it helps keep a more visible record for GX users.
 
 #### Asking your question in Slack
 

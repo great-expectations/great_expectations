@@ -2,12 +2,12 @@ from typing import List
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 
-context = ge.get_context()
+context = gx.get_context()
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py datasource_config">
 datasource_config = {
     "name": "my_gcs_datasource",
     "class_name": "Datasource",
@@ -39,11 +39,11 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"
 ] = "data/taxi_yellow_tripdata_samples/"
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py test_yaml_config">
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py add_datasource">
 context.add_datasource(**datasource_config)
 # </snippet>
 
@@ -71,7 +71,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
@@ -101,7 +101,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_gcs_datasource"][

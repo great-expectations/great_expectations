@@ -907,7 +907,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists_with_ge_config_v2(
     root_dir = context.root_directory
     assert context.list_checkpoints() == ["my_checkpoint"]
     script_path = os.path.join(
-        root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py"
+        root_dir, context.GX_UNCOMMITTED_DIR, "run_my_checkpoint.py"
     )
     with open(script_path, "w") as f:
         f.write("script here")
@@ -998,7 +998,7 @@ def test_checkpoint_script_happy_path_generates_script_with_ge_config_v2(
         ),
     ]
     expected_script = os.path.join(
-        root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py"
+        root_dir, context.GX_UNCOMMITTED_DIR, "run_my_checkpoint.py"
     )
     assert os.path.isfile(expected_script)
 
@@ -1041,7 +1041,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_with_ge_c
     )
 
     script_path = os.path.abspath(
-        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py")
+        os.path.join(root_dir, context.GX_UNCOMMITTED_DIR, "run_my_checkpoint.py")
     )
     assert os.path.isfile(script_path)
 
@@ -1099,7 +1099,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_with_ge_confi
     )
 
     script_path = os.path.abspath(
-        os.path.join(root_dir, context.GE_UNCOMMITTED_DIR, "run_my_checkpoint.py")
+        os.path.join(root_dir, context.GX_UNCOMMITTED_DIR, "run_my_checkpoint.py")
     )
     assert os.path.isfile(script_path)
 

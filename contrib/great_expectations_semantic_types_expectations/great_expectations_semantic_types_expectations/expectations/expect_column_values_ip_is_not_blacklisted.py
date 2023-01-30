@@ -52,7 +52,7 @@ class ColumnValuesIpIsNotBlacklisted(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesIpIsNotBlacklisted(ColumnMapExpectation):
-    """Expect column values IP address is not find on blacklists"""
+    """Expect IP address to not be on blacklists."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -122,8 +122,7 @@ class ExpectColumnValuesIpIsNotBlacklisted(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

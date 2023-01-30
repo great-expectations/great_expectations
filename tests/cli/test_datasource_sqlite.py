@@ -7,9 +7,9 @@ import pytest
 from click.testing import CliRunner
 from nbconvert.preprocessors import ExecutePreprocessor
 
-from great_expectations import DataContext
 from great_expectations.cli import cli
-from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from great_expectations.util import get_context
+from tests.cli.utils import assert_no_logging_messages_or_tracebacks, escape_ansi
 
 
 @mock.patch(
@@ -19,7 +19,7 @@ def test_cli_datasource_list(
     mock_emit, empty_data_context_stats_enabled, empty_sqlite_db, caplog, monkeypatch
 ):
     """Test an empty project and after adding a single datasource."""
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     runner = CliRunner(mix_stderr=False)
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -46,13 +46,13 @@ def test_cli_datasource_list(
         catch_exceptions=False,
     )
     expected_output = """\
-Using v3 (Batch Request) API\x1b[0m
-1 Datasource found:[0m
-[0m
- - [36mname:[0m wow_a_datasource[0m
-   [36mclass_name:[0m SqlAlchemyDatasource[0m
+Using v3 (Batch Request) API
+1 Datasource found:
+
+ - name: wow_a_datasource
+   class_name: SqlAlchemyDatasource
 """.strip()
-    stdout = result.stdout.strip()
+    stdout = escape_ansi(result.stdout).strip()
 
     assert stdout == expected_output
 
@@ -229,7 +229,7 @@ def test_cli_datasource_new_connection_string(
     monkeypatch,
 ):
     root_dir = empty_data_context_stats_enabled.root_directory
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
     assert context.list_datasources() == []
 
     runner = CliRunner(mix_stderr=False)
@@ -246,7 +246,7 @@ def test_cli_datasource_new_connection_string(
 
     assert result.exit_code == 0
 
-    uncommitted_dir = os.path.join(root_dir, context.GE_UNCOMMITTED_DIR)
+    uncommitted_dir = os.path.join(root_dir, context.GX_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
 
     assert os.path.isfile(expected_notebook)
@@ -306,7 +306,7 @@ def test_cli_datasource_new_connection_string(
     ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
     del context
-    context = DataContext(root_dir)
+    context = get_context(context_root_dir=root_dir)
 
     assert context.list_datasources() == [
         {

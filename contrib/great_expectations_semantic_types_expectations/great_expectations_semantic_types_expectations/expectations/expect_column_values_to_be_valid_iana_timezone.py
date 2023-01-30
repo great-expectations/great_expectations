@@ -56,7 +56,8 @@ class ColumnValuesIanaTimezone(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIanaTimezone(ColumnMapExpectation):
     """Expect values in this column to be valid IANA timezone strings.
-    A full list of valid timezones can be viewed by `pytz.all_timezones`.
+
+    A full list of valid timezones can be viewed by pytz.all_timezones. \
     See https://www.iana.org/time-zones for more information.
     """
 
@@ -80,6 +81,7 @@ class ExpectColumnValuesToBeValidIanaTimezone(ColumnMapExpectation):
                     "+08:00",
                 ],
             },
+            "suppress_test_for": ["spark"],
             "tests": [
                 {
                     "title": "positive_test_with_timezones",
@@ -122,8 +124,7 @@ class ExpectColumnValuesToBeValidIanaTimezone(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

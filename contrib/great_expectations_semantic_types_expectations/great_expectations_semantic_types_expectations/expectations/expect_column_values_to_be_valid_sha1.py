@@ -42,7 +42,7 @@ class ColumnValuesToBeValidSha1(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidSha1(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid SHA1 format."""
+    """Expect column values to be valid SHA1 hashes."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -107,8 +107,7 @@ class ExpectColumnValuesToBeValidSha1(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

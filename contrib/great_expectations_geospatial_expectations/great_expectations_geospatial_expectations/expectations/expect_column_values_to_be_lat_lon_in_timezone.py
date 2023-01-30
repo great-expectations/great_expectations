@@ -60,7 +60,8 @@ class ColumnValuesLatLonInTimezone(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeLatLonInTimezone(ColumnMapExpectation):
     """Expect each lat lon pair in this column to be a point inside a given timezone.
-    Timezone names can be found in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones under 'TZ database name'.
+
+    Timezone names can be found in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones under 'TZ database name'. \
     This works offline, so it isn't 100% accurate as timezones change but it should be enough for most purposes.
     """
 
@@ -127,8 +128,7 @@ class ExpectColumnValuesToBeLatLonInTimezone(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

@@ -58,6 +58,7 @@ class ColumnValuesToBeValidNorthCarolinaZip(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidNorthCarolinaZip(ColumnMapExpectation):
     """Expect values in this column to be valid North Carolina zipcodes.
+
     See https://pypi.org/project/zipcodes/ for more information.
     """
 
@@ -99,7 +100,7 @@ class ExpectColumnValuesToBeValidNorthCarolinaZip(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -112,8 +113,7 @@ class ExpectColumnValuesToBeValidNorthCarolinaZip(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

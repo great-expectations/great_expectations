@@ -1,10 +1,8 @@
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (

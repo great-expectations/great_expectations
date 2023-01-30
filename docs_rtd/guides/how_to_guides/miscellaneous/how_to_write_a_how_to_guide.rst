@@ -17,7 +17,7 @@ Steps
 
 	- Hint: it's often most efficient to run through the technical steps in a notebook or at the command line before starting to write. Then you can simply copy-paste content into code blocks, and write headers and text to connect them.
 	- After you finish writing, you should definitely follow your own steps from start to finish at least once, to make sure there aren’t any gaps.
-	
+
 #. If needed, add content to Additional Notes and/or Additional Resources. These sections supplement the article with information that would be distracting to include in Steps. It’s fine for them to be empty.
 #. Enable comments for your How-to guide, by following :ref:`these instructions <how_to_guides__miscellaneous__how_to_add_comments_to_a_page_in_documentation>`.
 #. Scan your article to make sure it follows the :ref:`Style guide <contributing__style_guide>`. If you’re not familiar with the Style Guide, that’s okay: your PR reviewer will also check for style and let you know if we find any issues.
@@ -96,7 +96,7 @@ Indentation, bolding, and code blocks
 - Indent content within steps.
 - Any time the user needs to do something, it should be in a code block.
 
-	- Please follow this convention even if the text in the code block is somewhat redundant against the text of the step. 
+	- Please follow this convention even if the text in the code block is somewhat redundant against the text of the step.
 	- Clear, sequential code blocks are easy for the eye to follow. They encourage a health copy-and-modify development pattern.
 
 - All of these styles are modeled in the :ref:`How-to guide template file <how_to_guides__miscellaneous__how_to_template>`. If you use that template as your guide, you'll be off to a very good start.
@@ -112,7 +112,7 @@ Indentation, bolding, and code blocks
 Using tabs to differentiate guides for different APIs
 #####################################################
 
-During the process of writing documentation for Great Expectations 0.13, there rose a need to differentiate between documentation for GE up to 0.12.x, and GE 0.13 and beyond.
+During the process of writing documentation for Great Expectations 0.13, there rose a need to differentiate between documentation for GX up to 0.12.x, and GX 0.13 and beyond.
 
 The use of ``content-tabs`` allows for both documentation to co-exist in the same how-to-doc.
 

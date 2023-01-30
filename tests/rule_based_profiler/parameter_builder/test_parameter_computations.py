@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core import IDDict
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
 )
@@ -17,6 +18,7 @@ from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     compute_bootstrap_quantiles_point_estimate,
+    sanitize_parameter_name,
 )
 
 # Allowable tolerance for how closely a bootstrap method approximates the sample
@@ -89,6 +91,46 @@ def test_bootstrap_point_estimate_efficacy(
             atol=EFFICACY_TOLERANCE,
             err_msg=f"Actual value of {actual_false_positive_rates[distribution]} differs from expected value of {false_positive_rate} by more than {ATOL + EFFICACY_TOLERANCE * abs(actual_false_positive_rates[distribution])} tolerance.",
         )
+
+
+def test_sanitize_parameter_name(
+    table_row_count_metric_config,
+    table_row_count_aggregate_fn_metric_config,
+    table_head_metric_config,
+    column_histogram_metric_config,
+):
+    sanitized_name: str
+
+    sanitized_name = sanitize_parameter_name(
+        name=table_row_count_metric_config.metric_name,
+        suffix=None,
+    )
+    assert sanitized_name == "table_row_count"
+
+    sanitized_name = sanitize_parameter_name(
+        name=table_row_count_aggregate_fn_metric_config.metric_name,
+        suffix=None,
+    )
+    assert sanitized_name == "table_row_count_aggregate_fn"
+
+    sanitized_name = sanitize_parameter_name(
+        name=table_head_metric_config.metric_name,
+        suffix=table_head_metric_config.metric_value_kwargs_id,
+    )
+    assert sanitized_name == "table_head_444fc52627dde82ad1d5c4fe290bfa6b"
+
+    table_head_metric_config._metric_value_kwargs = IDDict({})
+    sanitized_name = sanitize_parameter_name(
+        name=table_head_metric_config.metric_name,
+        suffix=table_head_metric_config.metric_value_kwargs_id,
+    )
+    assert sanitized_name == "table_head"
+
+    sanitized_name = sanitize_parameter_name(
+        name=column_histogram_metric_config.metric_name,
+        suffix=column_histogram_metric_config.metric_value_kwargs_id,
+    )
+    assert sanitized_name == "column_histogram_f78021ff11b53f9d3588655b2b8b4f3e"
 
 
 @pytest.mark.parametrize(
@@ -211,20 +253,22 @@ def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id
     replace_nan_with_zero: bool = True
     reduce_scalar_metric: bool = True
 
-    metric_multi_batch_parameter_builder = MetricMultiBatchParameterBuilder(
-        name="my_parameter_builder",
-        metric_name=metric_name,
-        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-        metric_value_kwargs=None,
-        single_batch_mode=False,
-        enforce_numeric_metric=enforce_numeric_metric,
-        replace_nan_with_zero=replace_nan_with_zero,
-        reduce_scalar_metric=reduce_scalar_metric,
-        evaluation_parameter_builder_configs=None,
-        data_context=None,
+    metric_multi_batch_parameter_builder: MetricMultiBatchParameterBuilder = (
+        MetricMultiBatchParameterBuilder(
+            name="my_parameter_builder",
+            metric_name=metric_name,
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs=None,
+            single_batch_mode=False,
+            enforce_numeric_metric=enforce_numeric_metric,
+            replace_nan_with_zero=replace_nan_with_zero,
+            reduce_scalar_metric=reduce_scalar_metric,
+            evaluation_parameter_builder_configs=None,
+            data_context=None,
+        )
     )
     if metric_name == "my_metric_6":
-        with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+        with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
             metric_multi_batch_parameter_builder._sanitize_metric_computation(
                 parameter_builder=metric_multi_batch_parameter_builder,
                 metric_name=metric_name,
@@ -252,5 +296,5 @@ def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id
                 variables=None,
                 parameters=None,
             )
-        except ge_exceptions.ProfilerExecutionError:
+        except gx_exceptions.ProfilerExecutionError:
             pytest.fail()

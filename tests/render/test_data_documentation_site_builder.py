@@ -5,7 +5,6 @@ from typing import Dict
 import pytest
 from freezegun import freeze_time
 
-from great_expectations import DataContext
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.store import ExpectationsStore, ValidationsStore
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
@@ -18,6 +17,7 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.util import get_context
 
 
 def assert_how_to_buttons(
@@ -600,7 +600,7 @@ def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory)
         ),
         str(os.path.join(project_dir, "great_expectations.yml")),
     )
-    context = DataContext(context_root_dir=project_dir)
+    context = get_context(context_root_dir=project_dir)
     local_site_config = context._project_config.data_docs_sites.get("local_site")
 
     module_name = "great_expectations.render.renderer.site_builder"
@@ -654,7 +654,7 @@ def test_site_builder_usage_statistics_enabled(
         },
     )
     site_builder_return_obj = site_builder.build()
-    index_page_path = site_builder_return_obj[0]
+    index_page_path = site_builder_return_obj[0][7:]  # strip prefix "file:///"
     links_dict = site_builder_return_obj[1]
     expectation_suite_pages = [
         file_relative_path(index_page_path, expectation_suite_link_dict["filepath"])
@@ -672,7 +672,7 @@ def test_site_builder_usage_statistics_enabled(
     expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z&dataContextId=f43d4897-385f-4366-82b0-1a8eda2bf79c"
 
     for page_path in page_paths_to_check:
-        with open(page_path[7:]) as f:
+        with open(page_path) as f:
             page_contents = f.read()
             assert expected_logo_url in page_contents
 
@@ -705,7 +705,7 @@ def test_site_builder_usage_statistics_disabled(
         },
     )
     site_builder_return_obj = site_builder.build()
-    index_page_path = site_builder_return_obj[0]
+    index_page_path = site_builder_return_obj[0][7:]  # strip prefix "file:///"
     links_dict = site_builder_return_obj[1]
     expectation_suite_pages = [
         file_relative_path(index_page_path, expectation_suite_link_dict["filepath"])
@@ -723,7 +723,7 @@ def test_site_builder_usage_statistics_disabled(
     expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z"
 
     for page_path in page_paths_to_check:
-        with open(page_path[7:]) as f:
+        with open(page_path) as f:
             page_contents = f.read()
             assert expected_logo_url in page_contents
             assert data_context_id not in page_contents

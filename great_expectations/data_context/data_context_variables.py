@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import contextlib
 import enum
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
+from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
@@ -16,13 +19,19 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
-from great_expectations.data_context.util import substitute_all_config_variables
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import DataContext
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
     from great_expectations.data_context.store import DataContextStore
+    from great_expectations.experimental.datasources.interfaces import (
+        Datasource as XDatasource,
+    )
+
+logger = logging.getLogger(__file__)
 
 
 class DataContextVariableSchema(str, enum.Enum):
@@ -66,18 +75,14 @@ class DataContextVariables(ABC):
     Should maintain parity with the `DataContextConfig`.
 
     Args:
-        config:        A reference to the DataContextConfig to perform CRUD on.
-        substitutions: A dictionary used to perform substitutions of ${VARIABLES}; to be used with GET requests.
-        _store:        An instance of a DataContextStore with the appropriate backend to persist config changes.
+        config:          A reference to the DataContextConfig to perform CRUD on.
+        config_provider: Responsible for determining config values and substituting them in GET calls.
+        _store:          An instance of a DataContextStore with the appropriate backend to persist config changes.
     """
 
     config: DataContextConfig
-    substitutions: Optional[dict] = None
+    config_provider: _ConfigurationProvider
     _store: Optional[DataContextStore] = None
-
-    def __post_init__(self) -> None:
-        if self.substitutions is None:
-            self.substitutions = {}
 
     def __str__(self) -> str:
         return str(self.config)
@@ -111,7 +116,7 @@ class DataContextVariables(ABC):
     def _get(self, attr: DataContextVariableSchema) -> Any:
         key: str = attr.value
         val: Any = self.config[key]
-        substituted_val: Any = substitute_all_config_variables(val, self.substitutions)
+        substituted_val: Any = self.config_provider.substitute_config(val)
         return substituted_val
 
     def save_config(self) -> Any:
@@ -306,7 +311,7 @@ class EphemeralDataContextVariables(DataContextVariables):
 
 @dataclass(repr=False)
 class FileDataContextVariables(DataContextVariables):
-    data_context: Optional["DataContext"] = None
+    data_context: FileDataContext = None  # type: ignore[assignment] # post_init ensures field always set
 
     def __post_init__(self) -> None:
         # Chetan - 20220607 - Although the above argument is not truly optional, we are
@@ -338,12 +343,56 @@ class FileDataContextVariables(DataContextVariables):
         )
         return store
 
+    def save_config(self) -> Any:
+        """
+        Persist any changes made to variables utilizing the configured Store.
+        """
+        # overridden in order to prevent calling `instantiate_class_from_config` on ZEP objects
+        # parent class does not have access to the `data_context`
+        with self._zep_objects_stash():
+            save_result = super().save_config()
+        return save_result
+
+    @contextlib.contextmanager
+    def _zep_objects_stash(
+        self: FileDataContextVariables,
+    ) -> Generator[None, None, None]:
+        """
+        Temporarily remove and stash zep objects from the datacontext.
+        Replace them once the with block ends.
+
+        NOTE: This could be generalized into a stand-alone context manager function,
+        but it would need to take in the data_context containing the zep objects.
+        """
+        config_xdatasources_stash: Dict[
+            str, XDatasource
+        ] = self.data_context._synchronize_zep_datasources()
+        try:
+            if config_xdatasources_stash:
+                logger.info(
+                    f"Stashing `XDatasource` during {type(self).__name__}.save_config() - {len(config_xdatasources_stash)} stashed"
+                )
+                for xdatasource_name in config_xdatasources_stash.keys():
+                    self.data_context.datasources.pop(xdatasource_name)
+                # this would be `deep_copy'ed in `instantiate_class_from_config` too
+                self.data_context.zep_config.xdatasources = {}
+            yield
+        except Exception:
+            raise
+        finally:
+            if config_xdatasources_stash:
+                logger.info(
+                    f"Replacing {len(config_xdatasources_stash)} stashed `XDatasource`s"
+                )
+                self.data_context.datasources.update(config_xdatasources_stash)
+                self.data_context.zep_config.xdatasources = config_xdatasources_stash
+
 
 @dataclass(repr=False)
 class CloudDataContextVariables(DataContextVariables):
-    ge_cloud_base_url: Optional[str] = None
-    ge_cloud_organization_id: Optional[str] = None
-    ge_cloud_access_token: Optional[str] = None
+    ge_cloud_base_url: str = None  # type: ignore[assignment] # post_init ensures field always set
+    ge_cloud_organization_id: str = None  # type: ignore[assignment] # post_init ensures field always set
+    ge_cloud_access_token: str = None  # type: ignore[assignment] # post_init ensures field always set
 
     def __post_init__(self) -> None:
         # Chetan - 20220607 - Although the above arguments are not truly optional, we are
@@ -366,17 +415,18 @@ class CloudDataContextVariables(DataContextVariables):
             )
 
     def _init_store(self) -> DataContextStore:
+        from great_expectations.data_context.cloud_constants import GXCloudRESTResource
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
-        from great_expectations.data_context.store.ge_cloud_store_backend import (
-            GeCloudRESTResource,
+        from great_expectations.data_context.store.gx_cloud_store_backend import (
+            GXCloudStoreBackend,
         )
 
         store_backend: dict = {
-            "class_name": "GeCloudStoreBackend",
+            "class_name": GXCloudStoreBackend.__name__,
             "ge_cloud_base_url": self.ge_cloud_base_url,
-            "ge_cloud_resource_type": GeCloudRESTResource.DATA_CONTEXT_VARIABLES,
+            "ge_cloud_resource_type": GXCloudRESTResource.DATA_CONTEXT_VARIABLES,
             "ge_cloud_credentials": {
                 "access_token": self.ge_cloud_access_token,
                 "organization_id": self.ge_cloud_organization_id,
@@ -390,15 +440,13 @@ class CloudDataContextVariables(DataContextVariables):
         )
         return store
 
-    def get_key(self) -> GeCloudIdentifier:
+    def get_key(self) -> GXCloudIdentifier:
         """
-        Generates a GE Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
+        Generates a GX Cloud-specific key for use with Stores. See parent "DataContextVariables.get_key" for more details.
         """
-        from great_expectations.data_context.store.ge_cloud_store_backend import (
-            GeCloudRESTResource,
-        )
+        from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
-        key = GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.DATA_CONTEXT_VARIABLES
+        key = GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.DATA_CONTEXT_VARIABLES
         )
         return key

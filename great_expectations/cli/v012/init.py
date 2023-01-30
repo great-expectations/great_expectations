@@ -4,7 +4,7 @@ import sys
 import click
 
 from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.cli_messages import (
     BUILD_DOCS_PROMPT,
@@ -25,6 +25,9 @@ from great_expectations.cli.v012.datasource import add_datasource as add_datasou
 from great_expectations.cli.v012.docs import build_docs
 from great_expectations.cli.v012.util import cli_message
 from great_expectations.core.usage_statistics.util import send_usage_message
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.exceptions import (
     DataContextError,
     DatasourceInitializationError,
@@ -36,10 +39,10 @@ try:
 except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
-    SQLAlchemyError = ge_exceptions.ProfilerError
+    SQLAlchemyError = gx_exceptions.ProfilerError
 
 
-@click.command()
+@click.command()  # noqa: C901 - 21
 @click.option(
     "--target-directory",
     "-d",
@@ -57,7 +60,7 @@ except ImportError:
     help="By default, usage statistics are enabled unless you specify the --no-usage-stats flag.",
     default=True,
 )
-def init(target_directory, view, usage_stats) -> None:
+def init(target_directory, view, usage_stats) -> None:  # noqa: C901 - 21
     """
     Initialize a new Great Expectations project.
 
@@ -71,9 +74,9 @@ def init(target_directory, view, usage_stats) -> None:
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
 
-    if DataContext.does_config_exist_on_disk(ge_dir):
+    if FileDataContext.does_config_exist_on_disk(ge_dir):
         try:
-            if DataContext.is_project_initialized(ge_dir):
+            if FileDataContext.is_project_initialized(ge_dir):
                 # Ensure the context can be instantiated
                 cli_message(PROJECT_IS_COMPLETE)
         except (DataContextError, DatasourceInitializationError) as e:
@@ -81,7 +84,7 @@ def init(target_directory, view, usage_stats) -> None:
             sys.exit(1)
 
         try:
-            context = DataContext.create(
+            context = FileDataContext.create(
                 target_directory, usage_statistics_enabled=usage_stats
             )
             cli_message(ONBOARDING_COMPLETE)
@@ -99,7 +102,7 @@ def init(target_directory, view, usage_stats) -> None:
             exit(0)
 
         try:
-            context = DataContext.create(
+            context = FileDataContext.create(
                 target_directory, usage_statistics_enabled=usage_stats
             )
             send_usage_message(
@@ -188,7 +191,7 @@ def init(target_directory, view, usage_stats) -> None:
                 sys.exit(0)
     except (
         DataContextError,
-        ge_exceptions.ProfilerError,
+        gx_exceptions.ProfilerError,
         OSError,
         SQLAlchemyError,
     ) as e:
@@ -219,4 +222,4 @@ def _slack_setup(context):
 
 
 def _get_full_path_to_ge_dir(target_directory):
-    return os.path.abspath(os.path.join(target_directory, DataContext.GE_DIR))
+    return os.path.abspath(os.path.join(target_directory, FileDataContext.GX_DIR))

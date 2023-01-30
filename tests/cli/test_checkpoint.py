@@ -14,7 +14,6 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
 from ruamel.yaml import YAML
 
-from great_expectations import DataContext
 from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
@@ -27,6 +26,7 @@ from great_expectations.datasource import (
     LegacyDatasource,
     SimpleSqlalchemyDatasource,
 )
+from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
 yaml = YAML()
@@ -43,7 +43,7 @@ def titanic_data_context_with_sql_datasource(
     titanic_data_context_stats_enabled_config_version_3,
     test_df,
 ):
-    context: DataContext = titanic_data_context_stats_enabled_config_version_3
+    context = titanic_data_context_stats_enabled_config_version_3
 
     db_file_path: str = file_relative_path(
         __file__,
@@ -128,7 +128,7 @@ def titanic_data_context_with_spark_datasource(
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
 
-    context = DataContext(context_root_dir=context_path)
+    context = get_context(context_root_dir=context_path)
     assert context.root_directory == context_path
 
     datasource_config: str = f"""
@@ -215,7 +215,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     monkeypatch,
     empty_data_context_stats_enabled,
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -273,7 +273,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -343,7 +343,7 @@ def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     runner: CliRunner = CliRunner(mix_stderr=False)
     checkpoint_name: str = "my_v1_checkpoint"
@@ -417,7 +417,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -485,7 +485,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
 def test_checkpoint_list_with_no_checkpoints(
     mock_emit, caplog, monkeypatch, empty_data_context_stats_enabled
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context = empty_data_context_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -541,7 +541,7 @@ def test_checkpoint_list_with_single_checkpoint(
     monkeypatch,
     empty_context_with_checkpoint_v1_stats_enabled,
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -600,7 +600,7 @@ def test_checkpoint_list_with_eight_checkpoints(
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -674,7 +674,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     What does this test and why?
     The `checkpoint new` CLI flow should raise an error if the Checkpoint name being created already exists in your checkpoint store.
     """
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -747,7 +747,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     This test builds that notebook and runs it to generate a Checkpoint and then tests the resulting configuration in the Checkpoint file.
     The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the Checkpoint configuration.
     """
-    context: DataContext = deterministic_asset_dataconnector_context
+    context = deterministic_asset_dataconnector_context
 
     root_dir: str = context.root_directory
     monkeypatch.chdir(os.path.dirname(root_dir))
@@ -872,7 +872,7 @@ expectation_suite_ge_cloud_id:
 def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -938,7 +938,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -1066,7 +1066,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     suite: ExpectationSuite = context.create_expectation_suite(
         expectation_suite_name="bar"
@@ -1275,7 +1275,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
 
     checkpoint_file_path: str = os.path.join(
@@ -1390,7 +1390,7 @@ def test_checkpoint_run_on_non_existent_validations(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     assert context.list_expectation_suite_names() == []
 
     checkpoint_file_path: str = os.path.join(
@@ -1499,7 +1499,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -1717,7 +1717,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_sql_datasource
+    context = titanic_data_context_with_sql_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -1927,7 +1927,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_spark_datasource
+    context = titanic_data_context_with_spark_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -2146,7 +2146,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -2364,7 +2364,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_sql_datasource
+    context = titanic_data_context_with_sql_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -2563,7 +2563,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_spark_datasource
+    context = titanic_data_context_with_spark_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -2780,7 +2780,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -2991,7 +2991,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_sql_datasource
+    context = titanic_data_context_with_sql_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -3186,7 +3186,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_data_context_with_spark_datasource
+    context = titanic_data_context_with_spark_datasource
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -3396,7 +3396,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
 def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -3450,12 +3450,12 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
 def test_checkpoint_script_raises_error_if_python_file_exists(
     mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     assert context.list_checkpoints() == ["my_v1_checkpoint"]
 
     script_path: str = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
+        context.root_directory, context.GX_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     with open(script_path, "w") as f:
         f.write("script here")
@@ -3515,7 +3515,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
 def test_checkpoint_script_happy_path_generates_script_pandas(
     mock_emit, caplog, monkeypatch, empty_context_with_checkpoint_v1_stats_enabled
 ):
-    context: DataContext = empty_context_with_checkpoint_v1_stats_enabled
+    context = empty_context_with_checkpoint_v1_stats_enabled
 
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -3563,7 +3563,7 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
         ),
     ]
     expected_script: str = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
+        context.root_directory, context.GX_UNCOMMITTED_DIR, "run_my_v1_checkpoint.py"
     )
     assert os.path.isfile(expected_script)
 
@@ -3594,7 +3594,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     suite: ExpectationSuite = context.create_expectation_suite(
         expectation_suite_name="users.delivery"
     )
@@ -3662,7 +3662,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     script_path: str = os.path.abspath(
         os.path.join(
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
@@ -3710,7 +3710,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -3787,7 +3787,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     script_path: str = os.path.abspath(
         os.path.join(
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )
@@ -3834,7 +3834,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     context.save_expectation_suite(
         expectation_suite=titanic_expectation_suite,
         expectation_suite_name="Titanic.warning",
@@ -3910,7 +3910,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     script_path: str = os.path.abspath(
         os.path.join(
             context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.GX_UNCOMMITTED_DIR,
             "run_my_fancy_checkpoint.py",
         )
     )

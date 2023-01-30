@@ -9,7 +9,7 @@ Great Expectations is the leading tool for [validating](./terms/validation.md), 
 
 Software developers have long known that automated testing is essential for managing complex codebases. Great Expectations brings the same discipline, confidence, and acceleration to data science and data engineering teams.
 
-![overview](../docs/guides/images/GE_OSS_process.png)
+![overview](../docs/guides/images/gx_oss_process.png)
 
 ### Why would I use Great Expectations?
 

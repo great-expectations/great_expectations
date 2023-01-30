@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -648,6 +648,88 @@ def test_return_all_batch_definitions_sorted(tmp_path_factory):
     assert len(my_batch_definition_list) == 10
 
 
+def test_return_only_unique_batch_definitions(tmp_path_factory):
+    base_directory = str(
+        tmp_path_factory.mktemp("test_return_only_unique_batch_definitions")
+    )
+    create_files_in_directory(
+        directory=base_directory,
+        file_name_list=[
+            "A/file_1.csv",
+            "A/file_2.csv",
+            "A/file_3.csv",
+            "B/file_1.csv",
+            "B/file_2.csv",
+        ],
+    )
+
+    my_data_connector_yaml = yaml.load(
+        f"""
+            class_name: ConfiguredAssetFilesystemDataConnector
+            datasource_name: test_environment
+            base_directory: {base_directory}
+            assets:
+                TestFiles:
+            default_regex:
+                pattern: (.+)/.+\\.csv
+                group_names:
+                    - name
+        """,
+    )
+
+    my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        instantiate_class_from_config(
+            config=my_data_connector_yaml,
+            runtime_environment={
+                "name": "general_filesystem_data_connector",
+                "execution_engine": PandasExecutionEngine(),
+            },
+            config_defaults={
+                "module_name": "great_expectations.datasource.data_connector"
+            },
+        )
+    )
+
+    expected = [
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict({"name": "A"}),
+        ),
+        BatchDefinition(
+            datasource_name="test_environment",
+            data_connector_name="general_filesystem_data_connector",
+            data_asset_name="TestFiles",
+            batch_identifiers=IDDict({"name": "B"}),
+        ),
+    ]
+
+    # with unnamed data_asset_name
+    unsorted_batch_definition_list = (
+        my_data_connector._get_batch_definition_list_from_batch_request(
+            BatchRequestBase(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="",
+            )
+        )
+    )
+    assert expected == unsorted_batch_definition_list
+
+    # with named data_asset_name
+    unsorted_batch_definition_list = (
+        my_data_connector.get_batch_definition_list_from_batch_request(
+            BatchRequest(
+                datasource_name="test_environment",
+                data_connector_name="general_filesystem_data_connector",
+                data_asset_name="TestFiles",
+            )
+        )
+    )
+    assert expected == unsorted_batch_definition_list
+
+
 def test_alpha(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_alpha"))
     create_files_in_directory(
@@ -1079,7 +1161,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
               name: for_me_Me_Me
     """,
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         my_data_connector: ConfiguredAssetFilesystemDataConnector = (
             instantiate_class_from_config(
@@ -1140,7 +1222,7 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
 
     """,
     )
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         my_data_connector: ConfiguredAssetFilesystemDataConnector = (
             instantiate_class_from_config(

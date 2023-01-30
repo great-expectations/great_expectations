@@ -29,6 +29,7 @@ logger.setLevel(logging.DEBUG)
 
 expectation_tracebacks = StringIO()
 expectation_checklists = StringIO()
+expectation_docstrings = StringIO()
 
 
 def execute_shell_command(command: str) -> int:
@@ -295,12 +296,6 @@ def build_gallery(
         logger.info("Done finding contrib modules")
 
     for expectation in sorted(requirements_dict):
-        # Temp
-        if expectation in [
-            "expect_column_kl_divergence_to_be_less_than",  # Infinity values break JSON
-            "expect_column_values_to_be_valid_arn",  # Contrib Expectation where pretty much no test passes on any backend
-        ]:
-            continue
         group = requirements_dict[expectation]["group"]
         print(f"\n\n\n=== {expectation} ({group}) ===")
         requirements = requirements_dict[expectation].get("requirements", [])
@@ -346,6 +341,7 @@ def build_gallery(
             diagnostics = impl().run_diagnostics(
                 ignore_suppress=ignore_suppress,
                 ignore_only_for=ignore_only_for,
+                for_gallery=True,
                 debug_logger=logger,
                 only_consider_these_backends=only_consider_these_backends,
                 context=context,
@@ -356,8 +352,18 @@ def build_gallery(
             )
             expectation_checklists.write(f"{checklist_string}\n")
             if diagnostics["description"]["docstring"]:
+                expectation_docstrings.write(
+                    "\n\n" + "=" * 80 + f"\n\n{expectation} ({group})\n"
+                )
+                expectation_docstrings.write(
+                    f"{diagnostics['description']['docstring']}\n"
+                )
                 diagnostics["description"]["docstring"] = format_docstring_to_markdown(
                     diagnostics["description"]["docstring"]
+                )
+                expectation_docstrings.write("\n" + "." * 80 + "\n\n")
+                expectation_docstrings.write(
+                    f"{diagnostics['description']['docstring']}\n"
                 )
         except Exception:
             logger.error(f"Failed to run diagnostics for: {expectation}")
@@ -590,7 +596,7 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     "--outfile-name",
     "-o",
     "outfile_name",
-    default="expectation_library_v2.json",
+    default="expectation_library_v2--staging.json",
     help="Name for the generated JSON file",
 )
 @click.option(
@@ -601,7 +607,7 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
 )
 @click.argument("args", nargs=-1)
 def main(**kwargs):
-    """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2.json
+    """Find all Expectations, run their diagnostics methods, and generate expectation_library_v2--staging.json
 
     - args: snake_name of specific Expectations to include (useful for testing)
     """
@@ -609,7 +615,8 @@ def main(**kwargs):
     if kwargs["backends"]:
         backends = [name.strip() for name in kwargs["backends"].split(",")]
 
-    context_dir, context = _disable_progress_bars()
+    # context_dir, context = _disable_progress_bars()
+    context = None
 
     gallery_info = build_gallery(
         include_core=not kwargs["no_core"],
@@ -622,17 +629,21 @@ def main(**kwargs):
     )
     tracebacks = expectation_tracebacks.getvalue()
     checklists = expectation_checklists.getvalue()
+    docstrings = expectation_docstrings.getvalue()
     if tracebacks != "":
         with open("./gallery-tracebacks.txt", "w") as outfile:
             outfile.write(tracebacks)
     if checklists != "":
         with open("./checklists.txt", "w") as outfile:
             outfile.write(checklists)
+    if docstrings != "":
+        with open("./docstrings.txt", "w") as outfile:
+            outfile.write(docstrings)
     with open(f"./{kwargs['outfile_name']}", "w") as outfile:
         json.dump(gallery_info, outfile, indent=4)
 
-    print(f"Deleting {context_dir}")
-    shutil.rmtree(context_dir)
+    # print(f"Deleting {context_dir}")
+    # shutil.rmtree(context_dir)
 
 
 if __name__ == "__main__":

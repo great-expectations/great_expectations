@@ -9,8 +9,8 @@ import pandas as pd
 import pytest
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations as ge
-import great_expectations.exceptions as ge_exceptions
+import great_expectations as gx
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationSuiteValidationResult
@@ -116,7 +116,7 @@ def test_basic_checkpoint_config_validation(
     config_version: 1
     """
     config_erroneous = yaml.load(yaml_config_erroneous)
-    with pytest.raises(ge_exceptions.InvalidConfigError):
+    with pytest.raises(gx_exceptions.InvalidConfigError):
         # noinspection PyUnusedLocal
         checkpoint_config = CheckpointConfig.from_commented_map(
             commented_map=config_erroneous
@@ -149,7 +149,7 @@ def test_basic_checkpoint_config_validation(
     actual_events = mock_emit.call_args_list
     assert actual_events == expected_events
 
-    with pytest.raises(ge_exceptions.InvalidConfigError):
+    with pytest.raises(gx_exceptions.InvalidConfigError):
         # noinspection PyUnusedLocal
         checkpoint: Checkpoint = context.test_yaml_config(
             yaml_config=yaml_config_erroneous,
@@ -400,7 +400,7 @@ def test_basic_checkpoint_config_validation(
 
     context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
     with pytest.raises(
-        ge_exceptions.DataContextError,
+        gx_exceptions.DataContextError,
         match=r'Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
@@ -970,11 +970,11 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
     mock_create_quarantine_data = mock.MagicMock()
     mock_create_quarantine_data.run.return_value = True
-    ge.validation_operators.CreateQuarantineData = mock_create_quarantine_data
+    gx.validation_operators.CreateQuarantineData = mock_create_quarantine_data
 
     mock_create_passed_data = mock.MagicMock()
     mock_create_passed_data.run.return_value = True
-    ge.validation_operators.CreatePassedData = mock_create_passed_data
+    gx.validation_operators.CreatePassedData = mock_create_passed_data
 
     expected_checkpoint_config: dict = {
         "name": "airflow_users_node_3",
@@ -1149,7 +1149,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     assert len(data_context.list_checkpoints()) == 1
 
     with pytest.raises(
-        ge_exceptions.DataContextError,
+        gx_exceptions.DataContextError,
         match=r'Checkpoint "my_base_checkpoint" must contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
@@ -1309,7 +1309,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     with pytest.raises(
-        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
         checkpoint.run()
 
@@ -1382,7 +1382,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     checkpoint: Checkpoint = context.get_checkpoint(checkpoint_config.name)
 
     with pytest.raises(
-        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
         checkpoint.run()
 
@@ -1490,7 +1490,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         validations=[{"batch_request": batch_request}],
     )
     with pytest.raises(
-        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
         checkpoint.run()
 
@@ -1547,7 +1547,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ],
     )
     with pytest.raises(
-        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
         checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
@@ -1605,7 +1605,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ],
     )
     with pytest.raises(
-        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
         # noinspection PyUnusedLocal
         result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
@@ -1679,7 +1679,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ],
     )
     with pytest.raises(
-        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
         # noinspection PyUnusedLocal
         result = checkpoint.run(
@@ -2097,7 +2097,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         ],
     )
     with pytest.raises(
-        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
         # noinspection PyUnusedLocal
         result = checkpoint.run(
@@ -2291,7 +2291,7 @@ def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and
     )
 
     with pytest.raises(
-        ge_exceptions.CheckpointError,
+        gx_exceptions.CheckpointError,
         match='Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
     ):
         checkpoint.run()
@@ -4526,7 +4526,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
     )
 
     with pytest.raises(
-        ge_exceptions.exceptions.InvalidBatchRequestError,
+        gx_exceptions.exceptions.InvalidBatchRequestError,
         match=r"The runtime_parameters dict must have one \(and only one\) of the following keys: 'batch_data', 'query', 'path'.",
     ):
         checkpoint.run(batch_request=runtime_batch_request)
@@ -4983,7 +4983,7 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_batch_request_into_che
     }
 
     with pytest.raises(
-        ge_exceptions.InvalidConfigError,
+        gx_exceptions.InvalidConfigError,
         match='batch_data found in batch_request cannot be saved to CheckpointStore "checkpoint_store"',
     ):
         context.add_checkpoint(**checkpoint_config)
@@ -5040,7 +5040,7 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_validations_into_check
     }
 
     with pytest.raises(
-        ge_exceptions.InvalidConfigError,
+        gx_exceptions.InvalidConfigError,
         match='batch_data found in validations cannot be saved to CheckpointStore "checkpoint_store"',
     ):
         context.add_checkpoint(**checkpoint_config)

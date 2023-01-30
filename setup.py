@@ -50,9 +50,10 @@ def get_extras_require():
 
     lite = results.pop("lite")
     contrib = results.pop("contrib")
+    docs_test = results.pop("api-docs-test")
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["test"] = lite + contrib
+    results["test"] = lite + contrib + docs_test
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]
@@ -81,7 +82,9 @@ config = {
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
     "extras_require": get_extras_require(),
-    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
+    "packages": find_packages(
+        exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
+    ),
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
@@ -103,6 +106,7 @@ config = {
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
 }
 

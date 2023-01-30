@@ -12,18 +12,18 @@ the snippets that are specified for use in documentation are maintained.  These 
 --documentation--
     https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant
 """
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
 
-context: ge.DataContext = ge.get_context()
+context: gx.DataContext = gx.get_context()
 
 # Configure your datasource (if you aren't using one that already exists)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py datasource_config">
 datasource_config = {
     "name": "taxi_multi_batch_datasource",
     "class_name": "Datasource",
@@ -62,7 +62,7 @@ except ValueError:
 
 # Prepare an Expectation Suite
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py expectation_suite">
 expectation_suite_name = "my_onboarding_assistant_suite"
 
 expectation_suite = context.create_expectation_suite(
@@ -72,7 +72,7 @@ expectation_suite = context.create_expectation_suite(
 
 # Prepare a Batch Request
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py batch_request">
 multi_batch_all_years_batch_request: BatchRequest = BatchRequest(
     datasource_name="taxi_multi_batch_datasource",
     data_connector_name="inferred_data_connector_all_years",
@@ -82,7 +82,7 @@ multi_batch_all_years_batch_request: BatchRequest = BatchRequest(
 
 # Run the Onboarding Assistant
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py exclude_column_names">
 exclude_column_names = [
     "VendorID",
     "pickup_datetime",
@@ -101,7 +101,7 @@ exclude_column_names = [
 ]
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py data_assistant_result">
 data_assistant_result = context.assistants.onboarding.run(
     batch_request=multi_batch_all_years_batch_request,
     exclude_column_names=exclude_column_names,
@@ -110,13 +110,13 @@ data_assistant_result = context.assistants.onboarding.run(
 
 # Save your Expectation Suite
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py get_expectation_suite">
 expectation_suite = data_assistant_result.get_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py save_expectation_suite">
 context.save_expectation_suite(
     expectation_suite=expectation_suite, discard_failed_expectations=False
 )
@@ -124,7 +124,7 @@ context.save_expectation_suite(
 
 # Use a SimpleCheckpoint to verify that your new Expectation Suite works.
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint_config">
 checkpoint_config = {
     "class_name": "SimpleCheckpoint",
     "validations": [
@@ -136,7 +136,7 @@ checkpoint_config = {
 }
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py checkpoint">
 checkpoint = SimpleCheckpoint(
     f"yellow_tripdata_sample_{expectation_suite_name}",
     context,
@@ -155,22 +155,22 @@ assert checkpoint_result["success"] is True
 # context.open_data_docs(resource_identifier=validation_result_identifier)
 
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py plot_metrics">
 data_assistant_result.plot_metrics()
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py metrics_by_domain">
 data_assistant_result.metrics_by_domain
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py plot_expectations_and_metrics">
 data_assistant_result.plot_expectations_and_metrics()
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py show_expectations_by_domain_type">
 data_assistant_result.show_expectations_by_domain_type()
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py show_expectations_by_expectation_type">
 data_assistant_result.show_expectations_by_expectation_type()
 # </snippet>

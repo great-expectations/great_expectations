@@ -4,18 +4,18 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
     BatchMarkers,
     BatchRequest,
 )
+from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import BatchSpec, IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -24,7 +24,10 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     RegexPatternStringParameterBuilder,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
+    FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
+    FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     ParameterContainer,
+    ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 from great_expectations.validator.validator import Validator
@@ -163,11 +166,12 @@ def test_regex_pattern_string_parameter_builder_alice(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
-    expected_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": r"^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$",
         "details": {
             "evaluated_regexes": {
@@ -185,7 +189,7 @@ def test_regex_pattern_string_parameter_builder_alice(
             domain=domain,
             parameters=parameters,
         )
-        == expected_value
+        == expected_parameter_node_as_dict
     )
 
 
@@ -243,12 +247,13 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
-    expected_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": r"^\d{1}$",
         "details": {
             "evaluated_regexes": {
@@ -266,8 +271,8 @@ def test_regex_pattern_string_parameter_builder_bobby_multiple_matches(
         parameters=parameters,
     )
     assert results is not None
-    assert sorted(results["value"]) == sorted(expected_value["value"])
-    assert results["details"] == expected_value["details"]
+    assert sorted(results["value"]) == sorted(expected_parameter_node_as_dict["value"])
+    assert results["details"] == expected_parameter_node_as_dict["details"]
 
 
 @pytest.mark.integration
@@ -315,12 +320,13 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         domain=domain,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder"
     )
-    expected_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": "-?\\d+",
         "details": {
             "evaluated_regexes": {
@@ -339,13 +345,31 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
         },
     }
 
-    assert (
+    parameter_node: ParameterNode = (
         get_parameter_value_by_fully_qualified_parameter_name(
             fully_qualified_parameter_name=fully_qualified_parameter_name_for_value,
             domain=domain,
             parameters=parameters,
         )
-        == expected_value
+    )
+
+    assert parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY] in [
+        r"\d+",
+        r"-?\d+",
+        r"-?\d+(?:\.\d*)?",
+        r"[A-Za-z0-9\.,;:!?()\"'%\-]+",
+    ]
+    assert (
+        parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY].items()
+        == expected_parameter_node_as_dict[
+            FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY
+        ].items()
+    )
+    assert (
+        parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY].success_ratio
+        == expected_parameter_node_as_dict[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY][
+            "success_ratio"
+        ]
     )
 
 
@@ -354,7 +378,7 @@ def test_regex_pattern_string_parameter_builder_bobby_no_match(
 def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Batch):
     batch: Batch = batch_fixture
     mock_data_context.get_batch_list.return_value = [batch]
-    mock_data_context.get_validator_using_batch_list.return_value = Validator(
+    mock_data_context.get_validator.return_value = Validator(
         execution_engine=PandasExecutionEngine(), batches=[batch]
     )
 
@@ -383,11 +407,12 @@ def test_regex_wrong_domain(mock_data_context: mock.MagicMock, batch_fixture: Ba
         domain.id: parameter_container,
     }
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as e:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as e:
         regex_pattern_string_parameter_builder.build_parameters(
             domain=domain,
             parameters=parameters,
             batch_list=[batch],
+            runtime_configuration=None,
         )
 
     assert (
@@ -440,6 +465,7 @@ def test_regex_single_candidate(
         domain=domain,
         parameters=parameters,
         batch_list=[batch],
+        runtime_configuration=None,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"
@@ -510,6 +536,7 @@ def test_regex_two_candidates(mock_data_context: mock.MagicMock, batch_fixture: 
         domain=domain,
         parameters=parameters,
         batch_list=[batch],
+        runtime_configuration=None,
     )
     fully_qualified_parameter_name_for_value: str = (
         "$parameter.my_regex_pattern_string_parameter_builder.value"

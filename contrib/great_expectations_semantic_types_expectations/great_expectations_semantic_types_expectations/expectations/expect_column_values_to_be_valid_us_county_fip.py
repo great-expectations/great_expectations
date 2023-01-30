@@ -52,7 +52,8 @@ class ColumnValuesToBeValidUSCountyFip(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidUSCountyFip(ColumnMapExpectation):
-    """Expect values in this column to be valid us county fip code.
+    """Expect values in this column to be valid us county fip codes.
+
     See https://github.com/yaph/geonamescache for more information.
     """
 
@@ -120,8 +121,7 @@ class ExpectColumnValuesToBeValidUSCountyFip(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

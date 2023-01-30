@@ -1,7 +1,12 @@
 from enum import Enum
-from typing import List
 
-from great_expectations.types import ColorPalettes, Colors
+from great_expectations.types import (
+    ColorPalettes,
+    FontFamily,
+    PrimaryColors,
+    SecondaryColors,
+    TintsAndShades,
+)
 
 # Size
 chart_width: int = 800
@@ -11,86 +16,95 @@ chart_height: int = 250
 chart_border_opacity: float = 0
 
 # Font
-font: str = "Verdana"
+font_family = FontFamily.MONTSERRAT
+font = font_family.value
 
 #
 # Chart Components
 #
 
 # Title
-title_align: str = "center"
-title_font_size: int = 15
-title_color: str = Colors.GREEN.value
-title_dy: int = -10
-subtitle_color: str = Colors.PURPLE.value
-subtitle_font: str = font
-subtitle_font_size: int = 14
-subtitle_font_weight: str = "bold"
+title_align = "center"
+title_color = PrimaryColors.ORANGE
+title_font_size = 15
+title_font_weight = 600
+title_dy = -10
+subtitle_color = PrimaryColors.COAL_GRAY
+subtitle_font = font
+subtitle_font_size = 14
+subtitle_font_weight = 500
 
 # Both Axes
-axis_title_color: str = Colors.PURPLE.value
-axis_title_font_size: int = 14
-axis_title_padding: int = 10
-axis_label_color: str = Colors.BLUE_1.value
-axis_label_font_size: int = 12
-axis_label_flush: bool = True
-axis_label_overlap_reduction: bool = True
+axis_title_color = PrimaryColors.COAL_GRAY
+axis_title_font_size = 14
+axis_title_font_weight = 500
+axis_title_padding = 10
+axis_label_color = PrimaryColors.COAL_GRAY
+axis_label_font_size = 12
+axis_label_font_weight = 500
+axis_label_flush = True
+axis_label_overlap_reduction = True
 
 # X-Axis Only
-x_axis_title_y: int = 25
-x_axis_label_angle: int = 0
-x_axis_label_flush: bool = True
-x_axis_grid: bool = True
+x_axis_title_y = 25
+x_axis_label_angle = 0
+x_axis_label_flush = True
+x_axis_grid = True
 
 # Y-Axis Only
-y_axis_title_x: int = -55
+y_axis_title_x = -55
 
 # Legend
-legend_title_color: str = Colors.PURPLE.value
-legend_title_font_size: int = 12
+legend_title_color = PrimaryColors.COAL_GRAY
+legend_title_font_size = 12
+legend_title_font_weight = 500
 
 # Scale
-scale_continuous_padding: int = 33
-scale_band_padding_outer: float = 1.0
+scale_continuous_padding = 33
+scale_band_padding_outer = 1.0
 
 #
 # Color Palettes
 #
 
-category_color_scheme: List[str] = ColorPalettes.CATEGORY_5.value
-diverging_color_scheme: List[str] = ColorPalettes.DIVERGING_7.value
-heatmap_color_scheme: List[str] = ColorPalettes.HEATMAP_6.value
-ordinal_color_scheme: List[str] = ColorPalettes.ORDINAL_7.value
+category_color_scheme = ColorPalettes.CATEGORY_5.value
+diverging_color_scheme = ColorPalettes.DIVERGING_7.value
+heatmap_color_scheme = ColorPalettes.HEATMAP_6.value
+ordinal_color_scheme = ColorPalettes.ORDINAL_5.value
 
 #
 # Chart Types
 #
 
 # Area
-fill_opacity: float = 0.5
-fill_color: str = ColorPalettes.HEATMAP_6.value[5]
+fill_opacity = 0.5
+fill_color = TintsAndShades.ROYAL_BLUE_20
 
 # Line Chart
-line_color: str = Colors.BLUE_2.value
-line_stroke_width: float = 2.5
-line_opacity: float = 0.9
+line_color = SecondaryColors.ROYAL_BLUE
+line_stroke_width = 2.5
+line_opacity = 0.9
 
 # Point
-point_size: int = 50
-point_color: str = Colors.GREEN.value
-point_filled: bool = True
-point_opacity: float = 1.0
+point_size = 50
+point_color = SecondaryColors.LEAF_GREEN
+point_filled = True
+point_opacity = 1.0
 
 # Bar Chart
-bar_color: str = Colors.PURPLE.value
-bar_opacity: float = 0.7
-bar_stroke_color: str = Colors.BLUE_1.value
-bar_stroke_width: int = 1
-bar_stroke_opacity: float = 1.0
+bar_color = SecondaryColors.ROYAL_BLUE
+bar_opacity = 0.7
+bar_stroke_color = SecondaryColors.MIDNIGHT_BLUE
+bar_stroke_width = 1
+bar_stroke_opacity = 1.0
 
 
 class AltairThemes(Enum):
-    # https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+    """
+    Altair theme configuration reference:
+        https://altair-viz.github.io/user_guide/configuration.html#top-level-chart-configuration
+    """
+
     DEFAULT_THEME = {
         "view": {
             "width": chart_width,
@@ -102,6 +116,7 @@ class AltairThemes(Enum):
             "align": title_align,
             "color": title_color,
             "fontSize": title_font_size,
+            "fontWeight": title_font_weight,
             "dy": title_dy,
             "subtitleFont": subtitle_font,
             "subtitleFontSize": subtitle_font_size,
@@ -110,9 +125,11 @@ class AltairThemes(Enum):
         },
         "axis": {
             "titleFontSize": axis_title_font_size,
+            "titleFontWeight": axis_title_font_weight,
             "titleColor": axis_title_color,
             "titlePadding": axis_title_padding,
             "labelFontSize": axis_label_font_size,
+            "labelFontWeight": axis_label_font_weight,
             "labelColor": axis_label_color,
             "labelFlush": axis_label_flush,
             "labelOverlap": axis_label_overlap_reduction,
@@ -129,6 +146,7 @@ class AltairThemes(Enum):
         "legend": {
             "titleColor": legend_title_color,
             "titleFontSize": legend_title_font_size,
+            "titleFontWeight": legend_title_font_weight,
         },
         "range": {
             "category": category_color_scheme,

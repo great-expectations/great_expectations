@@ -26,11 +26,9 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
+              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
             displayName: 'Install dependencies'
-          - script: |
-              pip install google-cloud-bigquery-storage
-            displayName: 'Install Google Cloud dependencies'
+
           - task: DownloadSecureFile@1
             name: gcp_authkey
             displayName: 'Download Google Service Account'
@@ -39,7 +37,6 @@ stages:
               retryCount: '2'
 
           - script: |
-              pip install pytest-azurepipelines
               pip freeze > pip-freeze.txt
               mkdir -p junit
               pytest -v $(test_script) \
@@ -54,6 +51,7 @@ stages:
               GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
               GE_TEST_BIGQUERY_PERFORMANCE_DATASET: $(GE_TEST_BIGQUERY_PERFORMANCE_DATASET)
+
           - task: PublishTestResults@2
             inputs:
               searchFolder: junit
@@ -80,6 +78,7 @@ stages:
               test_script: 'tests/test_definitions/test_expectations_v2_api.py'
               extra_args: ''
           maxParallel: 1
+
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -90,11 +89,9 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev.txt --constraint constraints-dev.txt
+              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
             displayName: 'Install dependencies'
-          - script: |
-              pip install google-cloud-bigquery-storage
-            displayName: 'Install Google Cloud dependencies'
+
           - task: DownloadSecureFile@1
             name: gcp_authkey
             displayName: 'Download Google Service Account'
@@ -103,7 +100,6 @@ stages:
               retryCount: '2'
 
           - script: |
-              pip install pytest-azurepipelines
               pip freeze > pip-freeze.txt
               mkdir -p junit
               pytest -v $(test_script) \
