@@ -2262,6 +2262,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"expectation_suite with name {expectation_suite_name} does not exist."
             )
 
+        meta: dict = expectation_suite.meta
         self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             id=expectation_suite.ge_cloud_id,
@@ -2269,7 +2270,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters=expectation_suite.evaluation_parameters,
             data_asset_type=expectation_suite.data_asset_type,
             execution_engine_type=expectation_suite.execution_engine_type,
-            meta=expectation_suite.meta,
+            meta=meta,
             overwrite_existing=True,
         )
 
