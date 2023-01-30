@@ -426,8 +426,32 @@ class RenderedStringTemplateContent(RenderedStringTemplateContentRender):
         )
 
 
+@deprecated_method_or_class(
+    version="0.15.32",
+    message=f"Importing the class RenderedTableContent from "
+    "great_expectations.render.types is deprecated as of v0.15.32 "
+    "in v0.18. Please import class RenderedTableContent "
+    "from great_expectations.render.",
+)
 class RenderedTableContent(RenderedTableContentRender):
     # deprecated-v0.15.32
+    """RenderedTableContent is RenderedComponentContent that is a table.
+
+    Args:
+        table: The table to be rendered.
+        header: The header for this content block.
+        subheader: The subheader for this content block.
+        header_row: The header row for the table.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+        table_options: The options that can be set for the table.
+            search: A boolean indicating whether to include search with the table.
+            icon-size: The size of the icons in the table. One of "sm", "md", or "lg".
+        header_row_options: The options that can be set for the header_row. A dictionary with the keys being the column
+                            name and the values being a dictionary with the following form:
+                                sortable: A boolean indicating whether the column is sortable.
+    """
+
     def __init__(
         self,
         table,

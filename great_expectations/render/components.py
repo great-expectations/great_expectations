@@ -279,17 +279,35 @@ class RenderedGraphContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedTableContent(RenderedComponentContent):
+    """RenderedTableContent is RenderedComponentContent that is a table.
+
+    Args:
+        table: The table to be rendered.
+        header: The header for this content block.
+        subheader: The subheader for this content block.
+        header_row: The header row for the table.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+        table_options: The options that can be set for the table.
+            search: A boolean indicating whether to include search with the table.
+            icon-size: The size of the icons in the table. One of "sm", "md", or "lg".
+        header_row_options: The options that can be set for the header_row. A dictionary with the keys being the column
+                            name and the values being a dictionary with the following form:
+                                sortable: A boolean indicating whether the column is sortable.
+    """
+
     def __init__(
         self,
-        table,
-        header=None,
-        subheader=None,
-        header_row=None,
-        styling=None,
-        content_block_type="table",
-        table_options=None,
-        header_row_options=None,
+        table: list[RenderedContent],
+        header: Optional[Union[RenderedContent, dict]] = None,
+        subheader: Optional[Union[RenderedContent, dict]] = None,
+        header_row: Optional[list[RenderedContent]] = None,
+        styling: Optional[dict] = None,
+        content_block_type: str = "table",
+        table_options: Optional[dict] = None,
+        header_row_options: Optional[dict] = None,
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
