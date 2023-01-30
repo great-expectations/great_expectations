@@ -44,9 +44,6 @@ class _DataFrameAsset(DataAsset):
         default="batch_request_param_"
     )
 
-    class Config:
-        extra = pydantic.Extra.allow
-
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
     ) -> List[Tuple[BatchRequest, pathlib.Path]]:
@@ -220,7 +217,7 @@ class PandasDatasource(Datasource):
     # instance attrs
     type: Literal["pandas"] = "pandas"
     name: str
-    assets: Dict[str, _DataFrameAsset] = {}  # type: ignore[valid-type]
+    assets: Dict[str, Union[CSVAsset, ExcelAsset, ParquetAsset, JSONAsset]] = {}  # type: ignore[valid-type]
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
