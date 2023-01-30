@@ -400,7 +400,7 @@ class SQLDatasource(Datasource):
             TestConnectionError
         """
         try:
-            self.engine.connect()
+            self._engine.connect()
         except Exception as e:
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
