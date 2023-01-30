@@ -443,39 +443,45 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     ExpectationSuiteValidationResult.success will be True if all Expectations passed, otherwise it will be False.
 
-    ExpectationSuiteValidationResult.statistics contains information about the Checkpoint run.::
-        {
-            "evaluated_expectations": 14,
-            "success_percent": 71.42857142857143,
-            "successful_expectations": 10,
-            "unsuccessful_expectations": 4
-        }
+    ExpectationSuiteValidationResult.statistics contains information about the Checkpoint run.:
+
+    ```python
+    {
+        "evaluated_expectations": 14,
+        "success_percent": 71.42857142857143,
+        "successful_expectations": 10,
+        "unsuccessful_expectations": 4
+    }
+    ```
 
     The meta property is an instance of ExpectationSuiteValidationResultMeta, and
-    contains information identifying the resources used during the Checkpoint run.::
-        {
-            "active_batch_definition": {
-              "batch_identifiers": {},
-              "data_asset_name": "taxi_data_1.csv",
-              "data_connector_name": "default_inferred_data_connector_name",
-              "datasource_name": "pandas"
-            },
-            "batch_markers": {
-              "ge_load_time": "20220727T154327.630107Z",
-              "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612"
-            },
-            "batch_spec": {
-              "path": "/Users/josh/work/gx_example_projects/great_expectations/../data/taxi_data_1.csv"
-            },
-            "checkpoint_name": "single_validation_checkpoint",
-            "expectation_suite_name": "taxi_suite_1",
-            "great_expectations_version": "0.15.15",
-            "run_id": {
-              "run_name": "20220727-114327-my-run-name-template",
-              "run_time": "2022-07-27T11:43:27.625252+00:00"
-            },
-            "validation_time": "20220727T154327.701100Z"
-          }
+    contains information identifying the resources used during the Checkpoint run.:
+
+    ```python
+    {
+        "active_batch_definition": {
+          "batch_identifiers": {},
+          "data_asset_name": "taxi_data_1.csv",
+          "data_connector_name": "default_inferred_data_connector_name",
+          "datasource_name": "pandas"
+        },
+        "batch_markers": {
+          "ge_load_time": "20220727T154327.630107Z",
+          "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612"
+        },
+        "batch_spec": {
+          "path": "/Users/josh/work/gx_example_projects/great_expectations/../data/taxi_data_1.csv"
+        },
+        "checkpoint_name": "single_validation_checkpoint",
+        "expectation_suite_name": "taxi_suite_1",
+        "great_expectations_version": "0.15.15",
+        "run_id": {
+          "run_name": "20220727-114327-my-run-name-template",
+          "run_time": "2022-07-27T11:43:27.625252+00:00"
+        },
+        "validation_time": "20220727T154327.701100Z"
+    }
+    ```
 
     Args:
         success: Boolean indicating the success or failure of this collection of results, or None.

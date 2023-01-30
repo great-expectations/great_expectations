@@ -36,17 +36,20 @@ class CheckpointResult(SerializableDictDot):
     might have an extra key named "expectation_suite_severity_level" to indicate if the suite is at either a
     "warning" or "failure" level.
 
-    Example run_results Dict::
-        {
-            ValidationResultIdentifier: {
-                "validation_result": ExpectationSuiteValidationResult,
-                "actions_results": {
-                    "my_action_name_that_stores_validation_results": {
-                        "class": "StoreValidationResultAction"
-                    }
+    Example run_results Dict:
+
+    ```python
+    {
+        ValidationResultIdentifier: {
+            "validation_result": ExpectationSuiteValidationResult,
+            "actions_results": {
+                "my_action_name_that_stores_validation_results": {
+                    "class": "StoreValidationResultAction"
                 }
             }
         }
+    }
+    ```
 
     Args:
         run_id: An instance of the RunIdentifier class.
