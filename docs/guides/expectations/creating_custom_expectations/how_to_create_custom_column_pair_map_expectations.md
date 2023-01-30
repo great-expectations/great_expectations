@@ -4,7 +4,7 @@ title: How to create a Custom Column Pair Map Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-**`ColumnPairMapExpectations`** are one of the most common types of <TechnicalTag tag="expectation" text="Expectation" />. They are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
+**`ColumnPairMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="Expectation" />. They are evaluated for a pair of columns and ask a yes/no question about the row-wise relationship between those two columns. Based on the result, they then calculate the percentage of rows that gave a positive answer. If the percentage is high enough, the Expectation considers that data valid.
 
 This guide will walk you through the process of creating a custom `ColumnPairMapExpectation`.
 
@@ -87,7 +87,7 @@ By convention, your <TechnicalTag tag="metric" text="Metric" /> class is defined
 Let's start by updating your Expectation's name and docstring.
 
 Replace the Expectation class name
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L60
+```python name="tests/integration/docusaurus/expectations/examples/column_pair_map_expectation_template.py ExpectColumnPairValuesToMatchSomeCriteria class_def"
 ```
 
 with your real Expectation class name, in upper camel case:
@@ -95,7 +95,7 @@ with your real Expectation class name, in upper camel case:
 ```
 
 You can also go ahead and write a new one-line docstring, replacing
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L63
+```python name="tests/integration/docusaurus/expectations/examples/column_pair_map_expectation_template.py docstring"
 ```
 
 with something like:
@@ -104,8 +104,7 @@ with something like:
 
 You'll also need to change the class name at the bottom of the file, by replacing this line:
 
-```python
-ExpectColumnPairValuesToMatchSomeCriteria().print_diagnostic_checklist()
+```python name="tests/integration/docusaurus/expectations/examples/column_pair_map_expectation_template.py diagnostics"
 ```
 
 with this one:
@@ -211,7 +210,7 @@ Next, choose a Metric Identifier for your Metric. By convention, Metric Identifi
 
 You'll need to substitute this metric into two places in the code. First, in the Metric class, replace
 
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L30
+```python name="tests/integration/docusaurus/expectations/examples/column_pair_map_expectation_template.py metric_name"
 ```
 
 with
@@ -221,7 +220,7 @@ with
 
 Second, in the Expectation class, replace
 
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L73
+```python name="tests/integration/docusaurus/expectations/examples/column_pair_map_expectation_template.py map_metric"
 ```
 
 with
@@ -235,7 +234,7 @@ Finally, rename the Metric class name itself, using the camel case version of th
 
 For example, replace:
 
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L26
+```python name="tests/integration/docusaurus/expectations/examples/column_pair_map_expectation_template.py ColumnPairValuesMatchSomeCriteria class_def"
 ```
 
 with
@@ -258,15 +257,14 @@ Completeness checklist for ExpectColumnPairValuesToHaveADifferenceOfThree:
 
 ### 7. Linting
 
-Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, `flake8`, and `pyupgrade`.
+Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, and `ruff`.
 
 If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
 ```console
 black <PATH/TO/YOUR/EXPECTATION.py>
 isort <PATH/TO/YOUR/EXPECTATION.py>
-flake8 <PATH/TO/YOUR/EXPECTATION.py>
-pyupgrade <PATH/TO/YOUR/EXPECTATION.py> --py3-plus
+ruff <PATH/TO/YOUR/EXPECTATION.py> --fix
 ```
 
 :::info
@@ -304,7 +302,7 @@ This guide will leave you with a Custom Expectation sufficient for [contribution
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
-```python file=../../../../examples/expectations/column_pair_map_expectation_template.py#L116-L121
+```python name="tests/integration/docusaurus/expectations/examples/column_pair_map_expectation_template.py library_metadata"
 ```
 
 would become

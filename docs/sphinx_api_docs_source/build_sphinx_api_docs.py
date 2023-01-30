@@ -20,13 +20,16 @@ Typical usage example:
         doc_builder.build_docs(clean=clean)
         ...
 """
+from __future__ import annotations
+
 import ast
 import importlib
 import logging
 import os
 import pathlib
 import shutil
-from typing import Dict, Tuple
+import sys
+from typing import Dict
 from urllib.parse import urlparse
 
 import invoke
@@ -107,6 +110,11 @@ class SphinxInvokeDocsBuilder:
 
     def _build_html_api_docs_in_temp_folder(self):
         """Builds html api documentation in temporary folder."""
+
+        sphinx_api_docs_source_dir = pathlib.Path.cwd()
+        if sphinx_api_docs_source_dir not in sys.path:
+            sys.path.append(str(sphinx_api_docs_source_dir))
+
         cmd = f"sphinx-build -M html ./ {self.temp_sphinx_html_dir} -E"
         self.ctx.run(cmd, echo=True, pty=True)
         logger.debug("Raw Sphinx HTML generated.")
@@ -199,15 +207,12 @@ class SphinxInvokeDocsBuilder:
 
                 doc_str = str(doc)
 
-                # Add front matter
-                doc_front_matter = (
-                    "---\n"
-                    f"title: {title_str}\n"
-                    f"sidebar_label: {title_str}\n"
-                    "---\n"
-                    "\n"
+                code_block_exists = "CodeBlock" in doc_str
+                doc_str = self._add_doc_front_matter(
+                    doc=doc_str, title=title_str, import_code_block=code_block_exists
                 )
-                doc_str = doc_front_matter + doc_str
+                if code_block_exists:
+                    doc_str = self._clean_up_code_blocks(doc_str)
 
                 # Write out mdx files
                 output_path = self.docusaurus_api_docs_path / self._get_mdx_file_path(
@@ -247,12 +252,19 @@ class SphinxInvokeDocsBuilder:
             # (if .parent is not used, then there will be a duplicate).
             path_prefix = pathlib.Path(shortest_dotted_path.replace(".", "/")).parent
 
+            # Remove the `great_expectations` top level
+            if path_prefix.parts[0] == "great_expectations":
+                path_prefix = pathlib.Path(*path_prefix.parts[1:])
+
             # Join the shortest path and write output
             output_path = (path_prefix / html_file_path.stem).with_suffix(".mdx")
         else:
             output_path = html_file_path.relative_to(static_html_file_path).with_suffix(
                 ".mdx"
             )
+            # Remove the `great_expectations` top level
+            if output_path.parts[0] == "great_expectations":
+                output_path = pathlib.Path(*output_path.parts[1:])
 
         return output_path
 
@@ -368,13 +380,57 @@ class SphinxInvokeDocsBuilder:
     def _remove_md_stubs(self):
         """Remove all markdown stub files."""
 
-        excluded_files: Tuple[pathlib.Path, ...] = (
+        excluded_files: tuple[pathlib.Path, ...] = (
             self.base_path / "index.md",
             self.base_path / "README.md",
         )
 
-        all_files: Tuple[pathlib.Path] = tuple(self.base_path.glob("*.md"))
+        all_files: tuple[pathlib.Path] = tuple(self.base_path.glob("*.md"))
 
         for file in all_files:
             if file not in excluded_files:
                 file.unlink()
+
+    def _add_doc_front_matter(
+        self, doc: str, title: str, import_code_block: bool = False
+    ) -> str:
+        """Add front matter to the beginning of doc.
+
+        Args:
+            doc: Document to add front matter to.
+            title: Desired title for the doc.
+            import_code_block: Whether to include import of docusaurus code block component.
+
+        Returns:
+            Document with front matter added.
+        """
+        import_code_block_content = ""
+        if import_code_block:
+            import_code_block_content = "import CodeBlock from '@theme/CodeBlock';"
+
+        doc_front_matter = (
+            "---\n"
+            f"title: {title}\n"
+            f"sidebar_label: {title}\n"
+            "---\n"
+            f"{import_code_block_content}"
+            "\n\n"
+        )
+        doc = doc_front_matter + doc
+
+        return doc
+
+    def _clean_up_code_blocks(self, doc: str) -> str:
+        """Revert escaped characters in code blocks.
+
+        CodeBlock common characters <,>,` get escaped when generating HTML.
+        Also quotes use a different quote character. This method cleans up
+        these items so that the code block is rendered appropriately.
+        """
+        doc = doc.replace("&lt;", "<").replace("&gt;", ">")
+        doc = (
+            doc.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
+        )
+        doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
+        doc = doc.replace("${", r"\${")
+        return doc
