@@ -29,7 +29,7 @@ class RuleBasedProfilerResult(SerializableDictDot):
     """
     ``RuleBasedProfilerResult`` is an immutable ``dataclass`` object which holds the results of executing the ``RuleBasedProfiler.run()`` method.
 
-    Properties represents configuration of effective Rule-Based Profiler, with all run-time overrides properly reconciled.
+    Properties represents the configuration of the Rule-Based Profiler (effective configuration if run via a DataAssistant or auto-initializing expectation), with all run-time overrides properly reconciled.
 
     Args:
         fully_qualified_parameter_names_by_domain:
