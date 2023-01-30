@@ -6,12 +6,12 @@ import pandas as pd
 from scipy import stats as stats
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -162,6 +162,13 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
 
 
 class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
+    """Expect that the Wasserstein Distance of the specified column with respect to an optional partition object to be lower than the provided value.
+
+    See Also:
+        [partition objects for distributional Expectations](https://docs.greatexpectations.io/docs/reference/expectations/distributional_expectations/#partition-objects)
+        [Wasserstein Metric on Wikipedia](https://en.wikipedia.org/wiki/Wasserstein_metric)
+    """
+
     # Setting necessary computation metric dependencies and defining kwargs, as well as assigning kwargs default values\
     metric_dependencies = ("column.custom.wasserstein",)
     success_keys = (
@@ -239,7 +246,7 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
     ]
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -261,15 +268,11 @@ class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     styling = runtime_configuration.get("styling")
     #     params = substitute_none_for_missing(
     #         configuration.kwargs,

@@ -12,12 +12,15 @@ from great_expectations.core.serializer import (
     JsonConfigSerializer,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store.datasource_store import DatasourceStore
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
+)
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
@@ -187,9 +190,9 @@ def test_datasource_store_set_cloud_mode(
     ge_cloud_organization_id: str,
 ) -> None:
     ge_cloud_store_backend_config: dict = {
-        "class_name": "GeCloudStoreBackend",
+        "class_name": GXCloudStoreBackend.__name__,
         "ge_cloud_base_url": ge_cloud_base_url,
-        "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
+        "ge_cloud_resource_type": GXCloudRESTResource.DATASOURCE,
         "ge_cloud_credentials": {
             "access_token": ge_cloud_access_token,
             "organization_id": ge_cloud_organization_id,

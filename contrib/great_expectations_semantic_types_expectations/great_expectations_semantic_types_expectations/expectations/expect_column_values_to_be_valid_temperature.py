@@ -42,7 +42,7 @@ class ColumnValuesToBeValidTemperature(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidTemperature(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid temperature format."""
+    """Expect column values to be valid temperatures."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -105,8 +105,7 @@ class ExpectColumnValuesToBeValidTemperature(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

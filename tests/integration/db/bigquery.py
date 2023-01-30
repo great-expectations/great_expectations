@@ -4,7 +4,7 @@ import os
 import pytest
 from google.cloud import bigquery
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -13,7 +13,7 @@ from great_expectations.validator.validator import Validator
 """
 What does this test and why?
 
-This integration test is part of the deprecation of the bigquery_temp_table parameter. As of GE 0.15.3,
+This integration test is part of the deprecation of the bigquery_temp_table parameter. As of GX 0.15.3,
 tables that are created as the result of a query are created as permanent tables with an expiration of 24 hours, with
 more information to be found:
 
@@ -38,7 +38,7 @@ CONNECTION_STRING: str = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 yaml = YAMLHandler()
 
-context: DataContext = ge.get_context()
+context: DataContext = gx.get_context()
 
 datasource_yaml: str = f"""
 name: my_bigquery_datasource

@@ -47,8 +47,10 @@ class ColumnAverageLatLonPairwiseDistance(ColumnAggregateMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnAverageLatLonPairwiseDistanceToBeLessThan(ColumnExpectation):
-    """This expectation will compute the pairwise haversine distance between each (latitude, longitude) pair
-    and test that the average is less than some value in km."""
+    """Expect the average pairwise haversine distance between lat/lon points in a column is less than some value in km.
+
+    This expectation will compute the pairwise haversine distance between each (latitude, longitude) pair and test that the average is less than some value in km.
+    """
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.

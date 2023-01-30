@@ -1,3 +1,9 @@
+from typing import Optional
+
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
 from great_expectations.expectations.expectation import (
     TableExpectation,
     render_evaluation_parameter_string,
@@ -33,10 +39,9 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> None:
         pass
@@ -45,10 +50,9 @@ class ExpectColumnParameterizedDistributionKsTestPValueToBeGreaterThan(
     @renderer(renderer_type=LegacyDiagnosticRendererType.OBSERVED_VALUE)
     def _diagnostic_observed_value_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> None:
         pass

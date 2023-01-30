@@ -7,6 +7,7 @@ For detailed information on QueryExpectations, please see:
 from typing import Optional, Union
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -44,7 +45,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         super().validate_configuration(configuration)
         value = configuration["kwargs"].get("value")
@@ -64,9 +65,9 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ) -> Union[ExpectationValidationResult, dict]:
-
+        metrics = convert_to_json_serializable(data=metrics)
+        query_result = list(metrics.get("query.table")[0].values())[0]
         value = configuration["kwargs"].get("value")
-        query_result = metrics.get("query.table")[0][0]
 
         success = query_result == value
 
@@ -86,6 +87,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
                     },
                 },
             ],
+            "suppress_test_for": ["snowflake"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -95,7 +97,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
                         "value": 5,
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -105,7 +106,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
                         "value": 2,
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite", "spark"],
                 },
                 {
                     "title": "positive_test_static_data_asset",
@@ -119,7 +119,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
                                  """,
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "positive_test_row_condition",
@@ -131,7 +130,6 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
                         "condition_parser": "great_expectations__experimental__",
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite", "spark"],
                 },
             ],
         },
@@ -140,7 +138,7 @@ class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "tags": ["query-based"],
-        "contributors": ["@joegargery"],
+        "contributors": ["@austiezr"],
     }
 
 

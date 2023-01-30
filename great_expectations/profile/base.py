@@ -9,12 +9,14 @@ from typing import Any, Optional
 
 from dateutil.parser import parse
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset
 from great_expectations.dataset import Dataset
 from great_expectations.exceptions import GreatExpectationsError
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -60,6 +62,7 @@ class OrderedProfilerCardinality(OrderedEnum):
         Takes the number and percentage of unique values in a column and returns the column cardinality.
         If you are unexpectedly returning a cardinality of "None", ensure that you are passing in values for both
         num_unique and pct_unique.
+
         Args:
             num_unique: The number of unique values in a column
             pct_unique: The percentage of unique values in a column
@@ -149,7 +152,13 @@ class Profiler(metaclass=abc.ABCMeta):
     def __init__(self, configuration: Optional[dict] = None) -> None:
         self.configuration = configuration
 
+    @public_api
     def validate(self, item_to_validate: Any) -> None:
+        """Raise an exception if `item_to_validate` cannot be profiled.
+
+        Args:
+            item_to_validate: The item to validate.
+        """
         pass
 
     def profile(
@@ -168,13 +177,13 @@ class Profiler(metaclass=abc.ABCMeta):
 
 class DataAssetProfiler:
     @classmethod
-    def validate(cls, data_asset):
+    def validate(cls, data_asset) -> bool:
         return isinstance(data_asset, DataAsset)
 
 
 class DatasetProfiler(DataAssetProfiler):
     @classmethod
-    def validate(cls, dataset):
+    def validate(cls, dataset) -> bool:
         return isinstance(dataset, (Dataset, Validator))
 
     @classmethod
@@ -200,7 +209,7 @@ class DatasetProfiler(DataAssetProfiler):
 
         if "notes" not in expectation_suite.meta:
             expectation_suite.meta["notes"] = {
-                "format": "markdown",
+                "format": MetaNotesFormat.MARKDOWN,
                 "content": [
                     "_To add additional notes, edit the <code>meta.notes.content</code> field in the appropriate Expectation json file._"
                     # TODO: be more helpful to the user by piping in the filename.

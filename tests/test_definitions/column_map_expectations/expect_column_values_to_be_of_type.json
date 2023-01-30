@@ -74,6 +74,23 @@
           "b": "BOOLEAN",
           "s": "DOUBLE",
           "s1": "BIGINT"
+        },
+        "snowflake": {
+          "x": "NUMBER",
+          "y": "DOUBLE",
+          "z": "STRING",
+          "n": "STRING",
+          "s": "DOUBLE",
+          "s1": "NUMBER"
+        },
+        "redshift": {
+          "x": "INTEGER",
+          "y": "DOUBLE_PRECISION",
+          "z": "VARCHAR",
+          "n": "VARCHAR",
+          "b": "BOOLEAN",
+          "s": "DOUBLE_PRECISION",
+          "s1": "BIGINT"
         }
       },
       "tests": [
@@ -101,7 +118,8 @@
           "out": {
             "success": true
           },
-          "only_for": ["sqlalchemy"]
+          "only_for": ["sqlalchemy"],
+          "suppress_test_for": ["snowflake"]
         },
         {
           "_note": "type name here works for tested spark types; for spark note we do not expect unexpected_list or unexpected_index_list since there are no column_map semantics for type",

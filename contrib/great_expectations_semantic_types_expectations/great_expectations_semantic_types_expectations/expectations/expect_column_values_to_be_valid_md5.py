@@ -42,7 +42,7 @@ class ColumnValuesToBeValidMd5(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidMd5(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid MD5 format."""
+    """Expect column values to be valid MD5 hashes."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -94,7 +94,7 @@ class ExpectColumnValuesToBeValidMd5(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -107,8 +107,7 @@ class ExpectColumnValuesToBeValidMd5(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

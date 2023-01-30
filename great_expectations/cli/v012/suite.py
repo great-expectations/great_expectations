@@ -4,7 +4,7 @@ import sys
 
 import click
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.datasource import get_batch_kwargs
 from great_expectations.cli.v012.mark import Mark as mark
@@ -27,7 +27,7 @@ try:
 except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
-    SQLAlchemyError = ge_exceptions.ProfilerError
+    SQLAlchemyError = gx_exceptions.ProfilerError
 
 
 @click.group()
@@ -87,7 +87,7 @@ def suite_edit(suite, datasource, directory, jupyter, batch_kwargs) -> None:
     )
 
 
-def _suite_edit(
+def _suite_edit(  # noqa: C901 - 22
     suite,
     datasource,
     directory,
@@ -111,7 +111,7 @@ def _suite_edit(
                 batch_kwargs = json.loads(batch_kwargs_json)
                 if datasource:
                     batch_kwargs["datasource"] = datasource
-                _batch = toolkit.load_batch(context, suite, batch_kwargs)
+                _ = toolkit.load_batch(context, suite, batch_kwargs)
             except json_parse_exception as je:
                 cli_message(
                     "<red>Please check that your batch_kwargs are valid JSON.\n{}</red>".format(
@@ -126,7 +126,7 @@ def _suite_edit(
                         success=True,
                     )
                 sys.exit(1)
-            except ge_exceptions.DataContextError:
+            except gx_exceptions.DataContextError:
                 cli_message(
                     "<red>Please check that your batch_kwargs are able to load a batch.</red>"
                 )
@@ -371,8 +371,8 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
                 success=False,
             )
     except (
-        ge_exceptions.DataContextError,
-        ge_exceptions.ProfilerError,
+        gx_exceptions.DataContextError,
+        gx_exceptions.ProfilerError,
         OSError,
         SQLAlchemyError,
     ) as e:
@@ -553,6 +553,6 @@ def suite_list(directory):
 def _get_notebook_path(context, notebook_name):
     return os.path.abspath(
         os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+            context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )

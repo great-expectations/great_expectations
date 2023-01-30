@@ -1,13 +1,16 @@
+from __future__ import annotations
+
 import datetime
 import json
 import os
 from collections import OrderedDict
+from typing import TYPE_CHECKING
 
 import pytest
 from freezegun import freeze_time
 from numpy import Infinity
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import PandasDatasource
@@ -15,11 +18,15 @@ from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.basic_suite_builder_profiler import (
     BasicSuiteBuilderProfiler,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.self_check.util import (
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
 from great_expectations.util import is_library_loadable
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
 
 FALSEY_VALUES = [None, [], False]
 
@@ -429,7 +436,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
     }
 
     assert expectation_suite.meta["notes"] == {
-        "format": "markdown",
+        "format": MetaNotesFormat.MARKDOWN,
         "content": [
             """#### This is an _example_ suite
 
@@ -491,7 +498,7 @@ def test_context_profiler(filesystem_csv_data_context):
     assert "batch_kwargs" in expectation_suite.meta["BasicSuiteBuilderProfiler"]
 
     assert expectation_suite.meta["notes"] == {
-        "format": "markdown",
+        "format": MetaNotesFormat.MARKDOWN,
         "content": [
             """#### This is an _example_ suite
 
@@ -536,7 +543,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
     and comparing the EVRs to ones retrieved from a
     previously stored file.
     """
-    df = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
+    df = gx.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
     suite, evrs = df.profile(BasicSuiteBuilderProfiler, profiler_configuration="demo")
 
     # Check to make sure BasicSuiteBuilderProfiler is adding meta.columns with a single "description" field for each column
@@ -600,7 +607,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_in_demo_mode():
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_have_included_or_excluded_columns_on_pandas(
     pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(pandas_dataset)
     assert isinstance(observed_suite, ExpectationSuite)
 
@@ -819,7 +826,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_columns_if_configuration_does_not_ha
 def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
     pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset, profiler_configuration={"included_columns": ["naturals"]}
     )
@@ -924,7 +931,7 @@ def test_BasicSuiteBuilderProfiler_uses_selected_columns_on_pandas(
 def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
     pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -993,7 +1000,7 @@ def test_BasicSuiteBuilderProfiler_respects_excluded_expectations_on_pandas(
 def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
     pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1043,7 +1050,7 @@ def test_BasicSuiteBuilderProfiler_respects_included_expectations_on_pandas(
 def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_falsey_on_pandas(
     included_columns, pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1080,7 +1087,7 @@ def test_BasicSuiteBuilderProfiler_uses_no_columns_if_included_columns_are_false
 def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations_are_falsey_on_pandas(
     included_expectations, pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1107,7 +1114,7 @@ def test_BasicSuiteBuilderProfiler_uses_no_expectations_if_included_expectations
 def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectations_are_falsey_on_pandas(
     excluded_expectations, pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1332,7 +1339,7 @@ def test_BasicSuiteBuilderProfiler_uses_all_expectations_if_excluded_expectation
 def test_BasicSuiteBuilderProfiler_uses_all_columns_if_excluded_columns_are_falsey_on_pandas(
     excluded_columns, pandas_dataset, empty_data_context
 ):
-    context: "DataContext" = empty_data_context
+    context: AbstractDataContext = empty_data_context
     observed_suite, evrs = BasicSuiteBuilderProfiler().profile(
         pandas_dataset,
         profiler_configuration={
@@ -1427,7 +1434,7 @@ def test_snapshot_BasicSuiteBuilderProfiler_on_titanic_with_builder_configuratio
     We are running the profiler on the Titanic dataset and comparing the EVRs
     to ones retrieved from a previously stored file.
     """
-    batch = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
+    batch = gx.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
     suite, evrs = BasicSuiteBuilderProfiler().profile(
         batch,
         profiler_configuration={

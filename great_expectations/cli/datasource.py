@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import enum
 import logging
 import os
 import sys
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
 import click
+from typing_extensions import TypeAlias
 
-from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
@@ -17,6 +19,11 @@ from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
 )
+from great_expectations.util import get_context
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import FileDataContext
+
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +63,7 @@ def datasource(ctx: click.Context) -> None:
         end_event_name,
     ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
         noun=cli_event_noun,
-        verb=ctx.invoked_subcommand,
+        verb=ctx.invoked_subcommand,  # type: ignore[arg-type] # could be None
     )
     send_usage_message(
         data_context=ctx.obj.data_context,
@@ -77,7 +84,7 @@ def datasource(ctx: click.Context) -> None:
 )
 def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     """Add a new Datasource to the data context."""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
@@ -101,7 +108,7 @@ def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
 @click.pass_context
 def delete_datasource(ctx: click.Context, datasource: str) -> None:
     """Delete the datasource specified as an argument"""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     if not ctx.obj.assume_yes:
@@ -139,7 +146,7 @@ def delete_datasource(ctx: click.Context, datasource: str) -> None:
 @click.pass_context
 def datasource_list(ctx: click.Context) -> None:
     """List known Datasources."""
-    context = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     try:
         datasources = context.list_datasources()
@@ -177,11 +184,12 @@ def _build_datasource_intro_string(datasources: List[dict]) -> str:
 
 
 def _datasource_new_flow(
-    context: DataContext,
+    context: FileDataContext,
     usage_event_end: str,
     datasource_name: Optional[str] = None,
     jupyter: bool = True,
 ) -> None:
+    helper: BaseDatasourceNewYamlHelper
     files_or_sql_selection = click.prompt(
         """
 What data would you like Great Expectations to connect to?
@@ -195,7 +203,7 @@ What data would you like Great Expectations to connect to?
         selected_files_backend = _prompt_for_execution_engine()
         helper = _get_files_helper(
             selected_files_backend,
-            context_root_dir=context.root_directory,
+            context_root_dir=context.root_directory,  # type: ignore[arg-type] # could be None
             datasource_name=datasource_name,
         )
     elif files_or_sql_selection == "2":
@@ -204,7 +212,11 @@ What data would you like Great Expectations to connect to?
         selected_database = _prompt_user_for_database_backend()
         helper = _get_sql_yaml_helper_class(selected_database, datasource_name)
     else:
-        helper = None
+        helper = None  # type: ignore[assignment] # causes error below
+        raise AttributeError(
+            "No `helper` selected"
+        )  # `None` has no `send_backend_choice_usage_message()`.
+        # Explicitly raised so that mypy understands that helper is not `None` below this line
 
     helper.send_backend_choice_usage_message(context)
     if not helper.verify_libraries_installed():
@@ -254,24 +266,24 @@ class BaseDatasourceNewYamlHelper:
         """Used in the interactive CLI to help users install dependencies."""
         raise NotImplementedError
 
-    def create_notebook(self, context: DataContext) -> str:
+    def create_notebook(self, context: FileDataContext) -> str:
         """Create a datasource_new notebook and save it to disk."""
         renderer = self.get_notebook_renderer(context)
         notebook_path = os.path.join(
-            context.root_directory,
-            context.GE_UNCOMMITTED_DIR,
+            context.root_directory,  # type: ignore[arg-type] # could be None
+            context.GX_UNCOMMITTED_DIR,
             "datasource_new.ipynb",
         )
         renderer.render_to_disk(notebook_path)
         return notebook_path
 
     def get_notebook_renderer(
-        self, context: DataContext
+        self, context: FileDataContext
     ) -> DatasourceNewNotebookRenderer:
         """Get a renderer specifically constructed for the datasource type."""
         raise NotImplementedError
 
-    def send_backend_choice_usage_message(self, context: DataContext) -> None:
+    def send_backend_choice_usage_message(self, context: FileDataContext) -> None:
         send_usage_message(
             data_context=context,
             event=UsageStatsEvents.CLI_NEW_DS_CHOICE,
@@ -308,13 +320,13 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
         self.context_root_dir: str = context_root_dir
 
     def get_notebook_renderer(
-        self, context: DataContext
+        self, context: FileDataContext
     ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
             context,
             datasource_type=self.datasource_type,
             datasource_yaml=self.yaml_snippet(),
-            datasource_name=self.datasource_name,
+            datasource_name=self.datasource_name,  # type: ignore[arg-type] # could be None
         )
 
     def yaml_snippet(self) -> str:
@@ -467,7 +479,7 @@ data_connectors:
       {{table_name}}:
         class_name: Asset
         schema_name: {{schema_name}}
-"""'''
+"""'''  # noqa: F541 # need these placeholders
 
         return yaml_str
 
@@ -482,13 +494,13 @@ data_connectors:
     database: {database}"""
 
     def get_notebook_renderer(
-        self, context: DataContext
+        self, context: FileDataContext
     ) -> DatasourceNewNotebookRenderer:
         return DatasourceNewNotebookRenderer(
             context,
             datasource_type=self.datasource_type,
             datasource_yaml=self.yaml_snippet(),
-            datasource_name=self.datasource_name,
+            datasource_name=self.datasource_name,  # type: ignore[arg-type] # could be None
             sql_credentials_snippet=self.credentials_snippet(),
         )
 
@@ -688,17 +700,12 @@ schema_name = ""  # or dataset name
 table_name = ""'''
 
     def verify_libraries_installed(self) -> bool:
-        pybigquery_ok = verify_library_dependent_modules(
-            python_import_name="pybigquery.sqlalchemy_bigquery",
-            pip_library_name="pybigquery",
-            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
-        )
         sqlalchemy_bigquery_ok = verify_library_dependent_modules(
             python_import_name="sqlalchemy_bigquery",
             pip_library_name="sqlalchemy_bigquery",
             module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
         )
-        return pybigquery_ok or sqlalchemy_bigquery_ok
+        return sqlalchemy_bigquery_ok
 
     def _yaml_innards(self) -> str:
         return "\n  connection_string: {connection_string}"
@@ -770,17 +777,21 @@ table_name = "YOUR_TABLE_NAME"'''
         return "\n  connection_string: {connection_string}"
 
 
-def _get_sql_yaml_helper_class(
-    selected_database: SupportedDatabaseBackends, datasource_name: Optional[str]
-) -> Union[
+SQLYAMLHelpers: TypeAlias = Union[
     MySQLCredentialYamlHelper,
     PostgresCredentialYamlHelper,
     RedshiftCredentialYamlHelper,
     SnowflakeCredentialYamlHelper,
     BigqueryCredentialYamlHelper,
     ConnectionStringCredentialYamlHelper,
-]:
-    helper_class_by_backend = {
+    TrinoCredentialYamlHelper,
+]
+
+
+def _get_sql_yaml_helper_class(
+    selected_database: SupportedDatabaseBackends, datasource_name: Optional[str]
+) -> SQLYAMLHelpers:
+    helper_class_by_backend: Dict[SupportedDatabaseBackends, Type[SQLYAMLHelpers]] = {
         SupportedDatabaseBackends.POSTGRES: PostgresCredentialYamlHelper,
         SupportedDatabaseBackends.MYSQL: MySQLCredentialYamlHelper,
         SupportedDatabaseBackends.REDSHIFT: RedshiftCredentialYamlHelper,
@@ -811,7 +822,9 @@ What are you processing your files with?
 def _get_files_helper(
     selection: str, context_root_dir: str, datasource_name: Optional[str] = None
 ) -> Union[PandasYamlHelper, SparkYamlHelper]:
-    helper_class_by_selection = {
+    helper_class_by_selection: Dict[
+        str, Union[Type[PandasYamlHelper], Type[SparkYamlHelper]]
+    ] = {
         "1": PandasYamlHelper,
         "2": SparkYamlHelper,
     }
@@ -863,7 +876,7 @@ def _verify_sqlalchemy_dependent_modules() -> bool:
 
 
 def sanitize_yaml_and_save_datasource(
-    context: DataContext, datasource_yaml: str, overwrite_existing: bool = False
+    context: FileDataContext, datasource_yaml: str, overwrite_existing: bool = False
 ) -> None:
     """A convenience function used in notebooks to help users save secrets."""
     if not datasource_yaml:
@@ -903,7 +916,9 @@ CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES: list = [
 ]
 
 
-def check_if_datasource_name_exists(context: DataContext, datasource_name: str) -> bool:
+def check_if_datasource_name_exists(
+    context: FileDataContext, datasource_name: str
+) -> bool:
     """
     Check if a Datasource name already exists in the on-disk version of the given DataContext and if so raise an error
     Args:
@@ -916,6 +931,6 @@ def check_if_datasource_name_exists(context: DataContext, datasource_name: str) 
     # TODO: 20210324 Anthony: Note reading the context from disk is a temporary fix to allow use in a notebook
     #  after test_yaml_config(). test_yaml_config() should update a copy of the in-memory data context rather than
     #  making changes directly to the in-memory context.
-    context_on_disk = DataContext(context.root_directory)
+    context_on_disk = get_context(context_root_dir=context.root_directory)
 
     return datasource_name in [d["name"] for d in context_on_disk.list_datasources()]

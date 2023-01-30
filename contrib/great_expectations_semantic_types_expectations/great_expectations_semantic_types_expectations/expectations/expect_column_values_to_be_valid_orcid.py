@@ -42,7 +42,7 @@ class ColumnValuesToBeValidOrcid(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidOrcid(ColumnMapExpectation):
-    """This Expectation validates data as conforming to the valid ORCID format."""
+    """Expect column values to conform to valid ORCID format."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -92,7 +92,7 @@ class ExpectColumnValuesToBeValidOrcid(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -105,8 +105,7 @@ class ExpectColumnValuesToBeValidOrcid(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

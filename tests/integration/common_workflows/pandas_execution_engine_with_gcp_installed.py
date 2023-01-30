@@ -2,7 +2,7 @@ import os
 from contextlib import contextmanager
 from typing import Dict
 
-import great_expectations as ge
+import great_expectations as gx
 
 
 @contextmanager
@@ -25,14 +25,14 @@ def temp_gc_creds() -> None:
 
 
 # What does this test and why?
-# A common initial use of GE is locally, with the PandasExecutionEngine
+# A common initial use of GX is locally, with the PandasExecutionEngine
 # A user of GCP could also have the GOOGLE_APPLICATION_CREDENTIALS set
 # This workflow was broken for a short time by PR # 3679 and then reverted with PR # 3689 and fixed with PR #3694
 # The following test ensures that this simple workflow still works
 
 
 with temp_gc_creds():
-    context = ge.get_context()
+    context = gx.get_context()
 
     example_yaml = """
 name: my_datasource

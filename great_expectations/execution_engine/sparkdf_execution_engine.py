@@ -3,13 +3,13 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
-import uuid
 import warnings
 from functools import reduce
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
 
 from dateutil.parser import parse
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
@@ -31,12 +31,12 @@ from great_expectations.exceptions import (
     GreatExpectationsError,
     ValidationError,
 )
-from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.bundled_metric_configuration import (
-    BundledMetricConfiguration,
+from great_expectations.execution_engine.execution_engine import (
+    MetricComputationConfiguration,
+    SplitDomainKwargs,
 )
-from great_expectations.execution_engine.execution_engine import SplitDomainKwargs
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
     SparkDataSampler,
@@ -49,6 +49,7 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_spark,
 )
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
@@ -86,9 +87,32 @@ def apply_dateutil_parse(column):
     return column.withColumn(col_name, _udf(col_name))
 
 
+@public_api
 class SparkDFExecutionEngine(ExecutionEngine):
-    """
+    """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
+
     This class holds an attribute `spark_df` which is a spark.sql.DataFrame.
+
+    Constructor builds a SparkDFExecutionEngine, using provided configuration parameters.
+
+    Args:
+        *args: Positional arguments for configuring SparkDFExecutionEngine
+        persist: If True (default), then creation of the Spark DataFrame is done outside this class
+        spark_config: Dictionary of Spark configuration options
+        force_reuse_spark_context: If True then utilize existing SparkSession if it exists and is active
+        **kwargs: Keyword arguments for configuring SparkDFExecutionEngine
+
+    For example:
+    ```python
+        name: str = "great_expectations-ee-config"
+        spark_config: Dict[str, str] = {
+        "spark.app.name": name,
+        "spark.sql.catalogImplementation": "hive",
+        "spark.executor.memory": "512m",
+        }
+        execution_engine = SparkDFExecutionEngine(spark_config=spark_config)
+        spark_session: SparkSession = execution_engine.spark
+    ```
 
     --ge-feature-maturity-info--
 
@@ -174,7 +198,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
         force_reuse_spark_context=False,
         **kwargs,
     ) -> None:
-        # Creation of the Spark DataFrame is done outside this class
         self._persist = persist
 
         if spark_config is None:
@@ -250,20 +273,26 @@ class SparkDFExecutionEngine(ExecutionEngine):
         """
 
         batch_data: Any
+        reader_method: str
+        reader_options: dict
+        path: str
+        schema: Optional[Union[pyspark.sql.types.StructType, dict, str]]
+        reader: DataFrameReader
+        reader_fn: Callable
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
             batch_data = batch_spec.batch_data
             if isinstance(batch_data, str):
-                raise ge_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(
                     f"""SparkDFExecutionEngine has been passed a string type batch_data, "{batch_data}", which is \
 illegal.  Please check your config."""
                 )
             batch_spec.batch_data = "SparkDataFrame"
 
         elif isinstance(batch_spec, AzureBatchSpec):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
+            path = batch_spec.path
             azure_url = AzureUrl(path)
             # TODO <WILL> 202209 - Add `schema` definition to Azure like PathBatchSpec below (GREAT-1224)
             try:
@@ -277,8 +306,8 @@ illegal.  Please check your config."""
                     self.spark.conf.set(
                         f"fs.azure.account.key.{storage_account_url}", credential
                     )
-                reader: DataFrameReader = self.spark.read.options(**reader_options)
-                reader_fn: Callable = self._get_reader_fn(
+                reader = self.spark.read.options(**reader_options)
+                reader_fn = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
                     path=path,
@@ -292,38 +321,32 @@ illegal.  Please check your config."""
                 )
 
         elif isinstance(batch_spec, (PathBatchSpec, GlueDataCatalogBatchSpec)):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict = batch_spec.reader_options or {}
-            path: str = batch_spec.path
-            schema: Optional[
-                Union[pyspark.sql.types.StructType, dict, str]
-            ] = reader_options.get("schema")
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options or {}
+            path = batch_spec.path
+            schema = reader_options.get("schema")
 
             # schema can be a dict if it has been through serialization step,
             # either as part of the datasource configuration, or checkpoint config
             if isinstance(schema, dict):
-                schema: pyspark.sql.types.StructType = sparktypes.StructType.fromJson(
-                    schema
-                )
+                schema = sparktypes.StructType.fromJson(schema)
 
             # this can happen if we have not converted schema into json at Datasource-config level
             elif isinstance(schema, str):
-                raise ge_exceptions.ExecutionEngineError(
+                raise gx_exceptions.ExecutionEngineError(
                     """
                                 Spark schema was not properly serialized.
-                                Please run the .jsonValue() method on the schema object before loading into GE.
+                                Please run the .jsonValue() method on the schema object before loading into GX.
                                 schema: your_schema.jsonValue()
                                 """
                 )
             # noinspection PyUnresolvedReferences
             try:
                 if schema:
-                    reader: DataFrameReader = self.spark.read.schema(schema).options(
-                        **reader_options
-                    )
+                    reader = self.spark.read.schema(schema).options(**reader_options)
                 else:
-                    reader: DataFrameReader = self.spark.read.options(**reader_options)
-                reader_fn: Callable = self._get_reader_fn(
+                    reader = self.spark.read.options(**reader_options)
+                reader_fn = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
                     path=path,
@@ -382,7 +405,7 @@ illegal.  Please check your config."""
 
     # TODO: <Alex>Similar to Abe's note in PandasExecutionEngine: Any reason this shouldn't be a private method?</Alex>
     @staticmethod
-    def guess_reader_method_from_path(path):
+    def guess_reader_method_from_path(path: str):
         """
         Based on a given filepath, decides a reader method. Currently supports tsv, csv, and parquet. If none of these
         file extensions are used, returns ExecutionEngineError stating that it is unable to determine the current path.
@@ -394,6 +417,7 @@ illegal.  Please check your config."""
             A dictionary entry of format {'reader_method': reader_method}
 
         """
+        path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return "csv"
         elif (
@@ -435,19 +459,18 @@ illegal.  Please check your config."""
                 f"Unable to find reader_method {reader_method} in spark.",
             )
 
+    @public_api
     def get_domain_records(  # noqa: C901 - 18
         self,
         domain_kwargs: dict,
     ) -> DataFrame:
-        """
-        Uses the given domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to
-        obtain and/or query a batch. Returns in the format of a Spark DataFrame.
+        """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
+            domain_kwargs (dict) - A dictionary consisting of the Domain kwargs specifying which data to obtain
 
         Returns:
-            A DataFrame (the data on which to compute)
+            A DataFrame (the data on which to compute returned in the format of a Spark DataFrame)
         """
         table = domain_kwargs.get("table", None)
         if table:
@@ -590,30 +613,33 @@ illegal.  Please check your config."""
             condition=joined_condition, condition_type=RowConditionParserType.SPARK_SQL
         )
 
+    @public_api
     def get_compute_domain(
         self,
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
     ) -> Tuple[DataFrame, dict, dict]:
-        """Uses a given batch dictionary and domain kwargs (which include a row condition and a condition parser)
-        to obtain and/or query a batch. Returns in the format of a Spark DataFrame.
+        """Uses a DataFrame and Domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
+
+        Returns in the format of a Spark DataFrame along with Domain arguments required for computing.  If the Domain \
+        is a single column, this is added to 'accessor Domain kwargs' and used for later access.
 
         Args:
-            domain_kwargs (dict) - A dictionary consisting of the domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes) - an Enum value indicating which metric domain the user would
-            like to be using, or a corresponding string value representing it. String types include "identity",
-            "column", "column_pair", "table" and "other". Enum types include capitalized versions of these from the
-            class MetricDomainTypes.
-            accessor_keys (str iterable) - keys that are part of the compute domain but should be ignored when
-            describing the domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_kwargs (dict): a dictionary consisting of the Domain kwargs specifying which data to obtain
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like \
+            to be using, or a corresponding string value representing it.  String types include "identity", "column", \
+            "column_pair", "table" and "other".  Enum types include capitalized versions of these from the class \
+            MetricDomainTypes.
+            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when \
+            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
               - a DataFrame (the data on which to compute)
               - a dictionary of compute_domain_kwargs, describing the DataFrame
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
-                identify the domain within the compute domain
+                identify the Domain within the compute domain
         """
         table: str = domain_kwargs.get("table", None)
         if table:
@@ -668,91 +694,76 @@ illegal.  Please check your config."""
 
     def resolve_metric_bundle(
         self,
-        metric_fn_bundle: Iterable[BundledMetricConfiguration],
-    ) -> Dict[Tuple[str, str, str], Any]:
+        metric_fn_bundle: Iterable[MetricComputationConfiguration],
+    ) -> Dict[Tuple[str, str, str], MetricValue]:
         """For every metric in a set of Metrics to resolve, obtains necessary metric keyword arguments and builds
         bundles of the metrics into one large query dictionary so that they are all executed simultaneously. Will fail
         if bundling the metrics together is not possible.
 
             Args:
-                metric_fn_bundle (Iterable[BundledMetricConfiguration]): \
-                    "BundledMetricConfiguration" contains MetricProvider's MetricConfiguration (its unique identifier),
+                metric_fn_bundle (Iterable[MetricComputationConfiguration]): \
+                    "MetricComputationConfiguration" contains MetricProvider's MetricConfiguration (its unique identifier),
                     its metric provider function (the function that actually executes the metric), and arguments to pass
                     to metric provider function (dictionary of metrics defined in registry and corresponding arguments).
 
             Returns:
                 A dictionary of "MetricConfiguration" IDs and their corresponding fully resolved values for domains.
         """
-        resolved_metrics: Dict[Tuple[str, str, str], Any] = {}
+        resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
         res: List[Row]
 
-        aggregates: Dict[Tuple, dict] = {}
+        aggregates: Dict[Tuple[str, str, str], dict] = {}
 
         aggregate: dict
 
         domain_id: Tuple[str, str, str]
 
-        bundled_metric_configuration: BundledMetricConfiguration
+        bundled_metric_configuration: MetricComputationConfiguration
         for bundled_metric_configuration in metric_fn_bundle:
-            bundled_metric_configuration: BundledMetricConfiguration
             metric_to_resolve: MetricConfiguration = (
                 bundled_metric_configuration.metric_configuration
             )
             metric_fn: Any = bundled_metric_configuration.metric_fn
             compute_domain_kwargs: dict = (
-                bundled_metric_configuration.compute_domain_kwargs
+                bundled_metric_configuration.compute_domain_kwargs or {}
             )
-
             if not isinstance(compute_domain_kwargs, IDDict):
                 compute_domain_kwargs = IDDict(compute_domain_kwargs)
 
-            domain_id = IDDict.convert_dictionary_to_id_dict(
-                data=convert_to_json_serializable(data=compute_domain_kwargs)
-            ).to_id()
+            domain_id = compute_domain_kwargs.to_id()
             if domain_id not in aggregates:
                 aggregates[domain_id] = {
                     "column_aggregates": [],
-                    "ids": [],
+                    "metric_ids": [],
                     "domain_kwargs": compute_domain_kwargs,
                 }
 
             aggregates[domain_id]["column_aggregates"].append(metric_fn)
-            aggregates[domain_id]["ids"].append(metric_to_resolve.id)
+            aggregates[domain_id]["metric_ids"].append(metric_to_resolve.id)
 
         for aggregate in aggregates.values():
             domain_kwargs: dict = aggregate["domain_kwargs"]
             df: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
 
-            assert len(aggregate["column_aggregates"]) == len(aggregate["ids"])
+            assert len(aggregate["column_aggregates"]) == len(aggregate["metric_ids"])
 
-            condition_ids: List[str] = []
-            aggregate_cols: List[str] = []
-
-            idx: int
-            for idx in range(len(aggregate["column_aggregates"])):
-                column_aggregate: Any = aggregate["column_aggregates"][idx]
-                aggregate_id: str = str(uuid.uuid4())
-                condition_ids.append(aggregate_id)
-                aggregate_cols.append(column_aggregate)
-
-            res = df.agg(*aggregate_cols).collect()
+            res = df.agg(*aggregate["column_aggregates"]).collect()
 
             logger.debug(
-                f"""SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id \
-{IDDict.convert_dictionary_to_id_dict(data=convert_to_json_serializable(data=domain_kwargs)).to_id()}"""
+                f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
             )
 
             assert (
                 len(res) == 1
             ), "all bundle-computed metrics must be single-value statistics"
-            assert len(aggregate["ids"]) == len(
+            assert len(aggregate["metric_ids"]) == len(
                 res[0]
             ), "unexpected number of metrics returned"
 
             idx: int
             metric_id: Tuple[str, str, str]
-            for idx, metric_id in enumerate(aggregate["ids"]):
+            for idx, metric_id in enumerate(aggregate["metric_ids"]):
                 # Converting DataFrame.collect() results into JSON-serializable format produces simple data types,
                 # amenable for subsequent post-processing by higher-level "Metric" and "Expectation" layers.
                 resolved_metrics[metric_id] = convert_to_json_serializable(

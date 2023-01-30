@@ -29,10 +29,10 @@ class TableColumns(TableMetricProvider):
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
@@ -53,10 +53,10 @@ class TableColumns(TableMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
@@ -65,10 +65,10 @@ class TableColumns(TableMetricProvider):
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]

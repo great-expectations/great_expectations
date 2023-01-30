@@ -173,60 +173,51 @@ def pythagorean_projection(loc1, loc2):
 class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpectation):
     """Expect values in a column to be tuples of degree-decimal (latitude, longitude) within a specified range of a given degree-decimal (latitude, longitude) point.
 
-    expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point is a :func:`column_map_expectation \
-    <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+    expect_column_values_to_be_lat_lon_coordinates_in_range_of_given_point is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
             The column name.
 
-
     Keyword Args:
         center_point (tuple(float, float) or list(float, float)): \
-            The point from which to measure to the column points.
+            The point from which to measure to the column points. \
             Must be a tuple or list of exactly two (2) floats.
-
         unit (str or None): \
-            The unit of distance with which to measure.
-            Must be one of: [miles, kilometers]
-            Default: kilometers
+            The unit of distance with which to measure. \
+            Must be one of: [miles, kilometers]. Default: kilometers
 
         range (int or float): \
             The range in [miles, kilometers] from your specified center_point to measure.
 
         projection (str or None): \
-            The method by which to calculate distance between points.
-            Must be one of: [fcc, pythagorean]
-            Default: pythagorean
+            The method by which to calculate distance between points. \
+            Must be one of: [fcc, pythagorean]. Default: pythagorean
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without
-            modification. For more detail, see :ref:`meta`.
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
-    Projections:
-        fcc: \
-            Calculates the distance in kilometers between two lat/lon points on an ellipsoidal earth
-            projected to a plane. Prescribed by the FCC for distances up to and not exceeding 475km/295mi.
-
-        pythagorean: \
-            Calculates the distance in kilometers between two lat/lon points on
-            a spherical earth projected to a plane. Very fast but error increases rapidly as distances increase.
+    Notes:
+        * fcc projection: Calculates the distance in kilometers between two lat/lon points on an ellipsoidal earth \
+          projected to a plane. Prescribed by the FCC for distances up to and not exceeding 475km/295mi.
+        * pythagorean projection: Calculates the distance in kilometers between two lat/lon points on \
+          a spherical earth projected to a plane. Very fast but error increases rapidly as distances increase.
     """
 
     def validate_configuration(
@@ -296,6 +287,7 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
                     "null",
                 ],
             },
+            "suppress_test_for": ["spark"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -452,7 +444,6 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
         cls,
         configuration: ExpectationConfiguration = None,
         result: ExpectationValidationResult = None,
-        language: str = None,
         runtime_configuration: dict = None,
         **kwargs,
     ) -> List[
@@ -467,9 +458,8 @@ class ExpectColumnValuesToBeLatLonCoordinatesInRangeOfGivenPoint(ColumnMapExpect
         ]
     ]:
         runtime_configuration = runtime_configuration or {}
-        include_column_name = runtime_configuration.get("include_column_name", True)
         include_column_name = (
-            include_column_name if include_column_name is not None else True
+            False if runtime_configuration.get("include_column_name") is False else True
         )
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(

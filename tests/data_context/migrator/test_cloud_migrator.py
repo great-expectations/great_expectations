@@ -6,10 +6,10 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import CloudMigrator
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.migrator.cloud_migrator import MigrationResponse
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from tests.data_context.migrator.conftest import StubBaseDataContext
@@ -24,9 +24,9 @@ def migrator_factory(
     def _create_migrator(context: Any) -> CloudMigrator:
         return gx.CloudMigrator(
             context=context,
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_organization_id=ge_cloud_organization_id,
-            ge_cloud_access_token=ge_cloud_access_token,
+            cloud_base_url=ge_cloud_base_url,
+            cloud_organization_id=ge_cloud_organization_id,
+            cloud_access_token=ge_cloud_access_token,
         )
 
     return _create_migrator
@@ -67,9 +67,9 @@ def mock_successful_migration(
             CloudMigrator.migrate(
                 context=context,
                 test_migrate=test_migrate,
-                ge_cloud_base_url=ge_cloud_base_url,
-                ge_cloud_access_token=ge_cloud_access_token,
-                ge_cloud_organization_id=ge_cloud_organization_id,
+                cloud_base_url=ge_cloud_base_url,
+                cloud_access_token=ge_cloud_access_token,
+                cloud_organization_id=ge_cloud_organization_id,
             )
 
         return mock_send_usage_message
@@ -90,18 +90,18 @@ def mock_failed_migration(
             CloudMigrator,
             "_migrate_to_cloud",
             return_value=None,
-            side_effect=ge_exceptions.MigrationError,
+            side_effect=gx_exceptions.MigrationError,
         ), mock.patch(
             f"{CloudMigrator.__module__}.send_usage_message",
             autospec=True,
         ) as mock_send_usage_message:
-            with pytest.raises(ge_exceptions.MigrationError):
+            with pytest.raises(gx_exceptions.MigrationError):
                 CloudMigrator.migrate(
                     context=context,
                     test_migrate=test_migrate,
-                    ge_cloud_base_url=ge_cloud_base_url,
-                    ge_cloud_access_token=ge_cloud_access_token,
-                    ge_cloud_organization_id=ge_cloud_organization_id,
+                    cloud_base_url=ge_cloud_base_url,
+                    cloud_access_token=ge_cloud_access_token,
+                    cloud_organization_id=ge_cloud_organization_id,
                 )
 
         return mock_send_usage_message
@@ -181,7 +181,7 @@ def test__send_validation_results_sends_valid_http_request(
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/expectation-validation-results",
         json={
             "data": {
-                "type": GeCloudRESTResource.EXPECTATION_VALIDATION_RESULT,
+                "type": GXCloudRESTResource.EXPECTATION_VALIDATION_RESULT,
                 "attributes": {
                     "organization_id": ge_cloud_organization_id,
                     "result": validation_results[keys[0]],

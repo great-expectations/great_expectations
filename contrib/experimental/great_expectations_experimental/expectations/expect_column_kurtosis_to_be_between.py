@@ -6,12 +6,12 @@ import pandas as pd
 import scipy.stats as stats
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -23,6 +23,7 @@ from great_expectations.expectations.expectation import (
     _format_map_output,
     render_evaluation_parameter_string,
 )
+from great_expectations.expectations.metrics import column_aggregate_partial
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
     column_aggregate_value,
@@ -78,31 +79,11 @@ class ColumnKurtosis(ColumnMetricProvider):
     #     # TODO: compute the value and return it
     #
     #     return column_median
-    #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
-    # def _spark(
-    #     cls,
-    #     execution_engine: "SqlAlchemyExecutionEngine",
-    #     metric_domain_kwargs: Dict,
-    #     metric_value_kwargs: Dict,
-    #     metrics: Dict[Tuple, Any],
-    #     runtime_configuration: Dict,
-    # ):
-    #     (
-    #         df,
-    #         compute_domain_kwargs,
-    #         accessor_domain_kwargs,
-    #     ) = execution_engine.get_compute_domain(
-    #         metric_domain_kwargs, MetricDomainTypes.COLUMN
-    #     )
-    #     column = accessor_domain_kwargs["column"]
-    #
-    #     column_median = None
-    #
-    #     # TODO: compute the value and return it
-    #
-    #     return column_median
-    #
+
+    @column_aggregate_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        return F.kurtosis(column)
+
     # @classmethod
     # def _get_evaluation_dependencies(
     #     cls,
@@ -147,7 +128,7 @@ class ColumnKurtosis(ColumnMetricProvider):
 
 
 class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
-    """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t)"""
+    """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t)."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
     examples = [
@@ -285,6 +266,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
             "@lodeous",
             "@bragleg",
             "@rexboyce",
+            "@mkopec87",
         ],
     }
 
@@ -303,7 +285,7 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
         "catch_exceptions": False,
     }
 
-    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    # def validate_configuration(self, configuration: Optional[ExpectationConfiguration] = None):
     #     """
     #     Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
     #     necessary configuration arguments have been provided for the validation of the expectation.
@@ -324,15 +306,11 @@ class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
     #     cls,
     #     configuration=None,
     #     result=None,
-    #     language=None,
     #     runtime_configuration=None,
     #     **kwargs,
     # ):
     #     runtime_configuration = runtime_configuration or {}
-    #     include_column_name = runtime_configuration.get("include_column_name", True)
-    #     include_column_name = (
-    #         include_column_name if include_column_name is not None else True
-    #     )
+    #     include_column_name = False if runtime_configuration.get("include_column_name") is False else True
     #     styling = runtime_configuration.get("styling")
     #     params = substitute_none_for_missing(
     #         configuration.kwargs,

@@ -23,7 +23,7 @@ from great_expectations.dataset.util import (
     check_sql_engine_dialect,
     get_approximate_percentile_disc_sql,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GESqlDialect
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import (
     generate_temporary_table_name,
     get_pyathena_potential_type,
@@ -283,7 +283,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 )
 
             count_query: Select
-            if self.sql_engine_dialect.name.lower() == GESqlDialect.MSSQL:
+            if self.sql_engine_dialect.name.lower() == GXSqlDialect.MSSQL:
                 count_query = self._get_count_query_mssql(
                     expected_condition=expected_condition,
                     ignore_values_condition=ignore_values_condition,
@@ -317,7 +317,7 @@ class MetaSqlAlchemyDataset(Dataset):
             count_results["unexpected_count"] = int(count_results["unexpected_count"])
 
             # limit doesn't compile properly for oracle so we will append rownum to query string later
-            if self.engine.dialect.name.lower() == GESqlDialect.ORACLE:
+            if self.engine.dialect.name.lower() == GXSqlDialect.ORACLE:
                 raw_query = (
                     sa.select([sa.column(column)])
                     .select_from(self._table)
@@ -758,11 +758,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         if custom_sql and not table_name:
             # NOTE: Eugene 2020-01-31: @James, this is a not a proper fix, but without it the "public" schema
             # was used for a temp table and raising an error
-            if engine.dialect.name.lower() != GESqlDialect.TRINO:
+            if engine.dialect.name.lower() != GXSqlDialect.TRINO:
                 schema = None
             table_name = generate_temporary_table_name()
             # mssql expects all temporary table names to have a prefix '#'
-            if engine.dialect.name.lower() == GESqlDialect.MSSQL:
+            if engine.dialect.name.lower() == GXSqlDialect.MSSQL:
                 table_name = f"#{table_name}"
             self.generated_table_name = table_name
         else:
@@ -783,11 +783,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 # Currently we do no error handling if the engine doesn't work out of the box.
                 raise err
 
-        if self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
+        if self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
             # In BigQuery the table name is already qualified with its schema name
             self._table = sa.Table(table_name, sa.MetaData(), schema=None)
             temp_table_schema_name = None
-        if self.engine.dialect.name.lower() == GESqlDialect.TRINO:
+        if self.engine.dialect.name.lower() == GXSqlDialect.TRINO:
             self._table = sa.Table(table_name, sa.MetaData(), schema=schema)
             temp_table_schema_name = schema
         else:
@@ -806,43 +806,43 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         dialect_name: str = self.engine.dialect.name.lower()
 
         if dialect_name in [
-            GESqlDialect.POSTGRESQL,
-            GESqlDialect.MYSQL,
-            GESqlDialect.SQLITE,
-            GESqlDialect.ORACLE,
-            GESqlDialect.MSSQL,
-            GESqlDialect.HIVE,
+            GXSqlDialect.POSTGRESQL,
+            GXSqlDialect.MYSQL,
+            GXSqlDialect.SQLITE,
+            GXSqlDialect.ORACLE,
+            GXSqlDialect.MSSQL,
+            GXSqlDialect.HIVE,
         ]:
             # These are the officially included and supported dialects by sqlalchemy
             self.dialect = import_library_module(
                 module_name=f"sqlalchemy.dialects.{self.engine.dialect.name}"
             )
 
-        elif dialect_name == GESqlDialect.SNOWFLAKE:
+        elif dialect_name == GXSqlDialect.SNOWFLAKE:
             self.dialect = import_library_module(
                 module_name="snowflake.sqlalchemy.snowdialect"
             )
-        elif self.engine.dialect.name.lower() == GESqlDialect.DREMIO:
+        elif self.engine.dialect.name.lower() == GXSqlDialect.DREMIO:
             # WARNING: Dremio Support is experimental, functionality is not fully under test
             self.dialect = import_library_module(
                 module_name="sqlalchemy_dremio.pyodbc.dialect"
             )
-        elif dialect_name == GESqlDialect.REDSHIFT:
+        elif dialect_name == GXSqlDialect.REDSHIFT:
             self.dialect = import_library_module(
                 module_name="sqlalchemy_redshift.dialect"
             )
-        elif dialect_name == GESqlDialect.BIGQUERY:
+        elif dialect_name == GXSqlDialect.BIGQUERY:
             self.dialect = import_library_module(module_name=_BIGQUERY_MODULE_NAME)
-        elif dialect_name == GESqlDialect.AWSATHENA:
+        elif dialect_name == GXSqlDialect.AWSATHENA:
             self.dialect = import_library_module(
                 module_name="pyathena.sqlalchemy_athena"
             )
-        elif dialect_name == GESqlDialect.TERADATASQL:
+        elif dialect_name == GXSqlDialect.TERADATASQL:
             # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
             )
-        elif dialect_name == GESqlDialect.TRINO:
+        elif dialect_name == GXSqlDialect.TRINO:
             # WARNING: Trino Support is experimental, functionality is not fully under test
             self.dialect = import_library_module(module_name="trino.sqlalchemy.dialect")
         elif dialect_name == "vertica":
@@ -854,9 +854,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             self.dialect = None
 
         if engine and engine.dialect.name.lower() in [
-            GESqlDialect.SQLITE,
-            GESqlDialect.MSSQL,
-            GESqlDialect.SNOWFLAKE,
+            GXSqlDialect.SQLITE,
+            GXSqlDialect.MSSQL,
+            GXSqlDialect.SNOWFLAKE,
         ]:
             # sqlite/mssql/snowflake temp tables only persist within a connection so override the engine
             self.engine = engine.connect()
@@ -872,7 +872,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if (
             custom_sql is not None
-            and self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY
+            and self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY
         ):
             if (
                 self.generated_table_name is not None
@@ -889,11 +889,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
 
             if self.generated_table_name is not None:
-                if self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
+                if self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
                     logger.warning(f"Created permanent table {table_name}")
-                if self.engine.dialect.name.lower() == GESqlDialect.TRINO:
+                if self.engine.dialect.name.lower() == GXSqlDialect.TRINO:
                     logger.warning(f"Created permanent view {schema}.{table_name}")
-                if self.engine.dialect.name.lower() == GESqlDialect.AWSATHENA:
+                if self.engine.dialect.name.lower() == GXSqlDialect.AWSATHENA:
                     logger.warning(f"Created permanent table default.{table_name}")
 
         try:
@@ -949,25 +949,25 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             head_sql_str = "select * from "
             if (
                 self._table.schema
-                and self.engine.dialect.name.lower() != GESqlDialect.BIGQUERY
+                and self.engine.dialect.name.lower() != GXSqlDialect.BIGQUERY
             ):
                 head_sql_str += f"{self._table.schema}.{self._table.name}"
-            elif self.engine.dialect.name.lower() == GESqlDialect.BIGQUERY:
+            elif self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
                 head_sql_str += f"`{self._table.name}`"
             else:
                 head_sql_str += self._table.name
             head_sql_str += f" limit {n:d}"
 
             # Limit is unknown in mssql! Use top instead!
-            if self.engine.dialect.name.lower() == GESqlDialect.MSSQL:
+            if self.engine.dialect.name.lower() == GXSqlDialect.MSSQL:
                 head_sql_str = f"select top({n}) * from {self._table.name}"
 
             # Limit doesn't work in oracle either
-            if self.engine.dialect.name.lower() == GESqlDialect.ORACLE:
+            if self.engine.dialect.name.lower() == GXSqlDialect.ORACLE:
                 head_sql_str = f"select * from {self._table.name} WHERE ROWNUM <= {n}"
 
             # Limit is unknown in teradatasql! Use sample instead!
-            if self.engine.dialect.name.lower() == GESqlDialect.TERADATASQL:
+            if self.engine.dialect.name.lower() == GXSqlDialect.TERADATASQL:
                 head_sql_str = f"select * from {self._table.name} sample {n}"
 
             df = pd.read_sql(head_sql_str, con=self.engine)
@@ -1011,7 +1011,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                                     # first part of OR(IN (NULL)) gives error in teradata
                                     sa.column(column).in_(ignore_values)
                                     if self.engine.dialect.name.lower()
-                                    != GESqlDialect.TERADATASQL
+                                    != GXSqlDialect.TERADATASQL
                                     else False,
                                     # Below is necessary b/c sa.in_() uses `==` but None != None
                                     # But we only consider this if None is actually in the list of ignore values
@@ -1112,8 +1112,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_column_median(self, column):
         # AWS Athena and presto have an special function that can be used to retrieve the median
         if (
-            self.sql_engine_dialect.name.lower() == GESqlDialect.AWSATHENA
-            or self.sql_engine_dialect.name.lower() == GESqlDialect.TRINO
+            self.sql_engine_dialect.name.lower() == GXSqlDialect.AWSATHENA
+            or self.sql_engine_dialect.name.lower() == GXSqlDialect.TRINO
         ):
             element_values = self.engine.execute(
                 f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
@@ -1153,21 +1153,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_column_quantiles(
         self, column: str, quantiles: Iterable, allow_relative_error: bool = False
     ) -> list:
-        if self.sql_engine_dialect.name.lower() == GESqlDialect.MSSQL:
+        if self.sql_engine_dialect.name.lower() == GXSqlDialect.MSSQL:
             return self._get_column_quantiles_mssql(column=column, quantiles=quantiles)
-        elif self.sql_engine_dialect.name.lower() == GESqlDialect.AWSATHENA:
+        elif self.sql_engine_dialect.name.lower() == GXSqlDialect.AWSATHENA:
             return self._get_column_quantiles_awsathena(
                 column=column, quantiles=quantiles
             )
-        elif self.sql_engine_dialect.name.lower() == GESqlDialect.TRINO:
+        elif self.sql_engine_dialect.name.lower() == GXSqlDialect.TRINO:
             return self._get_column_quantiles_trino(column=column, quantiles=quantiles)
-        elif self.sql_engine_dialect.name.lower() == GESqlDialect.BIGQUERY:
+        elif self.sql_engine_dialect.name.lower() == GXSqlDialect.BIGQUERY:
             return self._get_column_quantiles_bigquery(
                 column=column, quantiles=quantiles
             )
-        elif self.sql_engine_dialect.name.lower() == GESqlDialect.MYSQL:
+        elif self.sql_engine_dialect.name.lower() == GXSqlDialect.MYSQL:
             return self._get_column_quantiles_mysql(column=column, quantiles=quantiles)
-        elif self.sql_engine_dialect.name.lower() == GESqlDialect.SNOWFLAKE:
+        elif self.sql_engine_dialect.name.lower() == GXSqlDialect.SNOWFLAKE:
             # NOTE: 20201216 - JPC - snowflake has a representation/precision limitation
             # in its percentile_disc implementation that causes an error when we do
             # not round. It is unclear to me *how* the call to round affects the behavior --
@@ -1181,7 +1181,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 quantiles=quantiles,
                 allow_relative_error=allow_relative_error,
             )
-        elif self.sql_engine_dialect.name.lower() == GESqlDialect.SQLITE:
+        elif self.sql_engine_dialect.name.lower() == GXSqlDialect.SQLITE:
             return self._get_column_quantiles_sqlite(
                 column=column,
                 quantiles=quantiles,
@@ -1416,7 +1416,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 )
 
     def get_column_stdev(self, column):
-        if self.sql_engine_dialect.name.lower() == GESqlDialect.MSSQL:
+        if self.sql_engine_dialect.name.lower() == GXSqlDialect.MSSQL:
             # Note: "stdev_samp" is not a recognized built-in function name (but "stdev" does exist for "mssql").
             # This function is used to compute statistical standard deviation from sample data (per the reference in
             # https://sqlserverrider.wordpress.com/2013/03/06/standard-deviation-functions-stdev-and-stdevp-sql-server).
@@ -1668,25 +1668,25 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # handle cases where dialect.name.lower() returns a byte string (e.g. databricks)
         if isinstance(engine_dialect, bytes):
             engine_dialect = str(engine_dialect, "utf-8")
-        if engine_dialect == GESqlDialect.BIGQUERY:
+        if engine_dialect == GXSqlDialect.BIGQUERY:
             stmt = f"CREATE OR REPLACE VIEW `{table_name}` AS {custom_sql}"
-        elif engine_dialect == GESqlDialect.TRINO:
+        elif engine_dialect == GXSqlDialect.TRINO:
             stmt = f"CREATE OR REPLACE VIEW {schema_name}.{table_name} AS {custom_sql}"
         elif engine_dialect == "databricks":
             stmt = f"CREATE OR REPLACE TEMPORARY VIEW `{table_name}` AS {custom_sql}"
-        elif engine_dialect == GESqlDialect.DREMIO:
+        elif engine_dialect == GXSqlDialect.DREMIO:
             stmt = f"CREATE OR REPLACE VDS {table_name} AS {custom_sql}"
-        elif engine_dialect == GESqlDialect.SNOWFLAKE:
+        elif engine_dialect == GXSqlDialect.SNOWFLAKE:
             table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
 
             logger.info(f"Creating temporary table {table_name}")
             if schema_name is not None:
                 table_name = f"{schema_name}.{table_name}"
             stmt = f"CREATE OR REPLACE {table_type} TABLE {table_name} AS {custom_sql}"
-        elif self.sql_engine_dialect.name == GESqlDialect.MYSQL:
+        elif self.sql_engine_dialect.name == GXSqlDialect.MYSQL:
             # Note: We can keep the "MySQL" clause separate for clarity, even though it is the same as the generic case.
             stmt = f"CREATE TEMPORARY TABLE {table_name} AS {custom_sql}"
-        elif self.sql_engine_dialect.name == GESqlDialect.MSSQL:
+        elif self.sql_engine_dialect.name == GXSqlDialect.MSSQL:
             # Insert "into #{table_name}" in the custom sql query right before the "from" clause
             # Split is case sensitive so detect case.
             # Note: transforming custom_sql to uppercase/lowercase has uninteded consequences (i.e., changing column names), so this is not an option!
@@ -1698,9 +1698,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = (
                 f"{custom_sqlmod[0]}into {{table_name}} from{custom_sqlmod[1]}"
             ).format(table_name=table_name)
-        elif engine_dialect == GESqlDialect.AWSATHENA:
+        elif engine_dialect == GXSqlDialect.AWSATHENA:
             stmt = f"CREATE TABLE {table_name} AS {custom_sql}"
-        elif engine_dialect == GESqlDialect.ORACLE:
+        elif engine_dialect == GXSqlDialect.ORACLE:
             # oracle 18c introduced PRIVATE temp tables which are transient objects
             stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {table_name} ON COMMIT PRESERVE DEFINITION AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
@@ -1710,11 +1710,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt_2 = "CREATE GLOBAL TEMPORARY TABLE {table_name} ON COMMIT PRESERVE ROWS AS {custom_sql}".format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif engine_dialect == GESqlDialect.TERADATASQL:
+        elif engine_dialect == GXSqlDialect.TERADATASQL:
             stmt = 'CREATE VOLATILE TABLE "{table_name}" AS ({custom_sql}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
                 table_name=table_name, custom_sql=custom_sql
             )
-        elif self.sql_engine_dialect.name.lower() == GESqlDialect.HIVE:
+        elif self.sql_engine_dialect.name.lower() == GXSqlDialect.HIVE:
             stmt = "CREATE TEMPORARY TABLE {schema_name}.{table_name} AS {custom_sql}".format(
                 schema_name=schema_name if schema_name is not None else "default",
                 table_name=table_name,
@@ -1730,7 +1730,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         else:
             stmt = f'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'
 
-        if engine_dialect == GESqlDialect.ORACLE:
+        if engine_dialect == GXSqlDialect.ORACLE:
             try:
                 self.engine.execute(stmt_1)
             except DatabaseError:
@@ -1741,7 +1741,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
         col_info_dict_list: List[Dict]
-        if self.sql_engine_dialect.name.lower() == GESqlDialect.MSSQL:
+        if self.sql_engine_dialect.name.lower() == GXSqlDialect.MSSQL:
             type_module = self._get_dialect_type_module()
             # Get column names and types from the database
             # StackOverflow to the rescue: https://stackoverflow.com/a/38634368
@@ -1848,11 +1848,12 @@ WHERE
     ###
 
     @DocInherit
-    @MetaSqlAlchemyDataset.expectation(["column_list", "ignore_row_if"])
+    @MetaSqlAlchemyDataset.expectation(["column_list", "ignore_row_if", "mostly"])
     def expect_compound_columns_to_be_unique(
         self,
         column_list,
         ignore_row_if="all_values_are_missing",
+        mostly=None,
         result_format=None,
         row_condition=None,
         condition_parser=None,
@@ -1897,6 +1898,14 @@ WHERE
         else:
             # If no rows, then zero percent are unexpected.
             unexpected_percent = 0
+
+        # if mostly is passed in the kwargs it should first be checked if the unexpected_ratio is below mostly value
+        # If it is above, the expectation will return false
+        if mostly:
+            return {
+                "success": unexpected_count / total_count < 1 - mostly,
+                "result": {"unexpected_percent": unexpected_percent},
+            }
 
         return {
             "success": unexpected_count == 0,
@@ -2306,7 +2315,7 @@ WHERE
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
         # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
         # just the column we will be performing the expectation on, and the query is performed against it.
-        if self.sql_engine_dialect.name.lower() == GESqlDialect.MYSQL:
+        if self.sql_engine_dialect.name.lower() == GXSqlDialect.MYSQL:
             temp_table_name = generate_temporary_table_name()
             temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
                 new_temp_table=temp_table_name,

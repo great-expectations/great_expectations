@@ -105,7 +105,6 @@ class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
         def row_generator_fn(
             configuration=None,
             result=None,
-            language=None,
             runtime_configuration=None,
             **kwargs,
         ):
@@ -198,7 +197,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             if unexpected_statement:
                 expectation_string_cell += unexpected_statement
             if unexpected_table:
-                expectation_string_cell.append(unexpected_table)
+                expectation_string_cell += unexpected_table
             if len(expectation_string_cell) > 1:
                 output_row = [status_cell + [expectation_string_cell] + observed_value]
             else:

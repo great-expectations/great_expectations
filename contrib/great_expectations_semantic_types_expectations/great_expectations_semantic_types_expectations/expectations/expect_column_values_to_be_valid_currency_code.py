@@ -54,6 +54,7 @@ class ColumnValuesCurrencyCode(ColumnMapMetricProvider):
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeValidCurrencyCode(ColumnMapExpectation):
     """Expect values in this column to be valid currency codes (three capital letters).
+
     See ISO-4217 for more information.
     """
 
@@ -114,8 +115,7 @@ class ExpectColumnValuesToBeValidCurrencyCode(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:

@@ -1,13 +1,19 @@
-from typing import Optional
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Optional
 
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import (
     convert_json_string_to_be_python_compliant,
     lint_code,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class BaseNotebookRenderer(Renderer):
@@ -15,7 +21,7 @@ class BaseNotebookRenderer(Renderer):
     Abstract base class for methods that help with rendering a jupyter notebook.
     """
 
-    def __init__(self, context: Optional[DataContext] = None) -> None:
+    def __init__(self, context: Optional[AbstractDataContext] = None) -> None:
         super().__init__()
         self.context = context
         # Add cells to this notebook, then render by implementing a

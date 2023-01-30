@@ -14,11 +14,7 @@ You may provide the following key/value pairs in your Data Asset configuration t
 
 For example, imagine that you have a copy of the NYC taxi data from the getting started tutorial in a table called `yellow_tripdata_sample_2020`, along with a public schema.  You could access this data by defining an entry in the `assets` dictionary like:
 
-```python
-        "yellow_tripdata_sample_2020_full":{
-                "table_name": "yellow_tripdata_sample_2020",
-                "schema_name": "public",
-            },
+```python name="configured sql data asset single batch"
 ```
 
 
@@ -32,49 +28,12 @@ The configuration we provided above does not include a `splitter_method`, and th
 
 Alternatively, you could define a Data Asset that is split into Batches based on the year and month by defining the `splitter_method` to be `split_on_year_and_month` and providing a Datetime column. (In the case of the NYC taxi data, this would be the `pickup_datetime` column.)  Creating a Data Asset like this would result in the following key/value pair in your `assets` dictionary:
 
-```python
-        "yellow_tripdata_sample_2020_by_year_and_month":{
-            "table_name": "yellow_tripdata_sample_2020",
-            "schema_name": "public",
-            "splitter_method": "split_on_year_and_month",
-            "splitter_kwargs": {
-                "column_name": "pickup_datetime",
-            },
-        },
+```python name="configured sql data asset multi batch"
 ```
 
 If you included both of these Data Assets, your complete configuration would look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SqlAlchemyExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-        "connection_string": CONNECTION_STRING,
-    },
-    "data_connectors": {
-        "configured_data_connector_multi_batch_asset": {
-            "class_name": "ConfiguredAssetSqlDataConnector",
-            "assets":{
-                "yellow_tripdata_sample_2020_full": {
-                    "table_name": "yellow_tripdata_sample_2020",
-                    "schema_name": "public",
-                },
-                "yellow_tripdata_sample_2020_by_year_and_month":{
-                    "table_name": "yellow_tripdata_sample_2020",
-                    "schema_name": "public",
-                    "splitter_method": "split_on_year_and_month",
-                    "splitter_kwargs": {
-                        "column_name": "pickup_datetime",
-                    },
-                },
-            },
-        },
-    },
-}
+```python name="full configuration for sql configured Datasource"
 ```
 
 :::note Reminder

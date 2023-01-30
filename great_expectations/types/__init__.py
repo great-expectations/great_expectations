@@ -1,13 +1,16 @@
 import copy
 import logging
 from enum import Enum
-from typing import Optional, Set
+from typing import ClassVar, Dict, Optional, Set
 
 import pandas as pd
 
+from ..alias_types import JSONValues
+from ..core._docs_decorators import public_api
 from .base import SerializableDotDict
-from .color_palettes import ColorPalettes, Colors
+from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig
+from .fonts import FontFamily, FontFamilyURL
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +67,8 @@ class DictDot:
     For more examples of usage, please see `test_dataclass_serializable_dot_dict_pattern.py` in the tests folder.
     """
 
-    include_field_names: Set[str] = set()
-    exclude_field_names: Set[str] = set()
+    include_field_names: ClassVar[Set[str]] = set()
+    exclude_field_names: ClassVar[Set[str]] = set()
 
     def __getitem__(self, item):
         if isinstance(item, int):
@@ -235,12 +238,18 @@ class DictDot:
 
 
 class SerializableDictDot(DictDot):
-    def to_json_dict(self) -> dict:
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of the SerializableDictDot.
+
+        Subclasses must implement this abstract method.
+
+        Returns:
+            A JSON-serializable dict representation of the SerializableDictDot
         """
+
         # TODO: <Alex>2/4/2022</Alex>
-        A reference implementation can be provided, once circular import dependencies, caused by relative locations of
-        the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules are resolved.
-        """
+        # A reference implementation can be provided, once circular import dependencies, caused by relative locations of
+        # the "great_expectations/types/__init__.py" and "great_expectations/core/util.py" modules are resolved.
         raise NotImplementedError
 
 

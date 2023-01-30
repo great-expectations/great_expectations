@@ -16,6 +16,7 @@ from ruamel.yaml.comments import CommentedMap
 # To support python 3.7 we must import Protocol from typing_extensions instead of typing
 from typing_extensions import Protocol
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -23,6 +24,11 @@ from great_expectations.core import (
     ExpectationValidationResult,
 )
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.domain import (
+    INFERRED_SEMANTIC_TYPE_KEY,
+    Domain,
+    SemanticDomainTypes,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.datasource import DataConnector, Datasource
@@ -35,11 +41,6 @@ from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config.base import (
     RuleBasedProfilerConfig,
     ruleBasedProfilerConfigSchema,
-)
-from great_expectations.rule_based_profiler.domain import (
-    INFERRED_SEMANTIC_TYPE_KEY,
-    Domain,
-    SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     get_validator_with_expectation_suite,
@@ -433,13 +434,21 @@ def test_alice_expect_column_values_to_match_regex_auto_yes_default_profiler_con
     assert result.success
 
     expectation_config_kwargs: dict = result.expectation_config.kwargs
+
+    assert expectation_config_kwargs["regex"] in [
+        r"\d+",
+        r"-?\d+",
+        r"-?\d+(?:\.\d*)?",
+        r"[A-Za-z0-9\.,;:!?()\"'%\-]+",
+    ]
+
+    expectation_config_kwargs.pop("regex")
     assert expectation_config_kwargs == {
         "auto": True,
         "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
         "column": "id",
         "include_config": True,
         "mostly": 1.0,
-        "regex": "-?\\d+",
         "result_format": "SUMMARY",
     }
 
@@ -463,13 +472,21 @@ def test_alice_expect_column_values_to_not_match_regex_auto_yes_default_profiler
     assert not result.success
 
     expectation_config_kwargs: dict = result.expectation_config.kwargs
+
+    assert expectation_config_kwargs["regex"] in [
+        r"\d+",
+        r"-?\d+",
+        r"-?\d+(?:\.\d*)?",
+        r"[A-Za-z0-9\.,;:!?()\"'%\-]+",
+    ]
+
+    expectation_config_kwargs.pop("regex")
     assert expectation_config_kwargs == {
         "auto": True,
         "batch_id": "cf28d8229c247275c8cc0f41b4ceb62d",
         "column": "id",
         "include_config": True,
         "mostly": 1.0,
-        "regex": "-?\\d+",
         "result_format": "SUMMARY",
     }
 
@@ -973,7 +990,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
-    with pytest.raises(AssertionError) as e:
+    with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
         # noinspection PyUnusedLocal
         result = validator.expect_column_values_to_be_between(
             column=column_name,
@@ -1153,7 +1170,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
         }
 
-        with pytest.raises(AssertionError) as e:
+        with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
             # noinspection PyUnusedLocal
             result = validator.expect_column_values_to_be_between(
                 column=column_name,
@@ -1406,7 +1423,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
         }
 
-        with pytest.raises(AssertionError) as e:
+        with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
             # noinspection PyUnusedLocal
             result = validator.expect_column_values_to_be_between(
                 column=column_name,

@@ -11,9 +11,6 @@ from great_expectations.data_context.data_context.data_context import DataContex
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations.data_context.data_context.explorer_data_context import (
-    ExplorerDataContext,
-)
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )

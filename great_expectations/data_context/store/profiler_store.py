@@ -2,11 +2,11 @@ import random
 import uuid
 from typing import Union
 
-from great_expectations.data_context.cloud_constants import GeCloudRESTResource
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
-    GeCloudIdentifier,
+    GXCloudIdentifier,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
@@ -30,10 +30,10 @@ class ProfilerStore(ConfigurationStore):
             rules={},
         )
 
-        test_key: Union[GeCloudIdentifier, ConfigurationIdentifier]
-        if self.ge_cloud_mode:
+        test_key: Union[GXCloudIdentifier, ConfigurationIdentifier]
+        if self.cloud_mode:
             test_key = self.key_class(  # type: ignore[assignment,call-arg]
-                resource_type=GeCloudRESTResource.PROFILER,
+                resource_type=GXCloudRESTResource.PROFILER,
                 ge_cloud_id=str(uuid.uuid4()),
             )
         else:
@@ -64,8 +64,8 @@ class ProfilerStore(ConfigurationStore):
 
     def ge_cloud_response_json_to_object_dict(self, response_json: dict) -> dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
         ge_cloud_profiler_id = response_json["data"]["id"]
         profiler_config_dict = response_json["data"]["attributes"]["profiler"]

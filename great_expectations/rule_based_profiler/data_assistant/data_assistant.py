@@ -2,17 +2,22 @@ from abc import ABCMeta, abstractmethod
 from inspect import isabstract
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
-from great_expectations.core import IDDict
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import Batch, BatchRequestBase
+from great_expectations.core.domain import Domain, SemanticDomainTypes
+from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
+from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain import Domain, SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     MapMetricColumnDomainBuilder,
 )
@@ -55,8 +60,9 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
 from great_expectations.util import camel_to_snake, measure_execution_time
 from great_expectations.validator.validator import Validator
 
-
 # noinspection PyMethodParameters
+
+
 class MetaDataAssistant(ABCMeta):
     """
     MetaDataAssistant registers every DataAssistant class as it is defined, it them to the DataAssistant registry.
@@ -108,6 +114,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
         ...
     """
 
+    data_assistant_type: str  # Added by `MetaDataAssistant`
+
     class CommonlyUsedParameterBuilders:
         def get_table_row_count_metric_multi_batch_parameter_builder(
             self,
@@ -130,6 +138,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             metric_name: str = "table.columns"
             return self.build_metric_multi_batch_parameter_builder(
                 metric_name=metric_name,
+                suffix=None,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
             )
@@ -152,7 +161,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name="column_values.unique.unexpected_count",
+                metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_value_kwargs=None,
             )
 
@@ -163,7 +172,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name="column_values.nonnull.unexpected_count",
+                metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_value_kwargs=None,
             )
 
@@ -174,7 +183,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             This method instantiates one commonly used "MetricMultiBatchParameterBuilder" with specified directives.
             """
             return self.build_numeric_metric_multi_batch_parameter_builder(
-                metric_name="column_values.null.unexpected_count",
+                metric_name=f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
                 metric_value_kwargs=None,
             )
 
@@ -272,6 +281,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_metric_multi_batch_parameter_builder(
             metric_name: str,
+            suffix: Optional[str] = None,
             metric_domain_kwargs: Optional[
                 Union[str, dict]
             ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -280,7 +290,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "MetricMultiBatchParameterBuilder" with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=metric_name)
+            name: str = sanitize_parameter_name(name=metric_name, suffix=suffix)
             return MetricMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
@@ -297,6 +307,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_metric_single_batch_parameter_builder(
             metric_name: str,
+            suffix: Optional[str] = None,
             metric_domain_kwargs: Optional[
                 Union[str, dict]
             ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -305,7 +316,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "MetricSingleBatchParameterBuilder" class with arguments for specific purpose.
             """
-            name: str = sanitize_parameter_name(name=metric_name)
+            name: str = sanitize_parameter_name(name=metric_name, suffix=suffix)
             return MetricSingleBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
@@ -321,6 +332,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_numeric_metric_multi_batch_parameter_builder(
             metric_name: str,
+            suffix: Optional[str] = None,
             metric_domain_kwargs: Optional[
                 Union[str, dict]
             ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -329,7 +341,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "MetricMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=metric_name)
+            name: str = sanitize_parameter_name(name=metric_name, suffix=suffix)
             return MetricMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
@@ -346,6 +358,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_numeric_metric_single_batch_parameter_builder(
             metric_name: str,
+            suffix: Optional[str] = None,
             metric_domain_kwargs: Optional[
                 Union[str, dict]
             ] = DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -354,7 +367,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "MetricSingleBatchParameterBuilder" class with arguments for specific purpose.
             """
-            name: str = sanitize_parameter_name(name=metric_name)
+            name: str = sanitize_parameter_name(name=metric_name, suffix=suffix)
             return MetricSingleBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
@@ -370,6 +383,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         @staticmethod
         def build_numeric_metric_range_multi_batch_parameter_builder(
             metric_name: Optional[str] = None,
+            suffix: Optional[str] = None,
             metric_value_kwargs: Optional[Union[str, dict]] = None,
             evaluation_parameter_builder_configs: Optional[
                 List[ParameterBuilderConfig]
@@ -378,6 +392,9 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "NumericMetricRangeMultiBatchParameterBuilder" class with specific arguments for given purpose.
             """
+            if evaluation_parameter_builder_configs is None:
+                evaluation_parameter_builder_configs = []
+
             metric_multi_batch_parameter_builder_name: Optional[str] = None
             if metric_name is None:
                 metric_name = evaluation_parameter_builder_configs[0]["metric_name"]
@@ -385,7 +402,8 @@ class DataAssistant(metaclass=MetaDataAssistant):
                     evaluation_parameter_builder_configs[0].name
                 )
 
-            name: str = sanitize_parameter_name(name=f"{metric_name}.range")
+            name: str = f"{metric_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}range"
+            name = sanitize_parameter_name(name=name, suffix=suffix)
             return NumericMetricRangeMultiBatchParameterBuilder(
                 name=name,
                 metric_name=metric_name,
@@ -416,7 +434,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "RegexPatternStringParameterBuilder" class with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=f"{name}")
+            name = sanitize_parameter_name(name=name, suffix=None)
             return RegexPatternStringParameterBuilder(
                 name=name,
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
@@ -434,7 +452,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             """
             This method instantiates "HistogramSingleBatchParameterBuilder" class with specific arguments for given purpose.
             """
-            name: str = sanitize_parameter_name(name=f"{name}")
+            name = sanitize_parameter_name(name=name, suffix=None)
             return HistogramSingleBatchParameterBuilder(
                 name=name,
                 evaluation_parameter_builder_configs=None,
@@ -467,12 +485,12 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._validator = validator
 
-        if validator is None:
-            self._data_context = None
-            self._batches = None
-        else:
-            self._data_context = self._validator.data_context
-            self._batches = self._validator.batches
+        self._data_context = (
+            self._validator.data_context if self._validator is not None else None
+        )
+        self._batches: Optional[Dict[str, Union[Batch, XBatch]]] = (
+            self._validator.batches if self._validator is not None else None
+        )
 
         variables: Optional[Dict[str, Any]] = self.get_variables() or {}
         self._profiler = RuleBasedProfiler(
@@ -484,20 +502,23 @@ class DataAssistant(metaclass=MetaDataAssistant):
 
         self._metrics_parameter_builders_by_domain = {}
 
-        rules: Optional[List[Rule]] = self.get_rules() or []
+        rules: List[Rule] = self.get_rules() or []
 
         rule: Rule
         for rule in rules:
             self.profiler.add_rule(rule=rule)
             self._metrics_parameter_builders_by_domain[
                 Domain(
-                    domain_type=rule.domain_builder.domain_type,
+                    domain_type=rule.domain_builder.domain_type
+                    if rule.domain_builder
+                    else "",
                     rule_name=rule.name,
                 )
             ] = (
                 rule.parameter_builders or []
             )
 
+    @public_api
     def run(
         self,
         variables: Optional[Dict[str, Any]] = None,
@@ -509,17 +530,27 @@ class DataAssistant(metaclass=MetaDataAssistant):
             List[RuntimeEnvironmentDomainTypeDirectives]
         ] = None,
     ) -> DataAssistantResult:
-        """
-        Run the DataAssistant as it is currently configured.
+        """Run the DataAssistant as it is currently configured.
+
+        Example Usage::
+
+            data_assistant = VolumeDataAssistant(
+                name="my_volume_data_assistant",
+                validator=validator,
+            )
+            result: DataAssistantResult = data_assistant.run(
+                variables=None,
+                rules=None,
+            )
 
         Args:
-            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
-            rules: name/(configuration-dictionary) (overrides)
-            variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
-            domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
+            variables: Attribute name/value pairs (overrides); commonly-used in Builder objects.
+            rules: Name/configuration dictionary (overrides)
+            variables_directives_list: Additional/override runtime variables directives (modify `BaseRuleBasedProfiler`).
+            domain_type_directives_list: Additional/override runtime domain directives (modify `BaseRuleBasedProfiler`).
 
         Returns:
-            DataAssistantResult: The result object for the DataAssistant
+            An instance of `DataAssistantResult`.
         """
         usage_statistics_handler: Optional[UsageStatisticsHandler]
         if self._data_context is None:
@@ -527,9 +558,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         else:
             usage_statistics_handler = self._data_context._usage_statistics_handler
 
-        batches: Dict[str, Batch] = self._batches
-        if batches is None:
-            batches = {}
+        batches: Dict[str, Union[Batch, XBatch]] = self._batches or {}
 
         data_assistant_result = DataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
@@ -637,6 +666,10 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 parameter_builder.json_serialized_fully_qualified_parameter_name
                 for parameter_builder in parameter_builders
             ]
+            + [
+                parameter_builder.raw_fully_qualified_parameter_name
+                for parameter_builder in parameter_builders
+            ]
             for domain, parameter_builders in self._metrics_parameter_builders_by_domain.items()
         }
 
@@ -654,7 +687,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
             )
             for domain_key, fully_qualified_metrics_parameter_names in fully_qualified_metrics_parameter_names_by_domain.items()
             for domain, parameter_values_for_fully_qualified_parameter_names in parameter_values_for_fully_qualified_parameter_names_by_domain.items()
-            if domain.is_superset(domain_key)
+            if domain.is_superset(other=domain_key)
         }
 
         return parameter_values_for_fully_qualified_parameter_names_by_domain
@@ -665,14 +698,14 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
         """
-        batches: Dict[str, Batch] = self._batches
-        if batches is None:
-            batches = {}
+        batches: Dict[str, Union[Batch, XBatch]] = self._batches or {}
 
+        batch_id: str
+        batch: Batch
         return {
             batch_id: set(
-                IDDict.convert_dictionary_to_id_dict(
-                    batch.batch_definition.batch_identifiers
+                deep_convert_properties_iterable_to_id_dict(
+                    source=batch.batch_definition.batch_identifiers
                 ).items()
             )
             for batch_id, batch in batches.items()
@@ -713,22 +746,15 @@ def run_profiler_on_data(
         variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
         domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
     """
-    if rules is None:
-        rules = []
-
-    rule: Rule
-    rules_configs: Optional[Dict[str, Dict[str, Any]]] = {
-        rule.name: rule.to_json_dict() for rule in rules
-    }
     comment: str = f"""Created by effective Rule-Based Profiler of {data_assistant.__class__.__name__} with the \
 configuration included.
 """
     rule_based_profiler_result: RuleBasedProfilerResult = profiler.run(
         variables=variables,
-        rules=rules_configs,
+        rules=rules,
         batch_list=batch_list,
         batch_request=batch_request,
-        recompute_existing_parameter_values=False,
+        runtime_configuration=None,
         reconciliation_directives=DEFAULT_RECONCILATION_DIRECTIVES,
         variables_directives_list=variables_directives_list,
         domain_type_directives_list=domain_type_directives_list,

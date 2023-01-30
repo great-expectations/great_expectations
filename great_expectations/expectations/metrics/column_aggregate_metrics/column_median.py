@@ -36,10 +36,10 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         (
             selectable,
@@ -59,7 +59,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)
-            .where(column != None)
+            .where(column != None)  # noqa: E711
             .offset(max(nonnull_count // 2 - 1, 0))
             .limit(2)
             .select_from(selectable)
@@ -91,10 +91,10 @@ class ColumnMedian(ColumnAggregateMetricProvider):
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         (
             df,

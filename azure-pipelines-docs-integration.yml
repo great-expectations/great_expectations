@@ -56,7 +56,7 @@ stages:
                 tests/integration/fixtures/**
                 tests/test_sets/**
 
-          - bash: ./scripts/check_for_docs_deps_changes
+          - bash: ./scripts/check_for_docs_deps_changes.sh
             name: CheckDocsDependenciesChanges
 
   - stage: custom_checks
@@ -70,11 +70,13 @@ stages:
       - bash: python scripts/docs_link_checker.py -p docs -r docs -s docs --skip-external
         name: LinkChecker
 
-    - job: line_number_checker
+    - job: docs_snippet_checker
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
       steps:
-      - bash: python scripts/validate_docs_snippet_line_numbers.py
-        name: LineNumberChecker
+      - script: |
+          yarn install
+          python scripts/validate_docs_snippets.py
+        name: DocsSnippetChecker
 
   - stage: docusaurus_tests
     dependsOn: scope_check
@@ -102,17 +104,17 @@ stages:
           displayName: 'Update pip'
 
         - script: |
-            pip install --requirement requirements-dev.txt --constraint constraints-dev.txt .
+            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage git+https://github.com/awslabs/aws-glue-libs.git "cryptography==38.0.4"
           displayName: 'Install dependencies'
+
         - task: DownloadSecureFile@1
           name: gcp_authkey
           displayName: 'Download GCS Credentials'
           inputs:
               secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
+
         - script: |
-            # install google cloud storage dependency
-            pip install google-cloud-bigquery-storage
             # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
             curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
             ./google-cloud-sdk/install.sh --usage-reporting=False --path-update=True --quiet --install-python=False
@@ -131,7 +133,6 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pip install pytest pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
             pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws --azure tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:

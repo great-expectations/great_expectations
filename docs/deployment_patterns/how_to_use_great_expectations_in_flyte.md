@@ -99,7 +99,7 @@ def file_task(
 
 @workflow
 def file_wf(
-   dataset: CSVFile = "https://raw.githubusercontent.com/superconductive/ge_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
+   dataset: CSVFile = "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv",
 ) -> int:
    return file_task(dataset=dataset)
 
@@ -156,7 +156,7 @@ def to_df(dataset: str) -> pd.DataFrame:
 def schema_wf() -> int:
    return schema_task(
        dataframe=to_df(
-           dataset="https://raw.githubusercontent.com/superconductive/ge_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+           dataset="https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
        )
    )
 

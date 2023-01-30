@@ -3,6 +3,7 @@ title: How to connect to an Athena database
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import ConnectionStringAthena from './components/_connection_string_athena.md'
 
 This guide will help you add an Athena instance (or a database) as a <TechnicalTag tag="datasource" text="Datasource" />. This will allow you to <TechnicalTag tag="validation" text="Validate" /> tables and queries within this instance. When you use an Athena Datasource, the validation is done in Athena itself. Your data is not downloaded.
 
@@ -25,23 +26,7 @@ When prompted to choose from the list of database engines, chose `other`.
 
 ### 2. Identify your connection string
 
-In order to for Great Expectations to connect to Athena, you will need to provide a connection string.  To determine your connection string, reference the examples below and the [PyAthena documentation](https://github.com/laughingman7743/PyAthena#sqlalchemy).
-
-The following urls don't include credentials as it is recommended to use either the instance profile or the boto3 configuration file.
-
-If you want Great Expectations to connect to your Athena instance (without specifying a particular database), the URL should be:
-
-```bash
-awsathena+rest://@athena.{region}.amazonaws.com/?s3_staging_dir={s3_path}
-```
-
-Note the url parameter "s3_staging_dir" needed for storing query results in S3.
-
-If you want Great Expectations to connect to a particular database inside your Athena, the URL should be:
-
-```bash
-awsathena+rest://@athena.{region}.amazonaws.com/{database}?s3_staging_dir={s3_path}
-```
+<ConnectionStringAthena />
 
 After providing your connection string, you will then be presented with a Jupyter Notebook.
 

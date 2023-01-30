@@ -461,7 +461,7 @@ def validate_distribution_parameters(distribution, params):  # noqa: C901 - 33
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
     return

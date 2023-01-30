@@ -209,7 +209,7 @@ def build_continuous_partition_object(
     """Convenience method for building a partition object on continuous data from a dataset and column
 
     Args:
-        dataset (GE Dataset): the dataset for which to compute the partition
+        dataset (GX Dataset): the dataset for which to compute the partition
         column (string): The name of the column for which to construct the estimate.
         bins (string): One of 'uniform' (for uniformly spaced bins), 'ntile' (for percentile-spaced bins), or 'auto'
             (for automatically spaced bins)
@@ -252,7 +252,7 @@ def build_categorical_partition_object(dataset, column, sort="value"):
     """Convenience method for building a partition object on categorical data from a dataset and column
 
     Args:
-        dataset (GE Dataset): the dataset for which to compute the partition
+        dataset (GX Dataset): the dataset for which to compute the partition
         column (string): The name of the column for which to construct the estimate.
         sort (string): must be one of "value", "count", or "none".
             - if "value" then values in the resulting partition object will be sorted lexigraphically
@@ -545,7 +545,7 @@ def validate_distribution_parameters(distribution, params):
 
     else:
         raise ValueError(
-            "params must be a dict or list, or use ge.dataset.util.infer_distribution_parameters(data, distribution)"
+            "params must be a dict or list, or use great_expectations.dataset.util.infer_distribution_parameters(data, distribution)"
         )
 
     return

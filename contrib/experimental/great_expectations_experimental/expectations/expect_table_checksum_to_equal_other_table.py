@@ -1,4 +1,3 @@
-import json
 import re
 from copy import deepcopy
 
@@ -8,50 +7,31 @@ from copy import deepcopy
 # https://docs.greatexpectations.io/en/latest/reference/core_concepts.html#expectations-and-metrics.
 from typing import Any, Dict, Optional, Tuple
 
-import numpy as np
-
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationValidationResult,
+)
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    ColumnMapExpectation,
-    Expectation,
-    ExpectationConfiguration,
     TableExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics import (
-    ColumnMapMetricProvider,
-    column_condition_partial,
-)
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
-
-# from great_expectations.expectations.metrics.table_metric import TableMetricProvider
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
-from great_expectations.expectations.registry import (
-    _registered_expectations,
-    _registered_metrics,
-    _registered_renderers,
-)
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
+from great_expectations.render.util import substitute_none_for_missing
 from great_expectations.validator.validation_graph import MetricConfiguration
-from great_expectations.validator.validator import Validator
 
 # DEBUG=True
 DEBUG = False
@@ -281,9 +261,8 @@ class TableChecksumValues(TableMetricProvider):
 class ExpectTableChecksumToEqualOtherTable(TableExpectation):
     """Expect the checksum table to equal the checksum of another table.
 
-    expect_table_checksum_to_equal_other_table is a :func:`expectation \
-    <great_expectations.validator.validator.Validator.expectation>`, not a
-    ``column_map_expectation`` or ``column_aggregate_expectation``.
+    expect_table_checksum_to_equal_other_table is a \
+    [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
 
     Args:
         other_table_name (str): \
@@ -292,27 +271,25 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
             optional: Comma seperated list of columns which should be ignored from checksum calculation. e.g. "created_date, userid"
 
     Other Parameters:
-        result_format (string or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
             A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
-            modification. For more detail, see :ref:`meta`.
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
 
     See Also:
-        expect_table_row_count_to_equal_other_table
+        [expect_table_row_count_to_equal_other_table](https://greatexpectations.io/expectations/xpect_table_row_count_to_equal_other_table)
     """
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -420,7 +397,7 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                             "other": -7127504315667345025,
                         },
                     },
-                    "suppress_test_for": ["sqlite"],
+                    "only_for": ["bigquery"],
                 },
                 {
                     "title": "for bigquery - negative_test_with_checksum_not_equal",
@@ -438,16 +415,7 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                             "other": -2656867619187774560,
                         },
                     },
-                    "suppress_test_for": ["sqlite"],
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    # "dialects": ['sqlite', 'bigquery',],
-                    "dialects": [
-                        "sqlite",
-                    ],
+                    "only_for": ["bigquery"],
                 },
             ],
         }
@@ -472,7 +440,9 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
         "meta": None,
     }
 
-    def validate_configuration(self, configuration: Optional[ExpectationConfiguration]):
+    def validate_configuration(
+        self, configuration: Optional[ExpectationConfiguration] = None
+    ):
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
         necessary configuration arguments have been provided for the validation of the expectation.
@@ -509,10 +479,9 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration=None,
-        result=None,
-        language=None,
-        runtime_configuration=None,
+        configuration: Optional[ExpectationConfiguration] = None,
+        result: Optional[ExpectationValidationResult] = None,
+        runtime_configuration: Optional[dict] = None,
         **kwargs
     ):
         runtime_configuration = runtime_configuration or {}

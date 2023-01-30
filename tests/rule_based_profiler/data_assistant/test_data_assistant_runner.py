@@ -4,11 +4,11 @@ import pandas as pd
 import pytest
 
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
-from great_expectations.rule_based_profiler.domain import MetricDomainTypes
 
 
 @pytest.mark.integration

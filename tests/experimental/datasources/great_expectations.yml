@@ -1,0 +1,36 @@
+xdatasources:
+  my_pg_ds:
+    type: postgres
+    name: my_pg_ds
+    connection_string: "postgresql://userName:@hostname/dbName"
+    assets:
+      my_table_asset_wo_splitters:
+        type: table
+        name: my_table_asset_wo_splitters
+        table_name: my_table
+      with_splitter:
+        type: table
+        name: with_splitter
+        table_name: another_table
+        column_splitter:
+              method_name: split_on_year_and_month
+              column_name: my_column
+              name: my_year_and_month_splitter
+              param_names:
+                - year
+                - month
+      with_sorters:
+        type: table
+        name: with_sorters
+        table_name: another_table
+        order_by:
+          - key: year
+          - key: month
+            reverse: true
+      with_dsl_ish_sorters:
+        type: table
+        name: with_dsl_ish_sorters
+        table_name: another_table
+        order_by:
+          - year
+          - -month

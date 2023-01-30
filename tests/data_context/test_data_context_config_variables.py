@@ -5,20 +5,20 @@ from collections import OrderedDict
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations as ge
-from great_expectations.data_context.data_context import DataContext
+import great_expectations as gx
+from great_expectations.core.config_provider import _ConfigurationSubstitutor
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigSchema,
     DatasourceConfig,
     DatasourceConfigSchema,
 )
-from great_expectations.data_context.util import (
-    PasswordMasker,
-    file_relative_path,
-    substitute_config_variable,
-)
+from great_expectations.data_context.util import PasswordMasker, file_relative_path
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
+from great_expectations.util import get_context
 from tests.data_context.conftest import create_data_context_files
 
 yaml = YAML()
@@ -43,7 +43,7 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
         "../test_fixtures/config_variables.yml",
     )
     shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
-    return DataContext(context_root_dir=root_dir)
+    return get_context(context_root_dir=root_dir)
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(
@@ -94,10 +94,10 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     expected_config_commented_map.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
-    context = ge.data_context.DataContext(context_path)
+    context = get_context(context_root_dir=context_path)
     context._save_project_config()
     context_config_commented_map = dataContextConfigSchema.dump(
-        ge.data_context.DataContext(context_path)._project_config
+        get_context(context_root_dir=context_path)._project_config
     )
     context_config_commented_map.pop("anonymous_usage_statistics")
 
@@ -123,8 +123,8 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
         config_variables_fixture_filename="config_variables.yml",
     )
 
-    data_context = ge.data_context.DataContext(
-        context_path, runtime_environment=runtime_environment
+    data_context = get_context(
+        context_root_dir=context_path, runtime_environment=runtime_environment
     )
     config = data_context.get_config_with_variables_substituted()
 
@@ -148,6 +148,7 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
 
 
 def test_substitute_config_variable():
+    config_substitutor = _ConfigurationSubstitutor()
     config_variables_dict = {
         "arg0": "val_of_arg_0",
         "arg2": {"v1": 2},
@@ -155,67 +156,88 @@ def test_substitute_config_variable():
         "ARG4": "val_of_ARG_4",
     }
     assert (
-        substitute_config_variable("abc${arg0}", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "abc${arg0}", config_variables_dict
+        )
         == "abcval_of_arg_0"
     )
     assert (
-        substitute_config_variable("abc$arg0", config_variables_dict)
+        config_substitutor.substitute_config_variable("abc$arg0", config_variables_dict)
         == "abcval_of_arg_0"
     )
     assert (
-        substitute_config_variable("${arg0}", config_variables_dict) == "val_of_arg_0"
+        config_substitutor.substitute_config_variable("${arg0}", config_variables_dict)
+        == "val_of_arg_0"
     )
-    assert substitute_config_variable("hhhhhhh", config_variables_dict) == "hhhhhhh"
+    assert (
+        config_substitutor.substitute_config_variable("hhhhhhh", config_variables_dict)
+        == "hhhhhhh"
+    )
     with pytest.raises(MissingConfigVariableError) as exc:
-        substitute_config_variable(
+        config_substitutor.substitute_config_variable(
             "abc${arg1} def${foo}", config_variables_dict
         )  # does NOT equal "abc${arg1}"
     assert (
-        """Unable to find a match for config substitution variable: `arg1`.
-Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
-See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials"""
+        "Unable to find a match for config substitution variable: `arg1`."
         in exc.value.message
     )
     assert (
-        substitute_config_variable("${arg2}", config_variables_dict)
+        config_substitutor.substitute_config_variable("${arg2}", config_variables_dict)
         == config_variables_dict["arg2"]
     )
     assert exc.value.missing_config_variable == "arg1"
 
     # Null cases
-    assert substitute_config_variable("", config_variables_dict) == ""
-    assert substitute_config_variable(None, config_variables_dict) == None
+    assert (
+        config_substitutor.substitute_config_variable("", config_variables_dict) == ""
+    )
+    assert (
+        config_substitutor.substitute_config_variable(None, config_variables_dict)
+        == None
+    )
 
     # Test with mixed case
     assert (
-        substitute_config_variable("prefix_${aRg3}_suffix", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "prefix_${aRg3}_suffix", config_variables_dict
+        )
         == "prefix_val_of_aRg_3_suffix"
     )
     assert (
-        substitute_config_variable("${aRg3}", config_variables_dict) == "val_of_aRg_3"
+        config_substitutor.substitute_config_variable("${aRg3}", config_variables_dict)
+        == "val_of_aRg_3"
     )
     # Test with upper case
     assert (
-        substitute_config_variable("prefix_$ARG4/suffix", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "prefix_$ARG4/suffix", config_variables_dict
+        )
         == "prefix_val_of_ARG_4/suffix"
     )
-    assert substitute_config_variable("$ARG4", config_variables_dict) == "val_of_ARG_4"
+    assert (
+        config_substitutor.substitute_config_variable("$ARG4", config_variables_dict)
+        == "val_of_ARG_4"
+    )
 
     # Test with multiple substitutions
     assert (
-        substitute_config_variable("prefix${arg0}$aRg3", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            "prefix${arg0}$aRg3", config_variables_dict
+        )
         == "prefixval_of_arg_0val_of_aRg_3"
     )
 
     # Escaped `$` (don't substitute, but return un-escaped string)
     assert (
-        substitute_config_variable(r"abc\${arg0}\$aRg3", config_variables_dict)
+        config_substitutor.substitute_config_variable(
+            r"abc\${arg0}\$aRg3", config_variables_dict
+        )
         == "abc${arg0}$aRg3"
     )
 
     # Multiple configurations together
     assert (
-        substitute_config_variable(
+        config_substitutor.substitute_config_variable(
             r"prefix$ARG4.$arg0/$aRg3:${ARG4}/\$dontsub${arg0}:${aRg3}.suffix",
             config_variables_dict,
         )
@@ -619,7 +641,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     """
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context = ge.DataContext.create(
+    context = FileDataContext.create(
         project_root_dir=project_path,
         usage_statistics_enabled=False,
     )
