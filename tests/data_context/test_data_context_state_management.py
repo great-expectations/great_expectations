@@ -340,21 +340,24 @@ def test_add_or_update_expectation_suite_adds_successfully(
 ):
     context = in_memory_data_context
 
+    expectation_suite_name = "default"
     expectations = [
         ExpectationConfiguration(
             expectation_type="expect_column_values_to_be_in_set",
             kwargs={"column": "x", "value_set": [1, 2, 4]},
         ),
     ]
-    expectation_suite_name = "default"
     meta = {"great_expectations_version": "0.15.44"}
 
-    _ = context.add_or_update_expectation_suite(
-        expectations=expectations,
+    suite = context.add_or_update_expectation_suite(
         expectation_suite_name=expectation_suite_name,
+        expectations=expectations,
         meta=meta,
     )
 
+    assert suite.expectation_suite_name == expectation_suite_name
+    assert suite.expectations == expectations
+    assert suite.meta == meta
     assert context.expectations_store.save_count == 1
 
 
