@@ -738,7 +738,7 @@ class Expectation(metaclass=MetaExpectation):
                 }
             )
 
-            exception_traceback_collapse = CollapseContent(
+            exception_traceback_collapse = CollapseContent(  # type: ignore[arg-type]
                 **{
                     "collapse_toggle_link": "Show exception traceback...",
                     "collapse": [
