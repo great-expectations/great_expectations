@@ -89,10 +89,10 @@ class CollapseContent(CollapseContentRender):
 
     def __init__(
         self,
-        collapse: Union[RenderedContent, list],
-        collapse_toggle_link: Optional[Union[RenderedContent, dict]] = None,
-        header: Optional[Union[RenderedContent, dict]] = None,
-        subheader: Optional[Union[RenderedContent, dict]] = None,
+        collapse: Union[RenderedContentRender, list],
+        collapse_toggle_link: Optional[Union[RenderedContentRender, dict]] = None,
+        header: Optional[Union[RenderedContentRender, dict]] = None,
+        subheader: Optional[Union[RenderedContentRender, dict]] = None,
         styling: Optional[dict] = None,
         content_block_type: str = "collapse",
         inline_link: bool = False,
