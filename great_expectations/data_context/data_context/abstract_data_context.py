@@ -1503,6 +1503,38 @@ class AbstractDataContext(ConfigPeer, ABC):
         config = checkpoint.get_config()
         self.checkpoint_store.update_checkpoint(config)
 
+    def add_or_update_checkpoint(
+        self,
+        name: str,
+        config_version: Optional[Union[int, float]] = None,
+        template_name: Optional[str] = None,
+        module_name: Optional[str] = None,
+        class_name: Optional[str] = None,
+        run_name_template: Optional[str] = None,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[dict] = None,
+        action_list: Optional[List[dict]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        runtime_configuration: Optional[dict] = None,
+        validations: Optional[List[dict]] = None,
+        profilers: Optional[List[dict]] = None,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: Optional[str] = None,
+        batches: Optional[List[dict]] = None,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: Optional[Union[str, List[str]]] = None,
+        slack_webhook: Optional[str] = None,
+        notify_on: Optional[str] = None,
+        notify_with: Optional[Union[str, List[str]]] = None,
+        id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
+        default_validation_id: Optional[str] = None,
+    ) -> Checkpoint:
+        """
+        TODO
+        """
+        pass
+
     def get_checkpoint(
         self,
         name: Optional[str] = None,
