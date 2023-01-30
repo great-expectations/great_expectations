@@ -22,6 +22,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -52,6 +53,7 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -2132,11 +2134,95 @@ class AbstractDataContext(ConfigPeer, ABC):
             ValueError: The input `overwrite_existing` is of the wrong type.
             DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
         """
+        return self._add_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            overwrite_existing=overwrite_existing,
+        )
+
+    def add_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        id: str | None = None,
+        expectations: list[dict | ExpectationConfiguration] | None = None,
+        evaluation_parameters: dict | None = None,
+        data_asset_type: str | None = None,
+        execution_engine_type: Type[ExecutionEngine] | None = None,
+        meta: dict | None = None,
+    ) -> ExpectationSuite:
+        """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
+
+        Note that this method can be called by itself or run within the get_validator workflow.
+
+        When run with create_expectation_suite()::
+
+            expectation_suite_name = "genres_movies.fkey"
+            context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
+            batch = context.get_batch(
+                expectation_suite_name=expectation_suite_name
+            )
+
+
+        When run as part of get_validator()::
+
+            validator = context.get_validator(
+                datasource_name="my_datasource",
+                data_connector_name="whole_table",
+                data_asset_name="my_table",
+                create_expectation_suite_with_name="my_expectation_suite",
+            )
+            validator.expect_column_values_to_be_in_set("c1", [4,5,6])
+
+
+        Args:
+            expectation_suite_name: The name of the suite to create.
+            id: Identifier to associate with this suite.
+            expectations: Expectation Configurations to associate with this suite.
+            evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+            data_asset_type: Type of data asset to associate with this suite.
+            execution_engine_type: Name of the execution engine type.
+            meta: Metadata related to the suite.
+
+        Returns:
+            A new ExpectationSuite built with provided input args.
+
+        Raises:
+            DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
+        """
+        return self._add_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            id=id,
+            expectations=expectations,
+            evaluation_parameters=evaluation_parameters,
+            data_asset_type=data_asset_type,
+            execution_engine_type=execution_engine_type,
+            meta=meta,
+            overwrite_existing=False,  # `add` does not resolve collisions
+        )
+
+    def _add_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        id: str | None = None,
+        expectations: list[dict | ExpectationConfiguration] | None = None,
+        evaluation_parameters: dict | None = None,
+        data_asset_type: str | None = None,
+        execution_engine_type: Type[ExecutionEngine] | None = None,
+        meta: dict | None = None,
+        overwrite_existing: bool = False,
+        **kwargs,
+    ):
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
         expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
+            expectation_suite_name=expectation_suite_name,
+            data_context=self,
+            ge_cloud_id=id,
+            expectations=expectations,
+            evaluation_parameters=evaluation_parameters,
+            data_asset_type=data_asset_type,
+            execution_engine_type=execution_engine_type,
+            meta=meta,
         )
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
         if (
@@ -2144,10 +2230,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             and not overwrite_existing
         ):
             raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(
-                    expectation_suite_name
-                )
+                f"expectation_suite with name {expectation_suite_name} already exists."
+                " If you would like to overwrite this expectation_suite, please delete or"
+                " update it using `delete_expectation_suite` or `update_expectation_suite`, respectively."
             )
         self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
