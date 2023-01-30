@@ -4,7 +4,7 @@ title: How to use Great Expectations with Amazon Web Services using Redshift
 import Prerequisites from '@site/docs/components/_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
-import Congratulations from './components/_congratulations_aws_s3_pandas.md'
+import Congratulations from './components/_congratulations_aws_redshift.md'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <!-- Part 1: Setup -->
@@ -36,6 +36,7 @@ import GetLatestPip from '@site/docs/guides/setup/installation/components_local/
 
 import InstallBoto3WithPip from '@site/docs/guides/setup/configuring_metadata_stores/components/_install_boto3_with_pip.mdx'
 
+
 <!-- 1.2.5 Install Great Expectations -->
 
 import InstallGxWithPip from '@site/docs/guides/setup/installation/components_local/_install_ge_with_pip.mdx'
@@ -43,6 +44,11 @@ import InstallGxWithPip from '@site/docs/guides/setup/installation/components_lo
 <!-- 1.2.6 Verify that Great Expectations installed successfully -->
 
 import VerifySuccessfulGxInstallation from '@site/docs/guides/setup/installation/components_local/_verify_ge_install_succeeded.mdx'
+
+
+<!-- 1.2.7 Install dependencies for Redshift -->
+
+import RedshiftDependencies from '@site/docs/guides/connecting_to_your_data/database/components/_redshift_dependencies.md'
 
 <!-- 1.3 Create your Data Context -->
 
@@ -120,11 +126,11 @@ import InstantiateDataContext from '@site/docs/guides/connecting_to_your_data/cl
 
 <!-- 2.3 Determine your connection string -->
 
-import ConnectionStringAthena from '@site/docs/guides/connecting_to_your_data/database/components/_connection_string_athena.md'
+import ConnectionStringRedshift from '@site/docs/guides/connecting_to_your_data/database/components/_redshift_credentials.md'
 
 <!-- 2.4 Configure your Datasource -->
 
-import ConfigureYourDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_datasource_sql_runtime_configuration.md'
+import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/database/components/_datasource_redshift_configuration.md'
 
 <!-- 2.5 Save the Datasource configuration to your DataContext -->
 
@@ -132,7 +138,7 @@ import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecti
 
 <!-- 2.6 Test your new Datasource -->
 
-import TestAthenaDatasource from '@site/docs/guides/connecting_to_your_data/database/components/_datasource_athena_test.md'
+import TestRedshiftDatasource from '@site/docs/guides/connecting_to_your_data/database/components/_datasource_redshift_test.md'
 
 <!-- Part 3: Create Expectations -->
 
@@ -169,7 +175,7 @@ import RunCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws
 <!-- 4.2 Build and view Data Docs -->
 import BuildAndViewDataDocs from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_data_docs_build_and_view.md'
 
-Great Expectations can work within many frameworks.  In this guide you will be shown a workflow for using Great Expectations with AWS and cloud storage.  You will configure a local Great Expectations project to store Expectations, Validation Results, and Data Docs in Amazon S3 buckets.  You will further configure Great Expectations to use Pandas and access data stored in another Amazon S3 bucket.
+Great Expectations can work within many frameworks.  In this guide you will be shown a workflow for using Great Expectations with AWS and cloud storage.  You will configure a local Great Expectations project to store Expectations, Validation Results, and Data Docs in Amazon S3 buckets.  You will further configure Great Expectations to access data from a Redshift database.
 
 This guide will demonstrate each of the steps necessary to go from installing a new instance of Great Expectations to Validating your data for the first time and viewing your Validation Results as Data Docs.
 
@@ -216,6 +222,10 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 #### 1.2.6 Verify that Great Expectations installed successfully
 <VerifySuccessfulGxInstallation />
+
+#### 1.2.7 Install additional dependencies for Redshift
+
+<RedshiftDependencies />
 
 ### 1.3 Create your Data Context
 <CreateDataContextWithCli />
@@ -283,19 +293,23 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 #### 2.3.1 Determine your connection string
 
-<ConnectionStringAthena />
+<ConnectionStringRedshift />
 
 #### 2.3.2 Create your Datasource configuration
 
 <ConfigureYourDatasource />
 
-Datasources can be configured in many customized ways.  For additional information on how to configure a SQL datasource such as the one used to connect to your Athena data, please see our guide on [how to configure a SQL Datasource](../../../docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
+:::tip
+
+Datasources can be configured in many customized ways.  For additional information on how to configure a SQL datasource such as the one used to connect to your Redshift data, please see our guide on [how to configure a SQL Datasource](../../../docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
+
+:::
 
 ### 2.4 Save the Datasource configuration to your DataContext
 <SaveDatasourceConfigurationToDataContext />
 
 ### 2.5 Test your new Datasource
-<TestAthenaDatasource />
+<TestRedshiftDatasource />
 
 ## Part 3: Create Expectations
 
