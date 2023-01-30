@@ -1,5 +1,5 @@
 import warnings
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import List, Optional, Union
 
 from great_expectations.core._docs_decorators import deprecated_method_or_class
 from great_expectations.render import (
@@ -402,8 +402,11 @@ class RenderedStringTemplateContent(RenderedStringTemplateContentRender):
 
     Args:
         string_template: A dictionary containing:
+
             template: The string to perform substitution on. Variables are denoted with a preceeding $.
+
             params: A dictionary with keys that match variable names and values which will be substituted.
+
             styling: A dictionary containing styling information.
         styling: A dictionary containing styling information.
         content_block_type: The type of content block.
@@ -442,10 +445,13 @@ class RenderedTableContent(RenderedTableContentRender):
         styling: A dictionary containing styling information.
         content_block_type: The type of content block.
         table_options: The options that can be set for the table.
+
             search: A boolean indicating whether to include search with the table.
+
             icon-size: The size of the icons in the table. One of "sm", "md", or "lg".
         header_row_options: The options that can be set for the header_row. A dictionary with the keys being the column
                             name and the values being a dictionary with the following form:
+
                                 sortable: A boolean indicating whether the column is sortable.
     """
 
