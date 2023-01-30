@@ -143,7 +143,20 @@ _TEST_DEFS_DIR = os.path.join(
 )
 
 
+@public_api
 def render_evaluation_parameter_string(render_func) -> Callable:
+    """Decorator for Expectation classes that renders evaluation parameters as strings.
+
+    allows Expectations that use Evaluation Parameters to render the values
+    of the Evaluation Parameters along with the rest of the output.
+
+    Args:
+        render_func: The render method of the Expectation class.
+
+    Raises:
+        GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
+    """
+
     def inner_func(
         *args: Tuple[MetaExpectation], **kwargs: dict
     ) -> Union[List[RenderedStringTemplateContent], RenderedAtomicContent]:
