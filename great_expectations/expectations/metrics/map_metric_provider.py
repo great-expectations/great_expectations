@@ -36,11 +36,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricFunctionTypes,
-    MetricPartialFunctionTypes,
-)
 from great_expectations.execution_engine.polars_execution_engine import (
     PolarsExecutionEngine,
 )

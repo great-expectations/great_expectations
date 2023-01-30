@@ -6,7 +6,7 @@ except ImportError:
     polars = None
     DataFrame = None
 
-from great_expectations.execution_engine.execution_engine import BatchData
+from great_expectations.core.batch import BatchData
 
 
 class PolarsBatchData(BatchData):
