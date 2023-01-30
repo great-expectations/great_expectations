@@ -2336,7 +2336,6 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
     expectation_config_expect_column_pair_values_to_be_equal,
     expected_unexpected_indices_output,
 ):
-    """ """
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2390,11 +2389,6 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
     expectation_config_expect_column_pair_values_to_be_equal,
     expected_unexpected_indices_output,
 ):
-    """
-    What does this test?
-        - DataFrame being passed into Checkpoint has named index 'pk_2', which correspond to unexpected_index_column_names
-        - MapMetric calculation happens the same as if `pk_2` was a non-index column
-    """
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2466,11 +2460,6 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
     expectation_config_expect_column_pair_values_to_be_equal,
     expected_unexpected_indices_output,
 ):
-    """
-    What does this test?
-        - DataFrame being passed into Checkpoint has two named indices, which correspond to unexpected_index_column_names
-        - MapMatric calculation happens the same as if `pk_1` and `pk_2` were non-index columns
-    """
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2543,7 +2532,6 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
     expectation_config_expect_multicolumn_sum_to_equal,
     expected_unexpected_indices_output,
 ):
-    """ """
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2603,12 +2591,6 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
     expectation_config_expect_multicolumn_sum_to_equal,
     expected_unexpected_indices_output,
 ):
-    """
-    TODO:
-    What does this test?
-        - DataFrame being passed into Checkpoint has named index 'pk_2', which correspond to unexpected_index_column_names
-        - MapMetric calculation happens the same as if `pk_2` was a non-index column
-    """
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
@@ -2685,11 +2667,6 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
     expectation_config_expect_multicolumn_sum_to_equal,
     expected_unexpected_indices_output,
 ):
-    """
-    What does this test?
-        - DataFrame being passed into Checkpoint has two named indices, which correspond to unexpected_index_column_names
-        - MapMatric calculation happens the same as if `pk_1` and `pk_2` were non-index columns
-    """
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",

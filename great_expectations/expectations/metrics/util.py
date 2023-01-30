@@ -719,7 +719,6 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
     Returns:
         List of tuples having mapping from string-valued column name to typed column name; None if "verify_only" is set.
     """
-    # this is what we want to imitate, and then we will be ok
     column_names_list: List[str]
     if isinstance(column_names, list):
         column_names_list = column_names
