@@ -69,7 +69,13 @@ def _get_deprecation_warning_message(classname: str) -> str:
     )
 
 
-@deprecated_method_or_class
+@deprecated_method_or_class(
+    version="0.15.32",
+    message=f"Importing the class CollapseContent from "
+    "great_expectations.render.types is deprecated as of v0.15.32 "
+    "in v0.18. Please import class CollapseContent "
+    "from great_expectations.render.",
+)
 class CollapseContent(CollapseContentRender):
     # deprecated-v0.15.32
     """CollapseContent is RenderedComponentContent that can be collapsed.
@@ -386,7 +392,13 @@ class RenderedSectionContent(RenderedSectionContentRender):
         )
 
 
-@deprecated_method_or_class
+@deprecated_method_or_class(
+    version="0.15.32",
+    message=f"Importing the class RenderedStringTemplateContent from "
+    "great_expectations.render.types is deprecated as of v0.15.32 "
+    "in v0.18. Please import class RenderedStringTemplateContent "
+    "from great_expectations.render.",
+)
 class RenderedStringTemplateContent(RenderedStringTemplateContentRender):
     # deprecated-v0.15.32
     """RenderedStringTemplateContent is RenderedComponentContent that represents a templated string.
