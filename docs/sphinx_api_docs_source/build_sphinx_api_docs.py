@@ -172,6 +172,7 @@ class SphinxInvokeDocsBuilder:
         logger.info("Created mdx files for serving with docusaurus.")
 
     def _get_generated_html_file_paths(self):
+        """Collect html file paths from Sphinx-generated html, skipping known index paths."""
         static_html_file_path = pathlib.Path(self.temp_sphinx_html_dir) / "html"
         paths = static_html_file_path.glob("**/*.html")
         files = [
