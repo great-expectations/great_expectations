@@ -42,7 +42,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import JSONValues
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
@@ -1698,6 +1698,7 @@ class DataContextConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
+        # this is where we can do this?
         if "config_version" not in data:
             raise gx_exceptions.InvalidDataContextConfigError(
                 "The key `config_version` is missing; please check your config file.",
@@ -2340,7 +2341,51 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         }
 
 
+@public_api
+@deprecated_argument(argument_name="validation_operators", version="0.14.0")
 class DataContextConfig(BaseYamlConfig):
+    """Config class for DataContext.
+
+    The DataContextConfig holds all associated configuration parameters to build a Data Context. There are defaults set
+    for minimizing configuration in typical cases, but every parameter is configurable and all defaults are overridable.
+
+    In cases where the DataContext is instantitated without a yml file, the DataContextConfig can be instantiated directly.
+
+    --Documentation--
+        - https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file/
+
+    Args:
+        config_version (Optional[float]): config version of this DataContext.
+        datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
+            DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
+        xdatasources (Optional[dict]): temporary placeholder for Experimental Datasources.
+        expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
+        validations_store_name (Optional[str]): name of ValidationsStore to be used by DataContext.
+        evaluation_parameter_store_name (Optional[str]): name of EvaluationParamterStore to be used by DataContext.
+        checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
+        profiler_store_name (Optional[str]): name of ProfilerStore to be used by DataContext.
+        plugins_directory (Optional[str]): the directory in which custom plugin modules should be placed.
+        validation_operators: list of validation operators configured by this DataContext.
+        stores (Optional[dict]): single holder for all Stores associated with this DataContext.
+        data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
+        notebooks (Optional[NotebookConfig]): Configurations for Jupyter Notebooks associated with DataContext, such as
+            the `suite_edit` Notebook.
+        config_variables_file_path (Optional[str]): path for config_variables file, if used.
+        anonymous_usage_statistics (Optional[AnonymizedUsageStatisticsConfig]): configuration for enabling or disabling
+            anonymous usage statistics for GX.
+        store_backend_defaults (Optional[BaseStoreBackendDefaults]):  define base defaults for platform specific StoreBackendDefaults.
+            For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults
+            and you may be able to specify fewer parameters.
+        commented_map (Optional[CommentedMap]): the CommentedMap associated with DataContext configuration. Used when
+            instantiating with yml file.
+        concurrency (Optional[Union[ConcurrencyConfig, Dict]]): if enabled, Checkpoints associated with the DataContext
+            can run validations in parallel with multithreading.
+        progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally, for
+            profilers, or metrics calculations.
+        include_rendered_content (Optional[IncludedRenderedContentConfig]): allows rendered content to be configured
+            globally, at the ExpectationSuite or ExpectationValidationResults-level.
+    """
+
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = DataContextConfigSchema
 
