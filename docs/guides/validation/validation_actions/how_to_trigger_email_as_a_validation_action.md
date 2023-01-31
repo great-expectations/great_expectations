@@ -11,7 +11,7 @@ This how-to guide assumes that you have already:
 
 * Configured an email account on the SMTP server you are going to use to send the email
 * Identified the email addresses that messages will be sent to.
-* Created a <TechnicalTag tag="checkpoint" text="Checlpoint" /> which will be configured to send the emails.
+* Created a <TechnicalTag tag="checkpoint" text="Checkpoint" /> which will be configured to send the emails.
 :::
 
 ## Steps
