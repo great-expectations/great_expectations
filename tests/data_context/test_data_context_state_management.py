@@ -32,9 +32,12 @@ class ExpectationsStoreSpy(ExpectationsStore):
 
 
 class ProfilerStoreSpy(ProfilerStore):
-    def __init__(self, store_name: str) -> None:
+
+    STORE_NAME = "profiler_store"
+
+    def __init__(self) -> None:
         self.save_count = 0
-        super().__init__(store_name)
+        super().__init__(ProfilerStoreSpy.STORE_NAME)
 
     def set(self, key, value, **kwargs):
         self.save_count += 1
@@ -53,7 +56,7 @@ class EphemeralDataContextSpy(EphemeralDataContext):
         super().__init__(project_config)
         self.save_count = 0
         self._expectations_store = ExpectationsStoreSpy()
-        self._profiler_store = ProfilerStoreSpy("profiler_store")
+        self._profiler_store = ProfilerStoreSpy()
 
     @property
     def expectations_store(self):
