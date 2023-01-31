@@ -1132,11 +1132,11 @@ class Expectation(metaclass=MetaExpectation):
     def get_success_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> Dict[str, Any]:
-        """Retrieve the success kwargs
+        """Retrieve the success kwargs.
 
         Args:
             configuration: The `ExpectationConfiguration` that contains the kwargs. If no configuration arg is provided,
-            the success kwargs from the configuration attribute of the Expectation instance will be returned.
+                the success kwargs from the configuration attribute of the Expectation instance will be returned.
         """
         if not configuration:
             configuration = self.configuration
@@ -1311,10 +1311,10 @@ class Expectation(metaclass=MetaExpectation):
             raise_exceptions_for_backends: Bool object that when True will raise an Exception if a backend fails to connect.
             ignore_suppress:  Bool object that when True will ignore the suppress_test_for list on Expectation sample tests.
             ignore_only_for:  Bool object that when True will ignore the only_for list on Expectation sample tests.
-            for_gallery:  Bool object that when True will create empty arrays to use as examples for the Expectation Diagnostics
+            for_gallery:  Bool object that when True will create empty arrays to use as examples for the Expectation Diagnostics.
             debug_logger (optional[logging.Logger]):  Logger object to use for sending debug messages to.
-            only_consider_these_backends (optional[List[str]])  List of backends to consider
-            context (optional[AbstractDataContext]): Instance of any child of "AbstractDataContext" class
+            only_consider_these_backends (optional[List[str]])  List of backends to consider.
+            context (optional[AbstractDataContext]): Instance of any child of "AbstractDataContext" class.
 
         Returns:
             An Expectation Diagnostics report object
