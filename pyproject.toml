@@ -153,7 +153,7 @@ exclude = [
     'render/renderer/v3/suite_profile_notebook_renderer\.py',  # 4
     'render/util\.py',  # 17
     'render/view/view\.py',  # 11
-    'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 63
+    'rule_based_profiler/data_assistant_result/data_assistant_result\.py',  # 23
     'rule_based_profiler/data_assistant_result/plot_components\.py', # 12
     'rule_based_profiler/domain_builder/categorical_column_domain_builder\.py',  # 18
     'rule_based_profiler/domain_builder/map_metric_column_domain_builder\.py',  # 8

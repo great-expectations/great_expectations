@@ -146,7 +146,7 @@ class DataAssistantResult(SerializableDictDot):
     }
 
     _batch_id_to_batch_identifier_display_name_map: Optional[
-        Dict[str, Set[Tuple[str, Any]]]
+        Dict[str, Set[tuple[str, Any]]]
     ] = field(default=None)
     profiler_config: Optional[RuleBasedProfilerConfig] = None
     profiler_execution_time: Optional[float] = None
@@ -159,7 +159,7 @@ class DataAssistantResult(SerializableDictDot):
     _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
 
     @property
-    def metric_expectation_map(self) -> Dict[Union[str, Tuple[str, ...]], str]:
+    def metric_expectation_map(self) -> Dict[Union[str, tuple[str, ...]], str]:
         """
         A mapping is defined for which metrics to plot and their associated expectations.
         """
@@ -348,7 +348,7 @@ class DataAssistantResult(SerializableDictDot):
         json_dict.update(auxiliary_profiler_execution_details)
         return json.dumps(json_dict, indent=2)
 
-    def _get_metric_expectation_map(self) -> Dict[Tuple[str, ...], str]:
+    def _get_metric_expectation_map(self) -> dict[tuple[str, ...], str]:
         if not all(
             [isinstance(metric_names, str) or isinstance(metric_names, tuple)]
             for metric_names in self.metric_expectation_map.keys()
@@ -610,9 +610,9 @@ class DataAssistantResult(SerializableDictDot):
         display_charts: List[Union[alt.Chart, alt.LayerChart, alt.VConcatChart]] = []
         return_charts: List[Union[alt.Chart, alt.LayerChart]] = []
 
-        expectation_configurations: List[
-            ExpectationConfiguration
-        ] = self.expectation_configurations
+        expectation_configurations: list[ExpectationConfiguration] = (
+            self.expectation_configurations or []
+        )
 
         table_domain_charts: List[
             Union[alt.Chart, alt.LayerChart]
@@ -674,11 +674,16 @@ class DataAssistantResult(SerializableDictDot):
 
         chart_titles: List[str] = self._get_chart_titles(charts=themed_charts)
 
-        if len(chart_titles) > 0:
+        if chart_titles:
             metric_plot_count = self._get_metric_plot_count(charts=themed_charts)
             if plot_mode == plot_mode.DIAGNOSTIC:
+                expectations_produced = (
+                    len(self.expectation_configurations)
+                    if self.expectation_configurations
+                    else 0
+                )
                 print(
-                    f"""{len(self.expectation_configurations)} Expectations produced, {metric_plot_count} Expectation and Metric plots implemented
+                    f"""{expectations_produced} Expectations produced, {metric_plot_count} Expectation and Metric plots implemented
 Use DataAssistantResult.show_expectations_by_domain_type() or
 DataAssistantResult.show_expectations_by_expectation_type() to show all produced Expectations"""
                 )
@@ -926,7 +931,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         return df_transformed
 
     @staticmethod
-    def _get_column_set_text(column_set: List[str]) -> Tuple[str, int]:
+    def _get_column_set_text(column_set: List[str]) -> tuple[str, int]:
         dy: int
         if len(column_set) > 50:
             text = f"All batches have the same set of columns. The number of columns ({len(column_set)}) is too long to list here."
@@ -1400,10 +1405,11 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         Returns:
             An altair line chart with confidence intervals corresponding to "between" expectations
         """
+        domain_type: MetricDomainTypes
         if subtitle:
-            domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN
+            domain_type = MetricDomainTypes.COLUMN
         else:
-            domain_type: MetricDomainTypes = MetricDomainTypes.TABLE
+            domain_type = MetricDomainTypes.TABLE
 
         column_name: str = "column"
         batch_name: str = "batch"
@@ -2039,8 +2045,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         expectation_kwarg_tooltips: List[alt.Tooltip] = []
-        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
-        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        min_value_plot_component: ExpectationKwargPlotComponent
+        max_value_plot_component: ExpectationKwargPlotComponent
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwarg_tooltips.append(
                 expectation_kwarg_plot_component.generate_tooltip()
@@ -2110,6 +2116,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         anomaly_coded_lines: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             # encode point color based on anomalies
+            assert (
+                metric_plot_component.name
+            ), f"Metric name must be set: {metric_plot_component}"
             metric_name = metric_plot_component.name
             predicate = (
                 (alt.datum.min_value > alt.datum[metric_name])
@@ -2167,8 +2176,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         expectation_kwarg_tooltips: List[alt.Tooltip] = []
-        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
-        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        min_value_plot_component: ExpectationKwargPlotComponent
+        max_value_plot_component: ExpectationKwargPlotComponent
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwarg_tooltips.append(
                 expectation_kwarg_plot_component.generate_tooltip()
@@ -2248,6 +2257,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         anomaly_coded_bars: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             # encode bar color based on anomalies
+            assert (
+                metric_plot_component.name
+            ), f"Metric name must be set: {metric_plot_component}"
             metric_name = metric_plot_component.name
             predicate = (
                 (alt.datum.min_value > alt.datum[metric_name])
@@ -2296,8 +2308,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         )
 
         expectation_kwarg_tooltips: List[alt.Tooltip] = []
-        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
-        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        min_value_plot_component: ExpectationKwargPlotComponent
+        max_value_plot_component: ExpectationKwargPlotComponent
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwarg_tooltips.append(
                 expectation_kwarg_plot_component.generate_tooltip()
@@ -2377,6 +2389,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         anomaly_coded_lines: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
             # encode point color based on anomalies
+            assert (
+                metric_plot_component.name
+            ), f"Metric name must be set: {metric_plot_component}"
             metric_name = metric_plot_component.name
             predicate = (
                 (alt.datum.min_value > alt.datum[metric_name])
@@ -2457,8 +2472,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         quantiles: str = "quantiles"
         line_and_points_list: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
+            line: alt.Chart
             if quantiles in df.columns:
-                line: alt.Chart = (
+                line = (
                     alt.Chart(data=df, title=title)
                     .mark_line()
                     .encode(
@@ -2469,7 +2485,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                     )
                 )
             else:
-                line: alt.Chart = (
+                line = (
                     alt.Chart(data=df, title=title)
                     .mark_line()
                     .encode(
@@ -2538,7 +2554,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         bars: alt.Chart
         bars_list: List[alt.Chart] = []
         for metric_plot_component in metric_plot_components:
-            bars: alt.Chart = (
+            bars = (
                 alt.Chart(data=df, title=title)
                 .mark_bar()
                 .encode(
@@ -2655,12 +2671,15 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         expectation_kwargs_tooltip: List[alt.Tooltip] = []
         expectation_kwargs_initial_dropdown_state: List[str] = []
-        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
-        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        min_value_plot_component: ExpectationKwargPlotComponent
+        max_value_plot_component: ExpectationKwargPlotComponent
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwargs_tooltip.append(
                 expectation_kwarg_plot_component.generate_tooltip(),
             )
+            assert (
+                expectation_kwarg_plot_component.name
+            ), f"Expectation kwargs name must be set: {expectation_kwarg_plot_component}"
             expectation_kwargs_initial_dropdown_state.append(
                 expectation_kwarg_plot_component.name,
             )
@@ -2806,8 +2825,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         expectation_kwargs_tooltip: List[alt.Tooltip] = []
         expectation_kwargs_initial_dropdown_state: List[str] = []
-        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
-        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        min_value_plot_component: ExpectationKwargPlotComponent
+        max_value_plot_component: ExpectationKwargPlotComponent
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwargs_tooltip.append(
                 expectation_kwarg_plot_component.generate_tooltip(),
@@ -2944,8 +2963,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         expectation_kwargs_tooltip: List[alt.Tooltip] = []
         expectation_kwargs_initial_dropdown_state: List[str] = []
-        min_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
-        max_value_plot_component: Optional[ExpectationKwargPlotComponent] = None
+        min_value_plot_component: ExpectationKwargPlotComponent
+        max_value_plot_component: ExpectationKwargPlotComponent
         for expectation_kwarg_plot_component in expectation_kwarg_plot_components:
             expectation_kwargs_tooltip.append(
                 expectation_kwarg_plot_component.generate_tooltip()
@@ -3096,8 +3115,8 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Union[alt.Chart, alt.LayerChart]]:
-        metric_expectation_map: Dict[
-            Tuple[str], str
+        metric_expectation_map: dict[
+            tuple[str, ...], str
         ] = self._get_metric_expectation_map()
 
         table_based_expectations: List[str] = [
@@ -3123,14 +3142,14 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             str, List[ParameterNode]
         ] = attributed_metrics_by_table_domain[table_domain]
 
-        table_based_metric_names: Set[Union[Tuple[str], str]] = set()
+        table_based_metric_names: Set[Union[tuple[str, ...], str]] = set()
         for metrics in metric_expectation_map.keys():
             if all([metric.startswith("table") for metric in metrics]):
                 table_based_metric_names.add(metrics)
 
-        charts: List[alt.Chart] = []
-        metric_names: Tuple[str]
-        attributed_values: List[List[ParameterNode]]
+        charts: list[alt.Chart] = []
+        metric_names: tuple[str, ...]
+        attributed_values: list[list[ParameterNode]]
         expectation_type: str
         expectation_configuration: ExpectationConfiguration
         for metric_names in table_based_metric_names:
@@ -3201,9 +3220,9 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         exclude_column_names: Optional[List[str]],
         plot_mode: PlotMode,
         sequential: bool,
-    ) -> Tuple[List[alt.VConcatChart], List[alt.Chart]]:
+    ) -> tuple[List[alt.VConcatChart], List[alt.Chart]]:
         metric_expectation_map: Dict[
-            Tuple[str], str
+            tuple[str, ...], str
         ] = self._get_metric_expectation_map()
 
         column_based_expectation_configurations_by_type: Dict[
@@ -3224,7 +3243,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
             exclude_column_names,
         )
 
-        column_based_metric_names: Set[Union[Tuple[str], str]] = set()
+        column_based_metric_names: Set[Union[tuple[str, ...], str]] = set()
         for metrics in metric_expectation_map.keys():
             if all([metric.startswith("column") for metric in metrics]):
                 if plot_mode == PlotMode.DIAGNOSTIC:
@@ -3287,7 +3306,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         exclude_column_names: Optional[List[str]],
     ) -> Dict[str, List[ExpectationConfiguration]]:
         metric_expectation_map: Dict[
-            Tuple[str], str
+            tuple[str, ...], str
         ] = self._get_metric_expectation_map()
 
         column_based_expectations: Set[str] = {
@@ -3355,7 +3374,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     @staticmethod
     def _filter_attributed_metrics_by_metric_names(
         attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]],
-        metric_names: Tuple[str],
+        metric_names: tuple[str, ...],
     ) -> Dict[Domain, Dict[str, List[ParameterNode]]]:
         domain: Domain
         filtered_attributed_metrics: Dict[Domain, Dict[str, List[ParameterNode]]] = {}
@@ -3375,7 +3394,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         self,
         expectation_type: str,
         df: pd.DataFrame,
-        metric_names: Tuple[str],
+        metric_names: tuple[str, ...],
         plot_mode: PlotMode,
         sequential: bool,
         subtitle: Optional[str],
@@ -3488,7 +3507,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         self,
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
-        metric_names: Tuple[str],
+        metric_names: tuple[str, ...],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
         plot_mode: PlotMode,
         sequential: bool,
@@ -3517,13 +3536,13 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         self,
         expectation_type: str,
         expectation_configurations: List[ExpectationConfiguration],
-        metric_names: Tuple[str],
+        metric_names: tuple[str, ...],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[alt.Chart]:
         metric_expectation_map: Dict[
-            Tuple[str], str
+            tuple[str, ...], str
         ] = self._get_metric_expectation_map()
 
         sanitized_metric_names: Set[
@@ -3588,7 +3607,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         self,
         expectation_type: str,
         column_dfs: List[ColumnDataFrame],
-        metric_names: Tuple[str],
+        metric_names: tuple[str, ...],
         plot_mode: PlotMode,
         sequential: bool,
     ) -> List[Optional[alt.VConcatChart]]:
@@ -3730,7 +3749,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 quantiles = quantiles[0]
             df["quantiles"] = [quantiles for idx in df.index]
 
-        batch_identifier_list: List[Set[Tuple[str, str]]] = [
+        batch_identifier_list: List[Set[tuple[str, str]]] = [
             self._batch_id_to_batch_identifier_display_name_map[batch_id]
             for batch_id in batch_ids
         ]
@@ -3812,7 +3831,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     def _create_column_dfs_for_charting(
         self,
-        metric_names: Tuple[str],
+        metric_names: tuple[str, ...],
         attributed_metrics_by_domain: Dict[Domain, Dict[str, List[ParameterNode]]],
         expectation_configurations: List[ExpectationConfiguration],
         plot_mode: PlotMode,
@@ -3873,7 +3892,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
         self,
         expectation_type: str,
         expectation_configuration: Optional[ExpectationConfiguration],
-        metric_names: Tuple[str],
+        metric_names: tuple[str, ...],
         attributed_values: List[List[ParameterNode]],
         include_column_names: Optional[List[str]],
         exclude_column_names: Optional[List[str]],
@@ -4023,7 +4042,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
     @staticmethod
     def _get_sanitized_metric_names_from_metric_names(
-        metric_names: Tuple[str],
+        metric_names: tuple[str, ...],
     ) -> Set[str]:
         return {
             sanitize_parameter_name(name=metric_name, suffix=None)
