@@ -173,7 +173,6 @@ class SphinxInvokeDocsBuilder:
 
                     external_ref.string = formatted_text
 
-                # breakpoint()
                 # Process internal links
                 # Note: Currently the docusaurus link checker does not work well with
                 # anchor links, so we need to make these links absolute.
