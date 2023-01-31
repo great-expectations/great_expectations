@@ -288,8 +288,9 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
     with create_source(
         validate_batch_spec=collect_batch_spec, dialect="postgresql"
     ) as source:
-        with mock.patch("sqlalchemy.inspect"):
-            asset = source.add_table_asset(name="my_asset", table_name="my_table")
+        source, asset = create_and_add_table_asset_without_testing_connection(
+            source=source, name="my_asset", table_name="my_table"
+        )
         asset.add_year_and_month_splitter(column_name="my_col")
         batch_request_with_none = asset.get_batch_request(
             asset.batch_request_options_template()
@@ -313,8 +314,9 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
     with create_source(
         validate_batch_spec=collect_batch_spec, dialect="postgresql"
     ) as source:
-        with mock.patch("sqlalchemy.inspect"):
-            asset = source.add_table_asset(name="my_asset", table_name="my_table")
+        source, asset = create_and_add_table_asset_without_testing_connection(
+            source=source, name="my_asset", table_name="my_table"
+        )
         asset.add_year_and_month_splitter(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.get_batch_request({"year": 2022})
