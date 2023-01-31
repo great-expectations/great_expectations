@@ -52,9 +52,6 @@ def _source(
                 name="my_datasource",
                 connection_string=connection_string,
             )
-        postgres_datasource._engine = MockSaEngine(
-            dialect=Dialect("postgresql+psycopg2")
-        )
         yield postgres_datasource
     finally:
         PostgresDatasource.execution_engine_override = original_override

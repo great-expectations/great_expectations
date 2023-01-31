@@ -340,6 +340,10 @@ class Datasource(
     name: str
     assets: MutableMapping[str, DataAssetType] = {}
 
+    # private attrs
+    _cached_execution_engine_kwargs: dict[str, Any] = pydantic.PrivateAttr({})
+    _execution_engine: ExecutionEngine | None = pydantic.PrivateAttr(None)
+
     @pydantic.validator("assets", pre=True)
     def _load_asset_subtype(cls, v: Dict[str, dict]):
         LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
@@ -361,15 +365,17 @@ class Datasource(
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
-    @functools.lru_cache(maxsize=1)
-    def _get_execution_engine(self, **engine_kwargs) -> ExecutionEngine:
-        # lru_cache will cause this method to only instantiate a new ExecutionEngine if engine_kwargs have changed
-        # this is required to avoid losing temp table references
-        return self._execution_engine_type()(**engine_kwargs)
-
     def get_execution_engine(self) -> ExecutionEngine:
-        engine_kwargs = self.dict(exclude=self._excluded_eng_args)
-        return self._get_execution_engine(**engine_kwargs)
+        current_execution_engine_kwargs = self.dict(exclude=self._excluded_eng_args)
+        if (
+            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
+            or not self._execution_engine
+        ):
+            self._execution_engine = self._execution_engine_type()(
+                **current_execution_engine_kwargs
+            )
+            self._cached_execution_engine_kwargs = current_execution_engine_kwargs
+        return self._execution_engine
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
