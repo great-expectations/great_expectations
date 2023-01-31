@@ -1253,7 +1253,12 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         key = RuleBasedProfiler._construct_profiler_key(name=name, id=id)
         if not profiler_store.has_key(key):
-            raise gx_exceptions.ProfilerNotFoundError(message="TODO")
+            msg = "Non-existent Profiler configuration "
+            if name:
+                msg += f"named {name}"
+            elif id:
+                msg += f"with id {id}"
+            raise gx_exceptions.ProfilerNotFoundError(message=msg)
 
         RuleBasedProfiler.delete_profiler(name=name, id=id)
         RuleBasedProfiler.add_profiler(
@@ -1274,15 +1279,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
     @staticmethod
     def _construct_profiler_key(
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> ConfigurationIdentifier | GXCloudIdentifier:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id (but not both)"
+        assert bool(name) ^ bool(id), "Must provide either name or id (but not both)"
 
-        if ge_cloud_id:
+        if id:
             return GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=id
             )
         return ConfigurationIdentifier(
             configuration_key=name,

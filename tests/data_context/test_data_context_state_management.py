@@ -18,6 +18,7 @@ from great_expectations.data_context.types.base import (
     ProgressBarsConfig,
 )
 from great_expectations.exceptions.exceptions import StoreConfigurationError
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 
 class StoreSpy(Store):
@@ -295,3 +296,30 @@ def test_add_expectation_suite_failure(
         in str(e.value)
     )
     assert context.expectations_store.save_count == 1
+
+
+@pytest.mark.unit
+def test_update_profiler_success(in_memory_data_context: EphemeralDataContextSpy):
+    context = in_memory_data_context
+
+
+@pytest.mark.unit
+def test_update_profiler_failure(in_memory_data_context: EphemeralDataContextSpy):
+    context = in_memory_data_context
+
+    name = "my_rbp"
+    profiler = RuleBasedProfiler(
+        name=name,
+        config_version=1.0,
+        data_context=context,
+    )
+
+    with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
+        context.update_profiler(profiler)
+
+    assert f"Non-existent Profiler configuration named {name}" in str(e.value)
+
+
+@pytest.mark.unit
+def test_add_or_update_profiler(in_memory_data_context: EphemeralDataContextSpy):
+    context = in_memory_data_context

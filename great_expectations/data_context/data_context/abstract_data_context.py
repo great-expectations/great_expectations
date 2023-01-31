@@ -2422,10 +2422,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_profiler(
         self,
         name: str,
-        config_version: float,
-        rules: Dict[str, dict],
-        variables: Optional[dict] = None,
-        id: Optional[str] = None,
+        config_version: float | None = None,
+        rules: dict[str, dict] | None = None,
+        variables: dict | None = None,
+        id: str | None = None,
     ) -> RuleBasedProfiler:
         """
         TODO
@@ -2443,6 +2443,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             return self.get_profiler(
                 name=existing_profiler.name, ge_cloud_id=existing_profiler.ge_cloud_id
             )
+
+        if not config_version or not rules:
+            raise ValueError("TODO")
 
         return self.add_profiler(
             name=name, config_version=config_version, rules=rules, variables=variables
