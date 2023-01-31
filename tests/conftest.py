@@ -7320,7 +7320,8 @@ def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
             ],
         }
     )
-    return spark_session.createDataFrame(data=df)
+    test_df = spark_session.createDataFrame(data=df)
+    return test_df
 
 
 @pytest.fixture
@@ -7336,7 +7337,8 @@ def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
             "c": [10, 20, 30, 40, 50, 60],
         }
     )
-    return spark_session.createDataFrame(data=df)
+    test_df = spark_session.createDataFrame(data=df)
+    return test_df
 
 
 @pytest.fixture

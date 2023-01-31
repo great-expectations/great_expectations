@@ -190,6 +190,46 @@ def batch_request_for_spark_unexpected_rows_and_index(
     }
 
 
+@pytest.fixture()
+def batch_request_for_spark_unexpected_rows_and_index_column_pair(
+    spark_column_pairs_dataframe_for_unexpected_rows_and_index,
+) -> dict:
+    dataframe: "pyspark.sql.dataframe.DataFrame" = (
+        spark_column_pairs_dataframe_for_unexpected_rows_and_index
+    )
+    return {
+        "datasource_name": "spark_datasource",
+        "data_connector_name": "runtime_data_connector",
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "runtime_parameters": {
+            "batch_data": dataframe,
+        },
+        "batch_identifiers": {
+            "id_key_0": 1234567890,
+        },
+    }
+
+
+@pytest.fixture()
+def batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum(
+    spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index,
+) -> dict:
+    dataframe: "pyspark.sql.dataframe.DataFrame" = (
+        spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index
+    )
+    return {
+        "datasource_name": "spark_datasource",
+        "data_connector_name": "runtime_data_connector",
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "runtime_parameters": {
+            "batch_data": dataframe,
+        },
+        "batch_identifiers": {
+            "id_key_0": 1234567890,
+        },
+    }
+
+
 @pytest.fixture
 def expected_unexpected_indices_output() -> List[Dict[str, Union[str, int]]]:
     return [
@@ -1782,6 +1822,122 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_outp
     )
     assert not first_result_partial_list
     assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
+
+
+@pytest.mark.integration
+def test_spark_result_format_in_checkpoint_one_column_pair_expectation_complete_output(
+    in_memory_runtime_context,
+    batch_request_for_spark_unexpected_rows_and_index_column_pair,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_pair_values_to_be_equal,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="animal_names_exp",
+        batch_request=batch_request_for_spark_unexpected_rows_and_index_column_pair,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    index_column_names: List[str] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_column_names"
+    )
+    assert index_column_names == ["pk_1"]
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert first_result_full_list == [
+        {"ordered_item": "eraser", "pk_1": 3, "received_item": "desk"},
+        {"ordered_item": "eraser", "pk_1": 4, "received_item": "desk"},
+        {"ordered_item": "eraser", "pk_1": 5, "received_item": "desk"},
+    ]
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0][
+        "result"
+    ].get("partial_unexpected_index_list")
+    assert first_result_partial_list == [
+        {"ordered_item": "eraser", "pk_1": 3, "received_item": "desk"},
+        {"ordered_item": "eraser", "pk_1": 4, "received_item": "desk"},
+        {"ordered_item": "eraser", "pk_1": 5, "received_item": "desk"},
+    ]
+    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_query"
+    )
+    assert (
+        unexpected_index_query
+        == "df.filter(F.expr(NOT (ordered_item <=> received_item)))"
+    )
+
+
+@pytest.mark.integration
+def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output(
+    in_memory_runtime_context,
+    batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_multicolumn_sum_to_equal,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="animal_names_exp",
+        batch_request=batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_column_names"
+    )
+    assert index_column_names == ["pk_1"]
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert first_result_full_list == [
+        {"a": 20, "b": 20, "c": 20, "pk_1": 1},
+        {"a": 30, "b": 30, "c": 30, "pk_1": 2},
+        {"a": 40, "b": 40, "c": 40, "pk_1": 3},
+        {"a": 50, "b": 50, "c": 50, "pk_1": 4},
+        {"a": 60, "b": 60, "c": 60, "pk_1": 5},
+    ]
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0][
+        "result"
+    ].get("partial_unexpected_index_list")
+    assert first_result_partial_list == [
+        {"a": 20, "b": 20, "c": 20, "pk_1": 1},
+        {"a": 30, "b": 30, "c": 30, "pk_1": 2},
+        {"a": 40, "b": 40, "c": 40, "pk_1": 3},
+        {"a": 50, "b": 50, "c": 50, "pk_1": 4},
+        {"a": 60, "b": 60, "c": 60, "pk_1": 5},
+    ]
+
+    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_query"
+    )
+    assert unexpected_index_query == (
+        "df.filter(F.expr(NOT (((COALESCE(a, 0) + COALESCE(b, 0)) + COALESCE(c, 0)) = "
+        "30)))"
+    )
 
 
 @pytest.mark.integration

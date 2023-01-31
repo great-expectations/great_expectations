@@ -2829,26 +2829,36 @@ def _spark_map_condition_index(
     if unexpected_condition is None:
         return None
 
-    if "column" not in accessor_domain_kwargs:
-        raise ValueError(
-            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
-(_spark_column_map_condition_values).
-"""
-        )
+    domain_column_name_list: List[str] = list()
+    # column map expectations
+    if "column" in accessor_domain_kwargs:
+        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        # TODO: could we verify the column exists
+        domain_column_name_list.append(column_name)
+
+    # multi-column map expectations
+    elif "column_list" in accessor_domain_kwargs:
+        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+            "column_list"
+        ]
+        # TODO: could we verify the column exists
+        domain_column_name_list = column_list
+    elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
+        column_list: List[Union[str, quoted_name]] = list()
+        column_list.append(accessor_domain_kwargs["column_A"])
+        column_list.append(accessor_domain_kwargs["column_B"])
+        # TODO: could we verify the column exists
+        domain_column_name_list = column_list
 
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    domain_column = domain_kwargs["column"]
-
     df: pyspark.sql.dataframe.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
     )
-
     result_format = metric_value_kwargs["result_format"]
     if not result_format.get("unexpected_index_column_names"):
         raise gx_exceptions.MetricResolutionError(
             "unexpected_indices cannot be returned without 'unexpected_index_column_names'. Please check your configuration."
         )
-
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
     filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
@@ -2860,7 +2870,7 @@ def _spark_map_condition_index(
         "unexpected_index_column_names"
     ]
     columns_to_keep: List[str] = [column for column in unexpected_index_column_names]
-    columns_to_keep.append(domain_column)
+    columns_to_keep += domain_column_name_list
 
     # check that column name is in row
     for col_name in columns_to_keep:
