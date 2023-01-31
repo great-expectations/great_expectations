@@ -2486,6 +2486,61 @@ class AbstractDataContext(ConfigPeer, ABC):
             ge_cloud_id=ge_cloud_id,
         )
 
+    def update_profiler(self, profiler: RuleBasedProfiler) -> None:
+        """Update a Profiler that already exists.
+
+        Args:
+            profiler: The profiler to use to update.
+
+        Raises:
+            ProfilerNotFoundError: A profiler with the given name/id does not already exist.
+        """
+        RuleBasedProfiler.update_profiler(
+            profiler=profiler,
+            profiler_store=self.profiler_store,
+            data_context=self,
+        )
+
+    def add_or_update_profiler(
+        self,
+        name: str,
+        config_version: float | None = None,
+        rules: dict[str, dict] | None = None,
+        variables: dict | None = None,
+        id: str | None = None,
+    ) -> RuleBasedProfiler:
+        """Add a new Profiler or update an existing one on the context depending on whether it already exists or not.
+
+        Args:
+            name: The name of the RBP instance.
+            config_version: The version of the RBP (currently only 1.0 is supported).
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and expectation_configuration_builders.
+            variables: Any variables to be substituted within the rules.
+            id: The id associated with the RBP instance (if applicable).
+
+        Returns:
+            A new Profiler or an updated one (depending on whether or not it existed before this method call).
+        """
+        existing_profiler = None
+        try:
+            existing_profiler = self.get_profiler(name=name, ge_cloud_id=id)
+        except gx_exceptions.ProfilerNotFoundError:
+            logger.info(
+                f"Could not find an existing profiler named '{name}'; creating a new one."
+            )
+
+        if existing_profiler:
+            self.update_profiler(existing_profiler)
+            return self.get_profiler(
+                name=existing_profiler.name, ge_cloud_id=existing_profiler.ge_cloud_id
+            )
+
+        config_version = config_version or 1.0
+        rules = rules or {}
+        return self.add_profiler(
+            name=name, config_version=config_version, rules=rules, variables=variables
+        )
+
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
     )

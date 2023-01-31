@@ -10,7 +10,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations.data_context.store.expectations_store import ExpectationsStore
+from great_expectations.data_context.store import ExpectationsStore, ProfilerStore
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
@@ -18,12 +18,26 @@ from great_expectations.data_context.types.base import (
     ProgressBarsConfig,
 )
 from great_expectations.exceptions.exceptions import StoreConfigurationError
+from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 
 class ExpectationsStoreSpy(ExpectationsStore):
     def __init__(self) -> None:
         self.save_count = 0
         super().__init__()
+
+    def set(self, key, value, **kwargs):
+        self.save_count += 1
+        return super().set(key=key, value=value, **kwargs)
+
+
+class ProfilerStoreSpy(ProfilerStore):
+
+    STORE_NAME = "profiler_store"
+
+    def __init__(self) -> None:
+        self.save_count = 0
+        super().__init__(ProfilerStoreSpy.STORE_NAME)
 
     def set(self, key, value, **kwargs):
         self.save_count += 1
@@ -42,10 +56,15 @@ class EphemeralDataContextSpy(EphemeralDataContext):
         super().__init__(project_config)
         self.save_count = 0
         self._expectations_store = ExpectationsStoreSpy()
+        self._profiler_store = ProfilerStoreSpy()
 
     @property
     def expectations_store(self):
         return self._expectations_store
+
+    @property
+    def profiler_store(self):
+        return self._profiler_store
 
     def _save_project_config(self):
         """
@@ -378,6 +397,91 @@ def test_add_or_update_expectation_suite_updates_successfully(
             kwargs={"column": "x", "value_set": [1, 2, 4]},
         ),
     ]
-    context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
+    _ = context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
 
     assert context.expectations_store.save_count == 2
+
+
+@pytest.mark.unit
+def test_update_profiler_success(
+    in_memory_data_context: EphemeralDataContextSpy,
+    profiler_rules: dict,
+):
+    context = in_memory_data_context
+
+    name = "my_rbp"
+    config_version = 1.0
+    rules = profiler_rules
+
+    profiler = context.add_profiler(
+        name=name, config_version=config_version, rules=rules
+    )
+
+    assert context.profiler_store.save_count == 1
+
+    profiler.rules = {}
+    context.update_profiler(profiler)
+
+    assert context.profiler_store.save_count == 2
+
+
+@pytest.mark.unit
+def test_update_profiler_failure(in_memory_data_context: EphemeralDataContextSpy):
+    context = in_memory_data_context
+
+    name = "my_rbp"
+    profiler = RuleBasedProfiler(
+        name=name,
+        config_version=1.0,
+        data_context=context,
+    )
+
+    with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
+        context.update_profiler(profiler)
+
+    assert f"Non-existent Profiler configuration named {name}" in str(e.value)
+
+
+@pytest.mark.unit
+def test_add_or_update_profiler_adds_successfully(
+    in_memory_data_context: EphemeralDataContextSpy, profiler_rules: dict
+):
+    context = in_memory_data_context
+
+    name = "my_rbp"
+    config_version = 1.0
+    rules = profiler_rules
+
+    profiler = context.add_or_update_profiler(
+        name=name, config_version=config_version, rules=rules
+    )
+
+    config = profiler.config
+
+    assert config.name == name
+    assert config.config_version == config_version
+    assert len(config.rules) == len(rules) and config.rules.keys() == rules.keys()
+    assert context.profiler_store.save_count == 1
+
+
+@pytest.mark.unit
+def test_add_or_update_profiler_updates_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    profiler_rules: dict,
+):
+    context = in_memory_data_context
+
+    name = "my_rbp"
+    config_version = 1.0
+    rules = profiler_rules
+
+    profiler = context.add_profiler(
+        name=name, config_version=config_version, rules=rules
+    )
+
+    assert context.profiler_store.save_count == 1
+
+    profiler.rules = {}
+    _ = context.add_or_update_profiler(name=name)
+
+    assert context.profiler_store.save_count == 2
