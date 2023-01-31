@@ -2255,14 +2255,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: A suite with the given name does not already exist.
         """
-        expectation_suite_name = expectation_suite.expectation_suite_name
+        expectation_suite_name: str = expectation_suite.expectation_suite_name
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
         if not self.expectations_store.has_key(key):  # noqa: W601
             raise gx_exceptions.DataContextError(
                 f"expectation_suite with name {expectation_suite_name} does not exist."
             )
 
-        meta: dict = expectation_suite.meta
         self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             id=expectation_suite.ge_cloud_id,
@@ -2270,7 +2269,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             evaluation_parameters=expectation_suite.evaluation_parameters,
             data_asset_type=expectation_suite.data_asset_type,
             execution_engine_type=expectation_suite.execution_engine_type,
-            meta=meta,
+            meta=expectation_suite.meta,  # type: ignore[has-type] # Should just be a dict but mypy has trouble inferring
             overwrite_existing=True,
         )
 
