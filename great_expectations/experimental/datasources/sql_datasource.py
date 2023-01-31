@@ -113,11 +113,11 @@ def _query_for_year_and_month(
     # after construction. We may be able to use a hook in a property setter.
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
-    assert isinstance(
-        table_asset.datasource.execution_engine, SqlAlchemyExecutionEngine
-    )
+    execution_engine: ExecutionEngine = table_asset.datasource.get_execution_engine()
 
-    with table_asset.datasource.execution_engine.engine.connect() as conn:
+    assert isinstance(execution_engine, SqlAlchemyExecutionEngine)
+
+    with execution_engine.engine.connect() as conn:
         datetimes: DatetimeRange = query_datetime_range(
             conn,
             table_asset.table_name,
