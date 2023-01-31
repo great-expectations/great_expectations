@@ -34,7 +34,7 @@ class ColumnValuesGeometryDistanceToAddress(ColumnMapMetricProvider):
 
     # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
-    def _pandas(cls, column, **kwargs):
+    def _pandas(cls, column, **kwargs):  # noqa: C901 - 24
 
         column_shape_format = kwargs.get("column_shape_format")
         place = kwargs.get("place")
