@@ -777,7 +777,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _update_datasource(
         self,
-        datasource: LegacyDatasource | BaseDatasource | Datasource[Any],
+        datasource: LegacyDatasource | BaseDatasource,
         save_changes: bool | None = None,
         **kwargs,
     ) -> Datasource:
@@ -961,9 +961,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             datasource_name = arg1
         try:
-            datasource: LegacyDatasource | BaseDatasource | Datasource[
-                Any
-            ] = self.get_datasource(datasource_name=datasource_name)
+            datasource: LegacyDatasource | BaseDatasource | XDatasource = (
+                self.get_datasource(datasource_name=datasource_name)
+            )
             if issubclass(type(datasource), BaseDatasource):
                 api_version = "v3"
         except (ValueError, TypeError):
