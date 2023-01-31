@@ -24,8 +24,6 @@ from great_expectations.experimental.datasources.sql_datasource import (
 from tests.experimental.datasources.conftest import (
     DEFAULT_MAX_DT,
     DEFAULT_MIN_DT,
-    Dialect,
-    MockSaEngine,
     sqlachemy_execution_engine_mock_cls,
 )
 

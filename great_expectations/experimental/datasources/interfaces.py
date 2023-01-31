@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import dataclasses
-import functools
 import logging
 from pprint import pformat as pf
 from typing import (
