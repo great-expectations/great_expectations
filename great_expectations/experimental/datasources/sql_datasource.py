@@ -110,8 +110,8 @@ def _query_for_year_and_month(
     ],
 ) -> Dict[str, List]:
     assert isinstance(table_asset.datasource, SQLDatasource)
-    engine: sqlalchemy.engine.Engine = table_asset.datasource.get_engine()
-    with engine.connect() as conn:
+    execution_engine: ExecutionEngine = table_asset.datasource.get_execution_engine()
+    with execution_engine.engine.connect() as conn:
         datetimes: DatetimeRange = query_datetime_range(
             conn,
             table_asset.table_name,
