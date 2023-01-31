@@ -191,7 +191,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
                             app_params["eval_param"] = key
                             app_params["eval_param_value"] = val
                             rendered_content = RenderedStringTemplateContent(
-                                **{
+                                **{  # type: ignore[arg-type]
                                     "content_block_type": "string_template",
                                     "string_template": {
                                         "template": app_template_str,
@@ -545,7 +545,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         return [
             RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "styling": {"parent": {"classes": ["alert", "alert-warning"]}},
                     "string_template": {
@@ -637,7 +637,7 @@ class Expectation(metaclass=MetaExpectation):
         assert result, "Must provide a result object."
         if result.exception_info["raised_exception"]:
             return RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
@@ -660,7 +660,7 @@ class Expectation(metaclass=MetaExpectation):
 
         if result.success:
             return RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
@@ -687,7 +687,7 @@ class Expectation(metaclass=MetaExpectation):
             )
         else:
             return RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
@@ -727,7 +727,7 @@ class Expectation(metaclass=MetaExpectation):
                 expectation_type = None
 
             exception_message = RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": exception_message_template_str,
@@ -752,11 +752,11 @@ class Expectation(metaclass=MetaExpectation):
             )
 
             exception_traceback_collapse = CollapseContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "collapse_toggle_link": "Show exception traceback...",
                     "collapse": [
                         RenderedStringTemplateContent(
-                            **{
+                            **{  # type: ignore[arg-type]
                                 "content_block_type": "string_template",
                                 "string_template": {
                                     "template": result.exception_info[
@@ -792,7 +792,7 @@ class Expectation(metaclass=MetaExpectation):
 
             return [
                 RenderedStringTemplateContent(
-                    **{
+                    **{  # type: ignore[arg-type]
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": template_str,
@@ -880,7 +880,7 @@ class Expectation(metaclass=MetaExpectation):
                         sampled_values_set.add(string_unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
-            **{
+            **{  # type: ignore[arg-type]
                 "content_block_type": "table",
                 "table": table_rows,
                 "header_row": header_row,
@@ -895,11 +895,11 @@ class Expectation(metaclass=MetaExpectation):
             if not isinstance(query, str):
                 query = str(query)
             query_info = CollapseContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "collapse_toggle_link": "To retrieve all unexpected values...",
                     "collapse": [
                         RenderedStringTemplateContent(
-                            **{
+                            **{  # type: ignore[arg-type]
                                 "content_block_type": "string_template",
                                 "string_template": {
                                     "template": query,
@@ -1128,9 +1128,16 @@ class Expectation(metaclass=MetaExpectation):
             )
         return domain_kwargs
 
+    @public_api
     def get_success_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> Dict[str, Any]:
+        """Retrieve the success kwargs.
+
+        Args:
+            configuration: The `ExpectationConfiguration` that contains the kwargs. If no configuration arg is provided,
+                the success kwargs from the configuration attribute of the Expectation instance will be returned.
+        """
         if not configuration:
             configuration = self.configuration
 
@@ -1269,6 +1276,7 @@ class Expectation(metaclass=MetaExpectation):
             )
         return self._configuration
 
+    @public_api
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
@@ -1298,6 +1306,18 @@ class Expectation(metaclass=MetaExpectation):
         If errors are encountered in the process of running the diagnostics, they are assumed to be due to
         incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
         that do not exist). These errors are added under "errors" key in the report.
+
+        Args:
+            raise_exceptions_for_backends: Bool object that when True will raise an Exception if a backend fails to connect.
+            ignore_suppress:  Bool object that when True will ignore the suppress_test_for list on Expectation sample tests.
+            ignore_only_for:  Bool object that when True will ignore the only_for list on Expectation sample tests.
+            for_gallery:  Bool object that when True will create empty arrays to use as examples for the Expectation Diagnostics.
+            debug_logger (optional[logging.Logger]):  Logger object to use for sending debug messages to.
+            only_consider_these_backends (optional[List[str]])  List of backends to consider.
+            context (optional[AbstractDataContext]): Instance of any child of "AbstractDataContext" class.
+
+        Returns:
+            An Expectation Diagnostics report object
         """
 
         if debug_logger is not None:
@@ -1474,6 +1494,7 @@ class Expectation(metaclass=MetaExpectation):
                 UserWarning,
             )
 
+    @public_api
     def print_diagnostic_checklist(
         self,
         diagnostics: Optional[ExpectationDiagnostics] = None,
@@ -1483,6 +1504,10 @@ class Expectation(metaclass=MetaExpectation):
 
         This output from this method is a thin wrapper for ExpectationDiagnostics.generate_checklist()
         This method is experimental.
+
+        Args:
+            diagnostics (optional[ExpectationDiagnostics]): If diagnostics are not provided, diagnostics will be ran on self.
+            show_failed_tests (bool): If true, failing tests will be printed.
         """
 
         if diagnostics is None:
@@ -1492,7 +1517,6 @@ class Expectation(metaclass=MetaExpectation):
             for test in diagnostics.tests:
                 if test.test_passed is False:
                     print(f"=== {test.test_title} ({test.backend}) ===\n")
-                    print(test.stack_trace)  # type: ignore[attr-defined]
                     print(f"{80 * '='}\n")
 
         checklist: str = diagnostics.generate_checklist()
