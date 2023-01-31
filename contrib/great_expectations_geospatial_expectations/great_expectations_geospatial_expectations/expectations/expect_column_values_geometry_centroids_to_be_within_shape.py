@@ -41,7 +41,7 @@ class ColumnValuesGeometryCentroidsWithinShape(ColumnMapMetricProvider):
                     raise NotImplementedError(
                         "Shape constructor method not implemented. Must be in WKT, WKB, or GeoJSON format."
                     )
-            except:
+            except Exception:
                 raise Exception("A valid reference shape was not given.")
         else:
             raise Exception("A shape must be provided for this method.")

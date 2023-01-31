@@ -29,7 +29,7 @@ class ColumnValuesDecimalPlacesEquals(ColumnMapMetricProvider):
             try:
                 if x == int(x):
                     return decimal_places
-            except:
+            except Exception:
                 pass
             return len(str(x).split(".")[1])
 

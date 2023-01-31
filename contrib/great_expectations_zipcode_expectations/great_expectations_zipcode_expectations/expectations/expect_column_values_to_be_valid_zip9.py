@@ -17,7 +17,7 @@ def is_valid_zip9(zip: str):
     else:
         try:
             return zipcodes.is_real(zip)
-        except:
+        except Exception:
             return False
 
 

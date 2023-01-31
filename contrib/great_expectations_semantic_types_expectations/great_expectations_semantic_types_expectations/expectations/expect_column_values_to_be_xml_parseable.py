@@ -43,7 +43,7 @@ class ColumnValuesXmlParseable(ColumnMapMetricProvider):
             try:
                 etree.fromstring(val)
                 return True
-            except:
+            except Exception:
                 return False
 
         return column.map(is_xml)
@@ -54,7 +54,7 @@ class ColumnValuesXmlParseable(ColumnMapMetricProvider):
             try:
                 etree.fromstring(val)
                 return True
-            except:
+            except Exception:
                 return False
 
         is_xml_udf = F.udf(is_xml, sparktypes.BooleanType())

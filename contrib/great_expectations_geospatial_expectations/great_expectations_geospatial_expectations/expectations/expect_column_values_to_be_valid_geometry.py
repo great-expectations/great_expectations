@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_geometry(geo):
     try:
         return geo.is_valid
-    except:
+    except Exception:
         return False
 
 
