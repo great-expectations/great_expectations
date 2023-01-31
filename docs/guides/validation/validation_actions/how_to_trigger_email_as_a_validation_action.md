@@ -31,7 +31,7 @@ receiver_emails: [addresses you want to send the email to]  # each address must 
 
 ### 2. Update `action_list` in your Checkpoint configuration
 
-Open `great_expectations.yml` and add `send_email_on_validation_result` Action to `validation_operators`. Make sure the following section exists in the `great_expectations.yml` file.
+Locate the relevant checkpoint that you want to set up an email trigger for. Open the checkpoint's configuration file that is located at `great_expectations/checkpoints/` (for example, `great_expectations/checkpoints/checkpoint_01.yml`) and add an email action to the `action_list`. Follow the snippet below to set up the detials of your email trigger.
 
 ````yaml
 action_list:
