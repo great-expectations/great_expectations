@@ -143,7 +143,20 @@ _TEST_DEFS_DIR = os.path.join(
 )
 
 
+@public_api
 def render_evaluation_parameter_string(render_func) -> Callable:
+    """Decorator for Expectation classes that renders evaluation parameters as strings.
+
+    allows Expectations that use Evaluation Parameters to render the values
+    of the Evaluation Parameters along with the rest of the output.
+
+    Args:
+        render_func: The render method of the Expectation class.
+
+    Raises:
+        GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
+    """
+
     def inner_func(
         *args: Tuple[MetaExpectation], **kwargs: dict
     ) -> Union[List[RenderedStringTemplateContent], RenderedAtomicContent]:
@@ -1201,6 +1214,7 @@ class Expectation(metaclass=MetaExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @public_api
     def validate(
         self,
         validator: Validator,
@@ -1210,6 +1224,21 @@ class Expectation(metaclass=MetaExpectation):
         data_context: Optional[AbstractDataContext] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationValidationResult:
+        """Validates the expectation against the provided data.
+
+        Args:
+            validator: A Validator object that can be used to create Expectations, validate Expectations,
+                and get Metrics for Expectations.
+            configuration: Defines the parameters and name of a specific expectation.
+            evaluation_parameters: Dictionary of dynamic values used during Validation of an Expectation.
+            interactive_evaluation: Setting the interactive_evaluation flag on a DataAsset
+                make it possible to declare expectations and store expectations without
+                immediately evaluating them.
+            data_context: An instance of a GX DataContext.
+            runtime_configuration: The runtime configuration for the Expectation.
+        Returns:
+            An ExpectationValidationResult object
+        """
         if not configuration:
             configuration = deepcopy(self.configuration)
 
@@ -2493,7 +2522,30 @@ class QueryExpectation(TableExpectation, ABC):
             warnings.warn(str(e), UserWarning)
 
 
+@public_api
 class ColumnExpectation(TableExpectation, ABC):
+    """Base class for column-type Expectations.
+
+    These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
+    number of unique values, column type, etc.
+
+    --Documentation--
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/
+
+    Args:
+     domain_keys (tuple): A tuple of the keys used to determine the domain of the
+         expectation.
+     success_keys (tuple): A tuple of the keys used to determine the success of
+         the expectation.
+     default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
+         kwargs from the Expectation Configuration.
+
+         - A  "column" key is required for column expectations.
+
+    Raises:
+        InvalidExpectationConfigurationError: If no `column` is specified
+    """
+
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
