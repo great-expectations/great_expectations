@@ -48,7 +48,11 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
 
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_def">
-    @metric_value(engine=SqlAlchemyExecutionEngine)
+    @metric_value(
+        engine=SqlAlchemyExecutionEngine,
+        metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
+        domain_type=MetricDomainTypes.COLUMN,
+    )
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
