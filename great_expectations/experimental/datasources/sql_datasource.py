@@ -20,7 +20,6 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
@@ -110,9 +109,15 @@ def _query_for_year_and_month(
         [sqlalchemy.engine.base.Connection, str, str], DatetimeRange
     ],
 ) -> Dict[str, List]:
-    execution_engine: ExecutionEngine = table_asset.datasource.get_execution_engine()
-    assert isinstance(execution_engine, SqlAlchemyExecutionEngine)
-    with execution_engine.engine.connect() as conn:
+    # We should make an assertion about the execution_engine earlier. Right now it is assigned to
+    # after construction. We may be able to use a hook in a property setter.
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+    assert isinstance(
+        table_asset.datasource.execution_engine, SqlAlchemyExecutionEngine
+    )
+
+    with table_asset.datasource.execution_engine.engine.connect() as conn:
         datetimes: DatetimeRange = query_datetime_range(
             conn,
             table_asset.table_name,
