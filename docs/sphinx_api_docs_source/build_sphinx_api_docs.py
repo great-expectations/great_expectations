@@ -162,7 +162,7 @@ class SphinxInvokeDocsBuilder:
 
                 # Write out mdx files
                 output_path = self.docusaurus_api_docs_path / self._get_mdx_file_path(
-                    html_file_path=html_file_path
+                    sidebar_entry=self._get_sidebar_entry(html_file_path=html_file_path)
                 )
                 output_path.parent.mkdir(parents=True, exist_ok=True)
                 logger.info(f"Writing out mdx file: {str(output_path.absolute())}")
@@ -193,7 +193,9 @@ class SphinxInvokeDocsBuilder:
         title_str = title_str.replace("#", "")
         # Add .py to module titles
         stem_path = pathlib.Path(
-            self._get_mdx_file_path(html_file_path=html_file_path).stem
+            self._get_mdx_file_path(
+                sidebar_entry=self._get_sidebar_entry(html_file_path=html_file_path)
+            ).stem
         )
         mdx_stripped_path = str(stem_path.with_suffix(""))
         if mdx_stripped_path.lower() == title_str.lower():
@@ -234,11 +236,11 @@ class SphinxInvokeDocsBuilder:
             if str(href_path) == ".":
                 # For self referential links, use the file path
                 shortened_path_version = self._get_mdx_file_path(
-                    html_file_path=html_file_path
+                    sidebar_entry=self._get_sidebar_entry(html_file_path=html_file_path)
                 ).with_suffix(".html")
             else:
                 shortened_path_version = self._get_mdx_file_path(
-                    html_file_path=href_path
+                    sidebar_entry=self._get_sidebar_entry(html_file_path=href_path)
                 ).with_suffix(".html")
 
             fragment = ""
@@ -258,7 +260,18 @@ class SphinxInvokeDocsBuilder:
             doc_str = self._clean_up_code_blocks(doc_str)
         return doc_str
 
-    def _get_mdx_file_path(self, html_file_path: pathlib.Path) -> pathlib.Path:
+    def _get_sidebar_entry(self, html_file_path: pathlib.Path) -> SidebarEntry:
+        """Get the sidebar entry from html file path.
+
+        Args:
+            html_file_path: Path of the generated html file. Stem used as key.
+
+        Returns:
+            SidebarEntry corresponding to html file path.
+        """
+        return self.sidebar_entries.get(html_file_path.stem)
+
+    def _get_mdx_file_path(self, sidebar_entry: SidebarEntry) -> pathlib.Path:
         """Get the mdx file path for a processed sphinx-generated html file.
 
         If the subject is a class, the shortest dotted import path will
@@ -270,8 +283,6 @@ class SphinxInvokeDocsBuilder:
         Returns:
             Path within the API docs folder to create the mdx file.
         """
-
-        sidebar_entry = self.sidebar_entries.get(html_file_path.stem)
 
         output_path = sidebar_entry.mdx_relpath
 
