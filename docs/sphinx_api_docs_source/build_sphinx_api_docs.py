@@ -149,21 +149,9 @@ class SphinxInvokeDocsBuilder:
     def _process_and_create_docusaurus_mdx_files(self) -> None:
         """Creates API docs as mdx files to serve from docusaurus from content between <section> tags in the sphinx generated docs."""
 
-        # First get file paths
-        static_html_file_path = pathlib.Path(self.temp_sphinx_html_dir) / "html"
-        paths = static_html_file_path.glob("**/*.html")
-        files = [
-            p
-            for p in paths
-            if p.is_file()
-            and p.name
-            not in ("genindex.html", "search.html", "index.html", "py-modindex.html")
-            and "_static" not in str(p)
-        ]
-
         # Read the generated html and process the content for conversion to mdx
         # Write out to .mdx file using the relative file directory structure
-        for html_file_path in files:
+        for html_file_path in self._get_generated_html_file_paths():
             logger.info(f"Processing: {str(html_file_path.absolute())}")
             with open(html_file_path.absolute()) as f:
 
@@ -182,6 +170,19 @@ class SphinxInvokeDocsBuilder:
                     fout.write(doc_str)
 
         logger.info("Created mdx files for serving with docusaurus.")
+
+    def _get_generated_html_file_paths(self):
+        static_html_file_path = pathlib.Path(self.temp_sphinx_html_dir) / "html"
+        paths = static_html_file_path.glob("**/*.html")
+        files = [
+            p
+            for p in paths
+            if p.is_file()
+            and p.name
+            not in ("genindex.html", "search.html", "index.html", "py-modindex.html")
+            and "_static" not in str(p)
+        ]
+        return files
 
     def _parse_and_process_html_to_mdx(self, html_file_path, html_file_contents):
         soup = BeautifulSoup(html_file_contents, "html.parser")
