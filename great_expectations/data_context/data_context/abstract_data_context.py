@@ -766,8 +766,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: Union[LegacyDatasource, BaseDatasource],
         save_changes: bool | None = None,
     ) -> None:
-        """
-        Updates a Datasource that already exists in the store.
+        """Updates a Datasource that already exists in the store.
 
         Args:
             datasource: The Datasource object to update.
@@ -812,8 +811,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str,
         **kwargs,
     ) -> LegacyDatasource | BaseDatasource:
-        """
-        Add a new Datasource or update an existing one on the context depending on whether
+        """Add a new Datasource or update an existing one on the context depending on whether
         it already exists or not. The configuration is provided as kwargs.
 
         Args:
@@ -2211,14 +2209,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         expectation_suite_name: str,
         id: str | None = None,
-        expectations: list[dict | ExpectationConfiguration] | None = None,
+        expectations: Sequence[dict | ExpectationConfiguration] | None = None,
         evaluation_parameters: dict | None = None,
         data_asset_type: str | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         overwrite_existing: bool = False,
         **kwargs,
-    ):
+    ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
@@ -2245,6 +2243,86 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
 
+    def update_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+    ) -> None:
+        """Update an ExpectationSuite that already exists.
+
+        Args:
+            expectation_suite: The suite to use to update.
+
+        Raises:
+            DataContextError: A suite with the given name does not already exist.
+        """
+        expectation_suite_name: str = expectation_suite.expectation_suite_name
+        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        if not self.expectations_store.has_key(key):  # noqa: W601
+            raise gx_exceptions.DataContextError(
+                f"expectation_suite with name {expectation_suite_name} does not exist."
+            )
+
+        self._add_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            id=expectation_suite.ge_cloud_id,
+            expectations=expectation_suite.expectations,
+            evaluation_parameters=expectation_suite.evaluation_parameters,
+            data_asset_type=expectation_suite.data_asset_type,
+            execution_engine_type=expectation_suite.execution_engine_type,
+            meta=expectation_suite.meta,  # type: ignore[has-type] # Should just be a dict but mypy has trouble inferring
+            overwrite_existing=True,
+        )
+
+    def add_or_update_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        id: str | None = None,
+        expectations: list[dict | ExpectationConfiguration] | None = None,
+        evaluation_parameters: dict | None = None,
+        data_asset_type: str | None = None,
+        execution_engine_type: Type[ExecutionEngine] | None = None,
+        meta: dict | None = None,
+    ) -> ExpectationSuite:
+        """Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.
+
+        Args:
+            expectation_suite_name: The name of the suite to create.
+            id: Identifier to associate with this suite.
+            expectations: Expectation Configurations to associate with this suite.
+            evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+            data_asset_type: Type of data asset to associate with this suite.
+            execution_engine_type: Name of the execution engine type.
+            meta: Metadata related to the suite.
+
+        Returns:
+            A new ExpectationSuite or an updated once (depending on whether or not it existed before this method call).
+        """
+        existing_suite = None
+        try:
+            existing_suite = self.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name, ge_cloud_id=id
+            )
+        except gx_exceptions.DataContextError:
+            logger.info(
+                f"Could not find an existing suite named '{expectation_suite_name}'; creating a new one."
+            )
+
+        if existing_suite:
+            self.update_expectation_suite(existing_suite)
+            return self.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name, ge_cloud_id=id
+            )
+
+        return self.add_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            id=id,
+            expectations=expectations,
+            evaluation_parameters=evaluation_parameters,
+            data_asset_type=data_asset_type,
+            execution_engine_type=execution_engine_type,
+            meta=meta,
+        )
+
     def delete_expectation_suite(
         self,
         expectation_suite_name: Optional[str] = None,
@@ -2261,11 +2339,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         key = ExpectationSuiteIdentifier(expectation_suite_name)  # type: ignore[arg-type]
         if not self.expectations_store.has_key(key):  # noqa: W601
             raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} does not exist."
+                f"expectation_suite with name {expectation_suite_name} does not exist."
             )
-        else:
-            self.expectations_store.remove_key(key)
-            return True
+        self.expectations_store.remove_key(key)
+        return True
 
     @public_api
     @deprecated_argument(argument_name="ge_cloud_id", version="0.15.45")
