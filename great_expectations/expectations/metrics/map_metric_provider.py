@@ -2857,7 +2857,8 @@ def _spark_map_condition_index(
     result_format = metric_value_kwargs["result_format"]
     if not result_format.get("unexpected_index_column_names"):
         raise gx_exceptions.MetricResolutionError(
-            "unexpected_indices cannot be returned without 'unexpected_index_column_names'. Please check your configuration."
+            message="unexpected_indices cannot be returned without 'unexpected_index_column_names'. Please check your configuration.",
+            failed_metrics=["unexpected_index_list"],
         )
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
