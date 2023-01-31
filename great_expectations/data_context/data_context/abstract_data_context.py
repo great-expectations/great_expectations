@@ -2487,8 +2487,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
 
     def update_profiler(self, profiler: RuleBasedProfiler) -> None:
-        """
-        TODO
+        """Update a Profiler that already exists.
+
+        Args:
+            profiler: The profiler to use to update.
+
+        Raises:
+            ProfilerNotFoundError: A profiler with the given name/id does not already exist.
         """
         RuleBasedProfiler.update_profiler(
             profiler=profiler,
@@ -2504,8 +2509,17 @@ class AbstractDataContext(ConfigPeer, ABC):
         variables: dict | None = None,
         id: str | None = None,
     ) -> RuleBasedProfiler:
-        """
-        TODO
+        """Add a new Profiler or update an existing one on the context depending on whether it already exists or not.
+
+        Args:
+            name: The name of the RBP instance.
+            config_version: The version of the RBP (currently only 1.0 is supported).
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and expectation_configuration_builders.
+            variables: Any variables to be substituted within the rules.
+            id: The id associated with the RBP instance (if applicable).
+
+        Returns:
+            A new Profiler or an updated one (depending on whether or not it existed before this method call).
         """
         existing_profiler = None
         try:

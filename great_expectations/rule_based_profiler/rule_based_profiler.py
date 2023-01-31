@@ -1260,9 +1260,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 msg += f"with id {id}"
             raise gx_exceptions.ProfilerNotFoundError(message=msg)
 
-        RuleBasedProfiler.delete_profiler(
-            name=name, ge_cloud_id=id, profiler_store=profiler_store
-        )
+        if id:
+            RuleBasedProfiler.delete_profiler(
+                ge_cloud_id=id, profiler_store=profiler_store
+            )
+        else:
+            RuleBasedProfiler.delete_profiler(name=name, profiler_store=profiler_store)
+
         RuleBasedProfiler.add_profiler(
             config=profiler.config,
             data_context=data_context,
