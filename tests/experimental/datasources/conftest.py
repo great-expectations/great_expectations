@@ -27,7 +27,7 @@ from great_expectations.experimental.datasources.interfaces import (
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 # This is the default min/max time that we are using in our mocks.

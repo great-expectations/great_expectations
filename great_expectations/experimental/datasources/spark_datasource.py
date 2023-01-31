@@ -24,7 +24,7 @@ from great_expectations.experimental.datasources.interfaces import (
 if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class SparkDatasourceError(Exception):
@@ -92,9 +92,9 @@ class CSVSparkAsset(DataAsset):
                             self.base_directory / file_name,
                         )
                     )
-                    LOGGER.debug(f"Matching path: {self.base_directory / file_name}")
+                    logger.debug(f"Matching path: {self.base_directory / file_name}")
         if not batch_requests_with_path:
-            LOGGER.warning(
+            logger.warning(
                 f"Batch request {batch_request} corresponds to no data files."
             )
         return batch_requests_with_path
