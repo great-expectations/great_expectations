@@ -18,6 +18,7 @@ Typical usage example:
 from __future__ import annotations
 
 import ast
+import enum
 import importlib
 import logging
 import os
@@ -42,7 +43,14 @@ logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
 
-@dataclass(frozen=True)
+class SidebarEntryType(enum.Enum):
+    MODULE = "module"
+    CLASS = "class"
+    METHOD = "method"
+    MODULE_LEVEL_METHOD = "module_level_method"
+
+
+@dataclass
 class SidebarEntry:
 
     # TODO: Docstring
@@ -54,6 +62,7 @@ class SidebarEntry:
     class_min_dotted_path: str | None
     md_relpath: pathlib.Path
     mdx_relpath: pathlib.Path
+    type: SidebarEntryType
 
 
 class SphinxInvokeDocsBuilder:
@@ -312,6 +321,10 @@ class SphinxInvokeDocsBuilder:
 
         logger.debug("Removed existing generated raw Sphinx HTML.")
 
+    def _get_sidebar_entry_name(self) -> str:
+        # TODO: Implement
+        pass
+
     def _build_class_md_stubs(self) -> None:
         """Build markdown stub files with rst directives for auto documenting classes."""
         definitions = get_public_api_definitions()
@@ -334,6 +347,7 @@ class SphinxInvokeDocsBuilder:
                     mdx_relpath=self._get_class_mdx_relative_filepath(
                         definition=definition
                     ),
+                    type=SidebarEntryType.CLASS,
                 )
 
                 self.sidebar_entries[definition.name] = sidebar_entry
@@ -373,6 +387,7 @@ class SphinxInvokeDocsBuilder:
                 mdx_relpath=self._get_module_mdx_relative_filepath(
                     definition=definition
                 ),
+                type=SidebarEntryType.MODULE,
             )
 
             sidebar_entry_key = str(
