@@ -16,7 +16,11 @@ from great_expectations.expectations.metrics import (
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 # This class defines a Metric to support your Expectation
 # The main business logic for calculation lives here.
@@ -149,9 +153,7 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(  # FIXME: where does this come from?
-                params["row_condition"]
-            )
+            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
