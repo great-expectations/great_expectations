@@ -114,13 +114,20 @@ class RuleStats(SerializableDictDot):
         return convert_to_json_serializable(data=self.to_dict())
 
 
+@public_api
 @dataclass
 class DataAssistantResult(SerializableDictDot):
-    """
-    DataAssistantResult is a "dataclass" object, designed to hold results of executing "DataAssistant.run()" method.
-    Available properties are: "metrics_by_domain", "expectation_configurations", and configuration object
-    ("RuleBasedProfilerConfig") of effective Rule-Based Profiler, which embodies given "DataAssistant".
-    Use "_batch_id_to_batch_identifier_display_name_map" to translate "batch_id" values to display ("friendly") names.
+    """Result from a Data Assistant run, plus plotting functionality.
+
+    Args:
+        profiler_config: Effective Rule-Based Profiler configuration.
+        profiler_execution_time: Effective Rule-Based Profiler overall execution time in seconds.
+        rule_domain_builder_execution_time: Effective Rule-Based Profiler per-Rule DomainBuilder execution time in seconds.
+        rule_execution_time: Effective Rule-Based Profiler per-Rule execution time in seconds.
+        metrics_by_domain: Metrics by Domain.
+        expectation_configurations: Expectation configurations.
+        citation: Citations.
+        _batch_id_to_batch_identifier_display_name_map: Mapping from "batch_id" values to friendly display names.
     """
 
     ALLOWED_KEYS = {
@@ -142,15 +149,9 @@ class DataAssistantResult(SerializableDictDot):
         Dict[str, Set[Tuple[str, Any]]]
     ] = field(default=None)
     profiler_config: Optional[RuleBasedProfilerConfig] = None
-    profiler_execution_time: Optional[
-        float
-    ] = None  # Effective Rule-Based Profiler overall execution time (in seconds).
-    rule_domain_builder_execution_time: Optional[
-        Dict[str, float]
-    ] = None  # Effective Rule-Based Profiler per-Rule DomainBuilder execution time (in seconds).
-    rule_execution_time: Optional[
-        Dict[str, float]
-    ] = None  # Effective Rule-Based Profiler per-Rule total execution time (in seconds).
+    profiler_execution_time: Optional[float] = None
+    rule_domain_builder_execution_time: Optional[Dict[str, float]] = None
+    rule_execution_time: Optional[Dict[str, float]] = None
     metrics_by_domain: Optional[Dict[Domain, Dict[str, ParameterNode]]] = None
     expectation_configurations: Optional[List[ExpectationConfiguration]] = None
     citation: Optional[dict] = None
@@ -187,15 +188,20 @@ class DataAssistantResult(SerializableDictDot):
             send_usage_event=send_usage_event,
         ).show_expectations_by_domain_type()
 
+    @public_api
     def show_expectations_by_expectation_type(
         self,
         expectation_suite_name: Optional[str] = None,
         include_profiler_config: bool = False,
         send_usage_event: bool = True,
     ) -> None:
-        """
-        Populates named "ExpectationSuite" with "ExpectationConfiguration" list, stored in "DataAssistantResult" object,
-        and displays this "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined order.
+        """Populates an `ExpectationSuite` and displays `ExpectationConfiguration` list grouped by `expectation_type`.
+
+        Args:
+            expectation_suite_name: The name for the Expectation Suite. Default generated if none provided.
+            include_profiler_config: Whether to include the rule-based profiler config used by the data assistant to
+                generate the Expectation Suite.
+            send_usage_event: Set to False to disable sending usage events for this method.
         """
         self.get_expectation_suite(
             expectation_suite_name=expectation_suite_name,
@@ -276,9 +282,12 @@ class DataAssistantResult(SerializableDictDot):
             "citation": convert_to_json_serializable(data=self.citation),
         }
 
+    @public_api
     def to_json_dict(self) -> dict:
-        """
-        Returns: This DataAssistantResult as JSON-serializable dictionary.
+        """Returns JSON dictionary equivalent of this object.
+
+        Returns:
+            A JSON-serializable dictionary representation of the DataAssistantResult object.
         """
         return self.to_dict()
 

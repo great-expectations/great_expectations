@@ -1,13 +1,27 @@
+from __future__ import annotations
+
 import inspect
 import logging
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 
 import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricFunctionTypes,
@@ -53,10 +67,13 @@ from great_expectations.util import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
+if TYPE_CHECKING:
+    import pyspark
+
 logger = logging.getLogger(__name__)
 
 
-def column_function_partial(
+def column_function_partial(  # noqa: C901 - 19
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[str] = None,
     **kwargs,
@@ -116,7 +133,6 @@ def column_function_partial(
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 filter_column_isnull = kwargs.get(
@@ -188,7 +204,6 @@ def column_function_partial(
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 dialect = execution_engine.dialect_module
@@ -260,7 +275,6 @@ def column_function_partial(
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 column = data[column_name]
@@ -283,7 +297,8 @@ def column_function_partial(
         )
 
 
-def column_condition_partial(
+@public_api
+def column_condition_partial(  # noqa: C901 - 23
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
     **kwargs,
@@ -296,16 +311,13 @@ def column_condition_partial(
     A metric function that is decorated as a column_condition_partial will be called with the engine-specific column
     type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
-
-
     Args:
-        engine:
-        partial_fn_type:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        partial_fn_type: The metric function
+        **kwargs: Arguments passed to specified function
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-
     """
     domain_type = MetricDomainTypes.COLUMN
     if issubclass(engine, PandasExecutionEngine):
@@ -348,7 +360,6 @@ def column_condition_partial(
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 filter_column_isnull = kwargs.get(
@@ -416,7 +427,6 @@ def column_condition_partial(
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 sqlalchemy_engine: Engine = execution_engine.engine
@@ -501,7 +511,6 @@ def column_condition_partial(
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 column = data[column_name]
@@ -546,7 +555,8 @@ def column_condition_partial(
         )
 
 
-def column_pair_function_partial(
+@public_api
+def column_pair_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -555,13 +565,12 @@ def column_pair_function_partial(
     column_list type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
     Args:
-        engine:
-        partial_fn_type:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        partial_fn_type: The metric function
+        **kwargs: Arguments passed to specified function
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-
     """
     domain_type = MetricDomainTypes.COLUMN_PAIR
     if issubclass(engine, PandasExecutionEngine):
@@ -612,7 +621,6 @@ def column_pair_function_partial(
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 values = metric_fn(
@@ -676,7 +684,6 @@ def column_pair_function_partial(
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 column_pair_function = metric_fn(
@@ -744,7 +751,6 @@ def column_pair_function_partial(
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 column_pair_function = metric_fn(
@@ -770,7 +776,7 @@ def column_pair_function_partial(
         )
 
 
-def column_pair_condition_partial(
+def column_pair_condition_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
     **kwargs,
@@ -840,7 +846,6 @@ def column_pair_condition_partial(
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 meets_expectation_series = metric_fn(
@@ -912,7 +917,6 @@ def column_pair_condition_partial(
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 sqlalchemy_engine: Engine = execution_engine.engine
@@ -992,7 +996,6 @@ def column_pair_condition_partial(
                 column_A_name, column_B_name = get_dbms_compatible_column_names(
                     column_names=column_names,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 expected_condition = metric_fn(
@@ -1018,7 +1021,7 @@ def column_pair_condition_partial(
         )
 
 
-def multicolumn_function_partial(
+def multicolumn_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -1027,13 +1030,12 @@ def multicolumn_function_partial(
     column_list type and any value_kwargs associated with the Metric for which the provider function is being declared.
 
     Args:
-        engine:
-        partial_fn_type:
-        **kwargs:
+        engine: The `ExecutionEngine` used to to evaluate the condition
+        partial_fn_type: The metric function
+        **kwargs: Arguments passed to specified function
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
-
     """
     domain_type = MetricDomainTypes.MULTICOLUMN
     if issubclass(engine, PandasExecutionEngine):
@@ -1078,7 +1080,6 @@ def multicolumn_function_partial(
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 values = metric_fn(
@@ -1137,7 +1138,6 @@ def multicolumn_function_partial(
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=table_columns,
-                    execution_engine=execution_engine,
                 )
 
                 sqlalchemy_engine: Engine = execution_engine.engine
@@ -1209,7 +1209,6 @@ def multicolumn_function_partial(
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 multicolumn_function = metric_fn(
@@ -1234,7 +1233,7 @@ def multicolumn_function_partial(
         )
 
 
-def multicolumn_condition_partial(
+def multicolumn_condition_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
     **kwargs,
@@ -1298,7 +1297,6 @@ def multicolumn_condition_partial(
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 meets_expectation_series = metric_fn(
@@ -1363,7 +1361,6 @@ def multicolumn_condition_partial(
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 sqlalchemy_engine: Engine = execution_engine.engine
@@ -1439,7 +1436,6 @@ def multicolumn_condition_partial(
                 column_list = get_dbms_compatible_column_names(
                     column_names=column_list,
                     batch_columns_list=metrics["table.columns"],
-                    execution_engine=execution_engine,
                 )
 
                 expected_condition = metric_fn(
@@ -1504,7 +1500,6 @@ def _pandas_column_map_condition_values(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     ###
@@ -1520,7 +1515,9 @@ def _pandas_column_map_condition_values(
 
     domain_values = df[column_name]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[
+        boolean_mapped_unexpected_values == True  # noqa: E712
+    ]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1571,12 +1568,13 @@ def _pandas_column_pair_map_condition_values(
     column_A_name, column_B_name = get_dbms_compatible_column_names(
         column_names=column_names,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     domain_values = df[column_names]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[
+        boolean_mapped_unexpected_values == True  # noqa: E712
+    ]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1662,12 +1660,13 @@ def _pandas_multicolumn_map_condition_values(
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     domain_values = df[column_list]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[
+        boolean_mapped_unexpected_values == True  # noqa: E712
+    ]
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1749,7 +1748,6 @@ def _pandas_column_map_series_and_domain_values(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     ###
@@ -1765,8 +1763,10 @@ def _pandas_column_map_series_and_domain_values(
 
     domain_values = df[column_name]
 
-    domain_values = domain_values[boolean_mapped_unexpected_values == True]
-    map_series = map_series[boolean_mapped_unexpected_values == True]
+    domain_values = domain_values[
+        boolean_mapped_unexpected_values == True  # noqa: E712
+    ]
+    map_series = map_series[boolean_mapped_unexpected_values == True]  # noqa: E712
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1803,14 +1803,14 @@ def _pandas_map_condition_index(
     domain_records_df: pd.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
     )
-
+    domain_column_name_list: List[str] = list()
+    # column map expectations
     if "column" in accessor_domain_kwargs:
         column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
 
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
             batch_columns_list=metrics["table.columns"],
-            execution_engine=execution_engine,
         )
 
         ###
@@ -1825,7 +1825,9 @@ def _pandas_map_condition_index(
             domain_records_df = domain_records_df[
                 domain_records_df[column_name].notnull()
             ]
+        domain_column_name_list.append(column_name)
 
+    # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
         column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
             "column_list"
@@ -1833,10 +1835,20 @@ def _pandas_map_condition_index(
         verify_column_names_exist(
             column_names=column_list, batch_columns_list=metrics["table.columns"]
         )
+        domain_column_name_list = column_list
+
+    # column pair expectations
+    elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
+        column_list: List[Union[str, quoted_name]] = list()
+        column_list.append(accessor_domain_kwargs["column_A"])
+        column_list.append(accessor_domain_kwargs["column_B"])
+        verify_column_names_exist(
+            column_names=column_list, batch_columns_list=metrics["table.columns"]
+        )
+        domain_column_name_list = column_list
 
     result_format = metric_value_kwargs["result_format"]
     domain_records_df = domain_records_df[boolean_mapped_unexpected_values]
-    expectation_domain_column_name: Union[str, None] = domain_kwargs.get("column")
 
     unexpected_index_list: Union[
         List[int], List[Dict[str, Any]]
@@ -1845,9 +1857,8 @@ def _pandas_map_condition_index(
         result_format=result_format,
         execution_engine=execution_engine,
         metrics=metrics,
-        expectation_domain_column_name=expectation_domain_column_name,
+        expectation_domain_column_list=domain_column_name_list,
     )
-
     if result_format["result_format"] == "COMPLETE":
         return unexpected_index_list
     return unexpected_index_list[: result_format["partial_unexpected_count"]]
@@ -1892,7 +1903,6 @@ def _pandas_map_condition_query(
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
             batch_columns_list=metrics["table.columns"],
-            execution_engine=execution_engine,
         )
         filter_column_isnull = kwargs.get(
             "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
@@ -1941,7 +1951,6 @@ def _pandas_column_map_condition_value_counts(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     ###
@@ -2007,7 +2016,6 @@ def _pandas_map_condition_rows(
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
             batch_columns_list=metrics["table.columns"],
-            execution_engine=execution_engine,
         )
 
         ###
@@ -2193,7 +2201,6 @@ def _sqlalchemy_column_map_condition_values(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
@@ -2255,7 +2262,6 @@ def _sqlalchemy_column_pair_map_condition_values(
     column_A_name, column_B_name = get_dbms_compatible_column_names(
         column_names=column_names,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     query = sa.select(
@@ -2344,7 +2350,6 @@ def _sqlalchemy_multicolumn_map_condition_values(
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     column_selector = [sa.column(column_name) for column_name in column_list]
@@ -2427,7 +2432,6 @@ def _sqlalchemy_column_map_condition_value_counts(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     column: sa.Column = sa.column(column_name)
@@ -2668,7 +2672,9 @@ def _spark_map_condition_unexpected_count_value(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
+        F.col("__unexpected")
+    )
 
     return filtered.count()
 
@@ -2699,12 +2705,13 @@ def _spark_column_map_condition_values(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
+        F.col("__unexpected")
+    )
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
@@ -2744,16 +2751,17 @@ def _spark_column_map_condition_value_counts(
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
-    df: "pyspark.sql.dataframe.DataFrame" = execution_engine.get_domain_records(
+    df: pyspark.sql.dataframe.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
+        F.col("__unexpected")
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -2785,7 +2793,9 @@ def _spark_map_condition_rows(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
+        F.col("__unexpected")
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -2829,7 +2839,7 @@ def _spark_map_condition_index(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     domain_column = domain_kwargs["column"]
 
-    df: "pyspark.sql.dataframe.DataFrame" = execution_engine.get_domain_records(
+    df: pyspark.sql.dataframe.DataFrame = execution_engine.get_domain_records(
         domain_kwargs=domain_kwargs
     )
 
@@ -2841,7 +2851,9 @@ def _spark_map_condition_index(
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
+        F.col("__unexpected")
+    )
     unexpected_index_list: Optional[List[Dict[str, Any]]] = []
 
     unexpected_index_column_names: List[str] = result_format[
@@ -2945,12 +2957,13 @@ def _spark_column_pair_map_condition_values(
     column_A_name, column_B_name = get_dbms_compatible_column_names(
         column_names=column_names,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
+        F.col("__unexpected")
+    )
 
     result_format = metric_value_kwargs["result_format"]
     if result_format["result_format"] == "COMPLETE":
@@ -3039,12 +3052,13 @@ def _spark_multicolumn_map_condition_values(
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
         batch_columns_list=metrics["table.columns"],
-        execution_engine=execution_engine,
     )
 
     # withColumn is required to transform window functions returned by some metrics to boolean mask
     data = df.withColumn("__unexpected", unexpected_condition)
-    filtered = data.filter(F.col("__unexpected") == True).drop(F.col("__unexpected"))
+    filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
+        F.col("__unexpected")
+    )
 
     column_selector = [
         F.col(column_name).alias(column_name) for column_name in column_list
@@ -3100,7 +3114,12 @@ def _spark_multicolumn_map_condition_filtered_row_count(
     return df.count()
 
 
+@public_api
 class MapMetricProvider(MetricProvider):
+    """The base class for defining metrics that are evaluated for every row. An example of a map metric is
+    `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of `MapMetricProvider`).
+    """
+
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
@@ -3123,7 +3142,7 @@ class MapMetricProvider(MetricProvider):
     }
 
     @classmethod
-    def _register_metric_functions(cls):
+    def _register_metric_functions(cls):  # noqa: C901 - 28
         if not (
             hasattr(cls, "function_metric_name")
             or hasattr(cls, "condition_metric_name")
@@ -3670,7 +3689,16 @@ class MapMetricProvider(MetricProvider):
         )
 
 
+@public_api
 class ColumnMapMetricProvider(MapMetricProvider):
+    """Defines metrics that are evaluated for every row for a single column. An example of a column map
+    metric is `column_values.null` (which is implemented as a `ColumnMapMetricProvider`, a subclass of
+    `MapMetricProvider`).
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
+    """
+
     condition_domain_keys = (
         "batch_id",
         "table",
@@ -3725,7 +3753,14 @@ class ColumnMapMetricProvider(MapMetricProvider):
         return dependencies
 
 
+@public_api
 class ColumnPairMapMetricProvider(MapMetricProvider):
+    """Defines metrics that are evaluated for every row for a column pair. All column pair metrics require domain
+    keys of `column_A` and `column_B`.
+
+    `expect_column_pair_values_to_be_equal` is an example of an Expectation that uses this metric.
+    """
+
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
@@ -3786,7 +3821,14 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
         return dependencies
 
 
+@public_api
 class MulticolumnMapMetricProvider(MapMetricProvider):
+    """Defines metrics that are evaluated for every row for a set of columns. All multi-column metrics require the
+    domain key `column_list`.
+
+    `expect_compound_columns_to_be_unique` is an example of an Expectation that uses this metric.
+    """
+
     condition_domain_keys: Tuple[str, ...] = (
         "batch_id",
         "table",
