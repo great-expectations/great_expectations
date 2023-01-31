@@ -8,14 +8,13 @@ from great_expectations.util import get_context
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
 
-from great_expectations.core._docs_decorators import deprecated_argument, public_api
+from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 
 
-@public_api
 @deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_config", version="0.15.37")
 def BaseDataContext(
