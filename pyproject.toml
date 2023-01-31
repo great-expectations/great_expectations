@@ -228,7 +228,6 @@ extend-exclude = [
     "docs/*",
     "build/*",
     "assets/*",
-    "contrib/*",
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
