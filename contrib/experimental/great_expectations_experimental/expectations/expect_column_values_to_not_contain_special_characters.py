@@ -5,11 +5,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -88,7 +84,6 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                         "unexpected_index_list": [0, 1, 2],
                         "unexpected_list": ["apple@", "pear$!", "%banana%"],
                     },
-                    "exact_match_out": False,
                 }
             ],
         }

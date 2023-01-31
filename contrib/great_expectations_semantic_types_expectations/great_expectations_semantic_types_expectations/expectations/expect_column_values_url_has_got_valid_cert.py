@@ -4,7 +4,6 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 import datetime
-import json
 import socket
 import ssl
 from datetime import datetime
@@ -13,7 +12,6 @@ from typing import Optional
 from dateutil.parser import parse
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -32,7 +30,7 @@ def get_certificate_exp_date(host, port=443, timeout=1):
         expiry_date = datetime.strptime(cert["notAfter"], "%b %d %H:%M:%S %Y %Z")
         before_date = datetime.strptime(cert["notBefore"], "%b %d %H:%M:%S %Y %Z")
         return before_date, expiry_date
-    except Exception as e:
+    except Exception:
         return parse("1900-01-01"), parse("1900-01-01")
     finally:
         sock.close()
@@ -50,7 +48,7 @@ def has_valid_cert(url: str) -> bool:
             return True
         else:
             return False
-    except Exception as e:
+    except Exception:
         return False
 
 

@@ -5,12 +5,6 @@ from unittest import mock
 import pytest
 
 # noinspection PyUnresolvedReferences
-import contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics
-
-# noinspection PyUnresolvedReferences
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant import (
-    DataProfilerStructuredDataAssistant,
-)
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
     DataProfilerStructuredDataAssistantResult,
 )
@@ -28,12 +22,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 # noinspection PyUnresolvedReferences
-from tests.conftest import (
-    bobby_columnar_table_multi_batch_deterministic_data_context,
-    bobby_columnar_table_multi_batch_probabilistic_data_context,
-    no_usage_stats,
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
-)
+
+
+# noinspection PyUnresolvedReferences
 
 test_root_path = os.path.dirname(
     os.path.dirname(os.path.dirname(os.path.realpath(__file__)))

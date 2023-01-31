@@ -130,7 +130,6 @@ class ExpectColumnToHaveNoDaysMissing(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        import math
         from datetime import datetime, timedelta
 
         # returns the distinct dates of the column

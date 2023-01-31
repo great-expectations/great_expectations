@@ -28,7 +28,7 @@ from great_expectations.render.util import (
 )
 
 try:
-    import sqlalchemy as sa
+    pass
 except ImportError:
     pass
 
@@ -165,7 +165,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True
         )
-        styling = runtime_configuration.get("styling")
+        runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
             ["column", "mostly", "xml_schema", "row_condition", "condition_parser"],

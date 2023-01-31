@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from time import strptime
 from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration

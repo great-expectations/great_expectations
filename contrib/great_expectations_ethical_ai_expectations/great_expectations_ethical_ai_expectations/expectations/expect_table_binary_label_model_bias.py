@@ -1,8 +1,5 @@
-import json
 from typing import Any, Dict, Optional, Tuple
 
-import aequitas.plot as ap
-import pandas as pd
 from aequitas.bias import Bias
 from aequitas.fairness import Fairness
 from aequitas.group import Group

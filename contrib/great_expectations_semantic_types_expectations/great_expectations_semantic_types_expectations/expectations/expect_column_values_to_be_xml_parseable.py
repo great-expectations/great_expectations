@@ -29,7 +29,7 @@ from great_expectations.render.util import (
 )
 
 try:
-    import sqlalchemy as sa
+    pass
 except ImportError:
     pass
 
@@ -41,7 +41,7 @@ class ColumnValuesXmlParseable(ColumnMapMetricProvider):
     def _pandas(cls, column, **kwargs):
         def is_xml(val):
             try:
-                xml_doc = etree.fromstring(val)
+                etree.fromstring(val)
                 return True
             except:
                 return False
@@ -52,7 +52,7 @@ class ColumnValuesXmlParseable(ColumnMapMetricProvider):
     def _spark(cls, column, **kwargs):
         def is_xml(val):
             try:
-                xml_doc = etree.fromstring(val)
+                etree.fromstring(val)
                 return True
             except:
                 return False
