@@ -596,35 +596,15 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
     def list_keys(self, prefix: Tuple = ()) -> List[Tuple]:
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
-        s3 = self._create_client()
-        paginator = s3.get_paginator("list_objects_v2")
-
-        if self.prefix:
-            page_iterator = paginator.paginate(Bucket=self.bucket, Prefix=self.prefix)
-        else:
-            page_iterator = paginator.paginate(Bucket=self.bucket)
-
-        objects: list = []
-
-        for page in page_iterator:
-            current_page_contents = page.get("Contents")
-            # On first iteration check for "CommonPrefixes"
-            if (
-                current_page_contents is None
-                and objects == []
-                and "CommonPrefixes" in page
-            ):
-                logger.warning(
-                    "TupleS3StoreBackend returned CommonPrefixes, but delimiter should not have been set."
-                )
-                objects = []
-                break
-            if current_page_contents is not None:
-                objects.extend(current_page_contents)
-
+        s3r = self._create_resource()
+        bucket = s3r.Bucket(self.bucket)
         key_list = []
-        for s3_object_info in objects:
-            s3_object_key = s3_object_info["Key"]
+        if self.prefix:
+            objects_list = bucket.objects.filter(Prefix=self.prefix)
+        else:
+            objects_list = bucket.objects.all()
+        for s3_object_info in objects_list:
+            s3_object_key = s3_object_info.key
             if self.platform_specific_separator:
                 s3_object_key = os.path.relpath(s3_object_key, self.prefix)
             else:

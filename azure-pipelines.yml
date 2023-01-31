@@ -83,14 +83,6 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-    - job: type_hint_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-      - script: |
-          pip install $(grep -E '^(invoke|mypy|pytest-cov)' reqs/requirements-dev-contrib.txt)
-          invoke type-coverage
-        name: TypeHintChecker
-
     - job: static_type_check
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
@@ -102,12 +94,6 @@ stages:
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
         name: StaticTypeCheck
-
-    - job: docstring_checker
-      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
-      steps:
-      - bash: python scripts/check_docstring_coverage.py
-        name: DocstringChecker
 
     - job: docstring_linter
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))

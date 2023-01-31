@@ -5,28 +5,26 @@ needed in the future.
 
 Typical usage example:
 
-    @invoke.task(
-        help={
-            "clean": "Clean out existing documentation first. Defaults to True.",
-        }
-    )
+    @invoke.task()
     def my_task(
         ctx,
-        clean=True,
     ):
 
         doc_builder = SphinxInvokeDocsBuilder(ctx=ctx)
         doc_builder.exit_with_error_if_docs_dependencies_are_not_installed()
-        doc_builder.build_docs(clean=clean)
+        doc_builder.build_docs()
         ...
 """
+from __future__ import annotations
+
 import ast
 import importlib
 import logging
 import os
 import pathlib
 import shutil
-from typing import Dict, Tuple
+import sys
+from typing import Dict
 from urllib.parse import urlparse
 
 import invoke
@@ -107,6 +105,11 @@ class SphinxInvokeDocsBuilder:
 
     def _build_html_api_docs_in_temp_folder(self):
         """Builds html api documentation in temporary folder."""
+
+        sphinx_api_docs_source_dir = pathlib.Path.cwd()
+        if sphinx_api_docs_source_dir not in sys.path:
+            sys.path.append(str(sphinx_api_docs_source_dir))
+
         cmd = f"sphinx-build -M html ./ {self.temp_sphinx_html_dir} -E"
         self.ctx.run(cmd, echo=True, pty=True)
         logger.debug("Raw Sphinx HTML generated.")
@@ -181,9 +184,18 @@ class SphinxInvokeDocsBuilder:
 
                     split_href = href.split("#")
 
-                    shortened_path_version = self._get_mdx_file_path(
-                        pathlib.Path(split_href[0])
-                    ).with_suffix(".html")
+                    href_path = pathlib.Path(split_href[0])
+
+                    if str(href_path) == ".":
+                        # For self referential links, use the file path
+                        shortened_path_version = self._get_mdx_file_path(
+                            html_file_path=html_file
+                        ).with_suffix(".html")
+                    else:
+                        # Use the shortened path generated from the href
+                        shortened_path_version = self._get_mdx_file_path(
+                            html_file_path=pathlib.Path(split_href[0])
+                        ).with_suffix(".html")
 
                     fragment = ""
                     if len(split_href) > 1:
@@ -244,12 +256,19 @@ class SphinxInvokeDocsBuilder:
             # (if .parent is not used, then there will be a duplicate).
             path_prefix = pathlib.Path(shortest_dotted_path.replace(".", "/")).parent
 
+            # Remove the `great_expectations` top level
+            if path_prefix.parts[0] == "great_expectations":
+                path_prefix = pathlib.Path(*path_prefix.parts[1:])
+
             # Join the shortest path and write output
             output_path = (path_prefix / html_file_path.stem).with_suffix(".mdx")
         else:
             output_path = html_file_path.relative_to(static_html_file_path).with_suffix(
                 ".mdx"
             )
+            # Remove the `great_expectations` top level
+            if output_path.parts[0] == "great_expectations":
+                output_path = pathlib.Path(*output_path.parts[1:])
 
         return output_path
 
@@ -365,12 +384,12 @@ class SphinxInvokeDocsBuilder:
     def _remove_md_stubs(self):
         """Remove all markdown stub files."""
 
-        excluded_files: Tuple[pathlib.Path, ...] = (
+        excluded_files: tuple[pathlib.Path, ...] = (
             self.base_path / "index.md",
             self.base_path / "README.md",
         )
 
-        all_files: Tuple[pathlib.Path] = tuple(self.base_path.glob("*.md"))
+        all_files: tuple[pathlib.Path] = tuple(self.base_path.glob("*.md"))
 
         for file in all_files:
             if file not in excluded_files:
@@ -399,7 +418,7 @@ class SphinxInvokeDocsBuilder:
             f"sidebar_label: {title}\n"
             "---\n"
             f"{import_code_block_content}"
-            "\n"
+            "\n\n"
         )
         doc = doc_front_matter + doc
 
@@ -412,6 +431,10 @@ class SphinxInvokeDocsBuilder:
         Also quotes use a different quote character. This method cleans up
         these items so that the code block is rendered appropriately.
         """
-        doc = doc.replace("&lt;", "<").replace("&gt;", ">").replace("”", '"')
+        doc = doc.replace("&lt;", "<").replace("&gt;", ">")
+        doc = (
+            doc.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
+        )
         doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
+        doc = doc.replace("${", r"\${")
         return doc

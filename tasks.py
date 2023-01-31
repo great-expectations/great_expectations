@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 
 import invoke
 
-from scripts import check_public_api_docstrings, check_type_hint_coverage
+from scripts import check_public_api_docstrings
 
 try:
     from tests.integration.usage_statistics import usage_stats_utils
@@ -205,19 +205,6 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         raise invoke.Exit(
             message=f"{err}\n\nGenerated with {check_public_api_docstrings.__file__}",
             code=1,
-        )
-
-
-@invoke.task(aliases=["type-cov"])  # type: ignore
-def type_coverage(ctx: Context):
-    """
-    Check total type-hint coverage compared to `develop`.
-    """
-    try:
-        check_type_hint_coverage.main()
-    except AssertionError as err:
-        raise invoke.Exit(
-            message=f"{err}\n\n  See {check_type_hint_coverage.__file__}", code=1
         )
 
 

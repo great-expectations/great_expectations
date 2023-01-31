@@ -8,6 +8,7 @@ import sys
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -232,6 +233,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return domain_builder
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN,
         args_payload_fn=get_profiler_run_usage_statistics,
@@ -252,22 +254,21 @@ class BaseRuleBasedProfiler(ConfigPeer):
         ] = None,
         comment: Optional[str] = None,
     ) -> RuleBasedProfilerResult:
-        """
-        Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
+        """Run the Rule-Based Profiler.
 
         Args:
-            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
-            rules: name/(configuration-dictionary) (overrides)
-            batch_list: Explicit list of Batch objects to supply data at runtime
-            batch_request: Explicit batch_request used to supply data at runtime
-            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
-            reconciliation_directives: directives for how each rule component should be overwritten
-            variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
-            domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
-            comment: Optional comment for "citation" of "ExpectationSuite" returned as part of "RuleBasedProfilerResult"
+            variables: Attribute name/value pairs (overrides), commonly-used in `Builder` objects.
+            rules: A collection of rule configurations (overrides).
+            batch_list: The batches of data supplied at runtime.
+            batch_request: An explicit Batch Request used to supply data at runtime.
+            runtime_configuration: Additional runtime settings (see `Validator.DEFAULT_RUNTIME_CONFIGURATION`).
+            reconciliation_directives: Directives for how each rule component should be overwritten.
+            variables_directives_list: Additional override runtime variables directives (modify `BaseRuleBasedProfiler`).
+            domain_type_directives_list: Additional override runtime domain directives (modify `BaseRuleBasedProfiler`).
+            comment: A citation for the Expectation Suite returned as part of the `RuleBasedProfilerResult`.
 
         Returns:
-            "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
+            A `RuleBasedProfilerResult` instance that contains the profiling output.
         """
         # Check to see if the user has disabled progress bars
         disable = False
@@ -1327,7 +1328,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def rule_states(self) -> List[RuleState]:
         return self._rule_states
 
+    @public_api
     def to_json_dict(self) -> dict:
+        """Returns a JSON-serializable dict representation of this RuleBasedProfiler.
+
+        Returns:
+            A JSON-serializable dict representation of this RuleBasedProfiler.
+        """
         variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
             variables=self.variables
         )
@@ -1351,10 +1358,23 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self.__repr__()
 
 
+@public_api
 class RuleBasedProfiler(BaseRuleBasedProfiler):
-    """
-    RuleBasedProfiler object serves to profile, or automatically evaluate a set of rules, upon a given
-    batch / multiple batches of data.
+    """Create a `RuleBasedProfiler` to profile one or more batches of data.
+
+    For each rule in the `rules` configuration, instantiate the following if
+    available: a domain builder, a parameter builder, and a configuration builder.
+    These will be used to define profiler computation patterns.
+
+    Args:
+        name: Give the Profiler a name.
+        config_version: Specify the version of the Profiler to use (currently only `1.0` is supported).
+        variables: Variables to be substituted within the rules.
+        rules: A collection of rule configurations, each having its own `domain_builder`, `parameter_builders`, and `expectation_configuration_builders`.
+        data_context: Define the full runtime environment (data access, etc.).
+
+    Returns:
+        A `RuleBasedProfiler` instance.
 
     --ge-feature-maturity-info--
 
@@ -1434,21 +1454,8 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         data_context: Optional[AbstractDataContext] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        Create a new Profiler using configured rules.
-        For a Rule or an item in a Rule configuration, instantiates the following if
-        available: a domain builder, a parameter builder, and a configuration builder.
-        These will be used to define profiler computation patterns.
+        """Initialize a RuleBasedProfiler."""
 
-        Args:
-            name: The name of the RBP instance
-            id: Identifier specific to this RBP instance.
-            config_version: The version of the RBP (currently only 1.0 is supported)
-            variables: Any variables to be substituted within the rules
-            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
-            expectation_configuration_builders configuration components
-            data_context: AbstractDataContext object that defines full runtime environment (data access, etc.)
-        """
         profiler_config = RuleBasedProfilerConfig(
             name=name,
             id=id,

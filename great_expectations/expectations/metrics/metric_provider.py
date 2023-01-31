@@ -26,7 +26,21 @@ def metric_value(
     metric_fn_type: Union[str, MetricFunctionTypes] = MetricFunctionTypes.VALUE,
     **kwargs,
 ):
-    """The metric decorator annotates a method"""
+    """Decorator used to register a specific function as a metric value function.
+
+    Metric value functions are used by MetricProviders to immediately return
+    the value of the requested metric.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview
+
+    Args:
+        engine: the *type* of ExecutionEngine that this partial supports
+        metric_fn_type: the type of metric function. Usually the default value should be maintained.
+
+    Returns:
+        Decorated function
+    """
 
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)
@@ -47,7 +61,25 @@ def metric_partial(
     domain_type: Union[str, MetricDomainTypes],
     **kwargs,
 ):
-    """The metric decorator annotates a method"""
+    """Decorator used to register a specific function as a metric partial.
+
+    Metric partial functions are used by MetricProviders to support batching of
+    requests for multiple metrics in an ExecutionEngine. Instead of returning
+    the metric value immediately, they return a different function that the
+    ExecutionEngine can execute locally on your data to obtain the metric value.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/features_custom_expectations/how_to_add_spark_support_for_an_expectation
+        - https://docs.greatexpectations.io/docs/guides/expectations/features_custom_expectations/how_to_add_sqlalchemy_support_for_an_expectation
+
+    Args:
+        engine: the *type* of ExecutionEngine that this partial supports
+        partial_fn_type: the type of partial function
+        domain_type: the type of domain this metric function processes
+
+    Returns:
+        Decorated function
+    """
 
     def wrapper(metric_fn: Callable):
         @wraps(metric_fn)
@@ -71,9 +103,9 @@ class MetricProvider(metaclass=MetaMetricProvider):
     MetricProvider classes *must* have the following attributes set:
         1. `metric_name`: the name to use. Metric Name must be globally unique in
            a great_expectations installation.
-        1. `domain_keys`: a tuple of the *keys* used to determine the domain of the
+        2. `domain_keys`: a tuple of the *keys* used to determine the domain of the
            metric
-        2. `value_keys`: a tuple of the *keys* used to determine the value of
+        3. `value_keys`: a tuple of the *keys* used to determine the value of
            the metric.
 
     In some cases, subclasses of Expectation, such as TableMetricProvider will already
