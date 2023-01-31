@@ -1,7 +1,7 @@
 import re  # regular expressions
 
 # !!! This giant block of imports should be something simpler, such as:
-from great_expectations import *
+from great_expectations import *  # noqa: F403
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,

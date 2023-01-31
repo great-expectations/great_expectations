@@ -8,10 +8,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    ExpectationConfiguration,
-)
+from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import column_aggregate_partial
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,

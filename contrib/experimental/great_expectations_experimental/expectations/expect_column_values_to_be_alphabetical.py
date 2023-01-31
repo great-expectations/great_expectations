@@ -10,10 +10,6 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.map_metric import (
-    ColumnMapMetricProvider,
-    column_condition_partial,
-)
 
 
 # This class defines a Metric to support your Expectation

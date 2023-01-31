@@ -4,10 +4,7 @@ from scipy import stats as stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    ExpectationConfiguration,
-)
+from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
     column_aggregate_value,

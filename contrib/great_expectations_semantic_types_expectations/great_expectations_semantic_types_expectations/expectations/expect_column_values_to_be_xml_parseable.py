@@ -12,7 +12,6 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    ExpectationConfiguration,
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.import_manager import F, sparktypes
