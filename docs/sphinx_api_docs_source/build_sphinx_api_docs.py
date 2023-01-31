@@ -86,6 +86,9 @@ class SphinxInvokeDocsBuilder:
         self.definitions: Dict[str, Definition] = {}
         self.sidebar_entries: Dict[str, SidebarEntry] = {}
         self.written_stub_paths: list[pathlib.Path] = []
+        self.written_class_paths: dict[
+            pathlib.Path, list[str]
+        ] = {}  # Dict of {path: ["ClassName1", "ClassName2", ...]}
 
     def build_docs(self) -> None:
         """Main method to build Sphinx docs and convert to Docusaurus."""
@@ -380,6 +383,10 @@ class SphinxInvokeDocsBuilder:
                     path=sidebar_entry.md_relpath,
                 )
 
+                to_add = self.written_class_paths.get(definition.filepath, [])
+                to_add.append(definition.name)
+                self.written_class_paths[definition.filepath] = to_add
+
     def _write_stub(self, stub: str, path: pathlib.Path) -> None:
         """Write the markdown stub file with appropriate filename."""
         filepath = self.base_path / path
@@ -482,6 +489,14 @@ class SphinxInvokeDocsBuilder:
         """Create the markdown stub content for a module."""
 
         # TODO: Exclude classes that are already captured in separate class pages
+        classes_to_exclude: list[str] = self.written_class_paths.get(
+            definition.filepath, []
+        )
+        class_excludes = (
+            f":exclude-members: {', '.join(classes_to_exclude)}"
+            if classes_to_exclude
+            else ""
+        )
 
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
         file_name = dotted_path_prefix.split(".")[-1]
@@ -492,6 +507,7 @@ class SphinxInvokeDocsBuilder:
 .. automodule:: {dotted_path_prefix}
    :members:
    :inherited-members:
+   {class_excludes}
 
 ```
 """
