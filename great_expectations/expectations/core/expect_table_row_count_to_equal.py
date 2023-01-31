@@ -78,8 +78,10 @@ class ExpectTableRowCountToEqual(TableExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validate the configuration of an Expectation.
+        """Validate the configuration of an Expectation.
+
+        For `expect_table_row_count_to_equal` we require that the `configuraton.kwargs` contain
+        a `value` key that is either an `int` or a `dict` with an Evaluation Parameter.
 
         The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
         superclass hierarchy.
