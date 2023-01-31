@@ -24,6 +24,7 @@ import os
 import pathlib
 import shutil
 import sys
+from dataclasses import dataclass
 from typing import Dict
 from urllib.parse import urlparse
 
@@ -41,6 +42,20 @@ logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
 
+@dataclass(frozen=True)
+class SidebarEntry:
+
+    # TODO: Docstring
+
+    name: str
+    definition: Definition
+    module_relpath: pathlib.Path
+    class_relpath: pathlib.Path | None
+    class_min_dotted_path: str | None
+    md_relpath: pathlib.Path
+    mdx_relpath: pathlib.Path
+
+
 class SphinxInvokeDocsBuilder:
     """Utility class to support building API docs using Sphinx and Invoke."""
 
@@ -55,12 +70,13 @@ class SphinxInvokeDocsBuilder:
         self.base_path = base_path
         self.docs_path = base_path.parent
         self.repo_root = self.docs_path.parent
+        self.gx_path = self.repo_root / "great_expectations"
 
-        self.temp_sphinx_html_dir = (
-            self.repo_root / "temp_docs_build_dir" / "sphinx_api_docs"
-        )
+        self.temp_sphinx_html_dir = self.repo_root / "temp_sphinx_api_docs_build_dir"
         self.docusaurus_api_docs_path = self.docs_path / pathlib.Path("reference/api")
-        self.class_definitions: Dict[str, Definition] = {}
+        self.definitions: Dict[str, Definition] = {}
+        self.sidebar_entries: Dict[str, SidebarEntry] = {}
+        self.written_stub_paths: list[pathlib.Path] = []
 
     def build_docs(self) -> None:
         """Main method to build Sphinx docs and convert to Docusaurus."""
@@ -78,9 +94,9 @@ class SphinxInvokeDocsBuilder:
 
         self._process_and_create_docusaurus_mdx_files()
 
-        self._remove_md_stubs()
-
-        self._remove_temp_html()
+        # self._remove_md_stubs()
+        #
+        # self._remove_temp_html()
 
     @staticmethod
     def exit_with_error_if_docs_dependencies_are_not_installed() -> None:
@@ -148,6 +164,14 @@ class SphinxInvokeDocsBuilder:
                 title_str = title.get_text(strip=True)
                 title_str = title_str.replace("#", "")
 
+                # Add .py to module titles
+                stem_path = pathlib.Path(
+                    self._get_mdx_file_path(html_file_path=html_file).stem
+                )
+                mdx_stripped_path = str(stem_path.with_suffix(""))
+                if mdx_stripped_path.lower() == title_str.lower():
+                    title_str = str(stem_path.with_suffix(".py"))
+
                 # Add class="sphinx-api-doc" to section tag to reference in css
                 doc = soup.find("section")
                 doc["class"] = "sphinx-api-doc"
@@ -192,9 +216,8 @@ class SphinxInvokeDocsBuilder:
                             html_file_path=html_file
                         ).with_suffix(".html")
                     else:
-                        # Use the shortened path generated from the href
                         shortened_path_version = self._get_mdx_file_path(
-                            html_file_path=pathlib.Path(split_href[0])
+                            html_file_path=href_path
                         ).with_suffix(".html")
 
                     fragment = ""
@@ -242,35 +265,34 @@ class SphinxInvokeDocsBuilder:
             Path within the API docs folder to create the mdx file.
         """
 
-        static_html_file_path = pathlib.Path(self.temp_sphinx_html_dir) / "html"
+        sidebar_entry = self.sidebar_entries.get(html_file_path.stem)
 
-        # Get the definition
-        definition = self.class_definitions.get(html_file_path.stem)
-
-        if definition:
-            # Use definition to find the shortest path
-            shortest_dotted_path = get_shortest_dotted_path(
-                definition=definition, repo_root_path=self.repo_root
-            )
-            # Use parent since file will create sidebar entry with class name
-            # (if .parent is not used, then there will be a duplicate).
-            path_prefix = pathlib.Path(shortest_dotted_path.replace(".", "/")).parent
-
-            # Remove the `great_expectations` top level
-            if path_prefix.parts[0] == "great_expectations":
-                path_prefix = pathlib.Path(*path_prefix.parts[1:])
-
-            # Join the shortest path and write output
-            output_path = (path_prefix / html_file_path.stem).with_suffix(".mdx")
-        else:
-            output_path = html_file_path.relative_to(static_html_file_path).with_suffix(
-                ".mdx"
-            )
-            # Remove the `great_expectations` top level
-            if output_path.parts[0] == "great_expectations":
-                output_path = pathlib.Path(*output_path.parts[1:])
+        output_path = sidebar_entry.mdx_relpath
 
         return output_path
+
+    def _get_class_mdx_relative_filepath(self, definition: Definition) -> pathlib.Path:
+        # TODO: Docstring
+
+        if definition.filepath.is_absolute():
+            definition_path = definition.filepath.relative_to(self.gx_path)
+        else:
+            definition_path = definition.filepath
+
+        if isinstance(definition.ast_definition, ast.ClassDef):
+            definition_path = definition_path.with_suffix("") / definition.name
+
+        return definition_path.with_suffix(".mdx")
+
+    def _get_module_mdx_relative_filepath(self, definition: Definition) -> pathlib.Path:
+        # TODO: Docstring
+
+        if definition.filepath.is_absolute():
+            definition_path = definition.filepath.relative_to(self.gx_path)
+        else:
+            definition_path = definition.filepath
+
+        return definition_path.with_suffix(".py.mdx")
 
     def _get_base_url(self) -> str:
         """The base url for use in generating absolute links.
@@ -296,11 +318,30 @@ class SphinxInvokeDocsBuilder:
 
         for definition in definitions:
             if isinstance(definition.ast_definition, ast.ClassDef):
-                self.class_definitions[definition.name] = definition
+                self.definitions[definition.name] = definition
+
+                sidebar_entry = SidebarEntry(
+                    name=definition.name,
+                    definition=definition,
+                    module_relpath=definition.filepath.relative_to(self.gx_path),
+                    class_relpath=None,
+                    class_min_dotted_path=get_shortest_dotted_path(
+                        definition=definition, repo_root_path=self.repo_root
+                    ),
+                    md_relpath=self._get_md_file_name_from_entity_name(
+                        definition=definition
+                    ),
+                    mdx_relpath=self._get_class_mdx_relative_filepath(
+                        definition=definition
+                    ),
+                )
+
+                self.sidebar_entries[definition.name] = sidebar_entry
+
                 md_stub = self._create_class_md_stub(definition=definition)
                 self._write_stub(
                     stub=md_stub,
-                    path=self._get_md_file_name_from_entity_name(definition=definition),
+                    path=sidebar_entry.md_relpath,
                 )
 
     def _write_stub(self, stub: str, path: pathlib.Path) -> None:
@@ -316,17 +357,51 @@ class SphinxInvokeDocsBuilder:
         definitions = get_public_api_module_level_function_definitions()
 
         for definition in definitions:
-            md_stub = self._create_module_md_stub(definition=definition)
-            self._write_stub(
-                stub=md_stub,
-                path=self._get_md_file_name_from_dotted_path_prefix(
+
+            # TODO: Move this side effect to a separate method
+            self.definitions[definition.name] = definition
+
+            sidebar_entry = SidebarEntry(
+                name=definition.name,
+                definition=definition,
+                module_relpath=definition.filepath.relative_to(self.gx_path),
+                class_relpath=None,
+                class_min_dotted_path=get_shortest_dotted_path(
+                    definition=definition, repo_root_path=self.repo_root
+                ),
+                md_relpath=self._get_module_flat_path(definition=definition),
+                mdx_relpath=self._get_module_mdx_relative_filepath(
                     definition=definition
                 ),
             )
 
+            sidebar_entry_key = str(
+                self._get_module_flat_path(definition=definition, suffix="")
+            )
+            self.sidebar_entries[sidebar_entry_key] = sidebar_entry
+
+            md_stub = self._create_module_md_stub(definition=definition)
+
+            self._write_stub(
+                stub=md_stub,
+                path=sidebar_entry.md_relpath,
+            )
+
+    def _get_module_flat_path(
+        self, definition: Definition, suffix=".md"
+    ) -> pathlib.Path:
+        # TODO: Docstring
+        relpath = definition.filepath.relative_to(self.gx_path).with_suffix(suffix)
+        flat_path = str(relpath).replace("/", "_")
+        return pathlib.Path(flat_path)
+
     def _get_entity_name(self, definition: Definition) -> str:
         """Get the name of the entity (class, module, function)."""
         return definition.ast_definition.name
+
+    def _get_module_name(self, definition: Definition) -> str:
+        """Get the name of the module from the definition."""
+        return definition.filepath.with_suffix("").parts[-1]
 
     def _get_md_file_name_from_entity_name(
         self, definition: Definition
