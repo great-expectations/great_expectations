@@ -1279,13 +1279,13 @@ class Expectation(metaclass=MetaExpectation):
         that do not exist). These errors are added under "errors" key in the report.
 
         Args:
-            raise_exceptions_for_backends (bool)
-            ignore_suppress (bool)
-            ignore_only_for (bool)
-            for_gallery (bool)
-            debug_logger (optional[logging.Logger])
-            only_consider_these_backends (optional[List[str]])
-            context (optional[AbstractDataContext])
+            raise_exceptions_for_backends: Bool object that when True will raise an Exception if a backend fails to connect.
+            ignore_suppress:  Bool object that when True will ignore the suppress_test_for list on Expectation sample tests.
+            ignore_only_for:  Bool object that when True will ignore the only_for list on Expectation sample tests.
+            for_gallery:  Bool object that when True will create empty arrays to use as examples for the Expectation Diagnostics
+            debug_logger (optional[logging.Logger]):  Logger object to use for sending debug messages to.
+            only_consider_these_backends (optional[List[str]])  List of backends to consider
+            context (optional[AbstractDataContext]): Instance of any child of "AbstractDataContext" class
 
         Returns:
             An Expectation Diagnostics report object
