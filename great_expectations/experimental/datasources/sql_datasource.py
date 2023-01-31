@@ -5,6 +5,7 @@ import itertools
 from datetime import datetime
 from typing import (
     TYPE_CHECKING,
+    Any,
     Callable,
     Dict,
     List,
@@ -17,6 +18,7 @@ from typing import (
 
 import pydantic
 from pydantic import dataclasses as pydantic_dc
+from sqlalchemy import func
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -56,7 +58,7 @@ class ColumnSplitter:
     method_name: str
     param_names: Sequence[str]
 
-    def param_defaults(self, table_asset: TableAsset) -> Dict[str, List]:
+    def param_defaults(self, sql_asset: _SQLAsset) -> Dict[str, List]:
         raise NotImplementedError
 
     @pydantic.validator("method_name")
@@ -91,33 +93,34 @@ class SqlYearMonthSplitter(ColumnSplitter):
         default_factory=lambda: ["year", "month"]
     )
 
-    def param_defaults(self, table_asset: TableAsset) -> Dict[str, List]:
+    def param_defaults(self, sql_asset: _SQLAsset) -> Dict[str, List]:
         """Query sql database to get the years and months to split over.
 
         Args:
-            table_asset: A TableAsset over which we want to split the data.
+            sql_asset: A SQL DataAsset over which we want to split the data.
         """
         return _query_for_year_and_month(
-            table_asset, self.column_name, _get_sql_datetime_range
+            sql_asset, self.column_name, _get_sql_datetime_range
         )
 
 
 def _query_for_year_and_month(
-    table_asset: TableAsset,
+    sql_asset: _SQLAsset,
     column_name: str,
     query_datetime_range: Callable[
-        [sqlalchemy.engine.base.Connection, str, str], DatetimeRange
+        [sqlalchemy.engine.base.Connection, sqlalchemy.sql.Selectable, str],
+        DatetimeRange,
     ],
 ) -> Dict[str, List]:
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
-    execution_engine = table_asset.datasource.get_execution_engine()
+    execution_engine = sql_asset.datasource.get_execution_engine()
     assert isinstance(execution_engine, SqlAlchemyExecutionEngine)
 
     with execution_engine.engine.connect() as conn:
         datetimes: DatetimeRange = query_datetime_range(
             conn,
-            table_asset.table_name,
+            sql_asset.as_selectable(),
             column_name,
         )
     year: List[int] = list(range(datetimes.min.year, datetimes.max.year + 1))
@@ -130,17 +133,25 @@ def _query_for_year_and_month(
 
 
 def _get_sql_datetime_range(
-    conn: sqlalchemy.engine.base.Connection, table_name: str, col_name: str
+    conn: sqlalchemy.engine.base.Connection,
+    selectable: sqlalchemy.sql.Selectable,
+    col_name: str,
 ) -> DatetimeRange:
-    q = f"select min({col_name}), max({col_name}) from {table_name}"
-    min_max_dt = list(conn.execute(q))[0]
+    import sqlalchemy as sa
+
+    column = sa.column(col_name)
+    query = sa.select([func.min(col_name), func.max(column)]).select_from(selectable)
+    min_max_dt = list(conn.execute(query))[0]
+    if min_max_dt[0] is None or min_max_dt[1] is None:
+        raise SQLDatasourceError(
+            f"Data date range can not be determined for the query: {query}. The returned range was {min_max_dt}."
+        )
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
 
 
-class TableAsset(DataAsset):
+class _SQLAsset(DataAsset):
     # Instance fields
-    type: Literal["table"] = "table"
-    table_name: str
+    type: Literal["sqlasset"] = "sqlasset"
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
 
@@ -186,14 +197,14 @@ class TableAsset(DataAsset):
     def add_year_and_month_splitter(
         self,
         column_name: str,
-    ) -> TableAsset:
+    ) -> _SQLAsset:
         """Associates a year month splitter with this DataAsset
 
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
 
         Returns:
-            This TableAsset so we can use this method fluently.
+            This DataAsset so we can use this method fluently.
         """
         self.column_splitter = SqlYearMonthSplitter(
             column_name=column_name,
@@ -272,12 +283,7 @@ class TableAsset(DataAsset):
         column_splitter = self.column_splitter
         for request in self._fully_specified_batch_requests(batch_request):
             batch_metadata = copy.deepcopy(request.options)
-            batch_spec_kwargs = {
-                "type": "table",
-                "data_asset_name": self.name,
-                "table_name": self.table_name,
-                "batch_identifiers": {},
-            }
+            batch_spec_kwargs = self._create_batch_spec_kwargs()
             if column_splitter:
                 batch_spec_kwargs["splitter_method"] = column_splitter.method_name
                 batch_spec_kwargs["splitter_kwargs"] = {
@@ -329,6 +335,77 @@ class TableAsset(DataAsset):
         self.sort_batches(batch_list)
         return batch_list
 
+    def _create_batch_spec_kwargs(self) -> dict[str, Any]:
+        """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec
+
+        This is called by get_batch_list_from_batch_request to generate the batches.
+
+        Returns:
+            A dictionary that will be passed to SqlAlchemyDatasourceBatchSpec(**returned_dict)
+        """
+        raise NotImplementedError
+
+    def as_selectable(self) -> sqlalchemy.sql.Selectable:
+        """Returns a Selectable that can be used to query this data
+
+        Returns:
+            A Selectable that can be used in a from clause to query this data
+        """
+        raise NotImplementedError
+
+
+class QueryAsset(_SQLAsset):
+    # Instance fields
+    type: Literal["query"] = "query"  # type: ignore[assignment]
+    query: str
+
+    @pydantic.validator("query")
+    def query_must_start_with_select(cls, v: str):
+        query = v.lstrip()
+        if not (query.upper().startswith("SELECT") and query[6].isspace()):
+            raise ValueError("query must start with 'SELECT' followed by a whitespace.")
+        return v
+
+    def as_selectable(self) -> sqlalchemy.sql.Selectable:
+        """Returns the Selectable that is used to retrieve the data.
+
+        This can be used in a subselect FROM clause for queries against this data.
+        """
+        import sqlalchemy as sa
+
+        return sa.select(sa.text(self.query.lstrip()[6:])).subquery()
+
+    def _create_batch_spec_kwargs(self) -> dict[str, Any]:
+        return {
+            "data_asset_name": self.name,
+            "query": self.query,
+            "temp_table_schema_name": None,
+            "batch_identifiers": {},
+        }
+
+
+class TableAsset(_SQLAsset):
+    # Instance fields
+    type: Literal["table"] = "table"  # type: ignore[assignment]
+    table_name: str
+
+    def as_selectable(self) -> sqlalchemy.sql.Selectable:
+        """Returns the table as a sqlalchemy Selectable.
+
+        This can be used in a from clause for a query against this data.
+        """
+        import sqlalchemy as sa
+
+        return sa.text(self.table_name)
+
+    def _create_batch_spec_kwargs(self) -> dict[str, Any]:
+        return {
+            "type": "table",
+            "data_asset_name": self.name,
+            "table_name": self.table_name,
+            "batch_identifiers": {},
+        }
+
 
 class SQLDatasource(Datasource):
     """Adds a generic SQL datasource to the data context.
@@ -337,18 +414,18 @@ class SQLDatasource(Datasource):
         name: The name of this datasource.
         connection_string: The SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
-        assets: An optional dictionary whose keys are TableAsset names and whose values
-            are TableAsset objects.
+        assets: An optional dictionary whose keys are SQL DataAsset names and whose values
+            are SQL DataAsset objects.
     """
 
     # class var definitions
-    asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset]
+    asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset, QueryAsset]
 
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: str
-    assets: Dict[str, TableAsset] = {}
+    assets: Dict[str, _SQLAsset] = {}
 
     # private attrs
     _engine: sqlalchemy.engine.Engine = pydantic.PrivateAttr()
@@ -428,5 +505,28 @@ class SQLDatasource(Datasource):
             table_name=table_name,
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             # see DataAsset._parse_order_by_sorter()
+        )
+        return self.add_asset(asset)
+
+    def add_query_asset(
+        self,
+        name: str,
+        query: str,
+        order_by: Optional[BatchSortersDefinition] = None,
+    ) -> QueryAsset:
+        """Adds a query asset to this datasource.
+
+        Args:
+            name: The name of this table asset.
+            query: The SELECT query to selects the data to validate. It must begin with the "SELECT".
+            order_by: A list of BatchSorters or BatchSorter strings.
+
+        Returns:
+            The QueryAsset that is added to the datasource.
+        """
+        asset = QueryAsset(
+            name=name,
+            query=query,
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
         )
         return self.add_asset(asset)
