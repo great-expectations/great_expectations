@@ -10,7 +10,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations.data_context.store.expectations_store import ExpectationsStore
+from great_expectations.data_context.store import ExpectationsStore, ProfilerStore
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
@@ -31,6 +31,16 @@ class ExpectationsStoreSpy(ExpectationsStore):
         return super().set(key=key, value=value, **kwargs)
 
 
+class ProfilerStoreSpy(ProfilerStore):
+    def __init__(self, store_name: str) -> None:
+        self.save_count = 0
+        super().__init__(store_name)
+
+    def set(self, key, value, **kwargs):
+        self.save_count += 1
+        return super().set(key=key, value=value, **kwargs)
+
+
 class EphemeralDataContextSpy(EphemeralDataContext):
     """
     Simply wraps around EphemeralDataContext but keeps tabs on specific method calls around state management.
@@ -43,10 +53,15 @@ class EphemeralDataContextSpy(EphemeralDataContext):
         super().__init__(project_config)
         self.save_count = 0
         self._expectations_store = ExpectationsStoreSpy()
+        self._profiler_store = ProfilerStoreSpy("profiler_store")
 
     @property
     def expectations_store(self):
         return self._expectations_store
+
+    @property
+    def profiler_store(self):
+        return self._profiler_store
 
     def _save_project_config(self):
         """
@@ -379,14 +394,32 @@ def test_add_or_update_expectation_suite_updates_successfully(
             kwargs={"column": "x", "value_set": [1, 2, 4]},
         ),
     ]
-    context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
+    _ = context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
 
     assert context.expectations_store.save_count == 2
 
 
 @pytest.mark.unit
-def test_update_profiler_success(in_memory_data_context: EphemeralDataContextSpy):
+def test_update_profiler_success(
+    in_memory_data_context: EphemeralDataContextSpy,
+    profiler_rules: dict,
+):
     context = in_memory_data_context
+
+    name = "my_rbp"
+    config_version = 1.0
+    rules = profiler_rules
+
+    profiler = context.add_profiler(
+        name=name, config_version=config_version, rules=rules
+    )
+
+    assert context.profiler_store.save_count == 1
+
+    profiler.rules = {}
+    context.update_profiler(profiler)
+
+    assert context.profiler_store.save_count == 2
 
 
 @pytest.mark.unit
@@ -407,5 +440,45 @@ def test_update_profiler_failure(in_memory_data_context: EphemeralDataContextSpy
 
 
 @pytest.mark.unit
-def test_add_or_update_profiler(in_memory_data_context: EphemeralDataContextSpy):
+def test_add_or_update_profiler_adds_successfully(
+    in_memory_data_context: EphemeralDataContextSpy, profiler_rules: dict
+):
     context = in_memory_data_context
+
+    name = "my_rbp"
+    config_version = 1.0
+    rules = profiler_rules
+
+    profiler = context.add_or_update_profiler(
+        name=name, config_version=config_version, rules=rules
+    )
+
+    config = profiler.config
+
+    assert config.name == name
+    assert config.config_version == config_version
+    assert len(config.rules) == len(rules) and config.rules.keys() == rules.keys()
+    assert context.profiler_store.save_count == 1
+
+
+@pytest.mark.unit
+def test_add_or_update_profiler_updates_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    profiler_rules: dict,
+):
+    context = in_memory_data_context
+
+    name = "my_rbp"
+    config_version = 1.0
+    rules = profiler_rules
+
+    profiler = context.add_profiler(
+        name=name, config_version=config_version, rules=rules
+    )
+
+    assert context.profiler_store.save_count == 1
+
+    profiler.rules = {}
+    _ = context.add_or_update_profiler(name=name)
+
+    assert context.profiler_store.save_count == 2

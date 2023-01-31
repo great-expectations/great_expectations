@@ -2510,7 +2510,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         existing_profiler = None
         try:
             existing_profiler = self.get_profiler(name=name, ge_cloud_id=id)
-        except gx_exceptions.InvalidKeyError:
+        except gx_exceptions.ProfilerNotFoundError:
             logger.info(
                 f"Could not find an existing profiler named '{name}'; creating a new one."
             )
@@ -2521,9 +2521,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 name=existing_profiler.name, ge_cloud_id=existing_profiler.ge_cloud_id
             )
 
-        if not config_version or not rules:
-            raise ValueError("TODO")
-
+        config_version = config_version or 1.0
+        rules = rules or {}
         return self.add_profiler(
             name=name, config_version=config_version, rules=rules, variables=variables
         )
