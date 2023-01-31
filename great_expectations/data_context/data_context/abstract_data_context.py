@@ -2413,7 +2413,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         TODO
         """
-        pass
+        RuleBasedProfiler.update_profiler(
+            profiler=profiler,
+            profiler_store=self.profiler_store,
+            data_context=self,
+        )
 
     def add_or_update_profiler(
         self,
@@ -2426,7 +2430,23 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         TODO
         """
-        pass
+        existing_profiler = None
+        try:
+            existing_profiler = self.get_profiler(name=name, ge_cloud_id=id)
+        except gx_exceptions.InvalidKeyError:
+            logger.info(
+                f"Could not find an existing profiler named '{name}'; creating a new one."
+            )
+
+        if existing_profiler:
+            self.update_profiler(existing_profiler)
+            return self.get_profiler(
+                name=existing_profiler.name, ge_cloud_id=existing_profiler.ge_cloud_id
+            )
+
+        return self.add_profiler(
+            name=name, config_version=config_version, rules=rules, variables=variables
+        )
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,

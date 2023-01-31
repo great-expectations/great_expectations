@@ -1190,19 +1190,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> RuleBasedProfiler:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id (but not both)"
-
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
-            )
-        else:
-            key = ConfigurationIdentifier(
-                configuration_key=name,
-            )
+        key = RuleBasedProfiler._construct_profiler_key(name=name, id=ge_cloud_id)
         try:
             profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
         except gx_exceptions.InvalidKeyError as exc_ik:
@@ -1240,17 +1228,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         name: Optional[str] = None,
         ge_cloud_id: Optional[str] = None,
     ) -> None:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id (but not both)"
-
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
-            )
-        else:
-            key = ConfigurationIdentifier(configuration_key=name)
+        key = RuleBasedProfiler._construct_profiler_key(name=name, id=ge_cloud_id)
 
         try:
             profiler_store.remove_key(key=key)
@@ -1265,6 +1243,26 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
 
     @staticmethod
+    def update_profiler(
+        profiler: RuleBasedProfiler,
+        profiler_store: ProfilerStore,
+        data_context: AbstractDataContext,
+    ) -> None:
+        name = profiler.name
+        id = profiler.ge_cloud_id
+
+        key = RuleBasedProfiler._construct_profiler_key(name=name, id=id)
+        if not profiler_store.has_key(key):
+            raise gx_exceptions.ProfilerNotFoundError(message="TODO")
+
+        RuleBasedProfiler.delete_profiler(name=name, id=id)
+        RuleBasedProfiler.add_profiler(
+            config=profiler.config,
+            data_context=data_context,
+            profiler_store=profiler_store,
+        )
+
+    @staticmethod
     def list_profilers(
         profiler_store: ProfilerStore,
         ge_cloud_mode: bool = False,
@@ -1272,6 +1270,23 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if ge_cloud_mode:
             return profiler_store.list_keys()
         return [x.configuration_key for x in profiler_store.list_keys()]
+
+    @staticmethod
+    def _construct_profiler_key(
+        name: Optional[str] = None,
+        ge_cloud_id: Optional[str] = None,
+    ) -> ConfigurationIdentifier | GXCloudIdentifier:
+        assert bool(name) ^ bool(
+            ge_cloud_id
+        ), "Must provide either name or ge_cloud_id (but not both)"
+
+        if ge_cloud_id:
+            return GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
+            )
+        return ConfigurationIdentifier(
+            configuration_key=name,
+        )
 
     def self_check(self, pretty_print: bool = True) -> dict:
         """
