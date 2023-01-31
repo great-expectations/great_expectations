@@ -191,7 +191,7 @@ class _DataFrameAsset(DataAsset):
 
             # Some pydantic annotations are postponed due to circular imports.
             # Batch.update_forward_refs() will set the annotations before we
-            # instantiate the Batch class since we can import them above.
+            # instantiate the Batch class since we can import them in this scope.
             Batch.update_forward_refs()
             batch_list.append(
                 Batch(
