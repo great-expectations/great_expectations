@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from pprint import pprint
-from typing import Callable, ContextManager, Optional
+from typing import Callable, ContextManager, Optional, Tuple
 from unittest import mock
 
 import pytest
@@ -168,7 +168,7 @@ def create_and_add_table_asset_without_testing_connection(
     name: str,
     table_name: str,
     column_splitter: Optional[SqlYearMonthSplitter] = None,
-) -> tuple[PostgresDatasource, TableAsset]:
+) -> Tuple[PostgresDatasource, TableAsset]:
     table_asset = TableAsset(
         name=name,
         table_name=table_name,
