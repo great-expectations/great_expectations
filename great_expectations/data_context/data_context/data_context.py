@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Optional, Tuple, overload
 
 from typing_extensions import Literal
 
-from great_expectations.core._docs_decorators import deprecated_argument, public_api
+from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -65,7 +65,6 @@ def DataContext(
 # TODO: add additional overloads
 
 
-@public_api
 @deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_base_url", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_access_token", version="0.15.37")

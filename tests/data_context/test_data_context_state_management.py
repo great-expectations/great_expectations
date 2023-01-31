@@ -10,7 +10,7 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
-from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store.expectations_store import ExpectationsStore
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
@@ -20,7 +20,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 
 
-class StoreSpy(Store):
+class ExpectationsStoreSpy(ExpectationsStore):
     def __init__(self) -> None:
         self.save_count = 0
         super().__init__()
@@ -41,7 +41,7 @@ class EphemeralDataContextSpy(EphemeralDataContext):
     ) -> None:
         super().__init__(project_config)
         self.save_count = 0
-        self._expectations_store = StoreSpy()
+        self._expectations_store = ExpectationsStoreSpy()
 
     @property
     def expectations_store(self):
@@ -295,3 +295,89 @@ def test_add_expectation_suite_failure(
         in str(e.value)
     )
     assert context.expectations_store.save_count == 1
+
+
+@pytest.mark.unit
+def test_update_expectation_suite_success(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+
+    suite_name = "default"
+    suite = context.add_expectation_suite(suite_name)
+
+    assert context.expectations_store.save_count == 1
+
+    suite.expectations = [
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={"column": "x", "value_set": [1, 2, 4]},
+        ),
+    ]
+    context.update_expectation_suite(suite)
+
+    assert context.expectations_store.save_count == 2
+
+
+@pytest.mark.unit
+def test_update_expectation_suite_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+
+    suite_name = "my_brand_new_suite"
+    suite = ExpectationSuite(expectation_suite_name=suite_name)
+
+    with pytest.raises(gx_exceptions.DataContextError) as e:
+        context.update_expectation_suite(suite)
+
+    assert f"expectation_suite with name {suite_name} does not exist." in str(e.value)
+
+
+@pytest.mark.unit
+def test_add_or_update_expectation_suite_adds_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+
+    expectation_suite_name = "default"
+    expectations = [
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={"column": "x", "value_set": [1, 2, 4]},
+        ),
+    ]
+    meta = {"great_expectations_version": "0.15.44"}
+
+    suite = context.add_or_update_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+        expectations=expectations,
+        meta=meta,
+    )
+
+    assert suite.expectation_suite_name == expectation_suite_name
+    assert suite.expectations == expectations
+    assert suite.meta == meta
+    assert context.expectations_store.save_count == 1
+
+
+@pytest.mark.unit
+def test_add_or_update_expectation_suite_updates_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+
+    suite_name = "default"
+    suite = context.add_expectation_suite(suite_name)
+
+    assert context.expectations_store.save_count == 1
+
+    suite.expectations = [
+        ExpectationConfiguration(
+            expectation_type="expect_column_values_to_be_in_set",
+            kwargs={"column": "x", "value_set": [1, 2, 4]},
+        ),
+    ]
+    context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
+
+    assert context.expectations_store.save_count == 2
