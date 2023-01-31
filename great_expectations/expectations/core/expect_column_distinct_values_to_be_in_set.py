@@ -347,7 +347,7 @@ class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
             configuration: The ExpectationConfiguration to be validated.
 
         Raises:
-            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
                 Expectation.
         """
         super().validate_configuration(configuration)
