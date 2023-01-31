@@ -149,7 +149,9 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
             (
                 conditional_template_str,
                 conditional_params,
-            ) = parse_row_condition_string_pandas_engine(params["row_condition"])
+            ) = parse_row_condition_string_pandas_engine(  # FIXME: where does this come from?
+                params["row_condition"]
+            )
             template_str = conditional_template_str + ", then " + template_str
             params.update(conditional_params)
 
