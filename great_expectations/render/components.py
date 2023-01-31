@@ -296,9 +296,9 @@ class RenderedTableContent(RenderedComponentContent):
 
             icon-size: The size of the icons in the table. One of "sm", "md", or "lg".
         header_row_options: The options that can be set for the header_row. A dictionary with the keys being the column
-                            name and the values being a dictionary with the following form:
+            name and the values being a dictionary with the following form:
 
-                sortable: A boolean indicating whether the column is sortable.
+            sortable: A boolean indicating whether the column is sortable.
     """
 
     def __init__(
