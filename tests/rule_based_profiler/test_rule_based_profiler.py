@@ -1098,7 +1098,7 @@ def test_get_profiler_with_too_many_args_raises_error(
             ge_cloud_id="my_ge_cloud_id",
         )
 
-    assert "either name or ge_cloud_id" in str(e.value)
+    assert "either name or id" in str(e.value)
 
 
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
@@ -1320,7 +1320,7 @@ def test_delete_profiler_with_too_many_args_raises_error(
             ge_cloud_id="my_ge_cloud_id",
         )
 
-    assert "either name or ge_cloud_id" in str(e.value)
+    assert "either name or id" in str(e.value)
 
 
 @pytest.mark.unit
