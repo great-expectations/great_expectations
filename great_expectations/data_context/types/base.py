@@ -1698,7 +1698,6 @@ class DataContextConfigSchema(Schema):
     # noinspection PyUnusedLocal
     @validates_schema
     def validate_schema(self, data, **kwargs) -> None:
-        # this is where we can do this?
         if "config_version" not in data:
             raise gx_exceptions.InvalidDataContextConfigError(
                 "The key `config_version` is missing; please check your config file.",
