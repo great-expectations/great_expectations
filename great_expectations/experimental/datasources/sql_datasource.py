@@ -365,13 +365,8 @@ class SQLDatasource(Datasource):
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
-        """
-        Validates that SQL Alchemy was successfully imported and attempts to
-        create an engine if a properly formed connection_string was passed.
-        """
+        # validate that SQL Alchemy was successfully imported and attempt to create an engine
         if SQLALCHEMY_IMPORTED:
-            # connection_string will not be in values if an invalid string was passed and failed pydantic validation
-            # in this case, the specific ValidationError will be raised by pydantic after this root_validator is run
             if "connection_string" in kwargs and kwargs["connection_string"]:
                 try:
                     self._engine = sqlalchemy.create_engine(kwargs["connection_string"])

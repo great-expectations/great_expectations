@@ -337,7 +337,7 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
         metadatas = [batch.metadata for batch in batches]
         for month in _DEFAULT_TEST_MONTHS:
             expected_metadata = {"month": month, "year": 2022}
-            expected_metadata in metadatas
+            assert expected_metadata in metadatas
 
 
 @pytest.mark.unit
