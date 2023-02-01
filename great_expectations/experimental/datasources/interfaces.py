@@ -341,7 +341,7 @@ class Datasource(
 
     # private attrs
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
-    _execution_engine: ExecutionEngine | None = pydantic.PrivateAttr(None)
+    _execution_engine: Union[ExecutionEngine, None] = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", pre=True)
     def _load_asset_subtype(cls, v: Dict[str, dict]):

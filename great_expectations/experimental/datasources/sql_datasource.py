@@ -11,8 +11,8 @@ from typing import (
     NamedTuple,
     Optional,
     Sequence,
-    Set,
     Type,
+    Union,
     cast,
 )
 
@@ -351,7 +351,7 @@ class SQLDatasource(Datasource):
 
     # private attrs
     _cached_engine_kwargs: Dict[str, str] = pydantic.PrivateAttr({})
-    _engine: sqlalchemy.engine.Engine | None = pydantic.PrivateAttr(None)
+    _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
