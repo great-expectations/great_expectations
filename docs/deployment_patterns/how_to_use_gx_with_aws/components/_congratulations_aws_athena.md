@@ -1,0 +1,1 @@
+🚀🚀 Congratulations! 🚀🚀  You have successfully navigated the entire workflow for using Great Expectations with Amazon Web Services and Athena, from installing Great Expectations through Validating your Data.
