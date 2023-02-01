@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def spark_datasource(test_backends) -> SparkDatasource:
-    if "spark" not in test_backends:
+    if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
     return SparkDatasource(name="spark_datasource")

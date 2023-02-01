@@ -175,10 +175,10 @@ exclude = [
     'validator/validator\.py', # 54
     # tests
     'tests/experimental/datasources/conftest\.py',
-    'tests/experimental/datasources/test_utils\.py',
     'tests/experimental/datasources/tasks\.py',
     'tests/experimental/datasources/test_config\.py',
-    'tests/experimental/datasources/test_integration_datasource\.py',
+    'tests/experimental/datasources/integration/integration_test_utils\.py',
+    'tests/experimental/datasources/integration/test_integration_datasource\.py',
     'tests/experimental/datasources/test_pandas_datasource\.py',
     'tests/experimental/datasources/test_postgres_datasource\.py',
     'tests/experimental/datasources/test_spark_datasource\.py',

@@ -9,7 +9,14 @@ import pathlib
 import invoke
 import pandas as pd
 
-TEST_ROOT = pathlib.Path(__file__).parent.parent.parent.resolve(strict=True)
+from great_expectations.data_context.util import file_relative_path
+
+TEST_ROOT = pathlib.Path(
+    file_relative_path(
+        __file__,
+        pathlib.Path(""),
+    )
+)
 
 
 @invoke.task(aliases=["gen-assets"])
@@ -22,6 +29,7 @@ def generate_asset_files(
     """Generate or re-generate various test asset files."""
     if not source_csv_dir:
         source_csv_dir = TEST_ROOT / "test_sets" / "taxi_yellow_tripdata_samples"
+
     source_csv_dir = pathlib.Path(source_csv_dir).resolve(strict=True)
 
     json_asset_dir = pathlib.Path.cwd() / "json_assets"

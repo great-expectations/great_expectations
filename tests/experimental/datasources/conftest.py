@@ -15,6 +15,7 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -128,9 +129,12 @@ def inject_engine_lookup_double(monkeypatch: MonkeyPatch) -> ExecutionEngineDoub
 def pandas_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    csv_path = (
-        pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
-    ).resolve()
+    csv_path = pathlib.Path(
+        file_relative_path(
+            __file__,
+            pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples"),
+        )
+    )
     pandas_ds = context.sources.add_pandas(name="my_pandas")
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
@@ -145,10 +149,19 @@ def pandas_data(
 def sql_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    db_file = (
-        pathlib.Path(__file__)
-        / "../../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
-    ).resolve()
+    db_file = pathlib.Path(
+        file_relative_path(
+            __file__,
+            pathlib.Path(
+                "..",
+                "..",
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "sqlite",
+                "yellow_tripdata.db",
+            ),
+        )
+    )
     datasource = context.sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
@@ -168,9 +181,12 @@ def sql_data(
 def spark_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    csv_path = (
-        pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
-    ).resolve()
+    csv_path = pathlib.Path(
+        file_relative_path(
+            __file__,
+            pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples"),
+        )
+    )
     spark_ds = context.sources.add_spark(name="my_spark")
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
@@ -185,9 +201,12 @@ def spark_data(
 def multibatch_pandas_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    csv_path = (
-        pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
-    ).resolve()
+    csv_path = pathlib.Path(
+        file_relative_path(
+            __file__,
+            pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples"),
+        )
+    )
     pandas_ds = context.sources.add_pandas(name="my_pandas")
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
@@ -202,10 +221,19 @@ def multibatch_pandas_data(
 def multibatch_sql_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    db_file = (
-        pathlib.Path(__file__)
-        / "../../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata_sample_2020_all_months_combined.db"
-    ).resolve()
+    db_file = pathlib.Path(
+        file_relative_path(
+            __file__,
+            pathlib.Path(
+                "..",
+                "..",
+                "test_sets",
+                "taxi_yellow_tripdata_samples",
+                "sqlite",
+                "yellow_tripdata.db",
+            ),
+        )
+    )
     datasource = context.sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
@@ -225,9 +253,12 @@ def multibatch_sql_data(
 def multibatch_spark_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    csv_path = (
-        pathlib.Path(__file__) / "../../../test_sets/taxi_yellow_tripdata_samples"
-    ).resolve()
+    csv_path = pathlib.Path(
+        file_relative_path(
+            __file__,
+            pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples"),
+        )
+    )
     spark_ds = context.sources.add_spark(name="my_spark")
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
@@ -243,7 +274,7 @@ def multibatch_spark_data(
 def datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if "spark" not in test_backends:
+    if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
     return request.param(empty_data_context)
@@ -255,7 +286,7 @@ def datasource_test_data(
 def multibatch_datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if "spark" not in test_backends:
+    if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
     return request.param(empty_data_context)

@@ -8,6 +8,7 @@ import pydantic
 import pytest
 
 from great_expectations.data_context import FileDataContext
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sql_datasource import (
@@ -23,7 +24,12 @@ except ImportError:  # type: ignore[assignment]
 
 p = pytest.param
 
-EXPERIMENTAL_DATASOURCE_TEST_DIR = pathlib.Path(__file__).parent
+EXPERIMENTAL_DATASOURCE_TEST_DIR = pathlib.Path(
+    file_relative_path(
+        __file__,
+        pathlib.Path(""),
+    )
+)
 
 PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
