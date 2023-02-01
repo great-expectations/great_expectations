@@ -2549,6 +2549,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             if variables is None:
                 variables = convert_variables_to_dict(existing_profiler.variables)
 
+        config_version = config_version or 1.0
+        rules = rules or {}
         return self.add_profiler(
             name=name, config_version=config_version, rules=rules, variables=variables
         )
