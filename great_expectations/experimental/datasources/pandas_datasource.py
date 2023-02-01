@@ -53,6 +53,13 @@ class _DataFrameAsset(DataAsset):
     )
 
     class Config:
+        """
+        Need to allow extra fields for the base type because pydantic will first create
+        an instance of `_DataFrameAsset` before we select and create the more specific
+        asset subtype.
+        Each specific subtype should `forbid` extra fields.
+        """
+
         extra = pydantic.Extra.allow
 
     def _fully_specified_batch_requests_with_path(
