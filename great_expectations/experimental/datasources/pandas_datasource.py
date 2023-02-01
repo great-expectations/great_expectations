@@ -35,6 +35,14 @@ class PandasDatasourceError(Exception):
 
 
 class _DataFrameAsset(DataAsset):
+    # Pandas specific class attrs
+    _EXCLUDE_FROM_READER_OPTIONS: ClassVar[set[str]] = {
+        "name",
+        "path",
+        "regex",
+        "order_by",
+    }
+
     # Pandas specific attrs
     path: pathlib.Path
     regex: Pattern
@@ -142,13 +150,7 @@ class _DataFrameAsset(DataAsset):
                 path=str(path),
                 reader_method=f"read_{self.type}",
                 reader_options=self.dict(
-                    exclude_unset=True,
-                    exclude={  # TODO: don't hardcode
-                        "name",
-                        "path",
-                        "regex",
-                        "order_by",
-                    },
+                    exclude_unset=True, exclude=self._EXCLUDE_FROM_READER_OPTIONS
                 ),
             )
             data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
