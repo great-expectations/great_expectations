@@ -61,7 +61,7 @@ class _SourceFactories:
         An `.add_pandas()` pandas factory method will be added to `context.sources`.
 
         >>> class PandasDatasource(Datasource):
-        >>>     type: str = 'pandas'`
+        >>>     type: str = 'pandas'
         >>>     asset_types = [FileAsset]
         >>>     execution_engine: PandasExecutionEngine
         """
