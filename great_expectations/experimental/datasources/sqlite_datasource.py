@@ -117,7 +117,7 @@ class SqliteDatasource(SQLDatasource):
         self,
         name: str,
         table_name: str,
-        schema: Optional[str] = None,
+        schema_name: Optional[str] = None,
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> SqliteTableAsset:
         """Adds a sqlite table asset to this sqlite datasource.
@@ -125,7 +125,7 @@ class SqliteDatasource(SQLDatasource):
         Args:
             name: The name of this table asset.
             table_name: The table where the data resides.
-            schema: The schema that holds the table.
+            schema_name: The schema that holds the table.
             order_by: A list of BatchSorters or BatchSorter strings.
 
         Returns:
@@ -134,7 +134,7 @@ class SqliteDatasource(SQLDatasource):
         asset = SqliteTableAsset(
             name=name,
             table_name=table_name,
-            schema=schema,
+            schema_name=schema_name,
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             # see TableAsset._parse_order_by_sorter()
         )

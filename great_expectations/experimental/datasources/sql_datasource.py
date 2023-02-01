@@ -142,7 +142,7 @@ class TableAsset(DataAsset):
     # Instance fields
     type: Literal["table"] = "table"
     table_name: str
-    schema_name: Optional[str] = pydantic.Field(None, alias="schema")
+    schema_name: Optional[str] = None
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
 
@@ -159,11 +159,13 @@ class TableAsset(DataAsset):
         engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
         exists = sqlalchemy.inspect(engine).has_table(
             table_name=self.table_name,
-            schema=self.schema,
+            schema=self.schema_name,
         )
         if not exists:
             table_str = (
-                f"{self.schema}.{self.table_name}" if self.schema else self.table_name
+                f"{self.schema_name}.{self.table_name}"
+                if self.schema_name
+                else self.table_name
             )
             raise TestConnectionError(
                 f"Attempt to connect to table: {table_str} failed because the table "
@@ -410,7 +412,7 @@ class SQLDatasource(Datasource):
         self,
         name: str,
         table_name: str,
-        schema: Optional[str] = None,
+        schema_name: Optional[str] = None,
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> TableAsset:
         """Adds a table asset to this datasource.
@@ -418,7 +420,7 @@ class SQLDatasource(Datasource):
         Args:
             name: The name of this table asset.
             table_name: The table where the data resides.
-            schema: The schema that holds the table.
+            schema_name: The schema that holds the table.
             order_by: A list of BatchSorters or BatchSorter strings.
 
         Returns:
@@ -427,7 +429,7 @@ class SQLDatasource(Datasource):
         asset = TableAsset(
             name=name,
             table_name=table_name,
-            schema=schema,
+            schema_name=schema_name,
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             # see DataAsset._parse_order_by_sorter()
         )
