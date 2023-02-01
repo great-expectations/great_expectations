@@ -45,12 +45,10 @@ def _source(
     original_override = PostgresDatasource.execution_engine_override
     try:
         PostgresDatasource.execution_engine_override = execution_eng_cls
-        with mock.patch("sqlalchemy.create_engine"):
-            postgres_datasource = PostgresDatasource(
-                name="my_datasource",
-                connection_string=connection_string,
-            )
-        yield postgres_datasource
+        yield PostgresDatasource(
+            name="my_datasource",
+            connection_string=connection_string,
+        )
     finally:
         PostgresDatasource.execution_engine_override = original_override
 

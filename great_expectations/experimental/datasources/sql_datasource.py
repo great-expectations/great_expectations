@@ -11,6 +11,7 @@ from typing import (
     NamedTuple,
     Optional,
     Sequence,
+    Set,
     Type,
     cast,
 )
@@ -348,6 +349,10 @@ class SQLDatasource(Datasource):
     connection_string: str
     assets: Dict[str, TableAsset] = {}
 
+    # private attrs
+    _cached_engine_kwargs: Dict[str, str] = pydantic.PrivateAttr({})
+    _engine: sqlalchemy.engine.Engine | None = pydantic.PrivateAttr(None)
+
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the default execution engine type."""
@@ -356,23 +361,26 @@ class SQLDatasource(Datasource):
         return SqlAlchemyExecutionEngine
 
     def get_engine(self) -> sqlalchemy.engine.Engine:
-        # validate that SQL Alchemy was successfully imported and attempt to create an engine
-        if SQLALCHEMY_IMPORTED:
-            try:
-                engine = sqlalchemy.create_engine(self.connection_string)
-            except Exception as e:
-                # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
-                # one case is a missing plugin (e.g. psycopg2)
+        current_engine_kwargs = self.dict(exclude=self._excluded_eng_args)
+        if current_engine_kwargs != self._cached_engine_kwargs or not self._engine:
+            # validate that SQL Alchemy was successfully imported and attempt to create an engine
+            if SQLALCHEMY_IMPORTED:
+                try:
+                    self._engine = sqlalchemy.create_engine(self.connection_string)
+                except Exception as e:
+                    # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
+                    # one case is a missing plugin (e.g. psycopg2)
+                    raise SQLDatasourceError(
+                        "Unable to create a SQLAlchemy engine from "
+                        f"connection_string: {self.connection_string} due to the "
+                        f"following exception: {str(e)}"
+                    )
+                self._cached_engine_kwargs = current_engine_kwargs
+            else:
                 raise SQLDatasourceError(
-                    "Unable to create a SQLAlchemy engine from "
-                    f"connection_string: {self.connection_string} due to the "
-                    f"following exception: {str(e)}"
+                    "Unable to create SQLDatasource due to missing sqlalchemy dependency."
                 )
-        else:
-            raise SQLDatasourceError(
-                "Unable to create SQLDatasource due to missing sqlalchemy dependency."
-            )
-        return engine
+        return self._engine
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SQLDatasource.
