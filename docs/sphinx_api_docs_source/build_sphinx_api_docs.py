@@ -107,8 +107,8 @@ class SphinxInvokeDocsBuilder:
         self._process_and_create_docusaurus_mdx_files()
 
         # self._remove_md_stubs()
-        #
-        # self._remove_temp_html()
+
+        self._remove_temp_html()
 
     @staticmethod
     def exit_with_error_if_docs_dependencies_are_not_installed() -> None:
@@ -492,7 +492,7 @@ class SphinxInvokeDocsBuilder:
         classes_to_exclude: list[str] = self.written_class_paths.get(
             definition.filepath, []
         )
-        class_excludes = (
+        member_excludes = (
             f":exclude-members: {', '.join(classes_to_exclude)}"
             if classes_to_exclude
             else ""
@@ -505,9 +505,9 @@ class SphinxInvokeDocsBuilder:
 
 ```{{eval-rst}}
 .. automodule:: {dotted_path_prefix}
+   {member_excludes}
    :members:
    :inherited-members:
-   {class_excludes}
 
 ```
 """
