@@ -67,7 +67,7 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
 
         return w_value
 
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
@@ -94,7 +94,7 @@ class ColumnWassersteinDistance(ColumnMetricProvider):
     #
     #     return column_median
     #
-    # @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SparkDFExecutionEngine)
     # def _spark(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",

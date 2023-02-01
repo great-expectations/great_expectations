@@ -33,7 +33,7 @@ from great_expectations.experimental.datasources.metadatasource import MetaDatas
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     # TODO: When the Batch class is moved out of the experimental directory, we should try to import the annotations
@@ -42,10 +42,12 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
 
 try:
+    import pyspark
     from pyspark.sql import Row as pyspark_sql_Row
 except ImportError:
-    LOGGER.debug("No spark sql dataframe module available.")
+    pyspark = None
     pyspark_sql_Row = None
+    logger.debug("No spark sql dataframe module available.")
 
 
 class TestConnectionError(Exception):
@@ -118,7 +120,7 @@ def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
     Args:
         sort_key: A batch metadata key which will be used to sort batches on a data asset.
                   This can be prefixed with a + or - to indicate increasing or decreasing
-                  sorting. If not specified, defaults to increasing order.
+                  sorting.  If not specified, defaults to increasing order.
     """
     if sort_key[0] == "-":
         return BatchSorter(key=sort_key[1:], reverse=True)
