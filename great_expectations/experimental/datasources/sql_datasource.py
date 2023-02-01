@@ -146,9 +146,6 @@ class TableAsset(DataAsset):
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
 
-    class Config:
-        extra = pydantic.Extra.allow
-
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
 
