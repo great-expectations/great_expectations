@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass
+from string import punctuation
 from typing import TYPE_CHECKING
 
 from pyparsing import (
@@ -51,16 +52,18 @@ le = Literal("<=")
 eq = Literal("==")
 ops = (gt ^ lt ^ ge ^ le ^ eq).setResultsName("op")
 fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?").setResultsName("fnumber")
-condition_value = Suppress('"') + Word(f"{alphanums}._").setResultsName(
+punctuation_without_apostrophe = punctuation.replace('"', '').replace("'", "")
+condition_value_chars = alphanums + punctuation_without_apostrophe
+condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
-) + Suppress('"') ^ Suppress("'") + Word(f"{alphanums}._").setResultsName(
+) + Suppress('"') ^ Suppress("'") + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
 ) + Suppress(
     "'"
 )
 not_null = CaselessLiteral(".notnull()").setResultsName("notnull")
 condition = (column_name + not_null).setParseAction(_set_notnull) ^ (
-    column_name + ops + (fnumber ^ condition_value)
+        column_name + ops + (fnumber ^ condition_value)
 )
 
 
@@ -122,7 +125,7 @@ def _parse_great_expectations_condition(row_condition: str):
 
 # noinspection PyUnresolvedReferences
 def parse_condition_to_spark(
-    row_condition: str,
+        row_condition: str,
 ) -> "pyspark.sql.Column":  # noqa: F821 # TODO: pyspark typing
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
@@ -156,7 +159,7 @@ def parse_condition_to_spark(
 
 
 def parse_condition_to_sqlalchemy(
-    row_condition: str,
+        row_condition: str,
 ) -> ColumnElement:
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
