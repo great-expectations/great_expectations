@@ -62,11 +62,37 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         return config
 
     @overload
-    def yaml(self, stream_or_path: Union[StringIO, None] = None, **yaml_kwargs) -> str:
+    def yaml(
+        self,
+        stream_or_path: Union[StringIO, None] = None,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        by_alias: bool = ...,
+        exclude_unset: bool = ...,
+        exclude_defaults: bool = ...,
+        exclude_none: bool = ...,
+        encoder: Union[Callable[[Any], Any], None] = ...,
+        models_as_dict: bool = ...,
+        **yaml_kwargs,
+    ) -> str:
         ...
 
     @overload
-    def yaml(self, stream_or_path: pathlib.Path, **yaml_kwargs) -> pathlib.Path:
+    def yaml(
+        self,
+        stream_or_path: pathlib.Path,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        by_alias: bool = ...,
+        exclude_unset: bool = ...,
+        exclude_defaults: bool = ...,
+        exclude_none: bool = ...,
+        encoder: Union[Callable[[Any], Any], None] = ...,
+        models_as_dict: bool = ...,
+        **yaml_kwargs,
+    ) -> pathlib.Path:
         ...
 
     def yaml(
