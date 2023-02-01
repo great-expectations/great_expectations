@@ -348,16 +348,27 @@ class Datasource(
     def _load_asset_subtype(
         cls: Type[Datasource[DataAssetType]], data_asset: DataAsset
     ) -> DataAssetType:
-        LOGGER.info(f"Loading 'assets' ->\n{pf(data_asset, depth=4)}")
+        """
+        Some `data_asset` may be loaded as a less specific asset subtype different than
+        what was intended.
+        If a more specific subtype is needed the `data_asset` will be converted to a
+        more specific `DataAsset`.
+        """
+        LOGGER.debug(f"Loading 'assets' ->\n{pf(data_asset, depth=4)}")
         asset_type_name: str = data_asset.type
         asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[asset_type_name]
 
-        kwargs = data_asset.dict(exclude_unset=True)
-        LOGGER.info(f"kwargs\n{pf(kwargs)}")
+        if asset_type is type(data_asset):
+            # asset is already the intended type
+            return data_asset
 
-        polymorphed_asset = asset_type(**kwargs)
-        LOGGER.info(f"{asset_type}\n{repr(polymorphed_asset)}")
-        return polymorphed_asset
+        # strip out asset default kwargs
+        kwargs = data_asset.dict(exclude_unset=True)
+        LOGGER.debug(f"{asset_type_name} - kwargs\n{pf(kwargs)}")
+
+        asset_of_intended_type = asset_type(**kwargs)
+        LOGGER.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
+        return asset_of_intended_type
 
     def _execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the execution engine to be used"""
