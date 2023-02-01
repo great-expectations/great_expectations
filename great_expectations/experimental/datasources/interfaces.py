@@ -292,8 +292,6 @@ class DataAsset(ExperimentalBaseModel):
 # If a Datasource can have more than 1 DataAssetType, this will need to change.
 DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
 
-CALLS = []
-
 
 class Datasource(
     ExperimentalBaseModel, Generic[DataAssetType], metaclass=MetaDatasource
@@ -344,22 +342,19 @@ class Datasource(
         arbitrary_types_allowed = True
 
     @pydantic.validator("assets", each_item=True)
+    @classmethod
     def _load_asset_subtype(
         cls: Type[Datasource[DataAssetType]], data_asset: DataAsset
     ) -> DataAssetType:
-        global CALLS
-        CALLS.append(cls.__name__)
-        LOGGER.warning(f"Loading 'assets' ->\n{pf(data_asset, depth=4)}")
+        LOGGER.info(f"Loading 'assets' ->\n{pf(data_asset, depth=4)}")
         asset_type_name: str = data_asset.type
         asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[asset_type_name]
 
         kwargs = data_asset.dict(exclude_unset=True)
-        LOGGER.warning(f"kwargs\n{pf(kwargs)}")
+        LOGGER.info(f"kwargs\n{pf(kwargs)}")
 
         polymorphed_asset = asset_type(**kwargs)
-        LOGGER.warning(f"{asset_type}\n{repr(polymorphed_asset)}")
-
-        LOGGER.error(f"CALLS {CALLS}")
+        LOGGER.info(f"{asset_type}\n{repr(polymorphed_asset)}")
         return polymorphed_asset
 
     def _execution_engine_type(self) -> Type[ExecutionEngine]:
