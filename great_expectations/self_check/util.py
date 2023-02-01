@@ -1437,7 +1437,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_LOGGER.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr] # noqa: E731
+        _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr] # noqa: E731
 
     dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
@@ -2323,8 +2323,8 @@ def generate_expectation_tests(  # noqa: C901 - 43
     _debug = lambda x: x  # noqa: E731
     _error = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_LOGGER.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
-        _error = lambda x: debug_LOGGER.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
+        _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
+        _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
 
     parametrized_tests = []
 
@@ -2636,7 +2636,7 @@ def should_we_generate_this_test(
 
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_LOGGER.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
+        _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
 
     # backend will only ever be pandas, spark, or a specific SQL dialect, but sometimes
     # suppress_test_for or only_for may include "sqlalchemy"
@@ -2822,7 +2822,7 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
     :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
     if debug_logger is not None:
-        _debug = lambda x: debug_LOGGER.debug(  # noqa: E731
+        _debug = lambda x: debug_logger.debug(  # noqa: E731
             f"(evaluate_json_test_v3_api) {x}"
         )
     else:

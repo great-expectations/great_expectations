@@ -1321,10 +1321,10 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         if debug_logger is not None:
-            _debug = lambda x: debug_LOGGER.debug(  # noqa: E731
+            _debug = lambda x: debug_logger.debug(  # noqa: E731
                 f"(run_diagnostics) {x}"
             )
-            _error = lambda x: debug_LOGGER.error(  # noqa: E731
+            _error = lambda x: debug_logger.error(  # noqa: E731
                 f"(run_diagnostics) {x}"
             )
         else:
@@ -1819,10 +1819,10 @@ class Expectation(metaclass=MetaExpectation):
         """Generate test results. This is an internal method for run_diagnostics."""
 
         if debug_logger is not None:
-            _debug = lambda x: debug_LOGGER.debug(  # noqa: E731
+            _debug = lambda x: debug_logger.debug(  # noqa: E731
                 f"(_get_test_results) {x}"
             )
-            _error = lambda x: debug_LOGGER.error(  # noqa: E731
+            _error = lambda x: debug_logger.error(  # noqa: E731
                 f"(_get_test_results) {x}"
             )
         else:
