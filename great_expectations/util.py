@@ -74,7 +74,7 @@ except ModuleNotFoundError:
     # Fallback for python < 3.8
     import importlib_metadata  # type: ignore[no-redef]
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
@@ -82,7 +82,7 @@ try:
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql import Select
 except ImportError:
-    logger.debug(
+    LOGGER.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sa = None
@@ -984,7 +984,7 @@ def validate(
         )
 
     if expectation_suite is None:
-        logger.info("Using expectation suite from DataContext.")
+        LOGGER.info("Using expectation suite from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, str):
             data_context = get_context(context_root_dir=data_context)
@@ -1016,7 +1016,7 @@ def validate(
                 "When providing an expectation suite, expectation_suite_name cannot also be provided."
             )
 
-        logger.info(
+        LOGGER.info(
             f"Validating data_asset_name {data_asset_name} with expectation_suite_name {expectation_suite.expectation_suite_name}"
         )
 
@@ -1109,7 +1109,7 @@ def lint_code(code: str) -> str:
     # While this seems to resolve the issue, the root cause is yet to be determined.
 
     if black is None:
-        logger.warning(
+        LOGGER.warning(
             "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
         )
         return code
@@ -1147,7 +1147,7 @@ def _convert_nulls_to_None(code: str) -> str:
     result = re.findall(pattern, code)
     for match in result:
         code = code.replace(f'"{match}": null', f'"{match}": None')
-        logger.info(
+        LOGGER.info(
             f"Replaced '{match}: null' with '{match}: None' before writing to file"
         )
     return code
@@ -1161,7 +1161,7 @@ def _convert_json_bools_to_python_bools(code: str) -> str:
         curr = f'"{identifier}": {boolean}'
         updated = f'"{identifier}": {boolean.title()}'  # true -> True | false -> False
         code = code.replace(curr, updated)
-        logger.info(f"Replaced '{curr}' with '{updated}' before writing to file")
+        LOGGER.info(f"Replaced '{curr}' with '{updated}' before writing to file")
     return code
 
 
@@ -1519,7 +1519,7 @@ def convert_decimal_to_float(d: SupportsFloat) -> float:
         and isinstance(d, decimal.Decimal)
         and requires_lossy_conversion(d=d)
     ):
-        logger.warning(
+        LOGGER.warning(
             f"Using lossy conversion for decimal {d} to float object to support serialization."
         )
 

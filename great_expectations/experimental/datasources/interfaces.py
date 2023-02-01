@@ -33,7 +33,7 @@ from great_expectations.experimental.datasources.metadatasource import MetaDatas
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     # TODO: When the Batch class is moved out of the experimental directory, we should try to import the annotations
@@ -47,7 +47,7 @@ try:
 except ImportError:
     pyspark = None
     pyspark_sql_Row = None
-    logger.debug("No spark sql dataframe module available.")
+    LOGGER.debug("No spark sql dataframe module available.")
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants as returned. The keys represent dimensions one can slice the data along
@@ -345,7 +345,7 @@ class Datasource(
 
     @pydantic.validator("assets", pre=True)
     def _load_asset_subtype(cls, v: Dict[str, dict]):
-        logger.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
+        LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
         loaded_assets: Dict[str, DataAssetType] = {}
 
         # TODO (kilo59): catch key errors
@@ -354,10 +354,10 @@ class Datasource(
             asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[
                 asset_type_name
             ]
-            logger.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
+            LOGGER.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
             loaded_assets[asset_name] = asset_type(**config)
 
-        logger.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
+        LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
 
     def _execution_engine_type(self) -> Type[ExecutionEngine]:

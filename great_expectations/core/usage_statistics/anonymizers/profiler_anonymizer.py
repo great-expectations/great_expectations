@@ -6,7 +6,7 @@ from great_expectations.rule_based_profiler.config.base import RuleBasedProfiler
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import deep_filter_properties_iterable
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ProfilerAnonymizer(BaseAnonymizer):
@@ -88,7 +88,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
         for name, rule in rules.items():
             anonymized_rule: dict = self._anonymize_rule(name, rule)
             anonymized_rules.append(anonymized_rule)
-            logger.debug(f"Anonymized rule {name}")
+            LOGGER.debug(f"Anonymized rule {name}")
 
         return anonymized_rules
 
@@ -135,7 +135,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
             anonymized_domain_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
-            logger.debug("Anonymized batch request in DomainBuilder")
+            LOGGER.debug("Anonymized batch request in DomainBuilder")
 
         return anonymized_domain_builder
 
@@ -173,7 +173,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
             anonymized_parameter_builder[
                 "anonymized_batch_request"
             ] = anonymized_batch_request
-            logger.debug("Anonymized batch request in ParameterBuilder")
+            LOGGER.debug("Anonymized batch request in ParameterBuilder")
 
         return anonymized_parameter_builder
 
@@ -217,7 +217,7 @@ class ProfilerAnonymizer(BaseAnonymizer):
             anonymized_expectation_configuration_builder[
                 "anonymized_condition"
             ] = self._anonymize_string(condition)
-            logger.debug("Anonymized condition in ExpectationConfigurationBuilder")
+            LOGGER.debug("Anonymized condition in ExpectationConfigurationBuilder")
 
         return anonymized_expectation_configuration_builder
 

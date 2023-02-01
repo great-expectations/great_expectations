@@ -20,9 +20,9 @@ from typing import List, Optional
 import click
 import requests
 
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.addHandler(logging.StreamHandler())
+LOGGER.setLevel(logging.INFO)
 
 
 class LinkReport:
@@ -104,13 +104,13 @@ class LinkChecker:
         if self._skip_external:
             return None
 
-        logger.debug(f"Checking external link {link} in file {file}", link, file)
+        LOGGER.debug(f"Checking external link {link} in file {file}", link, file)
 
         try:
             response = requests.get(link)
 
             if 400 <= response.status_code < 500:
-                logger.info(
+                LOGGER.info(
                     f"External link {link} failed in file {file} with code {response.status_code}"
                 )
                 return LinkReport(
@@ -119,12 +119,12 @@ class LinkChecker:
                     f"External link returned status code: {response.status_code}",
                 )
             else:
-                logger.debug(
+                LOGGER.debug(
                     f"External link {link} successful in file {file}, response code: {response.status_code}",
                 )
                 return None
         except requests.exceptions.ConnectionError as err:
-            logger.info(
+            LOGGER.info(
                 f"External link {link} in file {file} raised a connection error"
             )
             return LinkReport(
@@ -149,71 +149,71 @@ class LinkChecker:
     def _check_absolute_link(
         self, link: str, file: str, path: str
     ) -> Optional[LinkReport]:
-        logger.debug(f"Checking absolute link {link} in file {file}")
+        LOGGER.debug(f"Checking absolute link {link} in file {file}")
 
         # absolute links should point to files that exist (with the .md extension added)
         md_file = self._get_absolute_path(path).rstrip("/") + ".md"
-        logger.debug(f"Absolute link {link} resolved to path {md_file}")
+        LOGGER.debug(f"Absolute link {link} resolved to path {md_file}")
 
         if not os.path.isfile(md_file):
-            logger.info(f"Absolute link {link} in file {file} was not found")
+            LOGGER.info(f"Absolute link {link} in file {file} was not found")
             return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
-            logger.debug(f"Absolute link {link} in file {file} found")
+            LOGGER.debug(f"Absolute link {link} in file {file} found")
             return None
 
     def _check_absolute_image(
         self, link: str, file: str, path: str
     ) -> Optional[LinkReport]:
-        logger.debug(f"Checking absolute image {link} in file {file}")
+        LOGGER.debug(f"Checking absolute image {link} in file {file}")
 
         image_file = self._get_absolute_path(path)
         if not os.path.isfile(image_file):
-            logger.info(f"Absolute image {link} in file {file} was not found")
+            LOGGER.info(f"Absolute image {link} in file {file} was not found")
             return LinkReport(link, file, f"Image {image_file} not found")
         else:
-            logger.debug(f"Absolute image {link} in file {file} found")
+            LOGGER.debug(f"Absolute image {link} in file {file} found")
             return None
 
     def _check_relative_link(
         self, link: str, file: str, path: str
     ) -> Optional[LinkReport]:
-        logger.debug(f"Checking relative link {link} in file {file}")
+        LOGGER.debug(f"Checking relative link {link} in file {file}")
 
         md_file = self._get_relative_path(file, path)
-        logger.debug(f"Relative link {link} resolved to path {md_file}")
+        LOGGER.debug(f"Relative link {link} resolved to path {md_file}")
 
         if not os.path.isfile(md_file):
-            logger.info(f"Relative link {link} in file {file} was not found")
+            LOGGER.info(f"Relative link {link} in file {file} was not found")
             return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
-            logger.debug(f"Relative link {link} in file{file} found")
+            LOGGER.debug(f"Relative link {link} in file{file} found")
             return None
 
     def _check_relative_image(
         self, link: str, file: str, path: str
     ) -> Optional[LinkReport]:
-        logger.debug(f"Checking relative image {link} in file {file}")
+        LOGGER.debug(f"Checking relative image {link} in file {file}")
 
         image_file = self._get_relative_path(file, path)
         if not os.path.isfile(image_file):
-            logger.info(f"Relative image {link} in file {file} was not found")
+            LOGGER.info(f"Relative image {link} in file {file} was not found")
             return LinkReport(link, file, f"Image {image_file} not found")
         else:
-            logger.debug(f"Relative image {link} in file {file} found")
+            LOGGER.debug(f"Relative image {link} in file {file} found")
             return None
 
     def _check_docroot_link(
         self, link: str, file: str, path: str
     ) -> Optional[LinkReport]:
-        logger.debug(f"Checking docroot link {link} in file {file}")
+        LOGGER.debug(f"Checking docroot link {link} in file {file}")
 
         md_file = self._get_docroot_path(path)
         if not os.path.isfile(md_file):
-            logger.info(f"Docroot link {link} in file {file} was not found")
+            LOGGER.info(f"Docroot link {link} in file {file} was not found")
             return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
-            logger.debug(f"Docroot link {link} in file {file} found")
+            LOGGER.debug(f"Docroot link {link} in file {file} found")
             return None
 
     def _check_link(self, match: re.Match, file: str) -> Optional[LinkReport]:

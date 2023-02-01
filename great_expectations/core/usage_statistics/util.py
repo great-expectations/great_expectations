@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def send_usage_message(

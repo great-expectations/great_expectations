@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store import Store
     from great_expectations.validation_operators import ValidationOperator
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class Anonymizer(BaseAnonymizer):

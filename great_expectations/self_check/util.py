@@ -88,7 +88,7 @@ expectationConfigurationSchema = ExpectationConfigurationSchema()
 expectationSuiteSchema = ExpectationSuiteSchema()
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sqlalchemy
@@ -100,7 +100,7 @@ except ImportError:
     create_engine = None
     Engine = None
     SQLAlchemyError = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+    LOGGER.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 try:
     from pyspark.sql import DataFrame as SparkDataFrame
@@ -205,7 +205,7 @@ except ImportError:
             }
         except AttributeError:
             # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
+            LOGGER.warning(
                 "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
             )
             from collections import namedtuple
@@ -474,7 +474,7 @@ try:
 except ImportError:
     SqlAlchemyDataset = None  # type: ignore[misc,assignment] # could be None
     SqlAlchemyBatchReference = None  # type: ignore[misc,assignment] # could be None
-    logger.debug(
+    LOGGER.debug(
         "Unable to load sqlalchemy dataset; install optional sqlalchemy dependency for support."
     )
 
@@ -482,7 +482,7 @@ try:
     from great_expectations.dataset import SparkDFDataset
 except ImportError:
     SparkDFDataset = None  # type: ignore[misc,assignment] # could be None
-    logger.debug(
+    LOGGER.debug(
         "Unable to load spark dataset; install optional spark dependency for support."
     )
 
@@ -1437,7 +1437,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr] # noqa: E731
+        _debug = lambda x: debug_LOGGER.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr] # noqa: E731
 
     dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
@@ -2070,7 +2070,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                     "spark tests are requested, but pyspark is not installed"
                 )
             else:
-                logger.warning(
+                LOGGER.warning(
                     "spark tests are requested, but pyspark is not installed"
                 )
         else:
@@ -2086,7 +2086,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                     "sqlalchemy tests are requested, but sqlalchemy in not installed"
                 )
             else:
-                logger.warning(
+                LOGGER.warning(
                     "sqlalchemy tests are requested, but sqlalchemy in not installed"
                 )
             return test_backends
@@ -2114,7 +2114,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                         f"{connection_string}"
                     )
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         f"backend-specific tests are requested, but unable to connect to the database at "
                         f"{connection_string}"
                     )
@@ -2131,7 +2131,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                         f"'mysql+pymysql://root@{db_hostname}/test_ci'"
                     )
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         "mysql tests are requested, but unable to connect to the mysql database at "
                         f"'mysql+pymysql://root@{db_hostname}/test_ci'"
                     )
@@ -2156,7 +2156,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                         "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
                     )
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         "mssql tests are requested, but unable to connect to the mssql database at "
                         f"'mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
                         "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true'",
@@ -2176,7 +2176,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                         "bigquery tests are requested, but unable to connect"
                     ) from e
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         f"bigquery tests are requested, but unable to connect; {repr(e)}"
                     )
             else:
@@ -2203,7 +2203,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                         "AWS tests are requested, but credentials were not set up"
                     )
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         "AWS tests are requested, but credentials were not set up"
                     )
 
@@ -2219,7 +2219,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                         "trino tests are requested, but unable to connect"
                     ) from e
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         f"trino tests are requested, but unable to connect; {repr(e)}"
                     )
             else:
@@ -2234,7 +2234,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                         "Azure tests are requested, but credentials were not set up"
                     )
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         "Azure tests are requested, but credentials were not set up"
                     )
             test_backends += ["azure"]
@@ -2251,7 +2251,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                         "redshift tests are requested, but unable to connect"
                     ) from e
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         f"redshift tests are requested, but unable to connect; {repr(e)}"
                     )
             else:
@@ -2269,7 +2269,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                         "athena tests are requested, but unable to connect"
                     ) from e
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         f"athena tests are requested, but unable to connect; {repr(e)}"
                     )
             else:
@@ -2287,7 +2287,7 @@ def build_test_backends_list(  # noqa: C901 - 48
                         "snowflake tests are requested, but unable to connect"
                     ) from e
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         f"snowflake tests are requested, but unable to connect; {repr(e)}"
                     )
             else:
@@ -2323,8 +2323,8 @@ def generate_expectation_tests(  # noqa: C901 - 43
     _debug = lambda x: x  # noqa: E731
     _error = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
-        _error = lambda x: debug_logger.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
+        _debug = lambda x: debug_LOGGER.debug(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
+        _error = lambda x: debug_LOGGER.error(f"(generate_expectation_tests) {x}")  # type: ignore[union-attr]  # noqa: E731
 
     parametrized_tests = []
 
@@ -2636,7 +2636,7 @@ def should_we_generate_this_test(
 
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
-        _debug = lambda x: debug_logger.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
+        _debug = lambda x: debug_LOGGER.debug(f"(should_we_generate_this_test) {x}")  # type: ignore[union-attr] # noqa: E731
 
     # backend will only ever be pandas, spark, or a specific SQL dialect, but sometimes
     # suppress_test_for or only_for may include "sqlalchemy"
@@ -2822,7 +2822,7 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
     :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
     if debug_logger is not None:
-        _debug = lambda x: debug_logger.debug(  # noqa: E731
+        _debug = lambda x: debug_LOGGER.debug(  # noqa: E731
             f"(evaluate_json_test_v3_api) {x}"
         )
     else:

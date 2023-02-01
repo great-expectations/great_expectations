@@ -23,7 +23,7 @@ except ImportError:
     create_engine = None
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class DatabaseStoreBackend(StoreBackend):
@@ -64,7 +64,7 @@ class DatabaseStoreBackend(StoreBackend):
 
         if engine is not None:
             if credentials is not None:
-                logger.warning(
+                LOGGER.warning(
                     "Both credentials and engine were provided during initialization of SqlAlchemyExecutionEngine. "
                     "Ignoring credentials."
                 )
@@ -248,7 +248,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             return self.engine.execute(sel).fetchone()[0]
         except (IndexError, SQLAlchemyError) as e:
-            logger.debug(f"Error fetching value: {str(e)}")
+            LOGGER.debug(f"Error fetching value: {str(e)}")
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
     def _set(self, key, value, allow_update=True, **kwargs) -> None:
@@ -271,7 +271,7 @@ class DatabaseStoreBackend(StoreBackend):
             self.engine.execute(ins)
         except IntegrityError as e:
             if self._get(key) == value:
-                logger.info(f"Key {str(key)} already exists with the same value.")
+                LOGGER.info(f"Key {str(key)} already exists with the same value.")
             else:
                 raise gx_exceptions.StoreBackendError(
                     f"Integrity error {str(e)} while trying to store key"
@@ -314,7 +314,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             return self.engine.execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
-            logger.debug(f"Error checking for value: {str(e)}")
+            LOGGER.debug(f"Error checking for value: {str(e)}")
             return False
 
     def list_keys(self, prefix=()):

@@ -13,7 +13,7 @@ from great_expectations.experimental.datasources.sources import _SourceFactories
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import Datasource
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class DataContext:
@@ -45,7 +45,7 @@ class DataContext:
             config_path = pathlib.Path(cls._context.root_directory) / _config_file
             cls._config = GxConfig.parse_yaml(config_path)
             for ds_name, datasource in cls._config.datasources.items():
-                logger.info(f"Loaded '{ds_name}' from config")
+                LOGGER.info(f"Loaded '{ds_name}' from config")
                 cls._context._attach_datasource_to_context(datasource)
                 # TODO: add assets?
 
@@ -56,8 +56,8 @@ class DataContext:
         self.root_directory = context_root_dir
         self._sources: _SourceFactories = _SourceFactories(self)
         self._datasources: Dict[str, Datasource] = {}
-        logger.info(f"4a. Available Factories - {self._sources.factories}")
-        logger.debug(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
+        LOGGER.info(f"4a. Available Factories - {self._sources.factories}")
+        LOGGER.debug(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
 
     @property
     def sources(self) -> _SourceFactories:
@@ -81,6 +81,6 @@ def get_context(
     context_root_dir: Optional[DirectoryPath] = None, **kwargs
 ) -> DataContext:
     """Experimental get_context placeholder function."""
-    logger.info(f"3. Getting context {context_root_dir or ''}")
+    LOGGER.info(f"3. Getting context {context_root_dir or ''}")
     context = DataContext.get_context(context_root_dir=context_root_dir, **kwargs)
     return context

@@ -24,7 +24,7 @@ from scripts.public_api_report import (
     _default_code_absolute_paths,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
@@ -126,7 +126,7 @@ def _log_with_timestamp(content: str) -> None:
     """Log content with timestamp appended."""
     timestamp = datetime.datetime.now()
     timestamp_str = timestamp.strftime("%H:%M:%S")
-    logger.debug(f"{content} Timestamp: {timestamp_str}")
+    LOGGER.debug(f"{content} Timestamp: {timestamp_str}")
 
 
 def _get_docstring_errors(
@@ -202,7 +202,7 @@ def _public_api_docstring_errors(
 def main(
     select_paths: list[pathlib.Path] | None = None,
 ):
-    logger.info(
+    LOGGER.info(
         "Generating list of public API docstring errors. This may take a minute."
     )
     errors = _public_api_docstring_errors(select_paths=select_paths)
@@ -210,14 +210,14 @@ def main(
     _log_with_timestamp("Finished evaluating public docstrings.")
 
     if not errors:
-        logger.info("There are no public API docstring errors.")
+        LOGGER.info("There are no public API docstring errors.")
     else:
         errors_str = (
             f"\n----- {len(errors)} errors found -----\n"
             + "\n".join([e.raw_error for e in errors])
             + "\n----- END -----\n"
         )
-        logger.error(errors_str)
+        LOGGER.error(errors_str)
 
     assert len(errors) == 0, f"There are {len(errors)} docstring errors to address."
 

@@ -25,7 +25,7 @@ from great_expectations.render.util import (
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ExpectColumnValuesToBeIncreasing(ColumnMapExpectation):

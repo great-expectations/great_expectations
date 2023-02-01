@@ -19,7 +19,7 @@ from great_expectations.expectations.registry import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 @public_api

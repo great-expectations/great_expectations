@@ -11,7 +11,7 @@ def test_parse_definition_nodes_from_file(tmpdir):
     f = tmpdir.mkdir("tmp").join("foo.py")
     f.write(
         """
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 def test_yaml_config():
     pass

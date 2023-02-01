@@ -25,12 +25,12 @@ if TYPE_CHECKING:
     from great_expectations.data_context import FileDataContext
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
 except ImportError:
-    logger.debug(
+    LOGGER.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sqlalchemy = None

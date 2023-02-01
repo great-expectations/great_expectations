@@ -17,14 +17,14 @@ from great_expectations.types import DictDot, SerializableDictDot, safe_deep_cop
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import pandas as pd
 except ImportError:
     pd = None
 
-    logger.debug(
+    LOGGER.debug(
         "Unable to load pandas; install optional pandas dependency for support."
     )
 
@@ -34,7 +34,7 @@ try:
 except ImportError:
     pyspark = None
     SparkDataFrame = None
-    logger.debug(
+    LOGGER.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
 
@@ -1036,7 +1036,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
                 )
 
             if batch_filter_parameters is None and batch_identifiers is not None:
-                logger.warning(
+                LOGGER.warning(
                     'Attempting to build data_connector_query but "batch_identifiers" was provided '
                     'instead of "batch_filter_parameters". The "batch_identifiers" key on '
                     'data_connector_query has been renamed to "batch_filter_parameters". Please update '

@@ -49,7 +49,7 @@ except ImportError:
     IndexLabel = Union[Hashable, Sequence[Hashable]]
     StorageOptions = Optional[Dict[str, Any]]
 
-logger = logging.getLogger(__file__)
+LOGGER = logging.getLogger(__file__)
 
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 
@@ -192,7 +192,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     # TODO: parse the annotation string
     annotation = param.annotation
     if not isinstance(annotation, str):
-        logger.debug(type(annotation), annotation)
+        LOGGER.debug(type(annotation), annotation)
         return annotation
 
     types: list = []
@@ -227,13 +227,13 @@ def _to_pydantic_fields(
 
         no_annotation: bool = param.annotation is inspect._empty
         if no_annotation:
-            logger.debug(f"`{param_name}` has no type annotation")
+            LOGGER.debug(f"`{param_name}` has no type annotation")
             FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
             type_ = Any
         else:
             type_ = _get_annotation_type(param)
             if type_ is UNSUPPORTED_TYPE or type_ == "None":
-                logger.debug(f"`{param_name}` has no supported types. Field skipped")
+                LOGGER.debug(f"`{param_name}` has no supported types. Field skipped")
                 FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
                 continue
 
@@ -285,23 +285,23 @@ def _generate_data_asset_models(
                 type_field=(f"Literal['{type_name}']", type_name),
                 fields_dict=fields,
             )
-            logger.debug(f"{model_name}\n{pf(fields)}")
+            LOGGER.debug(f"{model_name}\n{pf(fields)}")
         except NameError as err:
             # TODO: sql_table has a `schema` param that is a pydantic reserved attribute.
             # Solution is to use an alias field.
-            logger.debug(f"{model_name} - {type(err).__name__}:{err}")
+            LOGGER.debug(f"{model_name} - {type(err).__name__}:{err}")
             continue
         except TypeError as err:
             # may fail on python <3.10 due to use of builtin as generic
-            logger.warning(
+            LOGGER.warning(
                 f"{model_name} could not be created normally - {type(err).__name__}:{err}"
             )
-            logger.warning(f"{model_name} fields\n{pf(fields)}")
+            LOGGER.warning(f"{model_name} fields\n{pf(fields)}")
             raise
 
         data_asset_models[type_name] = asset_model
         asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
 
-    logger.debug(f"Needs extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")
-    logger.debug(f"No Annotation\n{FIELD_SKIPPED_NO_ANNOTATION}")
+    LOGGER.debug(f"Needs extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")
+    LOGGER.debug(f"No Annotation\n{FIELD_SKIPPED_NO_ANNOTATION}")
     return data_asset_models

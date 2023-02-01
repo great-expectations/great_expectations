@@ -10,7 +10,7 @@
 # get_nested_value_from_dict
 # )
 #
-# logger = logging.getLogger(__name__)
+# LOGGER = logging.getLogger(__name__)
 #
 #
 # class MultiBatchValidationMetaAnalysis(object):

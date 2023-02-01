@@ -39,7 +39,7 @@ from great_expectations.util import (
 
 yaml = YAMLHandler()
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():

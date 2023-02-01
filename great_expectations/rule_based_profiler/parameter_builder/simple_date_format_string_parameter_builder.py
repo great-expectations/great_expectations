@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     )
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 DEFAULT_CANDIDATE_STRINGS: Set[str] = {
     "%H:%M:%S",

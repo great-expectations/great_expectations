@@ -13,7 +13,7 @@ from great_expectations.datasource import (
 )
 from great_expectations.exceptions.exceptions import ExecutionEngineError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 try:
@@ -21,7 +21,7 @@ try:
 except ImportError:
     pd = None
 
-    logger.debug(
+    LOGGER.debug(
         "Unable to load pandas; install optional pandas dependency for support."
     )
 

@@ -39,7 +39,7 @@ from great_expectations.util import camel_to_snake
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 @public_api

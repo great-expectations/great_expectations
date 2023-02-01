@@ -19,7 +19,7 @@ from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
 from great_expectations.util import get_sqlalchemy_url, import_make_url
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
@@ -31,7 +31,7 @@ try:
 except ImportError:
     sqlalchemy = None
     create_engine = None
-    logger.debug("Unable to import sqlalchemy.")
+    LOGGER.debug("Unable to import sqlalchemy.")
 
 
 if sqlalchemy is not None:
@@ -325,7 +325,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
             drivername = credentials.pop("drivername")
             schema_name = credentials.pop("schema_name", None)
             if schema_name is not None:
-                logger.warning(
+                LOGGER.warning(
                     "schema_name specified creating a URL with schema is not supported. Set a default "
                     "schema on the user connecting to your database."
                 )
@@ -403,7 +403,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
 
         if "query" in batch_kwargs:
             if "limit" in batch_kwargs or "offset" in batch_kwargs:
-                logger.warning(
+                LOGGER.warning(
                     "Limit and offset parameters are ignored when using query-based batch_kwargs; consider "
                     "adding limit and offset directly to the generated query."
                 )
@@ -427,7 +427,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
             limit = batch_kwargs.get("limit")
             offset = batch_kwargs.get("offset")
             if limit is not None or offset is not None:
-                logger.info(
+                LOGGER.info(
                     "Generating query from table batch_kwargs based on limit and offset"
                 )
 

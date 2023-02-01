@@ -10,13 +10,13 @@ from great_expectations.expectations.metrics.util import (
     validate_distribution_parameters,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     from pyspark.sql.functions import stddev_samp  # noqa: F401
 except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
+    LOGGER.debug(str(e))
+    LOGGER.debug(
         "Unable to load spark context; install optional spark dependency for support."
     )
 

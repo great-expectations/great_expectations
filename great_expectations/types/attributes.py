@@ -4,7 +4,7 @@ from great_expectations.core import IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDotDict
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class Attributes(SerializableDotDict, IDDict):

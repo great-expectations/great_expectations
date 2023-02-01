@@ -15,7 +15,7 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 @public_api

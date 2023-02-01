@@ -8,14 +8,14 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy  # noqa: F401
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.sql.elements import WithinGroup
 except ImportError:
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+    LOGGER.debug("Unable to load SqlAlchemy or one of its subclasses.")
     DefaultDialect = None
     WithinGroup = None
 

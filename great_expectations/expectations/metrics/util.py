@@ -73,7 +73,7 @@ try:
 except ImportError:
     sqlalchemy_redshift = None
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy_dremio.pyodbc
@@ -112,7 +112,7 @@ except ImportError:
             bigquery_types_tuple = None
         except AttributeError:
             # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
+            LOGGER.warning(
                 "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
             )
             from collections import namedtuple
@@ -207,7 +207,7 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
         AttributeError,
         TypeError,
     ):  # TypeError can occur if the driver was not installed and so is None
-        logger.debug(
+        LOGGER.debug(
             "Unable to load BigQueryDialect dialect while running get_dialect_regex_expression in expectations.metrics.util",
             exc_info=True,
         )
@@ -261,7 +261,7 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
             else:
                 return sa.not_(column.regexp_match(literal(regex)))
         else:
-            logger.debug(
+            LOGGER.debug(
                 "regex_match is only enabled for sqlite when SQLAlchemy version is >= 1.4",
                 exc_info=True,
             )
@@ -274,7 +274,7 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
 
 def _get_dialect_type_module(dialect=None):
     if dialect is None:
-        logger.warning(
+        LOGGER.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
         return sa
@@ -395,7 +395,7 @@ def get_sqlalchemy_column_metadata(
 
         return columns
     except AttributeError as e:
-        logger.debug(f"Error while introspecting columns: {str(e)}")
+        LOGGER.debug(f"Error while introspecting columns: {str(e)}")
         return None
 
 

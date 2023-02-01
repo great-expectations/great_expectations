@@ -11,8 +11,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types import SerializableDictDot
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 class ReconciliationStrategy(Enum):

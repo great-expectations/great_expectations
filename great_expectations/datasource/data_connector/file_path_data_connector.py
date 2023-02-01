@@ -25,7 +25,7 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.execution_engine import ExecutionEngine
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 @public_api
@@ -61,7 +61,7 @@ class FilePathDataConnector(DataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        logger.debug(f'Constructing FilePathDataConnector "{name}".')
+        LOGGER.debug(f'Constructing FilePathDataConnector "{name}".')
 
         super().__init__(
             name=name,

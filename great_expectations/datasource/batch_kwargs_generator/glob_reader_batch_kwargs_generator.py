@@ -12,7 +12,7 @@ from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
@@ -65,7 +65,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         asset_globs=None,
         reader_method=None,
     ) -> None:
-        logger.debug(f"Constructing GlobReaderBatchKwargsGenerator {name!r}")
+        LOGGER.debug(f"Constructing GlobReaderBatchKwargsGenerator {name!r}")
         super().__init__(name, datasource=datasource)
         if reader_options is None:
             reader_options = {}
@@ -253,7 +253,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
             # So, we'll add a *sortable* id
             if matches is None:
-                logger.warning(f"No match found for path: {path}")
+                LOGGER.warning(f"No match found for path: {path}")
                 return (
                     datetime.datetime.now(datetime.timezone.utc).strftime(
                         "%Y%m%dT%H%M%S.%fZ"
@@ -264,7 +264,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 try:
                     return matches.group(match_group_id)
                 except IndexError:
-                    logger.warning(f"No match group {match_group_id} in path {path}")
+                    LOGGER.warning(f"No match group {match_group_id} in path {path}")
                     return (
                         datetime.datetime.now(datetime.timezone.utc).strftime(
                             "%Y%m%dT%H%M%S.%fZ"

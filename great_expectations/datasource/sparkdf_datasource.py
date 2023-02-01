@@ -11,7 +11,7 @@ from great_expectations.exceptions import BatchKwargsError
 from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     from pyspark.sql import DataFrame, SparkSession
@@ -19,7 +19,7 @@ except ImportError:
     DataFrame = None
     SparkSession = None
     # TODO: review logging more detail here
-    logger.debug(
+    LOGGER.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
 
@@ -180,7 +180,7 @@ class SparkDFDatasource(LegacyDatasource):
     def get_batch(self, batch_kwargs, batch_parameters=None):
         """class-private implementation of get_data_asset"""
         if self.spark is None:
-            logger.error("No spark session available")
+            LOGGER.error("No spark session available")
             return None
 
         reader_options = batch_kwargs.get("reader_options", {})

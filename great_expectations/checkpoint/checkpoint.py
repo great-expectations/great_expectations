@@ -65,7 +65,7 @@ from great_expectations.validator.validator import Validator
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class BaseCheckpoint(ConfigPeer):
@@ -1082,7 +1082,7 @@ class LegacyCheckpoint(Checkpoint):
             run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-            logger.info(f"Setting run_name to: {run_name}")
+            LOGGER.info(f"Setting run_name to: {run_name}")
 
         default_validation_operator = ActionListValidationOperator(
             data_context=self.data_context,
@@ -1164,7 +1164,7 @@ class LegacyCheckpoint(Checkpoint):
             )
         else:
             if self.validation_operator_name:
-                logger.warning(
+                LOGGER.warning(
                     f'Could not find Validation Operator "{self.validation_operator_name}" when '
                     f'running Checkpoint "{self.name}". Using default action_list_operator.'
                 )

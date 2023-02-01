@@ -7,7 +7,7 @@ from great_expectations.data_context.data_context_variables import (
 from great_expectations.data_context.store.configuration_store import ConfigurationStore
 from great_expectations.data_context.types.base import DataContextConfig
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class DataContextStore(ConfigurationStore):
@@ -49,7 +49,7 @@ class DataContextStore(ConfigurationStore):
             for attr in self.cloud_exclude_field_names:
                 if attr in payload:
                     payload.pop(attr)
-                    logger.debug(
+                    LOGGER.debug(
                         f"Removed {attr} from DataContextConfig while serializing to JSON"
                     )
 

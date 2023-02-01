@@ -171,11 +171,11 @@ def cli(
     The nouns are: checkpoint, datasource, docs, init, project, store, suite, validation-operator.
     Most nouns accept the following verbs: new, list, edit
     """
-    logger = _set_up_logger()
+    LOGGER = _set_up_logger()
     if verbose:
-        # Note we are explicitly not using a logger in all CLI output to have
+        # Note we are explicitly not using a LOGGER in all CLI output to have
         # more control over console UI.
-        logger.setLevel(logging.DEBUG)
+        LOGGER.setLevel(logging.DEBUG)
     ctx.obj = CLIState(
         v3_api=v3_api, config_file_location=config_file_location, assume_yes=assume_yes
     )

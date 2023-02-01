@@ -17,7 +17,7 @@ from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierS
 if TYPE_CHECKING:
     from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ExpectationSuiteIdentifier(DataContextKey):

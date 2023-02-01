@@ -69,8 +69,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.validator.validator import Validator
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 class ParameterBuilder(ABC, Builder):
@@ -525,7 +525,7 @@ specified (empty "metric_name" value detected)."""
                     value=resolved_metric_value,
                 )
             else:
-                logger.warning(
+                LOGGER.warning(
                     f"{metric_configuration.id[0]} was not found in the resolved Metrics for ParameterBuilder."
                 )
                 continue

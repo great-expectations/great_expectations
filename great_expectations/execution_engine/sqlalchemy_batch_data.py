@@ -16,7 +16,7 @@ except ImportError:
     DefaultDialect = None
     DatabaseError = None
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class SqlAlchemyBatchData(BatchData):
@@ -124,7 +124,7 @@ class SqlAlchemyBatchData(BatchData):
                 table_name = quoted_name(table_name, quote=True)
             if dialect == GXSqlDialect.BIGQUERY:
                 if schema_name is not None:
-                    logger.warning(
+                    LOGGER.warning(
                         "schema_name should not be used when passing a table_name for biquery. Instead, include the schema name in the table_name string."
                     )
                 # In BigQuery the table name is already qualified with its schema name
@@ -255,15 +255,15 @@ class SqlAlchemyBatchData(BatchData):
             stmt = f"{querymod[0]}into {{temp_table_name}} from{querymod[1]}".format(
                 temp_table_name=temp_table_name
             )
-        # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
+        # TODO: <WILL> LOGGER.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
         # Similar message may be needed in the future for Trino backend.
         elif dialect == GXSqlDialect.TRINO:
-            logger.warning(
+            LOGGER.warning(
                 f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"
         elif dialect == GXSqlDialect.AWSATHENA:
-            logger.warning(
+            LOGGER.warning(
                 f"GX has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
             )
             stmt = f"CREATE TABLE {temp_table_name} AS {query}"

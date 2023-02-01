@@ -50,7 +50,7 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class MigrationResponse(NamedTuple):
@@ -204,13 +204,13 @@ class CloudMigrator:
             self._log_about_bundle_contains_datasources()
 
     def _log_about_test_migrate(self) -> None:
-        logger.info(
+        LOGGER.info(
             "This is a test run! Please pass `test_migrate=False` to begin the "
             "actual migration (e.g. `CloudMigrator.migrate(context=context, test_migrate=False)`).\n"
         )
 
     def _log_about_usage_stats_disabled(self) -> None:
-        logger.info(
+        LOGGER.info(
             "We noticed that you had disabled usage statistics tracking. "
             "Please note that by migrating your context to GX Cloud your new Cloud Data Context "
             "will emit usage statistics. These statistics help us understand how we can improve "
@@ -218,7 +218,7 @@ class CloudMigrator:
         )
 
     def _log_about_bundle_contains_datasources(self) -> None:
-        logger.info(
+        LOGGER.info(
             "Since your existing context includes one or more datasources, "
             "please note that if your credentials are included in the datasource config, "
             "they will be sent to the GX Cloud backend. We recommend storing your credentials "

@@ -28,7 +28,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 try:
@@ -36,7 +36,7 @@ try:
     from sqlalchemy.exc import SQLAlchemyError
 
 except ImportError:
-    logger.debug(
+    LOGGER.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sa = None
@@ -46,7 +46,7 @@ except ImportError:
     SQLAlchemyError = None
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
 
 
@@ -181,7 +181,7 @@ def build_tuple_filesystem_store_backend(
     class_name: str = "TupleFilesystemStoreBackend",
     **kwargs,
 ) -> StoreBackend:
-    logger.debug(
+    LOGGER.debug(
         f"""Starting data_context/store/util.py#build_tuple_filesystem_store_backend using base_directory:
 "{base_directory}"""
     )
@@ -299,7 +299,7 @@ def build_configuration_store(
     overwrite_existing: bool = False,
     **kwargs,
 ) -> ConfigurationStore:
-    logger.debug(
+    LOGGER.debug(
         f"Starting data_context/store/util.py#build_configuration_store for store_name {store_name}"
     )
 
@@ -362,7 +362,7 @@ def load_checkpoint_config_from_store_backend(
     try:
         return config_store.get(key=key)  # type: ignore[return-value]
     except gx_exceptions.InvalidBaseYamlConfigError as exc:
-        logger.error(exc.messages)
+        LOGGER.error(exc.messages)
         raise gx_exceptions.InvalidCheckpointConfigError(
             "Error while processing DataContextConfig.", exc
         )
@@ -644,7 +644,7 @@ def load_data_into_test_database(
     if sa:
         engine = sa.create_engine(connection_string)
     else:
-        logger.debug(
+        LOGGER.debug(
             "Attempting to load data in to tests SqlAlchemy database, but unable to load SqlAlchemy context; "
             "install optional sqlalchemy dependency for support."
         )
@@ -666,7 +666,7 @@ def load_data_into_test_database(
             return return_value
         except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
-            logger.error(error_message)
+            LOGGER.error(error_message)
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
             # sensitive information does not make it into our CI logs.
@@ -696,7 +696,7 @@ def load_data_into_test_database(
             return return_value
         except SQLAlchemyError:
             error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
-            logger.error(error_message)
+            LOGGER.error(error_message)
             raise gx_exceptions.DatabaseConnectionError(error_message)
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
             # sensitive information does not make it into our CI logs.
@@ -845,7 +845,7 @@ def check_athena_table_count(
     if sa:
         engine = sa.create_engine(connection_string)
     else:
-        logger.debug(
+        LOGGER.debug(
             "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "
             "install optional sqlalchemy dependency for support."
         )
@@ -858,7 +858,7 @@ def check_athena_table_count(
         return len(result) == expected_table_count
     except SQLAlchemyError:
         error_message: str = """Docs integration tests encountered an error while loading test-data into test-database."""
-        logger.error(error_message)
+        LOGGER.error(error_message)
         raise gx_exceptions.DatabaseConnectionError(error_message)
         # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
         # sensitive information does not make it into our CI logs.
@@ -874,7 +874,7 @@ def clean_athena_db(connection_string: str, db_name: str, table_to_keep: str) ->
     if sa:
         engine = sa.create_engine(connection_string)
     else:
-        logger.debug(
+        LOGGER.debug(
             "Attempting to perform test on AWSAthena database, but unable to load SqlAlchemy context; "
             "install optional sqlalchemy dependency for support."
         )
@@ -1016,7 +1016,7 @@ def find_strings_in_nested_obj(obj: Any, target_strings: List[str]) -> bool:
 
     success: bool = _find_string(obj)
     if not success:
-        logger.info(f"Could not find the following target strings: {strings}")
+        LOGGER.info(f"Could not find the following target strings: {strings}")
 
     return success
 

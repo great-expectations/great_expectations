@@ -11,7 +11,7 @@ from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKw
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
@@ -21,7 +21,7 @@ except ImportError:
     sqlalchemy = None
     create_engine = None
     reflection = None
-    logger.debug("Unable to import sqlalchemy.")
+    LOGGER.debug("Unable to import sqlalchemy.")
 
 
 class AssetConfigurationSchema(Schema):
@@ -101,7 +101,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 self.inspector = sqlalchemy.inspect(self.engine)
 
             except sqlalchemy.exc.OperationalError:
-                logger.warning(
+                LOGGER.warning(
                     f"Unable to create inspector from engine in batch kwargs generator '{name}'"
                 )
                 self.inspector = None
@@ -195,7 +195,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
 
         if batch_kwargs is not None:
             if partition_id is not None:
-                logger.warning(
+                LOGGER.warning(
                     "table_generator cannot identify partitions; provided partition id will be recorded "
                     "only"
                 )

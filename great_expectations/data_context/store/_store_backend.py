@@ -7,7 +7,7 @@ import pyparsing as pp
 
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class StoreBackend(metaclass=ABCMeta):
@@ -72,7 +72,7 @@ class StoreBackend(metaclass=ABCMeta):
         """
         if self._suppress_store_backend_id:
             if not suppress_warning:
-                logger.warning(
+                LOGGER.warning(
                     f"You are attempting to access the store_backend_id of a store or store_backend named {self.store_name} that has been explicitly suppressed."
                 )
             return None
@@ -101,7 +101,7 @@ class StoreBackend(metaclass=ABCMeta):
                 return store_id
         except Exception:
             if not suppress_warning:
-                logger.warning(
+                LOGGER.warning(
                     f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}"
                 )
             return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
@@ -127,7 +127,7 @@ class StoreBackend(metaclass=ABCMeta):
         try:
             return self._set(key, value, **kwargs)
         except ValueError as e:
-            logger.debug(str(e))
+            LOGGER.debug(str(e))
             raise StoreBackendError("ValueError while calling _set on store backend.")
 
     def move(self, source_key, dest_key, **kwargs):

@@ -17,7 +17,7 @@ from great_expectations.util import filter_properties_dict
 
 yaml = YAMLHandler()
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture()

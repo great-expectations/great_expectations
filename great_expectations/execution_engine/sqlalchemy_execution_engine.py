@@ -83,7 +83,7 @@ from great_expectations.util import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
@@ -181,7 +181,7 @@ except ImportError:
             bigquery_types_tuple = None
         except AttributeError:
             # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            logger.warning(
+            LOGGER.warning(
                 "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
             )
             from collections import namedtuple
@@ -209,7 +209,7 @@ def _get_dialect_type_module(dialect):
     """Given a dialect, returns the dialect type, which is defines the engine/system that is used to communicates
     with the database/database implementation. Currently checks for RedShift/BigQuery dialects"""
     if dialect is None:
-        logger.warning(
+        LOGGER.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
         return sa
@@ -307,7 +307,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         if engine is not None:
             if credentials is not None:
-                logger.warning(
+                LOGGER.warning(
                     "Both credentials and engine were provided during initialization of SqlAlchemyExecutionEngine. "
                     "Ignoring credentials."
                 )
@@ -392,7 +392,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if self.engine.dialect.name.lower() == GXSqlDialect.SQLITE:
 
                 def _add_sqlite_functions(connection):
-                    logger.info(
+                    LOGGER.info(
                         f"Adding custom sqlite functions to connection {connection}"
                     )
                     connection.create_function("sqrt", 1, lambda x: math.sqrt(x))
@@ -406,7 +406,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
                 # Add sqlite functions to any future connections.
                 def _on_connect(dbapi_con, connection_record):
-                    logger.info(
+                    LOGGER.info(
                         f"A new sqlite connection was created: {dbapi_con}, {connection_record}"
                     )
                     _add_sqlite_functions(dbapi_con)
@@ -486,7 +486,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         drivername = credentials.pop("drivername")
         schema_name = credentials.pop("schema_name", None)
         if schema_name is not None:
-            logger.warning(
+            LOGGER.warning(
                 "schema_name specified creating a URL with schema is not supported. Set a default "
                 "schema on the user connecting to your database."
             )
@@ -1033,10 +1033,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 else:
                     sa_query_object = sa.select(query["select"]).select_from(selectable)
 
-                logger.debug(f"Attempting query {str(sa_query_object)}")
+                LOGGER.debug(f"Attempting query {str(sa_query_object)}")
                 res = self.engine.execute(sa_query_object).fetchall()
 
-                logger.debug(
+                LOGGER.debug(
                     f"""SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id \
 {IDDict(domain_kwargs).to_id()}"""
                 )
@@ -1044,7 +1044,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 exception_message: str = "An SQL execution Exception occurred.  "
                 exception_traceback: str = traceback.format_exc()
                 exception_message += f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
-                logger.error(exception_message)
+                LOGGER.error(exception_message)
                 raise ExecutionEngineError(message=exception_message)
 
             assert (

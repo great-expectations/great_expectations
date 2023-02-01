@@ -14,24 +14,24 @@ from great_expectations.types.attributes import Attributes
 from great_expectations.util import deep_filter_properties_iterable
 from great_expectations.validator.computed_metric import MetricValue
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
 except ImportError:
-    logger.debug("No SqlAlchemy module available.")
+    LOGGER.debug("No SqlAlchemy module available.")
     sa = None
 
 try:
     from sqlalchemy.engine import Row as sqlalchemy_engine_Row
 except ImportError:
-    logger.debug("No SqlAlchemy.engine module available.")
+    LOGGER.debug("No SqlAlchemy.engine module available.")
     sqlalchemy_engine_Row = None
 
 try:
     from pyspark.sql import Row as pyspark_sql_Row
 except ImportError:
-    logger.debug("No spark SQLContext available.")
+    LOGGER.debug("No spark SQLContext available.")
     pyspark_sql_Row = None
 
 

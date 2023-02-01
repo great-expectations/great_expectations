@@ -83,8 +83,8 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.profiler_store import ProfilerStore
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 class BaseRuleBasedProfiler(ConfigPeer):

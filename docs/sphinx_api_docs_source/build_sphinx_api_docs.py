@@ -41,9 +41,9 @@ from scripts.check_public_api_docstrings import (
 )
 from scripts.public_api_report import Definition, get_shortest_dotted_path
 
-logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.addHandler(logging.StreamHandler())
+LOGGER.setLevel(logging.INFO)
 
 
 class SphinxInvokeDocsBuilder:
@@ -106,7 +106,7 @@ class SphinxInvokeDocsBuilder:
                 code=1,
             )
 
-        logger.debug("Dependencies installed, proceeding.")
+        LOGGER.debug("Dependencies installed, proceeding.")
 
     def _build_html_api_docs_in_temp_folder(self):
         """Builds html api documentation in temporary folder."""
@@ -117,14 +117,14 @@ class SphinxInvokeDocsBuilder:
 
         cmd = f"sphinx-build -M html ./ {self.temp_sphinx_html_dir} -E"
         self.ctx.run(cmd, echo=True, pty=True)
-        logger.debug("Raw Sphinx HTML generated.")
+        LOGGER.debug("Raw Sphinx HTML generated.")
 
     def _remove_existing_api_docs(self) -> None:
         """Removes the existing api docs."""
         if self.docusaurus_api_docs_path.is_dir():
             shutil.rmtree(self.docusaurus_api_docs_path)
         pathlib.Path(self.docusaurus_api_docs_path).mkdir(parents=True, exist_ok=True)
-        logger.debug("Existing Docusaurus API docs removed.")
+        LOGGER.debug("Existing Docusaurus API docs removed.")
 
     def _process_and_create_docusaurus_mdx_files(self) -> None:
         """Creates API docs as mdx files to serve from docusaurus from content between <section> tags in the sphinx generated docs."""
@@ -144,7 +144,7 @@ class SphinxInvokeDocsBuilder:
         # Read the generated html and process the content for conversion to mdx
         # Write out to .mdx file using the relative file directory structure
         for html_file in files:
-            logger.info(f"Processing: {str(html_file.absolute())}")
+            LOGGER.info(f"Processing: {str(html_file.absolute())}")
             with open(html_file.absolute()) as f:
                 soup = BeautifulSoup(f.read(), "html.parser")
 
@@ -219,11 +219,11 @@ class SphinxInvokeDocsBuilder:
                     html_file_path=html_file
                 )
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                logger.info(f"Writing out mdx file: {str(output_path.absolute())}")
+                LOGGER.info(f"Writing out mdx file: {str(output_path.absolute())}")
                 with open(output_path, "w") as fout:
                     fout.write(doc_str)
 
-        logger.info("Created mdx files for serving with docusaurus.")
+        LOGGER.info("Created mdx files for serving with docusaurus.")
 
     def _get_mdx_file_path(self, html_file_path: pathlib.Path) -> pathlib.Path:
         """Get the mdx file path for a processed sphinx-generated html file.
@@ -284,7 +284,7 @@ class SphinxInvokeDocsBuilder:
         if temp_dir.exists():
             shutil.rmtree(temp_dir, ignore_errors=True)
 
-        logger.debug("Removed existing generated raw Sphinx HTML.")
+        LOGGER.debug("Removed existing generated raw Sphinx HTML.")
 
     def _build_class_md_stubs(self) -> None:
         """Build markdown stub files with rst directives for auto documenting classes."""

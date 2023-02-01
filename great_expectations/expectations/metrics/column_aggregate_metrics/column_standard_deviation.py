@@ -20,13 +20,13 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     from pyspark.sql.functions import stddev_samp  # noqa: F401
 except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
+    LOGGER.debug(str(e))
+    LOGGER.debug(
         "Unable to load spark context; install optional spark dependency for support."
     )
 

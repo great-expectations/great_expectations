@@ -52,7 +52,7 @@ from great_expectations.expectations.row_conditions import (
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import pyspark
@@ -74,7 +74,7 @@ except ImportError:
     # noinspection SpellCheckingInspection
     sparktypes = None
 
-    logger.debug(
+    LOGGER.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
 
@@ -684,7 +684,7 @@ illegal.  Please check your config."""
             )
 
         if not (filter_null or filter_nan):
-            logger.warning(
+            LOGGER.warning(
                 "add_column_row_condition called without specifying a desired row condition"
             )
 
@@ -750,7 +750,7 @@ illegal.  Please check your config."""
 
             res = df.agg(*aggregate["column_aggregates"]).collect()
 
-            logger.debug(
+            LOGGER.debug(
                 f"SparkDFExecutionEngine computed {len(res[0])} metrics on domain_id {IDDict(domain_kwargs).to_id()}"
             )
 

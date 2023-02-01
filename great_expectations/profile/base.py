@@ -19,7 +19,7 @@ from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.validator.validator import Validator
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class OrderedEnum(Enum):

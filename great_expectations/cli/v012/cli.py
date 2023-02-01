@@ -50,11 +50,11 @@ def cli(verbose) -> None:
     - great_expectations datasource profile : profile a datasource
 
     - great_expectations docs build : compile documentation from expectations"""
-    logger = _set_up_logger()
+    LOGGER = _set_up_logger()
     if verbose:
         # Note we are explicitly not using a logger in all CLI output to have
         # more control over console UI.
-        logger.setLevel(logging.DEBUG)
+        LOGGER.setLevel(logging.DEBUG)
 
 
 cli.add_command(datasource)

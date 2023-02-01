@@ -34,7 +34,7 @@ from great_expectations.exceptions import EvaluationParameterError
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 _epsilon = 1e-12
 
 
@@ -198,25 +198,25 @@ class EvaluationParameterParser:
             evaluated: Union[int, float, datetime.datetime]
             try:
                 evaluated = int(op)
-                logger.info(
+                LOGGER.info(
                     "Evaluation parameter operand successfully parsed as integer."
                 )
             except ValueError:
-                logger.info("Parsing evaluation parameter operand as integer failed.")
+                LOGGER.info("Parsing evaluation parameter operand as integer failed.")
                 try:
                     evaluated = float(op)
-                    logger.info(
+                    LOGGER.info(
                         "Evaluation parameter operand successfully parsed as float."
                     )
                 except ValueError:
-                    logger.info("Parsing evaluation parameter operand as float failed.")
+                    LOGGER.info("Parsing evaluation parameter operand as float failed.")
                     try:
                         evaluated = dateutil.parser.parse(op)
-                        logger.info(
+                        LOGGER.info(
                             "Evaluation parameter operand successfully parsed as datetime."
                         )
                     except ValueError as e:
-                        logger.info(
+                        LOGGER.info(
                             "Parsing evaluation parameter operand as datetime failed."
                         )
                         raise e
@@ -374,21 +374,21 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
                     )
                 return None
             else:
-                logger.error(
+                LOGGER.error(
                     "Unrecognized urn_type in ge_urn: must be 'stores' to use a metric store."
                 )
                 raise EvaluationParameterError(
                     f"No value found for $PARAMETER {str(parse_results[0])}"
                 )
         except ParseException as e:
-            logger.debug(
+            LOGGER.debug(
                 f"Parse exception while parsing evaluation parameter: {str(e)}"
             )
             raise EvaluationParameterError(
                 f"No value found for $PARAMETER {str(parse_results[0])}"
             ) from e
         except AttributeError as e:
-            logger.warning("Unable to get store for store-type valuation parameter.")
+            LOGGER.warning("Unable to get store for store-type valuation parameter.")
             raise EvaluationParameterError(
                 f"No value found for $PARAMETER {str(parse_results[0])}"
             ) from e
@@ -441,7 +441,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
         exception_message = (
             f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
         )
-        logger.debug(exception_message, e, exc_info=True)
+        LOGGER.debug(exception_message, e, exc_info=True)
         raise EvaluationParameterError(
             f"Error while evaluating evaluation parameter expression: {str(e)}"
         ) from e

@@ -2,7 +2,7 @@ import logging
 import threading
 from typing import Dict
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sqlalchemy
@@ -15,7 +15,7 @@ except ImportError:
     Connection = None
     Engine = None
     SQLAlchemyError = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+    LOGGER.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
 class SqlAlchemyConnectionManager:

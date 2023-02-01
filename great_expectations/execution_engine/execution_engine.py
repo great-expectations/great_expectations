@@ -52,7 +52,7 @@ if TYPE_CHECKING:
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
     from great_expectations.validator.validator import Validator
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 try:
@@ -60,7 +60,7 @@ try:
 except ImportError:
     pd = None
 
-    logger.debug(
+    LOGGER.debug(
         "Unable to load pandas; install optional pandas dependency for support."
     )
 
@@ -259,7 +259,7 @@ class ExecutionEngine(ABC):
 
         batch_spec_defaults_keys = set(batch_spec_defaults.keys())
         if not batch_spec_defaults_keys <= self.recognized_batch_spec_defaults:
-            logger.warning(
+            LOGGER.warning(
                 f"""Unrecognized batch_spec_default(s): \
 {str(batch_spec_defaults_keys - self.recognized_batch_spec_defaults)}
 """
@@ -446,7 +446,7 @@ class ExecutionEngine(ABC):
             filter_nan: if true, add a filter for nan values
         """
         if filter_null is False and filter_nan is False:
-            logger.warning(
+            LOGGER.warning(
                 "add_column_row_condition called with no filter condition requested"
             )
             return domain_kwargs
@@ -710,7 +710,7 @@ class ExecutionEngine(ABC):
             and accessor_keys is not None
             and len(list(accessor_keys)) > 0
         ):
-            logger.warning(
+            LOGGER.warning(
                 'Accessor keys ignored since Metric Domain Type is not "table"'
             )
 
@@ -789,7 +789,7 @@ class ExecutionEngine(ABC):
                 unexpected_keys_str: str = ", ".join(
                     map(lambda element: f'"{element}"', unexpected_keys)
                 )
-                logger.warning(
+                LOGGER.warning(
                     f"""Unexpected key(s) {unexpected_keys_str} found in domain_kwargs for Domain type "{domain_type.value}"."""
                 )
 

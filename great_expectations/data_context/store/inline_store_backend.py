@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     )
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 yaml = YAMLHandler()
 
@@ -201,7 +201,7 @@ class InlineStoreBackend(StoreBackend):
         # In environments where wrting to disk is not allowed, it is impossible to
         # save changes. As such, we log a warning but do not raise.
         except PermissionError as e:
-            logger.warning(f"Could not save project config to disk: {e}")
+            LOGGER.warning(f"Could not save project config to disk: {e}")
 
     @staticmethod
     def _determine_resource_name(key: Tuple[str, ...]) -> Optional[str]:

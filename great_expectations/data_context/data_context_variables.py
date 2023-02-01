@@ -31,7 +31,7 @@ if TYPE_CHECKING:
         Datasource as XDatasource,
     )
 
-logger = logging.getLogger(__file__)
+LOGGER = logging.getLogger(__file__)
 
 
 class DataContextVariableSchema(str, enum.Enum):
@@ -369,7 +369,7 @@ class FileDataContextVariables(DataContextVariables):
         ] = self.data_context._synchronize_zep_datasources()
         try:
             if config_xdatasources_stash:
-                logger.info(
+                LOGGER.info(
                     f"Stashing `XDatasource` during {type(self).__name__}.save_config() - {len(config_xdatasources_stash)} stashed"
                 )
                 for xdatasource_name in config_xdatasources_stash.keys():
@@ -381,7 +381,7 @@ class FileDataContextVariables(DataContextVariables):
             raise
         finally:
             if config_xdatasources_stash:
-                logger.info(
+                LOGGER.info(
                     f"Replacing {len(config_xdatasources_stash)} stashed `XDatasource`s"
                 )
                 self.data_context.datasources.update(config_xdatasources_stash)

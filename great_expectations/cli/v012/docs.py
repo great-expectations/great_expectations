@@ -3,7 +3,7 @@ import sys
 import click
 
 from great_expectations.cli.v012 import toolkit
-from great_expectations.cli.v012.cli_logging import logger
+from great_expectations.cli.v012.cli_logging import LOGGER
 from great_expectations.cli.v012.util import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.util import send_usage_message
 
@@ -143,7 +143,7 @@ def _build_intro_string(docs_sites_strings):
 
 def build_docs(context, site_name=None, view=True, assume_yes=False) -> None:
     """Build documentation in a context"""
-    logger.debug("Starting cli.datasource.build_docs")
+    LOGGER.debug("Starting cli.datasource.build_docs")
 
     if site_name is not None:
         site_names = [site_name]

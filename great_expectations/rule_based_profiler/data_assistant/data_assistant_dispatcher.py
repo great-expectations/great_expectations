@@ -13,7 +13,7 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class DataAssistantDispatcher:
@@ -88,7 +88,7 @@ class DataAssistantDispatcher:
         if name in registered_data_assistants:
             raise ValueError(f'Existing declarations of DataAssistant "{name}" found.')
 
-        logger.debug(
+        LOGGER.debug(
             f'Registering the declaration of DataAssistant "{name}" took place.'
         )
         registered_data_assistants[name] = data_assistant

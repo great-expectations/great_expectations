@@ -26,7 +26,7 @@ try:
 except ImportError:
     boto3 = None
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 @public_api
@@ -63,7 +63,7 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ):
-        logger.warning(
+        LOGGER.warning(
             "Warning: great_expectations.datasource.data_connector.ConfiguredAssetAWSGlueDataCatalogDataConnector is "
             "experimental. Methods, APIs, and core behavior may change in the future."
         )

@@ -20,7 +20,7 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 PYTHON_DOCKER_TAGS = [
     "3.7-buster",
@@ -66,7 +66,7 @@ def build_images(python_docker_tags: List[str], ge_version: str, repository: str
         tag = mk_image_tag(python_docker_tag, ge_version)
         image_name = f"{repository}:{tag}"
 
-        logger.info("Building image: " + image_name)
+        LOGGER.info("Building image: " + image_name)
 
         for line in client.api.build(
             path=".",
@@ -78,7 +78,7 @@ def build_images(python_docker_tags: List[str], ge_version: str, repository: str
         ):
             stripped = line.get("stream", "").strip()
             if stripped:
-                logger.info(stripped)
+                LOGGER.info(stripped)
 
 
 @cli.command()
@@ -89,7 +89,7 @@ def push_images(python_docker_tags: List[str], ge_version: str, repository: str)
     for python_docker_tag in python_docker_tags:
         tag = mk_image_tag(python_docker_tag, ge_version)
 
-        logger.info(f"Pushing image {repository}:{tag}")
+        LOGGER.info(f"Pushing image {repository}:{tag}")
 
         for line in client.api.push(
             repository=repository, tag=tag, stream=True, decode=True
@@ -98,13 +98,13 @@ def push_images(python_docker_tags: List[str], ge_version: str, repository: str)
             if status:
                 progress = line.get("progress", "").strip()
                 if progress:
-                    logger.info(f"{status}: {progress}")
+                    LOGGER.info(f"{status}: {progress}")
                 else:
-                    logger.info(status)
+                    LOGGER.info(status)
 
             error_detail = line.get("errorDetail", {}).get("message", "").strip()
             if error_detail:
-                logger.error(error_detail)
+                LOGGER.error(error_detail)
 
 
 if __name__ == "__main__":

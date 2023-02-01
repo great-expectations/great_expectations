@@ -19,7 +19,7 @@ from great_expectations.dataset.dataset import Dataset
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.dataset.util import validate_mostly
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import pyspark.sql.types as sparktypes
@@ -46,8 +46,8 @@ try:
         when,
     )
 except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
+    LOGGER.debug(str(e))
+    LOGGER.debug(
         "Unable to load spark context; install optional spark dependency for support."
     )
 
@@ -801,13 +801,13 @@ class SparkDFDataset(MetaSparkDFDataset):
             below_bins = hist.pop(0)
             bins.pop(0)
             if below_bins > 0:
-                logger.warning("Discarding histogram values below lowest bin.")
+                LOGGER.warning("Discarding histogram values below lowest bin.")
 
         if added_max:
             above_bins = hist.pop(-1)
             bins.pop(-1)
             if above_bins > 0:
-                logger.warning("Discarding histogram values above highest bin.")
+                LOGGER.warning("Discarding histogram values above highest bin.")
 
         return hist
 
@@ -864,7 +864,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             ]
         if None in value_set:
             # spark isin returns None when any value is compared to None
-            logger.error(
+            LOGGER.error(
                 "expect_column_values_to_be_in_set cannot support a None in the value_set in spark"
             )
             raise ValueError(
@@ -886,7 +886,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     ):
         if None in value_set:
             # spark isin returns None when any value is compared to None
-            logger.error(
+            LOGGER.error(
                 "expect_column_values_to_not_be_in_set cannot support a None in the value_set in spark"
             )
             raise ValueError(
@@ -1241,7 +1241,7 @@ class SparkDFDataset(MetaSparkDFDataset):
                     type_class = getattr(sparktypes, type_)
                     types.append(type_class)
                 except AttributeError:
-                    logger.debug(f"Unrecognized type: {type_}")
+                    LOGGER.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
                 raise ValueError("No recognized spark types in type_list")
             types = tuple(types)

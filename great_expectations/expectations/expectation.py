@@ -131,7 +131,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import MetaNotes
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 _TEST_DEFS_DIR = os.path.join(
@@ -1272,10 +1272,10 @@ class Expectation(metaclass=MetaExpectation):
         """
 
         if debug_logger is not None:
-            _debug = lambda x: debug_logger.debug(  # noqa: E731
+            _debug = lambda x: debug_LOGGER.debug(  # noqa: E731
                 f"(run_diagnostics) {x}"
             )
-            _error = lambda x: debug_logger.error(  # noqa: E731
+            _error = lambda x: debug_LOGGER.error(  # noqa: E731
                 f"(run_diagnostics) {x}"
             )
         else:
@@ -1613,7 +1613,7 @@ class Expectation(metaclass=MetaExpectation):
             name (str): name of Expectation
 
         Returns:
-            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
+            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to LOGGER.
         """
 
         expectation_impl: MetaExpectation = get_expectation_impl(name)
@@ -1766,10 +1766,10 @@ class Expectation(metaclass=MetaExpectation):
         """Generate test results. This is an internal method for run_diagnostics."""
 
         if debug_logger is not None:
-            _debug = lambda x: debug_logger.debug(  # noqa: E731
+            _debug = lambda x: debug_LOGGER.debug(  # noqa: E731
                 f"(_get_test_results) {x}"
             )
-            _error = lambda x: debug_logger.error(  # noqa: E731
+            _error = lambda x: debug_LOGGER.error(  # noqa: E731
                 f"(_get_test_results) {x}"
             )
         else:

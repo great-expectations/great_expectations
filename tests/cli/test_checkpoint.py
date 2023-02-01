@@ -33,7 +33,7 @@ yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 # TODO: <Alex>ALEX -- This belongs in tests/conftest.py</Alex>
@@ -62,7 +62,7 @@ def titanic_data_context_with_sql_datasource(
         df.to_sql(name="incomplete", con=sqlite_engine)
         test_df.to_sql(name="wrong", con=sqlite_engine)
     except ValueError as ve:
-        logger.warning(f"Unable to store information into database: {str(ve)}")
+        LOGGER.warning(f"Unable to store information into database: {str(ve)}")
 
     datasource_config: str = f"""
 class_name: SimpleSqlalchemyDatasource

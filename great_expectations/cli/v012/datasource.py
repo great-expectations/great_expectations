@@ -50,12 +50,12 @@ from great_expectations.exceptions import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.validator.validator import BridgeValidator
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
 except ImportError:
-    logger.debug(
+    LOGGER.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sqlalchemy = None
@@ -1482,7 +1482,7 @@ def profile_datasource(
     skip_prompt_flag=False,
 ):
     """Profile a named datasource using the specified context"""
-    # Note we are explicitly not using a logger in all CLI output to have
+    # Note we are explicitly not using a LOGGER in all CLI output to have
     # more control over console UI.
     logging.getLogger("great_expectations.profile.basic_dataset_profiler").setLevel(
         logging.INFO

@@ -18,7 +18,7 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class DatasourceNewNotebookRenderer(BaseNotebookRenderer):
@@ -134,7 +134,7 @@ context.list_datasources()""",
 
         lint = black is not None
         if not lint:
-            logger.warning(
+            LOGGER.warning(
                 "Please install the optional dependency 'black' to enable linting. Returning input with no changes."
             )
         self._add_template_cell(lint)

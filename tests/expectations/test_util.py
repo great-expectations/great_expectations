@@ -39,7 +39,7 @@ from great_expectations.self_check.util import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sqlalchemy
@@ -55,7 +55,7 @@ except ImportError:
     Engine = None
     Select = None
     SQLAlchemyError = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+    LOGGER.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
 def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, dict]:

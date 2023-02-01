@@ -17,14 +17,14 @@ import pkg_resources
 
 from great_expectations.data_context.data_context import DataContext
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
 chandler.setLevel(logging.DEBUG)
 chandler.setFormatter(
     logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", "%Y-%m-%dT%H:%M:%S")
 )
-logger.addHandler(chandler)
-logger.setLevel(logging.DEBUG)
+LOGGER.addHandler(chandler)
+LOGGER.setLevel(logging.DEBUG)
 
 
 expectation_tracebacks = StringIO()
@@ -64,7 +64,7 @@ def execute_shell_command(command: str) -> int:
             universal_newlines=True,
         )
         sh_out: str = res.stdout.strip()
-        logger.info(sh_out)
+        LOGGER.info(sh_out)
     except CalledProcessError as cpe:
         status_code = cpe.returncode
         sys.stderr.write(cpe.output)
@@ -74,7 +74,7 @@ def execute_shell_command(command: str) -> int:
         exception_message += (
             f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
         )
-        logger.error(exception_message)
+        LOGGER.error(exception_message)
 
     return status_code
 
@@ -90,7 +90,7 @@ def get_expectation_file_info_dict(
     oldpwd = os.getcwd()
     os.chdir(f"..{os.path.sep}..")
     repo_path = os.getcwd()
-    logger.debug(
+    LOGGER.debug(
         "Finding Expectation files in the repo and getting their create/update times"
     )
 
@@ -138,7 +138,7 @@ def get_expectation_file_info_dict(
             "path": file_path,
             "package": package_name,
         }
-        logger.debug(
+        LOGGER.debug(
             f"{name} ({package_name}) was created {result[name]['created_at']} and updated {result[name]['updated_at']}"
         )
         with open(file_path) as fp:
@@ -155,7 +155,7 @@ def get_expectation_file_info_dict(
         else:
             _prefix = "Contrib "
         result[name]["exp_type"] = _prefix + sorted(exp_type_set)[0]
-        logger.debug(
+        LOGGER.debug(
             f"Expectation type {_prefix}{sorted(exp_type_set)[0]} for {name} in {file_path}"
         )
 
@@ -230,10 +230,10 @@ def build_gallery(
     """
     gallery_info = dict()
     requirements_dict = {}
-    logger.info("Loading great_expectations library.")
+    LOGGER.info("Loading great_expectations library.")
     installed_packages = pkg_resources.working_set
     installed_packages_txt = sorted(f"{i.key}=={i.version}" for i in installed_packages)
-    logger.debug(f"Found the following packages: {installed_packages_txt}")
+    LOGGER.debug(f"Found the following packages: {installed_packages_txt}")
 
     expectation_file_info = get_expectation_file_info_dict(
         include_core=include_core,
@@ -247,11 +247,11 @@ def build_gallery(
     )
     if include_core:
         print("\n\n\n=== (Core) ===")
-        logger.info("Getting base registered expectations list")
-        logger.debug(f"Found the following expectations: {sorted(core_expectations)}")
+        LOGGER.info("Getting base registered expectations list")
+        LOGGER.debug(f"Found the following expectations: {sorted(core_expectations)}")
         for expectation in core_expectations:
             if only_these_expectations and expectation not in only_these_expectations:
-                # logger.debug(f"Skipping {expectation} since it's not requested")
+                # LOGGER.debug(f"Skipping {expectation} since it's not requested")
                 continue
             requirements_dict[expectation] = {"group": "core"}
 
@@ -260,7 +260,7 @@ def build_gallery(
 
     if include_contrib:
         print("\n\n\n=== (Contrib) ===")
-        logger.info("Finding contrib modules")
+        LOGGER.info("Finding contrib modules")
         skip_dirs = ("cli", "tests")
         contrib_dir = os.path.join(
             os.path.dirname(__file__),
@@ -285,15 +285,15 @@ def build_gallery(
                         only_these_expectations
                         and filename.replace(".py", "") not in only_these_expectations
                     ):
-                        # logger.debug(f"Skipping {filename} since it's not requested")
+                        # LOGGER.debug(f"Skipping {filename} since it's not requested")
                         continue
-                    logger.debug(f"Getting requirements for module {filename}")
+                    LOGGER.debug(f"Getting requirements for module {filename}")
                     contrib_subdir_name = os.path.basename(os.path.dirname(root))
                     requirements_dict[filename[:-3]] = get_contrib_requirements(
                         os.path.join(root, filename)
                     )
                     requirements_dict[filename[:-3]]["group"] = contrib_subdir_name
-        logger.info("Done finding contrib modules")
+        LOGGER.info("Done finding contrib modules")
 
     for expectation in sorted(requirements_dict):
         group = requirements_dict[expectation]["group"]
@@ -306,7 +306,7 @@ def build_gallery(
             )
             if is_satisfied or req in just_installed:
                 continue
-            logger.debug(f"Executing command: 'pip install \"{req}\"'")
+            LOGGER.debug(f"Executing command: 'pip install \"{req}\"'")
             status_code = execute_shell_command(f'pip install "{req}"')
             if status_code == 0:
                 just_installed.add(req)
@@ -317,14 +317,14 @@ def build_gallery(
                 expectation_tracebacks.write(f"Failed to pip install {req}\n\n")
 
         if group != "core":
-            logger.debug(f"Importing {expectation}")
+            LOGGER.debug(f"Importing {expectation}")
             try:
                 if group == "great_expectations_experimental":
                     importlib.import_module(f"expectations.{expectation}", group)
                 else:
                     importlib.import_module(f"{group}.expectations")
             except (ModuleNotFoundError, ImportError, Exception) as e:
-                logger.error(f"Failed to load expectation: {expectation}")
+                LOGGER.error(f"Failed to load expectation: {expectation}")
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
                     f"\n\n----------------\n{expectation} ({group})\n"
@@ -333,7 +333,7 @@ def build_gallery(
                 failed_to_import_set.add(expectation)
                 continue
 
-        logger.debug(f"Running diagnostics for expectation: {expectation}")
+        LOGGER.debug(f"Running diagnostics for expectation: {expectation}")
         try:
             impl = great_expectations.expectations.registry.get_expectation_impl(
                 expectation
@@ -342,7 +342,7 @@ def build_gallery(
                 ignore_suppress=ignore_suppress,
                 ignore_only_for=ignore_only_for,
                 for_gallery=True,
-                debug_logger=logger,
+                debug_logger=LOGGER,
                 only_consider_these_backends=only_consider_these_backends,
                 context=context,
             )
@@ -366,7 +366,7 @@ def build_gallery(
                     f"{diagnostics['description']['docstring']}\n"
                 )
         except Exception:
-            logger.error(f"Failed to run diagnostics for: {expectation}")
+            LOGGER.error(f"Failed to run diagnostics for: {expectation}")
             print(traceback.format_exc())
             expectation_tracebacks.write(
                 f"\n\n----------------\n{expectation} ({group})\n"
@@ -388,7 +388,7 @@ def build_gallery(
                     expectation
                 ].get("exp_type")
             except TypeError as e:
-                logger.error(f"Failed to create JSON for: {expectation}")
+                LOGGER.error(f"Failed to create JSON for: {expectation}")
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
                     f"\n\n----------------\n[JSON write fail] {expectation} ({group})\n"
@@ -397,11 +397,11 @@ def build_gallery(
 
     if just_installed:
         print("\n\n\n=== (Uninstalling) ===")
-        logger.info(
+        LOGGER.info(
             f"Uninstalling packages that were installed while running this script..."
         )
         for req in just_installed:
-            logger.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")
+            LOGGER.debug(f"Executing command: 'pip uninstall -y \"{req}\"'")
             execute_shell_command(f'pip uninstall -y "{req}"')
 
     expectation_filenames_set = set(requirements_dict.keys())

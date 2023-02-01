@@ -28,7 +28,7 @@ try:
 except ImportError:
     secretmanager = None
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class _ConfigurationSubstitutor:
@@ -216,7 +216,7 @@ class _ConfigurationSubstitutor:
             rf"{self.AWS_PATTERN}(?:\:([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}))?(?:\|([^\|]+))?$"
         )
         if not boto3:
-            logger.error(
+            LOGGER.error(
                 "boto3 is not installed, please install great_expectations with aws_secrets extra > "
                 "pip install great_expectations[aws_secrets]"
             )
@@ -277,7 +277,7 @@ class _ConfigurationSubstitutor:
             rf"{self.GCP_PATTERN}(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$"
         )
         if not secretmanager:
-            logger.error(
+            LOGGER.error(
                 "secretmanager is not installed, please install great_expectations with gcp extra > "
                 "pip install great_expectations[gcp]"
             )
@@ -334,7 +334,7 @@ class _ConfigurationSubstitutor:
             rf"{self.AZURE_PATTERN}(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
         )
         if not SecretClient:
-            logger.error(
+            LOGGER.error(
                 "SecretClient is not installed, please install great_expectations with azure_secrets extra > "
                 "pip install great_expectations[azure_secrets]"
             )

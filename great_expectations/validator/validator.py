@@ -92,7 +92,7 @@ from great_expectations.validator.validation_graph import (
     ValidationGraph,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 try:
@@ -100,7 +100,7 @@ try:
 except ImportError:
     pd = None
 
-    logger.debug(
+    LOGGER.debug(
         "Unable to load pandas; install optional pandas dependency for support."
     )
 
@@ -518,7 +518,7 @@ class Validator:
                     if arg_name in allowed_config_keys:
                         expectation_kwargs[arg_name] = arg
                     if arg_name == "meta":
-                        logger.warning(
+                        LOGGER.warning(
                             "Setting meta via args could be ambiguous; please use a kwarg instead."
                         )
                         meta = arg
@@ -732,7 +732,7 @@ class Validator:
                     if arg_name in allowed_config_keys:
                         expectation_kwargs[arg_name] = arg
                     if arg_name == "meta":
-                        logger.warning(
+                        LOGGER.warning(
                             "Setting meta via args could be ambiguous; please use a kwarg instead."
                         )
                 except IndexError:
@@ -1495,7 +1495,7 @@ class Validator:
 
         expectation_suite.expectations = expectations
         if not suppress_logging:
-            logger.info(message + settings_message)
+            LOGGER.info(message + settings_message)
         return expectation_suite
 
     @public_api
@@ -1651,7 +1651,7 @@ class Validator:
                         f"Unable to load expectation suite: IO error while reading {expectation_suite}"
                     )
             elif not isinstance(expectation_suite, ExpectationSuite):
-                logger.error(
+                LOGGER.error(
                     "Unable to validate using the provided value for expectation suite; does it need to be "
                     "loaded from a dictionary?"
                 )
@@ -1947,7 +1947,7 @@ class Validator:
                     self._expectation_suite.expectation_suite_name
                     != expectation_suite_name
                 ):
-                    logger.warning(
+                    LOGGER.warning(
                         "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
                             n1=self._expectation_suite.expectation_suite_name,
                             n2=expectation_suite_name,

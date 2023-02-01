@@ -47,7 +47,7 @@ if TYPE_CHECKING:
 
 STOP_SIGNAL = object()
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 _anonymizers = {}
 
@@ -114,17 +114,17 @@ class UsageStatisticsHandler:
                 return
             try:
                 res = session.post(self._url, json=message, timeout=2)
-                logger.debug(
+                LOGGER.debug(
                     "Posted usage stats: message status " + str(res.status_code)
                 )
                 if res.status_code != 201:
-                    logger.debug(
+                    LOGGER.debug(
                         "Server rejected message: ", json.dumps(message, indent=2)
                     )
             except requests.exceptions.Timeout:
-                logger.debug("Timeout while sending usage stats message.")
+                LOGGER.debug("Timeout while sending usage stats message.")
             except Exception as e:
-                logger.debug("Unexpected error posting message: " + str(e))
+                LOGGER.debug("Unexpected error posting message: " + str(e))
             finally:
                 self._message_queue.task_done()
 
@@ -204,7 +204,7 @@ class UsageStatisticsHandler:
             ).validate(message)
             return True
         except jsonschema.ValidationError as e:
-            logger.debug(
+            LOGGER.debug(
                 f"{UsageStatsExceptionPrefix.INVALID_MESSAGE.value} invalid message: "
                 + str(e)
             )
@@ -247,7 +247,7 @@ class UsageStatisticsHandler:
             log_message: str = (
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}"
             )
-            logger.debug(log_message)
+            LOGGER.debug(log_message)
 
 
 def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHandler]:
@@ -255,11 +255,11 @@ def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHa
         # If the object is usage_statistics-capable, then it will have a usage_statistics_handler
         handler = getattr(args_array[0], "_usage_statistics_handler", None)
         if handler is not None and not isinstance(handler, UsageStatisticsHandler):
-            logger.debug("Invalid UsageStatisticsHandler found on object.")
+            LOGGER.debug("Invalid UsageStatisticsHandler found on object.")
             handler = None
     except IndexError:
         # A wrapped method that is not an object; this would be erroneous usage
-        logger.debug(
+        LOGGER.debug(
             "usage_statistics enabled decorator should only be used on data context methods"
         )
         handler = None
@@ -268,7 +268,7 @@ def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHa
         handler = None
     except Exception as e:
         # An unknown error -- but we still fail silently
-        logger.debug(
+        LOGGER.debug(
             "Unrecognized error when trying to find usage_statistics_handler: " + str(e)
         )
         handler = None
@@ -370,7 +370,7 @@ def run_validation_operator_usage_statistics(
             obj=validation_operator_name
         )
     except TypeError as e:
-        logger.debug(
+        LOGGER.debug(
             f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, run_validation_operator_usage_statistics: Unable to create validation_operator_name hash"
         )
     if data_context._usage_statistics_handler:
@@ -381,7 +381,7 @@ def run_validation_operator_usage_statistics(
                 anonymizer.anonymize(obj=batch) for batch in assets_to_validate
             ]
         except Exception as e:
-            logger.debug(
+            LOGGER.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, run_validation_operator_usage_statistics: Unable to create anonymized_batches payload field"
             )
 
@@ -470,7 +470,7 @@ def add_datasource_usage_statistics(
     try:
         payload = datasource_anonymizer._anonymize_datasource_info(name, kwargs)
     except Exception as e:
-        logger.debug(
+        LOGGER.debug(
             f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, add_datasource_usage_statistics: Unable to create add_datasource_usage_statistics payload field"
         )
 
@@ -497,7 +497,7 @@ def get_batch_list_usage_statistics(
             anonymizer: Anonymizer = data_context._usage_statistics_handler.anonymizer
             payload = anonymizer.anonymize(*args, **kwargs)
         except Exception as e:
-            logger.debug(
+            LOGGER.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_batch_list_usage_statistics: Unable to create anonymized_batch_request payload field"
             )
 
@@ -542,7 +542,7 @@ def get_checkpoint_run_usage_statistics(
                 *(checkpoint,), **resolved_runtime_kwargs
             )
         except Exception as e:
-            logger.debug(
+            LOGGER.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_checkpoint_run_usage_statistics: Unable to create anonymized_checkpoint_run payload field"
             )
 
@@ -587,7 +587,7 @@ def get_profiler_run_usage_statistics(
 
             payload: dict = anonymizer.anonymize(obj=resolved_runtime_config)
         except Exception as e:
-            logger.debug(
+            LOGGER.debug(
                 f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, get_profiler_run_usage_statistics: Unable to create anonymized_profiler_run payload field"
             )
 
@@ -634,7 +634,7 @@ def send_usage_message_from_handler(
             }
             handler.emit(message)
     except Exception as e:
-        logger.debug(
+        LOGGER.debug(
             f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, Exception encountered while running send_usage_message_from_handler()."
         )
 
@@ -682,7 +682,7 @@ def _handle_expectation_suite_usage_statistics(
             obj=expectation_suite_name
         )
     except Exception as e:
-        logger.debug(
+        LOGGER.debug(
             f"{UsageStatsExceptionPrefix.EMIT_EXCEPTION.value}: {e} type: {type(e)}, {event_arguments_payload_handler_name}: Unable to create anonymized_expectation_suite_name payload field."
         )
 

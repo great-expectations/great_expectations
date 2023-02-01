@@ -4,7 +4,7 @@ from typing import Dict, Set
 
 from great_expectations.core.id_dict import BatchKwargs
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class BatchKwargsGenerator:
@@ -247,7 +247,7 @@ class BatchKwargsGenerator:
                 data_asset_name
             ]
             if passed_kwargs != kwargs:
-                logger.warning(
+                LOGGER.warning(
                     "Asked to yield batch_kwargs using different supplemental kwargs. Please reset iterator to "
                     "use different supplemental kwargs."
                 )
@@ -284,7 +284,7 @@ class BatchKwargsGenerator:
             | self._datasource.recognized_batch_parameters
         )
         if not param_keys <= recognized_params:
-            logger.warning(
+            LOGGER.warning(
                 f"Unrecognized batch_parameter(s): {str(param_keys - recognized_params)}"
             )
 
@@ -315,7 +315,7 @@ class BatchKwargsGenerator:
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
         data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]
         if passed_kwargs != kwargs:
-            logger.warning(
+            LOGGER.warning(
                 "Asked to yield batch_kwargs using different supplemental kwargs. Resetting iterator to "
                 "use new supplemental kwargs."
             )
@@ -333,7 +333,7 @@ class BatchKwargsGenerator:
                 data_asset_name
             ]
             if passed_kwargs != kwargs:
-                logger.warning(
+                LOGGER.warning(
                     "Asked to yield batch_kwargs using different batch parameters. Resetting iterator to "
                     "use different batch parameters."
                 )
@@ -347,13 +347,13 @@ class BatchKwargsGenerator:
                 return batch_kwargs
             except StopIteration:
                 # This is a degenerate case in which no kwargs are actually being generated
-                logger.warning(
+                LOGGER.warning(
                     f"No batch_kwargs found for data_asset_name {data_asset_name}"
                 )
                 return {}
         except TypeError:
             # If we don't actually have an iterator we can generate, even after resetting, just return empty
-            logger.warning(
+            LOGGER.warning(
                 f"Unable to generate batch_kwargs for data_asset_name {data_asset_name}"
             )
             return {}

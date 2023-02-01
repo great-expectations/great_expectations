@@ -12,7 +12,7 @@ from great_expectations.expectations.metrics.util import (
     get_dialect_like_pattern_expression,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ColumnValuesMatchLikePatternList(ColumnMapMetricProvider):
@@ -36,7 +36,7 @@ class ColumnValuesMatchLikePatternList(ColumnMapMetricProvider):
             column, _dialect, like_pattern_list[0]
         )
         if like_pattern_expression is None:
-            logger.warning(
+            LOGGER.warning(
                 f"Like patterns are not supported for dialect {str(_dialect.dialect.name)}"
             )
             raise NotImplementedError

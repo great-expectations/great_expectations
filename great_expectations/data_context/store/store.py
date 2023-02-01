@@ -14,7 +14,7 @@ from great_expectations.data_context.types.resource_identifiers import GXCloudId
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class Store:
@@ -48,7 +48,7 @@ class Store:
         if store_backend is None:
             store_backend = {"class_name": "InMemoryStoreBackend"}
         self._store_name = store_name
-        logger.debug("Building store_backend.")
+        LOGGER.debug("Building store_backend.")
         module_name = "great_expectations.data_context.store"
         self._store_backend = instantiate_class_from_config(
             config=store_backend,
@@ -240,7 +240,7 @@ class Store:
             )
         except gx_exceptions.DataContextError as e:
             new_store = None
-            logger.critical(
+            LOGGER.critical(
                 f"Error {e} occurred while attempting to instantiate a store."
             )
         if not new_store:

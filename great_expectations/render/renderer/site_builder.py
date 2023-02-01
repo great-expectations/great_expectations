@@ -21,7 +21,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.render.util import resource_key_passes_run_name_filter
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 FALSEY_YAML_STRINGS = [
     "0",
@@ -441,14 +441,14 @@ class DefaultSiteSectionBuilder:
                         **resource, data_context=self.data_context
                     )
             except exceptions.InvalidKeyError:
-                logger.warning(
+                LOGGER.warning(
                     f"Object with Key: {str(resource_key)} could not be retrieved. Skipping..."
                 )
                 continue
 
             if isinstance(resource_key, ExpectationSuiteIdentifier):
                 expectation_suite_name = resource_key.expectation_suite_name
-                logger.debug(
+                LOGGER.debug(
                     f"        Rendering expectation suite {expectation_suite_name}"
                 )
             elif isinstance(resource_key, ValidationResultIdentifier):
@@ -459,12 +459,12 @@ class DefaultSiteSectionBuilder:
                     resource_key.expectation_suite_identifier.expectation_suite_name
                 )
                 if self.name == "profiling":
-                    logger.debug(
+                    LOGGER.debug(
                         f"        Rendering profiling for batch {resource_key.batch_identifier}"
                     )
                 else:
 
-                    logger.debug(
+                    LOGGER.debug(
                         f"        Rendering validation: run name: {run_name}, run time: {run_time}, suite {expectation_suite_name} for batch {resource_key.batch_identifier}"
                     )
 
@@ -505,7 +505,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     f'{type(e).__name__}: "{str(e)}".  '
                     f'Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                LOGGER.error(exception_message)
 
 
 class DefaultSiteIndexBuilder:
@@ -733,9 +733,9 @@ class DefaultSiteIndexBuilder:
         """
 
         # Loop over sections in the HtmlStore
-        logger.debug("DefaultSiteIndexBuilder.build")
+        LOGGER.debug("DefaultSiteIndexBuilder.build")
         if not build_index:
-            logger.debug("Skipping index rendering")
+            LOGGER.debug("Skipping index rendering")
             return None, None
 
         index_links_dict = OrderedDict()
@@ -775,7 +775,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
             exception_message += (
                 f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
             )
-            logger.error(exception_message)
+            LOGGER.error(exception_message)
 
         return self.target_store.write_index_page(viewable_content), index_links_dict
 
@@ -902,7 +902,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     )
                 except Exception:
                     error_msg = f"Profiling result not found: {str(profiling_result_key.to_tuple()):s} - skipping"
-                    logger.warning(error_msg)
+                    LOGGER.warning(error_msg)
 
     def _add_validations_to_index_links(
         self,
@@ -959,7 +959,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     )
                 except Exception:
                     error_msg = f"Validation result not found: {str(validation_result_key.to_tuple()):s} - skipping"
-                    logger.warning(error_msg)
+                    LOGGER.warning(error_msg)
 
 
 class CallToActionButton:

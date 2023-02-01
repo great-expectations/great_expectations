@@ -15,8 +15,8 @@ import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.DEBUG)
 
 
 class BackendDependencies(enum.Enum):
@@ -1925,11 +1925,11 @@ def _execute_integration_test(
         )
         script_path = os.path.join(tmp_path, "test_script.py")
         shutil.copyfile(script_source, script_path)
-        logger.debug(
+        LOGGER.debug(
             f"(_execute_integration_test) script_source -> {script_source} :: copied to {script_path}"
         )
         if not script_source.endswith(".py"):
-            logger.error(f"{script_source} is not a python script!")
+            LOGGER.error(f"{script_source} is not a python script!")
             with open(script_path) as fp:
                 text = fp.read()
             print(f"contents of script_path:\n\n{text}\n\n")
@@ -1948,9 +1948,9 @@ def _execute_integration_test(
         test_script_module = importlib.util.module_from_spec(spec)
         loader.exec_module(test_script_module)
     except Exception as e:
-        logger.error(str(e))
+        LOGGER.error(str(e))
         if "JavaPackage" in str(e) and "aws_glue" in user_flow_script:
-            logger.debug("This is something aws_glue related, so just going to return")
+            LOGGER.debug("This is something aws_glue related, so just going to return")
             # Should try to copy aws-glue-libs jar files to Spark jar during pipeline setup
             #   - see https://stackoverflow.com/a/67371827
             return

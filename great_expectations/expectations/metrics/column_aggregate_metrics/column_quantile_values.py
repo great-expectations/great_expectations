@@ -23,7 +23,7 @@ from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     from trino.exceptions import TrinoUserError
@@ -36,7 +36,7 @@ try:
     from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
     from sqlalchemy.sql.selectable import CTE
 except ImportError:
-    logger.debug(
+    LOGGER.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     ProgrammingError = None
@@ -54,7 +54,7 @@ except ImportError:
 
         Row = RowProxy
     except ImportError:
-        logger.debug(
+        LOGGER.debug(
             "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
         )
         RowProxy = None
@@ -228,7 +228,7 @@ def _get_column_quantiles_mssql(
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
-        logger.error(exception_message)
+        LOGGER.error(exception_message)
         raise pe
 
 
@@ -250,7 +250,7 @@ def _get_column_quantiles_bigquery(
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
-        logger.error(exception_message)
+        LOGGER.error(exception_message)
         raise pe
 
 
@@ -309,7 +309,7 @@ def _get_column_quantiles_mysql(
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
-        logger.error(exception_message)
+        LOGGER.error(exception_message)
         raise pe
 
 
@@ -330,7 +330,7 @@ def _get_column_quantiles_trino(
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
-        logger.error(exception_message)
+        LOGGER.error(exception_message)
         raise pe
 
 
@@ -371,7 +371,7 @@ def _get_column_quantiles_sqlite(
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
-        logger.error(exception_message)
+        LOGGER.error(exception_message)
         raise pe
 
 
@@ -399,7 +399,7 @@ def _get_column_quantiles_athena(
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
-        logger.error(exception_message)
+        LOGGER.error(exception_message)
         raise pe
 
 
@@ -446,7 +446,7 @@ def _get_column_quantiles_generic_sqlalchemy(
                     exception_message: str = "An SQL syntax Exception occurred."
                     exception_traceback: str = traceback.format_exc()
                     exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
-                    logger.error(exception_message)
+                    LOGGER.error(exception_message)
                     raise pe
             else:
                 raise ValueError(

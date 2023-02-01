@@ -4,7 +4,7 @@ from typing import List
 
 from ruamel.yaml import YAML, yaml_object
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 yaml = YAML()
 
 

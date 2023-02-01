@@ -35,7 +35,7 @@ from great_expectations.data_asset.util import (
 )
 from great_expectations.exceptions import GreatExpectationsError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
@@ -379,7 +379,7 @@ class DataAsset:
                     self._expectation_suite.expectation_suite_name
                     != expectation_suite_name
                 ):
-                    logger.warning(
+                    LOGGER.warning(
                         "Overriding existing expectation_suite_name {n1} with new name {n2}".format(
                             n1=self._expectation_suite.expectation_suite_name,
                             n2=expectation_suite_name,
@@ -652,7 +652,7 @@ class DataAsset:
 
         expectation_suite.expectations = expectations
         if not suppress_logging:
-            logger.info(message + settings_message)
+            LOGGER.info(message + settings_message)
         return expectation_suite
 
     def save_expectation_suite(
@@ -857,7 +857,7 @@ class DataAsset:
                     **expectation_suite_dict, data_context=None
                 )
             elif not isinstance(expectation_suite, ExpectationSuite):
-                logger.error(
+                LOGGER.error(
                     "Unable to validate using the provided value for expectation suite; does it need to be "
                     "loaded from a dictionary?"
                 )

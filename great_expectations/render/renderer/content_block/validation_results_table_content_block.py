@@ -17,7 +17,7 @@ from great_expectations.render.renderer.content_block.expectation_string import 
     ExpectationStringRenderer,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ValidationResultsTableContentBlockRenderer(ExpectationStringRenderer):
@@ -152,7 +152,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                LOGGER.error(exception_message)
             try:
                 unexpected_table_renderer = get_renderer_impl(
                     object_name=expectation_type,
@@ -169,7 +169,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                LOGGER.error(exception_message)
             try:
                 observed_value_renderer = get_renderer_impl(
                     object_name=expectation_type,
@@ -191,7 +191,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 )
-                logger.error(exception_message)
+                LOGGER.error(exception_message)
 
             # If the expectation has some unexpected values...:
             if unexpected_statement:

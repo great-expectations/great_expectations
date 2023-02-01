@@ -12,7 +12,7 @@ try:
 except ModuleNotFoundError:
     OperationalError = RuntimeError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class BasicDatasetProfilerBase(DatasetProfiler):
@@ -84,7 +84,7 @@ class BasicDatasetProfilerBase(DatasetProfiler):
                 column, None, None
             ).result["observed_value"]
         except KeyError:  # if observed_value value is not set
-            logger.error(
+            LOGGER.error(
                 f"Failed to get cardinality of column {column:s} - continuing..."
             )
 
@@ -141,7 +141,7 @@ class BasicDatasetProfiler(BasicDatasetProfilerBase):
 
         number_of_columns = len(columns)
         for i, column in enumerate(columns):
-            logger.info(
+            LOGGER.info(
                 f"            Preparing column {i + 1} of {number_of_columns}: {column}"
             )
 

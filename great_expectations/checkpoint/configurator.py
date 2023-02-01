@@ -21,7 +21,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ActionDict(TypedDict):
@@ -175,7 +175,7 @@ class SimpleCheckpointConfigurator:
         )
         config_kwargs = checkpointConfigSchema.dump(checkpoint_config)
 
-        logger.debug(
+        LOGGER.debug(
             f"SimpleCheckpointConfigurator built this CheckpointConfig:"
             f"{checkpoint_config}"
         )

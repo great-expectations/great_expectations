@@ -75,8 +75,8 @@ if TYPE_CHECKING:
     )
 
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 MAX_DECIMALS: int = 9
 
@@ -479,7 +479,7 @@ detected.
 
         # Since complex numerical calculations do not support DateTime/TimeStamp data types, use "quantiles" estimator.
         if datetime_semantic_domain_type(domain=domain):
-            logger.info(
+            LOGGER.info(
                 f'Estimator "{estimator}" does not support DateTime/TimeStamp data types (downgrading to "quantiles").'
             )
             return QuantilesNumericRangeEstimator(

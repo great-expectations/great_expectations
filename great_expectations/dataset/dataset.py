@@ -20,13 +20,13 @@ from great_expectations.dataset.util import (
     is_valid_partition_object,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     from sqlalchemy.sql import quoted_name
 
 except:
-    logger.debug(
+    LOGGER.debug(
         "Unable to load quoted name from SqlAlchemy; install optional sqlalchemy dependency for support"
     )
     quoted_name = None
@@ -3521,7 +3521,7 @@ class Dataset(MetaDataset):
                     try:
                         min_value = parse(min_value)
                     except (ValueError, TypeError) as e:
-                        logger.debug(
+                        LOGGER.debug(
                             f"Something went wrong when parsing 'min_value': {e}"
                         )
 
@@ -3537,7 +3537,7 @@ class Dataset(MetaDataset):
                     try:
                         max_value = parse(max_value)
                     except (ValueError, TypeError) as e:
-                        logger.debug(
+                        LOGGER.debug(
                             f"Something went wrong when parsing 'max_value': {e}"
                         )
 
@@ -3656,7 +3656,7 @@ class Dataset(MetaDataset):
                     try:
                         min_value = parse(min_value)
                     except (ValueError, TypeError) as e:
-                        logger.debug(
+                        LOGGER.debug(
                             f"Something went wrong when parsing 'min_value': {e}"
                         )
 
@@ -3672,7 +3672,7 @@ class Dataset(MetaDataset):
                     try:
                         max_value = parse(max_value)
                     except (ValueError, TypeError) as e:
-                        logger.debug(
+                        LOGGER.debug(
                             f"Something went wrong when parsing 'max_value': {e}"
                         )
 

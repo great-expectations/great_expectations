@@ -30,7 +30,7 @@ from great_expectations.validation_operators.types.validation_operator_result im
     ValidationOperatorResult,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ValidationResultsPageRenderer(Renderer):
@@ -832,7 +832,7 @@ class ExpectationSuitePageRenderer(Renderer):
                         elif isinstance(notes["content"], list):
                             note_content = notes["content"]
                         else:
-                            logger.warning(
+                            LOGGER.warning(
                                 "Unrecognized Expectation suite notes format. Skipping rendering."
                             )
 
@@ -859,11 +859,11 @@ class ExpectationSuitePageRenderer(Renderer):
                                 for note in notes["content"]
                             ]
                         else:
-                            logger.warning(
+                            LOGGER.warning(
                                 "Unrecognized Expectation suite notes format. Skipping rendering."
                             )
                 else:
-                    logger.warning(
+                    LOGGER.warning(
                         "Unrecognized Expectation suite notes format. Skipping rendering."
                     )
 

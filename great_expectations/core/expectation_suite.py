@@ -63,7 +63,7 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 @public_api
@@ -198,7 +198,7 @@ class ExpectationSuite(SerializableDictDot):
                         **other_dict, data_context=self._data_context
                     )
                 except ValidationError:
-                    logger.debug(
+                    LOGGER.debug(
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
                         "dict other could not be instantiated as an ExpectationConfiguration"
                     )

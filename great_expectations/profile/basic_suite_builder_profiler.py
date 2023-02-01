@@ -8,8 +8,8 @@ from great_expectations.dataset.util import build_categorical_partition_object
 from great_expectations.exceptions import ProfilerError
 from great_expectations.profile.base import ProfilerCardinality, ProfilerDataType
 from great_expectations.profile.basic_dataset_profiler import (
+    LOGGER,
     BasicDatasetProfilerBase,
-    logger,
 )
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.util import is_nan
@@ -236,7 +236,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     column, min_value=observed_min - 1, max_value=observed_min + 1
                 )
             else:
-                logger.debug(
+                LOGGER.debug(
                     f"Skipping expect_column_min_to_be_between because observed value is nan: {observed_min}"
                 )
 
@@ -255,7 +255,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     column, min_value=observed_max - 1, max_value=observed_max + 1
                 )
             else:
-                logger.debug(
+                LOGGER.debug(
                     f"Skipping expect_column_max_to_be_between because observed value is nan: {observed_max}"
                 )
 
@@ -274,7 +274,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     column, min_value=observed_mean - 1, max_value=observed_mean + 1
                 )
             else:
-                logger.debug(
+                LOGGER.debug(
                     f"Skipping expect_column_mean_to_be_between because observed value is nan: {observed_mean}"
                 )
 
@@ -293,7 +293,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                     column, min_value=observed_median - 1, max_value=observed_median + 1
                 )
             else:
-                logger.debug(
+                LOGGER.debug(
                     f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
                 )
 
@@ -328,8 +328,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 or quantile_result.exception_info["exception_message"]
             ):
                 # TODO quantiles are not implemented correctly on sqlite, and likely other sql dialects
-                logger.debug(quantile_result.exception_info["exception_traceback"])
-                logger.debug(quantile_result.exception_info["exception_message"])
+                LOGGER.debug(quantile_result.exception_info["exception_traceback"])
+                LOGGER.debug(quantile_result.exception_info["exception_message"])
             else:
                 dataset.set_config_value("interactive_evaluation", False)
                 dataset.expect_column_quantile_values_to_be_between(
@@ -537,7 +537,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
 
     @classmethod  # noqa: C901
     def _profile(cls, dataset, configuration=None):  # noqa: C901 - 28
-        logger.debug(f"Running profiler with configuration: {configuration}")
+        LOGGER.debug(f"Running profiler with configuration: {configuration}")
         if configuration == "demo":
             return cls._demo_profile(dataset)
 
@@ -655,7 +655,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                                 included_expectations=included_expectations,
                             )
                         elif column_type in [ProfilerDataType.UNKNOWN]:
-                            logger.debug(
+                            LOGGER.debug(
                                 f"Skipping expectation creation for column {column} of unknown type: {column_type}"
                             )
                     pbar.update()
@@ -682,7 +682,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                             remove_multiple_matches=True,
                         )
                     except ValueError:
-                        logger.debug(
+                        LOGGER.debug(
                             f"Attempted to remove {expectation}, which was not found."
                         )
 

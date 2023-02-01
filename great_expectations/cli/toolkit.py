@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     )
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 EXIT_UPGRADE_CONTINUATION_MESSAGE = (
     "\nOk, exiting now. To upgrade at a later time, use the following command: "
@@ -859,7 +859,7 @@ def confirm_proceed_or_exit(
                     )
                 except Exception as e:
                     # Don't fail on usage stats
-                    logger.debug(f"Something went wrong when sending usage stats: {e}")
+                    LOGGER.debug(f"Something went wrong when sending usage stats: {e}")
                     pass
             sys.exit(exit_code)
         else:

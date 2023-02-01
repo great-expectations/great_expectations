@@ -26,7 +26,7 @@ from great_expectations.render.renderer.renderer import Renderer
 if TYPE_CHECKING:
     from great_expectations.render import RenderedContent
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class InlineRendererConfig(TypedDict):
@@ -162,7 +162,7 @@ class InlineRenderer(Renderer):
             ), f"The renderer: {renderer_name} for expectation: {expectation_type} should return RenderedAtomicContent."
         except Exception as e:
             error_message = f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type} with exception message: {str(e)}".'
-            logger.info(error_message)
+            LOGGER.info(error_message)
 
             failure_renderer: AtomicPrescriptiveRendererType | AtomicDiagnosticRendererType
             if renderer_name.startswith(AtomicRendererType.PRESCRIPTIVE):
@@ -171,7 +171,7 @@ class InlineRenderer(Renderer):
             else:
                 failure_renderer = AtomicDiagnosticRendererType.FAILED
                 failure_renderer_message = f'Renderer "{failure_renderer}" will be used to render diagnostic content.'
-            logger.info(failure_renderer_message)
+            LOGGER.info(failure_renderer_message)
 
             renderer_impl = get_renderer_impl(
                 object_name=expectation_type, renderer_type=failure_renderer

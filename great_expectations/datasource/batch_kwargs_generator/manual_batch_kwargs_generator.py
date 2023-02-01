@@ -7,7 +7,7 @@ from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator
 )
 from great_expectations.exceptions import BatchKwargsError, InvalidBatchKwargsError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ManualBatchKwargsGenerator(BatchKwargsGenerator):
@@ -39,7 +39,7 @@ class ManualBatchKwargsGenerator(BatchKwargsGenerator):
     recognized_batch_parameters = {"data_asset_name", "partition_id"}
 
     def __init__(self, name="default", datasource=None, assets=None) -> None:
-        logger.debug(f"Constructing ManualBatchKwargsGenerator {name!r}")
+        LOGGER.debug(f"Constructing ManualBatchKwargsGenerator {name!r}")
         super().__init__(name, datasource=datasource)
 
         if assets is None:

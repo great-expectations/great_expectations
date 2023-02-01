@@ -17,7 +17,7 @@ try:
 except ImportError:
     sa = None
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 # TODO: Rename config to constructor_kwargs and config_defaults -> constructor_kwarg_default
@@ -45,12 +45,12 @@ def instantiate_class_from_config(config, runtime_environment, config_defaults=N
         # Pop the value without using it, to avoid sending an unwanted value to the config_class
         config_defaults.pop("module_name", None)
 
-    logger.debug(f"(instantiate_class_from_config) module_name -> {module_name}")
+    LOGGER.debug(f"(instantiate_class_from_config) module_name -> {module_name}")
     verify_dynamic_loading_support(module_name=module_name)
 
     class_name = config.pop("class_name", None)
     if class_name is None:
-        logger.warning(
+        LOGGER.warning(
             "Instantiating class from config without an explicit class_name is dangerous. Consider adding "
             f"an explicit class_name for {config.get('name')}"
         )
@@ -189,7 +189,7 @@ class PasswordMasker:
                 return engine.url.__repr__()
             # Account for the edge case where we have SQLAlchemy in our env but haven't installed the appropriate dialect to match the input URL
             except Exception as e:
-                logger.warning(
+                LOGGER.warning(
                     f"Something went wrong when trying to use SQLAlchemy to obfuscate URL: {e}"
                 )
         else:

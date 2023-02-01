@@ -21,7 +21,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ColumnHistogram(ColumnAggregateMetricProvider):
@@ -293,12 +293,12 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             below_bins = hist.pop(0)
             bins.pop(0)
             if below_bins > 0:
-                logger.warning("Discarding histogram values below lowest bin.")
+                LOGGER.warning("Discarding histogram values below lowest bin.")
 
         if added_max:
             above_bins = hist.pop(-1)
             bins.pop(-1)
             if above_bins > 0:
-                logger.warning("Discarding histogram values above highest bin.")
+                LOGGER.warning("Discarding histogram values above highest bin.")
 
         return hist

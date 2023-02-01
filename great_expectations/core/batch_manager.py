@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.execution_engine import ExecutionEngine
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
@@ -98,7 +98,7 @@ class BatchManager:
         """
         active_batch_data_id: Optional[str] = self.active_batch_data_id
         if active_batch_data_id != self._active_batch_id:
-            logger.warning(
+            LOGGER.warning(
                 "ID of active Batch and ID of active loaded BatchData differ."
             )
 
@@ -150,7 +150,7 @@ class BatchManager:
                     batch, (Batch, XBatch)
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
-                logger.error(str(e))
+                LOGGER.error(str(e))
 
             self._execution_engine.load_batch_data(
                 batch_id=batch.id, batch_data=batch.data

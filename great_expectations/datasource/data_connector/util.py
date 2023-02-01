@@ -21,13 +21,13 @@ from great_expectations.datasource.data_connector.sorter import Sorter
 if TYPE_CHECKING:
     from great_expectations.datasource import DataConnector
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     from azure.storage.blob import BlobPrefix
 except ImportError:
     BlobPrefix = None
-    logger.debug(
+    LOGGER.debug(
         "Unable to load azure types; install optional Azure dependency for support."
     )
 
@@ -35,7 +35,7 @@ try:
     from google.cloud import storage
 except ImportError:
     storage = None
-    logger.debug(
+    LOGGER.debug(
         "Unable to load GCS connection object; install optional Google dependency for support"
     )
 
@@ -45,7 +45,7 @@ try:
 except ImportError:
     pyspark = None
     pyspark_sql = None
-    logger.debug(
+    LOGGER.debug(
         "Unable to load pyspark and pyspark.sql; install optional Spark dependency for support."
     )
 
@@ -176,7 +176,7 @@ def _determine_batch_identifiers_using_named_groups(
         if key in group_names:
             batch_identifiers[key] = value
         else:
-            logger.warning(
+            LOGGER.warning(
                 f"The named group '{key}' must explicitly be stated in group_names to be parsed"
             )
     return batch_identifiers
@@ -454,7 +454,7 @@ def list_s3_keys(
     if "continuation_token" in iterator_dict:
         query_options.update({"ContinuationToken": iterator_dict["continuation_token"]})
 
-    logger.debug(f"Fetching objects from S3 with query options: {query_options}")
+    LOGGER.debug(f"Fetching objects from S3 with query options: {query_options}")
 
     s3_objects_info: dict = s3.list_objects_v2(**query_options)
 

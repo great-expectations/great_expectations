@@ -16,7 +16,7 @@ except ImportError:
     URL = None
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class SqlAlchemyQueryStore(Store):

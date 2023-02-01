@@ -9,7 +9,7 @@ from great_expectations.data_context.util import (
 )
 from great_expectations.exceptions import ClassInstantiationError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class LegacyDatasource:

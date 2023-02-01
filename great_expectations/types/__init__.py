@@ -12,13 +12,13 @@ from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShade
 from .configurations import ClassConfig
 from .fonts import FontFamily, FontFamilyURL
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import pyspark
 except ImportError:
     pyspark = None
-    logger.debug(
+    LOGGER.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
 

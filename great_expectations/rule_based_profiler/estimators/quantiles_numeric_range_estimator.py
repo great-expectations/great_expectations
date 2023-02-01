@@ -28,8 +28,8 @@ from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effor
 if TYPE_CHECKING:
     import numpy.typing as npt
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 DEFAULT_QUANTILES_QUANTILE_STATISTIC_INTERPOLATION_METHOD: Final[str] = "nearest"
 

@@ -23,8 +23,8 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 class ExpectationConfigurationBuilder(ABC, Builder):
@@ -69,7 +69,7 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         """
         for k, v in kwargs.items():
             setattr(self, k, v)
-            logger.debug(
+            LOGGER.debug(
                 f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 

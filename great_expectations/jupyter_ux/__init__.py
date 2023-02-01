@@ -453,5 +453,5 @@ def display_column_evrs_as_section(
 
 
 # When importing the jupyter_ux module, we set up a preferred logging configuration
-logger = logging.getLogger("great_expectations")
-setup_notebook_logging(logger)
+LOGGER = logging.getLogger("great_expectations")
+setup_notebook_logging(LOGGER)

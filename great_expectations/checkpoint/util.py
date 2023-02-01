@@ -25,7 +25,7 @@ try:
 except ImportError:
     boto3 = None
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def send_slack_notification(
@@ -53,12 +53,12 @@ def send_slack_notification(
         else:
             ok_status = response.json()["ok"]
     except requests.ConnectionError:
-        logger.warning(f"Failed to connect to Slack webhook after {10} retries.")
+        LOGGER.warning(f"Failed to connect to Slack webhook after {10} retries.")
     except Exception as e:
-        logger.error(str(e))
+        LOGGER.error(str(e))
     else:
         if response.status_code != 200 or not ok_status:
-            logger.warning(
+            LOGGER.warning(
                 "Request to Slack webhook "
                 f"returned error {response.status_code}: {response.text}"
             )
@@ -88,12 +88,12 @@ def send_opsgenie_alert(query, suite_name, settings):
     try:
         response = session.post(url, headers=headers, json=payload)
     except requests.ConnectionError:
-        logger.warning("Failed to connect to Opsgenie")
+        LOGGER.warning("Failed to connect to Opsgenie")
     except Exception as e:
-        logger.error(str(e))
+        LOGGER.error(str(e))
     else:
         if response.status_code != 202:
-            logger.warning(
+            LOGGER.warning(
                 "Request to Opsgenie API "
                 f"returned error {response.status_code}: {response.text}"
             )
@@ -107,13 +107,13 @@ def send_microsoft_teams_notifications(query, microsoft_teams_webhook):
     try:
         response = session.post(url=microsoft_teams_webhook, json=query)
     except requests.ConnectionError:
-        logger.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
+        LOGGER.warning("Failed to connect to Microsoft Teams webhook after 10 retries.")
 
     except Exception as e:
-        logger.error(str(e))
+        LOGGER.error(str(e))
     else:
         if response.status_code != 200:
-            logger.warning(
+            LOGGER.warning(
                 "Request to Microsoft Teams webhook "
                 f"returned error {response.status_code}: {response.text}"
             )
@@ -127,14 +127,14 @@ def send_webhook_notifications(query, webhook, target_platform):
     try:
         response = session.post(url=webhook, json=query)
     except requests.ConnectionError:
-        logger.warning(
+        LOGGER.warning(
             f"Failed to connect to {target_platform} webhook after 10 retries."
         )
     except Exception as e:
-        logger.error(str(e))
+        LOGGER.error(str(e))
     else:
         if response.status_code != 200:
-            logger.warning(
+            LOGGER.warning(
                 f"Request to {target_platform} webhook "
                 f"returned error {response.status_code}: {response.text}"
             )
@@ -163,7 +163,7 @@ def send_email(
     try:
         if use_ssl:
             if use_tls:
-                logger.warning("Please choose between SSL or TLS, will default to SSL")
+                LOGGER.warning("Please choose between SSL or TLS, will default to SSL")
             context = ssl.create_default_context()
             mailserver = smtplib.SMTP_SSL(smtp_address, smtp_port, context=context)
         elif use_tls:
@@ -171,19 +171,19 @@ def send_email(
             context = ssl.create_default_context()
             mailserver.starttls(context=context)
         else:
-            logger.warning("Not using TLS or SSL to send an email is not secure")
+            LOGGER.warning("Not using TLS or SSL to send an email is not secure")
             mailserver = smtplib.SMTP(smtp_address, smtp_port)
         mailserver.login(sender_login, sender_password)
         mailserver.sendmail(sender_alias, receiver_emails_list, msg.as_string())
         mailserver.quit()
     except smtplib.SMTPConnectError:
-        logger.error(f"Failed to connect to the SMTP server at address: {smtp_address}")
+        LOGGER.error(f"Failed to connect to the SMTP server at address: {smtp_address}")
     except smtplib.SMTPAuthenticationError:
-        logger.error(
+        LOGGER.error(
             f"Failed to authenticate to the SMTP server at address: {smtp_address}"
         )
     except Exception as e:
-        logger.error(str(e))
+        LOGGER.error(str(e))
     else:
         return "success"
 
@@ -499,7 +499,7 @@ def send_sns_notification(
 
     """
     if not boto3:
-        logger.warning("boto3 is not installed")
+        LOGGER.warning("boto3 is not installed")
         return "boto3 is not installed"
 
     message_dict = {
@@ -516,6 +516,6 @@ def send_sns_notification(
     try:
         response = sns.publish(**message_dict)
     except sns.exceptions.InvalidParameterException:
-        logger.error(f"Received invalid for message: {validation_results}")
+        LOGGER.error(f"Received invalid for message: {validation_results}")
     else:
         return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"

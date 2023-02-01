@@ -14,7 +14,7 @@ from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 # noinspection SpellCheckingInspection

@@ -23,8 +23,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_ndarray_datetime_dtype
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 DEFAULT_KDE_NUM_RESAMPLES = 9999
 DEFAULT_KDE_QUANTILE_STATISTIC_INTERPOLATION_METHOD = "nearest"

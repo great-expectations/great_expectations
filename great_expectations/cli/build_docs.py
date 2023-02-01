@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.cli import toolkit
-from great_expectations.cli.cli_logging import logger
+from great_expectations.cli.cli_logging import LOGGER
 from great_expectations.cli.pretty_printing import cli_message
 
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ def build_docs(
     assume_yes: bool = False,
 ) -> None:
     """Build documentation in a context"""
-    logger.debug("Starting cli.datasource.build_docs")
+    LOGGER.debug("Starting cli.datasource.build_docs")
 
     index_page_locator_infos: Dict[str, str] = context.build_data_docs(
         site_names=site_names, dry_run=True

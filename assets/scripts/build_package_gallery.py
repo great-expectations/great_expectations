@@ -14,8 +14,8 @@ from great_expectations_contrib.package import GreatExpectationsContribPackageMa
 
 from great_expectations.core.util import convert_to_json_serializable
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 def gather_all_contrib_package_paths() -> List[str]:
@@ -32,7 +32,7 @@ def gather_all_contrib_package_paths() -> List[str]:
             if file == "package_info.yml":
                 package_paths.append(root)
 
-    logger.info(f"Found {len(package_paths)} contrib packages")
+    LOGGER.info(f"Found {len(package_paths)} contrib packages")
     return package_paths
 
 
@@ -62,11 +62,11 @@ def gather_all_package_manifests(package_paths: List[str]) -> List[dict]:
             # Serialize to dict to append to payload
             json_data: dict = package.to_json_dict()
             payload.append(json_data)
-            logger.info(
+            LOGGER.info(
                 f"Successfully serialized {package.package_name} to dict and appended to manifest list"
             )
         except Exception as e:
-            logger.error(
+            LOGGER.error(
                 f"Something went wrong when syncing {path} and serializing to dict: {e}"
             )
         finally:
@@ -94,7 +94,7 @@ def write_results_to_disk(path: str, package_manifests: List[dict]) -> None:
     with open(path, "w") as outfile:
         package_manifests_serialized = convert_to_json_serializable(package_manifests)
         json.dump(package_manifests_serialized, outfile, indent=4)
-        logger.info(f"Successfully wrote package manifests to {path}")
+        LOGGER.info(f"Successfully wrote package manifests to {path}")
 
 
 if __name__ == "__main__":

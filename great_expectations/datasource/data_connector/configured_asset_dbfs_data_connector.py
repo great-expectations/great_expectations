@@ -8,7 +8,7 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.execution_engine import ExecutionEngine
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 @public_api
@@ -44,7 +44,7 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        logger.debug(f'Constructing ConfiguredAssetDBFSDataConnector "{name}".')
+        LOGGER.debug(f'Constructing ConfiguredAssetDBFSDataConnector "{name}".')
 
         super().__init__(
             name=name,

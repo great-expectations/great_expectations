@@ -11,7 +11,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.expectations.metrics.util import get_dialect_regex_expression
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ColumnValuesNotMatchRegex(ColumnMapMetricProvider):
@@ -28,7 +28,7 @@ class ColumnValuesNotMatchRegex(ColumnMapMetricProvider):
             column, regex, _dialect, positive=False
         )
         if regex_expression is None:
-            logger.warning(f"Regex is not supported for dialect {str(_dialect)}")
+            LOGGER.warning(f"Regex is not supported for dialect {str(_dialect)}")
             raise NotImplementedError
 
         return regex_expression

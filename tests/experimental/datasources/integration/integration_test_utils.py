@@ -37,7 +37,7 @@ if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import Batch
 
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 def run_checkpoint_and_data_doc(

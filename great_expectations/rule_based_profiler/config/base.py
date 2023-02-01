@@ -30,8 +30,8 @@ if TYPE_CHECKING:
         RuleBasedProfiler,
     )
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 
 class NotNullSchema(Schema):
@@ -116,7 +116,7 @@ class DomainBuilderConfig(SerializableDictDot):
 
         for k, v in kwargs.items():
             setattr(self, k, v)
-            logger.debug(
+            LOGGER.debug(
                 f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".',
             )
 
@@ -199,7 +199,7 @@ class ParameterBuilderConfig(SerializableDictDot):
 
         for k, v in kwargs.items():
             setattr(self, k, v)
-            logger.debug(
+            LOGGER.debug(
                 f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{ self.__class__.__name__}".',
             )
 
@@ -298,7 +298,7 @@ class ExpectationConfigurationBuilderConfig(SerializableDictDot):
 
         for k, v in kwargs.items():
             setattr(self, k, v)
-            logger.debug(
+            LOGGER.debug(
                 f'Setting unknown kwarg ({k}, {v}) provided to constructor as argument in "{self.__class__.__name__}".'
             )
 
@@ -521,7 +521,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
 
             return config
         except ValidationError:
-            logger.error(
+            LOGGER.error(
                 "Encountered errors during loading config.  See ValidationError for more details."
             )
             raise

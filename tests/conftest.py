@@ -109,7 +109,7 @@ yaml = YAML()
 
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.order(index=2)
@@ -7204,7 +7204,7 @@ def set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builde
         "random_seed",
         RANDOM_SEED,
     )
-    logger.info(
+    LOGGER.info(
         "Set the random_seed attr of the NumericMetricRangeMultiBatchParameterBuilder to a consistent value"
     )
 

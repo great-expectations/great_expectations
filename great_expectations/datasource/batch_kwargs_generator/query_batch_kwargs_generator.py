@@ -9,7 +9,7 @@ from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator
 from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, ClassInstantiationError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
@@ -19,7 +19,7 @@ except ImportError:
     sqlalchemy = None
     create_engine = None
     reflection = None
-    logger.debug("Unable to import sqlalchemy.")
+    LOGGER.debug("Unable to import sqlalchemy.")
 
 
 class QueryBatchKwargsGenerator(BatchKwargsGenerator):
@@ -117,7 +117,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
     def _get_iterator(self, data_asset_name, query_parameters=None):
         raw_query = self._get_raw_query(data_asset_name=data_asset_name)
         if raw_query is None:
-            logger.warning(f"No query defined for data asset: {data_asset_name}")
+            LOGGER.warning(f"No query defined for data asset: {data_asset_name}")
             # There is no valid query path or temp query storage defined with the data_asset_name
             return None
 

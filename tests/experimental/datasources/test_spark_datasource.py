@@ -15,7 +15,7 @@ from great_expectations.experimental.datasources.spark_datasource import (
     SparkDatasource,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture

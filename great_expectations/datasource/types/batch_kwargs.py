@@ -4,7 +4,7 @@ from abc import ABCMeta
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.exceptions import InvalidBatchKwargsError
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class PandasDatasourceBatchKwargs(BatchKwargs, metaclass=ABCMeta):

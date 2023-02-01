@@ -23,7 +23,7 @@ from great_expectations.validation_operators.types.validation_operator_result im
     ValidationOperatorResult,
 )
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class ValidationOperator:
@@ -452,7 +452,7 @@ class ActionListValidationOperator(ValidationOperator):
         batch_actions_results = {}
         for action in self.action_list:
             # NOTE: Eugene: 2019-09-23: log the info about the batch and the expectation suite
-            logger.debug(f"Processing validation action with name {action['name']}")
+            LOGGER.debug(f"Processing validation action with name {action['name']}")
 
             if hasattr(batch, "active_batch_id"):
                 batch_identifier = batch.active_batch_id
@@ -484,7 +484,7 @@ class ActionListValidationOperator(ValidationOperator):
                 ]
 
             except Exception as e:
-                logger.exception(f"Error running action with name {action['name']}")
+                LOGGER.exception(f"Error running action with name {action['name']}")
                 raise e
 
         return batch_actions_results
@@ -849,7 +849,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
             # solution will be to have the Stores catch other known errors and raise KeyErrors,
             # so that methods like this can catch and handle a single error type.
             except Exception:
-                logger.debug(
+                LOGGER.debug(
                     "Failure expectation suite not found: {}".format(
                         failure_expectation_suite_identifier
                     )
@@ -896,7 +896,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
                     self.data_context.expectations_store_name
                 ].get(warning_expectation_suite_identifier)
             except Exception:
-                logger.debug(
+                LOGGER.debug(
                     "Warning expectation suite not found: {}".format(
                         warning_expectation_suite_identifier
                     )
