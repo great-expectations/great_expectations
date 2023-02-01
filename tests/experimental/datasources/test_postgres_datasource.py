@@ -96,7 +96,7 @@ def test_add_table_asset_with_splitter(create_source):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        with mock.patch("sqlalchemy.inspect"):
+        with mock.patch("sqlalchemy.inspect"), mock.patch("sqlalchemy.create_engine"):
             asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter("my_column")
         assert len(source.assets) == 1
@@ -121,7 +121,7 @@ def test_add_table_asset_with_no_splitter(create_source):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        with mock.patch("sqlalchemy.inspect"):
+        with mock.patch("sqlalchemy.inspect"), mock.patch("sqlalchemy.create_engine"):
             asset = source.add_table_asset(name="my_asset", table_name="my_table")
         assert len(source.assets) == 1
         assert asset == list(source.assets.values())[0]
