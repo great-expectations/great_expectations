@@ -40,7 +40,7 @@ class _DataFrameAsset(DataAsset):
     base_directory: pathlib.Path
     regex: Pattern
 
-    # Internal attrs
+    # Internal attributes
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
@@ -52,14 +52,14 @@ class _DataFrameAsset(DataAsset):
             TestConnectionError
         """
         success = False
-        for filepath in self.path.iterdir():
+        for filepath in self.base_directory.iterdir():
             if self.regex.match(filepath.name):
                 # if one file in the path matches the regex, we consider this asset valid
                 success = True
                 break
         if not success:
             raise TestConnectionError(
-                f"No file at path: {self.path} matched the regex: {self.regex}."
+                f"No file at path: {self.base_directory} matched the regex: {self.regex}."
             )
 
     def _fully_specified_batch_requests_with_path(

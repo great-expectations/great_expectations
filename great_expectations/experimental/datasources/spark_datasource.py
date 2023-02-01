@@ -19,6 +19,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     Datasource,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
@@ -39,10 +40,27 @@ class CSVSparkAsset(DataAsset):
     base_directory: pathlib.Path
     regex: Pattern
 
-    # Internal attrs
+    # Internal attributes
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
+
+    def test_connection(self) -> None:
+        """Test the connection for the CSVAsset.
+
+        Raises:
+            TestConnectionError
+        """
+        success = False
+        for filepath in self.base_directory.iterdir():
+            if self.regex.match(filepath.name):
+                # if one file in the path matches the regex, we consider this asset valid
+                success = True
+                break
+        if not success:
+            raise TestConnectionError(
+                f"No file at path: {self.base_directory} matched the regex: {self.regex}."
+            )
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
@@ -144,7 +162,8 @@ class CSVSparkAsset(DataAsset):
                     "inferSchema": True,
                 },
             )
-            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+            execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
+            data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
 
@@ -202,6 +221,20 @@ class SparkDatasource(Datasource):
         )
 
         return SparkDFExecutionEngine
+
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the SparkDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the SparkDatasource, whether to test them as well.
+
+        Raises:
+            TestConnectionError
+        """
+        # Only self.assets can be tested for PandasDatasource
+        if self.assets and test_assets:
+            for asset in self.assets.values():
+                asset.test_connection()  # type: ignore[union-attr]
 
     def add_csv_asset(
         self,

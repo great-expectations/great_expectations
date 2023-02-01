@@ -201,7 +201,7 @@ def run_multibatch_data_assistant_and_checkpoint(
     ]
 ):
     context, ds, _, batch_request = multibatch_datasource_test_data
-    execution_engine = ds.execution_engine
+    execution_engine = ds.get_execution_engine()
     data_assistant_result, checkpoint_result = _configure_and_run_data_assistant(
         context, batch_request
     )
