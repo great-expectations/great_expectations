@@ -230,7 +230,7 @@ def multibatch_sql_data(
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
                 "sqlite",
-                "yellow_tripdata.db",
+                "yellow_tripdata_sample_2020_all_months_combined.db",
             ),
         )
     )
