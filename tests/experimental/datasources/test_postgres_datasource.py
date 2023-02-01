@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from pprint import pprint
-from typing import Callable, ContextManager, Generator
+from typing import Callable, ContextManager
 
 import pytest
 from pydantic import ValidationError
@@ -37,7 +37,7 @@ def _source(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
-) -> Generator[PostgresDatasource, None, None]:
+) -> PostgresDatasource:
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=validate_batch_spec, dialect=dialect
     )
@@ -46,7 +46,7 @@ def _source(
         PostgresDatasource.execution_engine_override = execution_eng_cls
         yield PostgresDatasource(
             name="my_datasource",
-            connection_string=connection_string,  # type: ignore[arg-type]
+            connection_string=connection_string,
         )
     finally:
         PostgresDatasource.execution_engine_override = original_override
@@ -56,7 +56,7 @@ def _source(
 # would reduce the `with ...` boilerplate in the individual tests.
 @pytest.fixture
 def create_source() -> ContextManager:
-    return _source  # type: ignore[return-value]
+    return _source
 
 
 @pytest.mark.unit
