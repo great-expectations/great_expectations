@@ -1510,7 +1510,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         self.checkpoint_store.update_checkpoint(checkpoint)
 
-    def add_or_update_checkpoint(
+    def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
         self,
         name: str,
         id: str | None = None,
