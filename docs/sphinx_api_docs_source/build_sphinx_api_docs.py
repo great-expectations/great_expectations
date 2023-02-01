@@ -18,12 +18,14 @@ Typical usage example:
 from __future__ import annotations
 
 import ast
+import enum
 import importlib
 import logging
 import os
 import pathlib
 import shutil
 import sys
+from dataclasses import dataclass
 from typing import Dict
 from urllib.parse import urlparse
 
@@ -41,6 +43,25 @@ logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
 
+class SidebarEntryType(enum.Enum):
+    """Type of sidebar entry."""
+
+    MODULE = "module"
+    CLASS = "class"
+
+
+@dataclass
+class SidebarEntry:
+    """Paths and metadata for a sidebar entry."""
+
+    name: str
+    definition: Definition
+    class_min_dotted_path: str | None
+    md_relpath: pathlib.Path
+    mdx_relpath: pathlib.Path
+    type: SidebarEntryType
+
+
 class SphinxInvokeDocsBuilder:
     """Utility class to support building API docs using Sphinx and Invoke."""
 
@@ -55,12 +76,15 @@ class SphinxInvokeDocsBuilder:
         self.base_path = base_path
         self.docs_path = base_path.parent
         self.repo_root = self.docs_path.parent
+        self.gx_path = self.repo_root / "great_expectations"
 
-        self.temp_sphinx_html_dir = (
-            self.repo_root / "temp_docs_build_dir" / "sphinx_api_docs"
-        )
+        self.temp_sphinx_html_dir = self.repo_root / "temp_sphinx_api_docs_build_dir"
         self.docusaurus_api_docs_path = self.docs_path / pathlib.Path("reference/api")
-        self.class_definitions: Dict[str, Definition] = {}
+        self.definitions: Dict[str, Definition] = {}
+        self.sidebar_entries: Dict[str, SidebarEntry] = {}
+        self.written_class_md_stubs: dict[
+            pathlib.Path, list[str]
+        ] = {}  # Dict of {path_to_class_def: ["ClassName1", "ClassName2", ...]}
 
     def build_docs(self) -> None:
         """Main method to build Sphinx docs and convert to Docusaurus."""
@@ -76,7 +100,7 @@ class SphinxInvokeDocsBuilder:
 
         self._build_html_api_docs_in_temp_folder()
 
-        self._process_and_create_docusaurus_mdx_files()
+        self._create_mdx_files_for_docusaurus_from_sphinx_html()
 
         self._remove_md_stubs()
 
@@ -121,10 +145,37 @@ class SphinxInvokeDocsBuilder:
         pathlib.Path(self.docusaurus_api_docs_path).mkdir(parents=True, exist_ok=True)
         logger.debug("Existing Docusaurus API docs removed.")
 
-    def _process_and_create_docusaurus_mdx_files(self) -> None:
-        """Creates API docs as mdx files to serve from docusaurus from content between <section> tags in the sphinx generated docs."""
+    def _create_mdx_files_for_docusaurus_from_sphinx_html(self) -> None:
+        """Creates API docs as mdx files to serve from docusaurus.
 
-        # First get file paths
+        Content for the mdx files is between <section> tags in the sphinx
+        generated html docs.
+        """
+
+        # Read the generated html and process the content for conversion to mdx
+        # Write out to .mdx file using the relative file directory structure
+        for html_file_path in self._get_generated_html_file_paths():
+            logger.info(f"Processing: {str(html_file_path.absolute())}")
+            with open(html_file_path.absolute()) as f:
+
+                html_file_contents = f.read()
+                doc_str = self._parse_and_process_html_to_mdx(
+                    html_file_path, html_file_contents
+                )
+
+                # Write out mdx files
+                output_path = self.docusaurus_api_docs_path / self._get_mdx_file_path(
+                    sidebar_entry=self._get_sidebar_entry(html_file_path=html_file_path)
+                )
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                logger.info(f"Writing out mdx file: {str(output_path.absolute())}")
+                with open(output_path, "w") as fout:
+                    fout.write(doc_str)
+
+        logger.info("Created mdx files for serving with docusaurus.")
+
+    def _get_generated_html_file_paths(self):
+        """Collect html file paths from Sphinx-generated html, skipping known index paths."""
         static_html_file_path = pathlib.Path(self.temp_sphinx_html_dir) / "html"
         paths = static_html_file_path.glob("**/*.html")
         files = [
@@ -135,101 +186,117 @@ class SphinxInvokeDocsBuilder:
             not in ("genindex.html", "search.html", "index.html", "py-modindex.html")
             and "_static" not in str(p)
         ]
+        return files
 
-        # Read the generated html and process the content for conversion to mdx
-        # Write out to .mdx file using the relative file directory structure
-        for html_file in files:
-            logger.info(f"Processing: {str(html_file.absolute())}")
-            with open(html_file.absolute()) as f:
-                soup = BeautifulSoup(f.read(), "html.parser")
+    def _parse_and_process_html_to_mdx(
+        self, html_file_path: pathlib.Path, html_file_contents: str
+    ) -> str:
+        """Parse sphinx generated html and make changes suitable for use in docusaurus.
 
-                # Retrieve and remove the title (it will also be autogenerated by docusaurus)
-                title = soup.find("h1").extract()
-                title_str = title.get_text(strip=True)
-                title_str = title_str.replace("#", "")
+        Args:
+            html_file_path: Path to the html file to process.
+            html_file_contents: Contents of the html file to process.
 
-                # Add class="sphinx-api-doc" to section tag to reference in css
-                doc = soup.find("section")
-                doc["class"] = "sphinx-api-doc"
+        Returns:
+            Content suitable for use in a docusaurus mdx file.
+        """
+        soup = BeautifulSoup(html_file_contents, "html.parser")
 
-                # Change style to styles to avoid rendering errors
-                tags_with_style = doc.find_all(
-                    "col", style=lambda value: value in value
-                )
-                for tag in tags_with_style:
-                    style = tag["style"]
-                    del tag["style"]
-                    tag["styles"] = style
+        # Retrieve and remove the title (it will also be autogenerated by docusaurus)
+        title = soup.find("h1").extract()
+        title_str = title.get_text(strip=True)
+        title_str = title_str.replace("#", "")
 
-                # Process documentation links
-                external_refs = doc.find_all(class_="reference external")
-                for external_ref in external_refs:
-                    url = external_ref.string
-                    url_parts = urlparse(url)
-                    url_path = url_parts.path.strip("/").split("/")
-                    url_text = url_path[-1]
+        sidebar_entry = self._get_sidebar_entry(html_file_path=html_file_path)
 
-                    formatted_text = url_text.replace("_", " ").title()
+        # Add .py to module titles
+        if sidebar_entry.type == SidebarEntryType.MODULE:
+            stem_path = pathlib.Path(
+                self._get_mdx_file_path(sidebar_entry=sidebar_entry).stem
+            )
+            mdx_stripped_path = str(stem_path.with_suffix(""))
+            if mdx_stripped_path.lower() == title_str.lower():
+                title_str = str(stem_path.with_suffix(".py"))
 
-                    external_ref.string = formatted_text
+        # Add class="sphinx-api-doc" to section tag to reference in css
+        doc = soup.find("section")
+        doc["class"] = "sphinx-api-doc"
 
-                # Process internal links
-                # Note: Currently the docusaurus link checker does not work well with
-                # anchor links, so we need to make these links absolute.
-                # We also need to use the shortened path version to match
-                # what is used for the page url.
-                internal_refs = doc.find_all(class_="reference internal")
-                for internal_ref in internal_refs:
-                    href = internal_ref["href"]
+        # Change style to styles to avoid rendering errors
+        tags_with_style = doc.find_all("col", style=lambda value: value in value)
+        for tag in tags_with_style:
+            style = tag["style"]
+            del tag["style"]
+            tag["styles"] = style
 
-                    split_href = href.split("#")
+        # Process documentation links
+        external_refs = doc.find_all(class_="reference external")
+        for external_ref in external_refs:
+            url = external_ref.string
+            url_parts = urlparse(url)
+            url_path = url_parts.path.strip("/").split("/")
+            url_text = url_path[-1]
 
-                    href_path = pathlib.Path(split_href[0])
+            formatted_text = url_text.replace("_", " ").title()
 
-                    if str(href_path) == ".":
-                        # For self referential links, use the file path
-                        shortened_path_version = self._get_mdx_file_path(
-                            html_file_path=html_file
-                        ).with_suffix(".html")
-                    else:
-                        # Use the shortened path generated from the href
-                        shortened_path_version = self._get_mdx_file_path(
-                            html_file_path=pathlib.Path(split_href[0])
-                        ).with_suffix(".html")
+            external_ref.string = formatted_text
 
-                    fragment = ""
-                    if len(split_href) > 1:
-                        fragment = split_href[1]
+        # Process internal links
+        # Note: Currently the docusaurus link checker does not work well with
+        # anchor links, so we need to make these links absolute.
+        # We also need to use the shortened path version to match
+        # what is used for the page url.
+        internal_refs = doc.find_all(class_="reference internal")
+        for internal_ref in internal_refs:
+            href = internal_ref["href"]
 
-                    absolute_href = (
-                        self._get_base_url()
-                        + str(shortened_path_version)
-                        + "#"
-                        + fragment
-                    )
-                    internal_ref["href"] = absolute_href
+            split_href = href.split("#")
 
-                doc_str = str(doc)
+            href_path = pathlib.Path(split_href[0])
 
-                code_block_exists = "CodeBlock" in doc_str
-                doc_str = self._add_doc_front_matter(
-                    doc=doc_str, title=title_str, import_code_block=code_block_exists
-                )
-                if code_block_exists:
-                    doc_str = self._clean_up_code_blocks(doc_str)
+            if str(href_path) == ".":
+                # For self referential links, use the file path
+                shortened_path_version = self._get_mdx_file_path(
+                    sidebar_entry=self._get_sidebar_entry(html_file_path=html_file_path)
+                ).with_suffix("")
+            else:
+                shortened_path_version = self._get_mdx_file_path(
+                    sidebar_entry=self._get_sidebar_entry(html_file_path=href_path)
+                ).with_suffix("")
 
-                # Write out mdx files
-                output_path = self.docusaurus_api_docs_path / self._get_mdx_file_path(
-                    html_file_path=html_file
-                )
-                output_path.parent.mkdir(parents=True, exist_ok=True)
-                logger.info(f"Writing out mdx file: {str(output_path.absolute())}")
-                with open(output_path, "w") as fout:
-                    fout.write(doc_str)
+            fragment = ""
+            if len(split_href) > 1:
+                fragment = split_href[1]
 
-        logger.info("Created mdx files for serving with docusaurus.")
+            absolute_href = (
+                self._get_base_url() + str(shortened_path_version) + "#" + fragment
+            )
+            internal_ref["href"] = absolute_href
 
-    def _get_mdx_file_path(self, html_file_path: pathlib.Path) -> pathlib.Path:
+        doc_str = str(doc)
+
+        # Add front matter and handle code blocks
+        code_block_exists = "CodeBlock" in doc_str
+        doc_str = self._add_doc_front_matter(
+            doc=doc_str, title=title_str, import_code_block=code_block_exists
+        )
+        if code_block_exists:
+            doc_str = self._clean_up_code_blocks(doc_str)
+
+        return doc_str
+
+    def _get_sidebar_entry(self, html_file_path: pathlib.Path) -> SidebarEntry:
+        """Get the sidebar entry from html file path.
+
+        Args:
+            html_file_path: Path of the generated html file. Stem used as key.
+
+        Returns:
+            SidebarEntry corresponding to html file path.
+        """
+        return self.sidebar_entries.get(html_file_path.stem)
+
+    def _get_mdx_file_path(self, sidebar_entry: SidebarEntry) -> pathlib.Path:
         """Get the mdx file path for a processed sphinx-generated html file.
 
         If the subject is a class, the shortest dotted import path will
@@ -242,35 +309,34 @@ class SphinxInvokeDocsBuilder:
             Path within the API docs folder to create the mdx file.
         """
 
-        static_html_file_path = pathlib.Path(self.temp_sphinx_html_dir) / "html"
-
-        # Get the definition
-        definition = self.class_definitions.get(html_file_path.stem)
-
-        if definition:
-            # Use definition to find the shortest path
-            shortest_dotted_path = get_shortest_dotted_path(
-                definition=definition, repo_root_path=self.repo_root
-            )
-            # Use parent since file will create sidebar entry with class name
-            # (if .parent is not used, then there will be a duplicate).
-            path_prefix = pathlib.Path(shortest_dotted_path.replace(".", "/")).parent
-
-            # Remove the `great_expectations` top level
-            if path_prefix.parts[0] == "great_expectations":
-                path_prefix = pathlib.Path(*path_prefix.parts[1:])
-
-            # Join the shortest path and write output
-            output_path = (path_prefix / html_file_path.stem).with_suffix(".mdx")
-        else:
-            output_path = html_file_path.relative_to(static_html_file_path).with_suffix(
-                ".mdx"
-            )
-            # Remove the `great_expectations` top level
-            if output_path.parts[0] == "great_expectations":
-                output_path = pathlib.Path(*output_path.parts[1:])
+        output_path = sidebar_entry.mdx_relpath
 
         return output_path
+
+    def _get_class_mdx_relative_filepath(self, definition: Definition) -> pathlib.Path:
+        """Get the filepath to use for the docusaurus mdx file from a class definition."""
+
+        if definition.filepath.is_absolute():
+            definition_path = definition.filepath.relative_to(self.gx_path)
+        else:
+            definition_path = definition.filepath
+
+        if isinstance(definition.ast_definition, ast.ClassDef):
+            definition_path = (
+                definition_path.with_suffix("") / f"{definition.name}_class"
+            )
+
+        return definition_path.with_suffix(".mdx")
+
+    def _get_module_mdx_relative_filepath(self, definition: Definition) -> pathlib.Path:
+        """Get the filepath to use for the docusaurus mdx file from a module definition."""
+
+        if definition.filepath.is_absolute():
+            definition_path = definition.filepath.relative_to(self.gx_path)
+        else:
+            definition_path = definition.filepath
+
+        return definition_path.with_suffix(".py.mdx")
 
     def _get_base_url(self) -> str:
         """The base url for use in generating absolute links.
@@ -296,12 +362,36 @@ class SphinxInvokeDocsBuilder:
 
         for definition in definitions:
             if isinstance(definition.ast_definition, ast.ClassDef):
-                self.class_definitions[definition.name] = definition
+                self.definitions[definition.name] = definition
+
+                sidebar_entry = SidebarEntry(
+                    name=definition.name,
+                    definition=definition,
+                    class_min_dotted_path=get_shortest_dotted_path(
+                        definition=definition, repo_root_path=self.repo_root
+                    ),
+                    md_relpath=self._get_md_file_name_from_entity_name(
+                        definition=definition
+                    ),
+                    mdx_relpath=self._get_class_mdx_relative_filepath(
+                        definition=definition
+                    ),
+                    type=SidebarEntryType.CLASS,
+                )
+
+                self.sidebar_entries[definition.name] = sidebar_entry
+
                 md_stub = self._create_class_md_stub(definition=definition)
                 self._write_stub(
                     stub=md_stub,
-                    path=self._get_md_file_name_from_entity_name(definition=definition),
+                    path=sidebar_entry.md_relpath,
                 )
+
+                filepath_to_add = self.written_class_md_stubs.get(
+                    definition.filepath, []
+                )
+                filepath_to_add.append(definition.name)
+                self.written_class_md_stubs[definition.filepath] = filepath_to_add
 
     def _write_stub(self, stub: str, path: pathlib.Path) -> None:
         """Write the markdown stub file with appropriate filename."""
@@ -316,17 +406,52 @@ class SphinxInvokeDocsBuilder:
         definitions = get_public_api_module_level_function_definitions()
 
         for definition in definitions:
-            md_stub = self._create_module_md_stub(definition=definition)
-            self._write_stub(
-                stub=md_stub,
-                path=self._get_md_file_name_from_dotted_path_prefix(
+
+            self.definitions[definition.name] = definition
+
+            sidebar_entry = SidebarEntry(
+                name=definition.name,
+                definition=definition,
+                class_min_dotted_path=get_shortest_dotted_path(
+                    definition=definition, repo_root_path=self.repo_root
+                ),
+                md_relpath=self._get_module_flat_path(definition=definition),
+                mdx_relpath=self._get_module_mdx_relative_filepath(
                     definition=definition
                 ),
+                type=SidebarEntryType.MODULE,
             )
+
+            sidebar_entry_key = str(
+                self._get_module_flat_path(definition=definition, suffix="")
+            )
+            self.sidebar_entries[sidebar_entry_key] = sidebar_entry
+
+            md_stub = self._create_module_md_stub(definition=definition)
+
+            self._write_stub(
+                stub=md_stub,
+                path=sidebar_entry.md_relpath,
+            )
+
+    def _get_module_flat_path(
+        self, definition: Definition, suffix=".md"
+    ) -> pathlib.Path:
+        """Turn a path into a single filename.
+
+        e.g. "my/path/to/file.md" -> "my_path_to_file.md"
+        """
+        relpath = definition.filepath.relative_to(self.gx_path).with_suffix(suffix)
+        flat_path = str(relpath).replace("/", "_")
+        return pathlib.Path(flat_path)
 
     def _get_entity_name(self, definition: Definition) -> str:
         """Get the name of the entity (class, module, function)."""
         return definition.ast_definition.name
+
+    def _get_module_name(self, definition: Definition) -> str:
+        """Get the name of the module from the definition."""
+        return definition.filepath.with_suffix("").parts[-1]
 
     def _get_md_file_name_from_entity_name(
         self, definition: Definition
@@ -367,7 +492,11 @@ class SphinxInvokeDocsBuilder:
 """
 
     def _create_module_md_stub(self, definition: Definition) -> str:
-        """Create the markdown stub content for a module."""
+        """Create the markdown stub content for a module.
+
+        Note, this does not exclude classes that are already documented
+        on their own class-specific pages.
+        """
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
         file_name = dotted_path_prefix.split(".")[-1]
 
