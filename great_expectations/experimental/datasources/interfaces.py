@@ -340,7 +340,7 @@ class Datasource(
     assets: MutableMapping[str, DataAssetType] = {}
 
     # private attrs
-    _cached_execution_engine_kwargs: dict[str, Any] = pydantic.PrivateAttr({})
+    _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: ExecutionEngine | None = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", pre=True)
