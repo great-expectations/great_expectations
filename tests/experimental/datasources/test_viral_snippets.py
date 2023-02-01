@@ -6,8 +6,6 @@ from pprint import pformat as pf
 
 import pytest
 
-from great_expectations.data_context.util import file_relative_path
-
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
 
@@ -20,19 +18,15 @@ logger = logging.getLogger(__file__)
 
 @pytest.fixture
 def db_file() -> pathlib.Path:
-    db_file = pathlib.Path(
-        file_relative_path(
-            __file__,
-            pathlib.Path(
-                "..",
-                "..",
-                "test_sets",
-                "taxi_yellow_tripdata_samples",
-                "sqlite",
-                "yellow_tripdata.db",
-            ),
-        )
+    relative_path = pathlib.Path(
+        "..",
+        "..",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+        "sqlite",
+        "yellow_tripdata.db",
     )
+    db_file = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     assert db_file.exists()
     return db_file
 

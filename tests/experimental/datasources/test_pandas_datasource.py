@@ -12,7 +12,6 @@ from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     PandasDatasource,
@@ -35,12 +34,13 @@ def pandas_datasource() -> PandasDatasource:
 
 @pytest.fixture
 def csv_path() -> pathlib.Path:
-    return pathlib.Path(
-        file_relative_path(
-            __file__,
-            pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples"),
-        )
+    relative_path = pathlib.Path(
+        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path
 
 
 class SpyInterrupt(RuntimeError):

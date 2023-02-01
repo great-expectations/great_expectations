@@ -7,7 +7,6 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
 )
@@ -29,12 +28,13 @@ def spark_datasource(test_backends) -> SparkDatasource:
 
 @pytest.fixture
 def csv_path() -> pathlib.Path:
-    return pathlib.Path(
-        file_relative_path(
-            __file__,
-            pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples"),
-        )
+    relative_path = pathlib.Path(
+        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path
 
 
 @pytest.mark.unit

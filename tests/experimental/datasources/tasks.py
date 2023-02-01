@@ -9,14 +9,7 @@ import pathlib
 import invoke
 import pandas as pd
 
-from great_expectations.data_context.util import file_relative_path
-
-TEST_ROOT = pathlib.Path(
-    file_relative_path(
-        __file__,
-        pathlib.Path(""),
-    )
-)
+TEST_ROOT = pathlib.Path(__file__).parent.parent.parent.resolve(strict=True)
 
 
 @invoke.task(aliases=["gen-assets"])
