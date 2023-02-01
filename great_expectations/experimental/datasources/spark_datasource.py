@@ -39,6 +39,8 @@ class CSVSparkAsset(DataAsset):
     # Spark specific attributes
     base_directory: pathlib.Path
     regex: Pattern
+    header: bool = False
+    inferSchema: bool = False
 
     # Internal attributes
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
@@ -157,10 +159,22 @@ class CSVSparkAsset(DataAsset):
         ):
             batch_spec = PathBatchSpec(
                 path=str(path),
-                reader_options={
-                    "header": True,
-                    "inferSchema": True,
-                },
+                reader_method=f"{self.type[0:-6]}",  # temporary work-around till "type" naming convention is established
+                reader_options=self.dict(
+                    include={
+                        "header",
+                        "inferSchema",
+                    },
+                    exclude={  # TODO: don't hardcode
+                        "name",
+                        "type",
+                        "base_directory",
+                        "regex",
+                        "order_by",
+                    },
+                    by_alias=True,
+                    exclude_unset=True,
+                ),
             )
             execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
             data, markers = execution_engine.get_batch_data_and_markers(
@@ -242,6 +256,8 @@ class SparkDatasource(Datasource):
         name: str,
         base_directory: PathStr,
         regex: Union[str, re.Pattern],
+        header: bool = False,
+        infer_schema: bool = False,
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> CSVSparkAsset:
         """Adds a csv asset to this Spark datasource
@@ -250,12 +266,16 @@ class SparkDatasource(Datasource):
             name: The name of the csv asset
             base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
+            header: boolean (default False) indicating whether or not first line of CSV file is header line
+            infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
         """
         asset = CSVSparkAsset(
             name=name,
             base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            header=header,
+            inferSchema=infer_schema,
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
         )
         return self.add_asset(asset)

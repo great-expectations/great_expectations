@@ -50,6 +50,8 @@ def test_add_csv_asset_to_datasource(
         name="csv_asset",
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        header=True,
+        infer_schema=True,
     )
     assert asset.name == "csv_asset"
     assert asset.base_directory == csv_path
@@ -83,6 +85,8 @@ def test_csv_asset_with_regex_unnamed_parameters(
         name="csv_asset",
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        header=True,
+        infer_schema=True,
     )
     options = asset.batch_request_options_template()
     assert options == {"batch_request_param_1": None, "batch_request_param_2": None}
@@ -96,6 +100,8 @@ def test_csv_asset_with_regex_named_parameters(
         name="csv_asset",
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        header=True,
+        infer_schema=True,
     )
     options = asset.batch_request_options_template()
     assert options == {"year": None, "month": None}
@@ -109,6 +115,8 @@ def test_csv_asset_with_some_regex_named_parameters(
         name="csv_asset",
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
+        header=True,
+        infer_schema=True,
     )
     options = asset.batch_request_options_template()
     assert options == {"batch_request_param_1": None, "month": None}
@@ -122,6 +130,8 @@ def test_csv_asset_with_non_string_regex_named_parameters(
         name="csv_asset",
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
+        header=True,
+        infer_schema=True,
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # year is an int which will raise an error
@@ -136,6 +146,8 @@ def test_get_batch_list_from_fully_specified_batch_request(
         name="csv_asset",
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        header=True,
+        infer_schema=True,
     )
     request = asset.get_batch_request({"year": "2018", "month": "04"})
     batches = asset.get_batch_list_from_batch_request(request)
@@ -147,7 +159,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert batch.metadata == {
         "year": "2018",
         "month": "04",
-        "path": asset.base_directory / "yellow_tripdata_sample_2018-04.csv",
+        "base_directory": asset.base_directory / "yellow_tripdata_sample_2018-04.csv",
     }
     assert batch.id == "spark_datasource-csv_asset-year_2018-month_04"
 
@@ -173,11 +185,15 @@ def test_get_batch_list_from_partially_specified_batch_request(
         name="csv_asset",
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        header=True,
+        infer_schema=True,
     )
     request = asset.get_batch_request({"year": "2018"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert (len(batches)) == 12
-    batch_filenames = [pathlib.Path(batch.metadata["path"]).stem for batch in batches]
+    batch_filenames = [
+        pathlib.Path(batch.metadata["base_directory"]).stem for batch in batches
+    ]
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)
