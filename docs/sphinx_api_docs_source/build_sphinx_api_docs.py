@@ -258,11 +258,11 @@ class SphinxInvokeDocsBuilder:
                 # For self referential links, use the file path
                 shortened_path_version = self._get_mdx_file_path(
                     sidebar_entry=self._get_sidebar_entry(html_file_path=html_file_path)
-                ).with_suffix(".html")
+                ).with_suffix("")
             else:
                 shortened_path_version = self._get_mdx_file_path(
                     sidebar_entry=self._get_sidebar_entry(html_file_path=href_path)
-                ).with_suffix(".html")
+                ).with_suffix("")
 
             fragment = ""
             if len(split_href) > 1:
