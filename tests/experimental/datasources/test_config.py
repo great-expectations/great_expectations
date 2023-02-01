@@ -1,6 +1,7 @@
 import functools
 import json
 import pathlib
+import re
 from pprint import pformat as pf
 from typing import Callable, List
 
@@ -10,6 +11,7 @@ import pytest
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
+from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
     SqlYearMonthSplitter,
@@ -136,6 +138,28 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
         },
     },
 }
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("asset_dict", [{"type": "json", "orient": "records"}])
+def test_exclude_unset_asset_fields(asset_dict: dict):
+    ds_mapping = {"csv": "pandas", "json": "pandas"}
+
+    ds_type_: str = ds_mapping[asset_dict["type"]]
+    ds_class = _SourceFactories.type_lookup[ds_type_]
+
+    # fill in required args
+    asset_dict.update(
+        {
+            "name": "my_asset",
+            "path": pathlib.Path(__file__),
+            "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+        }
+    )
+    asset_name = asset_dict["name"]
+    ds_dict = {"name": "my_ds", "assets": {asset_name: asset_dict}}
+    datasource: Datasource = ds_class.parse_obj(ds_dict)
+    assert asset_dict == datasource.dict()["assets"][asset_name]
 
 
 @pytest.mark.parametrize(
