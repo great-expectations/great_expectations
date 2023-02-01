@@ -162,8 +162,11 @@ class TableAsset(DataAsset):
             schema=self.schema,
         )
         if not exists:
+            table_str = (
+                f"{self.schema}.{self.table_name}" if self.schema else self.table_name
+            )
             raise TestConnectionError(
-                f"Attempt to connect to table: {self.table_name} failed because the table "
+                f"Attempt to connect to table: {table_str} failed because the table "
                 "does not exist."
             )
 
