@@ -1,26 +1,27 @@
+from __future__ import annotations
+
 import logging
+from contextlib import contextmanager
 from datetime import datetime
 from typing import Callable, Dict, Tuple
 
 import pytest
 from pytest import MonkeyPatch
 
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.experimental.datasources.metadatasource import MetaDatasource
-
-LOGGER = logging.getLogger(__name__)
-
-from contextlib import contextmanager
-
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
     BatchMarkers,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
+from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
+
+logger = logging.getLogger(__name__)
+
 
 # This is the default min/max time that we are using in our mocks.
 # They are made global so our tests can reference them directly.

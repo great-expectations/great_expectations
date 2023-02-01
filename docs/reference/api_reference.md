@@ -7,7 +7,7 @@ We are currently working on updating our API Documentation.  These documents are
 
 We're excited for contributions to Great Expectations. If you see places where the code or documentation could be improved, please get involved!
 
-You can learn more and get started in the [Contributor docs](https://docs.greatexpectations.io/docs/contributing/contributing) or connect on [Slack](https://greatexpectations.io/slack)!
+You can learn more and get started in the [contributor docs](https://docs.greatexpectations.io/docs/contributing/contributing) or connect on [Slack](https://greatexpectations.io/slack)!
 
 :::
 

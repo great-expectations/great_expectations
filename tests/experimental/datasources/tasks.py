@@ -22,6 +22,7 @@ def generate_asset_files(
     """Generate or re-generate various test asset files."""
     if not source_csv_dir:
         source_csv_dir = TEST_ROOT / "test_sets" / "taxi_yellow_tripdata_samples"
+
     source_csv_dir = pathlib.Path(source_csv_dir).resolve(strict=True)
 
     json_asset_dir = pathlib.Path.cwd() / "json_assets"
