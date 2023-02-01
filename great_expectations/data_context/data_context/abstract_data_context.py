@@ -1574,48 +1574,50 @@ class AbstractDataContext(ConfigPeer, ABC):
                 name=existing_checkpoint.name,
                 ge_cloud_id=existing_checkpoint.ge_cloud_id,
             )
-            if id is None:
-                id = existing_checkpoint.ge_cloud_id
+            existing_config = existing_checkpoint.config
+            if id is None and existing_config.ge_cloud_id:
+                id = str(existing_config.ge_cloud_id)  # Account for UUID
             if config_version is None:
-                config_version = existing_checkpoint.config_version
+                config_version = existing_config.config_version
             if template_name is None:
-                template_name = existing_checkpoint.config.template_name
+                template_name = existing_config.template_name
             if module_name is None:
-                module_name = existing_checkpoint.config.module_name
+                module_name = existing_config.module_name
             if class_name is None:
-                class_name = existing_checkpoint.config.class_name
+                class_name = existing_config.class_name
             if run_name_template is None:
-                run_name_template = existing_checkpoint.config.run_name_template
+                run_name_template = existing_config.run_name_template
             if expectation_suite_name is None:
-                expectation_suite_name = (
-                    existing_checkpoint.config.expectation_suite_name
-                )
+                expectation_suite_name = existing_config.expectation_suite_name
             if batch_request is None:
-                batch_request = existing_checkpoint.config.batch_request
+                batch_request = existing_config.batch_request
             if action_list is None:
-                action_list = existing_checkpoint.action_list
+                action_list = existing_config.action_list
             if evaluation_parameters is None:
-                evaluation_parameters = existing_checkpoint.config.evaluation_parameters
+                evaluation_parameters = existing_config.evaluation_parameters
             if runtime_configuration is None:
-                runtime_configuration = existing_checkpoint.config.runtime_configuration
+                runtime_configuration = existing_config.runtime_configuration
             if validations is None:
-                validations = existing_checkpoint.validations
+                validations = existing_config.validations
             if profilers is None:
-                profilers = existing_checkpoint.config.profilers
+                profilers = existing_config.profilers
             if site_names is None:
-                site_names = existing_checkpoint.config.site_names
+                site_names = existing_config.site_names
             if slack_webhook is None:
-                slack_webhook = existing_checkpoint.config.slack_webhook
+                slack_webhook = existing_config.slack_webhook
             if notify_on is None:
-                notify_on = existing_checkpoint.config.notify_on
+                notify_on = existing_config.notify_on
             if notify_with is None:
-                notify_with = existing_checkpoint.config.notify_with
-            if expectation_suite_ge_cloud_id:
-                expectation_suite_ge_cloud_id = (
-                    existing_checkpoint.expectation_suite_ge_cloud_id
+                notify_with = existing_config.notify_with
+            if (
+                expectation_suite_ge_cloud_id
+                and existing_config.expectation_suite_ge_cloud_id
+            ):
+                expectation_suite_ge_cloud_id = str(  # Account for UUID
+                    existing_config.expectation_suite_ge_cloud_id
                 )
             if default_validation_id is None:
-                default_validation_id = existing_checkpoint.config.default_validation_id
+                default_validation_id = existing_config.default_validation_id
 
         return self.add_checkpoint(
             name=name,

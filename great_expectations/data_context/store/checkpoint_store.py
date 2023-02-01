@@ -194,7 +194,7 @@ class CheckpointStore(ConfigurationStore):
         id = checkpoint.ge_cloud_id
 
         if id:
-            key = self.determine_key(ge_cloud_id=id)
+            key = self.determine_key(ge_cloud_id=str(id))
         else:
             key = self.determine_key(name=name)
 
