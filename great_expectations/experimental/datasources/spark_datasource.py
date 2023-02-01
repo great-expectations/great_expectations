@@ -183,7 +183,7 @@ class CSVSparkAsset(DataAsset):
             )
 
             batch_metadata = copy.deepcopy(request.options)
-            batch_metadata["path"] = path
+            batch_metadata["base_directory"] = path
 
             # Some pydantic annotations are postponed due to circular imports. This will set the annotations before we
             # instantiate the Batch class since we can import them above.
