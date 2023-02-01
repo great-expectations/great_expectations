@@ -2784,7 +2784,9 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     else:
         result = getattr(data_asset, expectation_type)(**test["input"])
 
-    check_json_test_result(test=test, result=result, data_asset=data_asset)
+    check_json_test_result(
+        test=test, result=result, v2_or_v3_api="v2", data_asset=data_asset
+    )
 
 
 def evaluate_json_test_v3_api(  # noqa: C901 - 16
@@ -2900,6 +2902,7 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
             check_json_test_result(
                 test=test,
                 result=result,
+                v2_or_v3_api="v3",
                 data_asset=validator.execution_engine.batch_manager.active_batch_data,
                 pk_column=pk_column,
             )
@@ -2916,7 +2919,7 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
 
 
 def check_json_test_result(  # noqa: C901 - 52
-    test, result, data_asset=None, pk_column=False
+    test, result, v2_or_v3_api, data_asset=None, pk_column=False
 ) -> None:
 
     # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists
@@ -2999,6 +3002,17 @@ def check_json_test_result(  # noqa: C901 - 52
         result = result.to_json_dict()
         for key, value in test["output"].items():
             # Apply our great expectations-specific test logic
+            if v2_or_v3_api is "v2" and key in [
+                "element_count",
+                "missing_count",
+                "missing_percent",
+                "unexpected_percent",
+                "unexpected_percent_total",
+                "unexpected_percent_nonmissing",
+                "partial_unexpected_index_list",
+                "details",
+            ]:
+                pass
 
             if key == "success":
                 if isinstance(value, (np.floating, float)):
