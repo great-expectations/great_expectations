@@ -2295,7 +2295,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 expectation_suite_name=expectation_suite_name, ge_cloud_id=id
             )
         except gx_exceptions.DataContextError:
-            logger.info(
+            LOGGER.info(
                 f"Could not find an existing suite named '{expectation_suite_name}'; creating a new one."
             )
 
@@ -2517,7 +2517,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         try:
             existing_profiler = self.get_profiler(name=name, ge_cloud_id=id)
         except gx_exceptions.ProfilerNotFoundError:
-            logger.info(
+            LOGGER.info(
                 f"Could not find an existing profiler named '{name}'; creating a new one."
             )
 

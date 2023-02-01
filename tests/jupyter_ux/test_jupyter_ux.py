@@ -211,7 +211,7 @@ def test_configure_logging(caplog):
 
     # Now use the logging setup from the notebook
     LOGGER = logging.getLogger("great_expectations")
-    jux.setup_notebook_logging(logger)
+    jux.setup_notebook_logging(LOGGER)
     df = gx.dataset.PandasDataset({"a": [1, 2, 3]})
     df.expect_column_to_exist("a")
     df.get_expectation_suite()
