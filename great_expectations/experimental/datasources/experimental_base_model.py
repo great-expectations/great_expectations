@@ -162,6 +162,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
         """
+        self.__fields_set__.add("assets")
         return super().json(
             include=include,
             exclude=exclude,
@@ -226,6 +227,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
         """
+        self.__fields_set__.add("assets")
         return super().dict(
             include=include,
             exclude=exclude,
