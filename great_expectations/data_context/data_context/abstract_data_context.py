@@ -22,6 +22,7 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -52,6 +53,7 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -764,8 +766,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: Union[LegacyDatasource, BaseDatasource],
         save_changes: bool | None = None,
     ) -> None:
-        """
-        Updates a Datasource that already exists in the store.
+        """Updates a Datasource that already exists in the store.
 
         Args:
             datasource: The Datasource object to update.
@@ -810,8 +811,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str,
         **kwargs,
     ) -> LegacyDatasource | BaseDatasource:
-        """
-        Add a new Datasource or update an existing one on the context depending on whether
+        """Add a new Datasource or update an existing one on the context depending on whether
         it already exists or not. The configuration is provided as kwargs.
 
         Args:
@@ -1917,17 +1917,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         )
 
-        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
+        # We get a single BatchData so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        execution_engine: ExecutionEngine
-        if hasattr(batch_list[-1], "execution_engine"):
-            # 'XBatch's are execution engine aware. We just checked for this attr so we ignore the following
-            # attr defined mypy error
-            execution_engine = batch_list[-1].execution_engine
-        else:
-            execution_engine = self.datasources[  # type: ignore[union-attr]
-                batch_list[-1].batch_definition.datasource_name
-            ].execution_engine
+        execution_engine: ExecutionEngine = batch_list[-1].data.execution_engine
 
         validator = Validator(
             execution_engine=execution_engine,
@@ -2140,11 +2132,95 @@ class AbstractDataContext(ConfigPeer, ABC):
             ValueError: The input `overwrite_existing` is of the wrong type.
             DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
         """
+        return self._add_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            overwrite_existing=overwrite_existing,
+        )
+
+    def add_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        id: str | None = None,
+        expectations: list[dict | ExpectationConfiguration] | None = None,
+        evaluation_parameters: dict | None = None,
+        data_asset_type: str | None = None,
+        execution_engine_type: Type[ExecutionEngine] | None = None,
+        meta: dict | None = None,
+    ) -> ExpectationSuite:
+        """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
+
+        Note that this method can be called by itself or run within the get_validator workflow.
+
+        When run with create_expectation_suite()::
+
+            expectation_suite_name = "genres_movies.fkey"
+            context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
+            batch = context.get_batch(
+                expectation_suite_name=expectation_suite_name
+            )
+
+
+        When run as part of get_validator()::
+
+            validator = context.get_validator(
+                datasource_name="my_datasource",
+                data_connector_name="whole_table",
+                data_asset_name="my_table",
+                create_expectation_suite_with_name="my_expectation_suite",
+            )
+            validator.expect_column_values_to_be_in_set("c1", [4,5,6])
+
+
+        Args:
+            expectation_suite_name: The name of the suite to create.
+            id: Identifier to associate with this suite.
+            expectations: Expectation Configurations to associate with this suite.
+            evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+            data_asset_type: Type of data asset to associate with this suite.
+            execution_engine_type: Name of the execution engine type.
+            meta: Metadata related to the suite.
+
+        Returns:
+            A new ExpectationSuite built with provided input args.
+
+        Raises:
+            DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
+        """
+        return self._add_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            id=id,
+            expectations=expectations,
+            evaluation_parameters=evaluation_parameters,
+            data_asset_type=data_asset_type,
+            execution_engine_type=execution_engine_type,
+            meta=meta,
+            overwrite_existing=False,  # `add` does not resolve collisions
+        )
+
+    def _add_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        id: str | None = None,
+        expectations: Sequence[dict | ExpectationConfiguration] | None = None,
+        evaluation_parameters: dict | None = None,
+        data_asset_type: str | None = None,
+        execution_engine_type: Type[ExecutionEngine] | None = None,
+        meta: dict | None = None,
+        overwrite_existing: bool = False,
+        **kwargs,
+    ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
         expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name, data_context=self
+            expectation_suite_name=expectation_suite_name,
+            data_context=self,
+            ge_cloud_id=id,
+            expectations=expectations,
+            evaluation_parameters=evaluation_parameters,
+            data_asset_type=data_asset_type,
+            execution_engine_type=execution_engine_type,
+            meta=meta,
         )
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
         if (
@@ -2152,13 +2228,92 @@ class AbstractDataContext(ConfigPeer, ABC):
             and not overwrite_existing
         ):
             raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} already exists. If you would like to overwrite this "
-                "expectation_suite, set overwrite_existing=True.".format(
-                    expectation_suite_name
-                )
+                f"expectation_suite with name {expectation_suite_name} already exists."
+                " If you would like to overwrite this expectation_suite, please delete or"
+                " update it using `delete_expectation_suite` or `update_expectation_suite`, respectively."
             )
         self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
+
+    def update_expectation_suite(
+        self,
+        expectation_suite: ExpectationSuite,
+    ) -> None:
+        """Update an ExpectationSuite that already exists.
+
+        Args:
+            expectation_suite: The suite to use to update.
+
+        Raises:
+            DataContextError: A suite with the given name does not already exist.
+        """
+        expectation_suite_name: str = expectation_suite.expectation_suite_name
+        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        if not self.expectations_store.has_key(key):  # noqa: W601
+            raise gx_exceptions.DataContextError(
+                f"expectation_suite with name {expectation_suite_name} does not exist."
+            )
+
+        self._add_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            id=expectation_suite.ge_cloud_id,
+            expectations=expectation_suite.expectations,
+            evaluation_parameters=expectation_suite.evaluation_parameters,
+            data_asset_type=expectation_suite.data_asset_type,
+            execution_engine_type=expectation_suite.execution_engine_type,
+            meta=expectation_suite.meta,  # type: ignore[has-type] # Should just be a dict but mypy has trouble inferring
+            overwrite_existing=True,
+        )
+
+    def add_or_update_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        id: str | None = None,
+        expectations: list[dict | ExpectationConfiguration] | None = None,
+        evaluation_parameters: dict | None = None,
+        data_asset_type: str | None = None,
+        execution_engine_type: Type[ExecutionEngine] | None = None,
+        meta: dict | None = None,
+    ) -> ExpectationSuite:
+        """Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.
+
+        Args:
+            expectation_suite_name: The name of the suite to create.
+            id: Identifier to associate with this suite.
+            expectations: Expectation Configurations to associate with this suite.
+            evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+            data_asset_type: Type of data asset to associate with this suite.
+            execution_engine_type: Name of the execution engine type.
+            meta: Metadata related to the suite.
+
+        Returns:
+            A new ExpectationSuite or an updated once (depending on whether or not it existed before this method call).
+        """
+        existing_suite = None
+        try:
+            existing_suite = self.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name, ge_cloud_id=id
+            )
+        except gx_exceptions.DataContextError:
+            logger.info(
+                f"Could not find an existing suite named '{expectation_suite_name}'; creating a new one."
+            )
+
+        if existing_suite:
+            self.update_expectation_suite(existing_suite)
+            return self.get_expectation_suite(
+                expectation_suite_name=expectation_suite_name, ge_cloud_id=id
+            )
+
+        return self.add_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            id=id,
+            expectations=expectations,
+            evaluation_parameters=evaluation_parameters,
+            data_asset_type=data_asset_type,
+            execution_engine_type=execution_engine_type,
+            meta=meta,
+        )
 
     def delete_expectation_suite(
         self,
@@ -2176,11 +2331,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         key = ExpectationSuiteIdentifier(expectation_suite_name)  # type: ignore[arg-type]
         if not self.expectations_store.has_key(key):  # noqa: W601
             raise gx_exceptions.DataContextError(
-                "expectation_suite with name {} does not exist."
+                f"expectation_suite with name {expectation_suite_name} does not exist."
             )
-        else:
-            self.expectations_store.remove_key(key)
-            return True
+        self.expectations_store.remove_key(key)
+        return True
 
     @public_api
     @deprecated_argument(argument_name="ge_cloud_id", version="0.15.45")
@@ -2322,6 +2476,61 @@ class AbstractDataContext(ConfigPeer, ABC):
             profiler_store=self.profiler_store,
             name=name,
             ge_cloud_id=ge_cloud_id,
+        )
+
+    def update_profiler(self, profiler: RuleBasedProfiler) -> None:
+        """Update a Profiler that already exists.
+
+        Args:
+            profiler: The profiler to use to update.
+
+        Raises:
+            ProfilerNotFoundError: A profiler with the given name/id does not already exist.
+        """
+        RuleBasedProfiler.update_profiler(
+            profiler=profiler,
+            profiler_store=self.profiler_store,
+            data_context=self,
+        )
+
+    def add_or_update_profiler(
+        self,
+        name: str,
+        config_version: float | None = None,
+        rules: dict[str, dict] | None = None,
+        variables: dict | None = None,
+        id: str | None = None,
+    ) -> RuleBasedProfiler:
+        """Add a new Profiler or update an existing one on the context depending on whether it already exists or not.
+
+        Args:
+            name: The name of the RBP instance.
+            config_version: The version of the RBP (currently only 1.0 is supported).
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and expectation_configuration_builders.
+            variables: Any variables to be substituted within the rules.
+            id: The id associated with the RBP instance (if applicable).
+
+        Returns:
+            A new Profiler or an updated one (depending on whether or not it existed before this method call).
+        """
+        existing_profiler = None
+        try:
+            existing_profiler = self.get_profiler(name=name, ge_cloud_id=id)
+        except gx_exceptions.ProfilerNotFoundError:
+            logger.info(
+                f"Could not find an existing profiler named '{name}'; creating a new one."
+            )
+
+        if existing_profiler:
+            self.update_profiler(existing_profiler)
+            return self.get_profiler(
+                name=existing_profiler.name, ge_cloud_id=existing_profiler.ge_cloud_id
+            )
+
+        config_version = config_version or 1.0
+        rules = rules or {}
+        return self.add_profiler(
+            name=name, config_version=config_version, rules=rules, variables=variables
         )
 
     @usage_statistics_enabled_method(

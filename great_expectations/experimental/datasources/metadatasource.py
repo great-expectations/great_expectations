@@ -49,7 +49,9 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
         def _datasource_factory(name: str, **kwargs) -> Datasource:
             # TODO: update signature to match Datasource __init__ (ex update __signature__)
             LOGGER.debug(f"5. Adding '{name}' {cls_name}")
-            return cls(name=name, **kwargs)
+            datasource = cls(name=name, **kwargs)
+            datasource.test_connection()
+            return datasource
 
         _datasource_factory.__doc__ = cls.__doc__
 
