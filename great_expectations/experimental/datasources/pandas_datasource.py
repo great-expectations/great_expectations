@@ -4,7 +4,7 @@ import copy
 import logging
 import pathlib
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Set, Tuple, Type, Union
 
 import pydantic
 from typing_extensions import ClassVar, Literal
