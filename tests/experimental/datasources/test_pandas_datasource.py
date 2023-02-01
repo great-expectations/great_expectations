@@ -156,7 +156,7 @@ class TestDynamicPandasAssets:
         kwargs.update(extra_kwargs)
         print(f"extra_kwargs\n{pf(extra_kwargs)}")
         asset_instance = asset_model(**kwargs)
-        assert asset_instance.dict(exclude_unset=True) == kwargs
+        assert asset_instance.dict() == kwargs
 
     @pytest.mark.parametrize(
         "extra_kwargs",
