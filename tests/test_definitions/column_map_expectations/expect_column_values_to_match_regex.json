@@ -28,7 +28,7 @@
       },
       "out": {
         "success":false,
-        "unexpected_index_list": [4],
+        "unexpected_index_list": [{"a": "bee", "pk_index": 4}],
         "unexpected_list": ["bee"]
       },
       "suppress_test_for": ["sqlite", "mssql"]
@@ -76,7 +76,7 @@
       },
       "out": {
         "success":true,
-        "unexpected_index_list": [{"a": "bee", "pk_index": 4}],
+        "unexpected_index_list": [{"column_name with space": "bee", "pk_index": 4}],
         "unexpected_list": ["bee"]
       },
       "suppress_test_for": ["sqlite", "mssql", "bigquery"]
