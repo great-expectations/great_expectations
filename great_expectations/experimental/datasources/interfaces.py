@@ -396,6 +396,9 @@ class Datasource(
         # See the comment in DataAsset for more information.
         asset._datasource = self
         self.assets[asset.name] = asset
+        # pydantic needs to know that an asset has been set so that it doesn't get excluded
+        # when dumping to dict, json, yaml etc.
+        self.__fields_set__.add("assets")
         return asset
 
     # Abstract Methods
