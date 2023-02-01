@@ -141,9 +141,12 @@ class TableAsset(DataAsset):
     # Instance fields
     type: Literal["table"] = "table"
     table_name: str
-    schema: Optional[str] = None
+    schema_name: Optional[str] = pydantic.Field(None, alias="schema")
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
+
+    class Config:
+        extra = pydantic.Extra.allow
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.

@@ -3,7 +3,6 @@ import json
 import pathlib
 from pprint import pformat as pf
 from typing import Callable, List
-from unittest import mock
 
 import pydantic
 import pytest
@@ -135,8 +134,7 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
     ],
 )
 def test_load_config(inject_engine_lookup_double, load_method: Callable, input_):
-    with mock.patch("sqlalchemy.create_engine"):
-        loaded: GxConfig = load_method(input_)
+    loaded: GxConfig = load_method(input_)
     pp(loaded)
     assert loaded
 
@@ -242,8 +240,7 @@ def test_catch_bad_asset_configs(
     print(f"  Config\n{pf(config)}\n")
 
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        with mock.patch("sqlalchemy.create_engine"):
-            GxConfig.parse_obj({"xdatasources": config})
+        GxConfig.parse_obj({"xdatasources": config})
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -289,8 +286,7 @@ def test_general_column_splitter_errors(
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_dict_gx_config() -> GxConfig:
-    with mock.patch("sqlalchemy.create_engine"):
-        gx_config = GxConfig.parse_obj(PG_COMPLEX_CONFIG_DICT)
+    gx_config = GxConfig.parse_obj(PG_COMPLEX_CONFIG_DICT)
     assert gx_config
     return gx_config
 
@@ -298,8 +294,7 @@ def from_dict_gx_config() -> GxConfig:
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_json_gx_config() -> GxConfig:
-    with mock.patch("sqlalchemy.create_engine"):
-        gx_config = GxConfig.parse_raw(PG_COMPLEX_CONFIG_JSON)
+    gx_config = GxConfig.parse_raw(PG_COMPLEX_CONFIG_JSON)
     assert gx_config
     return gx_config
 
@@ -307,8 +302,7 @@ def from_json_gx_config() -> GxConfig:
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_yaml_gx_config() -> GxConfig:
-    with mock.patch("sqlalchemy.create_engine"):
-        gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
+    gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
     assert gx_config
     return gx_config
 
@@ -319,8 +313,7 @@ def test_dict_config_round_trip(
     dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
-    with mock.patch("sqlalchemy.create_engine"):
-        re_loaded: GxConfig = GxConfig.parse_obj(dumped)
+    re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
     assert re_loaded
 
@@ -333,8 +326,7 @@ def test_json_config_round_trip(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    with mock.patch("sqlalchemy.create_engine"):
-        re_loaded: GxConfig = GxConfig.parse_raw(dumped)
+    re_loaded: GxConfig = GxConfig.parse_raw(dumped)
     pp(re_loaded)
     assert re_loaded
 
@@ -347,8 +339,7 @@ def test_yaml_config_round_trip(
     dumped: str = from_yaml_gx_config.yaml()
     print(f"  Dumped YAML ->\n\n{dumped}\n")
 
-    with mock.patch("sqlalchemy.create_engine"):
-        re_loaded: GxConfig = GxConfig.parse_yaml(dumped)
+    re_loaded: GxConfig = GxConfig.parse_yaml(dumped)
     pp(re_loaded)
     assert re_loaded
 
@@ -367,8 +358,7 @@ def test_yaml_file_config_round_trip(
 
     print(f"  yaml_file -> \n\n{yaml_file.read_text()}")
 
-    with mock.patch("sqlalchemy.create_engine"):
-        re_loaded: GxConfig = GxConfig.parse_yaml(yaml_file)
+    re_loaded: GxConfig = GxConfig.parse_yaml(yaml_file)
     pp(re_loaded)
     assert re_loaded
 
