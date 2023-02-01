@@ -1,6 +1,7 @@
 import functools
 import json
 import pathlib
+import re
 from pprint import pformat as pf
 from typing import Callable, List
 from unittest import mock
@@ -11,6 +12,7 @@ import pytest
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
+from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
     SqlYearMonthSplitter,
@@ -69,7 +71,28 @@ PG_COMPLEX_CONFIG_DICT = {
                     "type": "table",
                 },
             },
-        }
+        },
+        "my_pandas_ds": {
+            "type": "pandas",
+            "name": "my_pandas_ds",
+            "assets": {
+                "my_csv_asset": {
+                    "name": "my_csv_asset",
+                    "type": "csv",
+                    "base_directory": __file__,
+                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                    "sep": "|",
+                    "names": ["col1", "col2"],
+                },
+                "my_json_asset": {
+                    "name": "my_json_asset",
+                    "type": "json",
+                    "base_directory": __file__,
+                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                    "orient": "records",
+                },
+            },
+        },
     }
 }
 PG_COMPLEX_CONFIG_JSON = json.dumps(PG_COMPLEX_CONFIG_DICT)
@@ -116,6 +139,63 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
         },
     },
 }
+
+
+@pytest.mark.parametrize(
+    "asset_dict", [{"type": "json", "orient": "records"}, {"type": "csv", "sep": "|"}]
+)
+class TestExcludeUnsetAssetFields:
+    """
+    Ensure that DataAsset fields are excluded from serialization if they have not be explicitly set.
+
+    We are trying to ensure that our configs aren't filled with default values from DataAssets that
+    users never set.
+    """
+
+    def test_from_datasource(self, asset_dict: dict):
+        ds_mapping = {"csv": "pandas", "json": "pandas"}
+
+        ds_type_: str = ds_mapping[asset_dict["type"]]
+        ds_class = _SourceFactories.type_lookup[ds_type_]
+
+        # fill in required args
+        asset_dict.update(
+            {
+                "name": "my_asset",
+                "base_directory": pathlib.Path(__file__),
+                "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+            }
+        )
+        asset_name = asset_dict["name"]
+        ds_dict = {"name": "my_ds", "assets": {asset_name: asset_dict}}
+        datasource: Datasource = ds_class.parse_obj(ds_dict)
+        assert asset_dict == datasource.dict()["assets"][asset_name]
+
+    def test_from_gx_config(self, asset_dict: dict):
+        """
+        Ensure that unset fields are excluded even when being parsed by the the top-level `GxConfig` class.
+        """
+        # fill in required args
+        asset_dict.update(
+            {
+                "name": "my_asset",
+                "base_directory": pathlib.Path(__file__),
+                "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+            }
+        )
+        asset_name = asset_dict["name"]
+        ds_dict = {
+            "name": "my_ds",
+            "type": "pandas",
+            "assets": {asset_name: asset_dict},
+        }
+        gx_config = GxConfig.parse_obj({"xdatasources": {"my_ds": ds_dict}})
+
+        gx_config_dict = gx_config.dict()
+        print(f"gx_config_dict\n{pf(gx_config_dict)}")
+        assert (
+            asset_dict == gx_config_dict["xdatasources"]["my_ds"]["assets"][asset_name]
+        )
 
 
 @pytest.mark.parametrize(
@@ -190,7 +270,7 @@ def test_catch_bad_top_level_config(
     [
         p(
             {"name": "missing `table_name`", "type": "table"},
-            ("xdatasources", "assets", "table_name"),
+            ("xdatasources", "assets", "missing `table_name`", "table_name"),
             "field required",
             id="missing `table_name`",
         ),
@@ -204,7 +284,13 @@ def test_catch_bad_top_level_config(
                     "column_name": "foo",
                 },
             },
-            ("xdatasources", "assets", "column_splitter", "method_name"),
+            (
+                "xdatasources",
+                "assets",
+                "unknown splitter",
+                "column_splitter",
+                "method_name",
+            ),
             "unexpected value; permitted: 'split_on_year_and_month'",
             id="unknown splitter method",
         ),
@@ -219,7 +305,14 @@ def test_catch_bad_top_level_config(
                     "param_names": ["year", "month", "INVALID"],
                 },
             },
-            ("xdatasources", "assets", "column_splitter", "param_names", 2),
+            (
+                "xdatasources",
+                "assets",
+                "bad splitter param",
+                "column_splitter",
+                "param_names",
+                2,
+            ),
             "unexpected value; permitted: 'year', 'month'",
             id="invalid splitter param_name",
         ),
@@ -338,7 +431,7 @@ def test_json_config_round_trip(
     pp(re_loaded)
     assert re_loaded
 
-    assert from_json_gx_config == re_loaded
+    assert from_json_gx_config.dict() == re_loaded.dict()
 
 
 def test_yaml_config_round_trip(
@@ -352,7 +445,7 @@ def test_yaml_config_round_trip(
     pp(re_loaded)
     assert re_loaded
 
-    assert from_yaml_gx_config == re_loaded
+    assert from_yaml_gx_config.dict() == re_loaded.dict()
 
 
 def test_yaml_file_config_round_trip(
