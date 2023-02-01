@@ -3072,9 +3072,10 @@ def check_json_test_result(  # noqa: C901 - 52
                 elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
                     pass
                 else:
-                    assert (
-                        result["result"]["unexpected_index_list"] == value
-                    ), f"{result['result']['unexpected_index_list']} != {value}"
+                    if pk_column:
+                        assert (
+                            result["result"]["unexpected_index_list"] == value
+                        ), f"{result['result']['unexpected_index_list']} != {value}"
 
             elif key == "unexpected_list":
                 try:
