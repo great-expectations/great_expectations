@@ -355,7 +355,7 @@ class SQLDatasource(Datasource):
     assets: Dict[str, TableAsset] = {}
 
     # private attrs
-    _cached_engine_kwargs: Dict[str, str] = pydantic.PrivateAttr({})
+    _cached_connection_string: str = pydantic.PrivateAttr("")
     _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
 
     @property
@@ -366,21 +366,20 @@ class SQLDatasource(Datasource):
         return SqlAlchemyExecutionEngine
 
     def get_engine(self) -> sqlalchemy.engine.Engine:
-        current_engine_kwargs = self.dict(exclude=self._excluded_eng_args)
-        if current_engine_kwargs != self._cached_engine_kwargs or not self._engine:
+        if self.connection_string != self._cached_connection_string or not self._engine:
             # validate that SQL Alchemy was successfully imported and attempt to create an engine
             if SQLALCHEMY_IMPORTED:
                 try:
                     self._engine = sqlalchemy.create_engine(self.connection_string)
                 except Exception as e:
                     # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
-                    # one case is a missing plugin (e.g. psycopg2)
+                    # one possible case is a missing plugin (e.g. psycopg2)
                     raise SQLDatasourceError(
                         "Unable to create a SQLAlchemy engine from "
                         f"connection_string: {self.connection_string} due to the "
                         f"following exception: {str(e)}"
                     )
-                self._cached_engine_kwargs = current_engine_kwargs
+                self._cached_connection_string = self.connection_string
             else:
                 raise SQLDatasourceError(
                     "Unable to create SQLDatasource due to missing sqlalchemy dependency."

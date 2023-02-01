@@ -324,7 +324,7 @@ class Datasource(
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
-    _excluded_eng_args: ClassVar[Set[str]] = {
+    _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
         "type",
         "execution_engine",
@@ -365,7 +365,9 @@ class Datasource(
         return self.execution_engine_override or self.execution_engine_type
 
     def get_execution_engine(self) -> ExecutionEngine:
-        current_execution_engine_kwargs = self.dict(exclude=self._excluded_eng_args)
+        current_execution_engine_kwargs = self.dict(
+            exclude=self._EXCLUDED_EXEC_ENG_ARGS
+        )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
             or not self._execution_engine
