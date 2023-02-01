@@ -269,7 +269,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         formats for accessing Azure Blob Storage service.  However, Pandas and Spark execution engines utilize identical
         path formats for accessing all other supported cloud storage services (AWS S3 and Google Cloud Storage).
         Moreover, these formats (encapsulated in S3BatchSpec and GCSBatchSpec) extend PathBatchSpec (common to them).
-        Therefore, at the present time, all cases with the exception of Azure Blob Storage , are handled generically.
+        Therefore, at the present time, all cases with the exception of Azure Blob Storage, are handled generically.
         """
 
         batch_data: Any
@@ -335,10 +335,10 @@ illegal.  Please check your config."""
             elif isinstance(schema, str):
                 raise gx_exceptions.ExecutionEngineError(
                     """
-                                Spark schema was not properly serialized.
-                                Please run the .jsonValue() method on the schema object before loading into GX.
-                                schema: your_schema.jsonValue()
-                                """
+                    Spark schema was not properly serialized.
+                    Please run the .jsonValue() method on the schema object before loading into GX.
+                    schema: your_schema.jsonValue()
+                    """
                 )
             # noinspection PyUnresolvedReferences
             try:
