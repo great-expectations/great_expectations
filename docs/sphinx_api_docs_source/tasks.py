@@ -9,9 +9,9 @@ import invoke
 from build_sphinx_api_docs import SphinxInvokeDocsBuilder
 from scripts import public_api_report
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.addHandler(logging.StreamHandler())
-LOGGER.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.INFO)
 
 
 @invoke.task

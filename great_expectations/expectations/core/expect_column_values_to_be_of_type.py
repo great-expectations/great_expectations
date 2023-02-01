@@ -42,13 +42,13 @@ from great_expectations.validator.validator import ValidationDependencies
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     import pyspark.sql.types as sparktypes
 except ImportError as e:
-    LOGGER.debug(str(e))
-    LOGGER.debug(
+    logger.debug(str(e))
+    logger.debug(
         "Unable to load spark context; install optional spark dependency for support."
     )
 
@@ -57,7 +57,7 @@ try:
     from sqlalchemy.dialects import registry
 
 except ImportError:
-    LOGGER.debug(
+    logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sa = None
@@ -101,7 +101,7 @@ except ImportError:
             bigquery_types_tuple = None
         except AttributeError:
             # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            LOGGER.warning(
+            logger.warning(
                 "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
             )
             from collections import namedtuple
@@ -374,7 +374,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     == GXSqlDialect.BIGQUERY
                     and not BIGQUERY_GEO_SUPPORT
                 ):
-                    LOGGER.warning(
+                    logger.warning(
                         "BigQuery GEOGRAPHY type is not supported by default. "
                         + "To install support, please run:"
                         + "  $ pip install 'sqlalchemy-bigquery[geography]'"
@@ -394,9 +394,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                     potential_type = getattr(type_module, expected_type)
                     types.append(potential_type)
             except AttributeError:
-                LOGGER.debug(f"Unrecognized type: {expected_type}")
+                logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
-                LOGGER.warning(
+                logger.warning(
                     "No recognized sqlalchemy types in type_list for current dialect."
                 )
             types = tuple(types)
@@ -420,7 +420,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
                 type_class = getattr(sparktypes, expected_type)
                 types.append(type_class)
             except AttributeError:
-                LOGGER.debug(f"Unrecognized type: {expected_type}")
+                logger.debug(f"Unrecognized type: {expected_type}")
             if len(types) == 0:
                 raise ValueError("No recognized spark types in expected_types_list")
             types = tuple(types)
@@ -559,7 +559,7 @@ def _get_dialect_type_module(
     execution_engine,
 ):
     if execution_engine.dialect_module is None:
-        LOGGER.warning(
+        logger.warning(
             "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
         )
         return sa

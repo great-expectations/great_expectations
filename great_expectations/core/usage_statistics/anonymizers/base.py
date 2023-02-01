@@ -8,7 +8,7 @@ from great_expectations.core.usage_statistics.util import (
 )
 from great_expectations.util import load_class
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class BaseAnonymizer(ABC):
@@ -20,7 +20,7 @@ class BaseAnonymizer(ABC):
 
     def __init__(self, salt: Optional[str] = None) -> None:
         if salt is not None and not isinstance(salt, str):
-            LOGGER.error("invalid salt: must provide a string. Setting a random salt.")
+            logger.error("invalid salt: must provide a string. Setting a random salt.")
             salt = None
         if salt is None:
             import secrets

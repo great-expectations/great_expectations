@@ -9,7 +9,7 @@ import pytest
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import ENABLED_METHODS
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def filter_enabled_methods(
@@ -96,7 +96,7 @@ def test_all_relevant_context_methods_emit_usage_stats(
     context = request.getfixturevalue(data_context_fixture_name)
 
     module_path = f"{context.__module__}.{context.__class__.__name__}.{method_name}"
-    LOGGER.info(f"Testing {module_path}")
+    logger.info(f"Testing {module_path}")
 
     # Every usage stats decorated method should have a corresponding private method for actual business logic
     method_to_patch = module_path.replace(method_name, f"_{method_name}")

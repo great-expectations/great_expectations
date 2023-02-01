@@ -12,7 +12,7 @@ from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError
 from great_expectations.util import filter_properties_dict
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
@@ -573,7 +573,7 @@ class TupleS3StoreBackend(TupleStoreBackend):
                     Body=value, ContentType=content_type, **self.s3_put_options
                 )
         except s3.meta.client.exceptions.ClientError as e:
-            LOGGER.debug(str(e))
+            logger.debug(str(e))
             raise StoreBackendError("Unable to set object in s3.")
 
         return s3_object_key

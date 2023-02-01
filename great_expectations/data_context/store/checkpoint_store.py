@@ -27,7 +27,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class CheckpointStore(ConfigurationStore):

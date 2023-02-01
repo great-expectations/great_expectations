@@ -131,7 +131,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import MetaNotes
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 _TEST_DEFS_DIR = os.path.join(
@@ -1666,7 +1666,7 @@ class Expectation(metaclass=MetaExpectation):
             name (str): name of Expectation
 
         Returns:
-            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to LOGGER.
+            boolean that represents whether an Expectation can be auto-initialized. Information also outputted to logger.
         """
 
         expectation_impl: MetaExpectation = get_expectation_impl(name)

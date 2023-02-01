@@ -12,7 +12,7 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.execution_engine import ExecutionEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @public_api
@@ -44,7 +44,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        LOGGER.debug(f'Constructing InferredAssetFilesystemDataConnector "{name}".')
+        logger.debug(f'Constructing InferredAssetFilesystemDataConnector "{name}".')
 
         super().__init__(
             name=name,

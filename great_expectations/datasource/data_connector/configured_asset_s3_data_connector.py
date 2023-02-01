@@ -16,7 +16,7 @@ from great_expectations.datasource.data_connector.configured_asset_file_path_dat
 from great_expectations.datasource.data_connector.util import list_s3_keys
 from great_expectations.execution_engine import ExecutionEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @public_api
@@ -59,7 +59,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         id: Optional[str] = None,
     ) -> None:
 
-        LOGGER.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
+        logger.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
 
         super().__init__(
             name=name,

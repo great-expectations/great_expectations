@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
     from great_expectations.render import RenderedAtomicContent, RenderedContent
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 _registered_expectations: dict = {}
 _registered_metrics: dict = {}
@@ -66,7 +66,7 @@ def register_renderer(
     # noinspection PyUnresolvedReferences
     renderer_name = renderer_fn._renderer_type  # type: ignore[attr-defined]
     if object_name not in _registered_renderers:
-        LOGGER.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
+        logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
         _registered_renderers[object_name] = {
             renderer_name: (parent_class, renderer_fn)
         }
@@ -77,13 +77,13 @@ def register_renderer(
             parent_class,
             renderer_fn,
         ):
-            LOGGER.info(
+            logger.info(
                 f"Multiple declarations of {renderer_name} renderer for expectation_type {object_name} "
                 f"found."
             )
             return
         else:
-            LOGGER.warning(
+            logger.warning(
                 f"Overwriting declaration of {renderer_name} renderer for expectation_type "
                 f"{object_name}."
             )
@@ -93,7 +93,7 @@ def register_renderer(
             )
         return
     else:
-        LOGGER.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
+        logger.debug(f"Registering {renderer_name} for expectation_type {object_name}.")
         _registered_renderers[object_name][renderer_name] = (parent_class, renderer_fn)
         return
 
@@ -155,16 +155,16 @@ def register_expectation(expectation: Type[Expectation]) -> None:
     # TODO: add version to key
     if expectation_type in _registered_expectations:
         if _registered_expectations[expectation_type] == expectation:
-            LOGGER.info(
+            logger.info(
                 f"Multiple declarations of expectation {expectation_type} found."
             )
             return
         else:
-            LOGGER.warning(
+            logger.warning(
                 f"Overwriting declaration of expectation {expectation_type}."
             )
 
-    LOGGER.debug(f"Registering expectation: {expectation_type}")
+    logger.debug(f"Registering expectation: {expectation_type}")
     _registered_expectations[expectation_type] = expectation
 
 
@@ -205,14 +205,14 @@ def register_metric(
     """
     res: dict = {}
     execution_engine_name = execution_engine.__name__
-    LOGGER.debug(f"Registering metric: {metric_name}")
+    logger.debug(f"Registering metric: {metric_name}")
     if metric_provider is not None and metric_fn_type is not None:
         metric_provider.metric_fn_type = metric_fn_type  # type: ignore[attr-defined]
     if metric_name in _registered_metrics:
         metric_definition = _registered_metrics[metric_name]
         current_domain_keys = metric_definition.get("metric_domain_keys", set())
         if set(current_domain_keys) != set(metric_domain_keys):
-            LOGGER.warning(
+            logger.warning(
                 f"metric {metric_name} is being registered with different metric_domain_keys; overwriting metric_domain_keys"
             )
             _add_response_key(
@@ -223,7 +223,7 @@ def register_metric(
 
         current_value_keys = metric_definition.get("metric_value_keys", set())
         if set(current_value_keys) != set(metric_value_keys):
-            LOGGER.warning(
+            logger.warning(
                 f"metric {metric_name} is being registered with different metric_value_keys; overwriting metric_value_keys"
             )
             _add_response_key(
@@ -236,7 +236,7 @@ def register_metric(
         if execution_engine_name in providers:
             current_provider_cls, current_provider_fn = providers[execution_engine_name]
             if current_provider_fn != metric_provider:
-                LOGGER.warning(
+                logger.warning(
                     f"metric {metric_name} is being registered with different metric_provider; overwriting metric_provider"
                 )
                 _add_response_key(
@@ -246,7 +246,7 @@ def register_metric(
                 )
                 providers[execution_engine_name] = metric_class, metric_provider
             else:
-                LOGGER.info(
+                logger.info(
                     f"Multiple declarations of metric {metric_name} for engine {execution_engine_name}."
                 )
                 _add_response_key(

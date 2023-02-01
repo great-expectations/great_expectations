@@ -27,7 +27,7 @@ from great_expectations.validation_operators import (
     StoreValidationResultAction,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class MockTeamsResponse:

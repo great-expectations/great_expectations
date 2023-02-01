@@ -8,7 +8,7 @@ from great_expectations.alias_types import PathStr
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 # TODO: <Alex>This module needs to be cleaned up.

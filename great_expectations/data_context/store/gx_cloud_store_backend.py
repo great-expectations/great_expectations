@@ -19,7 +19,7 @@ from great_expectations.data_context.types.resource_identifiers import GXCloudId
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ErrorDetail(TypedDict):
@@ -87,7 +87,7 @@ def get_user_friendly_error_message(
     support_message = []
     response: requests.Response = http_exc.response
 
-    LOGGER.log(log_level, f"{http_exc.__class__.__name__}:{http_exc} - {response}")
+    logger.log(log_level, f"{http_exc.__class__.__name__}:{http_exc} - {response}")
 
     request_id = response.headers.get("request-id", "")
     if request_id:
@@ -231,7 +231,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 )
             return cast(ResponsePayload, response.json())
         except json.JSONDecodeError as jsonError:
-            LOGGER.debug(
+            logger.debug(
                 "Failed to parse GX Cloud Response into JSON",
                 str(response.text),
                 str(jsonError),
@@ -244,7 +244,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to get object in GX Cloud Store Backend: {get_user_friendly_error_message(http_err)}"
             )
         except requests.Timeout as timeout_exc:
-            LOGGER.exception(timeout_exc)
+            logger.exception(timeout_exc)
             raise StoreBackendError(
                 "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
@@ -297,12 +297,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to update object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
         except requests.Timeout as timeout_exc:
-            LOGGER.exception(timeout_exc)
+            logger.exception(timeout_exc)
             raise StoreBackendError(
                 "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
-            LOGGER.debug(str(e))
+            logger.debug(str(e))
             raise StoreBackendError(
                 f"Unable to update object in GX Cloud Store Backend: {e}"
             )
@@ -382,12 +382,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 f"Unable to set object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
         except requests.Timeout as timeout_exc:
-            LOGGER.exception(timeout_exc)
+            logger.exception(timeout_exc)
             raise StoreBackendError(
                 "Unable to set object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
-            LOGGER.debug(str(e))
+            logger.debug(str(e))
             raise StoreBackendError(
                 f"Unable to set object in GX Cloud Store Backend: {e}"
             )
@@ -445,7 +445,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             return keys
         except Exception as e:
-            LOGGER.debug(str(e))
+            logger.debug(str(e))
             raise StoreBackendError(
                 f"Unable to list keys in GX Cloud Store Backend: {e}"
             )
@@ -490,17 +490,17 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response.raise_for_status()
             return True
         except requests.HTTPError as http_exc:
-            LOGGER.exception(http_exc)
+            logger.exception(http_exc)
             raise StoreBackendError(
                 f"Unable to delete object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
             )
         except requests.Timeout as timeout_exc:
-            LOGGER.exception(timeout_exc)
+            logger.exception(timeout_exc)
             raise StoreBackendError(
                 "Unable to delete object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
-            LOGGER.debug(str(e))
+            logger.debug(str(e))
             raise StoreBackendError(
                 f"Unable to delete object in GX Cloud Store Backend: {e}"
             )

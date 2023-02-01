@@ -15,7 +15,7 @@ from great_expectations.data_context.util import file_relative_path
 
 yaml: YAMLHandler = YAMLHandler()
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # constants used by the sql example
 pg_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
@@ -449,7 +449,7 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
             if_exists="replace",
         )
     except ValueError as ve:
-        LOGGER.warning(f"Unable to store information into database: {str(ve)}")
+        logger.warning(f"Unable to store information into database: {str(ve)}")
 
     batch_options = {"year": 2021}
 

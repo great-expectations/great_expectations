@@ -1,7 +1,7 @@
 import logging
 import warnings
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class MetaMetricProvider(type):

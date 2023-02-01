@@ -23,7 +23,7 @@ from great_expectations.render.renderer.content_block import (
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def convert_to_string_and_escape(var):
@@ -115,7 +115,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 """
                 exception_traceback = traceback.format_exc()
                 exception_message += f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
-                LOGGER.error(exception_message)
+                logger.error(exception_message)
 
         # NOTE : Some render* functions return None so we filter them out
         populated_content_blocks = list(filter(None, content_blocks))

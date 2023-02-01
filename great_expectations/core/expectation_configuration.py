@@ -55,7 +55,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
     from great_expectations.validator.validator import Validator
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def parse_result_format(result_format: Union[str, dict]) -> dict:
@@ -1054,7 +1054,7 @@ class ExpectationConfiguration(SerializableDictDot):
             self._raw_kwargs = self._kwargs
             self._kwargs = evaluation_args
         else:
-            LOGGER.debug(
+            logger.debug(
                 "evaluation_parameters have already been built on this expectation"
             )
 
@@ -1166,7 +1166,7 @@ class ExpectationConfiguration(SerializableDictDot):
                 },
             }
 
-        LOGGER.warning("Requested kwargs for an unrecognized expectation.")
+        logger.warning("Requested kwargs for an unrecognized expectation.")
         return {
             "domain_kwargs": (),
             # NOTE: this is almost certainly incomplete; subclasses should override
@@ -1313,7 +1313,7 @@ class ExpectationConfiguration(SerializableDictDot):
                     # noinspection PyNoneFunctionAssignment
                     other = expectationConfigurationSchema.load(other)
                 except ValidationError:
-                    LOGGER.debug(
+                    logger.debug(
                         "Unable to evaluate equivalence of ExpectationConfiguration object with dict because "
                         "dict other could not be instantiated as an ExpectationConfiguration"
                     )
@@ -1413,7 +1413,7 @@ class ExpectationConfiguration(SerializableDictDot):
             try:
                 urn = ge_urn.parseString(string_urn)
             except ParserError:
-                LOGGER.warning("Unable to parse great_expectations urn['$PARAMETER']")
+                logger.warning("Unable to parse great_expectations urn['$PARAMETER']")
                 continue
 
             # Query stores do not have "expectation_suite_name"

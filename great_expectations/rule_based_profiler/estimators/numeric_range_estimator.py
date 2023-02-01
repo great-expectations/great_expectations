@@ -15,8 +15,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class NumericRangeEstimator(ABC, SerializableDictDot):

@@ -11,7 +11,7 @@ from great_expectations.datasource.data_connector.configured_asset_file_path_dat
 from great_expectations.datasource.data_connector.util import list_gcs_keys
 from great_expectations.execution_engine import ExecutionEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     from google.cloud import storage
@@ -19,7 +19,7 @@ try:
 except ImportError:
     storage = None
     service_account = None
-    LOGGER.debug(
+    logger.debug(
         "Unable to load GCS connection object; install optional Google dependency for support"
     )
 
@@ -70,7 +70,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         id: Optional[str] = None,
     ) -> None:
 
-        LOGGER.debug(f'Constructing ConfiguredAssetGCSDataConnector "{name}".')
+        logger.debug(f'Constructing ConfiguredAssetGCSDataConnector "{name}".')
 
         super().__init__(
             name=name,

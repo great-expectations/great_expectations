@@ -3,7 +3,7 @@ import re
 from collections import namedtuple
 from typing import List, Union
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 ANNOTATION_REGEX = r""
 ANNOTATION_REGEX += r"[\s]*(id:.*)[\n]"

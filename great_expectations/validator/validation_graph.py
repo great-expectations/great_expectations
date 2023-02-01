@@ -28,7 +28,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 if TYPE_CHECKING:
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 MAX_METRIC_COMPUTATION_RETRIES: int = 3
@@ -135,7 +135,7 @@ class ValidationGraph:
             for metric_dependency in metric_dependencies.values():
                 # TODO: <Alex>In the future, provide a more robust cycle detection mechanism.</Alex>
                 if metric_dependency.id == metric_configuration.id:
-                    LOGGER.warning(
+                    logger.warning(
                         f"Metric {str(metric_configuration.id)} has created a circular dependency"
                     )
                     continue
@@ -302,7 +302,7 @@ class ValidationGraph:
                     raise err
             except Exception as e:
                 if catch_exceptions:
-                    LOGGER.error(
+                    logger.error(
                         f"""Caught exception {str(e)} while trying to resolve a set of {len(ready_metrics)} metrics; aborting graph resolution."""
                     )
                     done = True

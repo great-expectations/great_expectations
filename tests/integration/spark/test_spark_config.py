@@ -5,7 +5,7 @@ from typing import Dict, List
 import pytest
 from packaging.version import parse as parse_version
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     import pyspark
@@ -21,7 +21,7 @@ except ImportError:
     SparkDFDatasource = None
     SparkDFExecutionEngine = None
     # TODO: review logging more detail here
-    LOGGER.debug(
+    logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes."
     )
 

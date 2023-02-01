@@ -27,7 +27,7 @@ from tests.test_utils import (
 
 yaml = YAML()
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class SampleConfig(BaseYamlConfig):

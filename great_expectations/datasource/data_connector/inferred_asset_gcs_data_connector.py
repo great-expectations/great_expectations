@@ -10,7 +10,7 @@ from great_expectations.datasource.data_connector.inferred_asset_file_path_data_
 from great_expectations.datasource.data_connector.util import list_gcs_keys
 from great_expectations.execution_engine import ExecutionEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     from google.cloud import storage
@@ -18,7 +18,7 @@ try:
 except ImportError:
     storage = None
     service_account = None
-    LOGGER.debug(
+    logger.debug(
         "Unable to load GCS connection object; install optional Google dependency for support"
     )
 
@@ -72,7 +72,7 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        LOGGER.debug(f'Constructing InferredAssetGCSDataConnector "{name}".')
+        logger.debug(f'Constructing InferredAssetGCSDataConnector "{name}".')
 
         super().__init__(
             name=name,

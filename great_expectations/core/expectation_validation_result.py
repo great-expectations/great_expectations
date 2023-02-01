@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_metric_kwargs_id(metric_name, metric_kwargs):

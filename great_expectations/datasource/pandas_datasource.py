@@ -18,7 +18,7 @@ from great_expectations.execution_engine.pandas_execution_engine import (
 from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 HASH_THRESHOLD = 1e9
 
@@ -225,7 +225,7 @@ class PandasDatasource(LegacyDatasource):
             raw_url = batch_kwargs["s3"]
             reader_method = batch_kwargs.get("reader_method")
             url = S3Url(raw_url)
-            LOGGER.debug(f"Fetching s3 object. Bucket: {url.bucket} Key: {url.key}")
+            logger.debug(f"Fetching s3 object. Bucket: {url.bucket} Key: {url.key}")
             s3_object = s3.get_object(Bucket=url.bucket, Key=url.key)
             reader_fn = self._get_reader_fn(reader_method, url.key)
             default_reader_options = self._infer_default_options(

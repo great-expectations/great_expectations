@@ -26,8 +26,8 @@ if TYPE_CHECKING:
 
     import numpy.typing as npt
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class ExactNumericRangeEstimator(NumericRangeEstimator):

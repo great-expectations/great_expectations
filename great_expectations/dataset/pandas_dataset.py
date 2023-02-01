@@ -24,7 +24,7 @@ from great_expectations.dataset.util import (
     validate_mostly,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class MetaPandasDataset(Dataset):

@@ -46,13 +46,13 @@ from great_expectations.render.util import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     from sqlalchemy.exc import ProgrammingError
     from sqlalchemy.sql import Select
 except ImportError:
-    LOGGER.debug(
+    logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     ProgrammingError = None
@@ -66,7 +66,7 @@ except ImportError:
 
         Row = RowProxy
     except ImportError:
-        LOGGER.debug(
+        logger.debug(
             "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
         )
         RowProxy = None
@@ -161,7 +161,7 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
-        LOGGER.error(exception_message)
+        logger.error(exception_message)
         raise pe()
 
     # @classmethod

@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
@@ -114,7 +114,7 @@ class SlackRenderer(Renderer):
                             docs_link = data_docs_pages[docs_link_key]
                             report_element = self._get_report_element(docs_link)
                         else:
-                            LOGGER.critical(
+                            logger.critical(
                                 f"*ERROR*: Slack is trying to provide a link to the following DataDocs: `"
                                 f"{str(docs_link_key)}`, but it is not configured under `data_docs_sites` in the "
                                 f"`great_expectations.yml`\n"
@@ -200,14 +200,14 @@ class SlackRenderer(Renderer):
                         },
                     }
             except Exception as e:
-                LOGGER.warning(
+                logger.warning(
                     f"""SlackRenderer had a problem with generating the docs link.
                     link used to generate the docs link is: {docs_link} and is of type: {type(docs_link)}.
                     Error: {e}"""
                 )
                 return
         else:
-            LOGGER.warning(
+            logger.warning(
                 "No docs link found. Skipping data docs link in Slack message."
             )
         return report_element

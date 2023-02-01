@@ -15,7 +15,7 @@ try:
 except ImportError:
     boto3 = None
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
@@ -129,7 +129,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     def _get_iterator(
         self, data_asset_name, reader_method=None, reader_options=None, limit=None
     ):
-        LOGGER.debug(
+        logger.debug(
             f"Beginning S3GlobReaderBatchKwargsGenerator _get_iterator for data_asset_name: {data_asset_name}"
         )
 
@@ -260,7 +260,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 {"ContinuationToken": iterator_dict["continuation_token"]}
             )
 
-        LOGGER.debug(
+        logger.debug(
             f"Fetching objects from S3 with query options: {str(query_options)}"
         )
         asset_options = self._s3.list_objects_v2(**query_options)
@@ -360,7 +360,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # In the case that there is a defined regex, the user *wanted* a partition. But it didn't match.
             # So, we'll add a *sortable* id
             if matches is None:
-                LOGGER.warning(f"No match found for key: {key}")
+                logger.warning(f"No match found for key: {key}")
                 return (
                     datetime.datetime.now(datetime.timezone.utc).strftime(
                         "%Y%m%dT%H%M%S.%fZ"
@@ -371,7 +371,7 @@ class S3GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 try:
                     return matches.group(match_group_id)
                 except IndexError:
-                    LOGGER.warning(f"No match group {match_group_id} in key {key}")
+                    logger.warning(f"No match group {match_group_id} in key {key}")
                     return (
                         datetime.datetime.now(datetime.timezone.utc).strftime(
                             "%Y%m%dT%H%M%S.%fZ"

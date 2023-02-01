@@ -19,7 +19,7 @@ from great_expectations.datasource.data_connector.data_connector import DataConn
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
 from great_expectations.execution_engine import ExecutionEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 DEFAULT_DELIMITER: str = "-"
 
@@ -51,7 +51,7 @@ class RuntimeDataConnector(DataConnector):
         assets: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        LOGGER.debug(f'Constructing RuntimeDataConnector "{name}".')
+        logger.debug(f'Constructing RuntimeDataConnector "{name}".')
 
         super().__init__(
             name=name,

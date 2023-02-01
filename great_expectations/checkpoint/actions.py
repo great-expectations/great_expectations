@@ -41,7 +41,7 @@ from great_expectations.exceptions import ClassInstantiationError, DataContextEr
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext, DataContext
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @public_api
@@ -246,10 +246,10 @@ class SlackNotificationAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        LOGGER.debug("SlackNotificationAction.run")
+        logger.debug("SlackNotificationAction.run")
 
         if validation_result_suite is None:
-            LOGGER.warning(
+            logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
@@ -367,10 +367,10 @@ class PagerdutyAlertAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        LOGGER.debug("PagerdutyAlertAction.run")
+        logger.debug("PagerdutyAlertAction.run")
 
         if validation_result_suite is None:
-            LOGGER.warning(
+            logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
@@ -485,10 +485,10 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        LOGGER.debug("MicrosoftTeamsNotificationAction.run")
+        logger.debug("MicrosoftTeamsNotificationAction.run")
 
         if validation_result_suite is None:
-            LOGGER.warning(
+            logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
@@ -599,10 +599,10 @@ class OpsgenieAlertAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        LOGGER.debug("OpsgenieAlertAction.run")
+        logger.debug("OpsgenieAlertAction.run")
 
         if validation_result_suite is None:
-            LOGGER.warning(
+            logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
@@ -761,10 +761,10 @@ class EmailAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        LOGGER.debug("EmailAction.run")
+        logger.debug("EmailAction.run")
 
         if validation_result_suite is None:
-            LOGGER.warning(
+            logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
@@ -862,10 +862,10 @@ class StoreValidationResultAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
-        LOGGER.debug("StoreValidationResultAction.run")
+        logger.debug("StoreValidationResultAction.run")
 
         if validation_result_suite is None:
-            LOGGER.warning(
+            logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
@@ -944,10 +944,10 @@ class StoreEvaluationParametersAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        LOGGER.debug("StoreEvaluationParametersAction.run")
+        logger.debug("StoreEvaluationParametersAction.run")
 
         if validation_result_suite is None:
-            LOGGER.warning(
+            logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
@@ -1031,10 +1031,10 @@ class StoreMetricsAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        LOGGER.debug("StoreMetricsAction.run")
+        logger.debug("StoreMetricsAction.run")
 
         if validation_result_suite is None:
-            LOGGER.warning(
+            logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
@@ -1124,10 +1124,10 @@ class UpdateDataDocsAction(ValidationAction):
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
-        LOGGER.debug("UpdateDataDocsAction.run")
+        logger.debug("UpdateDataDocsAction.run")
 
         if validation_result_suite is None:
-            LOGGER.warning(
+            logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
             )
             return
@@ -1215,25 +1215,25 @@ class SNSNotificationAction(ValidationAction):
         data_asset=None,
         **kwargs,
     ) -> str:
-        LOGGER.debug("SNSNotificationAction.run")
+        logger.debug("SNSNotificationAction.run")
 
         if validation_result_suite is None:
-            LOGGER.warning(
+            logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action. "
             )
 
         if self.sns_message_subject is None:
-            LOGGER.warning(
+            logger.warning(
                 "No message subject was passed checking for expectation_suite_name"
             )
             if expectation_suite_identifier is None:
                 subject = validation_result_suite_identifier.run_id
-                LOGGER.warning(
+                logger.warning(
                     f"No expectation_suite_identifier was passed. Defaulting to validation run_id: {subject}."
                 )
             else:
                 subject = expectation_suite_identifier.expectation_suite_name
-                LOGGER.info(f"Using expectation_suite_name: {subject}")
+                logger.info(f"Using expectation_suite_name: {subject}")
         else:
             subject = self.sns_message_subject
 

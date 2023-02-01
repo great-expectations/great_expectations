@@ -12,7 +12,7 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def pandas_data(

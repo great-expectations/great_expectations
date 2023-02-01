@@ -19,14 +19,14 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.validator.validator import Validator
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     from pyspark.sql import DataFrame
 except ImportError:
     DataFrame = None
 
-    LOGGER.debug(
+    logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
 

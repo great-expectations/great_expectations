@@ -68,8 +68,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.validator.validator import Validator
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
 
@@ -1054,7 +1054,7 @@ def get_or_create_expectation_suite(
                 expectation_suite = data_context.create_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
-                LOGGER.info(
+                logger.info(
                     f'Created ExpectationSuite "{expectation_suite.expectation_suite_name}".'
                 )
         else:

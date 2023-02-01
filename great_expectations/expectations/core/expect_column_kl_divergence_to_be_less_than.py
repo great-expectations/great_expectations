@@ -52,7 +52,7 @@ from great_expectations.validator.validator import ValidationDependencies
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 

@@ -27,7 +27,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.util import file_relative_path
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
@@ -80,7 +80,7 @@ class SerializableDataContext(AbstractDataContext):
         """
         config_filepath = os.path.join(self.root_directory, self.GX_YML)  # type: ignore[arg-type]
 
-        LOGGER.debug(
+        logger.debug(
             f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
         )
 
@@ -90,7 +90,7 @@ class SerializableDataContext(AbstractDataContext):
                 zep_datasources = self._synchronize_zep_datasources()
                 if zep_datasources:
                     self.zep_config.datasources.update(zep_datasources)
-                    LOGGER.info(
+                    logger.info(
                         f"Saving {len(self.zep_config.datasources)} ZEP Datasources to {config_filepath}"
                     )
                     zep_json_dict: dict[str, JSONValues] = self.zep_config._json_dict()
@@ -98,7 +98,7 @@ class SerializableDataContext(AbstractDataContext):
 
                 self.config.to_yaml(outfile)
         except PermissionError as e:
-            LOGGER.warning(f"Could not save project config to disk: {e}")
+            logger.warning(f"Could not save project config to disk: {e}")
 
     def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
         """
@@ -328,7 +328,7 @@ class SerializableDataContext(AbstractDataContext):
         if result is None:
             raise gx_exceptions.ConfigNotFoundError()
 
-        LOGGER.debug(f"Using project config: {yml_path}")
+        logger.debug(f"Using project config: {yml_path}")
         return result
 
     @classmethod
@@ -400,7 +400,7 @@ class SerializableDataContext(AbstractDataContext):
             search_start_dir = os.getcwd()
 
         for i in range(4):
-            LOGGER.debug(
+            logger.debug(
                 f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
@@ -410,7 +410,7 @@ class SerializableDataContext(AbstractDataContext):
                 potential_yml = os.path.join(potential_ge_dir, cls.GX_YML)
                 if os.path.isfile(potential_yml):
                     yml_path = potential_yml
-                    LOGGER.debug(f"Found config file at {str(yml_path)}")
+                    logger.debug(f"Found config file at {str(yml_path)}")
                     break
             # move up one directory
             search_start_dir = os.path.dirname(search_start_dir)
@@ -473,5 +473,5 @@ class SerializableDataContext(AbstractDataContext):
             gx_exceptions.DataContextError,
             gx_exceptions.InvalidDataContextConfigError,
         ) as e:
-            LOGGER.debug(e)
+            logger.debug(e)
         return None

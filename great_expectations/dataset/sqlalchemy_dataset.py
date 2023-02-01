@@ -32,7 +32,7 @@ from great_expectations.util import (
     import_library_module,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
@@ -45,7 +45,7 @@ try:
     from sqlalchemy.sql.operators import custom_op
     from sqlalchemy.sql.selectable import CTE, Select
 except ImportError:
-    LOGGER.debug(
+    logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sa = None
@@ -70,7 +70,7 @@ except ImportError:
 
         Row = RowProxy
     except ImportError:
-        LOGGER.debug(
+        logger.debug(
             "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
         )
         RowProxy = None
@@ -128,7 +128,7 @@ except ImportError:
             bigquery_types_tuple = None
         except AttributeError:
             # In older versions of the pybigquery driver, types were not exported, so we use a hack
-            LOGGER.warning(
+            logger.warning(
                 "Old pybigquery driver version detected. Consider upgrading to 0.4.14 or later."
             )
             from collections import namedtuple
@@ -890,11 +890,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
             if self.generated_table_name is not None:
                 if self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
-                    LOGGER.warning(f"Created permanent table {table_name}")
+                    logger.warning(f"Created permanent table {table_name}")
                 if self.engine.dialect.name.lower() == GXSqlDialect.TRINO:
-                    LOGGER.warning(f"Created permanent view {schema}.{table_name}")
+                    logger.warning(f"Created permanent view {schema}.{table_name}")
                 if self.engine.dialect.name.lower() == GXSqlDialect.AWSATHENA:
-                    LOGGER.warning(f"Created permanent table default.{table_name}")
+                    logger.warning(f"Created permanent table default.{table_name}")
 
         try:
             insp = get_sqlalchemy_inspector(self.engine)
@@ -1202,7 +1202,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
-        LOGGER.error(exception_message)
+        logger.error(exception_message)
         raise pe
 
     def _get_column_quantiles_mssql(self, column: str, quantiles: Iterable) -> list:
@@ -1434,7 +1434,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         try:
             result = float(res[0])
         except TypeError:
-            LOGGER.warning(
+            logger.warning(
                 f"Having issue with stddev_samp on {column}, schema: {self._table.schema} table: {self._table.name}"
             )
             result = 0.0
@@ -1679,7 +1679,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         elif engine_dialect == GXSqlDialect.SNOWFLAKE:
             table_type = "TEMPORARY" if self.generated_table_name else "TRANSIENT"
 
-            LOGGER.info(f"Creating temporary table {table_name}")
+            logger.info(f"Creating temporary table {table_name}")
             if schema_name is not None:
                 table_name = f"{schema_name}.{table_name}"
             stmt = f"CREATE OR REPLACE {table_type} TABLE {table_name} AS {custom_sql}"
@@ -1951,7 +1951,7 @@ WHERE
 
     def _get_dialect_type_module(self):
         if self.dialect is None:
-            LOGGER.warning(
+            logger.warning(
                 "No sqlalchemy dialect found; relying in top-level sqlalchemy types."
             )
             return sa
@@ -2126,9 +2126,9 @@ WHERE
                         potential_type = getattr(type_module, type_)
                         types.append(potential_type)
                 except AttributeError:
-                    LOGGER.debug(f"Unrecognized type: {type_}")
+                    logger.debug(f"Unrecognized type: {type_}")
             if len(types) == 0:
-                LOGGER.warning(
+                logger.warning(
                     "No recognized sqlalchemy types in type_list for current dialect."
                 )
             types = tuple(types)
@@ -2549,7 +2549,7 @@ WHERE
     ):
         regex_expression = self._get_dialect_regex_expression(column, regex)
         if regex_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
@@ -2571,7 +2571,7 @@ WHERE
             column, regex, positive=False
         )
         if regex_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
@@ -2599,7 +2599,7 @@ WHERE
 
         regex_expression = self._get_dialect_regex_expression(column, regex_list[0])
         if regex_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
@@ -2638,7 +2638,7 @@ WHERE
             column, regex_list[0], positive=False
         )
         if regex_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Regex is not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
@@ -2661,7 +2661,7 @@ WHERE
             AttributeError,
             TypeError,
         ):  # TypeError can occur if the driver was not installed and so is None
-            LOGGER.debug(
+            logger.debug(
                 "Unable to load BigQueryDialect dialect while running _get_dialect_like_pattern_expression",
                 exc_info=True,
             )
@@ -2728,7 +2728,7 @@ WHERE
             column, like_pattern
         )
         if like_pattern_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Like patterns are not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
@@ -2750,7 +2750,7 @@ WHERE
             column, like_pattern, positive=False
         )
         if like_pattern_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Like patterns are not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
@@ -2782,7 +2782,7 @@ WHERE
             column, like_pattern_list[0]
         )
         if like_pattern_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Like patterns are not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError
@@ -2823,7 +2823,7 @@ WHERE
             column, like_pattern_list[0], positive=False
         )
         if like_pattern_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Like patterns are not supported for dialect {str(self.sql_engine_dialect)}"
             )
             raise NotImplementedError

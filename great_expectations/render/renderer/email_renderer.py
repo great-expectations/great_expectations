@@ -1,7 +1,7 @@
 import logging
 import textwrap
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.render.renderer.renderer import Renderer
@@ -73,7 +73,7 @@ class EmailRenderer(Renderer):
                                 f"`{str(docs_link_key)}`, but it is not configured under data_docs_sites "
                                 "in the great_expectations.yml</br>"
                             )
-                            LOGGER.critical(report_element)
+                            logger.critical(report_element)
                         if report_element:
                             print(report_element)
                             html += report_element
@@ -116,14 +116,14 @@ class EmailRenderer(Renderer):
                 else:
                     report_element = f'<p><strong>DataDocs</strong> can be found here: <a href="{docs_link}">{docs_link}</a>.</p>'
             except Exception as e:
-                LOGGER.warning(
+                logger.warning(
                     f"""EmailRenderer had a problem with generating the docs link.
                     link used to generate the docs link is: {docs_link} and is of type: {type(docs_link)}.
                     Error: {e}"""
                 )
                 return
         else:
-            LOGGER.warning(
+            logger.warning(
                 "No docs link found. Skipping data docs link in the email message."
             )
         return report_element

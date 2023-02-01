@@ -3,14 +3,14 @@ This file manages common global-level imports for which we want to centralize er
 """
 import logging
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 sa_import_warning_required = False
 spark_import_warning_required = False
 
 try:
     import sqlalchemy as sa
 except ImportError:
-    LOGGER.debug("No SqlAlchemy module available.")
+    logger.debug("No SqlAlchemy module available.")
     sa = None
 
 try:
@@ -18,7 +18,7 @@ try:
     from sqlalchemy.engine import Row as sqlalchemy_engine_Row
     from sqlalchemy.engine import reflection
 except ImportError:
-    LOGGER.debug("No SqlAlchemy.engine module available.")
+    logger.debug("No SqlAlchemy.engine module available.")
     reflection = None
     sqlalchemy_engine_Engine = None
     sqlalchemy_engine_Row = None
@@ -26,7 +26,7 @@ except ImportError:
 try:
     import sqlalchemy.func.count as sa_func_count
 except ImportError:
-    LOGGER.debug("No SqlAlchemy.func module available.")
+    logger.debug("No SqlAlchemy.func module available.")
     sa_func_count = None
 
 try:
@@ -34,7 +34,7 @@ try:
     import sqlalchemy.sql.expression.Select as sa_sql_expression_Select
     import sqlalchemy.sql.expression.Selectable as sa_sql_expression_Selectable
 except ImportError:
-    LOGGER.debug("No SqlAlchemy.sql.expression module available.")
+    logger.debug("No SqlAlchemy.sql.expression module available.")
     sa_sql_expression_ColumnClause = None
     sa_sql_expression_Select = None
     sa_sql_expression_Selectable = None
@@ -42,27 +42,27 @@ except ImportError:
 try:
     from sqlalchemy.sql.elements import quoted_name
 except ImportError:
-    LOGGER.debug("No SqlAlchemy.sql.elements module available.")
+    logger.debug("No SqlAlchemy.sql.elements module available.")
     quoted_name = None
 
 try:
     import pyspark.sql.functions as F
     import pyspark.sql.types as sparktypes
 except ImportError:
-    LOGGER.debug("No spark functions module available.")
+    logger.debug("No spark functions module available.")
     sparktypes = None
     F = None
 
 try:
     from pyspark.ml.feature import Bucketizer
 except ImportError:
-    LOGGER.debug("No spark Bucketizer available.")
+    logger.debug("No spark Bucketizer available.")
     Bucketizer = None
 
 try:
     from pyspark.sql import Window
 except ImportError:
-    LOGGER.debug("No spark Window function available.")
+    logger.debug("No spark Window function available.")
     Window = None
 
 try:
@@ -72,7 +72,7 @@ try:
     from pyspark.sql import SparkSession as pyspark_sql_SparkSession
     from pyspark.sql import SQLContext
 except ImportError:
-    LOGGER.debug("No spark SQLContext available.")
+    logger.debug("No spark SQLContext available.")
     SQLContext = None
     pyspark_sql_Column = None
     pyspark_sql_DataFrame = None

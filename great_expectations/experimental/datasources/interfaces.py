@@ -33,7 +33,7 @@ from great_expectations.experimental.datasources.metadatasource import MetaDatas
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     # TODO: When the Batch class is moved out of the experimental directory, we should try to import the annotations
@@ -47,7 +47,7 @@ try:
 except ImportError:
     pyspark = None
     pyspark_sql_Row = None
-    LOGGER.debug("No spark sql dataframe module available.")
+    logger.debug("No spark sql dataframe module available.")
 
 
 class TestConnectionError(Exception):
@@ -347,7 +347,7 @@ class Datasource(
 
     @pydantic.validator("assets", pre=True)
     def _load_asset_subtype(cls, v: Dict[str, dict]):
-        LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
+        logger.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
         loaded_assets: Dict[str, DataAssetType] = {}
 
         # TODO (kilo59): catch key errors
@@ -356,10 +356,10 @@ class Datasource(
             asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[
                 asset_type_name
             ]
-            LOGGER.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
+            logger.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
             loaded_assets[asset_name] = asset_type(**config)
 
-        LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
+        logger.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets
 
     def _execution_engine_type(self) -> Type[ExecutionEngine]:

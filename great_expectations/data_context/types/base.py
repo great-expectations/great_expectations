@@ -64,8 +64,8 @@ if TYPE_CHECKING:
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 CURRENT_GX_CONFIG_VERSION = 3
 FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE = 3
@@ -139,7 +139,7 @@ class BaseYamlConfig(SerializableDictDot):
 
             return config
         except ValidationError:
-            LOGGER.error(
+            logger.error(
                 "Encountered errors during loading config.  See ValidationError for more details."
             )
             raise
@@ -1690,7 +1690,7 @@ class DataContextConfigSchema(Schema):
         message: str = (
             f"Error while processing DataContextConfig: {' '.join(exc.messages)}"
         )
-        LOGGER.error(message)
+        logger.error(message)
         raise gx_exceptions.InvalidDataContextConfigError(
             message=message,
         )
@@ -1762,7 +1762,7 @@ class DataContextConfigSchema(Schema):
             and "validation_operators" in data
             and data["validation_operators"] is not None
         ):
-            LOGGER.warning(
+            logger.warning(
                 f"""You appear to be using a legacy capability with the latest config version \
 ({data["config_version"]}).\n    Your data context with this configuration version uses validation_operators, which \
 are being deprecated.  Please consult the V3 API migration guide \
@@ -2417,7 +2417,7 @@ class DataContextConfig(BaseYamlConfig):
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
         if xdatasources:
-            LOGGER.warning("`xdatasources` are an experimental feature")
+            logger.warning("`xdatasources` are an experimental feature")
 
         # Set defaults
         if config_version is None:

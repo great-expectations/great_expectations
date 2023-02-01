@@ -11,7 +11,7 @@ from great_expectations.expectations.metrics.util import (
     get_dialect_like_pattern_expression,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ColumnValuesNotMatchLikePattern(ColumnMapMetricProvider):
@@ -24,7 +24,7 @@ class ColumnValuesNotMatchLikePattern(ColumnMapMetricProvider):
             column, _dialect, like_pattern, positive=False
         )
         if like_pattern_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Like patterns are not supported for dialect {str(_dialect.name)}"
             )
             raise NotImplementedError

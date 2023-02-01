@@ -21,7 +21,7 @@ from great_expectations.render import (
 )
 from great_expectations.render.renderer.renderer import Renderer
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ContentBlockRenderer(Renderer):
@@ -117,7 +117,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         data_docs_exception_message
                         + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                     )
-                    LOGGER.error(exception_message)
+                    logger.error(exception_message)
 
                     if isinstance(obj_, ExpectationValidationResult):
                         content_block_fn = cls._get_content_block_fn(
@@ -245,7 +245,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                     data_docs_exception_message
                     + f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
                 )
-                LOGGER.error(exception_message)
+                logger.error(exception_message)
 
                 if isinstance(render_object, ExpectationValidationResult):
                     content_block_fn = cls._get_content_block_fn(
@@ -330,7 +330,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                         elif isinstance(notes["content"], list):
                             note_content = notes["content"]
                         else:
-                            LOGGER.warning(
+                            logger.warning(
                                 "Unrecognized Expectation suite notes format. Skipping rendering."
                             )
 
@@ -359,11 +359,11 @@ diagnose and repair the underlying issue.  Detailed information follows:
                                 for note in notes["content"]
                             ]
                         else:
-                            LOGGER.warning(
+                            logger.warning(
                                 "Unrecognized Expectation suite notes format. Skipping rendering."
                             )
                 else:
-                    LOGGER.warning(
+                    logger.warning(
                         "Unrecognized Expectation suite notes format. Skipping rendering."
                     )
 

@@ -13,7 +13,7 @@ from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 try:
@@ -21,7 +21,7 @@ try:
 except ImportError:
     pd = None
 
-    LOGGER.debug(
+    logger.debug(
         "Unable to load pandas; install optional pandas dependency for support."
     )
 
@@ -240,7 +240,7 @@ class MetricsCalculator:
         )
 
         if aborted_metrics_info:
-            LOGGER.warning(
+            logger.warning(
                 f"Exceptions\n{str(aborted_metrics_info)}\noccurred while resolving metrics."
             )
 

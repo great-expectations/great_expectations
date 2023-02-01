@@ -38,7 +38,7 @@ DEBUG = False
 
 import logging
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # This class defines the Metric, a class used by the Expectation to compute important data for validating itself
 class TableChecksum(TableMetricProvider):
@@ -96,11 +96,11 @@ class TableChecksum(TableMetricProvider):
                 selectable.name, selectcolumns, ignore_columns
             )
         else:
-            LOGGER.error("sql dialect is not supported: " + dialect_name)
+            logger.error("sql dialect is not supported: " + dialect_name)
             return 0
 
         if DEBUG:
-            LOGGER.error("\n***********cksumquery***********\n" + cksumquery)
+            logger.error("\n***********cksumquery***********\n" + cksumquery)
 
         return int(execution_engine.engine.execute(cksumquery).scalar())
 
@@ -147,7 +147,7 @@ def get_bigquery_checksum_query(table_name, selectcolumns, ignore_columns):
 # function to form sqlite query as some functions will be different in each dialect.
 def get_sqlite_checksum_query(table_name, selectcolumns, ignore_columns):
 
-    LOGGER.warning(
+    logger.warning(
         "“Warning: get_sqlite_checksum_query is experimental. The checksum or similar hashing function is not there in sqlite so using length function for testing purposes"
     )
     # checksum or similar hashing function is not there in sqlite so using length function for testing purposes.
@@ -514,7 +514,7 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
         checksum_self, checksum_other = metrics.get("table.checksum.values")
 
         if DEBUG:
-            LOGGER.error(
+            logger.error(
                 "\nChecksum_values: "
                 + "\nchecksum_self: "
                 + str(checksum_self)

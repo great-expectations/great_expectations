@@ -16,8 +16,8 @@ from great_expectations.core.expectation_diagnostics.expectation_diagnostics imp
 from great_expectations.expectations.expectation import Expectation
 from great_expectations.types import SerializableDictDot
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 yaml = YAML()
 
@@ -121,14 +121,14 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
 
     def _update_from_package_info(self, path: str) -> None:
         if not os.path.exists(path):
-            LOGGER.warning(f"Could not find package info file {path}")
+            logger.warning(f"Could not find package info file {path}")
             return
 
         with open(path) as f:
             data: dict = yaml.load(f.read())
 
         if not data:
-            LOGGER.warning(f"{path} is empty so exiting early")
+            logger.warning(f"{path} is empty so exiting early")
             return
 
         # Assign general attrs
@@ -204,7 +204,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
 
     def _update_dependencies(self, path: str) -> None:
         if not os.path.exists(path):
-            LOGGER.warning(f"Could not find requirements file {path}")
+            logger.warning(f"Could not find requirements file {path}")
             return
 
         with open(path) as f:
@@ -257,7 +257,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
         except Exception as e:
             # Exceptions should not break the CLI - this behavior should be working in the background
             # without the user being concerned about the underlying functionality
-            LOGGER.warning(
+            logger.warning(
                 f"Something went wrong when modifying the contributor package JSON object: {e}"
             )
             return []
@@ -305,7 +305,7 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                 expectations.append(obj)
                 names.append(name)
 
-        LOGGER.info(f"Found {len(names)} expectation(s): {names}")
+        logger.info(f"Found {len(names)} expectation(s): {names}")
         return expectations
 
     @staticmethod
@@ -317,6 +317,6 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
             instance = expectation()
             diagnostics = instance.run_diagnostics()
             diagnostics_list.append(diagnostics)
-            LOGGER.info(f"Successfully retrieved diagnostics from {expectation}")
+            logger.info(f"Successfully retrieved diagnostics from {expectation}")
 
         return diagnostics_list

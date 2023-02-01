@@ -119,8 +119,8 @@ if __name__ == "__main__":
         print("Unrecognized value for usage_statistics_enabled. Setting to True.")
         enable_usage_statistics = True
 
-    ge_LOGGER = logging.getLogger("great_expectations")
-    ge_LOGGER.setLevel(logging.DEBUG)
+    ge_logger = logging.getLogger("great_expectations")
+    ge_logger.setLevel(logging.DEBUG)
     main(
         data_context_id,
         nap_duration,

@@ -5,7 +5,7 @@ from typing import Dict
 
 import ipywidgets as widgets
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ExpectationExplorer:

@@ -28,7 +28,7 @@ from great_expectations.experimental.datasources.config import GxConfig
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 yaml = YAML()
 yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
@@ -166,12 +166,12 @@ class FileDataContext(SerializableDataContext):
             raise
 
     def _load_zep_config(self) -> GxConfig:
-        LOGGER.info(f"{type(self).__name__} loading zep config")
+        logger.info(f"{type(self).__name__} loading zep config")
         if not self.root_directory:
-            LOGGER.warning("`root_directory` not set, cannot load zep config")
+            logger.warning("`root_directory` not set, cannot load zep config")
         else:
             path_to_zep_yaml = pathlib.Path(self.root_directory) / self.GX_YML
             if path_to_zep_yaml.exists():
                 return GxConfig.parse_yaml(path_to_zep_yaml, _allow_empty=True)
-            LOGGER.info(f"no zep config at {path_to_zep_yaml.absolute()}")
+            logger.info(f"no zep config at {path_to_zep_yaml.absolute()}")
         return GxConfig(xdatasources={})

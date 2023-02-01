@@ -19,7 +19,7 @@ from great_expectations.render.renderer.call_to_action_renderer import (
 )
 from great_expectations.render.renderer.renderer import Renderer
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 # FIXME : This class needs to be rebuilt to accept SiteSectionIdentifiers as input.
@@ -479,4 +479,4 @@ diagnose and repair the underlying issue.  Detailed information follows:
             exception_message += (
                 f'{type(e).__name__}: "{str(e)}".  Traceback: "{exception_traceback}".'
             )
-            LOGGER.error(exception_message)
+            logger.error(exception_message)

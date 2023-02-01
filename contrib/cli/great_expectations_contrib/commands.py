@@ -12,8 +12,8 @@ from great_expectations.core.util import convert_to_json_serializable
 
 from .package import GreatExpectationsContribPackageManifest
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 Command = namedtuple("Command", ["name", "full_command", "error_message"])
 
@@ -157,14 +157,14 @@ def read_package_from_file(path: str) -> GreatExpectationsContribPackageManifest
     # If config file isn't found, create a blank JSON and write to disk
     if not os.path.exists(path):
         instance = GreatExpectationsContribPackageManifest()
-        LOGGER.debug(f"Could not find existing package JSON; instantiated a new one")
+        logger.debug(f"Could not find existing package JSON; instantiated a new one")
         return instance
 
     with open(path) as f:
         contents = f.read()
 
     data = json.loads(contents)
-    LOGGER.info(f"Successfully read existing package data from {path}")
+    logger.info(f"Successfully read existing package data from {path}")
     return GreatExpectationsContribPackageManifest(**data)
 
 
@@ -182,7 +182,7 @@ def write_package_to_disk(
     data = json.dumps(json_dict_serialized, indent=4)
     with open(path, "w") as f:
         f.write(data)
-        LOGGER.info(f"Succesfully wrote state to {path}.")
+        logger.info(f"Succesfully wrote state to {path}.")
 
 
 def sync_package(package: GreatExpectationsContribPackageManifest, path: str) -> None:

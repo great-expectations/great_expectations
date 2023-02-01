@@ -7,7 +7,7 @@ from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector.sorter import Sorter
 from great_expectations.util import is_int, is_numeric
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class NumericSorter(Sorter):

@@ -9,7 +9,7 @@ warnings.filterwarnings("ignore")
 # PLEASE CAREFULLY REVIEW TO ENSURE REMOVING THIS DOES NOT AFFECT DESIRED BEHAVIOR
 ###
 
-LOGGER = logging.getLogger("great_expectations.cli")
+logger = logging.getLogger("great_expectations.cli")
 
 
 def _set_up_logger():

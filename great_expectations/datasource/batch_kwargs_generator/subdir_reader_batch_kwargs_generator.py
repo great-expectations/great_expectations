@@ -9,7 +9,7 @@ from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator
 from great_expectations.datasource.types import PathBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 KNOWN_EXTENSIONS = [
     ".csv",
@@ -158,7 +158,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                     )
 
             if path is None:
-                LOGGER.warning(
+                logger.warning(
                     "Unable to find path with the provided partition; searching for asset-name partitions."
                 )
                 # Fall through to this case in the event that there is not a subdir available, or if partition_id was
@@ -212,7 +212,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         return valid_options
 
     def _get_iterator(self, data_asset_name, reader_options=None, limit=None):
-        LOGGER.debug(
+        logger.debug(
             f"Beginning SubdirReaderBatchKwargsGenerator _get_iterator for data_asset_name: {data_asset_name}"
         )
         # If the data asset is a file, then return the path.

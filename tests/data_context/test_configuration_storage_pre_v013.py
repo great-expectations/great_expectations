@@ -7,7 +7,7 @@ import pytest
 import great_expectations as gx
 from great_expectations.data_context.util import file_relative_path
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def read_config_file_from_disk(config_filepath):

@@ -16,7 +16,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 )
 from great_expectations.util import deep_filter_properties_iterable
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class BatchRequestAnonymizer(BaseAnonymizer):
@@ -89,7 +89,7 @@ class BatchRequestAnonymizer(BaseAnonymizer):
             runtime_parameters_keys.sort()
 
         except Exception:
-            LOGGER.debug(
+            logger.debug(
                 "anonymize_batch_request: Unable to create anonymized_batch_request payload field"
             )
 

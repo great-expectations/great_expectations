@@ -6,12 +6,12 @@ import numpy as np
 
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy  # noqa: F401
 except ImportError:
-    LOGGER.debug("Unable to load SqlAlchemy or one of its subclasses.")
+    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
 def is_valid_partition_object(partition_object):

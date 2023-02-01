@@ -162,7 +162,7 @@ if TYPE_CHECKING:
         ValidationOperator,
     )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 yaml = YAMLHandler()
 
 
@@ -540,7 +540,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if CheckpointStore.default_checkpoints_exist(
                 directory_path=self.root_directory  # type: ignore[arg-type]
             ):
-                LOGGER.warning(
+                logger.warning(
                     f"Checkpoint store named '{checkpoint_store_name}' is not a configured store, "
                     f"so will try to use default Checkpoint store.\n  Please update your configuration "
                     f"to the new version number {float(CURRENT_GX_CONFIG_VERSION)} in order to use the new "
@@ -603,7 +603,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             if AbstractDataContext._default_profilers_exist(
                 directory_path=self.root_directory
             ):
-                LOGGER.warning(
+                logger.warning(
                     f"Profiler store named '{profiler_store_name}' is not a configured store, so will try to use "
                     f"default Profiler store.\n  Please update your configuration to the new version number "
                     f"{float(CURRENT_GX_CONFIG_VERSION)} in order to use the new 'Profiler Store' feature.\n  "
@@ -732,7 +732,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
         save_changes = self._determine_save_changes_flag(save_changes)
 
-        LOGGER.debug(f"Starting AbstractDataContext.add_datasource for {name}")
+        logger.debug(f"Starting AbstractDataContext.add_datasource for {name}")
 
         module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
         verify_dynamic_loading_support(module_name=module_name)
@@ -825,7 +825,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         try:
             existing_datasource = self.get_datasource(name)
         except ValueError:
-            LOGGER.info(
+            logger.info(
                 f"Could not find an existing datasource named '{name}'; creating a new one."
             )
 
@@ -1169,14 +1169,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         try:
             active_store_names.append(self.checkpoint_store_name)  # type: ignore[arg-type]
         except (AttributeError, gx_exceptions.InvalidTopLevelConfigKeyError):
-            LOGGER.info(
+            logger.info(
                 "Checkpoint store is not configured; omitting it from active stores"
             )
 
         try:
             active_store_names.append(self.profiler_store_name)  # type: ignore[arg-type]
         except (AttributeError, gx_exceptions.InvalidTopLevelConfigKeyError):
-            LOGGER.info(
+            logger.info(
                 "Profiler store is not configured; omitting it from active stores"
             )
 
@@ -2295,7 +2295,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 expectation_suite_name=expectation_suite_name, ge_cloud_id=id
             )
         except gx_exceptions.DataContextError:
-            LOGGER.info(
+            logger.info(
                 f"Could not find an existing suite named '{expectation_suite_name}'; creating a new one."
             )
 
@@ -2517,7 +2517,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         try:
             existing_profiler = self.get_profiler(name=name, ge_cloud_id=id)
         except gx_exceptions.ProfilerNotFoundError:
-            LOGGER.info(
+            logger.info(
                 f"Could not find an existing profiler named '{name}'; creating a new one."
             )
 
@@ -2754,7 +2754,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             run_name = datetime.datetime.now(datetime.timezone.utc).strftime(
                 "%Y%m%dT%H%M%S.%fZ"
             )
-            LOGGER.info(f"Setting run_name to: {run_name}")
+            logger.info(f"Setting run_name to: {run_name}")
         if evaluation_parameters is None:
             return validation_operator.run(
                 assets_to_validate=assets_to_validate,
@@ -2853,7 +2853,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             run_name = run_name or "profiling"
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
 
-        LOGGER.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
+        logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
 
         if not additional_batch_kwargs:
             additional_batch_kwargs = {}
@@ -2887,7 +2887,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         total_start_time = datetime.datetime.now()
 
         name = data_asset_name
-        # LOGGER.info("\tProfiling '%s'..." % name)
+        # logger.info("\tProfiling '%s'..." % name)
 
         start_time = datetime.datetime.now()
 
@@ -2967,12 +2967,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.save_expectation_suite(expectation_suite)
         duration = (datetime.datetime.now() - start_time).total_seconds()
         # noinspection PyUnboundLocalVariable
-        LOGGER.info(
+        logger.info(
             f"\tProfiled {new_column_count} columns using {row_count} rows from {name} ({duration:.3f} sec)"
         )
 
         total_duration = (datetime.datetime.now() - total_start_time).total_seconds()
-        LOGGER.info(
+        logger.info(
             f"""
 Profiled the data asset, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
 Generated, evaluated, and stored {total_expectations} Expectations during profiling. Please review results using data-docs."""
@@ -3160,7 +3160,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         for url in urls_to_open:
             if url is not None:
-                LOGGER.debug(f"Opening Data Docs found here: {url}")
+                logger.debug(f"Opening Data Docs found here: {url}")
                 webbrowser.open(url)
 
     def get_docs_sites_urls(
@@ -3200,9 +3200,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
 
         if not sites:
-            LOGGER.debug("Found no data_docs_sites.")
+            logger.debug("Found no data_docs_sites.")
             return []
-        LOGGER.debug(f"Found {len(sites)} data_docs_sites.")
+        logger.debug(f"Found {len(sites)} data_docs_sites.")
 
         if site_name:
             if site_name not in sites.keys():
@@ -3461,7 +3461,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config_with_global_config_overrides: DataContextConfig = copy.deepcopy(config)
         usage_stats_enabled: bool = self._is_usage_stats_enabled()
         if not usage_stats_enabled:
-            LOGGER.info(
+            logger.info(
                 "Usage statistics is disabled globally. Applying override to project_config."
             )
             config_with_global_config_overrides.anonymous_usage_statistics.enabled = (
@@ -3474,7 +3474,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 {"data_context_id": global_data_context_id}
             )
             if not data_context_id_errors:
-                LOGGER.info(
+                logger.info(
                     "data_context_id is defined globally. Applying override to project_config."
                 )
                 config_with_global_config_overrides.anonymous_usage_statistics.data_context_id = (
@@ -3492,7 +3492,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 {"usage_statistics_url": global_usage_statistics_url}
             )
             if not usage_statistics_url_errors:
-                LOGGER.info(
+                logger.info(
                     "usage_statistics_url is defined globally. Applying override to project_config."
                 )
                 config_with_global_config_overrides.anonymous_usage_statistics.usage_statistics_url = (
@@ -3501,7 +3501,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             else:
                 validation_errors.update(usage_statistics_url_errors)
         if validation_errors:
-            LOGGER.warning(
+            logger.warning(
                 "The following globally-defined config variables failed validation:\n{}\n\n"
                 "Please fix the variables if you would like to apply global values to project_config.".format(
                     json.dumps(validation_errors, indent=2)
@@ -3537,7 +3537,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             if ge_usage_stats in AbstractDataContext.FALSEY_STRINGS:
                 usage_statistics_enabled = False
             else:
-                LOGGER.warning(
+                logger.warning(
                     "GE_USAGE_STATS environment variable must be one of: {}".format(
                         AbstractDataContext.FALSEY_STRINGS
                     )
@@ -3702,7 +3702,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     ) -> None:
         """Initialize the usage statistics system."""
         if not usage_statistics_config.enabled:
-            LOGGER.info("Usage statistics is disabled; skipping initialization.")
+            logger.info("Usage statistics is disabled; skipping initialization.")
             self._usage_statistics_handler = None
             return
 
@@ -3740,7 +3740,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 )
                 self._cached_datasources[datasource_name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
-                LOGGER.warning(f"Cannot initialize datasource {datasource_name}: {e}")
+                logger.warning(f"Cannot initialize datasource {datasource_name}: {e}")
                 # this error will happen if our configuration contains datasources that GX can no longer connect to.
                 # this is ok, as long as we don't use it to retrieve a batch. If we try to do that, the error will be
                 # caught at the context.get_batch() step. So we just pass here.
@@ -3964,7 +3964,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
             # run_id_set = set([key.run_id for key in filtered_key_list])
             if len(filtered_key_list) == 0:
-                LOGGER.warning("No valid run_id values found.")
+                logger.warning("No valid run_id values found.")
                 return {}
 
             filtered_key_list = sorted(filtered_key_list, key=lambda x: x.run_id)
@@ -4066,7 +4066,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                         )
                     except gx_exceptions.UnavailableMetricError:
                         # This will happen frequently in larger pipelines
-                        LOGGER.debug(
+                        logger.debug(
                             "metric {} was requested by another expectation suite but is not available in "
                             "this validation result.".format(metric_name)
                         )
@@ -4241,7 +4241,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         assert datasource
 
         if not dry_run:
-            LOGGER.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
+            logger.info(f"Profiling '{datasource_name}' with '{profiler.__name__}'")
 
         profiling_results = {}
 
@@ -4330,7 +4330,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             data_asset_names_to_profiled = data_assets
             total_data_assets = len(available_data_asset_name_list)
             if not dry_run:
-                LOGGER.info(
+                logger.info(
                     f"Profiling the white-listed data assets: {','.join(data_assets)}, alphabetically."
                 )
         else:
@@ -4350,11 +4350,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 name[0] for name in available_data_asset_name_list
             ]
         if not dry_run:
-            LOGGER.info(
+            logger.info(
                 f"Profiling all {len(available_data_asset_name_list)} data assets from batch kwargs generator {batch_kwargs_generator_name}"
             )
         else:
-            LOGGER.info(
+            logger.info(
                 f"Found {len(available_data_asset_name_list)} data assets from batch kwargs generator {batch_kwargs_generator_name}"
             )
 
@@ -4371,7 +4371,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             total_start_time = datetime.datetime.now()
 
             for name in data_asset_names_to_profiled:
-                LOGGER.info(f"\tProfiling '{name}'...")
+                logger.info(f"\tProfiling '{name}'...")
                 try:
                     profiling_results["results"].append(
                         self.profile_data_asset(
@@ -4388,30 +4388,30 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     )
 
                 except gx_exceptions.ProfilerError as err:
-                    LOGGER.warning(err.message)
+                    logger.warning(err.message)
                 except OSError as err:
-                    LOGGER.warning(
+                    logger.warning(
                         f"IOError while profiling {name[1]}. (Perhaps a loading error?) Skipping."
                     )
-                    LOGGER.debug(str(err))
+                    logger.debug(str(err))
                     skipped_data_assets += 1
                 except SQLAlchemyError as e:
-                    LOGGER.warning(
+                    logger.warning(
                         f"SqlAlchemyError while profiling {name[1]}. Skipping."
                     )
-                    LOGGER.debug(str(e))
+                    logger.debug(str(e))
                     skipped_data_assets += 1
 
             total_duration = (
                 datetime.datetime.now() - total_start_time
             ).total_seconds()
-            LOGGER.info(
+            logger.info(
                 f"""
     Profiled {len(data_asset_names_to_profiled)} of {total_data_assets} named data assets, with {total_rows} total rows and {total_columns} columns in {total_duration:.2f} seconds.
     Generated, evaluated, and stored {total_expectations} Expectations during profiling. Please review results using data-docs."""
             )
             if skipped_data_assets > 0:
-                LOGGER.warning(
+                logger.warning(
                     f"Skipped {skipped_data_assets} data assets due to errors."
                 )
 
@@ -4469,16 +4469,16 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         dry_run=False,
         build_index: bool = True,
     ):
-        LOGGER.debug("Starting DataContext.build_data_docs")
+        logger.debug("Starting DataContext.build_data_docs")
 
         index_page_locator_infos = {}
 
         sites = self.variables.data_docs_sites
         if sites:
-            LOGGER.debug("Found data_docs_sites. Building sites...")
+            logger.debug("Found data_docs_sites. Building sites...")
 
             for site_name, site_config in sites.items():
-                LOGGER.debug(
+                logger.debug(
                     f"Building Data Docs Site {site_name}",
                 )
 
@@ -4512,7 +4512,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                             ] = index_page_resource_identifier_tuple[0]
 
         else:
-            LOGGER.debug("No data_docs_config found. No site(s) built.")
+            logger.debug("No data_docs_config found. No site(s) built.")
 
         return index_page_locator_infos
 
@@ -4613,7 +4613,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
         if not os.path.isfile(config_variables_filepath):
-            LOGGER.info(
+            logger.info(
                 "Creating new substitution_variables file at {config_variables_filepath}".format(
                     config_variables_filepath=config_variables_filepath
                 )
@@ -4626,7 +4626,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _load_zep_config(self) -> GxConfig:
         """Called at beginning of DataContext __init__"""
-        LOGGER.info(
+        logger.info(
             f"{self.__class__.__name__} has not implemented `_load_zep_config()` returning empty `GxConfig`"
         )
         return GxConfig(xdatasources={})
@@ -4634,7 +4634,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _attach_zep_config_datasources(self, config: GxConfig):
         """Called at end of __init__"""
         for ds_name, datasource in config.datasources.items():
-            LOGGER.info(f"Loaded '{ds_name}' from ZEP config")
+            logger.info(f"Loaded '{ds_name}' from ZEP config")
             self._attach_datasource_to_context(datasource)
 
     def _synchronize_zep_datasources(self) -> Dict[str, XDatasource]:

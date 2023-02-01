@@ -8,7 +8,7 @@ from great_expectations.datasource.data_connector.configured_asset_aws_glue_data
 from great_expectations.exceptions import DataConnectorError
 from great_expectations.execution_engine import ExecutionEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @public_api
@@ -55,7 +55,7 @@ class InferredAssetAWSGlueDataCatalogDataConnector(
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ):
-        LOGGER.warning(
+        logger.warning(
             "Warning: great_expectations.datasource.data_connector.InferredAssetAWSGlueDataCatalogDataConnector is "
             "experimental. Methods, APIs, and core behavior may change in the future."
         )

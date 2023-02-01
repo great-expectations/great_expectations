@@ -40,6 +40,6 @@ __all__ = [
     "ge_urn",
 ]
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 RESULT_FORMATS = ["BOOLEAN_ONLY", "BASIC", "COMPLETE", "SUMMARY"]

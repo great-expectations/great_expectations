@@ -21,7 +21,7 @@ from great_expectations.self_check.util import (
 )
 from tests.conftest import build_test_backends_list_v2_api
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def pytest_generate_tests(metafunc):  # noqa: C901 - 38

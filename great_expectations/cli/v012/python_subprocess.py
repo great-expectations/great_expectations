@@ -7,7 +7,7 @@ from typing import Optional
 
 import click
 
-from great_expectations.core import LOGGER
+from great_expectations.core import logger
 
 
 def execute_shell_command(command: str) -> int:
@@ -44,7 +44,7 @@ def execute_shell_command(command: str) -> int:
             text=True,
         )
         sh_out: str = res.stdout.strip()
-        LOGGER.info(sh_out)
+        logger.info(sh_out)
     except CalledProcessError as cpe:
         status_code = cpe.returncode
         sys.stderr.write(cpe.output)
@@ -54,7 +54,7 @@ def execute_shell_command(command: str) -> int:
         exception_message += (
             f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
         )
-        LOGGER.error(exception_message)
+        logger.error(exception_message)
 
     return status_code
 
@@ -138,6 +138,6 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
             exception_message: str = "A Sub-Process call Exception occurred.\n"
             exception_traceback: str = traceback.format_exc()
             exception_message += f'{type(cpe).__name__}: "{str(cpe)}".  Traceback: "{exception_traceback}".'
-            LOGGER.error(exception_message)
+            logger.error(exception_message)
 
     return status_code

@@ -22,13 +22,13 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import filter_properties_dict
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy
     from sqlalchemy.engine.reflection import Inspector
 except ImportError:
-    LOGGER.debug(
+    logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sqlalchemy = None

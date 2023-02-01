@@ -7,7 +7,7 @@ from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     import pyspark
@@ -24,7 +24,7 @@ except ImportError:
     # noinspection SpellCheckingInspection
     sparktypes = None
 
-    LOGGER.debug(
+    logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
 

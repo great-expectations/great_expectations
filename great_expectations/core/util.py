@@ -43,7 +43,7 @@ from great_expectations.types.base import SerializableDotDict
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from great_expectations.util import convert_decimal_to_float
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     import pyspark
@@ -51,7 +51,7 @@ try:
 except ImportError:
     pyspark = None
     SparkSession = None
-    LOGGER.debug(
+    logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
 
@@ -75,7 +75,7 @@ try:
 except ImportError:
     sqlalchemy = None
     LegacyRow = None
-    LOGGER.debug("Unable to load SqlAlchemy or one of its subclasses.")
+    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
 SCHEMAS = {
@@ -804,10 +804,10 @@ def get_or_create_spark_application(
         if not sc_stopped:
             try:
                 # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
-                LOGGER.info("Stopping existing spark context to reconfigure.")
+                logger.info("Stopping existing spark context to reconfigure.")
                 spark_session.sparkContext.stop()
             except AttributeError:
-                LOGGER.error(
+                logger.error(
                     "Unable to load spark context; install optional spark dependency for support."
                 )
         spark_session = get_or_create_spark_session(spark_config=spark_config)
@@ -863,7 +863,7 @@ def get_or_create_spark_session(
             raise ValueError("SparkContext stopped unexpectedly.")
 
     except AttributeError:
-        LOGGER.error(
+        logger.error(
             "Unable to load spark context; install optional spark dependency for support."
         )
         spark_session = None

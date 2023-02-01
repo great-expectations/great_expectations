@@ -13,7 +13,7 @@ from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 
-LOGGER = logging.getLogger(__file__)
+logger = logging.getLogger(__file__)
 
 
 @pytest.fixture
@@ -81,7 +81,7 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     assert gx_yml.exists()
 
     tmp_gx_dir = gx_yml.parent.absolute()
-    LOGGER.info(f"tmp_gx_dir -> {tmp_gx_dir}")
+    logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
     return tmp_gx_dir
 
 
@@ -105,7 +105,7 @@ def zep_yaml_config_file(
     for ds_name in zep_only_config.datasources.keys():
         assert ds_name in yaml_string
 
-    LOGGER.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
+    logger.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
     return config_file_path
 
 

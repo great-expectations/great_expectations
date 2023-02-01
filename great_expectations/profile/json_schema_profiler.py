@@ -11,7 +11,7 @@ from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.profile.base import Profiler
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class JsonSchemaTypes(Enum):

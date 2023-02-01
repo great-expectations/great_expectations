@@ -70,7 +70,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 if TYPE_CHECKING:
     import pyspark
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def column_function_partial(  # noqa: C901 - 19
@@ -2216,7 +2216,7 @@ def _sqlalchemy_column_map_condition_values(
         result_format["result_format"] == "COMPLETE"
         and execution_engine.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY
     ):
-        LOGGER.warning(
+        logger.warning(
             "BigQuery imposes a limit of 10000 parameters on individual queries; "
             "if your data contains more than 10000 columns your results will be truncated."
         )

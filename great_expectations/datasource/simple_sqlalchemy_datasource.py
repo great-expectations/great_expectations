@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class SimpleSqlalchemyDatasource(BaseDatasource):

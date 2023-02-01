@@ -27,7 +27,7 @@ from tests.core.usage_statistics.util import (
 )
 from tests.test_utils import build_checkpoint_store_using_filesystem
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture

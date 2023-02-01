@@ -12,7 +12,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     multicolumn_condition_partial,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class SelectColumnValuesUniqueWithinRecord(MulticolumnMapMetricProvider):
@@ -44,7 +44,7 @@ class SelectColumnValuesUniqueWithinRecord(MulticolumnMapMetricProvider):
 
         # An arbitrary "num_columns" value used for issuing an explanatory message as a warning.
         if num_columns > 100:
-            LOGGER.warning(
+            logger.warning(
                 f"""Batch data with {num_columns} columns is detected.  Computing the "{cls.condition_metric_name}" \
 metric for wide tables using SQLAlchemy leads to long WHERE clauses for the underlying database engine to process.
 """

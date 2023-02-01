@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Asset:

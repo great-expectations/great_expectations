@@ -33,7 +33,7 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_splitter i
     PandasDataSplitter,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     import boto3
@@ -42,7 +42,7 @@ except ImportError:
     boto3 = None
     ClientError = None
     ParamValidationError = None
-    LOGGER.debug(
+    logger.debug(
         "Unable to load AWS connection object; install optional boto3 dependency for support"
     )
 
@@ -50,7 +50,7 @@ try:
     from azure.storage.blob import BlobServiceClient
 except ImportError:
     BlobServiceClient = None
-    LOGGER.debug(
+    logger.debug(
         "Unable to load Azure connection object; install optional azure dependency for support"
     )
 
@@ -64,7 +64,7 @@ except ImportError:
     service_account = None
     GoogleAPIError = None
     DefaultCredentialsError = None
-    LOGGER.debug(
+    logger.debug(
         "Unable to load GCS connection object; install optional google dependency for support"
     )
 
@@ -261,7 +261,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 raise gx_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
                 )
-            LOGGER.debug(
+            logger.debug(
                 f"Fetching s3 object. Bucket: {s3_url.bucket} Key: {s3_url.key}"
             )
             reader_fn: DataFrameFactoryFn = self._get_reader_fn(
@@ -289,7 +289,7 @@ class PandasExecutionEngine(ExecutionEngine):
                 container=azure_url.container, blob=azure_url.blob
             )
             azure_object = blob_client.download_blob()
-            LOGGER.debug(
+            logger.debug(
                 f"Fetching Azure blob. Container: {azure_url.container} Blob: {azure_url.blob}"
             )
             reader_fn = self._get_reader_fn(reader_method, azure_url.blob)
@@ -313,7 +313,7 @@ class PandasExecutionEngine(ExecutionEngine):
             try:
                 gcs_bucket = gcs_engine.get_bucket(gcs_url.bucket)
                 gcs_blob = gcs_bucket.blob(gcs_url.blob)
-                LOGGER.debug(
+                logger.debug(
                     f"Fetching GCS blob. Bucket: {gcs_url.bucket} Blob: {gcs_url.blob}"
                 )
             except GoogleAPIError as error:

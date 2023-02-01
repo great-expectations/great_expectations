@@ -5,12 +5,12 @@ from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator
     BatchKwargsGenerator,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     from pyspark.sql import SparkSession  # noqa: F401
 except ImportError:
-    LOGGER.debug(
+    logger.debug(
         "Unable to load spark context; install optional spark dependency for support."
     )
 
@@ -24,14 +24,14 @@ class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
         try:
             self.spark = get_or_create_spark_application()
         except Exception:
-            LOGGER.error(
+            logger.error(
                 "Unable to load spark context; install optional spark dependency for support."
             )
             self.spark = None
 
     def get_available_data_asset_names(self):
         if self.spark is None:
-            LOGGER.warning("No sparkSession available to query for tables.")
+            logger.warning("No sparkSession available to query for tables.")
             return {"names": []}
 
         tables = self.spark.sql(f"show tables in {self.database}")

@@ -40,7 +40,7 @@ from great_expectations.util import camel_to_snake
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @public_api
@@ -84,7 +84,7 @@ class RegexColumnMapMetricProvider(ColumnMapMetricProvider):
         regex_expression = get_dialect_regex_expression(column, cls.regex, _dialect)
 
         if regex_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Regex is not supported for dialect {str(_dialect.dialect.name)}"
             )
             raise NotImplementedError

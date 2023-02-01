@@ -3,7 +3,7 @@ import logging
 
 from great_expectations.core._docs_decorators import public_api
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @public_api

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
         BatchSortersDefinition,
     )
 
-LOGGER = logging.getLogger(__file__)
+logger = logging.getLogger(__file__)
 
 
 @pytest.fixture

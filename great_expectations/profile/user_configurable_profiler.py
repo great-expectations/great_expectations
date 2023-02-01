@@ -31,7 +31,7 @@ from great_expectations.util import is_nan
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context import AbstractDataContext
@@ -170,7 +170,7 @@ class UserConfigurableProfiler:
         self.table_expectations_only = table_expectations_only
         assert isinstance(self.table_expectations_only, bool)
         if self.table_expectations_only is True:
-            LOGGER.info(
+            logger.info(
                 "table_expectations_only is set to True. When used to build a suite, this profiler will ignore all"
                 "columns and create expectations only at the table level. If you would also like to create "
                 "expectations at the column level, you can instantiate a new profiler with table_expectations_only set "
@@ -307,7 +307,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
         self._build_expectations_table(self.profile_dataset)
 
         if self.value_set_threshold:
-            LOGGER.info(
+            logger.info(
                 "Using this profiler with a semantic_types dict will ignore the value_set_threshold parameter. If "
                 "you would like to include value_set expectations, you can include a 'value_set' entry in your "
                 "semantic_types dict with any columns for which you would like a value_set expectation, or you can "
@@ -489,7 +489,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
             The type of the column
         """
         if "expect_column_values_to_be_in_type_list" in self.excluded_expectations:
-            LOGGER.info(
+            logger.info(
                 "expect_column_values_to_be_in_type_list is in the excluded_expectations list. This"
                 "expectation is required to establish column data, so it will be run and then removed from the"
                 "expectation suite."
@@ -643,7 +643,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 ).result["observed_value"]
             )
         except KeyError:  # if observed_value value is not set
-            LOGGER.error(
+            logger.error(
                 f"Failed to get cardinality of column {column:s} - continuing..."
             )
         # Previously, if we had 25 possible categories out of 1000 rows, this would comes up as many, because of its
@@ -688,7 +688,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                 i in column_info_entry.get("semantic_types")
                 for i in ["BOOLEAN", "VALUE_SET"]
             ):
-                LOGGER.info(
+                logger.info(
                     f"Column {column_name} has both 'BOOLEAN' and 'VALUE_SET' specified as semantic_types."
                     f"As these are currently the same in function, the 'VALUE_SET' type will be removed."
                 )
@@ -855,7 +855,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     ),
                     match_type="domain",
                 )
-                LOGGER.debug(
+                logger.debug(
                     f"Skipping expect_column_min_to_be_between because observed value is nan: {observed_min}"
                 )
 
@@ -879,7 +879,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     ),
                     match_type="domain",
                 )
-                LOGGER.debug(
+                logger.debug(
                     f"Skipping expect_column_max_to_be_between because observed value is nan: {observed_max}"
                 )
 
@@ -903,7 +903,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     ),
                     match_type="domain",
                 )
-                LOGGER.debug(
+                logger.debug(
                     f"Skipping expect_column_mean_to_be_between because observed value is nan: {observed_mean}"
                 )
 
@@ -928,7 +928,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     ),
                     match_type="domain",
                 )
-                LOGGER.debug(
+                logger.debug(
                     f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
                 )
 
@@ -987,8 +987,8 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     ),
                     match_type="domain",
                 )
-                LOGGER.debug(quantile_result.exception_info["exception_traceback"])
-                LOGGER.debug(quantile_result.exception_info["exception_message"])
+                logger.debug(quantile_result.exception_info["exception_traceback"])
+                logger.debug(quantile_result.exception_info["exception_message"])
             else:
 
                 profile_dataset.expect_column_quantile_values_to_be_between(
@@ -1194,7 +1194,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     match_type="domain",
                 )
 
-                LOGGER.debug(
+                logger.debug(
                     f"""Skipping expect_column_proportion_of_unique_values_to_be_between because observed value is \
 nan: {pct_unique}
 """
@@ -1208,7 +1208,7 @@ nan: {pct_unique}
                     column, type_list=type_list
                 )
             else:
-                LOGGER.info(
+                logger.info(
                     f"Column type for column {column} is unknown. "
                     f"Skipping expect_column_values_to_be_in_type_list for this column."
                 )

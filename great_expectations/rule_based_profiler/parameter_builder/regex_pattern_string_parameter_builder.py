@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     )
 
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class RegexPatternStringParameterBuilder(ParameterBuilder):

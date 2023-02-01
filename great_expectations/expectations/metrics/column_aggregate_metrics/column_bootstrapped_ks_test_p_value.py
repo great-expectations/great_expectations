@@ -9,13 +9,13 @@ from great_expectations.expectations.metrics.util import (
     is_valid_continuous_partition_object,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 try:
     from pyspark.sql.functions import stddev_samp  # noqa: F401
 except ImportError as e:
-    LOGGER.debug(str(e))
-    LOGGER.debug(
+    logger.debug(str(e))
+    logger.debug(
         "Unable to load spark context; install optional spark dependency for support."
     )
 

@@ -17,7 +17,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 )
 from great_expectations.util import deep_filter_properties_iterable
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class CheckpointAnonymizer(BaseAnonymizer):
@@ -119,7 +119,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
                     for action_config_dict in action_list
                 ]
             except Exception:
-                LOGGER.debug(
+                logger.debug(
                     "anonymize_checkpoint_run: Unable to create anonymized_action_list payload field"
                 )
 
@@ -165,7 +165,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
                             for action_config_dict in validation_action_list
                         ]
                     except Exception:
-                        LOGGER.debug(
+                        logger.debug(
                             "anonymize_checkpoint_run: Unable to create anonymized_validation_action_list payload field"
                         )
 

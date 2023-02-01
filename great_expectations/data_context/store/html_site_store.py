@@ -29,7 +29,7 @@ from great_expectations.util import (
     verify_dynamic_loading_support,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class HtmlSiteStore:
@@ -122,7 +122,7 @@ class HtmlSiteStore:
             "fixed_length_key" in store_backend
             and store_backend["fixed_length_key"] is True
         ):
-            LOGGER.warning(
+            logger.warning(
                 "Configuring a filepath_template or using fixed_length_key is not supported in SiteBuilder: "
                 "filepaths will be selected based on the type of asset rendered."
             )
@@ -426,7 +426,7 @@ class HtmlSiteStore:
                             content_type = "font/opentype"
                         else:
                             # fallback
-                            LOGGER.warning(
+                            logger.warning(
                                 "Unable to automatically determine content_type for {}".format(
                                     source_name
                                 )

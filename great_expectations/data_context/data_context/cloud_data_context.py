@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @public_api
@@ -196,7 +196,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> str:
         if context_root_dir is None:
             context_root_dir = os.getcwd()
-            LOGGER.info(
+            logger.info(
                 f'context_root_dir was not provided - defaulting to current working directory "'
                 f'{context_root_dir}".'
             )
@@ -438,7 +438,7 @@ class CloudDataContext(SerializableDataContext):
         }
         for config_variable, value in cloud_config_variable_defaults.items():
             if substitutions.get(config_variable) is None:
-                LOGGER.info(
+                logger.info(
                     f'Config variable "{config_variable}" was not found in environment or global config ('
                     f'{self.GLOBAL_CONFIG_PATHS}). Using default value "{value}" instead. If you would '
                     f"like to "

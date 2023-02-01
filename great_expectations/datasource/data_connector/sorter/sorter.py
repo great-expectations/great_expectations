@@ -5,7 +5,7 @@ from typing import Any, List, Union, ValuesView
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Sorter:

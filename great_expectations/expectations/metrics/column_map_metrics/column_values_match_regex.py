@@ -11,7 +11,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.expectations.metrics.util import get_dialect_regex_expression
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ColumnValuesMatchRegex(ColumnMapMetricProvider):
@@ -26,7 +26,7 @@ class ColumnValuesMatchRegex(ColumnMapMetricProvider):
     def _sqlalchemy(cls, column, regex, _dialect, **kwargs):
         regex_expression = get_dialect_regex_expression(column, regex, _dialect)
         if regex_expression is None:
-            LOGGER.warning(
+            logger.warning(
                 f"Regex is not supported for dialect {str(_dialect.dialect.name)}"
             )
             raise NotImplementedError

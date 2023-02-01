@@ -23,8 +23,8 @@ import re
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Set
 
-LOGGER = logging.getLogger()
-LOGGER.setLevel(logging.INFO)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def parse_definition_nodes_from_source_code(directory: str) -> Dict[str, Set[str]]:
@@ -50,7 +50,7 @@ def parse_definition_nodes_from_file(file: str) -> Dict[str, Set[str]]:
     with open(file) as f:
         root = ast.parse(f.read(), file)
 
-    LOGGER.debug(f"Parsing {file} for function/class definnitions")
+    logger.debug(f"Parsing {file} for function/class definnitions")
 
     # Parse all 'def ...' and 'class ...' statements in the source code
     definition_nodes = []
@@ -58,13 +58,13 @@ def parse_definition_nodes_from_file(file: str) -> Dict[str, Set[str]]:
         if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
             name = node.name
             definition_nodes.append(name)
-            LOGGER.debug(f"Found symbol {name}")
+            logger.debug(f"Found symbol {name}")
 
     # Associate the function/class name with the file it comes from
     file_definition_map: DefaultDict[str, Set[str]] = defaultdict(set)
     for name in definition_nodes:
         file_definition_map[name].add(file)
-    LOGGER.debug(f"Added {len(definition_nodes)} definitions to map")
+    logger.debug(f"Added {len(definition_nodes)} definitions to map")
 
     return file_definition_map
 
@@ -103,7 +103,7 @@ def find_docusaurus_refs_in_file(file: str) -> Set[str]:
     with open(file) as f:
         contents = f.read()
 
-    LOGGER.debug(f"Reviewing {file} for Docusaurus links")
+    logger.debug(f"Reviewing {file} for Docusaurus links")
 
     file_refs: Set[str] = set()
 
@@ -111,7 +111,7 @@ def find_docusaurus_refs_in_file(file: str) -> Set[str]:
     r = re.compile(r"```python file=([\.\/l\w]+)")
     matches = r.findall(contents)
     if not matches:
-        LOGGER.info(f"Could not find any Docusaurs links in {file}")
+        logger.info(f"Could not find any Docusaurs links in {file}")
         return file_refs
 
     for match in matches:
@@ -120,7 +120,7 @@ def find_docusaurus_refs_in_file(file: str) -> Set[str]:
         if path[-3:] == ".py":
             file_refs.add(path)
         else:
-            LOGGER.info(f"Excluding {path} due to not being a .py file")
+            logger.info(f"Excluding {path} due to not being a .py file")
 
     return file_refs
 
@@ -160,12 +160,12 @@ def retrieve_symbols_from_file(file: str) -> Set[str]:
             func = node.func
             if isinstance(func, ast.Attribute):
                 symbols.add(func.attr)
-                LOGGER.debug(f"Identified symbol {func.attr}")
+                logger.debug(f"Identified symbol {func.attr}")
             elif isinstance(func, ast.Name):
                 symbols.add(func.id)
-                LOGGER.debug(f"Identified symbol {func.id}")
+                logger.debug(f"Identified symbol {func.id}")
 
-    LOGGER.debug(f"parsed {len(symbols)} symbols from {file}")
+    logger.debug(f"parsed {len(symbols)} symbols from {file}")
     return symbols
 
 

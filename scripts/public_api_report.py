@@ -54,7 +54,7 @@ import pathlib
 from dataclasses import dataclass
 from typing import List, Optional, Set, Union, cast
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Removed from imports due to circular import issues
@@ -157,11 +157,11 @@ class DocsExampleParser:
 
         function_calls = self._get_all_function_calls(tree=tree)
         function_names = self._get_non_private_function_names(calls=function_calls)
-        LOGGER.debug(f"function_names: {function_names}")
+        logger.debug(f"function_names: {function_names}")
 
         gx_imports = self._list_all_gx_imports(tree=tree)
         import_names = self._get_non_private_gx_import_names(imports=gx_imports)
-        LOGGER.debug(f"import_names: {import_names}")
+        logger.debug(f"import_names: {import_names}")
 
         return function_names | import_names
 
@@ -1764,7 +1764,7 @@ def main():
 
     printable_definitions = public_api_report.generate_printable_definitions()
     for printable_definition in printable_definitions:
-        LOGGER.info(printable_definition)
+        logger.info(printable_definition)
 
     public_api_report.write_printable_definitions_to_file(
         filepath=_repo_root() / "public_api_report.txt",
