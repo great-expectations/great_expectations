@@ -18,11 +18,7 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
 
     metric_name = "column.distinct_dates"
 
-    @metric_value(
-        engine=SqlAlchemyExecutionEngine,
-        metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
-        domain_type=MetricDomainTypes.COLUMN,
-    )
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,

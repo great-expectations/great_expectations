@@ -55,8 +55,8 @@ def _source(
         PostgresDatasource.execution_engine_override = original_override
 
 
-# We may be able parameterize this fixture so we can instantiate _source in the fixture. This
-# would reduce the `with ...` boilerplate in the individual tests.
+# We may be able to parameterize this fixture so we can instantiate _source in the fixture.
+# This would reduce the `with ...` boilerplate in the individual tests.
 @pytest.fixture
 def create_source() -> ContextManager:
     return _source
