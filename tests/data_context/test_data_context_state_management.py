@@ -539,3 +539,43 @@ def test_update_checkpoint_failure(in_memory_data_context: EphemeralDataContextS
         context.update_checkpoint(checkpoint)
 
     assert f"Could not find a Checkpoint named {name}" in str(e.value)
+
+
+@pytest.mark.unit
+def test_add_or_update_checkpoint_adds_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+):
+    context = in_memory_data_context
+    name = "my_checkpoint"
+    checkpoint_config["name"] = name
+
+    checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
+
+    actual_config = checkpoint.config
+
+    assert actual_config.name == name
+    assert (
+        actual_config.expectation_suite_name
+        == checkpoint_config["expectation_suite_name"]
+    )
+    assert actual_config.validations == checkpoint_config["validations"]
+    assert context.checkpoint_store.save_count == 1
+
+
+@pytest.mark.unit
+def test_add_or_update_profiler_updates_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+):
+    context = in_memory_data_context
+    name = "my_checkpoint"
+    checkpoint_config["name"] = name
+
+    checkpoint = context.add_checkpoint(**checkpoint_config)
+
+    assert context.checkpoint_store.save_count == 1
+
+    _ = context.add_or_update_checkpoint(name=name)
+
+    assert context.checkpoint_store.save_count == 2

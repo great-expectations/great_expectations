@@ -1563,7 +1563,42 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
-        pass
+        existing_checkpoint = None
+        try:
+            existing_checkpoint = self.get_checkpoint(name=name, ge_cloud_id=id)
+        except gx_exceptions.DataContextError:
+            logger.info(
+                f"Could not find an existing checkpoint named '{name}'; creating a new one."
+            )
+
+        if existing_checkpoint:
+            self.update_checkpoint(existing_checkpoint)
+            return self.get_checkpoint(name=name, ge_cloud_id=id)
+
+        return self.add_checkpoint(
+            name=name,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            validation_operator_name=validation_operator_name,
+            batches=batches,
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+            ge_cloud_id=id,
+            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            default_validation_id=default_validation_id,
+        )
 
     def get_checkpoint(
         self,
