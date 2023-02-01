@@ -25,7 +25,7 @@ if sa:
     # the SimpleSqlalchemyDatasource under test takes it as an input.
     class DummySAEngine(sa.engine.Engine):
         # Logger is configured to log nothing
-        LOGGER = logging.Logger(name="DummySAEngineLogger", level=55)
+        logger = logging.Logger(name="DummySAEngineLogger", level=55)
 
         def __init__(self, *args, **kwargs):
             # We intentionally don't call super.__init__ because this is a dummy.
