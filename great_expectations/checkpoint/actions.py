@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from typing_extensions import Final
 
 from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.core._docs_decorators import deprecated_argument, public_api
+from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 
@@ -28,6 +28,7 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -65,6 +66,7 @@ class ValidationAction:
 
         return isinstance(self.data_context, CloudDataContext)
 
+    @public_api
     def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -76,15 +78,21 @@ class ValidationAction:
         checkpoint_identifier=None,
         **kwargs,
     ):
-        """
+        """Public entrypoint GX uses to trigger a ValidationAction.
 
-        :param validation_result_suite:
-        :param validation_result_suite_identifier:
-        :param data_asset:
-        :param expectation_suite_identifier:  The ExpectationSuiteIdentifier to use
-        :param checkpoint_identifier:  The Checkpoint to use
-        :param: kwargs - any additional arguments the child might use
-        :return:
+        When a ValidationAction is configured in a Checkpoint, this method gets called
+        after the Checkpoint produces an ExpectationSuiteValidationResult.
+
+        Args:
+            validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
+            validation_result_suite_identifier: an instance of either the ValidationResultIdentifier class (for open source Great Expectations) or the GXCloudIdentifier (from Great Expectations Cloud).
+            data_asset: An instance of the Validator class.
+            expectation_suite_identifier: Optionally, an instance of the ExpectationSuiteIdentifier class.
+            checkpoint_identifier: Optionally, an Identifier for the Checkpoint.
+            kwargs: named parameters that are specific to a given Action, and need to be assigned a value in the Action's configuration in a Checkpoint's action_list.
+
+        Returns:
+            A Dict describing the result of the Action.
         """
         return self._run(
             validation_result_suite=validation_result_suite,
@@ -95,6 +103,7 @@ class ValidationAction:
             **kwargs,
         )
 
+    @public_api
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -105,6 +114,24 @@ class ValidationAction:
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
+        """Private method containing the logic specific to a ValidationAction's implementation.
+
+        The implementation details specific to this ValidationAction must live in this method.
+        Additional context required by the ValidationAction may be specified in the Checkpoint's
+        `action_list` under the `action` key. These arbitrary key/value pairs will be passed into
+        the ValidationAction as keyword arguments.
+
+        Args:
+            validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
+            validation_result_suite_identifier: an instance of either the ValidationResultIdentifier
+                class (for open source Great Expectations) or the GeCloudIdentifier (from Great Expectations Cloud).
+            data_asset: An instance of the Validator class.
+            expectation_suite_identifier:  Optionally, an instance of the ExpectationSuiteIdentifier class.
+            checkpoint_identifier:  Optionally, an Identifier for the Checkpoints.
+
+        Returns:
+            A Dict describing the result of the Action.
+        """
         return NotImplementedError
 
 

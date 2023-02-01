@@ -22,6 +22,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     Datasource,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
@@ -43,6 +44,23 @@ class _DataFrameAsset(DataAsset):
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
+
+    def test_connection(self) -> None:
+        """Test the connection for the CSVAsset.
+
+        Raises:
+            TestConnectionError
+        """
+        success = False
+        for filepath in self.path.iterdir():
+            if self.regex.match(filepath.name):
+                # if one file in the path matches the regex, we consider this asset valid
+                success = True
+                break
+        if not success:
+            raise TestConnectionError(
+                f"No file at path: {self.path} matched the regex: {self.regex}."
+            )
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
@@ -150,7 +168,8 @@ class _DataFrameAsset(DataAsset):
                     },
                 ),
             )
-            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+            execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
+            data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
 
@@ -172,8 +191,9 @@ class _DataFrameAsset(DataAsset):
             batch_metadata = copy.deepcopy(request.options)
             batch_metadata["base_directory"] = path
 
-            # Some pydantic annotations are postponed due to circular imports. This will set the annotations before we
-            # instantiate the Batch class since we can import them above.
+            # Some pydantic annotations are postponed due to circular imports.
+            # Batch.update_forward_refs() will set the annotations before we
+            # instantiate the Batch class since we can import them in this scope.
             Batch.update_forward_refs()
             batch_list.append(
                 Batch(
@@ -229,6 +249,20 @@ class PandasDatasource(Datasource):
         )
 
         return PandasExecutionEngine
+
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the PandasDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the PandasDatasource, whether to test them as well.
+
+        Raises:
+            TestConnectionError
+        """
+        # Only self.assets can be tested for PandasDatasource
+        if self.assets and test_assets:
+            for asset in self.assets.values():
+                asset.test_connection()  # type: ignore[union-attr]
 
     def add_csv_asset(
         self,

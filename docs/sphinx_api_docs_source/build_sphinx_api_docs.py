@@ -5,19 +5,14 @@ needed in the future.
 
 Typical usage example:
 
-    @invoke.task(
-        help={
-            "clean": "Clean out existing documentation first. Defaults to True.",
-        }
-    )
+    @invoke.task()
     def my_task(
         ctx,
-        clean=True,
     ):
 
         doc_builder = SphinxInvokeDocsBuilder(ctx=ctx)
         doc_builder.exit_with_error_if_docs_dependencies_are_not_installed()
-        doc_builder.build_docs(clean=clean)
+        doc_builder.build_docs()
         ...
 """
 from __future__ import annotations
@@ -189,9 +184,18 @@ class SphinxInvokeDocsBuilder:
 
                     split_href = href.split("#")
 
-                    shortened_path_version = self._get_mdx_file_path(
-                        pathlib.Path(split_href[0])
-                    ).with_suffix(".html")
+                    href_path = pathlib.Path(split_href[0])
+
+                    if str(href_path) == ".":
+                        # For self referential links, use the file path
+                        shortened_path_version = self._get_mdx_file_path(
+                            html_file_path=html_file
+                        ).with_suffix(".html")
+                    else:
+                        # Use the shortened path generated from the href
+                        shortened_path_version = self._get_mdx_file_path(
+                            html_file_path=pathlib.Path(split_href[0])
+                        ).with_suffix(".html")
 
                     fragment = ""
                     if len(split_href) > 1:

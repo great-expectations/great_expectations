@@ -49,6 +49,11 @@ except ImportError:
     pyspark_sql_Row = None
     LOGGER.debug("No spark sql dataframe module available.")
 
+
+class TestConnectionError(Exception):
+    pass
+
+
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants as returned. The keys represent dimensions one can slice the data along
 # and the values are the realized. If a value is None or unspecified, the batch_request
@@ -150,6 +155,16 @@ class DataAsset(ExperimentalBaseModel):
     def datasource(self, ds: Datasource):
         assert isinstance(ds, Datasource)
         self._datasource = ds
+
+    def test_connection(self) -> None:
+        """Test the connection for the DataAsset.
+
+        Raises:
+            TestConnectionError
+        """
+        raise NotImplementedError(
+            "One needs to implement 'test_connection' on a DataAsset subclass"
+        )
 
     # Abstract Methods
     def batch_request_options_template(
@@ -325,23 +340,10 @@ class Datasource(
     type: str
     name: str
     assets: MutableMapping[str, DataAssetType] = {}
-    _execution_engine: ExecutionEngine = pydantic.PrivateAttr()
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        engine_kwargs = {
-            k: v for (k, v) in kwargs.items() if k not in self._excluded_eng_args
-        }
-        self._execution_engine = self._execution_engine_type()(**engine_kwargs)
-
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        return self._execution_engine
-
-    class Config:
-        # TODO: revisit this (1 option - define __get_validator__ on ExecutionEngine)
-        # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
-        arbitrary_types_allowed = True
+    # private attrs
+    _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
+    _execution_engine: ExecutionEngine | None = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", pre=True)
     def _load_asset_subtype(cls, v: Dict[str, dict]):
@@ -363,6 +365,18 @@ class Datasource(
     def _execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
+
+    def get_execution_engine(self) -> ExecutionEngine:
+        current_execution_engine_kwargs = self.dict(exclude=self._excluded_eng_args)
+        if (
+            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
+            or not self._execution_engine
+        ):
+            self._execution_engine = self._execution_engine_type()(
+                **current_execution_engine_kwargs
+            )
+            self._cached_execution_engine_kwargs = current_execution_engine_kwargs
+        return self._execution_engine
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -398,6 +412,7 @@ class Datasource(
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
+        asset.test_connection()
         self.assets[asset.name] = asset
         return asset
 
@@ -407,6 +422,19 @@ class Datasource(
         """Return the ExecutionEngine type use for this Datasource"""
         raise NotImplementedError(
             "One needs to implement 'execution_engine_type' on a Datasource subclass"
+        )
+
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the Datasource.
+
+        Args:
+            test_assets: If assets have been passed to the Datasource, an attempt can be made to test them as well.
+
+        Raises:
+            TestConnectionError
+        """
+        raise NotImplementedError(
+            "One needs to implement 'test_connection' on a Datasource subclass"
         )
 
     # End Abstract Methods

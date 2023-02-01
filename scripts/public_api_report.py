@@ -525,20 +525,6 @@ class CodeReferenceFilter:
             filepath=pathlib.Path("great_expectations/core/expectation_suite.py"),
         ),
         IncludeExcludeDefinition(
-            reason="Part of our API, but typically we now use get_context().",
-            name="DataContext",
-            filepath=pathlib.Path(
-                "great_expectations/data_context/data_context/data_context.py"
-            ),
-        ),
-        IncludeExcludeDefinition(
-            reason="Part of our API, but typically we now use get_context().",
-            name="BaseDataContext",
-            filepath=pathlib.Path(
-                "great_expectations/data_context/data_context/base_data_context.py"
-            ),
-        ),
-        IncludeExcludeDefinition(
             reason="Validation Actions are used within Checkpoints but are part of our Public API and can be overridden via plugins.",
             name="ValidationAction",
             filepath=pathlib.Path("great_expectations/checkpoint/actions.py"),
@@ -792,6 +778,20 @@ class CodeReferenceFilter:
         ),
     ]
     DEFAULT_EXCLUDES: List[IncludeExcludeDefinition] = [
+        IncludeExcludeDefinition(
+            reason="We now use get_context(), this method only exists for backward compatibility.",
+            name="DataContext",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/data_context.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="We now use get_context(), this method only exists for backward compatibility.",
+            name="BaseDataContext",
+            filepath=pathlib.Path(
+                "great_expectations/data_context/data_context/base_data_context.py"
+            ),
+        ),
         IncludeExcludeDefinition(
             reason="Experimental is not part of the public API",
             filepath=pathlib.Path(
