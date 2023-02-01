@@ -20,6 +20,8 @@ from typing import (
 import pydantic
 from ruamel.yaml import YAML
 
+from great_expectations.experimental.datasources.constants import _FIELD_ALWAYS_SET
+
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -162,7 +164,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
         """
-        self.__fields_set__.add("assets")
+        self.__fields_set__.add(_FIELD_ALWAYS_SET)
         return super().json(
             include=include,
             exclude=exclude,
@@ -227,7 +229,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
         """
-        self.__fields_set__.add("assets")
+        self.__fields_set__.add(_FIELD_ALWAYS_SET)
         return super().dict(
             include=include,
             exclude=exclude,
