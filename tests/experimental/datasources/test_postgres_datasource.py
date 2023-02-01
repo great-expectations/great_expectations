@@ -1,10 +1,11 @@
 from contextlib import contextmanager
 from pprint import pprint
-from typing import Callable, ContextManager, Optional, Tuple
+from typing import Callable, ContextManager, Generator, Optional, Tuple
 from unittest import mock
 
 import pytest
 from pydantic import ValidationError
+from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -38,7 +39,7 @@ def _source(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
-) -> PostgresDatasource:
+) -> Generator[PostgresDatasource, None, None]:
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=validate_batch_spec, dialect=dialect
     )
@@ -47,7 +48,7 @@ def _source(
         PostgresDatasource.execution_engine_override = execution_eng_cls
         yield PostgresDatasource(
             name="my_datasource",
-            connection_string=connection_string,
+            connection_string=connection_string,  # type: ignore[arg-type] # coerced
         )
     finally:
         PostgresDatasource.execution_engine_override = original_override
@@ -57,11 +58,14 @@ def _source(
 # This would reduce the `with ...` boilerplate in the individual tests.
 @pytest.fixture
 def create_source() -> ContextManager:
-    return _source
+    return _source  # type: ignore[return-value]
+
+
+CreateSourceFixture: TypeAlias = Callable[..., ContextManager[PostgresDatasource]]
 
 
 @pytest.mark.unit
-def test_construct_postgres_datasource(create_source):
+def test_construct_postgres_datasource(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
@@ -92,7 +96,7 @@ def assert_batch_request(
 
 
 @pytest.mark.unit
-def test_add_table_asset_with_splitter(create_source):
+def test_add_table_asset_with_splitter(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
@@ -117,7 +121,7 @@ def test_add_table_asset_with_splitter(create_source):
 
 
 @pytest.mark.unit
-def test_add_table_asset_with_no_splitter(create_source):
+def test_add_table_asset_with_no_splitter(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
@@ -248,7 +252,7 @@ def assert_batches_correct_with_year_month_splitter_defaults(batches):
 
 @pytest.mark.unit
 def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_options(
-    create_source,
+    create_source: CreateSourceFixture,
 ):
     batch_specs = []
 
@@ -271,7 +275,7 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
 
 @pytest.mark.unit
 def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_none(
-    create_source,
+    create_source: CreateSourceFixture,
 ):
     batch_specs = []
 
@@ -297,7 +301,7 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
 
 @pytest.mark.unit
 def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_request_options(
-    create_source,
+    create_source: CreateSourceFixture,
 ):
     batch_specs = []
 
@@ -335,7 +339,7 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
 
 @pytest.mark.unit
 def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
-    create_source,
+    create_source: CreateSourceFixture,
 ):
     def validate_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         assert spec == {
@@ -362,7 +366,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
 
 
 @pytest.mark.unit
-def test_datasource_gets_nonexistent_asset(create_source):
+def test_datasource_gets_nonexistent_asset(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
@@ -381,7 +385,7 @@ def test_datasource_gets_nonexistent_asset(create_source):
     ],
 )
 def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
-    create_source,
+    create_source: CreateSourceFixture,
     batch_request_args,
 ):
     with create_source(
@@ -413,7 +417,7 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
     [{}, {"year": 2021}, {"year": 2021, "month": 10}, {"year": None, "month": 10}],
 )
 def test_get_batch_list_from_batch_request_with_good_batch_request(
-    create_source, batch_request_options
+    create_source: CreateSourceFixture, batch_request_options
 ):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -442,7 +446,7 @@ def test_get_batch_list_from_batch_request_with_good_batch_request(
     ],
 )
 def test_get_batch_list_from_batch_request_with_malformed_batch_request(
-    create_source, batch_request_args
+    create_source: CreateSourceFixture, batch_request_args
 ):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -461,7 +465,7 @@ def test_get_batch_list_from_batch_request_with_malformed_batch_request(
             asset.get_batch_list_from_batch_request(batch_request)
 
 
-def test_get_bad_batch_request(create_source):
+def test_get_bad_batch_request(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
@@ -529,7 +533,7 @@ def test_get_bad_batch_request(create_source):
         ),
     ],
 )
-def test_sort_batch_list_by_metadata(sort_info, create_source):
+def test_sort_batch_list_by_metadata(sort_info, create_source: CreateSourceFixture):
     sort_keys, sort_values = sort_info
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -558,7 +562,7 @@ def test_sort_batch_list_by_metadata(sort_info, create_source):
 
 
 @pytest.mark.unit
-def test_sort_batch_list_by_unknown_key(create_source):
+def test_sort_batch_list_by_unknown_key(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
@@ -602,7 +606,7 @@ def test_table_asset_sorter_parsing(order_by: list):
 
 
 @pytest.mark.unit
-def test_data_source_json_has_properties(create_source):
+def test_data_source_json_has_properties(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
@@ -618,7 +622,7 @@ def test_data_source_json_has_properties(create_source):
 
 
 @pytest.mark.unit
-def test_data_source_str_has_properties(create_source):
+def test_data_source_yaml_has_properties(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
@@ -660,7 +664,9 @@ def test_datasource_dict_has_properties(create_source):
         "postgresql+pg8000://userName:@hostname",
     ],
 )
-def test_validate_valid_postgres_connection_string(create_source, connection_string):
+def test_validate_valid_postgres_connection_string(
+    create_source: CreateSourceFixture, connection_string
+):
     connection_string = "postgresql://userName:@hostname/dbName"
     with create_source(
         validate_batch_spec=lambda _: None,
@@ -682,7 +688,9 @@ def test_validate_valid_postgres_connection_string(create_source, connection_str
         "postgresql+invalid://",
     ],
 )
-def test_validate_invalid_postgres_connection_string(create_source, connection_string):
+def test_validate_invalid_postgres_connection_string(
+    create_source: CreateSourceFixture, connection_string
+):
     with pytest.raises(ValidationError):
         with create_source(
             validate_batch_spec=lambda _: None,
