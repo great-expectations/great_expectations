@@ -149,7 +149,7 @@ class TableAsset(DataAsset):
         """Test the connection for the TableAsset.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         assert isinstance(self.datasource, SQLDatasource)
         engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
@@ -326,7 +326,7 @@ class TableAsset(DataAsset):
 
 
 class SQLDatasource(Datasource):
-    """Adds a generic SQL datasource to the data context.
+    """A generic SQL datasource.
 
     Args:
         name: The name of this datasource.
@@ -378,7 +378,7 @@ class SQLDatasource(Datasource):
             test_assets: If assets have been passed to the SQLDatasource, whether to test them as well.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         try:
             engine: sqlalchemy.engine.Engine = self.get_engine()
