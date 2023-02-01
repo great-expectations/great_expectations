@@ -141,6 +141,7 @@ class TableAsset(DataAsset):
     # Instance fields
     type: Literal["table"] = "table"
     table_name: str
+    schema: Optional[str] = None
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
 
@@ -151,16 +152,10 @@ class TableAsset(DataAsset):
             TestConnectionError
         """
         assert isinstance(self.datasource, SQLDatasource)
-        schema: Optional[str] = None
-        table_name: str
-        if "." in self.table_name:
-            schema, table_name = self.table_name.split(".")
-        else:
-            table_name = self.table_name
         engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
         exists = sqlalchemy.inspect(engine).has_table(
-            table_name=table_name,
-            schema=schema,
+            table_name=self.table_name,
+            schema=self.schema,
         )
         if not exists:
             raise TestConnectionError(
@@ -411,6 +406,7 @@ class SQLDatasource(Datasource):
         self,
         name: str,
         table_name: str,
+        schema: Optional[str] = None,
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> TableAsset:
         """Adds a table asset to this datasource.
@@ -418,6 +414,7 @@ class SQLDatasource(Datasource):
         Args:
             name: The name of this table asset.
             table_name: The table where the data resides.
+            schema: The schema that holds the table.
             order_by: A list of BatchSorters or BatchSorter strings.
 
         Returns:
@@ -426,6 +423,7 @@ class SQLDatasource(Datasource):
         asset = TableAsset(
             name=name,
             table_name=table_name,
+            schema=schema,
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             # see DataAsset._parse_order_by_sorter()
         )
