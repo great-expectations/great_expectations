@@ -36,7 +36,7 @@ class PandasDatasourceError(Exception):
 
 class _DataFrameAsset(DataAsset):
     # Pandas specific class attrs
-    _EXCLUDE_FROM_READER_OPTIONS: ClassVar[set[str]] = {
+    _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "name",
         "path",
         "regex",
