@@ -49,7 +49,7 @@ class _DataFrameAsset(DataAsset):
         """Test the connection for the CSVAsset.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         success = False
         for filepath in self.base_directory.iterdir():
@@ -59,7 +59,7 @@ class _DataFrameAsset(DataAsset):
                 break
         if not success:
             raise TestConnectionError(
-                f"No file at path: {self.base_directory} matched the regex: {self.regex}."
+                f"No file at path: {self.base_directory} matched the regex: {self.regex.pattern}."
             )
 
     def _fully_specified_batch_requests_with_path(

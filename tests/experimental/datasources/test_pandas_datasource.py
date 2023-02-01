@@ -12,6 +12,7 @@ from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     PandasDatasource,
@@ -405,3 +406,21 @@ def test_pandas_sorter(
             metadata = batches[batch_index].metadata
             assert metadata[key1] == range1
             assert metadata[key2] == range2
+
+
+def test_test_connection(pandas_datasource: PandasDatasource, csv_path: pathlib.Path):
+    regex = r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+    csv_asset = CSVAsset(
+        name="csv_asset",
+        base_directory=csv_path,
+        regex=regex,
+    )
+    pandas_datasource.assets = {"csv_asset": csv_asset}
+    with pytest.raises(TestConnectionError) as e:
+        pandas_datasource.test_connection()
+
+    substrings = [
+        "No file at path: ",
+        f"/tests/test_sets/taxi_yellow_tripdata_samples matched the regex: {regex}.",
+    ]
+    assert all(substring in str(e.value) for substring in substrings)
