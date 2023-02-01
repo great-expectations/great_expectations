@@ -345,9 +345,6 @@ class SQLDatasource(Datasource):
     connection_string: str
     assets: Dict[str, TableAsset] = {}
 
-    # private attrs
-    _engine: sqlalchemy.engine.Engine = pydantic.PrivateAttr()
-
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the default execution engine type."""
@@ -355,31 +352,24 @@ class SQLDatasource(Datasource):
 
         return SqlAlchemyExecutionEngine
 
-    class Config:
-        arbitrary_types_allowed = True
-
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
+    def get_engine(self) -> sqlalchemy.engine.Engine:
         # validate that SQL Alchemy was successfully imported and attempt to create an engine
         if SQLALCHEMY_IMPORTED:
-            if "connection_string" in kwargs and kwargs["connection_string"]:
-                try:
-                    self._engine = sqlalchemy.create_engine(kwargs["connection_string"])
-                except Exception as e:
-                    # connection_string has passed pydantic validation,
-                    # but still fails to create a sqlalchemy engine
-                    raise SQLDatasourceError(
-                        "Unable to create a SQLAlchemy engine from "
-                        f"connection_string: {kwargs['connection_string']} due to the "
-                        f"following exception: {str(e)}"
-                    )
+            try:
+                engine = sqlalchemy.create_engine(self.connection_string)
+            except Exception as e:
+                # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
+                # one case is a missing plugin (e.g. psycopg2)
+                raise SQLDatasourceError(
+                    "Unable to create a SQLAlchemy engine from "
+                    f"connection_string: {self.connection_string} due to the "
+                    f"following exception: {str(e)}"
+                )
         else:
             raise SQLDatasourceError(
                 "Unable to create SQLDatasource due to missing sqlalchemy dependency."
             )
-
-    def get_engine(self) -> sqlalchemy.engine.Engine:
-        return self._engine
+        return engine
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SQLDatasource.
