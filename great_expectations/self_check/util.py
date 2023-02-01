@@ -2873,7 +2873,7 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
                 runtime_kwargs = {
                     "result_format": {
                         "result_format": "COMPLETE",
-                        "unexpected_index_columns": ["pk_index"],
+                        "unexpected_index_column_names": ["pk_index"],
                     },
                     "include_config": False,
                 }
