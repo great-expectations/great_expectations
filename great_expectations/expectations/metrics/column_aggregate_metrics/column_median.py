@@ -32,7 +32,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         column_nonnull_elements: pd.Series = column[~column_null_elements_cond]
         return column_nonnull_elements.median()
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -87,7 +87,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
 
         return column_median
 
-    @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
