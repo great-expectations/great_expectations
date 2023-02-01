@@ -1503,7 +1503,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """Update a Checkpoint that already exists.
 
         Args:
-            checkppoint: The checkpoint to use to update.
+            checkpoint: The checkpoint to use to update.
 
         Raises:
             DataContextError: A suite with the given name does not already exist.
