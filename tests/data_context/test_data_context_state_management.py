@@ -520,6 +520,7 @@ def test_update_checkpoint_success(
 
     assert context.checkpoint_store.save_count == 1
 
+    checkpoint.config.ge_cloud_id = "f37bfbb0-b61f-4d9c-907c-7826dcb4179f"
     context.update_checkpoint(checkpoint)
 
     assert context.checkpoint_store.save_count == 2
@@ -564,7 +565,7 @@ def test_add_or_update_checkpoint_adds_successfully(
 
 
 @pytest.mark.unit
-def test_add_or_update_profiler_updates_successfully(
+def test_add_or_update_checkpoint_updates_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
     checkpoint_config: dict,
 ):
@@ -576,6 +577,7 @@ def test_add_or_update_profiler_updates_successfully(
 
     assert context.checkpoint_store.save_count == 1
 
+    checkpoint.config.ge_cloud_id = "f37bfbb0-b61f-4d9c-907c-7826dcb4179f"
     _ = context.add_or_update_checkpoint(name=name)
 
     assert context.checkpoint_store.save_count == 2
