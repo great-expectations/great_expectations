@@ -3003,7 +3003,7 @@ def check_json_test_result(  # noqa: C901 - 52
         result = result.to_json_dict()
         for key, value in test["output"].items():
             # Apply our great expectations-specific test logic
-            if v2_or_v3_api is "v2" and key in [
+            if v2_or_v3_api == "v2" and key in [
                 "element_count",
                 "missing_count",
                 "missing_percent",
