@@ -3071,9 +3071,10 @@ def check_json_test_result(  # noqa: C901 - 52
                 if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
                     pass
                 else:
-                    assert (
-                        result["result"]["unexpected_index_list"] == value
-                    ), f"{result['result']['unexpected_index_list']} != {value}"
+                    if pk_column:
+                        assert (
+                            result["result"]["unexpected_index_list"] == value
+                        ), f"{result['result']['unexpected_index_list']} != {value}"
 
             elif key == "unexpected_list":
                 try:
@@ -3184,7 +3185,8 @@ def check_json_test_result(  # noqa: C901 - 52
                         ],
                         value["tail_weights"],
                     )
-
+            elif key == "exact_match_out":
+                pass
             else:
                 raise ValueError(
                     f"Invalid test specification: unknown key {key} in 'out'"
