@@ -3002,19 +3002,6 @@ def check_json_test_result(  # noqa: C901 - 52
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
         for key, value in test["output"].items():
-            # Apply our great expectations-specific test logic
-            if v2_or_v3_api == "v2" and key in [
-                "element_count",
-                "missing_count",
-                "missing_percent",
-                "unexpected_percent",
-                "unexpected_percent_total",
-                "unexpected_percent_nonmissing",
-                "partial_unexpected_index_list",
-                "details",
-            ]:
-                pass
-
             if key == "success":
                 if isinstance(value, (np.floating, float)):
                     try:
@@ -3200,8 +3187,6 @@ def check_json_test_result(  # noqa: C901 - 52
                         ],
                         value["tail_weights"],
                     )
-            elif key == "exact_match_out":
-                pass
             else:
                 raise ValueError(
                     f"Invalid test specification: unknown key {key} in 'out'"
