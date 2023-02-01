@@ -335,9 +335,7 @@
           "unexpected_list": [
             10
           ],
-          "unexpected_index_list": [
-            9
-          ],
+          "unexpected_index_list":[{"x": 10, "pk_index": 9}],
           "success": true
         },
         "in": {
@@ -355,10 +353,7 @@
             1,
             2
           ],
-          "unexpected_index_list": [
-            0,
-            1
-          ],
+          "unexpected_index_list":[{"x": 1, "pk_index": 0}, {"x": 2, "pk_index": 1}],
           "success": false
         },
         "in": {
@@ -434,9 +429,7 @@
           "unexpected_list": [
             5
           ],
-          "unexpected_index_list": [
-            4
-          ],
+          "unexpected_index_list": [{"z": 5, "pk_index": 4}],
           "success": false
         },
         "in": {
@@ -453,9 +446,7 @@
           "unexpected_list": [
             5
           ],
-          "unexpected_index_list": [
-            4
-          ],
+          "unexpected_index_list": [{"z": 5, "pk_index": 4}],
           "success": true
         },
         "in": {
@@ -506,9 +497,7 @@
           "unexpected_list": [
             "abc"
           ],
-          "unexpected_index_list": [
-            9
-          ],
+          "unexpected_index_list": [{"y": "abc", "pk_index": 9}],
           "success": false
         },
         "suppress_test_for": ["spark"]
@@ -525,7 +514,7 @@
         "out": {
           "unexpected_list": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
           "unexpected_index_list": [
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+            {"numeric": "1", "pk_index": 0}, {"numeric": "2", "pk_index": 1}, {"numeric": "3", "pk_index": 2}, {"numeric": "4", "pk_index": 3}, {"numeric": "5", "pk_index": 4}, {"numeric": "6", "pk_index": 5}, {"numeric": "7", "pk_index": 6}, {"numeric": "8", "pk_index": 7}, {"numeric": "9", "pk_index": 8}, {"numeric": "10", "pk_index": 9}
           ],
           "success": false
         },
@@ -542,7 +531,7 @@
         },
         "out": {
           "unexpected_list": [1],
-          "unexpected_index_list": [0],
+          "unexpected_index_list": [{"x": 1, "pk_index": 0}],
           "success": false
         }
       },
@@ -573,7 +562,7 @@
         },
         "out": {
           "unexpected_list": [10],
-          "unexpected_index_list": [9],
+          "unexpected_index_list": [{"x": 10, "pk_index": 9}],
           "success": false
         }
       },
@@ -622,7 +611,7 @@
         },
         "out": {
           "unexpected_list": [9],
-          "unexpected_index_list": [8],
+          "unexpected_index_list": [{"x": 9, "pk_index": 8}],
           "success": false
         }
       },{

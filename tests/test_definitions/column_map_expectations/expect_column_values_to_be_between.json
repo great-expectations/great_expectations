@@ -356,7 +356,7 @@
             10
           ],
           "unexpected_index_list": [
-            9
+              {"x": 10, "pk_index": 9}
           ],
           "success": true
         },
@@ -376,8 +376,7 @@
             2
           ],
           "unexpected_index_list": [
-            0,
-            1
+            {"x": 1, "pk_index": 0}, {"x": 2, "pk_index": 1}
           ],
           "success": false
         },
@@ -593,7 +592,7 @@
         },
         "out": {
           "unexpected_list": [10],
-          "unexpected_index_list": [9],
+          "unexpected_index_list": [{"x": 10, "pk_index": 9}] ,
           "success": false
         }
       },

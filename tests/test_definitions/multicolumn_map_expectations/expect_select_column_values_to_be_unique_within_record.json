@@ -126,7 +126,7 @@
       },
       "out": {
         "unexpected_list": [{"a": 1.0, "b": 1.0}, {"a": 1.0, "b": 1.0}, {"a": 1.0, "b": 1.0}, {"a": 2.0, "b": 2.0}, {"a": 2.0, "b": 2.0}],
-        "unexpected_index_list": [0,2,4,5,7],
+        "unexpected_index_list": [{"a": 1.0, "pk_index": 0, "b": 1.0}, {"a": 1.0, "pk_index": 2, "b": 1.0}, {"a": 1.0, "pk_index": 4, "b": 1.0}, {"a": 2.0, "pk_index": 5, "b": 2.0}, {"a": 2.0, "pk_index": 7, "b": 2.0}],
         "success": false
       }
     },{
@@ -169,11 +169,31 @@
             }
           ],
           "partial_unexpected_index_list": [
-            0,
-            2,
-            4,
-            5,
-            7
+            {
+              "a": 1.0,
+              "pk_index": 0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "pk_index": 2,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "pk_index": 4,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "pk_index": 5,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "pk_index": 7,
+              "b": 2.0
+            }
           ],
           "details": {
             "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
@@ -200,12 +220,33 @@
               "b": 2.0
             }
           ],
-          "unexpected_index_list": [
-            0,
-            2,
-            4,
-            5,
-            7
+          "unexpected_index_list":
+          [
+            {
+              "a": 1.0,
+              "pk_index": 0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "pk_index": 2,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "pk_index": 4,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "pk_index": 5,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "pk_index": 7,
+              "b": 2.0
+            }
           ]
         }
       }
