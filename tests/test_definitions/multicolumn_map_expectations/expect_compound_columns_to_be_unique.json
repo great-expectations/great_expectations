@@ -285,14 +285,115 @@
         "success": false
       }
     },{
-      "title": "unexpected_values_exact_match_out_with_unexpected_index_list",
-      "exact_match_out" : false,
-      "only_for": ["pandas"],
+      "title": "unexpected_values_exact_match_out_with_unexpected_index_list_pandas_v2_api",
+      "exact_match_out" : true,
+      "only_for": ["pandas_v2_api"],
       "in": {
         "column_list": ["a", "b"]
       },
       "out": {
         "success": false,
+        "result": {
+          "element_count": 10,
+          "missing_count": 1,
+          "missing_percent": 10.0,
+          "unexpected_count": 9,
+          "unexpected_percent": 100.0,
+          "unexpected_percent_total": 90.0,
+          "unexpected_percent_nonmissing": 100.0,
+          "partial_unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            }
+          ],
+          "partial_unexpected_index_list": [0,1,2,3,4,5,6,7,8],
+          "details": {
+            "partial_unexpected_counts_error": "partial_unexpected_counts requested, but requires a hashable type"
+          },
+          "unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 2.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 1.0
+            }
+          ],
+          "unexpected_index_list": [0,1,2,3,4,5,6,7,8]
+        }
+      }
+    },{
+      "title": "unexpected_values_exact_match_out_with_unexpected_index_list_pandas_v3",
+      "exact_match_out" : true,
+      "only_for": ["pandas_v3_api"],
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "success": false,
+        "result": {
           "unexpected_count": 9,
           "partial_unexpected_list": [
             {
@@ -417,6 +518,7 @@
             "b": 1.0
           }
         ]
+      }
       }
     },{
       "title": "unexpected_values_exact_match_out_without_unexpected_index_list",
