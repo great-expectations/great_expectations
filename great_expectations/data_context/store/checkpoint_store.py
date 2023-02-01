@@ -193,7 +193,11 @@ class CheckpointStore(ConfigurationStore):
         name = checkpoint.name
         id = checkpoint.ge_cloud_id
 
-        key = self.determine_key(name=name, ge_cloud_id=id)
+        if id:
+            key = self.determine_key(ge_cloud_id=id)
+        else:
+            key = self.determine_key(name=name)
+
         if not self.has_key(key):
             raise gx_exceptions.CheckpointNotFoundError(
                 f"Could not find a Checkpoint named {name}"

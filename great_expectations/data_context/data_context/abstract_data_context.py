@@ -1523,9 +1523,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = None,
-        batches: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
@@ -1551,8 +1548,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration: The runtime configuration to use in generating this checkpoint.
             validations: The validations to use in generating this checkpoint.
             profilers: The profilers to use in generating this checkpoint.
-            validation_operator_name: The validation operator name to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
-            batches: The batches to use in generating this checkpoint. This is only used for LegacyCheckpoint configuration.
             site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
@@ -1572,8 +1567,52 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if existing_checkpoint:
-            self.update_checkpoint(existing_checkpoint)
-            return self.get_checkpoint(name=name, ge_cloud_id=id)
+            self.delete_checkpoint(
+                name=existing_checkpoint.name,
+                ge_cloud_id=existing_checkpoint.ge_cloud_id,
+            )
+            if id is None:
+                id = existing_checkpoint.ge_cloud_id
+            if config_version is None:
+                config_version = existing_checkpoint.config_version
+            if template_name is None:
+                template_name = existing_checkpoint.config.template_name
+            if module_name is None:
+                module_name = existing_checkpoint.config.module_name
+            if class_name is None:
+                class_name = existing_checkpoint.config.class_name
+            if run_name_template is None:
+                run_name_template = existing_checkpoint.config.run_name_template
+            if expectation_suite_name is None:
+                expectation_suite_name = (
+                    existing_checkpoint.config.expectation_suite_name
+                )
+            if batch_request is None:
+                batch_request = existing_checkpoint.config.batch_request
+            if action_list is None:
+                action_list = existing_checkpoint.action_list
+            if evaluation_parameters is None:
+                evaluation_parameters = existing_checkpoint.config.evaluation_parameters
+            if runtime_configuration is None:
+                runtime_configuration = existing_checkpoint.config.runtime_configuration
+            if validations is None:
+                validations = existing_checkpoint.validations
+            if profilers is None:
+                profilers = existing_checkpoint.config.profilers
+            if site_names is None:
+                site_names = existing_checkpoint.config.site_names
+            if slack_webhook is None:
+                slack_webhook = existing_checkpoint.config.slack_webhook
+            if notify_on is None:
+                notify_on = existing_checkpoint.config.notify_on
+            if notify_with is None:
+                notify_with = existing_checkpoint.config.notify_with
+            if expectation_suite_ge_cloud_id:
+                expectation_suite_ge_cloud_id = (
+                    existing_checkpoint.expectation_suite_ge_cloud_id
+                )
+            if default_validation_id is None:
+                default_validation_id = existing_checkpoint.config.default_validation_id
 
         return self.add_checkpoint(
             name=name,
@@ -1589,8 +1628,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            validation_operator_name=validation_operator_name,
-            batches=batches,
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
