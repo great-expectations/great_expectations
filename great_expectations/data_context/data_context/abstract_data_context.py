@@ -124,6 +124,9 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
 )
+from great_expectations.rule_based_profiler.helpers.util import (
+    convert_variables_to_dict,
+)
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
@@ -1917,17 +1920,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         )
 
-        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
+        # We get a single BatchData so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        execution_engine: ExecutionEngine
-        if hasattr(batch_list[-1], "execution_engine"):
-            # 'XBatch's are execution engine aware. We just checked for this attr so we ignore the following
-            # attr defined mypy error
-            execution_engine = batch_list[-1].execution_engine
-        else:
-            execution_engine = self.datasources[  # type: ignore[union-attr]
-                batch_list[-1].batch_definition.datasource_name
-            ].execution_engine
+        execution_engine: ExecutionEngine = batch_list[-1].data.execution_engine
 
         validator = Validator(
             execution_engine=execution_engine,
@@ -2308,10 +2303,22 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if existing_suite:
-            self.update_expectation_suite(existing_suite)
-            return self.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name, ge_cloud_id=id
+            self.delete_expectation_suite(
+                expectation_suite_name=existing_suite.name,
+                ge_cloud_id=existing_suite.ge_cloud_id,
             )
+            if id is None:
+                id = existing_suite.ge_cloud_id
+            if expectations is None:
+                expectations = existing_suite.expectations
+            if evaluation_parameters is None:
+                evaluation_parameters = existing_suite.evaluation_parameters
+            if data_asset_type is None:
+                data_asset_type = existing_suite.data_asset_type
+            if execution_engine_type is None:
+                execution_engine_type = existing_suite.execution_engine_type
+            if meta is None:
+                meta = existing_suite.meta
 
         return self.add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
@@ -2484,6 +2491,68 @@ class AbstractDataContext(ConfigPeer, ABC):
             profiler_store=self.profiler_store,
             name=name,
             ge_cloud_id=ge_cloud_id,
+        )
+
+    def update_profiler(self, profiler: RuleBasedProfiler) -> None:
+        """Update a Profiler that already exists.
+
+        Args:
+            profiler: The profiler to use to update.
+
+        Raises:
+            ProfilerNotFoundError: A profiler with the given name/id does not already exist.
+        """
+        RuleBasedProfiler.update_profiler(
+            profiler=profiler,
+            profiler_store=self.profiler_store,
+            data_context=self,
+        )
+
+    def add_or_update_profiler(
+        self,
+        name: str,
+        id: str | None = None,
+        config_version: float | None = None,
+        rules: dict[str, dict] | None = None,
+        variables: dict | None = None,
+    ) -> RuleBasedProfiler:
+        """Add a new Profiler or update an existing one on the context depending on whether it already exists or not.
+
+        Args:
+            name: The name of the RBP instance.
+            config_version: The version of the RBP (currently only 1.0 is supported).
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and expectation_configuration_builders.
+            variables: Any variables to be substituted within the rules.
+            id: The id associated with the RBP instance (if applicable).
+
+        Returns:
+            A new Profiler or an updated one (depending on whether or not it existed before this method call).
+        """
+        existing_profiler = None
+        try:
+            existing_profiler = self.get_profiler(name=name, ge_cloud_id=id)
+        except gx_exceptions.ProfilerNotFoundError:
+            logger.info(
+                f"Could not find an existing profiler named '{name}'; creating a new one."
+            )
+
+        if existing_profiler:
+            self.delete_profiler(
+                name=existing_profiler.name, ge_cloud_id=existing_profiler.ge_cloud_id
+            )
+            if id is None:
+                id = existing_profiler.ge_cloud_id
+            if config_version is None:
+                config_version = existing_profiler.config_version
+            if rules is None:
+                rules = {rule.name: rule.to_dict() for rule in existing_profiler.rules}
+            if variables is None:
+                variables = convert_variables_to_dict(existing_profiler.variables)
+
+        config_version = config_version or 1.0
+        rules = rules or {}
+        return self.add_profiler(
+            name=name, config_version=config_version, rules=rules, variables=variables
         )
 
     @usage_statistics_enabled_method(
