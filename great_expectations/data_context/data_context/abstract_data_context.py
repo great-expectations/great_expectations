@@ -78,6 +78,7 @@ from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
     AnonymizedUsageStatisticsConfig,
     CheckpointConfig,
+    CheckpointValidationConfig,
     ConcurrencyConfig,
     DataContextConfig,
     DataContextConfigDefaults,
@@ -1524,7 +1525,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         action_list: list[dict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
-        validations: list[dict] | None = None,
+        validations: list[CheckpointValidationConfig] | None = None,
         profilers: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = None,
