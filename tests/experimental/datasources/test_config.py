@@ -79,7 +79,7 @@ PG_COMPLEX_CONFIG_DICT = {
                 "my_csv_asset": {
                     "name": "my_csv_asset",
                     "type": "csv",
-                    "path": __file__,
+                    "base_directory": __file__,
                     "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
@@ -87,7 +87,7 @@ PG_COMPLEX_CONFIG_DICT = {
                 "my_json_asset": {
                     "name": "my_json_asset",
                     "type": "json",
-                    "path": __file__,
+                    "base_directory": __file__,
                     "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
                     "orient": "records",
                 },
@@ -162,7 +162,7 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "path": pathlib.Path(__file__),
+                "base_directory": pathlib.Path(__file__),
                 "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
@@ -179,7 +179,7 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "path": pathlib.Path(__file__),
+                "base_directory": pathlib.Path(__file__),
                 "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )

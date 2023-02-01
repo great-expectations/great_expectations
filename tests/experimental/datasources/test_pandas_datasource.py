@@ -150,7 +150,7 @@ class TestDynamicPandasAssets:
         """
         kwargs: dict[str, Any] = {
             "name": "test",
-            "path": pathlib.Path(__file__),
+            "base_directory": pathlib.Path(__file__),
             "regex": re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
         }
         kwargs.update(extra_kwargs)
