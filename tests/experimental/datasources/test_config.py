@@ -364,7 +364,7 @@ def test_json_config_round_trip(
     pp(re_loaded)
     assert re_loaded
 
-    assert from_json_gx_config == re_loaded
+    assert from_json_gx_config.dict() == re_loaded.dict()
 
 
 def test_yaml_config_round_trip(
