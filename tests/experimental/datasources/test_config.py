@@ -289,7 +289,8 @@ def test_general_column_splitter_errors(
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_dict_gx_config() -> GxConfig:
-    gx_config = GxConfig.parse_obj(PG_COMPLEX_CONFIG_DICT)
+    with mock.patch("sqlalchemy.create_engine"):
+        gx_config = GxConfig.parse_obj(PG_COMPLEX_CONFIG_DICT)
     assert gx_config
     return gx_config
 
@@ -306,7 +307,8 @@ def from_json_gx_config() -> GxConfig:
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_yaml_gx_config() -> GxConfig:
-    gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
+    with mock.patch("sqlalchemy.create_engine"):
+        gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
     assert gx_config
     return gx_config
 
