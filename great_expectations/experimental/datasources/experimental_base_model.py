@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 yaml = YAML(typ="safe")
 # NOTE (kilo59): the following settings appear to be what we use in existing codebase
@@ -43,7 +43,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
     @classmethod
     def parse_yaml(cls: Type[_Self], f: Union[pathlib.Path, str]) -> _Self:
         loaded = yaml.load(f)
-        LOGGER.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
+        logger.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
         # noinspection PyArgumentList
         config = cls(**loaded)
         return config
