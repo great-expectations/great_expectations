@@ -141,7 +141,6 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
 }
 
 
-@pytest.mark.unit  # TODO: remove this... maybe
 @pytest.mark.parametrize(
     "asset_dict", [{"type": "json", "orient": "records"}, {"type": "csv", "sep": "|"}]
 )
