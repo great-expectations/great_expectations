@@ -244,7 +244,7 @@ class PandasDatasource(Datasource):
             name: The name of the csv asset
             base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         asset = CSVAsset(
@@ -270,7 +270,7 @@ class PandasDatasource(Datasource):
             name: The name of the csv asset
             base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
         asset = JSONAsset(
@@ -296,7 +296,7 @@ class PandasDatasource(Datasource):
             name: The name of the csv asset
             base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
         asset = ExcelAsset(
@@ -322,7 +322,7 @@ class PandasDatasource(Datasource):
             name: The name of the csv asset
             base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
         asset = ParquetAsset(

@@ -115,7 +115,7 @@ def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
     Args:
         sort_key: A batch metadata key which will be used to sort batches on a data asset.
                   This can be prefixed with a + or - to indicate increasing or decreasing
-                  sorting. If not specified, defaults to increasing order.
+                  sorting.  If not specified, defaults to increasing order.
     """
     if sort_key[0] == "-":
         return BatchSorter(key=sort_key[1:], reverse=True)
@@ -498,7 +498,6 @@ class Batch(ExperimentalBaseModel):
             HeadData
         """
         self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
-        # TODO: <Alex>ALEX_NOTE-1/27/2023: This should be accomplished through calling "MetricsCalculator.head()"; however, circular-imports problem currently prevents importing "MetricsCalculator".</Alex>
         metric = MetricConfiguration(
             metric_name="table.head",
             metric_domain_kwargs={"batch_id": self.id},
