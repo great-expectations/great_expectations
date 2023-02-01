@@ -3186,7 +3186,8 @@ def check_json_test_result(  # noqa: C901 - 52
                         ],
                         value["tail_weights"],
                     )
-
+            elif key == "exact_match_out":
+                pass
             else:
                 raise ValueError(
                     f"Invalid test specification: unknown key {key} in 'out'"
