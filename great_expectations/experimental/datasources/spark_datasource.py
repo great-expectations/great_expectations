@@ -59,7 +59,7 @@ class CSVSparkAsset(DataAsset):
                 break
         if not success:
             raise TestConnectionError(
-                f"No file at path: {self.base_directory} matched the regex: {self.regex}."
+                f"No file at path: {self.base_directory} matched the regex: {self.regex.pattern}."
             )
 
     def _fully_specified_batch_requests_with_path(

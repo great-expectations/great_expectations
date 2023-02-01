@@ -9,6 +9,7 @@ import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
+    TestConnectionError,
 )
 from great_expectations.experimental.datasources.spark_datasource import (
     CSVSparkAsset,
@@ -276,3 +277,21 @@ def test_spark_sorter(
             metadata = batches[batch_index].metadata
             assert metadata[key1] == range1
             assert metadata[key2] == range2
+
+
+def test_test_connection(spark_datasource: SparkDatasource, csv_path: pathlib.Path):
+    regex = r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+    csv_spark_asset = CSVSparkAsset(
+        name="csv_asset",
+        base_directory=csv_path,
+        regex=regex,
+    )
+    spark_datasource.assets = {"csv_spark_asset": csv_spark_asset}
+    with pytest.raises(TestConnectionError) as e:
+        spark_datasource.test_connection()
+
+    substrings = [
+        "No file at path: ",
+        f"/tests/test_sets/taxi_yellow_tripdata_samples matched the regex: {regex}.",
+    ]
+    assert all(substring in str(e.value) for substring in substrings)
