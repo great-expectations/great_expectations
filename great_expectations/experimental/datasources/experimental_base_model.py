@@ -181,7 +181,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         by_alias: bool = False,
-        exclude_unset: bool = False,
+        exclude_unset: bool = True,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
         encoder: Union[Callable[[Any], Any], None] = None,

@@ -140,26 +140,62 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
 }
 
 
-@pytest.mark.unit
-@pytest.mark.parametrize("asset_dict", [{"type": "json", "orient": "records"}])
-def test_exclude_unset_asset_fields(asset_dict: dict):
-    ds_mapping = {"csv": "pandas", "json": "pandas"}
+@pytest.mark.unit  # TODO: remove this... maybe
+@pytest.mark.parametrize(
+    "asset_dict", [{"type": "json", "orient": "records"}, {"type": "csv", "sep": "|"}]
+)
+class TestExcludeUnsetAssetFields:
+    """
+    Ensure that DataAsset fields are excluded from serialization if they have not be explicitly set.
 
-    ds_type_: str = ds_mapping[asset_dict["type"]]
-    ds_class = _SourceFactories.type_lookup[ds_type_]
+    We are trying to ensure that our configs aren't filled with default values from DataAssets that
+    users never set.
+    """
 
-    # fill in required args
-    asset_dict.update(
-        {
-            "name": "my_asset",
-            "path": pathlib.Path(__file__),
-            "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+    def test_from_datasource(self, asset_dict: dict):
+        ds_mapping = {"csv": "pandas", "json": "pandas"}
+
+        ds_type_: str = ds_mapping[asset_dict["type"]]
+        ds_class = _SourceFactories.type_lookup[ds_type_]
+
+        # fill in required args
+        asset_dict.update(
+            {
+                "name": "my_asset",
+                "path": pathlib.Path(__file__),
+                "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+            }
+        )
+        asset_name = asset_dict["name"]
+        ds_dict = {"name": "my_ds", "assets": {asset_name: asset_dict}}
+        datasource: Datasource = ds_class.parse_obj(ds_dict)
+        assert asset_dict == datasource.dict()["assets"][asset_name]
+
+    def test_from_gx_config(self, asset_dict: dict):
+        """
+        Ensure that unset fields are excluded even when being parsed by the the top-level `GxConfig` class.
+        """
+        # fill in required args
+        asset_dict.update(
+            {
+                "name": "my_asset",
+                "path": pathlib.Path(__file__),
+                "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+            }
+        )
+        asset_name = asset_dict["name"]
+        ds_dict = {
+            "name": "my_ds",
+            "type": "pandas",
+            "assets": {asset_name: asset_dict},
         }
-    )
-    asset_name = asset_dict["name"]
-    ds_dict = {"name": "my_ds", "assets": {asset_name: asset_dict}}
-    datasource: Datasource = ds_class.parse_obj(ds_dict)
-    assert asset_dict == datasource.dict()["assets"][asset_name]
+        gx_config = GxConfig.parse_obj({"xdatasources": {"my_ds": ds_dict}})
+
+        gx_config_dict = gx_config.dict()
+        print(f"gx_config_dict\n{pf(gx_config_dict)}")
+        assert (
+            asset_dict == gx_config_dict["xdatasources"]["my_ds"]["assets"][asset_name]
+        )
 
 
 @pytest.mark.parametrize(
