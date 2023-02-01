@@ -124,6 +124,9 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
 )
+from great_expectations.rule_based_profiler.helpers.util import (
+    convert_variables_to_dict,
+)
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
@@ -2300,10 +2303,22 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if existing_suite:
-            self.update_expectation_suite(existing_suite)
-            return self.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name, ge_cloud_id=id
+            self.delete_expectation_suite(
+                expectation_suite_name=existing_suite.name,
+                ge_cloud_id=existing_suite.ge_cloud_id,
             )
+            if id is None:
+                id = existing_suite.ge_cloud_id
+            if expectations is None:
+                expectations = existing_suite.expectations
+            if evaluation_parameters is None:
+                evaluation_parameters = existing_suite.evaluation_parameters
+            if data_asset_type is None:
+                data_asset_type = existing_suite.data_asset_type
+            if execution_engine_type is None:
+                execution_engine_type = existing_suite.execution_engine_type
+            if meta is None:
+                meta = existing_suite.meta
 
         return self.add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
@@ -2496,10 +2511,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_profiler(
         self,
         name: str,
+        id: str | None = None,
         config_version: float | None = None,
         rules: dict[str, dict] | None = None,
         variables: dict | None = None,
-        id: str | None = None,
     ) -> RuleBasedProfiler:
         """Add a new Profiler or update an existing one on the context depending on whether it already exists or not.
 
@@ -2522,10 +2537,17 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if existing_profiler:
-            self.update_profiler(existing_profiler)
-            return self.get_profiler(
+            self.delete_profiler(
                 name=existing_profiler.name, ge_cloud_id=existing_profiler.ge_cloud_id
             )
+            if id is None:
+                id = existing_profiler.ge_cloud_id
+            if config_version is None:
+                config_version = existing_profiler.config_version
+            if rules is None:
+                rules = {rule.name: rule.to_dict() for rule in existing_profiler.rules}
+            if variables is None:
+                variables = convert_variables_to_dict(existing_profiler.variables)
 
         config_version = config_version or 1.0
         rules = rules or {}
