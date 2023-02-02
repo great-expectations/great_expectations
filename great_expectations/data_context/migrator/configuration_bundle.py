@@ -119,9 +119,7 @@ class ConfigurationBundle:
 
     def _get_all_checkpoints(self) -> List[CheckpointConfig]:
         return [
-            self._context.checkpoint_store.get_checkpoint(
-                name=checkpoint_name, ge_cloud_id=None
-            )
+            self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, id=None)
             for checkpoint_name in self._context.list_checkpoints()
         ]
 

@@ -1585,7 +1585,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         profilers: list[dict] | None = None,
         run_id: str | int | float | None = None,
         run_name: str | None = None,
-        run_time: str | datetime.datetime = None,
+        run_time: datetime.datetime | None = None,
         result_format: str | None = None,
         expectation_suite_ge_cloud_id: str | None = None,
         id: str | None = None,
