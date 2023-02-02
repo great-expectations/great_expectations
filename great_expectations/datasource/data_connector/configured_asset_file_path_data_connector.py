@@ -170,6 +170,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
+
         return self._get_full_file_path_for_asset(path=path, asset=asset)
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
@@ -177,12 +178,14 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
+
         if asset is not None:
             # Override the defaults
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern
             if asset.group_names:
                 regex_config["group_names"] = asset.group_names
+
         return regex_config
 
     def _get_asset(self, data_asset_name: Optional[str]) -> Union[Asset, None]:
