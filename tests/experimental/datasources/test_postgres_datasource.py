@@ -216,6 +216,7 @@ def test_datasource_gets_batch_list_no_splitter(create_source):
         assert spec == {
             "batch_identifiers": {},
             "data_asset_name": "my_asset",
+            "schema_name": None,
             "table_name": "my_table",
             "type": "table",
         }
