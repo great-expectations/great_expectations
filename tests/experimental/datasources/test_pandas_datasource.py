@@ -409,14 +409,16 @@ def test_pandas_sorter(
             assert metadata[key2] == range2
 
 
-def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, list[str]]:
+def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     base_directory = pathlib.Path("/this/path/is/not/here")
     regex = re.compile("yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
-    error_message_substrings = [f"Path: {base_directory} does not exist."]
-    return base_directory, regex, error_message_substrings
+    test_connection_error = TestConnectionError(
+        f"Path: {base_directory.resolve()} does not exist."
+    )
+    return base_directory, regex, test_connection_error
 
 
-def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, list[str]]:
+def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     relative_path = pathlib.Path(
         "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
@@ -424,35 +426,36 @@ def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, list[str]]:
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
     regex = re.compile("green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
-    error_message_substrings = [
-        "No file at path: ",
-        f"/tests/test_sets/taxi_yellow_tripdata_samples matched the regex: {regex.pattern}",
-    ]
-    return base_directory, regex, error_message_substrings
+    test_connection_error = TestConnectionError(
+        f"No file at path: {base_directory.resolve()} matched the regex: {regex.pattern}"
+    )
+    return base_directory, regex, test_connection_error
 
 
 @pytest.fixture(params=[bad_base_directory_config, bad_regex_config])
 def datasource_test_connection_error_messages(
     pandas_datasource: PandasDatasource, request
 ) -> tuple[PandasDatasource, list[str]]:
-    base_directory, regex, error_message_substrings = request.param()
+    base_directory, regex, test_connection_error = request.param()
     csv_asset = CSVAsset(
         name="csv_asset",
         base_directory=base_directory,
         regex=regex,
     )
     pandas_datasource.assets = {"csv_asset": csv_asset}
-    return pandas_datasource, error_message_substrings
+    return pandas_datasource, test_connection_error
 
 
 def test_test_connection_failures(
-    datasource_test_connection_error_messages: tuple[PandasDatasource, list[str]]
+    datasource_test_connection_error_messages: tuple[
+        PandasDatasource, TestConnectionError
+    ]
 ):
     (
         pandas_datasource,
-        error_message_substrings,
+        test_connection_error,
     ) = datasource_test_connection_error_messages
 
-    with pytest.raises(TestConnectionError) as e:
+    with pytest.raises(type(test_connection_error)) as e:
         pandas_datasource.test_connection()
-    assert all(substring in str(e.value) for substring in error_message_substrings)
+    assert str(e.value) == str(test_connection_error)

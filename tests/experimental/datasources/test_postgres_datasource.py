@@ -14,6 +14,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     BatchSorter,
+    TestConnectionError,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
     PostgresDatasource,
@@ -702,3 +703,75 @@ def test_validate_invalid_postgres_connection_string(
             connection_string=connection_string,
         ):
             pass
+
+
+def bad_connection_string_database_config() -> tuple[str, str, str, list[str]]:
+    connection_string = "postgresql+psycopg2://postgres:@localhost/bad_database"
+    table_name = "good_table"
+    schema_name = "good_schema"
+    error_message_substrings = [""]
+    return connection_string, table_name, schema_name, error_message_substrings
+
+
+def bad_connection_string_user_config() -> tuple[str, str, str, TestConnectionError]:
+    connection_string = "postgresql+psycopg2://bad_user:@localhost/test_ci"
+    table_name = "good_table"
+    schema_name = "good_schema"
+    test_connection_error = TestConnectionError()
+    return connection_string, table_name, schema_name, test_connection_error
+
+
+def bad_table_name_config() -> tuple[str, str, str, TestConnectionError]:
+    connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
+    table_name = "bad_table"
+    schema_name = "good_schema"
+    test_connection_error = TestConnectionError()
+    return connection_string, table_name, schema_name, test_connection_error
+
+
+def bad_schema_name_config() -> tuple[str, str, str, TestConnectionError]:
+    connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
+    table_name = "good_table"
+    schema_name = "bad_schema"
+    test_connection_error = TestConnectionError()
+    return connection_string, table_name, schema_name, test_connection_error
+
+
+@pytest.fixture(
+    params=[
+        bad_connection_string_database_config,
+        bad_connection_string_user_config,
+        bad_table_name_config,
+        bad_schema_name_config,
+    ]
+)
+def datasource_test_connection_error_messages(
+    request,
+) -> tuple[PostgresDatasource, TestConnectionError]:
+    connection_string, table_name, schema_name, test_connection_error = request.param()
+    table_asset = TableAsset(
+        name="table_asset",
+        table_name=table_name,
+        schema_name=schema_name,
+    )
+    postgres_datasource = PostgresDatasource(
+        name="postgres_datasource",
+        connection_string=connection_string,
+        assets={"table_asset": table_asset},
+    )
+    return postgres_datasource, test_connection_error
+
+
+def test_test_connection_failures(
+    datasource_test_connection_error_messages: tuple[
+        PostgresDatasource, TestConnectionError
+    ]
+):
+    (
+        postgres_datasource,
+        test_connection_error,
+    ) = datasource_test_connection_error_messages
+
+    with pytest.raises(type(test_connection_error)) as e:
+        postgres_datasource.test_connection()
+    assert str(e.value) == str(test_connection_error)
