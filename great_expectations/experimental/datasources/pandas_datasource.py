@@ -4,7 +4,7 @@ import copy
 import logging
 import pathlib
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Set, Tuple, Type, Union
 
 import pydantic
 from typing_extensions import ClassVar, Literal
@@ -22,12 +22,13 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     Datasource,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class PandasDatasourceError(Exception):
@@ -35,14 +36,49 @@ class PandasDatasourceError(Exception):
 
 
 class _DataFrameAsset(DataAsset):
-    # Pandas specific attrs
-    path: pathlib.Path
+    # Pandas specific class attrs
+    _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "name",
+        "base_directory",
+        "regex",
+        "order_by",
+    }
+
+    # Pandas specific attributes
+    base_directory: pathlib.Path
     regex: Pattern
 
-    # Internal attrs
+    # Internal attributes
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
+
+    class Config:
+        """
+        Need to allow extra fields for the base type because pydantic will first create
+        an instance of `_DataFrameAsset` before we select and create the more specific
+        asset subtype.
+        Each specific subtype should `forbid` extra fields.
+        """
+
+        extra = pydantic.Extra.allow
+
+    def test_connection(self) -> None:
+        """Test the connection for the CSVAsset.
+
+        Raises:
+            TestConnectionError
+        """
+        success = False
+        for filepath in self.base_directory.iterdir():
+            if self.regex.match(filepath.name):
+                # if one file in the path matches the regex, we consider this asset valid
+                success = True
+                break
+        if not success:
+            raise TestConnectionError(
+                f"No file at path: {self.base_directory} matched the regex: {self.regex}."
+            )
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
@@ -62,7 +98,9 @@ class _DataFrameAsset(DataAsset):
         group_id_to_option = {v: k for k, v in option_to_group_id.items()}
         batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
 
-        all_files: List[pathlib.Path] = list(pathlib.Path(self.path).iterdir())
+        all_files: List[pathlib.Path] = list(
+            pathlib.Path(self.base_directory).iterdir()
+        )
 
         file_name: pathlib.Path
         for file_name in all_files:
@@ -86,12 +124,12 @@ class _DataFrameAsset(DataAsset):
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),
-                            self.path / file_name,
+                            self.base_directory / file_name,
                         )
                     )
-                    LOGGER.debug(f"Matching path: {self.path / file_name}")
+                    logger.debug(f"Matching path: {self.base_directory / file_name}")
         if not batch_requests_with_path:
-            LOGGER.warning(
+            logger.warning(
                 f"Batch request {batch_request} corresponds to no data files."
             )
         return batch_requests_with_path
@@ -139,16 +177,11 @@ class _DataFrameAsset(DataAsset):
                 path=str(path),
                 reader_method=f"read_{self.type}",
                 reader_options=self.dict(
-                    exclude_unset=True,
-                    exclude={  # TODO: don't hardcode
-                        "name",
-                        "path",
-                        "regex",
-                        "order_by",
-                    },
+                    exclude_unset=True, exclude=self._EXCLUDE_FROM_READER_OPTIONS
                 ),
             )
-            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+            execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
+            data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
 
@@ -168,10 +201,11 @@ class _DataFrameAsset(DataAsset):
             )
 
             batch_metadata = copy.deepcopy(request.options)
-            batch_metadata["path"] = path
+            batch_metadata["base_directory"] = path
 
-            # Some pydantic annotations are postponed due to circular imports. This will set the annotations before we
-            # instantiate the Batch class since we can import them above.
+            # Some pydantic annotations are postponed due to circular imports.
+            # Batch.update_forward_refs() will set the annotations before we
+            # instantiate the Batch class since we can import them in this scope.
             Batch.update_forward_refs()
             batch_list.append(
                 Batch(
@@ -214,10 +248,19 @@ class PandasDatasource(Datasource):
         JSONAsset,
     ]
 
-    # instance attrs
+    # instance attributes
     type: Literal["pandas"] = "pandas"
     name: str
-    assets: Dict[str, Union[CSVAsset, ExcelAsset, ParquetAsset, JSONAsset]] = {}  # type: ignore[valid-type]
+    assets: Dict[  # type: ignore[valid-type]
+        str,
+        Union[
+            _DataFrameAsset,
+            CSVAsset,
+            ExcelAsset,
+            ParquetAsset,
+            JSONAsset,
+        ],
+    ] = {}
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
@@ -228,10 +271,24 @@ class PandasDatasource(Datasource):
 
         return PandasExecutionEngine
 
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the PandasDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the PandasDatasource, whether to test them as well.
+
+        Raises:
+            TestConnectionError
+        """
+        # Only self.assets can be tested for PandasDatasource
+        if self.assets and test_assets:
+            for asset in self.assets.values():
+                asset.test_connection()  # type: ignore[union-attr]
+
     def add_csv_asset(
         self,
         name: str,
-        data_path: PathStr,
+        base_directory: PathStr,
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -240,14 +297,14 @@ class PandasDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            data_path: Path to directory with csv files
+            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: one of "asc" (ascending) or "desc" (descending) -- the method by which to sort "Asset" parts.
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         asset = CSVAsset(
             name=name,
-            path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
+            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             **kwargs,
@@ -257,7 +314,7 @@ class PandasDatasource(Datasource):
     def add_json_asset(
         self,
         name: str,
-        data_path: PathStr,
+        base_directory: PathStr,
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -266,13 +323,14 @@ class PandasDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            data_path: Path to directory with csv files
+            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
         asset = JSONAsset(
             name=name,
-            path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
+            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             **kwargs,
@@ -282,7 +340,7 @@ class PandasDatasource(Datasource):
     def add_excel_asset(
         self,
         name: str,
-        data_path: PathStr,
+        base_directory: PathStr,
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -291,13 +349,14 @@ class PandasDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            data_path: Path to directory with csv files
+            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
         asset = ExcelAsset(
             name=name,
-            path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
+            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             **kwargs,
@@ -307,7 +366,7 @@ class PandasDatasource(Datasource):
     def add_parquet_asset(
         self,
         name: str,
-        data_path: PathStr,
+        base_directory: PathStr,
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -316,13 +375,14 @@ class PandasDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            data_path: Path to directory with csv files
+            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
         asset = ParquetAsset(
             name=name,
-            path=data_path,  # type: ignore[arg-type]  # str will be coerced to Path
+            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             **kwargs,

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass
+from string import punctuation
 from typing import TYPE_CHECKING
 
 from pyparsing import (
@@ -51,9 +52,11 @@ le = Literal("<=")
 eq = Literal("==")
 ops = (gt ^ lt ^ ge ^ le ^ eq).setResultsName("op")
 fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?").setResultsName("fnumber")
-condition_value = Suppress('"') + Word(f"{alphanums}._").setResultsName(
+punctuation_without_apostrophe = punctuation.replace('"', "").replace("'", "")
+condition_value_chars = alphanums + punctuation_without_apostrophe
+condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
-) + Suppress('"') ^ Suppress("'") + Word(f"{alphanums}._").setResultsName(
+) + Suppress('"') ^ Suppress("'") + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
 ) + Suppress(
     "'"

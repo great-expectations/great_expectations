@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import logging
 import pathlib
+import re
 from dataclasses import dataclass
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Type
 
 import pydantic
 import pytest
@@ -12,10 +13,11 @@ from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
+    JSONAsset,
     PandasDatasource,
+    _DataFrameAsset,
 )
 
 if TYPE_CHECKING:
@@ -35,12 +37,13 @@ def pandas_datasource() -> PandasDatasource:
 
 @pytest.fixture
 def csv_path() -> pathlib.Path:
-    return pathlib.Path(
-        file_relative_path(
-            __file__,
-            pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples"),
-        )
+    relative_path = pathlib.Path(
+        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path
 
 
 class SpyInterrupt(RuntimeError):
@@ -91,7 +94,7 @@ class TestDynamicPandasAssets:
             for t in assets_field.type_.__args__  # accessing the `Union` members with `__args__`
         }
 
-        assert asset_class_names == asset_field_union_members
+        assert asset_class_names.issubset(asset_field_union_members)
 
     @pytest.mark.parametrize(
         "method_name",
@@ -130,6 +133,32 @@ class TestDynamicPandasAssets:
         assert type_name in asset_class_names
 
     @pytest.mark.parametrize(
+        ["asset_model", "extra_kwargs"],
+        [
+            (CSVAsset, {"sep": "|", "names": ["col1", "col2", "col3"]}),
+            (JSONAsset, {"orient": "records", "encoding_errors": "strict"}),
+        ],
+    )
+    def test_data_asset_defaults(
+        self,
+        asset_model: Type[_DataFrameAsset],
+        extra_kwargs: dict,
+    ):
+        """
+        Test that an asset dictionary can be dumped with only the original passed keys
+        present.
+        """
+        kwargs: dict[str, Any] = {
+            "name": "test",
+            "base_directory": pathlib.Path(__file__),
+            "regex": re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
+        }
+        kwargs.update(extra_kwargs)
+        print(f"extra_kwargs\n{pf(extra_kwargs)}")
+        asset_instance = asset_model(**kwargs)
+        assert asset_instance.dict() == kwargs
+
+    @pytest.mark.parametrize(
         "extra_kwargs",
         [
             {"sep": "|", "decimal": ","},
@@ -148,7 +177,7 @@ class TestDynamicPandasAssets:
             empty_data_context.sources.add_pandas("my_pandas")
             .add_csv_asset(
                 "my_csv",
-                data_path=csv_path,
+                base_directory=csv_path,
                 regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                 **extra_kwargs,
             )
@@ -175,11 +204,11 @@ def test_add_csv_asset_to_datasource(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
     assert asset.name == "csv_asset"
-    assert asset.path == csv_path
+    assert asset.base_directory == csv_path
     assert asset.regex.match("random string") is None
     assert asset.regex.match("yellow_tripdata_sample_11D1-22.csv") is None
     m1 = asset.regex.match("yellow_tripdata_sample_1111-22.csv")
@@ -191,11 +220,11 @@ def test_construct_csv_asset_directly(csv_path: pathlib.Path):
     # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
-        path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",  # Ignoring IDE warning (type declarations are consistent).
     )
     assert asset.name == "csv_asset"
-    assert asset.path == csv_path
+    assert asset.base_directory == csv_path
     assert asset.regex.match("random string") is None
     assert asset.regex.match("yellow_tripdata_sample_11D1-22.csv") is None
     m1 = asset.regex.match("yellow_tripdata_sample_1111-22.csv")
@@ -208,7 +237,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
     options = asset.batch_request_options_template()
@@ -221,7 +250,7 @@ def test_csv_asset_with_regex_named_parameters(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
     options = asset.batch_request_options_template()
@@ -234,7 +263,7 @@ def test_csv_asset_with_some_regex_named_parameters(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
     )
     options = asset.batch_request_options_template()
@@ -247,7 +276,7 @@ def test_csv_asset_with_non_string_regex_named_parameters(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
@@ -261,7 +290,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
 ):
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
     request = asset.get_batch_request({"year": "2018", "month": "04"})
@@ -274,7 +303,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert batch.metadata == {
         "year": "2018",
         "month": "04",
-        "path": asset.path / "yellow_tripdata_sample_2018-04.csv",
+        "base_directory": asset.base_directory / "yellow_tripdata_sample_2018-04.csv",
     }
     assert batch.id == "pandas_datasource-csv_asset-year_2018-month_04"
 
@@ -298,13 +327,15 @@ def test_get_batch_list_from_partially_specified_batch_request(
 
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
     request = asset.get_batch_request({"year": "2018"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert (len(batches)) == 12
-    batch_filenames = [pathlib.Path(batch.metadata["path"]).stem for batch in batches]
+    batch_filenames = [
+        pathlib.Path(batch.metadata["base_directory"]).stem for batch in batches
+    ]
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)
@@ -369,7 +400,7 @@ def test_pandas_sorter(
 
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
-        data_path=csv_path,
+        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
         order_by=order_by,
     )
@@ -383,15 +414,15 @@ def test_pandas_sorter(
 
     ordered_years = reversed(years) if "-year" in order_by else years
     ordered_months = reversed(months) if "-month" in order_by else months
-    if "year" in order_by[0]:
+    if "year" in order_by[0]:  # type: ignore[operator]
         ordered = [
-            TimeRange(key="year", range=ordered_years),
-            TimeRange(key="month", range=ordered_months),
+            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
+            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
         ]
     else:
         ordered = [
-            TimeRange(key="month", range=ordered_months),
-            TimeRange(key="year", range=ordered_years),
+            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
+            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
         ]
 
     batch_index = -1

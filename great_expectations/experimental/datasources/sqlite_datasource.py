@@ -4,7 +4,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Type
 
 import pydantic
-from pydantic import constr
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import ClassVar
 
@@ -12,14 +11,6 @@ from great_expectations.experimental.datasources.interfaces import DataAsset
 
 if TYPE_CHECKING:
     import sqlalchemy
-
-    # The SqliteConnectionString type is defined this way because mypy can't handle
-    # constraint types. See: https://github.com/pydantic/pydantic/issues/156
-    # which suggests the solution here:
-    # https://github.com/pydantic/pydantic/issues/975#issuecomment-551147305
-    SqliteConnectionString = str
-else:
-    SqliteConnectionString = constr(regex=r"^sqlite")
 
 from typing_extensions import Literal
 
@@ -91,11 +82,21 @@ def _get_sqlite_datetime_range(
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
 
 
+class SqliteDsn(pydantic.AnyUrl):
+    allowed_schemes = {
+        "sqlite",
+        "sqlite+pysqlite",
+        "sqlite+aiosqlite",
+        "sqlite+pysqlcipher",
+    }
+    host_required = False
+
+
 class SqliteDatasource(SQLDatasource):
     """Adds a sqlite datasource to the data context.
 
     Args:
-        name: The name of this sqlite datasource
+        name: The name of this sqlite datasource.
         connection_string: The SQLAlchemy connection string used to connect to the sqlite database.
             For example: "sqlite:///path/to/file.db"
         assets: An optional dictionary whose keys are TableAsset names and whose values
@@ -109,7 +110,7 @@ class SqliteDatasource(SQLDatasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
-    connection_string: SqliteConnectionString
+    connection_string: SqliteDsn
     assets: Dict[str, SqliteTableAsset] = {}  # type: ignore[assignment]
 
     def add_table_asset(

@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from pydantic.error_wrappers import ErrorDict as PydanticErrorDict
 
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 _ZEP_STYLE_DESCRIPTION: Final[str] = "ZEP Experimental Datasources"
@@ -48,7 +48,7 @@ class GxConfig(ExperimentalBaseModel):
     @validator("xdatasources", pre=True)
     @classmethod
     def _load_datasource_subtype(cls, v: Dict[str, dict]):
-        LOGGER.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
+        logger.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
         loaded_datasources: Dict[str, Datasource] = {}
 
         for ds_name, config in v.items():
@@ -60,7 +60,7 @@ class GxConfig(ExperimentalBaseModel):
 
             try:
                 ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_type_name]
-                LOGGER.debug(f"Instantiating '{ds_name}' as {ds_type}")
+                logger.debug(f"Instantiating '{ds_name}' as {ds_type}")
             except KeyError as type_lookup_err:
                 raise ValueError(
                     f"'{ds_name}' has unsupported 'type' - {type_lookup_err}"
@@ -74,7 +74,7 @@ class GxConfig(ExperimentalBaseModel):
             for asset in datasource.assets.values():
                 asset._datasource = datasource
 
-        LOGGER.info(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
+        logger.info(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
 
         if v and not loaded_datasources:
             raise ValueError(f"Of {len(v)} entries, no 'datasources' could be loaded")
@@ -96,16 +96,16 @@ class GxConfig(ExperimentalBaseModel):
                 super().parse_yaml(f)
             except ValidationError as validation_err:
                 errors_list: List[PydanticErrorDict] = validation_err.errors()
-                LOGGER.info(
+                logger.info(
                     f"{cls.__name__}.parse_yaml() failed with errors - {errors_list}"
                 )
                 if errors_list == _MISSING_XDATASOURCES_ERRORS:
-                    LOGGER.info(
+                    logger.info(
                         f"{cls.__name__}.parse_yaml() returning empty `xdatasources`"
                     )
                     return cls(xdatasources={})
                 else:
-                    LOGGER.warning(
+                    logger.warning(
                         "`_allow_empty` does not prevent unrelated validation errors"
                     )
                     raise

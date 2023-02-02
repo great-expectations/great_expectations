@@ -27,15 +27,26 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     Datasource,
+    TestConnectionError,
 )
 
-if TYPE_CHECKING:
+SQLALCHEMY_IMPORTED = False
+try:
     import sqlalchemy
 
+    SQLALCHEMY_IMPORTED = True
+except ImportError:
+    pass
+
+if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
 
 
 class SQLDatasourceError(Exception):
+    pass
+
+
+class SQLDatasourceWarning(UserWarning):
     pass
 
 
@@ -98,15 +109,12 @@ def _query_for_year_and_month(
         [sqlalchemy.engine.base.Connection, str, str], DatetimeRange
     ],
 ) -> Dict[str, List]:
-    # We should make an assertion about the execution_engine earlier. Right now it is assigned to
-    # after construction. We may be able to use a hook in a property setter.
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
-    assert isinstance(
-        table_asset.datasource.execution_engine, SqlAlchemyExecutionEngine
-    )
+    execution_engine = table_asset.datasource.get_execution_engine()
+    assert isinstance(execution_engine, SqlAlchemyExecutionEngine)
 
-    with table_asset.datasource.execution_engine.engine.connect() as conn:
+    with execution_engine.engine.connect() as conn:
         datetimes: DatetimeRange = query_datetime_range(
             conn,
             table_asset.table_name,
@@ -135,6 +143,30 @@ class TableAsset(DataAsset):
     table_name: str
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
+
+    def test_connection(self) -> None:
+        """Test the connection for the TableAsset.
+
+        Raises:
+            TestConnectionError
+        """
+        assert isinstance(self.datasource, SQLDatasource)
+        schema: Optional[str] = None
+        table_name: str
+        if "." in self.table_name:
+            schema, table_name = self.table_name.split(".")
+        else:
+            table_name = self.table_name
+        engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
+        exists = sqlalchemy.inspect(engine).has_table(
+            table_name=table_name,
+            schema=schema,
+        )
+        if not exists:
+            raise TestConnectionError(
+                f"Attempt to connect to table: {self.table_name} failed because the table "
+                "does not exist."
+            )
 
     def batch_request_options_template(
         self,
@@ -258,7 +290,8 @@ class TableAsset(DataAsset):
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
-            data, markers = self.datasource.execution_engine.get_batch_data_and_markers(
+            execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
+            data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
 
@@ -277,8 +310,9 @@ class TableAsset(DataAsset):
                 batch_spec_passthrough=None,
             )
 
-            # Some pydantic annotations are postponed due to circular imports. This will set the annotations before we
-            # instantiate the Batch class since we can import them above.
+            # Some pydantic annotations are postponed due to circular imports.
+            # Batch.update_forward_refs() will set the annotations before we
+            # instantiate the Batch class since we can import them in this scope.
             Batch.update_forward_refs()
             batch_list.append(
                 Batch(
@@ -300,7 +334,7 @@ class SQLDatasource(Datasource):
     """Adds a generic SQL datasource to the data context.
 
     Args:
-        name: The name of this datasource
+        name: The name of this datasource.
         connection_string: The SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
         assets: An optional dictionary whose keys are TableAsset names and whose values
@@ -316,12 +350,62 @@ class SQLDatasource(Datasource):
     connection_string: str
     assets: Dict[str, TableAsset] = {}
 
+    # private attrs
+    _engine: sqlalchemy.engine.Engine = pydantic.PrivateAttr()
+
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the default execution engine type."""
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
         return SqlAlchemyExecutionEngine
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
+        # validate that SQL Alchemy was successfully imported and attempt to create an engine
+        if SQLALCHEMY_IMPORTED:
+            if "connection_string" in kwargs and kwargs["connection_string"]:
+                try:
+                    self._engine = sqlalchemy.create_engine(kwargs["connection_string"])
+                except Exception as e:
+                    # connection_string has passed pydantic validation,
+                    # but still fails to create a sqlalchemy engine
+                    raise SQLDatasourceError(
+                        "Unable to create a SQLAlchemy engine from "
+                        f"connection_string: {kwargs['connection_string']} due to the "
+                        f"following exception: {str(e)}"
+                    )
+        else:
+            raise SQLDatasourceError(
+                "Unable to create SQLDatasource due to missing sqlalchemy dependency."
+            )
+
+    def get_engine(self) -> sqlalchemy.engine.Engine:
+        return self._engine
+
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the SQLDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the SQLDatasource, whether to test them as well.
+
+        Raises:
+            TestConnectionError
+        """
+        try:
+            engine: sqlalchemy.engine.Engine = self.get_engine()
+            engine.connect()
+        except Exception as e:
+            raise TestConnectionError(
+                "Attempt to connect to datasource failed with the following error message: "
+                f"{str(e)}"
+            )
+        if self.assets and test_assets:
+            for asset in self.assets.values():
+                asset.test_connection()
 
     def add_table_asset(
         self,
