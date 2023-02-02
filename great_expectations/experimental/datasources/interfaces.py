@@ -160,7 +160,7 @@ class DataAsset(ExperimentalBaseModel):
         """Test the connection for the DataAsset.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         raise NotImplementedError(
             "One needs to implement 'test_connection' on a DataAsset subclass"

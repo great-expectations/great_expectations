@@ -54,13 +54,13 @@ class _DataFrameAsset(DataAsset):
         if not self.base_directory.exists():
             raise TestConnectionError(f"Path: {self.base_directory} does not exist.")
 
-        success = False
+        regex_match_success = False
         for filepath in self.base_directory.iterdir():
             if self.regex.match(filepath.name):
                 # if one file in the path matches the regex, we consider this asset valid
-                success = True
+                regex_match_success = True
                 break
-        if not success:
+        if not regex_match_success:
             raise TestConnectionError(
                 f"No file at path: {self.base_directory} matched the regex: {self.regex.pattern}"
             )
