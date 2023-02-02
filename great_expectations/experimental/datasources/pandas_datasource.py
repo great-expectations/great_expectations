@@ -46,40 +46,27 @@ JSONAsset = _ASSET_MODELS["json"]
 ParquetAsset = _ASSET_MODELS["parquet"]
 
 
-class CSVPandasAsset(CSVAsset):
+def build_filesystem_data_asset_class(superclass: Type[_FilesystemDataAsset]):
     def get_reader_method(self) -> str:
         return f"read_{self.type}"
 
     def get_reader_options_include(self) -> set[str] | None:
         return None
 
+    setattr(superclass, "get_reader_method", get_reader_method)
+    setattr(superclass, "get_reader_options_include", get_reader_options_include)
 
-class ExcelPandasAsset(ExcelAsset):
-    def get_reader_method(self) -> str:
-        return f"read_{self.type}"
-
-    def get_reader_options_include(self) -> set[str] | None:
-        return None
+    return superclass
 
 
-class JSONPandasAsset(JSONAsset):
-    def get_reader_method(self) -> str:
-        return f"read_{self.type}"
-
-    def get_reader_options_include(self) -> set[str] | None:
-        return None
-
-
-class ParquetPandasAsset(ParquetAsset):
-    def get_reader_method(self) -> str:
-        return f"read_{self.type}"
-
-    def get_reader_options_include(self) -> set[str] | None:
-        return None
+CSVPandasAsset = build_filesystem_data_asset_class(CSVAsset)
+ExcelPandasAsset = build_filesystem_data_asset_class(ExcelAsset)
+JSONPandasAsset = build_filesystem_data_asset_class(JSONAsset)
+ParquetPandasAsset = build_filesystem_data_asset_class(ParquetAsset)
 
 
 class PandasDatasource(Datasource):
-    # class attrs
+    # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [
         CSVPandasAsset,
         ExcelPandasAsset,

@@ -42,7 +42,7 @@ class CSVSparkAsset(_FilesystemDataAsset):
 
 
 class SparkDatasource(Datasource):
-    # class attrs
+    # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVSparkAsset]
 
     # instance attributes

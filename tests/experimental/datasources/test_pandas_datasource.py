@@ -126,8 +126,7 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            t.__name__.lower().split("pandasasset")[0]
-            for t in PandasDatasource.asset_types
+            t.__name__.lower().split("asset")[0] for t in PandasDatasource.asset_types
         }
         print(asset_class_names)
 
