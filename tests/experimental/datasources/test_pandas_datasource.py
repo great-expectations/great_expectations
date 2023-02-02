@@ -5,7 +5,7 @@ import pathlib
 import re
 from dataclasses import dataclass
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Type
 
 import pydantic
 import pytest
@@ -16,7 +16,9 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
+    JSONAsset,
     PandasDatasource,
+    _DataFrameAsset,
 )
 
 if TYPE_CHECKING:
@@ -93,7 +95,7 @@ class TestDynamicPandasAssets:
             for t in assets_field.type_.__args__  # accessing the `Union` members with `__args__`
         }
 
-        assert asset_class_names == asset_field_union_members
+        assert asset_class_names.issubset(asset_field_union_members)
 
     @pytest.mark.parametrize(
         "method_name",
@@ -130,6 +132,32 @@ class TestDynamicPandasAssets:
         print(asset_class_names)
 
         assert type_name in asset_class_names
+
+    @pytest.mark.parametrize(
+        ["asset_model", "extra_kwargs"],
+        [
+            (CSVAsset, {"sep": "|", "names": ["col1", "col2", "col3"]}),
+            (JSONAsset, {"orient": "records", "encoding_errors": "strict"}),
+        ],
+    )
+    def test_data_asset_defaults(
+        self,
+        asset_model: Type[_DataFrameAsset],
+        extra_kwargs: dict,
+    ):
+        """
+        Test that an asset dictionary can be dumped with only the original passed keys
+        present.
+        """
+        kwargs: dict[str, Any] = {
+            "name": "test",
+            "base_directory": pathlib.Path(__file__),
+            "regex": re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
+        }
+        kwargs.update(extra_kwargs)
+        print(f"extra_kwargs\n{pf(extra_kwargs)}")
+        asset_instance = asset_model(**kwargs)
+        assert asset_instance.dict() == kwargs
 
     @pytest.mark.parametrize(
         "extra_kwargs",
@@ -387,15 +415,15 @@ def test_pandas_sorter(
 
     ordered_years = reversed(years) if "-year" in order_by else years
     ordered_months = reversed(months) if "-month" in order_by else months
-    if "year" in order_by[0]:
+    if "year" in order_by[0]:  # type: ignore[operator]
         ordered = [
-            TimeRange(key="year", range=ordered_years),
-            TimeRange(key="month", range=ordered_months),
+            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
+            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
         ]
     else:
         ordered = [
-            TimeRange(key="month", range=ordered_months),
-            TimeRange(key="year", range=ordered_years),
+            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
+            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
         ]
 
     batch_index = -1
