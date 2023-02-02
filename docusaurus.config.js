@@ -69,6 +69,7 @@ module.exports = {
     //   textColor: '#ffffff', // Defaults to `#000`.
     //   isCloseable: false // Defaults to `true`.
     // },
+    image:'img/gx-preview.png',
     navbar: {
       logo: {
         alt: 'Great Expectations',
