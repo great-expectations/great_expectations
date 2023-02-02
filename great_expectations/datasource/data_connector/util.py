@@ -122,8 +122,10 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
+
     if processed_data_reference is None:
         return None
+
     data_asset_name_from_batch_identifiers: str = processed_data_reference[0]
     batch_identifiers: IDDict = processed_data_reference[1]
     if data_asset_name is None:
@@ -165,6 +167,7 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     data_asset_name: str = batch_identifiers.pop(
         "data_asset_name", DEFAULT_DATA_ASSET_NAME
     )
+
     return data_asset_name, batch_identifiers
 
 
@@ -179,6 +182,7 @@ def _determine_batch_identifiers_using_named_groups(
             logger.warning(
                 f"The named group '{key}' must explicitly be stated in group_names to be parsed"
             )
+
     return batch_identifiers
 
 
@@ -298,6 +302,7 @@ def _invert_regex_to_data_reference_template(
 
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)  # type: ignore[no-redef]
+
     return data_reference_template
 
 
@@ -509,6 +514,7 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
             sorter_name: str = sorter_config["name"]
             new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
             sorter_dict[sorter_name] = new_sorter
+
     return sorter_dict
 
 
@@ -545,4 +551,5 @@ def _build_asset_from_config(
             package_name=None,
             class_name=config["class_name"],
         )
+
     return asset

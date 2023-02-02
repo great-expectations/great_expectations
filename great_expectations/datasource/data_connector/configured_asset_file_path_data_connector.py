@@ -194,6 +194,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             and data_asset_name in self.assets
         ):
             asset = self.assets[data_asset_name]  # type: ignore[assignment]
+
         return asset
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
