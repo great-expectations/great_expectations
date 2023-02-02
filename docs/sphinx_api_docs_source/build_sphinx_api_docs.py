@@ -316,15 +316,18 @@ class SphinxInvokeDocsBuilder:
     def _get_class_mdx_relative_filepath(self, definition: Definition) -> pathlib.Path:
         """Get the filepath to use for the docusaurus mdx file from a class definition."""
 
-        if definition.filepath.is_absolute():
-            definition_path = definition.filepath.relative_to(self.gx_path)
-        else:
-            definition_path = definition.filepath
+        shortest_dotted_path = get_shortest_dotted_path(
+            definition=definition, repo_root_path=self.repo_root
+        )
+        # Use parent since file will create sidebar entry with class name
+        # (if .parent is not used, then there will be a duplicate).
+        path_prefix = pathlib.Path(shortest_dotted_path.replace(".", "/")).parent
 
-        if isinstance(definition.ast_definition, ast.ClassDef):
-            definition_path = (
-                definition_path.with_suffix("") / f"{definition.name}_class"
-            )
+        # Remove the `great_expectations` top level
+        if path_prefix.parts[0] == "great_expectations":
+            path_prefix = pathlib.Path(*path_prefix.parts[1:])
+
+        definition_path = path_prefix / f"{definition.name}_class"
 
         return definition_path.with_suffix(".mdx")
 
