@@ -26,6 +26,7 @@ from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.experimental.datasources.constants import _FIELD_ALWAYS_SET
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
@@ -33,7 +34,7 @@ from great_expectations.experimental.datasources.metadatasource import MetaDatas
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     # TODO: When the Batch class is moved out of the experimental directory, we should try to import the annotations
@@ -42,10 +43,12 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
 
 try:
+    import pyspark
     from pyspark.sql import Row as pyspark_sql_Row
 except ImportError:
-    LOGGER.debug("No spark sql dataframe module available.")
+    pyspark = None
     pyspark_sql_Row = None
+    logger.debug("No spark sql dataframe module available.")
 
 
 class TestConnectionError(Exception):
@@ -118,7 +121,7 @@ def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
     Args:
         sort_key: A batch metadata key which will be used to sort batches on a data asset.
                   This can be prefixed with a + or - to indicate increasing or decreasing
-                  sorting. If not specified, defaults to increasing order.
+                  sorting.  If not specified, defaults to increasing order.
     """
     if sort_key[0] == "-":
         return BatchSorter(key=sort_key[1:], reverse=True)
@@ -343,22 +346,32 @@ class Datasource(
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: ExecutionEngine | None = pydantic.PrivateAttr(None)
 
-    @pydantic.validator("assets", pre=True)
-    def _load_asset_subtype(cls, v: Dict[str, dict]):
-        LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
-        loaded_assets: Dict[str, DataAssetType] = {}
+    @pydantic.validator("assets", each_item=True)
+    @classmethod
+    def _load_asset_subtype(
+        cls: Type[Datasource[DataAssetType]], data_asset: DataAsset
+    ) -> DataAssetType:
+        """
+        Some `data_asset` may be loaded as a less specific asset subtype different than
+        what was intended.
+        If a more specific subtype is needed the `data_asset` will be converted to a
+        more specific `DataAsset`.
+        """
+        logger.info(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
+        asset_type_name: str = data_asset.type
+        asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[asset_type_name]
 
-        # TODO (kilo59): catch key errors
-        for asset_name, config in v.items():
-            asset_type_name: str = config["type"]
-            asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[
-                asset_type_name
-            ]
-            LOGGER.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
-            loaded_assets[asset_name] = asset_type(**config)
+        if asset_type is type(data_asset):
+            # asset is already the intended type
+            return data_asset
 
-        LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
-        return loaded_assets
+        # strip out asset default kwargs
+        kwargs = data_asset.dict(exclude_unset=True)
+        logger.debug(f"{asset_type_name} - kwargs\n{pf(kwargs)}")
+
+        asset_of_intended_type = asset_type(**kwargs)
+        logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
+        return asset_of_intended_type
 
     def _execution_engine_type(self) -> Type[ExecutionEngine]:
         """Returns the execution engine to be used"""
@@ -412,6 +425,9 @@ class Datasource(
         asset._datasource = self
         asset.test_connection()
         self.assets[asset.name] = asset
+        # pydantic needs to know that an asset has been set so that it doesn't get excluded
+        # when dumping to dict, json, yaml etc.
+        self.__fields_set__.add(_FIELD_ALWAYS_SET)
         return asset
 
     # Abstract Methods
