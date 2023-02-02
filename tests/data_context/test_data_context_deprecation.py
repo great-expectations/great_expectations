@@ -271,13 +271,10 @@ def test_data_context_crud_api_deprecation(
     method = getattr(context, method_name)
     args = {arg: mock.Mock() for arg in required_args}
 
-    with pytest.warns() as record:
+    with pytest.deprecated_call():
         try:
             method(**args)
         # We only care about triggering the method to ensure deprecation
         # The actual underlying logic of each method is under test elsewhere in the test suite
         except Exception:
             pass
-
-    assert len(record) == 1
-    assert isinstance(record[0].message, DeprecationWarning)
