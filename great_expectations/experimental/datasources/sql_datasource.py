@@ -154,16 +154,25 @@ class TableAsset(DataAsset):
         """
         assert isinstance(self.datasource, SQLDatasource)
         engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
-        exists = sqlalchemy.inspect(engine).has_table(
+        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+
+        table_str = (
+            f"{self.schema_name}.{self.table_name}"
+            if self.schema_name
+            else self.table_name
+        )
+
+        if self.schema_name and self.schema_name not in inspector.get_schema_names():
+            raise TestConnectionError(
+                f"Attempt to connect to table: {table_str} failed because the schema "
+                "does not exist."
+            )
+
+        table_exists = sqlalchemy.inspect(engine).has_table(
             table_name=self.table_name,
             schema=self.schema_name,
         )
-        if not exists:
-            table_str = (
-                f"{self.schema_name}.{self.table_name}"
-                if self.schema_name
-                else self.table_name
-            )
+        if not table_exists:
             raise TestConnectionError(
                 f"Attempt to connect to table: {table_str} failed because the table "
                 "does not exist."
@@ -402,6 +411,7 @@ class SQLDatasource(Datasource):
             )
         if self.assets and test_assets:
             for asset in self.assets.values():
+                asset._datasource = self
                 asset.test_connection()
 
     def add_table_asset(

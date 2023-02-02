@@ -346,18 +346,21 @@ class Datasource(
     _execution_engine: Union[ExecutionEngine, None] = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", pre=True)
-    def _load_asset_subtype(cls, v: Dict[str, dict]):
+    def _load_asset_subtype(cls, v: Dict[str, dict | DataAssetType]):
         logger.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
         loaded_assets: Dict[str, DataAssetType] = {}
 
         # TODO (kilo59): catch key errors
-        for asset_name, config in v.items():
-            asset_type_name: str = config["type"]
-            asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[
-                asset_type_name
-            ]
-            logger.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
-            loaded_assets[asset_name] = asset_type(**config)
+        for asset_name, asset in v.items():
+            if isinstance(asset, dict):
+                asset_type_name: str = asset["type"]
+                asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[
+                    asset_type_name
+                ]
+                logger.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
+                loaded_assets[asset_name] = asset_type(**asset)
+            else:
+                loaded_assets[asset_name] = asset
 
         logger.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
         return loaded_assets

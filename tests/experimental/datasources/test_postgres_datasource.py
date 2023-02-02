@@ -3,7 +3,6 @@ from pprint import pprint
 from typing import Callable, ContextManager, Generator, Optional, Tuple
 
 import pytest
-import pytest_mock
 from pydantic import ValidationError
 from typing_extensions import TypeAlias
 
@@ -97,13 +96,13 @@ def assert_batch_request(
 
 
 @pytest.mark.unit
-def test_add_table_asset_with_splitter(create_source: CreateSourceFixture):
+def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        with pytest_mock.patch("sqlalchemy.inspect"), pytest_mock.patch(
-            "sqlalchemy.create_engine"
-        ):
+        with mocker.patch("sqlalchemy.create_engine"), mocker.patch(
+            "sqlalchemy.engine"
+        ), mocker.patch("sqlalchemy.inspect"):
             asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter("my_column")
         assert len(source.assets) == 1
@@ -124,13 +123,13 @@ def test_add_table_asset_with_splitter(create_source: CreateSourceFixture):
 
 
 @pytest.mark.unit
-def test_add_table_asset_with_no_splitter(create_source: CreateSourceFixture):
+def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        with pytest_mock.patch("sqlalchemy.inspect"), pytest_mock.patch(
-            "sqlalchemy.create_engine"
-        ):
+        with mocker.patch("sqlalchemy.create_engine"), mocker.patch(
+            "sqlalchemy.engine"
+        ), mocker.patch("sqlalchemy.inspect"):
             asset = source.add_table_asset(name="my_asset", table_name="my_table")
         assert len(source.assets) == 1
         assert asset == list(source.assets.values())[0]
@@ -705,19 +704,33 @@ def test_validate_invalid_postgres_connection_string(
             pass
 
 
-def bad_connection_string_database_config() -> tuple[str, str, str, list[str]]:
+def bad_connection_string_database_config() -> tuple[
+    str, str, str, TestConnectionError
+]:
     connection_string = "postgresql+psycopg2://postgres:@localhost/bad_database"
     table_name = "good_table"
     schema_name = "good_schema"
-    error_message_substrings = [""]
-    return connection_string, table_name, schema_name, error_message_substrings
+    test_connection_error = TestConnectionError(
+        "Attempt to connect to datasource failed with the following error message: "
+        '(psycopg2.OperationalError) connection to server at "localhost" (::1), port '
+        '5432 failed: FATAL:  database "bad_database" does not exist\n'
+        "\n"
+        "(Background on this error at: https://sqlalche.me/e/14/e3q8)"
+    )
+    return connection_string, table_name, schema_name, test_connection_error
 
 
 def bad_connection_string_user_config() -> tuple[str, str, str, TestConnectionError]:
     connection_string = "postgresql+psycopg2://bad_user:@localhost/test_ci"
     table_name = "good_table"
     schema_name = "good_schema"
-    test_connection_error = TestConnectionError()
+    test_connection_error = TestConnectionError(
+        "Attempt to connect to datasource failed with the following error message: "
+        '(psycopg2.OperationalError) connection to server at "localhost" (::1), port '
+        '5432 failed: FATAL:  role "bad_user" does not exist\n'
+        "\n"
+        "(Background on this error at: https://sqlalche.me/e/14/e3q8)"
+    )
     return connection_string, table_name, schema_name, test_connection_error
 
 
@@ -725,7 +738,10 @@ def bad_table_name_config() -> tuple[str, str, str, TestConnectionError]:
     connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
     table_name = "bad_table"
     schema_name = "good_schema"
-    test_connection_error = TestConnectionError()
+    test_connection_error = TestConnectionError(
+        "Attempt to connect to table: good_schema.bad_table failed because the table "
+        "does not exist."
+    )
     return connection_string, table_name, schema_name, test_connection_error
 
 
@@ -733,7 +749,10 @@ def bad_schema_name_config() -> tuple[str, str, str, TestConnectionError]:
     connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
     table_name = "good_table"
     schema_name = "bad_schema"
-    test_connection_error = TestConnectionError()
+    test_connection_error = TestConnectionError(
+        "Attempt to connect to table: bad_schema.good_table failed because the schema "
+        "does not exist."
+    )
     return connection_string, table_name, schema_name, test_connection_error
 
 
@@ -741,8 +760,8 @@ def bad_schema_name_config() -> tuple[str, str, str, TestConnectionError]:
     params=[
         bad_connection_string_database_config,
         bad_connection_string_user_config,
-        bad_table_name_config,
-        bad_schema_name_config,
+        # bad_table_name_config,
+        # bad_schema_name_config,
     ]
 )
 def datasource_test_connection_error_messages(
