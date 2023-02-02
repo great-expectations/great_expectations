@@ -164,7 +164,7 @@ class DataAsset(ExperimentalBaseModel):
             TestConnectionError
         """
         raise NotImplementedError(
-            "One needs to implement 'test_connection' on a DataAsset subclass"
+            """One needs to implement "test_connection" on a DataAsset subclass."""
         )
 
     # Abstract Methods
@@ -435,7 +435,7 @@ class Datasource(
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Return the ExecutionEngine type use for this Datasource"""
         raise NotImplementedError(
-            "One needs to implement 'execution_engine_type' on a Datasource subclass"
+            """One needs to implement "execution_engine_type" on a Datasource subclass."""
         )
 
     def test_connection(self, test_assets: bool = True) -> None:
@@ -448,7 +448,7 @@ class Datasource(
             TestConnectionError
         """
         raise NotImplementedError(
-            "One needs to implement 'test_connection' on a Datasource subclass"
+            """One needs to implement "test_connection" on a Datasource subclass."""
         )
 
     # End Abstract Methods
