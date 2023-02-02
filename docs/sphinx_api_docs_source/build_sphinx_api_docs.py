@@ -327,6 +327,9 @@ class SphinxInvokeDocsBuilder:
         if path_prefix.parts[0] == "great_expectations":
             path_prefix = pathlib.Path(*path_prefix.parts[1:])
 
+        # Use the `_class` suffix to differentiate between classes and folders with
+        # the same name since the docusaurus sidebar is case insensitive. E.g.
+        # great_expectations/checkpoint path and Checkpoint class
         definition_path = path_prefix / f"{definition.name}_class"
 
         return definition_path.with_suffix(".mdx")
