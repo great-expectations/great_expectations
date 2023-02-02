@@ -21,11 +21,7 @@ class ColumnValuesInSetSparkOptimized(ColumnAggregateMetricProvider):
         "value_set",
     )
 
-    @metric_value(
-        engine=SparkDFExecutionEngine,
-        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_FN,
-        domain_type=MetricDomainTypes.COLUMN,
-    )
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
