@@ -3,6 +3,7 @@ from pprint import pprint
 from typing import Callable, ContextManager, Generator, Optional, Tuple
 
 import pytest
+import sqlalchemy.engine
 from pydantic import ValidationError
 from typing_extensions import TypeAlias
 
@@ -760,8 +761,8 @@ def bad_schema_name_config() -> tuple[str, str, str, TestConnectionError]:
     params=[
         bad_connection_string_database_config,
         bad_connection_string_user_config,
-        # bad_table_name_config,
-        # bad_schema_name_config,
+        bad_table_name_config,
+        bad_schema_name_config,
     ]
 )
 def datasource_test_connection_error_messages(
@@ -782,15 +783,18 @@ def datasource_test_connection_error_messages(
 
 
 def test_test_connection_failures(
+    mocker,
     datasource_test_connection_error_messages: tuple[
         PostgresDatasource, TestConnectionError
-    ]
+    ],
 ):
     (
         postgres_datasource,
         test_connection_error,
     ) = datasource_test_connection_error_messages
 
+    m = mocker.patch("sqlalchemy.engine.Inspector.get_schema_names")
+    m.return_value = ["good_schema"]
     with pytest.raises(type(test_connection_error)) as e:
         postgres_datasource.test_connection()
     assert str(e.value) == str(test_connection_error)
