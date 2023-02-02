@@ -46,7 +46,7 @@ JSONAsset = _ASSET_MODELS["json"]
 ParquetAsset = _ASSET_MODELS["parquet"]
 
 
-def build_filesystem_data_asset_class(
+def _build_filesystem_data_asset_class(
     superclass: Type[_FilesystemDataAsset],
 ) -> Type[_FilesystemDataAsset]:
     def get_reader_method(self) -> str:
@@ -61,10 +61,10 @@ def build_filesystem_data_asset_class(
     return superclass
 
 
-CSVPandasAsset = build_filesystem_data_asset_class(CSVAsset)
-ExcelPandasAsset = build_filesystem_data_asset_class(ExcelAsset)
-JSONPandasAsset = build_filesystem_data_asset_class(JSONAsset)
-ParquetPandasAsset = build_filesystem_data_asset_class(ParquetAsset)
+CSVPandasAsset = _build_filesystem_data_asset_class(CSVAsset)
+ExcelPandasAsset = _build_filesystem_data_asset_class(ExcelAsset)
+JSONPandasAsset = _build_filesystem_data_asset_class(JSONAsset)
+ParquetPandasAsset = _build_filesystem_data_asset_class(ParquetAsset)
 
 
 class PandasDatasource(Datasource):
@@ -121,7 +121,7 @@ class PandasDatasource(Datasource):
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
     ) -> CSVPandasAsset:  # type: ignore[valid-type]
-        """Adds a csv asset to this pandas datasource
+        """Adds a CSV DataAsst to the present "PandasDatasource" object.
 
         Args:
             name: The name of the csv asset
@@ -147,7 +147,7 @@ class PandasDatasource(Datasource):
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
     ) -> ExcelPandasAsset:  # type: ignore[valid-type]
-        """Adds a Excel asset to this pandas datasource
+        """Adds an Excel DataAsst to the present "PandasDatasource" object.
 
         Args:
             name: The name of the csv asset
@@ -173,7 +173,7 @@ class PandasDatasource(Datasource):
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
     ) -> JSONPandasAsset:  # type: ignore[valid-type]
-        """Adds a JSON asset to this pandas datasource
+        """Adds a JSON DataAsst to the present "PandasDatasource" object.
 
         Args:
             name: The name of the csv asset
@@ -199,7 +199,7 @@ class PandasDatasource(Datasource):
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
     ) -> ParquetPandasAsset:  # type: ignore[valid-type]
-        """Adds a parquet asset to this pandas datasource
+        """dds a Parquet DataAsst to the present "PandasDatasource" object.
 
         Args:
             name: The name of the csv asset
