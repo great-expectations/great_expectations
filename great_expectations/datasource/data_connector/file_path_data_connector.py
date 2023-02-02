@@ -217,6 +217,7 @@ class FilePathDataConnector(DataConnector):
             batch_definition_list = sorter.get_sorted_batch_definitions(
                 batch_definitions=batch_definition_list
             )
+
         return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(
@@ -272,6 +273,7 @@ class FilePathDataConnector(DataConnector):
         if ext:
             # Provided prefix is a filename so no adjustment is necessary
             return text
+
         # Provided prefix is a directory (so we want to ensure we append it with '/')
         return os.path.join(text, "")
 
@@ -287,9 +289,11 @@ class FilePathDataConnector(DataConnector):
 batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
 """
             )
+
         path = self._get_full_file_path(
             path=path, data_asset_name=batch_definition.data_asset_name
         )
+
         return {"path": path}
 
     def _validate_batch_request(self, batch_request: BatchRequestBase) -> None:
@@ -313,6 +317,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 configured group_name.
                     """
                 )
+
             if len(group_names) < len(self.sorters):
                 raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" is configured with {len(group_names)} group names;

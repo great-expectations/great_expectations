@@ -74,6 +74,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
                 base_directory = normalize_directory_path(
                     dir_path=asset.base_directory, root_directory_path=base_directory
                 )
+
             if asset.glob_directive:
                 glob_directive = asset.glob_directive
 

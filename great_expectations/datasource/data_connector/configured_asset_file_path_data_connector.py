@@ -61,6 +61,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         if assets is None:
             assets = {}
+
         _assets: Dict[str, Union[dict, Asset]] = assets
         self._assets = _assets
         self._build_assets_from_config(config=assets)
