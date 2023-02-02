@@ -165,7 +165,7 @@ class TableAsset(DataAsset):
         if self.schema_name and self.schema_name not in inspector.get_schema_names():
             raise TestConnectionError(
                 f"Attempt to connect to table: {table_str} failed because the schema "
-                "does not exist."
+                f"{self.schema_name} does not exist."
             )
 
         table_exists = sqlalchemy.inspect(engine).has_table(
