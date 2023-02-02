@@ -44,7 +44,6 @@ from great_expectations.rule_based_profiler.config.base import (
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
-    ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
@@ -1248,7 +1247,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         profiler: RuleBasedProfiler,
         profiler_store: ProfilerStore,
         data_context: AbstractDataContext,
-    ) -> None:
+    ) -> RuleBasedProfiler:
         name = profiler.name
         id = profiler.ge_cloud_id
 
