@@ -39,6 +39,9 @@
     /* make pagination look like the nice buttons */
     --ifm-pagination-nav-border-radius: 35px;
     --ifm-pagination-nav-padding: 16px;
+
+    /* enlarge the sidebar width */
+    --doc-sidebar-width: 350px !important;
 }
 
 /* override huge h1 */
