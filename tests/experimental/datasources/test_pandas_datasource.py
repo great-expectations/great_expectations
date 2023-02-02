@@ -218,10 +218,10 @@ def test_add_csv_asset_to_datasource(
 @pytest.mark.unit
 def test_construct_csv_asset_directly(csv_path: pathlib.Path):
     # noinspection PyTypeChecker
-    asset = CSVAsset(
+    asset = CSVAsset(  # type: ignore[call-arg] # no type
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",  # Ignoring IDE warning (type declarations are consistent).
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",  # type: ignore[arg-type]
     )
     assert asset.name == "csv_asset"
     assert asset.base_directory == csv_path
