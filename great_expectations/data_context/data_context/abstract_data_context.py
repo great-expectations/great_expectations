@@ -332,6 +332,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.config.update(project_config)
 
     @public_api
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         args_payload_fn=save_expectation_suite_usage_statistics,
@@ -653,6 +656,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._project_config = project_config
         self.variables.config = project_config
 
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     def save_datasource(
         self, datasource: Union[LegacyDatasource, BaseDatasource]
     ) -> Union[LegacyDatasource, BaseDatasource]:
@@ -1218,6 +1224,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
 
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
@@ -2109,6 +2118,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     @public_api
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
