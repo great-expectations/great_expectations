@@ -44,6 +44,7 @@ from great_expectations.rule_based_profiler.config.base import (
     domainBuilderConfigSchema,
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
+    ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
     DomainBuilder,
@@ -1268,8 +1269,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         else:
             RuleBasedProfiler.delete_profiler(name=name, profiler_store=profiler_store)
 
-        _ = RuleBasedProfiler.add_profiler(
-            config=profiler.config,
+        config = profiler.config
+        config.config_version = profiler.config_version
+        config.rules = {rule.name: rule.to_dict() for rule in profiler.rules}
+        config.variables = convert_variables_to_dict(profiler.variables)
+
+        return RuleBasedProfiler.add_profiler(
+            config=config,
             data_context=data_context,
             profiler_store=profiler_store,
         )
