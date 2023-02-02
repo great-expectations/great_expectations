@@ -29,6 +29,9 @@ cloud:
   - '@wookasz'         # Łukasz Lempart
   - '@josectobar'      # José Tobar
   - '@elenajdanova'    # Elena Jdanova
+  - '@DrewHoo'         # Drew Hoover
+  - '@lockettks'       # Kim Mathieu
+  - '@superengi'       # Saahir Foux
 
 # Aggregates a few different teams
 core-team:
