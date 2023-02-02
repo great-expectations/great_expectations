@@ -178,7 +178,7 @@ class PandasDatasource(Datasource):
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
     ) -> ParquetAsset:  # type: ignore[valid-type]
-        """dds a Parquet DataAsst to the present "PandasDatasource" object.
+        """Adds a Parquet DataAsst to the present "PandasDatasource" object.
 
         Args:
             name: The name of the csv asset
