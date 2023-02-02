@@ -93,6 +93,7 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
                     dir_path=asset.base_directory,
                     root_directory_path=base_directory,
                 )
+
         return str(Path(base_directory).joinpath(path))
 
     @property
