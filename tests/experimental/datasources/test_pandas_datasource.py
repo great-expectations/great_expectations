@@ -137,7 +137,7 @@ class TestDynamicPandasAssets:
         ["asset_model", "extra_kwargs"],
         [
             (CSVAsset, {"sep": "|", "names": ["col1", "col2", "col3"]}),
-            (JSONAsset, {"orient": "records", "encoding_errors": "strict"}),
+            (JSONAsset, {"orient": "records", "convert_dates": True}),
         ],
     )
     def test_data_asset_defaults(
