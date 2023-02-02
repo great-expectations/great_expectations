@@ -1467,7 +1467,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The Checkpoint object created.
         """
-        # TODO - resolution logic
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
@@ -1495,8 +1499,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=ge_cloud_id,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            ge_cloud_id=id,
+            expectation_suite_ge_cloud_id=expectation_suite_id,
             default_validation_id=default_validation_id,
         )
 
@@ -1521,12 +1525,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             CheckpointNotFoundError if the requested Checkpoint does not exists.
         """
-        # Resolution logic
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
-            name=name, ge_cloud_id=ge_cloud_id
+            name=name, ge_cloud_id=id
         )
         checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
             checkpoint_config=checkpoint_config,
@@ -1552,10 +1557,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             CheckpointNotFoundError if the requested Checkpoint does not exists.
         """
-        # Resolution logic
-        return self.checkpoint_store.delete_checkpoint(
-            name=name, ge_cloud_id=ge_cloud_id
-        )
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+
+        return self.checkpoint_store.delete_checkpoint(name=name, ge_cloud_id=id)
 
     @public_api
     @usage_statistics_enabled_method(
@@ -1607,11 +1612,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             CheckpointResult
         """
-        # Resolution logic
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
 
         return self._run_checkpoint(
             checkpoint_name=checkpoint_name,
-            ge_cloud_id=ge_cloud_id,
+            ge_cloud_id=id,
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
@@ -1625,7 +1634,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_id,
             **kwargs,
         )
 
@@ -1802,7 +1811,11 @@ class AbstractDataContext(ConfigPeer, ABC):
                 of `batch_data`, `query` or `path`), or if the `ExpectationSuite` cannot be created or
                 retrieved using either the provided name or identifier
         """
-        # Resolution logic
+        # <GX_RENAME>
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
+
         include_rendered_content = (
             self._determine_if_expectation_validation_result_include_rendered_content(
                 include_rendered_content=include_rendered_content
@@ -1816,7 +1829,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     expectation_suite is not None,
                     expectation_suite_name is not None,
                     create_expectation_suite_with_name is not None,
-                    expectation_suite_ge_cloud_id is not None,
+                    expectation_suite_id is not None,
                 ]
             )
             > 1
@@ -1826,14 +1839,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
             raise ValueError(
                 "No more than one of expectation_suite_name,"
-                f"{'expectation_suite_ge_cloud_id,' if ge_cloud_mode else ''}"
+                f"{'expectation_suite_id,' if ge_cloud_mode else ''}"
                 " expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
-        if expectation_suite_ge_cloud_id is not None:
+        if expectation_suite_id is not None:
             expectation_suite = self.get_expectation_suite(
                 include_rendered_content=include_rendered_content,
-                ge_cloud_id=expectation_suite_ge_cloud_id,
+                ge_cloud_id=expectation_suite_id,
             )
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(
@@ -2483,12 +2496,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ProfilerNotFoundError if the requested Profiler does not exists.
         """
-        # Resolution logic
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+
         return RuleBasedProfiler.get_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            ge_cloud_id=id,
         )
 
     def delete_profiler(
@@ -2506,7 +2521,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ProfilerNotFoundError if the requested Profiler does not exists.
         """
-        # Resolution logic
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+
         RuleBasedProfiler.delete_profiler(
             profiler_store=self.profiler_store,
             name=name,
@@ -2605,12 +2622,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             AssertionError if both a `name` and `ge_cloud_id` are provided.
             AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
         """
-        # Resolution
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+
         return self._run_profiler_with_dynamic_arguments(
             batch_list=batch_list,
             batch_request=batch_request,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            ge_cloud_id=id,
             variables=variables,
             rules=rules,
         )
@@ -2662,12 +2681,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             AssertionError if both a `name` and `ge_cloud_id` are provided.
             AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
         """
-        # Resolution logic
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+
         return self._run_profiler_on_data(
             batch_list=batch_list,
             batch_request=batch_request,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            ge_cloud_id=id,
         )
 
     def _run_profiler_on_data(
@@ -4692,3 +4713,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if xdatasources:
             self.zep_config.xdatasources.update(xdatasources)
         return self.zep_config.xdatasources
+
+    @staticmethod
+    def _resolve_id_and_ge_cloud_id(
+        id: str | None, ge_cloud_id: str | None
+    ) -> str | None:
+        if id and ge_cloud_id:
+            raise ValueError("Please only pass in either id or ge_cloud_id (not both)")
+        return id if id else ge_cloud_id
