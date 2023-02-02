@@ -216,8 +216,8 @@ def test_datasource_gets_batch_list_no_splitter(create_source):
         assert spec == {
             "batch_identifiers": {},
             "data_asset_name": "my_asset",
-            "schema_name": None,
             "table_name": "my_table",
+            "schema_name": None,
             "type": "table",
         }
 
@@ -332,6 +332,7 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
                 "type": "table",
                 "data_asset_name": "my_asset",
                 "table_name": "my_table",
+                "schema_name": None,
                 "batch_identifiers": {"my_col": {"year": 2022, "month": month}},
                 "splitter_method": "split_on_year_and_month",
                 "splitter_kwargs": {"column_name": "my_col"},
@@ -356,6 +357,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
             "splitter_kwargs": {"column_name": "my_col"},
             "splitter_method": "split_on_year_and_month",
             "table_name": "my_table",
+            "schema_name": None,
             "type": "table",
         }
 
