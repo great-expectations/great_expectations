@@ -4,6 +4,25 @@
 # Currently used in our netlify pipeline.
 # Note: Will be modified to build API docs on latest tagged release.
 
+# Previous versions
+
+# Get all versions starting without `v`
+git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V
+
+# Get versions <0.14.x where x is largest, check out and build docs
+git tag | grep -E "^[0-9]{1,}\.13\.[0-9]{1,}" | sort -V | tail -1
+
+# Get version 0.14.x where x is largest, check out and build docs
+V14=`git tag | grep -E "^[0-9]{1,}\.14\.[0-9]{1,}" | sort -V | tail -1`
+git checkout $V14
+
+# Get version 0.15.x where x is largest, check out and build docs
+git tag | grep -E "^[0-9]{1,}\.15\.[0-9]{1,}" | sort -V | tail -1
+
+# While loop to check for future versions? Make manual for first pass.
+
+
+# Current versions
 echo "Installing dev dependencies"
 pip install -c constraints-dev.txt -e ".[test]"
 
