@@ -46,34 +46,13 @@ JSONAsset = _ASSET_MODELS["json"]
 ParquetAsset = _ASSET_MODELS["parquet"]
 
 
-def _build_filesystem_data_asset_class(
-    superclass: Type[_FilesystemDataAsset],
-) -> Type[_FilesystemDataAsset]:
-    def _get_reader_method(self) -> str:
-        return f"read_{self.type}"
-
-    def _get_reader_options_include(self) -> set[str] | None:
-        return None
-
-    setattr(superclass, "_get_reader_method", _get_reader_method)
-    setattr(superclass, "_get_reader_options_include", _get_reader_options_include)
-
-    return superclass
-
-
-CSVPandasAsset = _build_filesystem_data_asset_class(CSVAsset)
-ExcelPandasAsset = _build_filesystem_data_asset_class(ExcelAsset)
-JSONPandasAsset = _build_filesystem_data_asset_class(JSONAsset)
-ParquetPandasAsset = _build_filesystem_data_asset_class(ParquetAsset)
-
-
 class PandasDatasource(Datasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [
-        CSVPandasAsset,
-        ExcelPandasAsset,
-        JSONPandasAsset,
-        ParquetPandasAsset,
+        CSVAsset,
+        ExcelAsset,
+        JSONAsset,
+        ParquetAsset,
     ]
 
     # instance attributes
@@ -83,10 +62,10 @@ class PandasDatasource(Datasource):
         str,
         Union[
             _FilesystemDataAsset,
-            CSVPandasAsset,
-            ExcelPandasAsset,
-            ParquetPandasAsset,
-            JSONPandasAsset,
+            CSVAsset,
+            ExcelAsset,
+            JSONAsset,
+            ParquetAsset,
         ],
     ] = {}
 
@@ -120,7 +99,7 @@ class PandasDatasource(Datasource):
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
-    ) -> CSVPandasAsset:  # type: ignore[valid-type]
+    ) -> CSVAsset:  # type: ignore[valid-type]
         """Adds a CSV DataAsst to the present "PandasDatasource" object.
 
         Args:
@@ -130,7 +109,7 @@ class PandasDatasource(Datasource):
             order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
-        asset = CSVPandasAsset(
+        asset = CSVAsset(
             name=name,
             base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
@@ -146,7 +125,7 @@ class PandasDatasource(Datasource):
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
-    ) -> ExcelPandasAsset:  # type: ignore[valid-type]
+    ) -> ExcelAsset:  # type: ignore[valid-type]
         """Adds an Excel DataAsst to the present "PandasDatasource" object.
 
         Args:
@@ -156,7 +135,7 @@ class PandasDatasource(Datasource):
             order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
-        asset = ExcelPandasAsset(
+        asset = ExcelAsset(
             name=name,
             base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
@@ -172,7 +151,7 @@ class PandasDatasource(Datasource):
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
-    ) -> JSONPandasAsset:  # type: ignore[valid-type]
+    ) -> JSONAsset:  # type: ignore[valid-type]
         """Adds a JSON DataAsst to the present "PandasDatasource" object.
 
         Args:
@@ -182,7 +161,7 @@ class PandasDatasource(Datasource):
             order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
-        asset = JSONPandasAsset(
+        asset = JSONAsset(
             name=name,
             base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
@@ -198,7 +177,7 @@ class PandasDatasource(Datasource):
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
-    ) -> ParquetPandasAsset:  # type: ignore[valid-type]
+    ) -> ParquetAsset:  # type: ignore[valid-type]
         """dds a Parquet DataAsst to the present "PandasDatasource" object.
 
         Args:
@@ -208,7 +187,7 @@ class PandasDatasource(Datasource):
             order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
-        asset = ParquetPandasAsset(
+        asset = ParquetAsset(
             name=name,
             base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
