@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 from contextlib import contextmanager
 from pprint import pprint
 from typing import Callable, ContextManager, Generator, Optional, Tuple
 
 import pytest
-import sqlalchemy.engine
 from pydantic import ValidationError
 from typing_extensions import TypeAlias
 
