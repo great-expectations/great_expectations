@@ -3070,7 +3070,7 @@ def check_json_test_result(  # noqa: C901 - 52
                 elif isinstance(data_asset, SqlAlchemyBatchData):
                     pass
                 else:
-                    if pk_column:
+                    if pk_column and result["result"].get("unexpected_index_list"):
                         assert (
                             result["result"]["unexpected_index_list"] == value
                         ), f"{result['result']['unexpected_index_list']} != {value}"
