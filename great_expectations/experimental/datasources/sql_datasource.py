@@ -175,7 +175,7 @@ class TableAsset(DataAsset):
         if not table_exists:
             raise TestConnectionError(
                 f'Attempt to connect to table: "{table_str}" failed because the table '
-                "does not exist."
+                f'"{self.table_name}" does not exist.'
             )
 
     def batch_request_options_template(

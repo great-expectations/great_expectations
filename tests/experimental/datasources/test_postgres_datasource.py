@@ -746,7 +746,7 @@ def bad_table_name_config() -> tuple[str, str, str, TestConnectionError]:
     schema_name = "good_schema"
     test_connection_error = TestConnectionError(
         'Attempt to connect to table: "good_schema.bad_table" failed because the table '
-        "does not exist."
+        '"bad_table" does not exist.'
     )
     return connection_string, table_name, schema_name, test_connection_error
 
