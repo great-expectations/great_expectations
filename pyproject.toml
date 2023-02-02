@@ -180,7 +180,6 @@ exclude = [
     'tests/experimental/datasources/integration/conftest\.py',
     'tests/experimental/datasources/integration/integration_test_utils\.py',
     'tests/experimental/datasources/integration/test_integration_datasource\.py',
-    'tests/experimental/datasources/test_pandas_datasource\.py',
     'tests/experimental/datasources/test_spark_datasource\.py',
 ]
 
