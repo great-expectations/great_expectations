@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import pytest
 
+from great_expectations.data_context.data_context import (
+    AbstractDataContext,
+    CloudDataContext,
+)
 from great_expectations.data_context.data_context.base_data_context import (
     _resolve_cloud_args as base_data_context_resolver,
-)
-from great_expectations.data_context.data_context.cloud_data_context import (
-    CloudDataContext,
 )
 from great_expectations.data_context.data_context.data_context import (
     _resolve_cloud_args as data_context_resolver,
@@ -236,3 +239,36 @@ def test_get_context_resolve_cloud_args(
 ):
     actual_resolved_args = get_context_resolver(**cloud_args)
     assert actual_resolved_args == expected_resolved_args
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+@pytest.mark.parametrize(
+    "id, ge_cloud_id, expected",
+    [
+        pytest.param("abc123", None, "abc123", id="only id"),
+        pytest.param(None, "abc123", "abc123", id="only ge_cloud_id"),
+        pytest.param(None, None, None, id="neither id nor ge_cloud_id"),
+    ],
+)
+def test_data_context__resolve_id_and_ge_cloud_id_success(
+    id: str | None, ge_cloud_id: str | None, expected: str | None
+):
+    resolved = AbstractDataContext._resolve_id_and_ge_cloud_id(
+        id=id, ge_cloud_id=ge_cloud_id
+    )
+    assert resolved == expected
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_data_context__resolve_id_and_ge_cloud_id_failure():
+    id = "abc123"
+    ge_cloud_id = "def456"
+
+    with pytest.raises(ValueError) as e:
+        _ = AbstractDataContext._resolve_id_and_ge_cloud_id(
+            id=id, ge_cloud_id=ge_cloud_id
+        )
+
+    assert "either id or ge_cloud_id (not both)" in str(e.value)

@@ -1646,22 +1646,22 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _run_checkpoint(
         self,
-        checkpoint_name: Optional[str] = None,
-        id: Optional[str] = None,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
-        run_id: Optional[Union[str, int, float]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[datetime.datetime] = None,
-        result_format: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        checkpoint_name: str | None = None,
+        id: str | None = None,
+        template_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: BatchRequestBase | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        run_id: str | int | float | None = None,
+        run_name: str | None = None,
+        run_time: datetime.datetime | None = None,
+        result_format: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
         **kwargs,
     ) -> CheckpointResult:
         checkpoint: Checkpoint = self.get_checkpoint(
@@ -2704,10 +2704,10 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _run_profiler_on_data(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
+        batch_list: list[Batch] | None = None,
+        batch_request: BatchRequestBase | None = None,
+        name: str | None = None,
+        id: str | None = None,
     ) -> RuleBasedProfilerResult:
         return RuleBasedProfiler.run_profiler_on_data(
             data_context=self,

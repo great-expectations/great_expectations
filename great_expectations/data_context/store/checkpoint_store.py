@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import itertools
 import logging
 import os
@@ -116,8 +118,8 @@ class CheckpointStore(ConfigurationStore):
 
     def delete_checkpoint(
         self,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
+        name: str | None = None,
+        id: str | None = None,
     ) -> None:
         key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=id
@@ -129,9 +131,7 @@ class CheckpointStore(ConfigurationStore):
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
             )
 
-    def get_checkpoint(
-        self, name: Optional[str], id: Optional[str]
-    ) -> CheckpointConfig:
+    def get_checkpoint(self, name: str | None, id: str | None) -> CheckpointConfig:
         key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=id
         )
@@ -169,7 +169,7 @@ class CheckpointStore(ConfigurationStore):
         return checkpoint_config
 
     def add_checkpoint(
-        self, checkpoint: "Checkpoint", name: Optional[str], id: Optional[str]
+        self, checkpoint: Checkpoint, name: str | None, id: str | None
     ) -> None:
         key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=id
