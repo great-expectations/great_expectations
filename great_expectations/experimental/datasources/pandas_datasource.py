@@ -4,7 +4,7 @@ import copy
 import logging
 import pathlib
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Tuple, Type, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Set, Tuple, Type, Union
 
 import pydantic
 from typing_extensions import ClassVar, Literal
@@ -36,6 +36,14 @@ class PandasDatasourceError(Exception):
 
 
 class _DataFrameAsset(DataAsset):
+    # Pandas specific class attrs
+    _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "name",
+        "base_directory",
+        "regex",
+        "order_by",
+    }
+
     # Pandas specific attributes
     base_directory: pathlib.Path
     regex: Pattern
@@ -44,6 +52,16 @@ class _DataFrameAsset(DataAsset):
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
+
+    class Config:
+        """
+        Need to allow extra fields for the base type because pydantic will first create
+        an instance of `_DataFrameAsset` before we select and create the more specific
+        asset subtype.
+        Each specific subtype should `forbid` extra fields.
+        """
+
+        extra = pydantic.Extra.allow
 
     def test_connection(self) -> None:
         """Test the connection for the CSVAsset.
@@ -159,13 +177,7 @@ class _DataFrameAsset(DataAsset):
                 path=str(path),
                 reader_method=f"read_{self.type}",
                 reader_options=self.dict(
-                    exclude_unset=True,
-                    exclude={  # TODO: don't hardcode
-                        "name",
-                        "base_directory",
-                        "regex",
-                        "order_by",
-                    },
+                    exclude_unset=True, exclude=self._EXCLUDE_FROM_READER_OPTIONS
                 ),
             )
             execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
@@ -239,7 +251,16 @@ class PandasDatasource(Datasource):
     # instance attributes
     type: Literal["pandas"] = "pandas"
     name: str
-    assets: Dict[str, Union[CSVAsset, ExcelAsset, ParquetAsset, JSONAsset]] = {}  # type: ignore[valid-type]
+    assets: Dict[  # type: ignore[valid-type]
+        str,
+        Union[
+            _DataFrameAsset,
+            CSVAsset,
+            ExcelAsset,
+            ParquetAsset,
+            JSONAsset,
+        ],
+    ] = {}
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
