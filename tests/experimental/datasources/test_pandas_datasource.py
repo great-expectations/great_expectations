@@ -17,7 +17,7 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     JSONAsset,
     PandasDatasource,
-    _DataFrameAsset,
+    _FilesystemDataAsset,
 )
 
 if TYPE_CHECKING:
@@ -136,12 +136,12 @@ class TestDynamicPandasAssets:
         ["asset_model", "extra_kwargs"],
         [
             (CSVAsset, {"sep": "|", "names": ["col1", "col2", "col3"]}),
-            (JSONAsset, {"orient": "records", "encoding_errors": "strict"}),
+            (JSONAsset, {"orient": "records", "convert_dates": True}),
         ],
     )
     def test_data_asset_defaults(
         self,
-        asset_model: Type[_DataFrameAsset],
+        asset_model: Type[_FilesystemDataAsset],
         extra_kwargs: dict,
     ):
         """

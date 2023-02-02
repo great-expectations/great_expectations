@@ -354,8 +354,9 @@ def test_update_expectation_suite_success(
             kwargs={"column": "x", "value_set": [1, 2, 4]},
         ),
     ]
-    context.update_expectation_suite(suite)
+    updated_suite = context.update_expectation_suite(suite)
 
+    assert updated_suite.expectations == suite.expectations
     assert context.expectations_store.save_count == 2
 
 
@@ -369,7 +370,7 @@ def test_update_expectation_suite_failure(
     suite = ExpectationSuite(expectation_suite_name=suite_name)
 
     with pytest.raises(gx_exceptions.DataContextError) as e:
-        context.update_expectation_suite(suite)
+        _ = context.update_expectation_suite(suite)
 
     assert f"expectation_suite with name {suite_name} does not exist." in str(e.value)
 
@@ -464,9 +465,10 @@ def test_update_profiler_success(
 
     assert context.profiler_store.save_count == 1
 
-    profiler.rules = {}
-    context.update_profiler(profiler)
+    profiler.rules = []
+    updated_profiler = context.update_profiler(profiler)
 
+    assert updated_profiler.rules == profiler.rules
     assert context.profiler_store.save_count == 2
 
 
@@ -482,7 +484,7 @@ def test_update_profiler_failure(in_memory_data_context: EphemeralDataContextSpy
     )
 
     with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
-        context.update_profiler(profiler)
+        _ = context.update_profiler(profiler)
 
     assert f"Non-existent Profiler configuration named {name}" in str(e.value)
 
