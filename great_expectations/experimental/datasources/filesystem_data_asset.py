@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Set, Tuple
+from typing import TYPE_CHECKING, List, Optional, Pattern, Set, Tuple
 
 import pydantic
 from typing_extensions import ClassVar
