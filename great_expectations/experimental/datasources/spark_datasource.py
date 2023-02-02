@@ -51,6 +51,9 @@ class CSVSparkAsset(DataAsset):
         Raises:
             TestConnectionError
         """
+        if not self.base_directory.exists():
+            raise TestConnectionError(f"Path: {self.base_directory} does not exist.")
+
         success = False
         for filepath in self.base_directory.iterdir():
             if self.regex.match(filepath.name):

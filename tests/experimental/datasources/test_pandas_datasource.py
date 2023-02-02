@@ -410,6 +410,20 @@ def test_pandas_sorter(
 
 def test_test_connection(pandas_datasource: PandasDatasource, csv_path: pathlib.Path):
     regex = r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+    bad_csv_path = "/this/path/is/not/here"
+
+    csv_asset = CSVAsset(
+        name="csv_asset",
+        base_directory=bad_csv_path,
+        regex=regex,
+    )
+    pandas_datasource.assets = {"csv_asset": csv_asset}
+
+    with pytest.raises(TestConnectionError) as e:
+        pandas_datasource.test_connection()
+
+    assert str(e.value) == f"Path: {bad_csv_path} does not exist."
+
     csv_asset = CSVAsset(
         name="csv_asset",
         base_directory=csv_path,
@@ -421,6 +435,6 @@ def test_test_connection(pandas_datasource: PandasDatasource, csv_path: pathlib.
 
     substrings = [
         "No file at path: ",
-        f"/tests/test_sets/taxi_yellow_tripdata_samples matched the regex: {regex}.",
+        f"/tests/test_sets/taxi_yellow_tripdata_samples matched the regex: {regex}",
     ]
     assert all(substring in str(e.value) for substring in substrings)

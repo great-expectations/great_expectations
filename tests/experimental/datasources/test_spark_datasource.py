@@ -281,6 +281,20 @@ def test_spark_sorter(
 
 def test_test_connection(spark_datasource: SparkDatasource, csv_path: pathlib.Path):
     regex = r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+    bad_csv_path = "/this/path/is/not/here"
+
+    csv_spark_asset = CSVSparkAsset(
+        name="csv_asset",
+        base_directory=bad_csv_path,
+        regex=regex,
+    )
+    spark_datasource.assets = {"csv_asset": csv_spark_asset}
+
+    with pytest.raises(TestConnectionError) as e:
+        spark_datasource.test_connection()
+
+    assert str(e.value) == f"Path: {bad_csv_path} does not exist."
+
     csv_spark_asset = CSVSparkAsset(
         name="csv_asset",
         base_directory=csv_path,
@@ -292,6 +306,6 @@ def test_test_connection(spark_datasource: SparkDatasource, csv_path: pathlib.Pa
 
     substrings = [
         "No file at path: ",
-        f"/tests/test_sets/taxi_yellow_tripdata_samples matched the regex: {regex}.",
+        f"/tests/test_sets/taxi_yellow_tripdata_samples matched the regex: {regex}",
     ]
     assert all(substring in str(e.value) for substring in substrings)
