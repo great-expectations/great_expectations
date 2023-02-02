@@ -240,6 +240,7 @@ def assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs):
                 "type": "table",
                 "data_asset_name": "my_asset",
                 "table_name": "my_table",
+                "schema_name": None,
                 "batch_identifiers": {"my_col": {"year": year, "month": month}},
                 "splitter_method": "split_on_year_and_month",
                 "splitter_kwargs": {"column_name": "my_col"},
