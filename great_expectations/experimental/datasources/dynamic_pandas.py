@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import enum
 import functools
 import inspect
 import logging
@@ -48,6 +49,14 @@ except ImportError:
     CSVEngine = Literal["c", "python", "pyarrow", "python-fwf"]
     IndexLabel = Union[Hashable, Sequence[Hashable]]
     StorageOptions = Optional[Dict[str, Any]]
+
+try:
+    from pandas._libs.lib import _NoDefault
+except ImportError:
+
+    class _NoDefault(enum.Enum):  # type: ignore[no-redef]
+        no_default = "NO_DEFAULT"
+
 
 logger = logging.getLogger(__file__)
 
@@ -180,6 +189,8 @@ def _get_default_value(
 ) -> object:
     if param.default is inspect.Parameter.empty:
         default = ...
+    elif param.default is _NoDefault.no_default:
+        default = None
     else:
         default = param.default
     return default
@@ -256,9 +267,12 @@ def _create_pandas_asset_model(
     model_base: M,
     type_field: Tuple[Union[Type, str], str],
     fields_dict: Dict[str, _FieldSpec],
+    extra: pydantic.Extra,
 ) -> M:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
     model = pydantic.create_model(model_name, __base__=model_base, type=type_field, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
+    # can't set both __base__ & __config__ when dynamically creating model
+    model.__config__.extra = extra
     return model
 
 
@@ -284,6 +298,7 @@ def _generate_data_asset_models(
                 model_base=base_model_class,
                 type_field=(f"Literal['{type_name}']", type_name),
                 fields_dict=fields,
+                extra=pydantic.Extra.forbid,
             )
             logger.debug(f"{model_name}\n{pf(fields)}")
         except NameError as err:
