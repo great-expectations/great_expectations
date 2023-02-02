@@ -24,9 +24,10 @@ ls
 echo "done printing ls"
 mkdir build_dir_version_0_14_x
 cd build_dir_version_0_14_x
+pwd
 # Do I need to clone the whole repo here instead of checkout?
 # Might be safer to avoid node package conflicts?
-git clone git@github.com:great-expectations/great_expectations.git
+git clone https://github.com/great-expectations/great_expectations.git
 cd great_expectations
 git checkout $V14
 yarn install
