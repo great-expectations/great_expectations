@@ -520,6 +520,7 @@ class CloudDataContext(SerializableDataContext):
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        del ge_cloud_id
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
