@@ -282,34 +282,38 @@ def test_spark_sorter(
 
 def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, list[str]]:
     base_directory = pathlib.Path("/this/path/is/not/here")
-    regex = re.Pattern("yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    regex = re.compile("yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     error_message_substrings = [f"Path: {base_directory} does not exist."]
     return base_directory, regex, error_message_substrings
 
 
-def bad_regex_directory_config(
-    csv_path: pathlib.Path,
-) -> tuple[pathlib.Path, re.Pattern, list[str]]:
-    base_directory = csv_path
-    regex = re.Pattern("green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, list[str]]:
+    relative_path = pathlib.Path(
+        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+    )
+    base_directory = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    regex = re.compile("green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     error_message_substrings = [
         "No file at path: ",
-        f"/tests/test_sets/taxi_yellow_tripdata_samples matched the regex: {regex}",
+        f"/tests/test_sets/taxi_yellow_tripdata_samples matched the regex: {regex.pattern}",
     ]
     return base_directory, regex, error_message_substrings
 
 
-@pytest.fixture(params=["bad_base_directory_config", "bad_regex_directory_config"])
+@pytest.fixture(params=[bad_base_directory_config, bad_regex_config])
 def datasource_test_connection_error_messages(
-    spark_datasource, request
+    spark_datasource: SparkDatasource, request
 ) -> tuple[SparkDatasource, list[str]]:
+    base_directory, regex, error_message_substrings = request.param()
     csv_spark_asset = CSVSparkAsset(
         name="csv_spark_asset",
-        base_directory=request.param[0],
-        regex=request.param[1],
+        base_directory=base_directory,
+        regex=regex,
     )
     spark_datasource.assets = {"csv_spark_asset": csv_spark_asset}
-    return spark_datasource, request.param[2]
+    return spark_datasource, error_message_substrings
 
 
 def test_test_connection_failures(
