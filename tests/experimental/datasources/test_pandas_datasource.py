@@ -441,7 +441,7 @@ def datasource_test_connection_error_messages(
     return pandas_datasource, request.param[2]
 
 
-def test_test_connection(
+def test_test_connection_failures(
     datasource_test_connection_error_messages: tuple[PandasDatasource, list[str]]
 ):
     (

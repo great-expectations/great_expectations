@@ -1,5 +1,6 @@
 import logging
 import pathlib
+import re
 from dataclasses import dataclass
 from typing import List
 
@@ -279,33 +280,46 @@ def test_spark_sorter(
             assert metadata[key2] == range2
 
 
-def test_test_connection(spark_datasource: SparkDatasource, csv_path: pathlib.Path):
-    regex = r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
-    bad_csv_path = "/this/path/is/not/here"
+def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, list[str]]:
+    base_directory = pathlib.Path("/this/path/is/not/here")
+    regex = re.Pattern("yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    error_message_substrings = [f"Path: {base_directory} does not exist."]
+    return base_directory, regex, error_message_substrings
 
-    csv_spark_asset = CSVSparkAsset(
-        name="csv_asset",
-        base_directory=bad_csv_path,
-        regex=regex,
-    )
-    spark_datasource.assets = {"csv_asset": csv_spark_asset}
 
-    with pytest.raises(TestConnectionError) as e:
-        spark_datasource.test_connection()
-
-    assert str(e.value) == f"Path: {bad_csv_path} does not exist."
-
-    csv_spark_asset = CSVSparkAsset(
-        name="csv_asset",
-        base_directory=csv_path,
-        regex=regex,
-    )
-    spark_datasource.assets = {"csv_spark_asset": csv_spark_asset}
-    with pytest.raises(TestConnectionError) as e:
-        spark_datasource.test_connection()
-
-    substrings = [
+def bad_regex_directory_config(
+    csv_path: pathlib.Path,
+) -> tuple[pathlib.Path, re.Pattern, list[str]]:
+    base_directory = csv_path
+    regex = re.Pattern("green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    error_message_substrings = [
         "No file at path: ",
         f"/tests/test_sets/taxi_yellow_tripdata_samples matched the regex: {regex}",
     ]
-    assert all(substring in str(e.value) for substring in substrings)
+    return base_directory, regex, error_message_substrings
+
+
+@pytest.fixture(params=["bad_base_directory_config", "bad_regex_directory_config"])
+def datasource_test_connection_error_messages(
+    spark_datasource, request
+) -> tuple[SparkDatasource, list[str]]:
+    csv_spark_asset = CSVSparkAsset(
+        name="csv_spark_asset",
+        base_directory=request.param[0],
+        regex=request.param[1],
+    )
+    spark_datasource.assets = {"csv_spark_asset": csv_spark_asset}
+    return spark_datasource, request.param[2]
+
+
+def test_test_connection_failures(
+    datasource_test_connection_error_messages: tuple[SparkDatasource, list[str]]
+):
+    (
+        spark_datasource,
+        error_message_substrings,
+    ) = datasource_test_connection_error_messages
+
+    with pytest.raises(TestConnectionError) as e:
+        spark_datasource.test_connection()
+    assert all(substring in str(e.value) for substring in error_message_substrings)
