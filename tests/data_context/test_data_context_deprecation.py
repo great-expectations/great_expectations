@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from unittest import mock
+
 import pytest
 
 from great_expectations.data_context.data_context.base_data_context import (
@@ -8,6 +12,9 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.data_context.data_context.data_context import (
     _resolve_cloud_args as data_context_resolver,
+)
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
 )
 from great_expectations.data_context.types.base import GXCloudConfig
 from great_expectations.util import _resolve_cloud_args as get_context_resolver
@@ -236,3 +243,39 @@ def test_get_context_resolve_cloud_args(
 ):
     actual_resolved_args = get_context_resolver(**cloud_args)
     assert actual_resolved_args == expected_resolved_args
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "method_name, required_args",
+    [
+        pytest.param(
+            "save_expectation_suite", ["expectation_suite"], id="save_expectation_suite"
+        ),
+        pytest.param("save_datasource", ["datasource"], id="save_datasource"),
+        pytest.param("save_profiler", ["profiler"], id="save_profiler"),
+        pytest.param(
+            "create_expectation_suite",
+            ["expectation_suite_name"],
+            id="create_expectation_suite",
+        ),
+    ],
+)
+def test_data_context_crud_api_deprecation(
+    in_memory_runtime_context: EphemeralDataContext,
+    method_name: str,
+    required_args: list[str],
+):
+    context = in_memory_runtime_context
+
+    method = getattr(context, method_name)
+    args = {arg: mock.Mock() for arg in required_args}
+
+    with pytest.warns() as record:
+        try:
+            method(**args)
+        except Exception:
+            pass
+
+    assert len(record) == 1
+    assert isinstance(record[0].message, DeprecationWarning)
