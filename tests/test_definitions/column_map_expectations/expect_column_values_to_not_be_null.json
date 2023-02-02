@@ -46,7 +46,7 @@
           "out": {
             "success": false,
             "unexpected_list": [null, null, null, null],
-            "unexpected_index_list": [0,1, 2, 3]
+            "unexpected_index_list": [0, 1, 2, 3]
           }
         },{
           "title": "positive_mostly",
@@ -84,7 +84,7 @@
           "out": {
             "success": false,
             "unexpected_list": [null],
-            "unexpected_index_list": [2]
+            "unexpected_index_list": [{"one_null": null, "pk_index": 2}]
           }
         },{
           "title": "positive_case_with_mostly_and_no_unexpected_values",
@@ -112,11 +112,7 @@
               null,
               null
             ],
-            "unexpected_index_list": [
-              0,
-              1,
-              2
-            ]
+            "unexpected_index_list": [{"three_null": null, "pk_index": 0}, {"three_null": null, "pk_index": 1}, {"three_null": null, "pk_index": 2}]
           }
         }]
     }]
