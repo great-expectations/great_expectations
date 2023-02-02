@@ -2412,7 +2412,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         config_version: float,
         rules: dict[str, dict],
         variables: dict | None,
-    ):
+    ) -> RuleBasedProfiler:
         config_data = {
             "name": name,
             "id": id,
