@@ -49,14 +49,14 @@ ParquetAsset = _ASSET_MODELS["parquet"]
 def _build_filesystem_data_asset_class(
     superclass: Type[_FilesystemDataAsset],
 ) -> Type[_FilesystemDataAsset]:
-    def get_reader_method(self) -> str:
+    def _get_reader_method(self) -> str:
         return f"read_{self.type}"
 
-    def get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str] | None:
         return None
 
-    setattr(superclass, "get_reader_method", get_reader_method)
-    setattr(superclass, "get_reader_options_include", get_reader_options_include)
+    setattr(superclass, "_get_reader_method", _get_reader_method)
+    setattr(superclass, "_get_reader_options_include", _get_reader_options_include)
 
     return superclass
 

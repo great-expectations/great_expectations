@@ -52,13 +52,13 @@ class _FilesystemDataAsset(DataAsset):
 
         extra = pydantic.Extra.allow
 
-    def get_reader_method(self) -> str:
+    def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "reader_method" for File-Path style DataAsset extensions as temporary \
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
-    def get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str] | None:
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""
@@ -176,9 +176,9 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         ):
             batch_spec = PathBatchSpec(
                 path=str(path),
-                reader_method=self.get_reader_method(),
+                reader_method=self._get_reader_method(),
                 reader_options=self.dict(
-                    include=self.get_reader_options_include(),
+                    include=self._get_reader_options_include(),
                     exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                     exclude_unset=True,
                 ),

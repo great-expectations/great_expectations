@@ -34,10 +34,10 @@ class CSVSparkAsset(_FilesystemDataAsset):
     header: bool = False
     inferSchema: bool = False
 
-    def get_reader_method(self) -> str:
+    def _get_reader_method(self) -> str:
         return f"{self.type[0:-6]}"
 
-    def get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str] | None:
         return {"header", "inferSchema"}
 
 
