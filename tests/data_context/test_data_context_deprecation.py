@@ -274,6 +274,8 @@ def test_data_context_crud_api_deprecation(
     with pytest.warns() as record:
         try:
             method(**args)
+        # We only care about triggering the method to ensure deprecation
+        # The actual underlying logic of each method is under test elsewhere in the test suite
         except Exception:
             pass
 
