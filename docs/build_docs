@@ -13,11 +13,19 @@ git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V
 git tag | grep -E "^[0-9]{1,}\.13\.[0-9]{1,}" | sort -V | tail -1
 
 # Get version 0.14.x where x is largest, check out and build docs
+echo "Building docs for 0.14.x"
 V14=$(git tag | grep -E "^[0-9]{1,}\.14\.[0-9]{1,}" | sort -V | tail -1)
+mkdir build_dir_version_0_14_x
+cd build_dir_version_0_14_x
 git checkout $V14
 yarn install
 yarn build
-mv build/ versioned_docs/version-$V14
+mv build/ ../versioned_docs/version-$V14
+cd ..
+ls
+pwd
+echo "Done building docs for 0.14.x"
+
 
 # Get version 0.15.x where x is largest, check out and build docs
 V15=$(git tag | grep -E "^[0-9]{1,}\.15\.[0-9]{1,}" | sort -V | tail -1)
