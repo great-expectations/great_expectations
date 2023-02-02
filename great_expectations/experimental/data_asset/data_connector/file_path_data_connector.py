@@ -73,7 +73,6 @@ class FilePathDataConnector(DataConnector):
 
         if default_regex is None:
             default_regex = {}
-
         self._default_regex = default_regex
 
         self._sorters = build_sorters_from_config(config_list=sorters)  # type: ignore[arg-type]
