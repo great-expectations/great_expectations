@@ -1,9 +1,9 @@
 from contextlib import contextmanager
 from pprint import pprint
 from typing import Callable, ContextManager, Generator, Optional, Tuple
-from unittest import mock
 
 import pytest
+import pytest_mock
 from pydantic import ValidationError
 from typing_extensions import TypeAlias
 
@@ -100,7 +100,9 @@ def test_add_table_asset_with_splitter(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        with mock.patch("sqlalchemy.inspect"), mock.patch("sqlalchemy.create_engine"):
+        with pytest_mock.patch("sqlalchemy.inspect"), pytest_mock.patch(
+            "sqlalchemy.create_engine"
+        ):
             asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter("my_column")
         assert len(source.assets) == 1
@@ -125,7 +127,9 @@ def test_add_table_asset_with_no_splitter(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        with mock.patch("sqlalchemy.inspect"), mock.patch("sqlalchemy.create_engine"):
+        with pytest_mock.patch("sqlalchemy.inspect"), pytest_mock.patch(
+            "sqlalchemy.create_engine"
+        ):
             asset = source.add_table_asset(name="my_asset", table_name="my_table")
         assert len(source.assets) == 1
         assert asset == list(source.assets.values())[0]
