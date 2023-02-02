@@ -439,7 +439,7 @@ def test_pandas_sorter(
 
 def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     base_directory = pathlib.Path("/this/path/is/not/here")
-    regex = re.compile("yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     test_connection_error = TestConnectionError(
         f"Path: {base_directory.resolve()} does not exist."
     )
@@ -453,7 +453,7 @@ def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     base_directory = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    regex = re.compile("green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     test_connection_error = TestConnectionError(
         f"No file at path: {base_directory.resolve()} matched the regex: {regex.pattern}"
     )
