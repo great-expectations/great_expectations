@@ -17,7 +17,7 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     JSONAsset,
     PandasDatasource,
-    _DataFrameAsset,
+    _FilesystemDataAsset,
 )
 
 if TYPE_CHECKING:
@@ -126,7 +126,8 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            t.__name__.lower().split("asset")[0] for t in PandasDatasource.asset_types
+            t.__name__.lower().split("pandasasset")[0]
+            for t in PandasDatasource.asset_types
         }
         print(asset_class_names)
 
@@ -141,7 +142,7 @@ class TestDynamicPandasAssets:
     )
     def test_data_asset_defaults(
         self,
-        asset_model: Type[_DataFrameAsset],
+        asset_model: Type[_FilesystemDataAsset],
         extra_kwargs: dict,
     ):
         """

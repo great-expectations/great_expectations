@@ -276,7 +276,7 @@ def _create_pandas_asset_model(
     return model
 
 
-def _generate_data_asset_models(
+def _generate_pandas_data_asset_models(
     base_model_class: M, whitelist: Optional[Sequence[str]] = None
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(whitelist)
