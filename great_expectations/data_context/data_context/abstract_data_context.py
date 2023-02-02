@@ -4731,4 +4731,4 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     ) -> str | None:
         if id and ge_cloud_id:
             raise ValueError("Please only pass in either id or ge_cloud_id (not both)")
-        return id if id else ge_cloud_id
+        return id or ge_cloud_id
