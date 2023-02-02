@@ -247,7 +247,7 @@ def test_get_context_resolve_cloud_args(
     "id, ge_cloud_id, expected",
     [
         pytest.param("abc123", None, "abc123", id="only id"),
-        pytest.param(None, "abc123", "abc123", id="only ge_cloud_id"),
+        pytest.param(None, "def456", "def456", id="only ge_cloud_id"),
         pytest.param(None, None, None, id="neither id nor ge_cloud_id"),
     ],
 )
