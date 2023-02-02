@@ -286,6 +286,7 @@ class TableAsset(DataAsset):
                 "type": "table",
                 "data_asset_name": self.name,
                 "table_name": self.table_name,
+                "schema_name": self.schema_name,
                 "batch_identifiers": {},
             }
             if column_splitter:
