@@ -46,7 +46,9 @@ JSONAsset = _ASSET_MODELS["json"]
 ParquetAsset = _ASSET_MODELS["parquet"]
 
 
-def build_filesystem_data_asset_class(superclass: Type[_FilesystemDataAsset]):
+def build_filesystem_data_asset_class(
+    superclass: Type[_FilesystemDataAsset],
+) -> Type[_FilesystemDataAsset]:
     def get_reader_method(self) -> str:
         return f"read_{self.type}"
 
