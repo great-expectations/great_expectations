@@ -15,8 +15,13 @@ git tag | grep -E "^[0-9]{1,}\.13\.[0-9]{1,}" | sort -V | tail -1
 # Get version 0.14.x where x is largest, check out and build docs
 echo "Building docs for 0.14.x"
 V14=$(git tag | grep -E "^[0-9]{1,}\.14\.[0-9]{1,}" | sort -V | tail -1)
+echo "printing pwd"
+pwd
+echo "printing pwd"
 mkdir build_dir_version_0_14_x
 cd build_dir_version_0_14_x
+# Do I need to clone the whole repo here instead of checkout?
+# Might be safer to avoid node package conflicts?
 git checkout $V14
 yarn install
 yarn build
