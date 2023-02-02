@@ -768,7 +768,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
         save_changes: bool | None = None,
-    ) -> None:
+    ) -> Datasource:
         """Updates a Datasource that already exists in the store.
 
         Args:
@@ -776,7 +776,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             save_changes: do I save changes to disk?
         """
         save_changes = self._determine_save_changes_flag(save_changes)
-        self._update_datasource(datasource=datasource, save_changes=save_changes)
+        return self._update_datasource(datasource=datasource, save_changes=save_changes)
 
     def _update_datasource(
         self,
@@ -2276,7 +2276,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def update_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
-    ) -> None:
+    ) -> ExpectationSuite:
         """Update an ExpectationSuite that already exists.
 
         Args:
@@ -2292,7 +2292,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"expectation_suite with name {expectation_suite_name} does not exist."
             )
 
-        self._add_expectation_suite(
+        return self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             id=expectation_suite.ge_cloud_id,
             expectations=expectation_suite.expectations,
@@ -2539,7 +2539,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
-    def update_profiler(self, profiler: RuleBasedProfiler) -> None:
+    def update_profiler(self, profiler: RuleBasedProfiler) -> RuleBasedProfiler:
         """Update a Profiler that already exists.
 
         Args:
@@ -2548,7 +2548,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             ProfilerNotFoundError: A profiler with the given name/id does not already exist.
         """
-        RuleBasedProfiler.update_profiler(
+        return RuleBasedProfiler.update_profiler(
             profiler=profiler,
             profiler_store=self.profiler_store,
             data_context=self,

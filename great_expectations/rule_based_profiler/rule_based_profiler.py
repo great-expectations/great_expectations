@@ -1247,7 +1247,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         profiler: RuleBasedProfiler,
         profiler_store: ProfilerStore,
         data_context: AbstractDataContext,
-    ) -> None:
+    ) -> RuleBasedProfiler:
         name = profiler.name
         id = profiler.ge_cloud_id
 
@@ -1268,8 +1268,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         else:
             RuleBasedProfiler.delete_profiler(name=name, profiler_store=profiler_store)
 
-        _ = RuleBasedProfiler.add_profiler(
-            config=profiler.config,
+        config = profiler.config
+        config.config_version = profiler.config_version
+        config.rules = {rule.name: rule.to_dict() for rule in profiler.rules}
+        config.variables = convert_variables_to_dict(profiler.variables)
+
+        return RuleBasedProfiler.add_profiler(
+            config=config,
             data_context=data_context,
             profiler_store=profiler_store,
         )
