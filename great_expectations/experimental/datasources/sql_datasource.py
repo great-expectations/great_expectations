@@ -280,6 +280,7 @@ class TableAsset(DataAsset):
 
         batch_list: List[Batch] = []
         column_splitter = self.column_splitter
+        batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
             batch_metadata = copy.deepcopy(request.options)
             batch_spec_kwargs = {
