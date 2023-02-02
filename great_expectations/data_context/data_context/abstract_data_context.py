@@ -124,9 +124,6 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
 )
-from great_expectations.rule_based_profiler.helpers.util import (
-    convert_variables_to_dict,
-)
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
