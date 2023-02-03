@@ -146,6 +146,23 @@ class TestDynamicPandasAssets:
 
         assert type_name in asset_class_names
 
+    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    def test_minimal_validation(self, asset_class: Type[_FilesystemDataAsset]):
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            asset_class(  # type: ignore[call-arg] # type has default
+                name="test",
+                base_directory=pathlib.Path(__file__),
+                regex=re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
+                foo="bar",
+            )
+
+        errors_dict = exc_info.value.errors()
+        assert {
+            "loc": ("foo",),
+            "msg": "extra fields not permitted",
+            "type": "value_error.extra",
+        } == errors_dict[-1]
+
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],
         [
