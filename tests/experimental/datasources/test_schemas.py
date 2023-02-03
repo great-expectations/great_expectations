@@ -9,7 +9,7 @@ import pytest
 from great_expectations.experimental.datasources import _SCHEMAS_DIR
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
-PANDAS_CONSTRAINT_VERSION: str = "1.3.5"  # this is the version we run in the standard test pipeline. Update as needed
+PANDAS_STANDARD_TEST_VERSION: str = "1.3.5"  # this is the version we run in the standard test pipeline. Update as needed
 PANDAS_VERSION: str = pandas.__version__
 
 
@@ -32,9 +32,14 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
 
     If this test is failing run `invoke schema --sync` to update schemas and commit the
     changes.
+
+    Note: if the installed version of pandas doesn't match the one used in the standard
+    test pipeline, the test will be marked a `xfail` because the schemas will not match.
     """
-    if PANDAS_CONSTRAINT_VERSION != PANDAS_VERSION:
-        pytest.xfail(reason=f"schema generated with pandas {PANDAS_CONSTRAINT_VERSION}")
+    if PANDAS_STANDARD_TEST_VERSION != PANDAS_VERSION:
+        pytest.xfail(
+            reason=f"schema generated with pandas {PANDAS_STANDARD_TEST_VERSION}"
+        )
 
     print(f"python version: {sys.version.split()[0]}")
     print(f"pandas version: {PANDAS_VERSION}\n")
