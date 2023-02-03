@@ -1,5 +1,5 @@
 {
-    "title": "TableAsset",
+    "title": "CSVSparkAsset",
     "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
     "type": "object",
     "properties": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "table",
+            "default": "csv_spark",
             "enum": [
-                "table"
+                "csv_spark"
             ],
             "type": "string"
         },
@@ -22,19 +22,32 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "table_name": {
-            "title": "Table Name",
-            "type": "string"
+        "base_directory": {
+            "title": "Base Directory",
+            "type": "string",
+            "format": "path"
         },
-        "column_splitter": {
-            "$ref": "#/definitions/SqlYearMonthSplitter"
+        "regex": {
+            "title": "Regex",
+            "type": "string",
+            "format": "regex"
+        },
+        "header": {
+            "title": "Header",
+            "default": false,
+            "type": "boolean"
+        },
+        "inferSchema": {
+            "title": "Inferschema",
+            "default": false,
+            "type": "boolean"
         }
     },
     "required": [
         "name",
-        "table_name"
+        "base_directory",
+        "regex"
     ],
-    "additionalProperties": false,
     "definitions": {
         "BatchSorter": {
             "title": "BatchSorter",
@@ -52,38 +65,6 @@
             },
             "required": [
                 "key"
-            ]
-        },
-        "SqlYearMonthSplitter": {
-            "title": "SqlYearMonthSplitter",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "split_on_year_and_month",
-                    "enum": [
-                        "split_on_year_and_month"
-                    ],
-                    "type": "string"
-                },
-                "param_names": {
-                    "title": "Param Names",
-                    "type": "array",
-                    "items": {
-                        "enum": [
-                            "year",
-                            "month"
-                        ],
-                        "type": "string"
-                    }
-                }
-            },
-            "required": [
-                "column_name"
             ]
         }
     }
