@@ -98,8 +98,8 @@ def _get_sqlite_datetime_range(
     column = sa.column(col_name)
     query = sa.select(
         [
-            func.strftime("%Y%m%d", sa.func.min(column)),
-            func.strftime("%Y%m%d", sa.func.max(column)),
+            sa.func.strftime("%Y%m%d", sa.func.min(column)),
+            sa.func.strftime("%Y%m%d", sa.func.max(column)),
         ]
     ).select_from(selectable)
     min_max_dt = [
