@@ -254,15 +254,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
 
         return batch_definition_list
 
-    @public_api
-    def get_available_data_asset_names(self) -> List[str]:
-        """Return the list of asset names known by this DataConnector.
-
-        Returns:
-            A list of available names
-        """
-        return list(self.assets.keys())
-
     def get_unmatched_data_references(self) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
@@ -272,15 +263,6 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
             list of data_references that are not matched by configuration.
         """
         return []
-
-    def get_available_data_asset_names_and_types(self) -> List[Tuple[str, str]]:
-        """
-        Return the list of asset names and types known by this DataConnector.
-
-        Returns:
-        A list of tuples consisting of available names and types
-        """
-        return [(asset["table_name"], asset["type"]) for asset in self.assets.values()]
 
     def build_batch_spec(
         self, batch_definition: BatchDefinition

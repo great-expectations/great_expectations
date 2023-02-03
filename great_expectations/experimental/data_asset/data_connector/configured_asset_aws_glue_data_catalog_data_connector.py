@@ -149,15 +149,6 @@ class ConfiguredAssetAWSGlueDataCatalogDataConnector(DataConnector):
 
         return GlueDataCatalogBatchSpec(batch_spec)
 
-    @public_api
-    def get_available_data_asset_names(self) -> List[str]:
-        """Return the list of asset names known by this DataConnector.
-
-        Returns:
-            A list of available names
-        """
-        return list(self.assets.keys())
-
     def get_unmatched_data_references(self) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache

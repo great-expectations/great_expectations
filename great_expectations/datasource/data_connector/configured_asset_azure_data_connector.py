@@ -12,7 +12,10 @@ from great_expectations.datasource.data_connector.configured_asset_file_path_dat
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.util import list_azure_keys
+from great_expectations.datasource.data_connector.util import (
+    list_azure_keys,
+    sanitize_prefix,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -76,7 +79,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._container = container
-        self._name_starts_with = FilePathDataConnector.sanitize_prefix(name_starts_with)
+        self._name_starts_with = sanitize_prefix(name_starts_with)
         self._delimiter = delimiter
 
         if azure_options is None:

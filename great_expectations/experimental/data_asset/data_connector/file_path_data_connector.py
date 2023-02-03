@@ -1,5 +1,6 @@
+import copy
 import logging
-import os
+from pathlib import Path
 from typing import Iterator, List, Optional, cast
 
 import great_expectations.exceptions as gx_exceptions
@@ -11,19 +12,21 @@ from great_expectations.core.batch import (
     BatchSpec,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.datasource.data_connector.batch_filter import (
+from great_expectations.experimental.data_asset.data_connector.asset.asset import Asset
+from great_expectations.experimental.data_asset.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
 )
-from great_expectations.datasource.data_connector.data_connector import DataConnector
-from great_expectations.datasource.data_connector.sorter import Sorter
-from great_expectations.datasource.data_connector.util import (
+from great_expectations.experimental.data_asset.data_connector.data_connector import (
+    DataConnector,
+)
+from great_expectations.experimental.data_asset.data_connector.sorter import Sorter
+from great_expectations.experimental.data_asset.data_connector.util import (
     batch_definition_matches_batch_request,
     build_sorters_from_config,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
-from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -42,37 +45,27 @@ class FilePathDataConnector(DataConnector):
 
     Args:
         name: The name of the Data Connector.
-        datasource_name: The name of this Data Connector's Datasource.
-        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
         default_regex: A regex configuration for filtering data references. The dict can include a regex `pattern` and
             a list of `group_names` for capture groups.
         sorters: A list of sorters for sorting data references.
         batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
-        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
         self,
         name: str,
-        datasource_name: str,
-        execution_engine: Optional[ExecutionEngine] = None,
         default_regex: Optional[dict] = None,
         sorters: Optional[list] = None,
         batch_spec_passthrough: Optional[dict] = None,
-        id: Optional[str] = None,
     ) -> None:
-        logger.debug(f'Constructing FilePathDataConnector "{name}".')
-
         super().__init__(
             name=name,
-            id=id,
-            datasource_name=datasource_name,
-            execution_engine=execution_engine,  # type: ignore[arg-type] # execution_engine cannot be None
             batch_spec_passthrough=batch_spec_passthrough,
         )
 
         if default_regex is None:
             default_regex = {}
+
         self._default_regex = default_regex
 
         self._sorters = build_sorters_from_config(config_list=sorters)  # type: ignore[arg-type]
@@ -81,6 +74,54 @@ class FilePathDataConnector(DataConnector):
     @property
     def sorters(self) -> Optional[dict]:
         return self._sorters
+
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
+
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # data_asset_name: str = batch_definition.data_asset_name
+        # batch_spec_passthrough: dict = self.asset.batch_spec_passthrough
+        # TODO: <Alex>ALEX</Alex>
+        batch_spec_passthrough: dict = {}
+        # TODO: <Alex>ALEX</Alex>
+        # batch_spec_passthrough from data_asset
+        batch_spec_passthrough = copy.deepcopy(batch_spec_passthrough)
+        batch_definition_batch_spec_passthrough = (
+            copy.deepcopy(batch_definition.batch_spec_passthrough) or {}
+        )
+        # batch_spec_passthrough from Batch Definition supersedes batch_spec_passthrough from data_asset
+        batch_spec_passthrough.update(batch_definition_batch_spec_passthrough)
+        batch_definition.batch_spec_passthrough = batch_spec_passthrough
+
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
+        return PathBatchSpec(batch_spec)
+        # TODO: <Alex>ALEX</Alex>
+
+    def _refresh_data_references_cache(self) -> None:
+        # Map data_references to batch_definitions
+        self._data_references_cache = {}
+
+        # TODO: <Alex>ALEX</Alex>
+        for data_reference in self._get_data_reference_list():
+            mapped_batch_definition_list: List[BatchDefinition] = self._map_data_reference_to_batch_definition_list(  # type: ignore[assignment]
+                data_reference=data_reference,
+                # TODO: <Alex>ALEX</Alex>
+                data_asset_name=None,
+                # TODO: <Alex>ALEX</Alex>
+            )
+            self._data_references_cache[data_reference] = mapped_batch_definition_list
+        # TODO: <Alex>ALEX</Alex>
 
     def _get_data_reference_list_from_cache_by_data_asset_name(
         self, data_asset_name: str
@@ -115,6 +156,38 @@ class FilePathDataConnector(DataConnector):
         ]
 
         return path_list
+
+    def get_data_reference_list_count(self) -> int:
+        """
+        Returns the list of data_references known by this DataConnector from its _data_references_cache
+
+        Returns:
+            number of data_references known by this DataConnector.
+        """
+        total_references: int = len(self._data_references_cache)
+        return total_references
+
+    def get_unmatched_data_references(self) -> List[str]:
+        """
+        Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
+        and returning data_reference that do not have an associated data_asset.
+
+        Returns:
+            list of data_references that are not matched by configuration.
+        """
+
+        # TODO: <Alex>ALEX</Alex>
+        # noinspection PyTypeChecker
+        unmatched_data_references: List[str] = list(
+            dict(
+                filter(
+                    lambda element: element[1] is None,
+                    self._data_references_cache.items(),
+                )
+            ).values()
+        )
+        # TODO: <Alex>ALEX</Alex>
+        return unmatched_data_references
 
     def get_batch_definition_list_from_batch_request(  # type: ignore[override] # BaseBatchRequest
         self,
@@ -181,7 +254,6 @@ class FilePathDataConnector(DataConnector):
             )
 
         if batch_request.data_connector_query is not None:
-
             data_connector_query_dict = batch_request.data_connector_query.copy()
             if (
                 batch_request.limit is not None
@@ -196,26 +268,6 @@ class FilePathDataConnector(DataConnector):
                 batch_definition_list=batch_definition_list
             )
 
-        return batch_definition_list
-
-    def _sort_batch_definition_list(
-        self, batch_definition_list: List[BatchDefinition]
-    ) -> List[BatchDefinition]:
-        """
-        Use configured sorters to sort batch_definition
-
-        Args:
-            batch_definition_list (list): list of batch_definitions to sort
-
-        Returns:
-            sorted list of batch_definitions
-
-        """
-        sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))  # type: ignore[union-attr]
-        for sorter in sorters:
-            batch_definition_list = sorter.get_sorted_batch_definitions(
-                batch_definitions=batch_definition_list
-            )
         return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(
@@ -246,34 +298,6 @@ class FilePathDataConnector(DataConnector):
             group_names=group_names,
         )
 
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
-        """
-        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
-
-        Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
-
-        Returns:
-            BatchSpec built from batch_definition
-        """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
-        return PathBatchSpec(batch_spec)
-
-    @staticmethod
-    def sanitize_prefix(text: str) -> str:
-        """
-        Takes in a given user-prefix and cleans it to work with file-system traversal methods
-        (i.e. add '/' to the end of a string meant to represent a directory)
-        """
-        _, ext = os.path.splitext(text)
-        if ext:
-            # Provided prefix is a filename so no adjustment is necessary
-            return text
-        # Provided prefix is a directory (so we want to ensure we append it with '/')
-        return os.path.join(text, "")
-
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
@@ -286,13 +310,41 @@ class FilePathDataConnector(DataConnector):
 batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
 """
             )
-        path = self._get_full_file_path(
-            path=path, data_asset_name=batch_definition.data_asset_name
-        )
+
+        path = self._get_full_file_path(path=path)
+
         return {"path": path}
 
+    def _sort_batch_definition_list(
+        self, batch_definition_list: List[BatchDefinition]
+    ) -> List[BatchDefinition]:
+        """
+        Use configured sorters to sort batch_definition
+
+        Args:
+            batch_definition_list (list): list of batch_definitions to sort
+
+        Returns:
+            sorted list of batch_definitions
+
+        """
+        sorters: Iterator[Sorter] = reversed(list(self.sorters.values()))  # type: ignore[union-attr]
+        for sorter in sorters:
+            batch_definition_list = sorter.get_sorted_batch_definitions(
+                batch_definitions=batch_definition_list
+            )
+
+        return batch_definition_list
+
+    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
+        batch_definition_list: List[BatchDefinition] = [
+            batch_definitions[0]
+            for batch_definitions in self._data_references_cache.values()
+            if batch_definitions is not None
+        ]
+        return batch_definition_list
+
     def _validate_batch_request(self, batch_request: BatchRequestBase) -> None:
-        super()._validate_batch_request(batch_request=batch_request)
         self._validate_sorters_configuration(
             data_asset_name=batch_request.data_asset_name
         )
@@ -312,6 +364,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 configured group_name.
                     """
                 )
+
             if len(group_names) < len(self.sorters):
                 raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" is configured with {len(group_names)} group names;
@@ -319,13 +372,21 @@ this is fewer than number of sorters specified, which is {len(self.sorters)}.
                     """
                 )
 
-    def _get_batch_definition_list_from_cache(self) -> List[BatchDefinition]:
-        raise NotImplementedError
-
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
-        raise NotImplementedError
+        regex_config: dict = copy.deepcopy(self._default_regex)
+        asset: Optional[Asset] = None
+        if data_asset_name:
+            asset = self._get_asset(data_asset_name=data_asset_name)
 
-    def _get_full_file_path(
-        self, path: str, data_asset_name: Optional[str] = None
-    ) -> str:
-        raise NotImplementedError
+        if asset is not None:
+            # Override the defaults
+            if asset.pattern:
+                regex_config["pattern"] = asset.pattern
+            if asset.group_names:
+                regex_config["group_names"] = asset.group_names
+
+        return regex_config
+
+    def _get_full_file_path(self, path: str) -> str:
+        base_directory: str = self.base_directory
+        return str(Path(base_directory).joinpath(path))
