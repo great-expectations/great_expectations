@@ -465,7 +465,7 @@ def docker(
 
 
 @invoke.task(
-    aliases=("schema",),
+    aliases=("schema", "schemas"),
     help={
         "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class.",
         "sync": "Update the json schemas at `great_expectations/experimental/datasources/schemas`",
