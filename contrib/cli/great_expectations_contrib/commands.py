@@ -65,7 +65,7 @@ def perform_check(suppress_output: bool) -> bool:
         Command(
             "ruff",
             "ruff --select I --fix .",
-            "Please ensure that your imports are sorted properly with `isort --profile black .`",
+            "Please ensure that your imports are sorted properly with `ruff --select I --fix .`",
         ),
         Command(
             "pytest",
