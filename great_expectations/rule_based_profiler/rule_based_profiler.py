@@ -1057,7 +1057,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
     ) -> RuleBasedProfilerResult:
@@ -1065,7 +1065,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             data_context=data_context,
             profiler_store=profiler_store,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
         return profiler.run(
@@ -1087,13 +1087,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> RuleBasedProfilerResult:
         profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
             data_context=data_context,
             profiler_store=profiler_store,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
         rule: Rule
@@ -1188,19 +1188,19 @@ class BaseRuleBasedProfiler(ConfigPeer):
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> RuleBasedProfiler:
-        key = RuleBasedProfiler._construct_profiler_key(name=name, id=ge_cloud_id)
+        key = RuleBasedProfiler._construct_profiler_key(name=name, id=id)
         try:
             profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
         except gx_exceptions.InvalidKeyError as exc_ik:
-            id: Union[GXCloudIdentifier, ConfigurationIdentifier] = (
+            config_id: Union[GXCloudIdentifier, ConfigurationIdentifier] = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
             )
             raise gx_exceptions.ProfilerNotFoundError(
-                message=f'Non-existent Profiler configuration named "{id}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Profiler configuration named "{config_id}".\n\nDetails: {exc_ik}'
             )
 
         config: dict = profiler_config.to_json_dict()
@@ -1226,20 +1226,20 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def delete_profiler(
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
-        key = RuleBasedProfiler._construct_profiler_key(name=name, id=ge_cloud_id)
+        key = RuleBasedProfiler._construct_profiler_key(name=name, id=id)
 
         try:
             profiler_store.remove_key(key=key)
         except (gx_exceptions.InvalidKeyError, KeyError) as exc_ik:
-            id = (
+            config_id = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
             )
             raise gx_exceptions.ProfilerNotFoundError(
-                message=f'Non-existent Profiler configuration named "{id}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Profiler configuration named "{config_id}".\n\nDetails: {exc_ik}'
             )
 
     @staticmethod

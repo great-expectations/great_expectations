@@ -64,6 +64,10 @@ class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
     pass
 
 
+class RenderingError(GreatExpectationsError):
+    pass
+
+
 class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
     def __init__(self, message, validation_error=None, field_name=None) -> None:
         if validation_error is not None:
