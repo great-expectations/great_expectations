@@ -124,9 +124,6 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
 )
-from great_expectations.rule_based_profiler.helpers.util import (
-    convert_variables_to_dict,
-)
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.validator import BridgeValidator, Validator
@@ -2363,35 +2360,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new ExpectationSuite or an updated once (depending on whether or not it existed before this method call).
         """
-        existing_suite = None
-        try:
-            existing_suite = self.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name, ge_cloud_id=id
-            )
-        except gx_exceptions.DataContextError:
-            logger.info(
-                f"Could not find an existing suite named '{expectation_suite_name}'; creating a new one."
-            )
-
-        if existing_suite:
-            self.delete_expectation_suite(
-                expectation_suite_name=existing_suite.name,
-                ge_cloud_id=existing_suite.ge_cloud_id,
-            )
-            if id is None:
-                id = existing_suite.ge_cloud_id
-            if expectations is None:
-                expectations = existing_suite.expectations
-            if evaluation_parameters is None:
-                evaluation_parameters = existing_suite.evaluation_parameters
-            if data_asset_type is None:
-                data_asset_type = existing_suite.data_asset_type
-            if execution_engine_type is None:
-                execution_engine_type = existing_suite.execution_engine_type
-            if meta is None:
-                meta = existing_suite.meta
-
-        return self.add_expectation_suite(
+        return self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             id=id,
             expectations=expectations,
@@ -2399,6 +2368,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_asset_type=data_asset_type,
             execution_engine_type=execution_engine_type,
             meta=meta,
+            overwrite_existing=True,  # `add_or_update` always overwrites.
         )
 
     def delete_expectation_suite(
@@ -2499,8 +2469,25 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted Profiler constructed by the input arguments.
         """
+        return self._add_profiler(
+            name=name,
+            id=None,
+            config_version=config_version,
+            rules=rules,
+            variables=variables,
+        )
+
+    def _add_profiler(
+        self,
+        name: str,
+        id: str | None,
+        config_version: float,
+        rules: dict[str, dict],
+        variables: dict | None,
+    ) -> RuleBasedProfiler:
         config_data = {
             "name": name,
+            "id": id,
             "config_version": config_version,
             "rules": rules,
             "variables": variables,
@@ -2610,31 +2597,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new Profiler or an updated one (depending on whether or not it existed before this method call).
         """
-        existing_profiler = None
-        try:
-            existing_profiler = self.get_profiler(name=name, id=id)
-        except gx_exceptions.ProfilerNotFoundError:
-            logger.info(
-                f"Could not find an existing profiler named '{name}'; creating a new one."
-            )
-
-        if existing_profiler:
-            self.delete_profiler(
-                name=existing_profiler.name, id=existing_profiler.ge_cloud_id
-            )
-            if id is None:
-                id = existing_profiler.ge_cloud_id
-            if config_version is None:
-                config_version = existing_profiler.config_version
-            if rules is None:
-                rules = {rule.name: rule.to_dict() for rule in existing_profiler.rules}
-            if variables is None:
-                variables = convert_variables_to_dict(existing_profiler.variables)
-
         config_version = config_version or 1.0
         rules = rules or {}
-        return self.add_profiler(
-            name=name, config_version=config_version, rules=rules, variables=variables
+        return self._add_profiler(
+            name=name,
+            id=id,
+            config_version=config_version,
+            rules=rules,
+            variables=variables,
         )
 
     @usage_statistics_enabled_method(
