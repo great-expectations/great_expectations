@@ -386,7 +386,7 @@ class SQLDatasource(Datasource):
                         "Unable to create a SQLAlchemy engine from "
                         f"connection_string: {self.connection_string} due to the "
                         f"following exception: {str(e)}"
-                    )
+                    ) from e
                 self._cached_connection_string = self.connection_string
             else:
                 raise SQLDatasourceError(
@@ -410,7 +410,7 @@ class SQLDatasource(Datasource):
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{str(e)}"
-            )
+            ) from e
         if self.assets and test_assets:
             for asset in self.assets.values():
                 asset._datasource = self
