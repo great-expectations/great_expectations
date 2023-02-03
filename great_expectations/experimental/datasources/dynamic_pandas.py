@@ -23,6 +23,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    overload,
 )
 
 import pandas as pd
@@ -165,10 +166,29 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
 # TODO: make these functions a generator pipeline
 
 
+@overload
 def _extract_io_methods(
+    blacklist: Optional[Sequence[str]] = ...,
+    whitelist: None = ...,
+) -> List[Tuple[str, DataFrameFactoryFn]]:
+    ...
+
+
+@overload
+def _extract_io_methods(
+    blacklist: None = ...,
+    whitelist: Optional[Sequence[str]] = ...,
+) -> List[Tuple[str, DataFrameFactoryFn]]:
+    ...
+
+
+def _extract_io_methods(
+    blacklist: Optional[Sequence[str]] = None,
     whitelist: Optional[Sequence[str]] = None,
 ) -> List[Tuple[str, DataFrameFactoryFn]]:
     member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
+    if blacklist:
+        return [t for t in member_functions if t[0] not in blacklist]
     if whitelist:
         return [t for t in member_functions if t[0] in whitelist]
     return [t for t in member_functions if t[0].startswith("read_")]
@@ -287,9 +307,10 @@ def _create_pandas_asset_model(
 
 
 def _generate_pandas_data_asset_models(
-    base_model_class: M, whitelist: Optional[Sequence[str]] = None
+    base_model_class: M,
+    blacklist: Optional[Sequence[str]] = None,
 ) -> Dict[str, M]:
-    io_methods = _extract_io_methods(whitelist)
+    io_methods = _extract_io_methods(blacklist=blacklist)
     io_method_sigs = _extract_io_signatures(io_methods)
 
     data_asset_models: Dict[str, M] = {}
