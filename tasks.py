@@ -520,18 +520,18 @@ def type_schema(
         for name in _SourceFactories.type_lookup.type_names():
             model = _SourceFactories.type_lookup[name]
 
+            if (
+                model in {*PandasDatasource.asset_types, PandasDatasource}
+                and _PANDAS_SCHEMA_VERSION != pandas.__version__
+            ):
+                print(
+                    f"🙈  {name} - was generated with pandas {_PANDAS_SCHEMA_VERSION}; skipping"
+                )
+                continue
+
             try:
                 schema_path = schema_dir.joinpath(f"{model.__name__}.json")
                 json_str: str = model.schema_json(indent=indent) + "\n"
-
-                if (
-                    model in {*PandasDatasource.asset_types, PandasDatasource}
-                    and _PANDAS_SCHEMA_VERSION != pandas.__version__
-                ):
-                    print(
-                        f"🙈  {name} - was generated with pandas {_PANDAS_SCHEMA_VERSION}; skipping"
-                    )
-                    continue
 
                 if issubclass(model, Datasource):
                     print(f"🙈  {name} - is a Datasource; skipping")
