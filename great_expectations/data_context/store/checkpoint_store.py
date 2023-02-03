@@ -184,7 +184,7 @@ class CheckpointStore(ConfigurationStore):
         key = self._construct_key_from_checkpoint(checkpoint)
         if self.has_key(key):
             return self.update_checkpoint(checkpoint)
-        return self.add_checkpoint(checkpoint=checkpoint)
+        return self._add_checkpoint(key=key, checkpoint=checkpoint)
 
     def _construct_key_from_checkpoint(
         self, checkpoint: Checkpoint
