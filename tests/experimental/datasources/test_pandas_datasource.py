@@ -465,7 +465,7 @@ def datasource_test_connection_error_messages(
     pandas_datasource: PandasDatasource, request
 ) -> tuple[PandasDatasource, TestConnectionError]:
     base_directory, regex, test_connection_error = request.param()
-    csv_asset = CSVAsset(
+    csv_asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
         base_directory=base_directory,
         regex=regex,
