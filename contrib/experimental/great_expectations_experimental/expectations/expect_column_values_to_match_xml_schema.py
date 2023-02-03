@@ -27,11 +27,6 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 
-try:
-    pass
-except ImportError:
-    pass
-
 
 class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_xml_schema"
