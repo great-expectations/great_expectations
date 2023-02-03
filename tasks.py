@@ -490,7 +490,13 @@ def type_schema(
 
     --list to show all available types
     """
+    import pandas
+
+    from great_expectations.experimental.datasources import _PANDAS_SCHEMA_VERSION
     from great_expectations.experimental.datasources.interfaces import Datasource
+    from great_expectations.experimental.datasources.pandas_datasource import (
+        PandasDatasource,
+    )
     from great_expectations.experimental.datasources.sources import _SourceFactories
 
     buffer = io.StringIO()
@@ -517,6 +523,15 @@ def type_schema(
             try:
                 schema_path = schema_dir.joinpath(f"{model.__name__}.json")
                 json_str: str = model.schema_json(indent=indent) + "\n"
+
+                if (
+                    model in {*PandasDatasource.asset_types, PandasDatasource}
+                    and _PANDAS_SCHEMA_VERSION != pandas.__version__
+                ):
+                    print(
+                        f"🙈  {name} - was generated with pandas {_PANDAS_SCHEMA_VERSION}; skipping"
+                    )
+                    continue
 
                 if issubclass(model, Datasource):
                     print(f"🙈  {name} - is a Datasource; skipping")
