@@ -437,23 +437,23 @@ def test_pandas_sorter(
             assert metadata[key2] == range2
 
 
-def bad_base_directory_config() -> tuple[pathlib.Path, str, TestConnectionError]:
+def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     base_directory = pathlib.Path("/this/path/is/not/here")
-    regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     test_connection_error = TestConnectionError(
         f"Path: {base_directory.resolve()} does not exist."
     )
     return base_directory, regex, test_connection_error
 
 
-def bad_regex_config() -> tuple[pathlib.Path, str, TestConnectionError]:
+def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     relative_path = pathlib.Path(
         "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
     base_directory = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    regex = r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     test_connection_error = TestConnectionError(
         f"No file at path: {base_directory.resolve()} matched the regex: {regex}"
     )
