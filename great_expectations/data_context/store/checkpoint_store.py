@@ -176,18 +176,7 @@ class CheckpointStore(ConfigurationStore):
         )
         self._add_checkpoint(key=key, checkpoint=checkpoint)
 
-    def _add_checkpoint(
-        self,
-        key: GXCloudIdentifier | ConfigurationIdentifier,
-        checkpoint: Checkpoint,
-    ) -> None:
-        checkpoint_config = checkpoint.get_config()
-        checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
-        if isinstance(checkpoint_ref, GXCloudIDAwareRef):
-            cloud_id = checkpoint_ref.cloud_id
-            checkpoint.ge_cloud_id = uuid.UUID(cloud_id)  # type: ignore[misc]
-
-    def update_checkpoint(self, checkpoint: Checkpoint) -> None:
+    def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
         name = checkpoint.name
         id = checkpoint.ge_cloud_id
 
@@ -201,7 +190,19 @@ class CheckpointStore(ConfigurationStore):
                 f"Could not find a Checkpoint named {name}"
             )
 
-        self._add_checkpoint(key=key, checkpoint=checkpoint)
+        return self._add_checkpoint(key=key, checkpoint=checkpoint)
+
+    def _add_checkpoint(
+        self,
+        key: GXCloudIdentifier | ConfigurationIdentifier,
+        checkpoint: Checkpoint,
+    ) -> Checkpoint:
+        checkpoint_config = checkpoint.get_config()
+        checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
+        if isinstance(checkpoint_ref, GXCloudIDAwareRef):
+            cloud_id = checkpoint_ref.cloud_id
+            checkpoint.ge_cloud_id = uuid.UUID(cloud_id)  # type: ignore[misc]
+        return checkpoint
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
         """Create a checkpoint config in the store using a store_backend-specific key.

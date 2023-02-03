@@ -1534,7 +1534,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.checkpoint_store.add_checkpoint(checkpoint=checkpoint, name=name, id=id)
         return checkpoint
 
-    def update_checkpoint(self, checkpoint: Checkpoint) -> None:
+    def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
         """Update a Checkpoint that already exists.
 
         Args:
@@ -1543,7 +1543,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: A suite with the given name does not already exist.
         """
-        self.checkpoint_store.update_checkpoint(checkpoint)
+        return self.checkpoint_store.update_checkpoint(checkpoint)
 
     def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
         self,
@@ -1566,7 +1566,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         slack_webhook: str | None = None,
         notify_on: str | None = None,
         notify_with: str | list[str] | None = None,
-        expectation_suite_ge_cloud_id: str | None = None,
+        expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
     ) -> Checkpoint:
         """Add a new Checkpoint or update an existing one on the context depending on whether it already exists or not.
@@ -1590,71 +1590,15 @@ class AbstractDataContext(ConfigPeer, ABC):
             slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
-            expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
 
         Returns:
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
-        existing_checkpoint = None
-        try:
-            existing_checkpoint = self.get_checkpoint(name=name, ge_cloud_id=id)
-        except gx_exceptions.DataContextError:
-            logger.info(
-                f"Could not find an existing checkpoint named '{name}'; creating a new one."
-            )
-
-        if existing_checkpoint:
-            self.delete_checkpoint(
-                name=existing_checkpoint.name,
-                ge_cloud_id=existing_checkpoint.ge_cloud_id,
-            )
-            existing_config = existing_checkpoint.config
-            if id is None and existing_config.ge_cloud_id:
-                id = str(existing_config.ge_cloud_id)  # Account for UUID
-            if config_version is None:
-                config_version = existing_config.config_version
-            if template_name is None:
-                template_name = existing_config.template_name
-            if module_name is None:
-                module_name = existing_config.module_name
-            if class_name is None:
-                class_name = existing_config.class_name
-            if run_name_template is None:
-                run_name_template = existing_config.run_name_template
-            if expectation_suite_name is None:
-                expectation_suite_name = existing_config.expectation_suite_name
-            if batch_request is None:
-                batch_request = existing_config.batch_request
-            if action_list is None:
-                action_list = existing_config.action_list
-            if evaluation_parameters is None:
-                evaluation_parameters = existing_config.evaluation_parameters
-            if runtime_configuration is None:
-                runtime_configuration = existing_config.runtime_configuration
-            if validations is None:
-                validations = existing_config.validations
-            if profilers is None:
-                profilers = existing_config.profilers
-            if site_names is None:
-                site_names = existing_config.site_names
-            if slack_webhook is None:
-                slack_webhook = existing_config.slack_webhook
-            if notify_on is None:
-                notify_on = existing_config.notify_on
-            if notify_with is None:
-                notify_with = existing_config.notify_with
-            if (
-                expectation_suite_ge_cloud_id
-                and existing_config.expectation_suite_ge_cloud_id
-            ):
-                expectation_suite_ge_cloud_id = str(  # Account for UUID
-                    existing_config.expectation_suite_ge_cloud_id
-                )
-            if default_validation_id is None:
-                default_validation_id = existing_config.default_validation_id
-
         return self.add_checkpoint(
+            data_context=self,
+            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -1673,7 +1617,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_on=notify_on,
             notify_with=notify_with,
             ge_cloud_id=id,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_id,
             default_validation_id=default_validation_id,
         )
 
