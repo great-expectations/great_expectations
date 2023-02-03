@@ -1,0 +1,104 @@
+{
+    "title": "SQLTableAsset",
+    "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "sql_table",
+            "enum": [
+                "sql_table"
+            ],
+            "type": "string"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/BatchSorter"
+            }
+        },
+        "base_directory": {
+            "title": "Base Directory",
+            "type": "string",
+            "format": "path"
+        },
+        "regex": {
+            "title": "Regex",
+            "type": "string",
+            "format": "regex"
+        },
+        "table_name": {
+            "title": "Table Name",
+            "type": "string"
+        },
+        "con": {
+            "title": "Con"
+        },
+        "schema_name": {
+            "title": "Schema Name",
+            "type": "string"
+        },
+        "index_col": {
+            "title": "Index Col",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            ]
+        },
+        "coerce_float": {
+            "title": "Coerce Float",
+            "default": true,
+            "type": "boolean"
+        },
+        "parse_dates": {
+            "title": "Parse Dates"
+        },
+        "columns": {
+            "title": "Columns"
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        }
+    },
+    "required": [
+        "name",
+        "base_directory",
+        "regex",
+        "table_name",
+        "con"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "BatchSorter": {
+            "title": "BatchSorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

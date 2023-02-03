@@ -1,0 +1,132 @@
+{
+    "title": "STATAAsset",
+    "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "stata",
+            "enum": [
+                "stata"
+            ],
+            "type": "string"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/BatchSorter"
+            }
+        },
+        "base_directory": {
+            "title": "Base Directory",
+            "type": "string",
+            "format": "path"
+        },
+        "regex": {
+            "title": "Regex",
+            "type": "string",
+            "format": "regex"
+        },
+        "convert_dates": {
+            "title": "Convert Dates",
+            "default": true,
+            "type": "boolean"
+        },
+        "convert_categoricals": {
+            "title": "Convert Categoricals",
+            "default": true,
+            "type": "boolean"
+        },
+        "index_col": {
+            "title": "Index Col",
+            "type": "string"
+        },
+        "convert_missing": {
+            "title": "Convert Missing",
+            "default": false,
+            "type": "boolean"
+        },
+        "preserve_dtypes": {
+            "title": "Preserve Dtypes",
+            "default": true,
+            "type": "boolean"
+        },
+        "columns": {
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "order_categoricals": {
+            "title": "Order Categoricals",
+            "default": true,
+            "type": "boolean"
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        },
+        "iterator": {
+            "title": "Iterator",
+            "default": false,
+            "type": "boolean"
+        },
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name",
+        "base_directory",
+        "regex"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "BatchSorter": {
+            "title": "BatchSorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}
