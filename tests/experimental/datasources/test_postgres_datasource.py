@@ -808,7 +808,7 @@ def datasource_test_connection_error_messages(
     )
 
 
-pytest.mark.unit
+@pytest.mark.unit
 def test_test_connection_failures(
     mocker,
     datasource_test_connection_error_messages: tuple[
