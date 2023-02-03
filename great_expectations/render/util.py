@@ -297,59 +297,61 @@ def build_count_and_index_table(
     unexpected_count: int,
     unexpected_list: Optional[List[dict]] = None,
     unexpected_index_column_names: Optional[List[str]] = None,
-) -> Tuple[List[str], List[List[Any]]]:
+):
     """
-    Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
-    Unexpected Counts and Indices table for ID/PK.
-
+        Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
+        Unexpected Counts and Indices table for ID/PK.
     Args:
-         partial_unexpected_counts: list of dictionaries containing unexpected values and counts
-         unexpected_index_list: list of dictionaries containing unexpected indices and their values
-         unexpected_count: how many total unexpected values are there?
-         unexpected_list: optional list of all unexpected values. Used default Pandas unexpected
-             indices (without define id/pk columns)
-         unexpected_count: total number of unexpected values. Used to build the header.
+        partial_unexpected_counts: list of dictionaries containing unexpected values and counts
+        unexpected_index_list: list of dictionaries containing unexpected indices and their values
+        unexpected_count: how many total unexpected values are there?
+        unexpected_list: optional list of all unexpected values. Used with default Pandas unexpected
+             indices (without defined id/pk columns)
+        unexpected_index_column_names: list of unexpected_index_column_names
+
     Returns:
         List of strings that will be rendered into DataDocs
 
     """
     table_rows: List[List[str]] = []
     total_count: int = 0
-
     unexpected_index_df = _convert_unexpected_indices_to_df(
         unexpected_index_list=unexpected_index_list,
         unexpected_index_column_names=unexpected_index_column_names,
         unexpected_list=unexpected_list,
         partial_unexpected_counts=partial_unexpected_counts,
     )
+    if unexpected_index_df.empty:
+        raise Exception(
+            f"GX ran into an issue while building count and index table. Please check your settings."
+        )
+
     # if we are using pandas default unexpected_indices
-    if unexpected_index_df is not None and unexpected_index_column_names is None:
+    if unexpected_index_column_names is None:
         unexpected_index_column_names = ["Index"]
 
-    for unexpected_count_dict in partial_unexpected_counts:
-        value: Optional[Any] = unexpected_count_dict.get("value")
-        count: Optional[int] = unexpected_count_dict.get("count")
+    for index, row in unexpected_index_df.iterrows():
+        row_list: List[Union[str, int]] = []
+
+        unexpected_value = index
+        count = int(row.Count)
         if count:
             total_count += count
-
-        row_list: List[Union[str, int]] = []
-        if value is not None and value != "":
-            row_list.append(value)
+        if unexpected_value is not None and unexpected_value != "":
+            row_list.append(unexpected_value)
             row_list.append(count)
-        elif value == "":
+        elif unexpected_value == "":
             row_list.append("EMPTY")
             row_list.append(count)
         else:
-            # this value has already been replaced in the unexpected_index_df
-            value = "null"
+            unexpected_value = "null"
             row_list.append("null")
             row_list.append(count)
-        if unexpected_index_column_names:
-            for column_name in unexpected_index_column_names:
-                row_list.append(unexpected_index_df[[column_name]].loc[value].item())
+        for column_name in unexpected_index_column_names:
+            row_list.append(str(row[column_name]))
+
         if len(row_list) > 0:
             table_rows.append(row_list)
-
     # Check to see if we have *all* of the unexpected values accounted for. If so,
     # we show counts. If not, we only show "sampled" unexpected values.
     if total_count == unexpected_count:
@@ -369,30 +371,6 @@ def _convert_unexpected_indices_to_df(
     unexpected_index_column_names: Optional[List[str]] = None,
     unexpected_list: Optional[List[Any]] = None,
 ) -> Optional[pd.DataFrame]:
-    """
-    Helper method to convert the list of unexpected indices into a DataFrame that can be used to
-    display unexpected indices. domain_column (the column the Expectation is run on) is used
-    as the index for the DataFrame, and the columns are the unexpected_index_column_names, or a default
-    value in the case of Pandas, which provides default indices.
-
-    In cases where the number of indices is too great (max 10 by default), the remaining values are
-    truncated and the column contains "..." in their place.
-
-                pk_1
-    giraffe     3
-    lion        4
-    zebra       5 6 8 ...
-
-    Args:
-
-        unexpected_index_list : all unexpected values and indices
-        partial_unexpected_counts : counts for unexpected values (max 20 by default)
-        unexpected_index_column_names:  in the case of defining ID/PK columns
-        unexpected_list: if we are using default Pandas output.
-
-    Returns:
-        pd.DataFrame that contains indices for unexpected values
-    """
     if unexpected_index_column_names:
         # if we have defined unexpected_index_column_names for ID/PK
         unexpected_index_list_as_string: pd.DataFrame = pd.DataFrame(
@@ -401,10 +379,10 @@ def _convert_unexpected_indices_to_df(
         unexpected_index_list_as_string = unexpected_index_list_as_string.fillna(
             value="null"
         )
-        domain_column_name: str = (
-            set(unexpected_index_list[0].keys())
-            .difference(set(unexpected_index_column_names))
-            .pop()
+        domain_column_name_list: List[str] = list(
+            set(unexpected_index_list[0].keys()).difference(
+                set(unexpected_index_column_names)
+            )
         )
     elif unexpected_list:
         # if we are using default Pandas unexpected indices
@@ -416,36 +394,30 @@ def _convert_unexpected_indices_to_df(
         unexpected_index_list_as_string = unexpected_index_list_as_string.fillna(
             value="null"
         )
-        domain_column_name: str = "Value"
+        domain_column_name_list: List[str] = ["Value"]
         unexpected_index_column_names: List[str] = ["Index"]
+
     else:
         return None
 
-    # unexpected indices are joined as list
     all_unexpected_indices: pd.DataFrame = unexpected_index_list_as_string.groupby(
-        domain_column_name
+        domain_column_name_list
     ).agg(lambda y: list(y))
 
-    # filter all_unexpected_indices according to partial_unexpected_counts, since it has a maximum of 20 values by default
-    values_we_have_counts_for: List[str] = list(
-        pd.DataFrame(partial_unexpected_counts)["value"]
+    # add count
+    col_to_count: str = unexpected_index_column_names[0]
+    all_unexpected_indices["Count"] = all_unexpected_indices[col_to_count].apply(
+        lambda x: len(x)
     )
-    # list comprehension to replace None with 'null'
-    values_we_have_counts_for = [
-        "null" if val is None else val for val in values_we_have_counts_for
-    ]
+    all_unexpected_indices.index = all_unexpected_indices.index.map(str)
 
-    filtered_unexpected_indices = all_unexpected_indices[
-        all_unexpected_indices.index.isin(values_we_have_counts_for)
-    ]
-
-    # applying function to every row in Pandas
-    # https://www.geeksforgeeks.org/apply-function-to-every-row-in-a-pandas-dataframe/
     for column in unexpected_index_column_names:
-        filtered_unexpected_indices[column] = filtered_unexpected_indices[column].apply(
+        all_unexpected_indices[column] = all_unexpected_indices[column].apply(
             lambda row: truncate_list_of_indices(row)
         )
-
+    filtered_unexpected_indices = all_unexpected_indices.head(
+        len(partial_unexpected_counts)
+    )
     return filtered_unexpected_indices
 
 
