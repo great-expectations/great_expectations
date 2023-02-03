@@ -188,7 +188,11 @@ def _extract_io_methods(
 ) -> List[Tuple[str, DataFrameFactoryFn]]:
     member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
     if blacklist:
-        return [t for t in member_functions if t[0] not in blacklist]
+        return [
+            t
+            for t in member_functions
+            if t[0] not in blacklist and t[0].startswith("read_")
+        ]
     if whitelist:
         return [t for t in member_functions if t[0] in whitelist]
     return [t for t in member_functions if t[0].startswith("read_")]
