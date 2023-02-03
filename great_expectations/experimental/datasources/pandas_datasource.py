@@ -37,7 +37,7 @@ BLACK_LIST = (
     # "read_parquet",
     # "read_clipboard",
     # "read_feather",
-    "read_fwf",
+    "read_fwf",  # unhandled type
     # "read_gbq",
     # "read_hdf",
     # "read_html",
@@ -45,10 +45,10 @@ BLACK_LIST = (
     # "read_pickle",
     # "read_sas",
     # "read_spss",
-    # "read_sql",
+    "read_sql",  # type-name conflict
     # "read_sql_query",
-    # "read_sql_table",
-    # "read_table",
+    "read_sql_table",  # type-name conflict
+    "read_table",  # type-name conflict
     # "read_xml",
 )
 
@@ -60,20 +60,50 @@ with Timer(text="Generate Models and assign - elapsed time: {milliseconds:.0f} m
         _FilesystemDataAsset, blacklist=BLACK_LIST
     )
 
+    ClipboardAsset = _ASSET_MODELS["clipboard"]
     CSVAsset = _ASSET_MODELS["csv"]
     ExcelAsset = _ASSET_MODELS["excel"]
+    FeatherAsset = _ASSET_MODELS["feather"]
+    GbqAsset = _ASSET_MODELS["gbq"]
+    HdfAsset = _ASSET_MODELS["hdf"]
+    HTMLAsset = _ASSET_MODELS["html"]
     JSONAsset = _ASSET_MODELS["json"]
+    OrcAsset = _ASSET_MODELS["orc"]
     ParquetAsset = _ASSET_MODELS["parquet"]
+    PickleAsset = _ASSET_MODELS["pickle"]
+    SasAsset = _ASSET_MODELS["sas"]
+    SpssAsset = _ASSET_MODELS["spss"]
+    # SqlAsset = _ASSET_MODELS["sql"]
+    Sql_queryAsset = _ASSET_MODELS["sql_query"]
+    # Sql_tableAsset = _ASSET_MODELS["sql_table"]
+    StataAsset = _ASSET_MODELS["stata"]
+    # TableAsset = _ASSET_MODELS["table"]
+    XmlAsset = _ASSET_MODELS["xml"]
 
 with Timer(text="Metadatsource registration - elapsed time: {milliseconds:.0f} ms"):
 
     class PandasDatasource(Datasource):
         # class attributes
         asset_types: ClassVar[List[Type[DataAsset]]] = [
+            ClipboardAsset,
             CSVAsset,
             ExcelAsset,
+            FeatherAsset,
+            GbqAsset,
+            HdfAsset,
+            HTMLAsset,
             JSONAsset,
+            OrcAsset,
             ParquetAsset,
+            PickleAsset,
+            SasAsset,
+            SpssAsset,
+            Sql_queryAsset,
+            # SqlAsset,
+            # Sql_tableAsset,
+            StataAsset,
+            # TableAsset,
+            XmlAsset,
         ]
 
         # instance attributes
@@ -83,10 +113,25 @@ with Timer(text="Metadatsource registration - elapsed time: {milliseconds:.0f} m
             str,
             Union[
                 _FilesystemDataAsset,
+                ClipboardAsset,
                 CSVAsset,
                 ExcelAsset,
+                FeatherAsset,
+                GbqAsset,
+                HdfAsset,
+                HTMLAsset,
                 JSONAsset,
+                OrcAsset,
                 ParquetAsset,
+                PickleAsset,
+                SasAsset,
+                SpssAsset,
+                Sql_queryAsset,
+                # SqlAsset,
+                # Sql_tableAsset,
+                StataAsset,
+                # TableAsset,
+                XmlAsset,
             ],
         ] = {}
 
@@ -217,5 +262,4 @@ with Timer(text="Metadatsource registration - elapsed time: {milliseconds:.0f} m
             )
             return self.add_asset(asset)
 
-
-print(f"{len(_ASSET_MODELS)} Models")
+    print(f"{len(_ASSET_MODELS)} Models")
