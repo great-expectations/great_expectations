@@ -343,7 +343,7 @@ class TableAsset(DataAsset):
 
 
 class SQLDatasource(Datasource):
-    """A generic SQL datasource.
+    """Adds a generic SQL datasource to the data context.
 
     Args:
         name: The name of this datasource.
