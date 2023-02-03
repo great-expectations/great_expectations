@@ -103,7 +103,9 @@ class TestDynamicPandasAssets:
             param("read_csv"),
             param("read_excel"),
             param("read_feather"),
-            param("read_fwf", marks=pytest.mark.xfail),
+            param(
+                "read_fwf", marks=pytest.mark.xfail(reason="unhandled type annotation")
+            ),
             param("read_gbq"),
             param("read_hdf"),
             param("read_html"),
@@ -113,17 +115,23 @@ class TestDynamicPandasAssets:
             param("read_pickle"),
             param("read_sas"),
             param("read_spss"),
-            param("read_sql", marks=pytest.mark.xfail),
+            param(
+                "read_sql",
+                marks=pytest.mark.xfail(reason="conflict with 'sql' type name"),
+            ),
             param(
                 "read_sql_query",
-                marks=pytest.mark.xfail(reason="type name logic expects sqlquery"),
+                marks=pytest.mark.xfail(reason="type name logic expects 'sqlquery'"),
             ),
             param(
                 "read_sql_table",
-                marks=pytest.mark.xfail(reason="type name logic expects sqltable"),
+                marks=pytest.mark.xfail(reason="type name logic expects 'sqltable'"),
             ),
             param("read_stata"),
-            param("read_table", marks=pytest.mark.xfail),
+            param(
+                "read_table",
+                marks=pytest.mark.xfail(reason="conflict with 'table' type name"),
+            ),
             param("read_xml"),
         ],
     )
