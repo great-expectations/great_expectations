@@ -1,0 +1,129 @@
+{
+    "title": "PostgresDatasource",
+    "description": "Adds a postgres datasource to the data context.\n\nArgs:\n    name: The name of this postgres datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"postgresql+psycopg2://postgres:@localhost/test_database\"\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
+    "type": "object",
+    "properties": {
+        "type": {
+            "title": "Type",
+            "default": "postgres",
+            "enum": [
+                "postgres"
+            ],
+            "type": "string"
+        },
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "assets": {
+            "title": "Assets",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/TableAsset"
+            }
+        },
+        "connection_string": {
+            "title": "Connection String",
+            "minLength": 1,
+            "maxLength": 65536,
+            "format": "uri",
+            "type": "string"
+        }
+    },
+    "required": [
+        "name",
+        "connection_string"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "BatchSorter": {
+            "title": "BatchSorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        },
+        "SqlYearMonthSplitter": {
+            "title": "SqlYearMonthSplitter",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year_and_month",
+                    "enum": [
+                        "split_on_year_and_month"
+                    ],
+                    "type": "string"
+                },
+                "param_names": {
+                    "title": "Param Names",
+                    "type": "array",
+                    "items": {
+                        "enum": [
+                            "year",
+                            "month"
+                        ],
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "column_name"
+            ]
+        },
+        "TableAsset": {
+            "title": "TableAsset",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "table",
+                    "enum": [
+                        "table"
+                    ],
+                    "type": "string"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchSorter"
+                    }
+                },
+                "table_name": {
+                    "title": "Table Name",
+                    "type": "string"
+                },
+                "column_splitter": {
+                    "$ref": "#/definitions/SqlYearMonthSplitter"
+                }
+            },
+            "required": [
+                "name",
+                "table_name"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
