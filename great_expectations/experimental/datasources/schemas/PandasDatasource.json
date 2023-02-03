@@ -1,0 +1,705 @@
+{
+    "title": "PandasDatasource",
+    "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+    "type": "object",
+    "properties": {
+        "type": {
+            "title": "Type",
+            "default": "pandas",
+            "enum": [
+                "pandas"
+            ],
+            "type": "string"
+        },
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "assets": {
+            "title": "Assets",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "$ref": "#/definitions/_FilesystemDataAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/CSVAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/ExcelAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/JSONAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/ParquetAsset"
+                    }
+                ]
+            }
+        }
+    },
+    "required": [
+        "name"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "BatchSorter": {
+            "title": "BatchSorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        },
+        "_FilesystemDataAsset": {
+            "title": "_FilesystemDataAsset",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "type": "string"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchSorter"
+                    }
+                },
+                "base_directory": {
+                    "title": "Base Directory",
+                    "type": "string",
+                    "format": "path"
+                },
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                }
+            },
+            "required": [
+                "name",
+                "type",
+                "base_directory",
+                "regex"
+            ]
+        },
+        "CSVAsset": {
+            "title": "CSVAsset",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "csv",
+                    "enum": [
+                        "csv"
+                    ],
+                    "type": "string"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchSorter"
+                    }
+                },
+                "base_directory": {
+                    "title": "Base Directory",
+                    "type": "string",
+                    "format": "path"
+                },
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "sep": {
+                    "title": "Sep",
+                    "default": "NO_DEFAULT"
+                },
+                "delimiter": {
+                    "title": "Delimiter"
+                },
+                "header": {
+                    "title": "Header",
+                    "default": "infer"
+                },
+                "names": {
+                    "title": "Names",
+                    "default": "NO_DEFAULT"
+                },
+                "index_col": {
+                    "title": "Index Col"
+                },
+                "usecols": {
+                    "title": "Usecols",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    ]
+                },
+                "squeeze": {
+                    "title": "Squeeze",
+                    "default": false
+                },
+                "prefix": {
+                    "title": "Prefix",
+                    "default": "NO_DEFAULT"
+                },
+                "mangle_dupe_cols": {
+                    "title": "Mangle Dupe Cols",
+                    "default": true
+                },
+                "dtype": {
+                    "title": "Dtype",
+                    "type": "object"
+                },
+                "engine": {
+                    "title": "Engine"
+                },
+                "converters": {
+                    "title": "Converters"
+                },
+                "true_values": {
+                    "title": "True Values"
+                },
+                "false_values": {
+                    "title": "False Values"
+                },
+                "skipinitialspace": {
+                    "title": "Skipinitialspace",
+                    "default": false
+                },
+                "skiprows": {
+                    "title": "Skiprows",
+                    "anyOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "skipfooter": {
+                    "title": "Skipfooter",
+                    "default": 0
+                },
+                "nrows": {
+                    "title": "Nrows"
+                },
+                "na_values": {
+                    "title": "Na Values"
+                },
+                "keep_default_na": {
+                    "title": "Keep Default Na",
+                    "default": true
+                },
+                "na_filter": {
+                    "title": "Na Filter",
+                    "default": true
+                },
+                "verbose": {
+                    "title": "Verbose",
+                    "default": false
+                },
+                "skip_blank_lines": {
+                    "title": "Skip Blank Lines",
+                    "default": true
+                },
+                "parse_dates": {
+                    "title": "Parse Dates",
+                    "default": false
+                },
+                "infer_datetime_format": {
+                    "title": "Infer Datetime Format",
+                    "default": false
+                },
+                "keep_date_col": {
+                    "title": "Keep Date Col",
+                    "default": false
+                },
+                "date_parser": {
+                    "title": "Date Parser"
+                },
+                "dayfirst": {
+                    "title": "Dayfirst",
+                    "default": false
+                },
+                "cache_dates": {
+                    "title": "Cache Dates",
+                    "default": true
+                },
+                "iterator": {
+                    "title": "Iterator",
+                    "default": false
+                },
+                "chunksize": {
+                    "title": "Chunksize"
+                },
+                "compression": {
+                    "title": "Compression",
+                    "default": "infer"
+                },
+                "thousands": {
+                    "title": "Thousands"
+                },
+                "decimal": {
+                    "title": "Decimal",
+                    "default": ".",
+                    "type": "string"
+                },
+                "lineterminator": {
+                    "title": "Lineterminator"
+                },
+                "quotechar": {
+                    "title": "Quotechar",
+                    "default": "\""
+                },
+                "quoting": {
+                    "title": "Quoting",
+                    "default": 0
+                },
+                "doublequote": {
+                    "title": "Doublequote",
+                    "default": true
+                },
+                "escapechar": {
+                    "title": "Escapechar"
+                },
+                "comment": {
+                    "title": "Comment"
+                },
+                "encoding": {
+                    "title": "Encoding"
+                },
+                "encoding_errors": {
+                    "title": "Encoding Errors",
+                    "default": "strict",
+                    "type": "string"
+                },
+                "dialect": {
+                    "title": "Dialect",
+                    "type": "string"
+                },
+                "error_bad_lines": {
+                    "title": "Error Bad Lines"
+                },
+                "warn_bad_lines": {
+                    "title": "Warn Bad Lines"
+                },
+                "on_bad_lines": {
+                    "title": "On Bad Lines"
+                },
+                "delim_whitespace": {
+                    "title": "Delim Whitespace",
+                    "default": false
+                },
+                "low_memory": {
+                    "title": "Low Memory",
+                    "default": true
+                },
+                "memory_map": {
+                    "title": "Memory Map",
+                    "default": false
+                },
+                "float_precision": {
+                    "title": "Float Precision"
+                },
+                "storage_options": {
+                    "title": "Storage Options",
+                    "type": "object"
+                }
+            },
+            "required": [
+                "name",
+                "base_directory",
+                "regex"
+            ],
+            "additionalProperties": false
+        },
+        "ExcelAsset": {
+            "title": "ExcelAsset",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "excel",
+                    "enum": [
+                        "excel"
+                    ],
+                    "type": "string"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchSorter"
+                    }
+                },
+                "base_directory": {
+                    "title": "Base Directory",
+                    "type": "string",
+                    "format": "path"
+                },
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "io": {
+                    "title": "Io"
+                },
+                "sheet_name": {
+                    "title": "Sheet Name",
+                    "default": 0
+                },
+                "header": {
+                    "title": "Header",
+                    "default": 0
+                },
+                "names": {
+                    "title": "Names"
+                },
+                "index_col": {
+                    "title": "Index Col"
+                },
+                "usecols": {
+                    "title": "Usecols",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    ]
+                },
+                "squeeze": {
+                    "title": "Squeeze",
+                    "default": false
+                },
+                "dtype": {
+                    "title": "Dtype",
+                    "type": "object"
+                },
+                "engine": {
+                    "title": "Engine"
+                },
+                "converters": {
+                    "title": "Converters"
+                },
+                "true_values": {
+                    "title": "True Values"
+                },
+                "false_values": {
+                    "title": "False Values"
+                },
+                "skiprows": {
+                    "title": "Skiprows",
+                    "anyOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        },
+                        {
+                            "type": "integer"
+                        }
+                    ]
+                },
+                "nrows": {
+                    "title": "Nrows"
+                },
+                "na_values": {
+                    "title": "Na Values"
+                },
+                "keep_default_na": {
+                    "title": "Keep Default Na",
+                    "default": true
+                },
+                "na_filter": {
+                    "title": "Na Filter",
+                    "default": true
+                },
+                "verbose": {
+                    "title": "Verbose",
+                    "default": false
+                },
+                "parse_dates": {
+                    "title": "Parse Dates",
+                    "default": false
+                },
+                "date_parser": {
+                    "title": "Date Parser"
+                },
+                "thousands": {
+                    "title": "Thousands"
+                },
+                "comment": {
+                    "title": "Comment"
+                },
+                "skipfooter": {
+                    "title": "Skipfooter",
+                    "default": 0
+                },
+                "convert_float": {
+                    "title": "Convert Float"
+                },
+                "mangle_dupe_cols": {
+                    "title": "Mangle Dupe Cols",
+                    "default": true
+                },
+                "storage_options": {
+                    "title": "Storage Options",
+                    "type": "object"
+                }
+            },
+            "required": [
+                "name",
+                "base_directory",
+                "regex",
+                "io"
+            ],
+            "additionalProperties": false
+        },
+        "JSONAsset": {
+            "title": "JSONAsset",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "json",
+                    "enum": [
+                        "json"
+                    ],
+                    "type": "string"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchSorter"
+                    }
+                },
+                "base_directory": {
+                    "title": "Base Directory",
+                    "type": "string",
+                    "format": "path"
+                },
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "orient": {
+                    "title": "Orient"
+                },
+                "typ": {
+                    "title": "Typ",
+                    "default": "frame"
+                },
+                "dtype": {
+                    "title": "Dtype",
+                    "type": "object"
+                },
+                "convert_axes": {
+                    "title": "Convert Axes"
+                },
+                "convert_dates": {
+                    "title": "Convert Dates",
+                    "default": true
+                },
+                "keep_default_dates": {
+                    "title": "Keep Default Dates",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "numpy": {
+                    "title": "Numpy",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "precise_float": {
+                    "title": "Precise Float",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "date_unit": {
+                    "title": "Date Unit"
+                },
+                "encoding": {
+                    "title": "Encoding"
+                },
+                "encoding_errors": {
+                    "title": "Encoding Errors",
+                    "default": "strict",
+                    "type": "string"
+                },
+                "lines": {
+                    "title": "Lines",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "chunksize": {
+                    "title": "Chunksize",
+                    "type": "integer"
+                },
+                "compression": {
+                    "title": "Compression",
+                    "default": "infer",
+                    "anyOf": [
+                        {
+                            "enum": [
+                                "infer",
+                                "gzip",
+                                "bz2",
+                                "zip",
+                                "xz",
+                                "zstd",
+                                "tar"
+                            ],
+                            "type": "string"
+                        },
+                        {
+                            "type": "object"
+                        }
+                    ]
+                },
+                "nrows": {
+                    "title": "Nrows",
+                    "type": "integer"
+                },
+                "storage_options": {
+                    "title": "Storage Options",
+                    "type": "object"
+                }
+            },
+            "required": [
+                "name",
+                "base_directory",
+                "regex"
+            ],
+            "additionalProperties": false
+        },
+        "ParquetAsset": {
+            "title": "ParquetAsset",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "parquet",
+                    "enum": [
+                        "parquet"
+                    ],
+                    "type": "string"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchSorter"
+                    }
+                },
+                "base_directory": {
+                    "title": "Base Directory",
+                    "type": "string",
+                    "format": "path"
+                },
+                "regex": {
+                    "title": "Regex",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "path": {
+                    "title": "Path"
+                },
+                "engine": {
+                    "title": "Engine",
+                    "default": "auto",
+                    "type": "string"
+                },
+                "columns": {
+                    "title": "Columns"
+                },
+                "storage_options": {
+                    "title": "Storage Options",
+                    "type": "object"
+                },
+                "use_nullable_dtypes": {
+                    "title": "Use Nullable Dtypes",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "kwargs": {
+                    "title": "Kwargs"
+                }
+            },
+            "required": [
+                "name",
+                "base_directory",
+                "regex",
+                "path",
+                "kwargs"
+            ],
+            "additionalProperties": false
+        }
+    }
+}
