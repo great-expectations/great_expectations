@@ -284,25 +284,25 @@ def test_spark_sorter(
             assert metadata[key2] == range2
 
 
-def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
+def bad_base_directory_config() -> tuple[pathlib.Path, str, TestConnectionError]:
     base_directory = pathlib.Path("/this/path/is/not/here")
-    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
     test_connection_error = TestConnectionError(
         f"Path: {base_directory.resolve()} does not exist."
     )
     return base_directory, regex, test_connection_error
 
 
-def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
+def bad_regex_config() -> tuple[pathlib.Path, str, TestConnectionError]:
     relative_path = pathlib.Path(
         "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
     base_directory = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    regex = r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
     test_connection_error = TestConnectionError(
-        f"No file at path: {base_directory.resolve()} matched the regex: {regex.pattern}",
+        f"No file at path: {base_directory.resolve()} matched the regex: {regex}",
     )
     return base_directory, regex, test_connection_error
 
@@ -310,7 +310,7 @@ def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
 @pytest.fixture(params=[bad_base_directory_config, bad_regex_config])
 def datasource_test_connection_error_messages(
     spark_datasource: SparkDatasource, request
-) -> tuple[SparkDatasource, list[str]]:
+) -> tuple[SparkDatasource, TestConnectionError]:
     base_directory, regex, test_connection_error = request.param()
     csv_spark_asset = CSVSparkAsset(
         name="csv_spark_asset",

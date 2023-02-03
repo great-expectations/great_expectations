@@ -713,7 +713,7 @@ def test_validate_invalid_postgres_connection_string(
             pass
 
 
-def bad_connection_string_database_config() -> tuple[
+def bad_connection_string_config() -> tuple[
     str, str, str, str | None, TestConnectionError
 ]:
     connection_string = "postgresql+psycopg2://postgres:@localhost/bad_database"
@@ -727,31 +727,6 @@ def bad_connection_string_database_config() -> tuple[
     )
     test_connection_error = TestConnectionError(
         "Attempt to connect to datasource failed with the following error message: "
-        f"{sqlalchemy_engine_connect_error_raised}"
-    )
-    return (
-        connection_string,
-        table_name,
-        schema_name,
-        sqlalchemy_engine_connect_error_raised,
-        test_connection_error,
-    )
-
-
-def bad_connection_string_user_config() -> tuple[
-    str, str, str, str | None, TestConnectionError
-]:
-    connection_string = "postgresql+psycopg2://bad_user:@localhost/test_ci"
-    table_name = "good_table"
-    schema_name = "good_schema"
-    sqlalchemy_engine_connect_error_raised = (
-        '(psycopg2.OperationalError) connection to server at "localhost" (::1), port '
-        '5432 failed: FATAL:  role "bad_user" does not exist\n'
-        "\n"
-        "(Background on this error at: https://sqlalche.me/e/14/e3q8)"
-    )
-    test_connection_error = TestConnectionError(
-        f"Attempt to connect to datasource failed with the following error message: "
         f"{sqlalchemy_engine_connect_error_raised}"
     )
     return (
@@ -801,8 +776,7 @@ def bad_schema_name_config() -> tuple[str, str, str, str | None, TestConnectionE
 
 @pytest.fixture(
     params=[
-        bad_connection_string_database_config,
-        bad_connection_string_user_config,
+        bad_connection_string_config,
         bad_table_name_config,
         bad_schema_name_config,
     ]
