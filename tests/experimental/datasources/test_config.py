@@ -499,9 +499,15 @@ def test_custom_sorter_serialization(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["xdatasources"][
+    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["xdatasources"][  # type: ignore[index]
         "my_pg_ds"
-    ]["assets"]["with_dslish_sorters"]["order_by"]
+    ][
+        "assets"
+    ][
+        "with_dslish_sorters"
+    ][
+        "order_by"
+    ]
 
     assert '"reverse": True' not in dumped
     assert '{"key":' not in dumped
