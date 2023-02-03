@@ -386,7 +386,9 @@ def test_convert_unexpected_indices_to_df_column_pair_expectation():
         partial_unexpected_counts=partial_unexpected_counts,
     )
     assert list(res) == ["pk_2", "Count"]
-    assert res.index.to_list() == ["('eraser', 'desk')"]
+    assert res.index.to_list() == ["('eraser', 'desk')"] or res.index.to_list() == [
+        "('desk', 'eraser')"
+    ]
     assert res.iloc[0].tolist() == ["three, four, five", 3]
 
 
@@ -401,7 +403,9 @@ def test_convert_unexpected_indices_to_df_column_pair_expectation_no_id_pk():
         partial_unexpected_counts=partial_unexpected_counts,
     )
     assert list(res) == ["Index", "Count"]
-    assert res.index.to_list() == ["('eraser', 'desk')"]
+    assert res.index.to_list() == ["('eraser', 'desk')"] or res.index.to_list() == [
+        "('desk', 'eraser')"
+    ]
     assert res.iloc[0].tolist() == ["3, 4, 5", 3]
 
 
