@@ -37,8 +37,9 @@
             }
           }
         },{
-          "title": "negative_all_missing_values",
+          "title": "negative_all_missing_values_pandas",
           "exact_match_out": false,
+          "only_for": ["pandas"],
           "in": {
             "column": "all_null",
             "result_format": "COMPLETE"
@@ -49,8 +50,9 @@
             "unexpected_index_list": [0, 1, 2, 3]
           }
         },{
-          "title": "positive_mostly",
+          "title": "positive_mostly_pandas",
           "exact_match_out": false,
+          "only_for": ["pandas"],
           "in": {
             "column": "one_null",
             "mostly": 0.7,
@@ -62,9 +64,10 @@
             "unexpected_index_list": [2]
           }
         },{
-          "title": "negative_no_mostly_one_missing",
+          "title": "negative_no_mostly_one_missing_pandas",
           "include_in_gallery": true,
           "exact_match_out": false,
+          "only_for": ["pandas"],
           "in": {
             "column": "one_null",
             "result_format": "COMPLETE"
