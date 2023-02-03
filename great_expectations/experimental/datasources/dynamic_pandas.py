@@ -148,8 +148,17 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
     "csv": "CSVAsset",
-    "json": "JSONAsset",
+    "gbq": "GBQAsset",
+    "hdf": "HDFAsset",
     "html": "HTMLAsset",
+    "json": "JSONAsset",
+    "orc": "ORCAsset",
+    "sas": "SASAsset",
+    "spss": "SPSSAsset",
+    "sql_query": "SQLQueryAsset",
+    "sql_table": "SQLTableAsset",
+    "stata": "STATAAsset",
+    "xml": "XMLAsset",
 }
 
 _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {

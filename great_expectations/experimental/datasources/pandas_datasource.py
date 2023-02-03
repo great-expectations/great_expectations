@@ -64,21 +64,21 @@ with Timer(text="Generate Models and assign - elapsed time: {milliseconds:.0f} m
     CSVAsset = _ASSET_MODELS["csv"]
     ExcelAsset = _ASSET_MODELS["excel"]
     FeatherAsset = _ASSET_MODELS["feather"]
-    GbqAsset = _ASSET_MODELS["gbq"]
-    HdfAsset = _ASSET_MODELS["hdf"]
+    GBQAsset = _ASSET_MODELS["gbq"]
+    HDFAsset = _ASSET_MODELS["hdf"]
     HTMLAsset = _ASSET_MODELS["html"]
     JSONAsset = _ASSET_MODELS["json"]
-    OrcAsset = _ASSET_MODELS["orc"]
+    ORCAsset = _ASSET_MODELS["orc"]
     ParquetAsset = _ASSET_MODELS["parquet"]
     PickleAsset = _ASSET_MODELS["pickle"]
-    SasAsset = _ASSET_MODELS["sas"]
-    SpssAsset = _ASSET_MODELS["spss"]
+    SASAsset = _ASSET_MODELS["sas"]
+    SPSSAsset = _ASSET_MODELS["spss"]
     # SqlAsset = _ASSET_MODELS["sql"]
-    Sql_queryAsset = _ASSET_MODELS["sql_query"]
-    Sql_tableAsset = _ASSET_MODELS["sql_table"]
-    StataAsset = _ASSET_MODELS["stata"]
+    SQLQueryAsset = _ASSET_MODELS["sql_query"]
+    SQLTableAsset = _ASSET_MODELS["sql_table"]
+    STATAAsset = _ASSET_MODELS["stata"]
     # TableAsset = _ASSET_MODELS["table"]
-    XmlAsset = _ASSET_MODELS["xml"]
+    XMLAsset = _ASSET_MODELS["xml"]
 
 with Timer(text="Metadatsource registration - elapsed time: {milliseconds:.0f} ms"):
 
@@ -89,21 +89,21 @@ with Timer(text="Metadatsource registration - elapsed time: {milliseconds:.0f} m
             CSVAsset,
             ExcelAsset,
             FeatherAsset,
-            GbqAsset,
-            HdfAsset,
+            GBQAsset,
+            HDFAsset,
             HTMLAsset,
             JSONAsset,
-            OrcAsset,
+            ORCAsset,
             ParquetAsset,
             PickleAsset,
-            SasAsset,
-            SpssAsset,
-            Sql_queryAsset,
+            SASAsset,
+            SPSSAsset,
+            SQLQueryAsset,
             # SqlAsset,
-            Sql_tableAsset,
-            StataAsset,
+            SQLTableAsset,
+            STATAAsset,
             # TableAsset,
-            XmlAsset,
+            XMLAsset,
         ]
 
         # instance attributes
