@@ -4,7 +4,6 @@ import logging
 import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 
-from codetiming import Timer
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.alias_types import PathStr
@@ -30,7 +29,7 @@ class PandasDatasourceError(Exception):
     pass
 
 
-BLACK_LIST = (
+_BLACK_LIST = (
     # "read_csv",
     # "read_json",
     # "read_excel",
@@ -52,39 +51,62 @@ BLACK_LIST = (
     # "read_xml",
 )
 
-# print(f"{len(WHITELIST)} Models")
+_ASSET_MODELS = _generate_pandas_data_asset_models(
+    _FilesystemDataAsset, blacklist=_BLACK_LIST
+)
 
-with Timer(text="Generate Models and assign - elapsed time: {milliseconds:.0f} ms"):
+ClipboardAsset = _ASSET_MODELS["clipboard"]
+CSVAsset = _ASSET_MODELS["csv"]
+ExcelAsset = _ASSET_MODELS["excel"]
+FeatherAsset = _ASSET_MODELS["feather"]
+GBQAsset = _ASSET_MODELS["gbq"]
+HDFAsset = _ASSET_MODELS["hdf"]
+HTMLAsset = _ASSET_MODELS["html"]
+JSONAsset = _ASSET_MODELS["json"]
+ORCAsset = _ASSET_MODELS["orc"]
+ParquetAsset = _ASSET_MODELS["parquet"]
+PickleAsset = _ASSET_MODELS["pickle"]
+SASAsset = _ASSET_MODELS["sas"]
+SPSSAsset = _ASSET_MODELS["spss"]
+# SqlAsset = _ASSET_MODELS["sql"]
+SQLQueryAsset = _ASSET_MODELS["sql_query"]
+SQLTableAsset = _ASSET_MODELS["sql_table"]
+STATAAsset = _ASSET_MODELS["stata"]
+# TableAsset = _ASSET_MODELS["table"]
+XMLAsset = _ASSET_MODELS["xml"]
 
-    _ASSET_MODELS = _generate_pandas_data_asset_models(
-        _FilesystemDataAsset, blacklist=BLACK_LIST
-    )
 
-    ClipboardAsset = _ASSET_MODELS["clipboard"]
-    CSVAsset = _ASSET_MODELS["csv"]
-    ExcelAsset = _ASSET_MODELS["excel"]
-    FeatherAsset = _ASSET_MODELS["feather"]
-    GBQAsset = _ASSET_MODELS["gbq"]
-    HDFAsset = _ASSET_MODELS["hdf"]
-    HTMLAsset = _ASSET_MODELS["html"]
-    JSONAsset = _ASSET_MODELS["json"]
-    ORCAsset = _ASSET_MODELS["orc"]
-    ParquetAsset = _ASSET_MODELS["parquet"]
-    PickleAsset = _ASSET_MODELS["pickle"]
-    SASAsset = _ASSET_MODELS["sas"]
-    SPSSAsset = _ASSET_MODELS["spss"]
-    # SqlAsset = _ASSET_MODELS["sql"]
-    SQLQueryAsset = _ASSET_MODELS["sql_query"]
-    SQLTableAsset = _ASSET_MODELS["sql_table"]
-    STATAAsset = _ASSET_MODELS["stata"]
-    # TableAsset = _ASSET_MODELS["table"]
-    XMLAsset = _ASSET_MODELS["xml"]
+class PandasDatasource(Datasource):
+    # class attributes
+    asset_types: ClassVar[List[Type[DataAsset]]] = [
+        ClipboardAsset,
+        CSVAsset,
+        ExcelAsset,
+        FeatherAsset,
+        GBQAsset,
+        HDFAsset,
+        HTMLAsset,
+        JSONAsset,
+        ORCAsset,
+        ParquetAsset,
+        PickleAsset,
+        SASAsset,
+        SPSSAsset,
+        SQLQueryAsset,
+        # SqlAsset,
+        SQLTableAsset,
+        STATAAsset,
+        # TableAsset,
+        XMLAsset,
+    ]
 
-with Timer(text="Metadatsource registration - elapsed time: {milliseconds:.0f} ms"):
-
-    class PandasDatasource(Datasource):
-        # class attributes
-        asset_types: ClassVar[List[Type[DataAsset]]] = [
+    # instance attributes
+    type: Literal["pandas"] = "pandas"
+    name: str
+    assets: Dict[  # type: ignore[valid-type]
+        str,
+        Union[
+            _FilesystemDataAsset,
             ClipboardAsset,
             CSVAsset,
             ExcelAsset,
@@ -104,162 +126,132 @@ with Timer(text="Metadatsource registration - elapsed time: {milliseconds:.0f} m
             STATAAsset,
             # TableAsset,
             XMLAsset,
-        ]
+        ],
+    ] = {}
 
-        # instance attributes
-        type: Literal["pandas"] = "pandas"
-        name: str
-        assets: Dict[  # type: ignore[valid-type]
-            str,
-            Union[
-                _FilesystemDataAsset,
-                ClipboardAsset,
-                CSVAsset,
-                ExcelAsset,
-                FeatherAsset,
-                GbqAsset,
-                HdfAsset,
-                HTMLAsset,
-                JSONAsset,
-                OrcAsset,
-                ParquetAsset,
-                PickleAsset,
-                SasAsset,
-                SpssAsset,
-                Sql_queryAsset,
-                # SqlAsset,
-                # Sql_tableAsset,
-                StataAsset,
-                # TableAsset,
-                XmlAsset,
-            ],
-        ] = {}
+    @property
+    def execution_engine_type(self) -> Type[ExecutionEngine]:
+        """Return the PandasExecutionEngine unless the override is set"""
+        from great_expectations.execution_engine.pandas_execution_engine import (
+            PandasExecutionEngine,
+        )
 
-        @property
-        def execution_engine_type(self) -> Type[ExecutionEngine]:
-            """Return the PandasExecutionEngine unless the override is set"""
-            from great_expectations.execution_engine.pandas_execution_engine import (
-                PandasExecutionEngine,
-            )
+        return PandasExecutionEngine
 
-            return PandasExecutionEngine
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the PandasDatasource.
 
-        def test_connection(self, test_assets: bool = True) -> None:
-            """Test the connection for the PandasDatasource.
+        Args:
+            test_assets: If assets have been passed to the PandasDatasource, whether to test them as well.
 
-            Args:
-                test_assets: If assets have been passed to the PandasDatasource, whether to test them as well.
+        Raises:
+            TestConnectionError
+        """
+        # Only self.assets can be tested for PandasDatasource
+        if self.assets and test_assets:
+            for asset in self.assets.values():
+                asset.test_connection()  # type: ignore[union-attr]
 
-            Raises:
-                TestConnectionError
-            """
-            # Only self.assets can be tested for PandasDatasource
-            if self.assets and test_assets:
-                for asset in self.assets.values():
-                    asset.test_connection()  # type: ignore[union-attr]
+    def add_csv_asset(
+        self,
+        name: str,
+        base_directory: PathStr,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
+        **kwargs,  # TODO: update signature to have specific keys & types
+    ) -> CSVAsset:  # type: ignore[valid-type]
+        """Adds a CSV DataAsst to the present "PandasDatasource" object.
 
-        def add_csv_asset(
-            self,
-            name: str,
-            base_directory: PathStr,
-            regex: Union[str, re.Pattern],
-            order_by: Optional[BatchSortersDefinition] = None,
-            **kwargs,  # TODO: update signature to have specific keys & types
-        ) -> CSVAsset:  # type: ignore[valid-type]
-            """Adds a CSV DataAsst to the present "PandasDatasource" object.
+        Args:
+            name: The name of the csv asset
+            base_directory: base directory path, relative to which CSV file paths will be collected
+            regex: regex pattern that matches csv filenames that is used to label the batches
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
+        """
+        asset = CSVAsset(
+            name=name,
+            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
+            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            **kwargs,
+        )
+        return self.add_asset(asset)
 
-            Args:
-                name: The name of the csv asset
-                base_directory: base directory path, relative to which CSV file paths will be collected
-                regex: regex pattern that matches csv filenames that is used to label the batches
-                order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
-                kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
-            """
-            asset = CSVAsset(
-                name=name,
-                base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
-                regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
-                order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
-                **kwargs,
-            )
-            return self.add_asset(asset)
+    def add_excel_asset(
+        self,
+        name: str,
+        base_directory: PathStr,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
+        **kwargs,  # TODO: update signature to have specific keys & types
+    ) -> ExcelAsset:  # type: ignore[valid-type]
+        """Adds an Excel DataAsst to the present "PandasDatasource" object.
 
-        def add_excel_asset(
-            self,
-            name: str,
-            base_directory: PathStr,
-            regex: Union[str, re.Pattern],
-            order_by: Optional[BatchSortersDefinition] = None,
-            **kwargs,  # TODO: update signature to have specific keys & types
-        ) -> ExcelAsset:  # type: ignore[valid-type]
-            """Adds an Excel DataAsst to the present "PandasDatasource" object.
+        Args:
+            name: The name of the csv asset
+            base_directory: base directory path, relative to which CSV file paths will be collected
+            regex: regex pattern that matches csv filenames that is used to label the batches
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
+        """
+        asset = ExcelAsset(
+            name=name,
+            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
+            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            **kwargs,
+        )
+        return self.add_asset(asset)
 
-            Args:
-                name: The name of the csv asset
-                base_directory: base directory path, relative to which CSV file paths will be collected
-                regex: regex pattern that matches csv filenames that is used to label the batches
-                order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
-                kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
-            """
-            asset = ExcelAsset(
-                name=name,
-                base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
-                regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
-                order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
-                **kwargs,
-            )
-            return self.add_asset(asset)
+    def add_json_asset(
+        self,
+        name: str,
+        base_directory: PathStr,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
+        **kwargs,  # TODO: update signature to have specific keys & types
+    ) -> JSONAsset:  # type: ignore[valid-type]
+        """Adds a JSON DataAsst to the present "PandasDatasource" object.
 
-        def add_json_asset(
-            self,
-            name: str,
-            base_directory: PathStr,
-            regex: Union[str, re.Pattern],
-            order_by: Optional[BatchSortersDefinition] = None,
-            **kwargs,  # TODO: update signature to have specific keys & types
-        ) -> JSONAsset:  # type: ignore[valid-type]
-            """Adds a JSON DataAsst to the present "PandasDatasource" object.
+        Args:
+            name: The name of the csv asset
+            base_directory: base directory path, relative to which CSV file paths will be collected
+            regex: regex pattern that matches csv filenames that is used to label the batches
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
+        """
+        asset = JSONAsset(
+            name=name,
+            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
+            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            **kwargs,
+        )
+        return self.add_asset(asset)
 
-            Args:
-                name: The name of the csv asset
-                base_directory: base directory path, relative to which CSV file paths will be collected
-                regex: regex pattern that matches csv filenames that is used to label the batches
-                order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
-                kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
-            """
-            asset = JSONAsset(
-                name=name,
-                base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
-                regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
-                order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
-                **kwargs,
-            )
-            return self.add_asset(asset)
+    def add_parquet_asset(
+        self,
+        name: str,
+        base_directory: PathStr,
+        regex: Union[str, re.Pattern],
+        order_by: Optional[BatchSortersDefinition] = None,
+        **kwargs,  # TODO: update signature to have specific keys & types
+    ) -> ParquetAsset:  # type: ignore[valid-type]
+        """Adds a Parquet DataAsst to the present "PandasDatasource" object.
 
-        def add_parquet_asset(
-            self,
-            name: str,
-            base_directory: PathStr,
-            regex: Union[str, re.Pattern],
-            order_by: Optional[BatchSortersDefinition] = None,
-            **kwargs,  # TODO: update signature to have specific keys & types
-        ) -> ParquetAsset:  # type: ignore[valid-type]
-            """Adds a Parquet DataAsst to the present "PandasDatasource" object.
-
-            Args:
-                name: The name of the csv asset
-                base_directory: base directory path, relative to which CSV file paths will be collected
-                regex: regex pattern that matches csv filenames that is used to label the batches
-                order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
-                kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
-            """
-            asset = ParquetAsset(
-                name=name,
-                base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
-                regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
-                order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
-                **kwargs,
-            )
-            return self.add_asset(asset)
-
-    print(f"{len(_ASSET_MODELS)} Models")
+        Args:
+            name: The name of the csv asset
+            base_directory: base directory path, relative to which CSV file paths will be collected
+            regex: regex pattern that matches csv filenames that is used to label the batches
+            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
+        """
+        asset = ParquetAsset(
+            name=name,
+            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
+            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            **kwargs,
+        )
+        return self.add_asset(asset)
