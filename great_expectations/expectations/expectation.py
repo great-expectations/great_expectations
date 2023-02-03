@@ -3059,9 +3059,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             ),
         )
 
-        if result_format_str in ["BASIC", "SUMMARY"]:
-            return validation_dependencies
-
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
@@ -3076,6 +3073,8 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
+        if result_format_str in ["BASIC"]:
+            return validation_dependencies
 
         if isinstance(execution_engine, PandasExecutionEngine):
             metric_kwargs = get_metric_kwargs(
@@ -3358,7 +3357,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             ),
         )
 
-        if result_format_str in ["BASIC", "SUMMARY"]:
+        if result_format_str in ["BASIC"]:
             return validation_dependencies
 
         if include_unexpected_rows:
