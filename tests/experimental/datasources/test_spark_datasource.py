@@ -318,7 +318,7 @@ def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     )
     regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     test_connection_error = TestConnectionError(
-        f"No file at path: {base_directory.resolve()} matched the regex: {regex}",
+        f"No file at path: {base_directory.resolve()} matched the regex: {regex.pattern}",
     )
     return base_directory, regex, test_connection_error
 
