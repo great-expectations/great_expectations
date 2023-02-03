@@ -29,9 +29,6 @@
         "schema_name": {
             "title": "Schema Name",
             "type": "string"
-        },
-        "column_splitter": {
-            "$ref": "#/definitions/SqlYearMonthSplitter"
         }
     },
     "required": [
