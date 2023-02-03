@@ -842,3 +842,35 @@ def test_test_connection_failures(
     with pytest.raises(type(test_connection_error)) as e:
         postgres_datasource.test_connection()
     assert str(e.value) == str(test_connection_error)
+
+
+@pytest.mark.unit
+def test_query_data_asset(create_source):
+    query = "SELECT * FROM my_table"
+
+    def validate_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
+        assert spec == {
+            "data_asset_name": "query_asset",
+            "query": "SELECT * FROM my_table",
+            "temp_table_schema_name": None,
+            "batch_identifiers": {},
+        }
+
+    with create_source(
+        validate_batch_spec=validate_batch_spec, dialect="postgresql"
+    ) as source:
+        asset = source.add_query_asset(
+            name="query_asset", query="SELECT * FROM my_table"
+        )
+        assert asset.name == "query_asset"
+        assert asset.query.lower() == query.lower()
+        source.get_batch_list_from_batch_request(asset.get_batch_request())
+
+
+@pytest.mark.unit
+def test_non_select_query_data_asset(create_source):
+    with create_source(
+        validate_batch_spec=lambda _: None, dialect="postgresql"
+    ) as source:
+        with pytest.raises(ValueError):
+            source.add_query_asset(name="query_asset", query="* FROM my_table")
