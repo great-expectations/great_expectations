@@ -1597,8 +1597,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
         return self.add_checkpoint(
-            data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
             name=name,
             config_version=config_version,
             template_name=template_name,

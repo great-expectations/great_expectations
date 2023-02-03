@@ -653,7 +653,27 @@ def test_add_or_update_checkpoint_adds_successfully(
     "update_kwargs,expected_config",
     [
         pytest.param(
-            {},
+            {
+                "action_list": [],
+                "batch_request": {},
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "evaluation_parameters": {},
+                "expectation_suite_name": "oss_test_expectation_suite",
+                "module_name": "great_expectations.checkpoint",
+                "profilers": [],
+                "runtime_configuration": {},
+                "validations": [
+                    {"expectation_suite_name": "taxi.demo_pass"},
+                    {
+                        "batch_request": {
+                            "datasource_name": "oss_test_datasource",
+                            "data_connector_name": "oss_test_data_connector",
+                            "data_asset_name": "users",
+                        }
+                    },
+                ],
+            },
             CheckpointConfig(
                 **{
                     "action_list": [],
@@ -682,6 +702,9 @@ def test_add_or_update_checkpoint_adds_successfully(
         ),
         pytest.param(
             {
+                "class_name": "Checkpoint",
+                "module_name": "great_expectations.checkpoint",
+                "config_version": 1.0,
                 "validations": [],
                 "evaluation_parameters": {
                     "environment": "$GE_ENVIRONMENT",
@@ -702,7 +725,7 @@ def test_add_or_update_checkpoint_adds_successfully(
                         "aux_param_0": "$MY_PARAM",
                         "aux_param_1": "1 + $MY_PARAM",
                     },
-                    "expectation_suite_name": "oss_test_expectation_suite",
+                    "expectation_suite_name": None,
                     "module_name": "great_expectations.checkpoint",
                     "name": "my_checkpoint",
                     "profilers": [],
@@ -718,7 +741,7 @@ def test_add_or_update_checkpoint_updates_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
     checkpoint_config: dict,
     update_kwargs: dict,
-    expected_config: dict,
+    expected_config: CheckpointConfig,
 ):
     context = in_memory_data_context
     name = "my_checkpoint"
