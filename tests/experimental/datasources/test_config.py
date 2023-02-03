@@ -21,8 +21,8 @@ from great_expectations.experimental.datasources.sql_datasource import (
 
 try:
     from devtools import debug as pp
-except ImportError:  # type: ignore[assignment]
-    from pprint import pprint as pp  # type: ignore[assignment]
+except ImportError:
+    from pprint import pprint as pp
 
 p = pytest.param
 

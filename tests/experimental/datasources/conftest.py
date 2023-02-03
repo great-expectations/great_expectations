@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from contextlib import contextmanager
 from datetime import datetime
-from typing import Callable, Dict, Tuple, Type
+from typing import Callable, Dict, Generator, Tuple, Type
 
 import pytest
 from pytest import MonkeyPatch
@@ -98,7 +98,9 @@ class ExecutionEngineDouble(ExecutionEngine):
 
 
 @pytest.fixture
-def inject_engine_lookup_double(monkeypatch: MonkeyPatch) -> ExecutionEngineDouble:  # type: ignore[misc]
+def inject_engine_lookup_double(
+    monkeypatch: MonkeyPatch,
+) -> Generator[Type[ExecutionEngineDouble], None, None]:
     """
     Inject an execution engine test double into the _SourcesFactory.engine_lookup
     so that all Datasources use the execution engine double.
