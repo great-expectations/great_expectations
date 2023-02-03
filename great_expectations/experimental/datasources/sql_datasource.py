@@ -441,4 +441,5 @@ class SQLDatasource(Datasource):
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             # see DataAsset._parse_order_by_sorter()
         )
+        asset.test_connection()
         return self.add_asset(asset)
