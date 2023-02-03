@@ -5,7 +5,18 @@ import datetime
 import logging
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 from dateutil.parser import parse
 
@@ -269,7 +280,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         formats for accessing Azure Blob Storage service.  However, Pandas and Spark execution engines utilize identical
         path formats for accessing all other supported cloud storage services (AWS S3 and Google Cloud Storage).
         Moreover, these formats (encapsulated in S3BatchSpec and GCSBatchSpec) extend PathBatchSpec (common to them).
-        Therefore, at the present time, all cases with the exception of Azure Blob Storage , are handled generically.
+        Therefore, at the present time, all cases with the exception of Azure Blob Storage, are handled generically.
         """
 
         batch_data: Any
@@ -335,10 +346,10 @@ illegal.  Please check your config."""
             elif isinstance(schema, str):
                 raise gx_exceptions.ExecutionEngineError(
                     """
-                                Spark schema was not properly serialized.
-                                Please run the .jsonValue() method on the schema object before loading into GX.
-                                schema: your_schema.jsonValue()
-                                """
+                    Spark schema was not properly serialized.
+                    Please run the .jsonValue() method on the schema object before loading into GX.
+                    schema: your_schema.jsonValue()
+                    """
                 )
             # noinspection PyUnresolvedReferences
             try:
@@ -346,6 +357,7 @@ illegal.  Please check your config."""
                     reader = self.spark.read.schema(schema).options(**reader_options)
                 else:
                     reader = self.spark.read.options(**reader_options)
+
                 reader_fn = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
@@ -429,7 +441,19 @@ illegal.  Please check your config."""
             f"Unable to determine reader method from path: {path}"
         )
 
-    def _get_reader_fn(self, reader, reader_method=None, path=None):
+    @overload
+    def _get_reader_fn(
+        self, reader, reader_method: str = ..., path: Optional[str] = ...
+    ) -> Callable:
+        ...
+
+    @overload
+    def _get_reader_fn(
+        self, reader, reader_method: None = ..., path: str = ...
+    ) -> Callable:
+        ...
+
+    def _get_reader_fn(self, reader, reader_method=None, path=None) -> Callable:
         """Static helper for providing reader_fn
 
         Args:

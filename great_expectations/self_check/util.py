@@ -2873,7 +2873,7 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
                 runtime_kwargs = {
                     "result_format": {
                         "result_format": "COMPLETE",
-                        "unexpected_index_columns": ["pk_index"],
+                        "unexpected_index_column_names": ["pk_index"],
                     },
                     "include_config": False,
                 }
@@ -2999,8 +2999,6 @@ def check_json_test_result(  # noqa: C901 - 52
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
         for key, value in test["output"].items():
-            # Apply our great expectations-specific test logic
-
             if key == "success":
                 if isinstance(value, (np.floating, float)):
                     try:
@@ -3072,9 +3070,10 @@ def check_json_test_result(  # noqa: C901 - 52
                 elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
                     pass
                 else:
-                    assert (
-                        result["result"]["unexpected_index_list"] == value
-                    ), f"{result['result']['unexpected_index_list']} != {value}"
+                    if pk_column:
+                        assert (
+                            result["result"]["unexpected_index_list"] == value
+                        ), f"{result['result']['unexpected_index_list']} != {value}"
 
             elif key == "unexpected_list":
                 try:

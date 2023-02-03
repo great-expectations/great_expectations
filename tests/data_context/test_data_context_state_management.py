@@ -333,8 +333,9 @@ def test_update_expectation_suite_success(
             kwargs={"column": "x", "value_set": [1, 2, 4]},
         ),
     ]
-    context.update_expectation_suite(suite)
+    updated_suite = context.update_expectation_suite(suite)
 
+    assert updated_suite.expectations == suite.expectations
     assert context.expectations_store.save_count == 2
 
 
@@ -348,7 +349,7 @@ def test_update_expectation_suite_failure(
     suite = ExpectationSuite(expectation_suite_name=suite_name)
 
     with pytest.raises(gx_exceptions.DataContextError) as e:
-        context.update_expectation_suite(suite)
+        _ = context.update_expectation_suite(suite)
 
     assert f"expectation_suite with name {suite_name} does not exist." in str(e.value)
 
@@ -381,24 +382,48 @@ def test_add_or_update_expectation_suite_adds_successfully(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "new_expectations",
+    [
+        pytest.param(
+            [],
+            id="empty expectations",
+        ),
+        pytest.param(
+            [
+                ExpectationConfiguration(
+                    expectation_type="expect_column_to_exist",
+                    kwargs={"column": "pickup_datetime"},
+                )
+            ],
+            id="new expectations",
+        ),
+    ],
+)
 def test_add_or_update_expectation_suite_updates_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
+    new_expectations: list[ExpectationConfiguration],
 ):
     context = in_memory_data_context
 
     suite_name = "default"
-    suite = context.add_expectation_suite(suite_name)
+    suite = context.add_expectation_suite(
+        expectation_suite_name=suite_name,
+        expectations=[
+            ExpectationConfiguration(
+                expectation_type="expect_column_values_to_be_in_set",
+                kwargs={"column": "x", "value_set": [1, 2, 4]},
+            ),
+        ],
+    )
 
     assert context.expectations_store.save_count == 1
 
-    suite.expectations = [
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_in_set",
-            kwargs={"column": "x", "value_set": [1, 2, 4]},
-        ),
-    ]
-    _ = context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
+    suite = context.add_or_update_expectation_suite(
+        expectation_suite_name=suite_name, expectations=new_expectations
+    )
 
+    assert suite.expectations == new_expectations
     assert context.expectations_store.save_count == 2
 
 
@@ -419,9 +444,10 @@ def test_update_profiler_success(
 
     assert context.profiler_store.save_count == 1
 
-    profiler.rules = {}
-    context.update_profiler(profiler)
+    profiler.rules = []
+    updated_profiler = context.update_profiler(profiler)
 
+    assert updated_profiler.rules == profiler.rules
     assert context.profiler_store.save_count == 2
 
 
@@ -437,7 +463,7 @@ def test_update_profiler_failure(in_memory_data_context: EphemeralDataContextSpy
     )
 
     with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
-        context.update_profiler(profiler)
+        _ = context.update_profiler(profiler)
 
     assert f"Non-existent Profiler configuration named {name}" in str(e.value)
 
@@ -465,9 +491,45 @@ def test_add_or_update_profiler_adds_successfully(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "new_rules",
+    [
+        pytest.param(
+            {},
+            id="empty rules",
+        ),
+        pytest.param(
+            {
+                "my_new_rule": {
+                    "variables": {},
+                    "domain_builder": {
+                        "class_name": "TableDomainBuilder",
+                    },
+                    "parameter_builders": [
+                        {
+                            "class_name": "MetricMultiBatchParameterBuilder",
+                            "name": "my_parameter",
+                            "metric_name": "my_metric",
+                        },
+                    ],
+                    "expectation_configuration_builders": [
+                        {
+                            "class_name": "DefaultExpectationConfigurationBuilder",
+                            "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                            "column_A": "$domain.domain_kwargs.column_A",
+                            "column_B": "$domain.domain_kwargs.column_B",
+                        },
+                    ],
+                },
+            },
+            id="new rule",
+        ),
+    ],
+)
 def test_add_or_update_profiler_updates_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
     profiler_rules: dict,
+    new_rules: dict,
 ):
     context = in_memory_data_context
 
@@ -481,7 +543,8 @@ def test_add_or_update_profiler_updates_successfully(
 
     assert context.profiler_store.save_count == 1
 
-    profiler.rules = {}
-    _ = context.add_or_update_profiler(name=name)
+    profiler = context.add_or_update_profiler(name=name, rules=new_rules)
 
+    # Rules get converted to a list within the RBP constructor
+    assert sorted(rule.name for rule in profiler.rules) == sorted(new_rules.keys())
     assert context.profiler_store.save_count == 2
