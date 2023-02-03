@@ -103,7 +103,7 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> None:
-        # this is why
+        # TODO: Need for prescriptive renderer for Expectation if we want to render in DataDocs.
         pass
 
     @classmethod
@@ -115,5 +115,5 @@ class ExpectMulticolumnSumToEqual(MulticolumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> None:
-        # this is why
+        # TODO: Need for diagnostic renderer for Expectation if we want to render in DataDocs.
         pass
