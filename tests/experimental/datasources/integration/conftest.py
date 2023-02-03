@@ -79,6 +79,8 @@ def spark_data(
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
+        header=True,
+        infer_schema=True,
     )
     batch_request = asset.get_batch_request({"year": "2019", "month": "01"})
     return context, spark_ds, asset, batch_request
@@ -148,6 +150,8 @@ def multibatch_spark_data(
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
+        header=True,
+        infer_schema=True,
     )
     batch_request = asset.get_batch_request({"year": "2020"})
     return context, spark_ds, asset, batch_request
