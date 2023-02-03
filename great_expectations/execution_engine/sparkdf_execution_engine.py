@@ -5,7 +5,18 @@ import datetime
 import logging
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 from dateutil.parser import parse
 
@@ -346,6 +357,7 @@ illegal.  Please check your config."""
                     reader = self.spark.read.schema(schema).options(**reader_options)
                 else:
                     reader = self.spark.read.options(**reader_options)
+
                 reader_fn = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
@@ -429,7 +441,19 @@ illegal.  Please check your config."""
             f"Unable to determine reader method from path: {path}"
         )
 
-    def _get_reader_fn(self, reader, reader_method=None, path=None):
+    @overload
+    def _get_reader_fn(
+        self, reader, reader_method: str = ..., path: Optional[str] = ...
+    ) -> Callable:
+        ...
+
+    @overload
+    def _get_reader_fn(
+        self, reader, reader_method: None = ..., path: str = ...
+    ) -> Callable:
+        ...
+
+    def _get_reader_fn(self, reader, reader_method=None, path=None) -> Callable:
         """Static helper for providing reader_fn
 
         Args:
