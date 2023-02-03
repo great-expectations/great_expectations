@@ -78,15 +78,23 @@ class ColumnSplitter:
             raise ValueError(f"unexpected value; permitted: '{permitted_values_str}'")
         return v
 
-    def test_connection(self) -> None:
+    def test_connection(self, table_asset: TableAsset) -> None:
         """Test the connection for the ColumnSplitter.
+
+        Args:
+            table_asset: The TableAsset to which the ColumnSplitter will be applied.
 
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        raise NotImplementedError(
-            """One needs to implement "test_connection" on a ColumnSplitter subclass."""
-        )
+        engine: sqlalchemy.engine.Engine = table_asset.datasource.get_engine()
+        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+        if self.column_name not in inspector.get_columns(
+            table_name=table_asset.table_name, schema=table_asset.schema
+        ):
+            raise TestConnectionError(
+                f'The column "{self.column_name}" was not found in table "{table_asset.qualified_table_name}"'
+            )
 
 
 class DatetimeRange(NamedTuple):
@@ -154,6 +162,14 @@ class TableAsset(DataAsset):
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
 
+    @property
+    def qualified_table_name(self) -> str:
+        return (
+            f"{self.schema_name}.{self.table_name}"
+            if self.schema_name
+            else self.table_name
+        )
+
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
 
@@ -205,9 +221,11 @@ class TableAsset(DataAsset):
         Returns:
             This TableAsset so we can use this method fluently.
         """
-        self.column_splitter = SqlYearMonthSplitter(
+        year_and_month_splitter = SqlYearMonthSplitter(
             column_name=column_name,
         )
+        year_and_month_splitter.test_connection(table_asset=self)
+        self.column_splitter = year_and_month_splitter
         return self
 
     def _fully_specified_batch_requests(self, batch_request) -> List[BatchRequest]:
