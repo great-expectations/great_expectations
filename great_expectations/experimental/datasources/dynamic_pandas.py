@@ -312,9 +312,10 @@ def _create_pandas_asset_model(
 
 def _generate_pandas_data_asset_models(
     base_model_class: M,
+    whitelist: Optional[Sequence[str]] = None,
     blacklist: Optional[Sequence[str]] = None,
 ) -> Dict[str, M]:
-    io_methods = _extract_io_methods(blacklist=blacklist)
+    io_methods = _extract_io_methods(blacklist, whitelist)  # type: ignore[arg-type] # FIXME
     io_method_sigs = _extract_io_signatures(io_methods)
 
     data_asset_models: Dict[str, M] = {}
