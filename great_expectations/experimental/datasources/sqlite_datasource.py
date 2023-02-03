@@ -149,7 +149,7 @@ class SqliteDatasource(SQLDatasource):
     # left side enforces the names on instance creation
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
     connection_string: SqliteDsn
-    assets: Dict[str, SqliteTableAsset] = {}  # type: ignore[assignment]
+    assets: Dict[str, SqliteAssetTypes] = {}  # type: ignore[assignment]
 
     def add_table_asset(
         self,

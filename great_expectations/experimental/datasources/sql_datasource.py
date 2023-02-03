@@ -13,6 +13,7 @@ from typing import (
     Optional,
     Sequence,
     Type,
+    Union,
     cast,
 )
 
@@ -151,33 +152,17 @@ def _get_sql_datetime_range(
 
 class _SQLAsset(DataAsset):
     # Instance fields
-    type: Literal["sqlasset"] = "sqlasset"
+    type: Literal["_sqlasset"] = "_sqlasset"
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
 
     def test_connection(self) -> None:
-        """Test the connection for the TableAsset.
+        """Test the connection for the _SQLAsset.
 
         Raises:
             TestConnectionError
         """
         assert isinstance(self.datasource, SQLDatasource)
-        schema: Optional[str] = None
-        table_name: str
-        if "." in self.table_name:
-            schema, table_name = self.table_name.split(".")
-        else:
-            table_name = self.table_name
-        engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
-        exists = sqlalchemy.inspect(engine).has_table(
-            table_name=table_name,
-            schema=schema,
-        )
-        if not exists:
-            raise TestConnectionError(
-                f"Attempt to connect to table: {self.table_name} failed because the table "
-                "does not exist."
-            )
 
     def batch_request_options_template(
         self,
@@ -389,6 +374,30 @@ class TableAsset(_SQLAsset):
     type: Literal["table"] = "table"  # type: ignore[assignment]
     table_name: str
 
+    def test_connection(self) -> None:
+        """Test the connection for the TableAsset.
+
+        Raises:
+            TestConnectionError
+        """
+        assert isinstance(self.datasource, SQLDatasource)
+        schema: Optional[str] = None
+        table_name: str
+        if "." in self.table_name:
+            schema, table_name = self.table_name.split(".")
+        else:
+            table_name = self.table_name
+        engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
+        exists = sqlalchemy.inspect(engine).has_table(
+            table_name=table_name,
+            schema=schema,
+        )
+        if not exists:
+            raise TestConnectionError(
+                f"Attempt to connect to table: {self.table_name} failed because the table "
+                "does not exist."
+            )
+
     def as_selectable(self) -> sqlalchemy.sql.Selectable:
         """Returns the table as a sqlalchemy Selectable.
 
@@ -425,7 +434,9 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: str
-    assets: Dict[str, _SQLAsset] = {}
+    # We need to explicitly add each asset type to the Union due to how
+    # deserialization is implemented in our pydantic base model.
+    assets: Dict[str, Union[TableAsset, QueryAsset]] = {}
 
     # private attrs
     _engine: sqlalchemy.engine.Engine = pydantic.PrivateAttr()

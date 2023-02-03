@@ -17,7 +17,6 @@ def sqlite_database_path() -> pathlib.Path:
     relative_path = pathlib.Path(
         "..",
         "..",
-        "..",
         "test_sets",
         "taxi_yellow_tripdata_samples",
         "sqlite",
