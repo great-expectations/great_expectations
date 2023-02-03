@@ -136,6 +136,8 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "filepath_or_buffer": {"base_directory": _FieldSpec(pathlib.Path, ...)},
     # JSONAsset
     "path_or_buf": {"base_directory": _FieldSpec(pathlib.Path, ...)},
+    # SQLTable
+    "schema": {"schema_name": _FieldSpec(str, None)},  # NOTE: maybe use an alias?
     # misc
     "filepath": {"base_directory": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
@@ -342,7 +344,7 @@ def _generate_pandas_data_asset_models(
         except NameError as err:
             # TODO: sql_table has a `schema` param that is a pydantic reserved attribute.
             # Solution is to use an alias field.
-            logger.debug(f"{model_name} - {type(err).__name__}:{err}")
+            logger.info(f"{model_name} - {type(err).__name__}:{err}")
             continue
         except TypeError as err:
             # may fail on python <3.10 due to use of builtin as generic

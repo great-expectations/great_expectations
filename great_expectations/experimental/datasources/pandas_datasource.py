@@ -47,7 +47,7 @@ BLACK_LIST = (
     # "read_spss",
     "read_sql",  # type-name conflict
     # "read_sql_query",
-    "read_sql_table",  # type-name conflict
+    # "read_sql_table",
     "read_table",  # type-name conflict
     # "read_xml",
 )
@@ -75,7 +75,7 @@ with Timer(text="Generate Models and assign - elapsed time: {milliseconds:.0f} m
     SpssAsset = _ASSET_MODELS["spss"]
     # SqlAsset = _ASSET_MODELS["sql"]
     Sql_queryAsset = _ASSET_MODELS["sql_query"]
-    # Sql_tableAsset = _ASSET_MODELS["sql_table"]
+    Sql_tableAsset = _ASSET_MODELS["sql_table"]
     StataAsset = _ASSET_MODELS["stata"]
     # TableAsset = _ASSET_MODELS["table"]
     XmlAsset = _ASSET_MODELS["xml"]
@@ -100,7 +100,7 @@ with Timer(text="Metadatsource registration - elapsed time: {milliseconds:.0f} m
             SpssAsset,
             Sql_queryAsset,
             # SqlAsset,
-            # Sql_tableAsset,
+            Sql_tableAsset,
             StataAsset,
             # TableAsset,
             XmlAsset,
