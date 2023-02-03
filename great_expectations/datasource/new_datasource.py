@@ -28,7 +28,6 @@ class BaseDatasource:
     Args:
         name: the name for the datasource
         execution_engine: the type of compute engine to produce
-        data_connectors: DataConnectors to add to the datasource
         data_context_root_directory: Installation directory path (if installed on a filesystem).
         concurrency: Concurrency config used to configure the execution engine.
         id: Identifier specific to this datasource.

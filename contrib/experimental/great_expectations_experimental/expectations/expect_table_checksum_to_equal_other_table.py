@@ -63,7 +63,7 @@ class TableChecksum(TableMetricProvider):
     #
     #     return len(columnslist)
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -191,7 +191,7 @@ class TableChecksumValues(TableMetricProvider):
     #
     #     return cksum_value_self, cksum_value_other
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -231,7 +231,7 @@ class TableChecksumValues(TableMetricProvider):
     ):
 
         # set ignore_columns to '' if it is not provided.
-        if "ignore_columns" in configuration.kwargs:
+        if configuration and "ignore_columns" in configuration.kwargs:
             runtime_configuration["ignore_columns"] = configuration.kwargs[
                 "ignore_columns"
             ]
@@ -242,9 +242,10 @@ class TableChecksumValues(TableMetricProvider):
         table_row_count_metric_config_other = deepcopy(metric.metric_domain_kwargs)
 
         # set table value to other_table_name in metric configuration.
-        table_row_count_metric_config_other["table"] = configuration.kwargs[
-            "other_table_name"
-        ]
+        if configuration:
+            table_row_count_metric_config_other["table"] = configuration.kwargs[
+                "other_table_name"
+            ]
 
         return {
             "table.checksum.self": MetricConfiguration(
