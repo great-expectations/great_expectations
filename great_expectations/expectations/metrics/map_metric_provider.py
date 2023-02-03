@@ -2488,6 +2488,7 @@ def _sqlalchemy_map_condition_rows(
         )
 
 
+# marker
 def _sqlalchemy_map_condition_query(
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
@@ -2555,6 +2556,7 @@ def _sqlalchemy_map_condition_query(
     return query_as_string
 
 
+# marker
 def _sqlalchemy_map_condition_index(
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
