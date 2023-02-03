@@ -719,7 +719,7 @@ def bad_connection_string_database_config() -> tuple[
     connection_string = "postgresql+psycopg2://postgres:@localhost/bad_database"
     table_name = "good_table"
     schema_name = "good_schema"
-    sqlalchemy_engine_connect_return_value = (
+    sqlalchemy_engine_connect_error_raised = (
         '(psycopg2.OperationalError) connection to server at "localhost" (::1), port '
         '5432 failed: FATAL:  database "bad_database" does not exist\n'
         "\n"
@@ -727,16 +727,13 @@ def bad_connection_string_database_config() -> tuple[
     )
     test_connection_error = TestConnectionError(
         "Attempt to connect to datasource failed with the following error message: "
-        '(psycopg2.OperationalError) connection to server at "localhost" (::1), port '
-        '5432 failed: FATAL:  database "bad_database" does not exist\n'
-        "\n"
-        "(Background on this error at: https://sqlalche.me/e/14/e3q8)"
+        f"{sqlalchemy_engine_connect_error_raised}"
     )
     return (
         connection_string,
         table_name,
         schema_name,
-        sqlalchemy_engine_connect_return_value,
+        sqlalchemy_engine_connect_error_raised,
         test_connection_error,
     )
 
@@ -747,24 +744,21 @@ def bad_connection_string_user_config() -> tuple[
     connection_string = "postgresql+psycopg2://bad_user:@localhost/test_ci"
     table_name = "good_table"
     schema_name = "good_schema"
-    sqlalchemy_engine_connect_return_value = (
+    sqlalchemy_engine_connect_error_raised = (
         '(psycopg2.OperationalError) connection to server at "localhost" (::1), port '
         '5432 failed: FATAL:  role "bad_user" does not exist\n'
         "\n"
         "(Background on this error at: https://sqlalche.me/e/14/e3q8)"
     )
     test_connection_error = TestConnectionError(
-        "Attempt to connect to datasource failed with the following error message: "
-        '(psycopg2.OperationalError) connection to server at "localhost" (::1), port '
-        '5432 failed: FATAL:  role "bad_user" does not exist\n'
-        "\n"
-        "(Background on this error at: https://sqlalche.me/e/14/e3q8)"
+        f"Attempt to connect to datasource failed with the following error message: "
+        f"{sqlalchemy_engine_connect_error_raised}"
     )
     return (
         connection_string,
         table_name,
         schema_name,
-        sqlalchemy_engine_connect_return_value,
+        sqlalchemy_engine_connect_error_raised,
         test_connection_error,
     )
 
@@ -773,7 +767,7 @@ def bad_table_name_config() -> tuple[str, str, str, str | None, TestConnectionEr
     connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
     table_name = "bad_table"
     schema_name = "good_schema"
-    sqlalchemy_engine_connect_return_value = None
+    sqlalchemy_engine_connect_error_raised = None
     test_connection_error = TestConnectionError(
         'Attempt to connect to table: "good_schema.bad_table" failed because the table '
         '"bad_table" does not exist.'
@@ -782,7 +776,7 @@ def bad_table_name_config() -> tuple[str, str, str, str | None, TestConnectionEr
         connection_string,
         table_name,
         schema_name,
-        sqlalchemy_engine_connect_return_value,
+        sqlalchemy_engine_connect_error_raised,
         test_connection_error,
     )
 
@@ -791,7 +785,7 @@ def bad_schema_name_config() -> tuple[str, str, str, str | None, TestConnectionE
     connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
     table_name = "good_table"
     schema_name = "bad_schema"
-    sqlalchemy_engine_connect_return_value = None
+    sqlalchemy_engine_connect_error_raised = None
     test_connection_error = TestConnectionError(
         'Attempt to connect to table: "bad_schema.good_table" failed because the schema '
         '"bad_schema" does not exist.'
@@ -800,7 +794,7 @@ def bad_schema_name_config() -> tuple[str, str, str, str | None, TestConnectionE
         connection_string,
         table_name,
         schema_name,
-        sqlalchemy_engine_connect_return_value,
+        sqlalchemy_engine_connect_error_raised,
         test_connection_error,
     )
 
@@ -820,7 +814,7 @@ def datasource_test_connection_error_messages(
         connection_string,
         table_name,
         schema_name,
-        sqlalchemy_engine_connect_return_value,
+        sqlalchemy_engine_connect_error_raised,
         test_connection_error,
     ) = request.param()
     table_asset = TableAsset(
@@ -835,7 +829,7 @@ def datasource_test_connection_error_messages(
     )
     return (
         postgres_datasource,
-        sqlalchemy_engine_connect_return_value,
+        sqlalchemy_engine_connect_error_raised,
         test_connection_error,
     )
 
@@ -848,7 +842,7 @@ def test_test_connection_failures(
 ):
     (
         postgres_datasource,
-        sqlalchemy_engine_connect_return_value,
+        sqlalchemy_engine_connect_error_raised,
         test_connection_error,
     ) = datasource_test_connection_error_messages
 
@@ -857,8 +851,8 @@ def test_test_connection_failures(
     connect = mocker.patch(
         "tests.experimental.datasources.conftest.MockSaEngine.connect"
     )
-    if sqlalchemy_engine_connect_return_value:
-        connect.side_effect = Exception(sqlalchemy_engine_connect_return_value)
+    if sqlalchemy_engine_connect_error_raised:
+        connect.side_effect = Exception(sqlalchemy_engine_connect_error_raised)
     inspect = mocker.patch("sqlalchemy.inspect")
     inspect.return_value = MockSaInspector()
     get_schema_names = mocker.patch(
