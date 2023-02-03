@@ -112,6 +112,10 @@
                     "title": "Table Name",
                     "type": "string"
                 },
+                "schema_name": {
+                    "title": "Schema Name",
+                    "type": "string"
+                },
                 "column_splitter": {
                     "$ref": "#/definitions/SqlYearMonthSplitter"
                 }
