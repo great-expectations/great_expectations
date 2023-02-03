@@ -474,6 +474,7 @@ def datasource_test_connection_error_messages(
     return pandas_datasource, test_connection_error
 
 
+@pytest.mark.unit
 def test_test_connection_failures(
     datasource_test_connection_error_messages: tuple[
         PandasDatasource, TestConnectionError
