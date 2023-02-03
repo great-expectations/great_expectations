@@ -325,7 +325,7 @@ def build_count_and_index_table(
     )
     if unexpected_index_df.empty:
         raise RenderingError(
-            f"GX ran into an issue while building count and index table for rendering. Please check your configuration."
+            "GX ran into an issue while building count and index table for rendering. Please check your configuration."
         )
 
     # using default indices for Pandas
