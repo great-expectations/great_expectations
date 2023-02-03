@@ -33,9 +33,7 @@
             "format": "regex"
         },
         "path": {
-            "title": "Path",
-            "format": "file-path",
-            "type": "string"
+            "title": "Path"
         },
         "engine": {
             "title": "Engine",
@@ -43,11 +41,7 @@
             "type": "string"
         },
         "columns": {
-            "title": "Columns",
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+            "title": "Columns"
         },
         "storage_options": {
             "title": "Storage Options",
