@@ -332,6 +332,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.config.update(project_config)
 
     @public_api
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         args_payload_fn=save_expectation_suite_usage_statistics,
@@ -360,6 +363,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: If a suite with the same name exists and `overwrite_existing` is set to `False`.
         """
+        # deprecated-v0.15.48
+        warnings.warn(
+            "save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. "
+            "Please use update_expectation_suite or add_or_update_expectation_suite instead.",
+            DeprecationWarning,
+        )
         return self._save_expectation_suite(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
@@ -647,6 +656,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._project_config = project_config
         self.variables.config = project_config
 
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     def save_datasource(
         self, datasource: Union[LegacyDatasource, BaseDatasource]
     ) -> Union[LegacyDatasource, BaseDatasource]:
@@ -664,6 +676,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The datasource, after storing and retrieving the stored config.
         """
+        # deprecated-v0.15.48
+        warnings.warn(
+            "save_datasource is deprecated as of v0.15.48 and will be removed in v0.18. "
+            "Please use update_datasource or add_or_update_datasource instead.",
+            DeprecationWarning,
+        )
         # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.
         # This is to be removed once substitution logic is migrated from the context to the individual object level.
         config = datasource._raw_config
@@ -1206,6 +1224,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
 
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
@@ -1218,6 +1239,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The input profiler - may be modified with an id depending on the backing store.
         """
+        # deprecated-v0.15.48
+        warnings.warn(
+            "save_profiler is deprecated as of v0.15.48 and will be removed in v0.18. "
+            "Please use update_profiler or add_or_update_profiler instead.",
+            DeprecationWarning,
+        )
         name = profiler.name
         ge_cloud_id = profiler.ge_cloud_id
         key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
@@ -2126,6 +2153,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     @public_api
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -2170,6 +2200,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             ValueError: The input `overwrite_existing` is of the wrong type.
             DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
         """
+        # deprecated-v0.15.48
+        warnings.warn(
+            "create_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. "
+            "Please use add_expectation_suite or add_or_update_expectation_suite instead.",
+            DeprecationWarning,
+        )
         return self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             overwrite_existing=overwrite_existing,
