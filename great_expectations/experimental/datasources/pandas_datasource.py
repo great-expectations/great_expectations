@@ -42,7 +42,7 @@ _BLACK_LIST = (
     # "read_html",
     # "read_orc",
     # "read_pickle",
-    "read_sas",  # invalid json schema
+    # "read_sas",  # invalid json schema
     # "read_spss",
     "read_sql",  # type-name conflict
     # "read_sql_query",
@@ -66,7 +66,7 @@ JSONAsset = _ASSET_MODELS["json"]
 ORCAsset = _ASSET_MODELS["orc"]
 ParquetAsset = _ASSET_MODELS["parquet"]
 PickleAsset = _ASSET_MODELS["pickle"]
-# SASAsset = _ASSET_MODELS["sas"]
+SASAsset = _ASSET_MODELS["sas"]
 SPSSAsset = _ASSET_MODELS["spss"]
 # SqlAsset = _ASSET_MODELS["sql"]
 SQLQueryAsset = _ASSET_MODELS["sql_query"]
@@ -90,7 +90,7 @@ class PandasDatasource(Datasource):
         ORCAsset,
         ParquetAsset,
         PickleAsset,
-        # SASAsset,
+        SASAsset,
         SPSSAsset,
         SQLQueryAsset,
         # SqlAsset,
@@ -118,7 +118,7 @@ class PandasDatasource(Datasource):
             ORCAsset,
             ParquetAsset,
             PickleAsset,
-            # SASAsset,
+            SASAsset,
             SPSSAsset,
             SQLQueryAsset,
             # SqlAsset,
