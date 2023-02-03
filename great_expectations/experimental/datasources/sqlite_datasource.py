@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Type, TypeVar, Union
 
 import pydantic
 from pydantic import dataclasses as pydantic_dc
-from sqlalchemy import func
 from typing_extensions import ClassVar
 
 from great_expectations.experimental.datasources.interfaces import DataAsset
@@ -99,12 +98,15 @@ def _get_sqlite_datetime_range(
     column = sa.column(col_name)
     query = sa.select(
         [
-            func.strftime("%Y%m%d", func.min(column)),
-            func.strftime("%Y%m%d", func.max(column)),
+            func.strftime("%Y%m%d", sa.func.min(column)),
+            func.strftime("%Y%m%d", sa.func.max(column)),
         ]
     ).select_from(selectable)
     min_max_dt = [
-        datetime.strptime(dt, "%Y%m%d") for dt in list(conn.execute(query))[0]
+        datetime.strptime(dt, "%Y%m%d")
+        for dt in list(
+            conn.execute(query.compile(compile_kwargs={"literal_binds": True}))
+        )[0]
     ]
     if min_max_dt[0] is None or min_max_dt[1] is None:
         raise SQLDatasourceError(

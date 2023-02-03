@@ -30,7 +30,7 @@ def sqlite_datasource(sqlite_database_path, sqlite_datasource_name) -> SqliteDat
     connection_string = f"sqlite:///{sqlite_database_path}"
     datasource = SqliteDatasource(
         name=sqlite_datasource_name,
-        connection_string=connection_string,
+        connection_string=connection_string,  # ignore[arg-type]  # pydantic will coerce
     )
     return datasource
 

@@ -19,7 +19,6 @@ from typing import (
 
 import pydantic
 from pydantic import dataclasses as pydantic_dc
-from sqlalchemy import func
 from typing_extensions import ClassVar, Literal
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -141,8 +140,12 @@ def _get_sql_datetime_range(
     import sqlalchemy as sa
 
     column = sa.column(col_name)
-    query = sa.select([func.min(col_name), func.max(column)]).select_from(selectable)
-    min_max_dt = list(conn.execute(query))[0]
+    query = sa.select([sa.func.min(col_name), sa.func.max(column)]).select_from(
+        selectable
+    )
+    min_max_dt = list(
+        conn.execute(query.compile(compile_kwargs={"literal_binds": True}))
+    )[0]
     if min_max_dt[0] is None or min_max_dt[1] is None:
         raise SQLDatasourceError(
             f"Data date range can not be determined for the query: {query}. The returned range was {min_max_dt}."
