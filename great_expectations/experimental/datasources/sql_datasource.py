@@ -140,7 +140,7 @@ def _get_sql_datetime_range(
     import sqlalchemy as sa
 
     column = sa.column(col_name)
-    query = sa.select([sa.func.min(col_name), sa.func.max(column)]).select_from(
+    query = sa.select([sa.func.min(column), sa.func.max(column)]).select_from(
         selectable
     )
     min_max_dt = list(
