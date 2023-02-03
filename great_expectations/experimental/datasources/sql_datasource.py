@@ -79,12 +79,14 @@ class ColumnSplitter:
         return v
 
     def test_connection(self) -> None:
-        """Test the connection for the TableAsset.
+        """Test the connection for the ColumnSplitter.
 
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        ...
+        raise NotImplementedError(
+            """One needs to implement "test_connection" on a ColumnSplitter subclass."""
+        )
 
 
 class DatetimeRange(NamedTuple):
