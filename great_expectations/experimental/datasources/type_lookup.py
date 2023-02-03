@@ -18,7 +18,7 @@ from typing import (
 
 from typing_extensions import TypeAlias
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class TypeLookupError(ValueError):
@@ -135,7 +135,7 @@ class TypeLookup(
         txn_exc: Union[Exception, None] = None
 
         backup_data = copy.copy(self.data)
-        LOGGER.debug("Beginning TypeLookup transaction")
+        logger.debug("Beginning TypeLookup transaction")
         try:
             yield self
         except Exception as exc:
@@ -143,11 +143,11 @@ class TypeLookup(
             raise
         finally:
             if txn_exc:
-                LOGGER.debug("Transaction of items rolled back")
+                logger.debug("Transaction of items rolled back")
                 self.data = backup_data
             else:
-                LOGGER.debug("Transaction committing items")
-            LOGGER.debug("Completed TypeLookup transaction")
+                logger.debug("Transaction committing items")
+            logger.debug("Completed TypeLookup transaction")
 
 
 if __name__ == "__main__":

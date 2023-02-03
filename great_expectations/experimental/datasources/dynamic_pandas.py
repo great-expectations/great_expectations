@@ -132,11 +132,11 @@ def _replace_builtins(input_: str | type) -> str | type:
 
 FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     # CSVAsset
-    "filepath_or_buffer": {"path": _FieldSpec(pathlib.Path, ...)},
+    "filepath_or_buffer": {"base_directory": _FieldSpec(pathlib.Path, ...)},
     # JSONAsset
-    "path_or_buf": {"path": _FieldSpec(pathlib.Path, ...)},
+    "path_or_buf": {"base_directory": _FieldSpec(pathlib.Path, ...)},
     # misc
-    "filepath": {"path": _FieldSpec(pathlib.Path, ...)},
+    "filepath": {"base_directory": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
@@ -270,13 +270,26 @@ def _create_pandas_asset_model(
     model_base: M,
     type_field: Tuple[Union[Type, str], str],
     fields_dict: Dict[str, _FieldSpec],
+    extra: pydantic.Extra,
 ) -> M:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
     model = pydantic.create_model(model_name, __base__=model_base, type=type_field, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
+    # can't set both __base__ & __config__ when dynamically creating model
+    model.__config__.extra = extra
+
+    def _get_reader_method(self) -> str:
+        return f"read_{self.type}"
+
+    def _get_reader_options_include(self) -> set[str] | None:
+        return None
+
+    setattr(model, "_get_reader_method", _get_reader_method)
+    setattr(model, "_get_reader_options_include", _get_reader_options_include)
+
     return model
 
 
-def _generate_data_asset_models(
+def _generate_pandas_data_asset_models(
     base_model_class: M, whitelist: Optional[Sequence[str]] = None
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(whitelist)
@@ -298,6 +311,7 @@ def _generate_data_asset_models(
                 model_base=base_model_class,
                 type_field=(f"Literal['{type_name}']", type_name),
                 fields_dict=fields,
+                extra=pydantic.Extra.forbid,
             )
             logger.debug(f"{model_name}\n{pf(fields)}")
         except NameError as err:

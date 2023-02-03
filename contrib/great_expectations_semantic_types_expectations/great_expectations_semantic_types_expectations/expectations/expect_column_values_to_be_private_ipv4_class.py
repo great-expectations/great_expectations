@@ -4,11 +4,9 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 import ipaddress
-import json
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -30,7 +28,7 @@ def is_private_ip_address_in_class(addr: str, ip_class) -> bool:
                 if ipaddress.ip_address(addr) in ipaddress.ip_network("192.168.0.0/16"):
                     return True
         return False
-    except Exception as e:
+    except Exception:
         return False
 
 

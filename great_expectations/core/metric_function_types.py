@@ -12,20 +12,18 @@ class MetricFunctionTypes(enum.Enum):
 
     The available types are:
 
-    - `VALUE` -- metric implementation function returns a value computed over a dataset represented by "Domain" (e.g., a
-      statistic on row values of a column).
-    - `MAP_VALUES` (unused in current version) -- metric implementation function returns a mapping between every
+    - `VALUE` -- metric implementation function returns a value computed over a dataset represented by "Domain" \
+        (e.g., a statistic on column row values). \
+        This is the only value in use (others below have never been used and are thus deprecated).
+    - `MAP_VALUES` (never used and deprecated) -- metric implementation function returns a mapping between every
       "Domain" value and the result of a transformation of the corresponding "Domain" value.
-    - `WINDOW_VALUES` (unused in current version) -- metric implementation function returns the result of applying a
+    - `WINDOW_VALUES` (never used and deprecated) -- metric implementation function returns the result of applying a
       specified windowing operation over "Domain" values.
-    - `AGGREGATE_VALUE` (unused in current version) -- metric implementation function returns the result of applying a
+    - `AGGREGATE_VALUE` (never used and deprecated) -- metric implementation function returns the result of applying a
       specified aggregation operation to every "Domain" value.
     """
 
     VALUE = "value"
-    MAP_VALUES = "value"  # "map_values" (unused in current version)
-    WINDOW_VALUES = "value"  # "window_values" (unused in current version)
-    AGGREGATE_VALUE = "value"  # "aggregate_value" (unused in current version)
 
 
 @public_api

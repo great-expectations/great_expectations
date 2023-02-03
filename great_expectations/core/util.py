@@ -43,12 +43,22 @@ from great_expectations.types.base import SerializableDotDict
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from great_expectations.util import convert_decimal_to_float
 
+logger = logging.getLogger(__name__)
+
+try:
+    import pyspark
+    from pyspark.sql import SparkSession  # noqa: F401
+except ImportError:
+    pyspark = None
+    SparkSession = None
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
+    )
+
 try:
     from pyspark.sql.types import StructType
 except ImportError:
     StructType = None
-
-logger = logging.getLogger(__name__)
 
 
 try:
@@ -87,21 +97,9 @@ SCHEMAS = {
     },
 }
 
-try:
-    import pyspark
-    from pyspark.sql import SparkSession
-
-except ImportError:
-    pyspark = None
-    SparkSession = None
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
-
 
 if TYPE_CHECKING:
     import numpy.typing as npt
-    from pyspark.sql import SparkSession  # noqa: F401
     from ruamel.yaml.comments import CommentedMap
 
 

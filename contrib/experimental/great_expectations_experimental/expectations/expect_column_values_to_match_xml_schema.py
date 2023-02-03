@@ -27,11 +27,6 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 
-try:
-    import sqlalchemy as sa
-except ImportError:
-    pass
-
 
 class ColumnValuesMatchXmlSchema(ColumnMapMetricProvider):
     condition_metric_name = "column_values.match_xml_schema"
@@ -165,7 +160,7 @@ class ExpectColumnValuesToMatchXmlSchema(ColumnMapExpectation):
         include_column_name = (
             False if runtime_configuration.get("include_column_name") is False else True
         )
-        styling = runtime_configuration.get("styling")
+        _ = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,
             ["column", "mostly", "xml_schema", "row_condition", "condition_parser"],

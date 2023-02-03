@@ -5,10 +5,7 @@ from typing import Any, Callable, Dict, Optional, Type, Union
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import (
-    MetricFunctionTypes,
-    MetricPartialFunctionTypes,
-)
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     SparkDFExecutionEngine,
@@ -36,8 +33,6 @@ logger = logging.getLogger(__name__)
 @public_api
 def column_aggregate_value(
     engine: Type[ExecutionEngine],
-    metric_fn_type=MetricFunctionTypes.VALUE,
-    domain_type=MetricDomainTypes.COLUMN,
     **kwargs,
 ):
     """Provides Pandas support for authoring a metric_fn with a simplified signature.
@@ -50,21 +45,16 @@ def column_aggregate_value(
 
     Args:
         engine: The `ExecutionEngine` used to to evaluate the condition
-        metric_fn_type: The metric function type
-        domain_type: The domain over which the metric will operate
         **kwargs: Arguments passed to specified function
 
     Returns:
         An annotated metric_function which will be called with a simplified signature.
     """
+    domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN
     if issubclass(engine, PandasExecutionEngine):
 
         def wrapper(metric_fn: Callable):
-            @metric_value(
-                engine=PandasExecutionEngine,
-                metric_fn_type=metric_fn_type,
-                domain_type=domain_type,
-            )
+            @metric_value(engine=PandasExecutionEngine)
             @wraps(metric_fn)
             def inner_func(
                 cls,
@@ -127,8 +117,10 @@ def column_aggregate_partial(engine: Type[ExecutionEngine], **kwargs):
     Returns:
         An annotated metric_function which will be called with a simplified signature.
     """
-    partial_fn_type = MetricPartialFunctionTypes.AGGREGATE_FN
-    domain_type = MetricDomainTypes.COLUMN
+    partial_fn_type: MetricPartialFunctionTypes = (
+        MetricPartialFunctionTypes.AGGREGATE_FN
+    )
+    domain_type: MetricDomainTypes = MetricDomainTypes.COLUMN
     if issubclass(engine, SqlAlchemyExecutionEngine):
 
         def wrapper(metric_fn: Callable):
