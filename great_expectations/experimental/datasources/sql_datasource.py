@@ -93,7 +93,7 @@ class ColumnSplitter:
             table_name=table_asset.table_name, schema=table_asset.schema
         ):
             raise TestConnectionError(
-                f'The column "{self.column_name}" was not found in table "{table_asset.qualified_table_name}"'
+                f'The column "{self.column_name}" was not found in table "{table_asset.qualified_name}"'
             )
 
 
@@ -158,12 +158,12 @@ def _get_sql_datetime_range(
 class TableAsset(DataAsset):
     # Instance fields
     type: Literal["table"] = "table"
-    table_name: str
+    table_name: str | sqlalchemy.sql.quoted_name
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
 
     @property
-    def qualified_table_name(self) -> str:
+    def qualified_name(self) -> str:
         return (
             f"{self.schema_name}.{self.table_name}"
             if self.schema_name
