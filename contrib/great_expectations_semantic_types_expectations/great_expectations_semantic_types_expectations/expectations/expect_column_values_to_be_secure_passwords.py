@@ -1,6 +1,5 @@
 from typing import Optional
 
-from great_expectations import *  # noqa: F403
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
