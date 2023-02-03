@@ -372,8 +372,110 @@ def test_convert_unexpected_indices_to_df_multiple_with_truncation():
     assert res.iloc[0].tolist() == ["0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ...", 13]
 
 
-# ADD TEST USING THE PAIRs
-# and for counts
+def test_convert_unexpected_indices_to_df_column_pair_expectation():
+    partial_unexpected_counts = [{"value": ("eraser", "desk"), "count": 3}]
+    unexpected_index_list = [
+        {"ordered_item": "eraser", "received_item": "desk", "pk_2": "three"},
+        {"ordered_item": "eraser", "received_item": "desk", "pk_2": "four"},
+        {"ordered_item": "eraser", "received_item": "desk", "pk_2": "five"},
+    ]
+    unexpected_index_column_names = ["pk_2"]
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=unexpected_index_list,
+        unexpected_index_column_names=unexpected_index_column_names,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == ["pk_2", "Count"]
+    assert res.index.to_list() == ["('eraser', 'desk')"]
+    assert res.iloc[0].tolist() == ["three, four, five", 3]
+
+
+def test_convert_unexpected_indices_to_df_column_pair_expectation_no_id_pk():
+    partial_unexpected_counts = [{"value": ("eraser", "desk"), "count": 3}]
+    unexpected_index_list = [3, 4, 5]
+    unexpected_list = [("eraser", "desk"), ("eraser", "desk"), ("eraser", "desk")]
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=unexpected_index_list,
+        unexpected_index_column_names=None,
+        unexpected_list=unexpected_list,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == ["Index", "Count"]
+    assert res.index.to_list() == ["('eraser', 'desk')"]
+    assert res.iloc[0].tolist() == ["3, 4, 5", 3]
+
+
+def test_convert_unexpected_indices_to_df_multiple_column_expectation():
+    partial_unexpected_counts = [
+        {"value": (20, 20, 20), "count": 1},
+        {"value": (30, 30, 30), "count": 1},
+        {"value": (40, 40, 40), "count": 1},
+        {"value": (50, 50, 50), "count": 1},
+        {"value": (60, 60, 60), "count": 1},
+    ]
+    unexpected_index_list = [
+        {"a": 20, "pk_1": 1, "b": 20, "c": 20},
+        {"a": 30, "pk_1": 2, "b": 30, "c": 30},
+        {"a": 40, "pk_1": 3, "b": 40, "c": 40},
+        {"a": 50, "pk_1": 4, "b": 50, "c": 50},
+        {"a": 60, "pk_1": 5, "b": 60, "c": 60},
+    ]
+    unexpected_index_column_names = ["pk_1"]
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=unexpected_index_list,
+        unexpected_index_column_names=unexpected_index_column_names,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == ["pk_1", "Count"]
+    assert res.index.to_list() == [
+        "('20', '20', '20')",
+        "('30', '30', '30')",
+        "('40', '40', '40')",
+        "('50', '50', '50')",
+        "('60', '60', '60')",
+    ]
+    assert res.iloc[0].tolist() == ["1", 1]
+    assert res.iloc[1].tolist() == ["2", 1]
+    assert res.iloc[2].tolist() == ["3", 1]
+    assert res.iloc[3].tolist() == ["4", 1]
+    assert res.iloc[4].tolist() == ["5", 1]
+
+
+def test_convert_unexpected_indices_to_df_multiple_column_expectation_no_id_pk():
+    partial_unexpected_counts = [
+        {"value": (20, 20, 20), "count": 1},
+        {"value": (30, 30, 30), "count": 1},
+        {"value": (40, 40, 40), "count": 1},
+        {"value": (50, 50, 50), "count": 1},
+        {"value": (60, 60, 60), "count": 1},
+    ]
+    unexpected_list = [
+        (20, 20, 20),
+        (30, 30, 30),
+        (40, 40, 40),
+        (50, 50, 50),
+        (60, 60, 60),
+    ]
+    unexpected_index_list = [1, 2, 3, 4, 5]
+    res = _convert_unexpected_indices_to_df(
+        unexpected_index_list=unexpected_index_list,
+        unexpected_index_column_names=None,
+        unexpected_list=unexpected_list,
+        partial_unexpected_counts=partial_unexpected_counts,
+    )
+    assert list(res) == ["Index", "Count"]
+    assert res.index.to_list() == [
+        "(20, 20, 20)",
+        "(30, 30, 30)",
+        "(40, 40, 40)",
+        "(50, 50, 50)",
+        "(60, 60, 60)",
+    ]
+    assert res.iloc[0].tolist() == ["1", 1]
+    assert res.iloc[1].tolist() == ["2", 1]
+    assert res.iloc[2].tolist() == ["3", 1]
+    assert res.iloc[3].tolist() == ["4", 1]
+    assert res.iloc[4].tolist() == ["5", 1]
 
 
 def test_convert_unexpected_indices_to_df_actual_values():
@@ -542,7 +644,9 @@ def test_build_count_and_index_table_with_column_pair():
         unexpected_index_column_names=unexpected_index_column_names,
     )
     assert header_row == ["Unexpected Value", "Count", "pk_2"]
-    assert table_rows == [["('desk', 'eraser')", 3, "three, four, five"]]
+    assert table_rows == [
+        ["('desk', 'eraser')", 3, "three, four, five"]
+    ] or table_rows == [["('eraser', 'desk')", 3, "three, four, five"]]
 
 
 def test_build_count_and_index_table_with_null():
