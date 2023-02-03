@@ -95,7 +95,7 @@ except ImportError:
 try:
     from sqlalchemy.engine import Dialect, Row
     from sqlalchemy.exc import OperationalError
-    from sqlalchemy.sql import Selectable, Subquery
+    from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import (
         BooleanClauseList,
         Label,
