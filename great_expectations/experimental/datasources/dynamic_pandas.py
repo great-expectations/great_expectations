@@ -273,10 +273,20 @@ def _create_pandas_asset_model(
     model = pydantic.create_model(model_name, __base__=model_base, type=type_field, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
     # can't set both __base__ & __config__ when dynamically creating model
     model.__config__.extra = extra
+
+    def _get_reader_method(self) -> str:
+        return f"read_{self.type}"
+
+    def _get_reader_options_include(self) -> set[str] | None:
+        return None
+
+    setattr(model, "_get_reader_method", _get_reader_method)
+    setattr(model, "_get_reader_options_include", _get_reader_options_include)
+
     return model
 
 
-def _generate_data_asset_models(
+def _generate_pandas_data_asset_models(
     base_model_class: M, whitelist: Optional[Sequence[str]] = None
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(whitelist)
