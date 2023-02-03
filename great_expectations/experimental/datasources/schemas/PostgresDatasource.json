@@ -20,7 +20,14 @@
             "default": {},
             "type": "object",
             "additionalProperties": {
-                "$ref": "#/definitions/TableAsset"
+                "anyOf": [
+                    {
+                        "$ref": "#/definitions/TableAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/QueryAsset"
+                    }
+                ]
             }
         },
         "connection_string": {
@@ -111,9 +118,43 @@
                         "$ref": "#/definitions/BatchSorter"
                     }
                 },
+                "column_splitter": {
+                    "$ref": "#/definitions/SqlYearMonthSplitter"
+                },
                 "table_name": {
                     "title": "Table Name",
                     "type": "string"
+                }
+            },
+            "required": [
+                "name",
+                "table_name"
+            ],
+            "additionalProperties": false
+        },
+        "QueryAsset": {
+            "title": "QueryAsset",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "query",
+                    "enum": [
+                        "query"
+                    ],
+                    "type": "string"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchSorter"
+                    }
                 },
                 "schema_name": {
                     "title": "Schema Name",
@@ -121,11 +162,15 @@
                 },
                 "column_splitter": {
                     "$ref": "#/definitions/SqlYearMonthSplitter"
+                },
+                "query": {
+                    "title": "Query",
+                    "type": "string"
                 }
             },
             "required": [
                 "name",
-                "table_name"
+                "query"
             ],
             "additionalProperties": false
         }

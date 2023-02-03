@@ -338,9 +338,13 @@ def test_catch_bad_asset_configs(
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
     all_errors = exc_info.value.errors()
-    assert len(all_errors) == 1, "Expected 1 error"
-    assert expected_error_loc == all_errors[0]["loc"]
-    assert expected_msg == all_errors[0]["msg"]
+    assert len(all_errors) >= 1, "Expected at least 1 error"
+    test_msg = ""
+    for error in all_errors:
+        if expected_error_loc == all_errors[0]["loc"]:
+            test_msg = error["msg"]
+            break
+    assert expected_msg == test_msg
 
 
 @pytest.mark.unit
