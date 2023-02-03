@@ -78,6 +78,14 @@ class ColumnSplitter:
             raise ValueError(f"unexpected value; permitted: '{permitted_values_str}'")
         return v
 
+    def test_connection(self) -> None:
+        """Test the connection for the TableAsset.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        ...
+
 
 class DatetimeRange(NamedTuple):
     min: datetime
