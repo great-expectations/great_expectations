@@ -519,7 +519,7 @@ def type_schema(
                 json_str: str = model.schema_json(indent=indent) + "\n"
 
                 if issubclass(model, Datasource):
-                    print(f"🙈  {name} - is a Datasource skipping")
+                    print(f"🙈  {name} - is a Datasource; skipping")
                     continue
 
                 if schema_path.exists():
