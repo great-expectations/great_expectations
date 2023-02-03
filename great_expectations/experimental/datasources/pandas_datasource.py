@@ -30,16 +30,34 @@ class PandasDatasourceError(Exception):
     pass
 
 
-with Timer(text="Generate 4 Models and assign - elapsed time: {milliseconds:.0f} ms"):
+BLACK_LIST = (
+    # "read_csv",
+    # "read_json",
+    # "read_excel",
+    # "read_parquet",
+    # "read_clipboard",
+    # "read_feather",
+    "read_fwf",
+    # "read_gbq",
+    # "read_hdf",
+    # "read_html",
+    # "read_orc",
+    # "read_pickle",
+    # "read_sas",
+    # "read_spss",
+    # "read_sql",
+    # "read_sql_query",
+    # "read_sql_table",
+    # "read_table",
+    # "read_xml",
+)
+
+# print(f"{len(WHITELIST)} Models")
+
+with Timer(text="Generate Models and assign - elapsed time: {milliseconds:.0f} ms"):
 
     _ASSET_MODELS = _generate_pandas_data_asset_models(
-        _FilesystemDataAsset,
-        whitelist=(
-            "read_csv",
-            "read_json",
-            "read_excel",
-            "read_parquet",
-        ),
+        _FilesystemDataAsset, blacklist=BLACK_LIST
     )
 
     CSVAsset = _ASSET_MODELS["csv"]
@@ -198,3 +216,6 @@ with Timer(text="Metadatsource registration - elapsed time: {milliseconds:.0f} m
                 **kwargs,
             )
             return self.add_asset(asset)
+
+
+print(f"{len(_ASSET_MODELS)} Models")

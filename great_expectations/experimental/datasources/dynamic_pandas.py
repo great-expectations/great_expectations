@@ -328,6 +328,8 @@ def _generate_pandas_data_asset_models(
             type_name, f"{type_name.capitalize()}Asset"
         )
 
+        print(signature_tuple.name, "->", model_name)
+
         try:
             asset_model = _create_pandas_asset_model(
                 model_name=model_name,
