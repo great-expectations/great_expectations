@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from contextlib import contextmanager
 from datetime import datetime
-from typing import TYPE_CHECKING, Callable, Dict, Tuple
+from typing import Callable, Dict, Tuple, Type
 
 import pytest
 from pytest import MonkeyPatch
@@ -17,11 +17,8 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.experimental.datasources.metadatasource import MetaDatasource
+from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
-
-if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.interfaces import Datasource
 
 logger = logging.getLogger(__name__)
 
@@ -92,11 +89,11 @@ def sqlachemy_execution_engine_mock_cls(
     return MockSqlAlchemyExecutionEngine
 
 
-class ExecutionEngineDouble:
+class ExecutionEngineDouble(ExecutionEngine):
     def __init__(self, *args, **kwargs):
         pass
 
-    def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
+    def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:  # type: ignore[override]
         return BatchData(self), BatchMarkers(ge_load_time=None)
 
 
@@ -107,15 +104,15 @@ def inject_engine_lookup_double(monkeypatch: MonkeyPatch) -> ExecutionEngineDoub
     so that all Datasources use the execution engine double.
     Dynamically create a new subclass so that runtime type validation does not fail.
     """
-    original_engine_override: Dict[Datasource, ExecutionEngine] = {}
+    original_engine_override: Dict[Type[Datasource], Type[ExecutionEngine]] = {}
     for key in _SourceFactories.type_lookup.keys():
-        if issubclass(type(key), MetaDatasource):
+        if issubclass(type(key), Datasource):
             original_engine_override[key] = key.execution_engine_override
 
     try:
         for source in original_engine_override.keys():
-            source.execution_engine_override = ExecutionEngineDouble  # type: ignore[misc,assignment] # assign to class var
+            source.execution_engine_override = ExecutionEngineDouble
         yield ExecutionEngineDouble
     finally:
         for source, engine in original_engine_override.items():
-            source.execution_engine_override = engine  # type: ignore[misc,assignment] # assign to class var
+            source.execution_engine_override = engine
