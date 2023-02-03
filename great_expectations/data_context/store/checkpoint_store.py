@@ -168,29 +168,32 @@ class CheckpointStore(ConfigurationStore):
 
         return checkpoint_config
 
-    def add_checkpoint(
-        self, checkpoint: Checkpoint, name: str | None, id: str | None
-    ) -> None:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=id
-        )
-        self._add_checkpoint(key=key, checkpoint=checkpoint)
+    def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        key = self._construct_key_from_checkpoint(checkpoint)
+        return self._add_checkpoint(key=key, checkpoint=checkpoint)
 
     def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
-        name = checkpoint.name
-        id = checkpoint.ge_cloud_id
-
-        if id:
-            key = self.determine_key(ge_cloud_id=str(id))
-        else:
-            key = self.determine_key(name=name)
-
+        key = self._construct_key_from_checkpoint(checkpoint)
         if not self.has_key(key):
             raise gx_exceptions.CheckpointNotFoundError(
-                f"Could not find a Checkpoint named {name}"
+                f"Could not find a Checkpoint named {checkpoint.name}"
             )
-
         return self._add_checkpoint(key=key, checkpoint=checkpoint)
+
+    def add_or_update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        key = self._construct_key_from_checkpoint(checkpoint)
+        if self.has_key(key):
+            return self.update_checkpoint(checkpoint)
+        return self.add_checkpoint(checkpoint=checkpoint)
+
+    def _construct_key_from_checkpoint(
+        self, checkpoint: Checkpoint
+    ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
+        name = checkpoint.name
+        id = checkpoint.ge_cloud_id
+        if id:
+            return self.determine_key(ge_cloud_id=str(id))
+        return self.determine_key(name=name)
 
     def _add_checkpoint(
         self,

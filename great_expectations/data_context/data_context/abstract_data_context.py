@@ -1531,8 +1531,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             default_validation_id=default_validation_id,
         )
 
-        self.checkpoint_store.add_checkpoint(checkpoint=checkpoint, name=name, id=id)
-        return checkpoint
+        return self.checkpoint_store.add_checkpoint(checkpoint)
 
     def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
         """Update a Checkpoint that already exists.
@@ -1596,7 +1595,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
-        return self.add_checkpoint(
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        checkpoint = Checkpoint.construct_from_config_args(
+            data_context=self,
+            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
             name=name,
             config_version=config_version,
             template_name=template_name,
@@ -1610,6 +1613,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
+            # the following four arguments are used by SimpleCheckpoint
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
@@ -1618,6 +1622,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_ge_cloud_id=expectation_suite_id,
             default_validation_id=default_validation_id,
         )
+        return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
 
     def get_checkpoint(
         self,
