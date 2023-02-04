@@ -159,38 +159,6 @@ class _SQLAsset(DataAsset):
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
 
-    def test_connection(self) -> None:
-        """Test the connection for the _SQLAsset.
-
-        Raises:
-            TestConnectionError: If the connection test fails.
-        """
-        assert isinstance(self.datasource, SQLDatasource)
-        engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
-        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
-
-        table_str = (
-            f"{self.schema_name}.{self.table_name}"
-            if self.schema_name
-            else self.table_name
-        )
-
-        if self.schema_name and self.schema_name not in inspector.get_schema_names():
-            raise TestConnectionError(
-                f'Attempt to connect to table: "{table_str}" failed because the schema '
-                f'"{self.schema_name}" does not exist.'
-            )
-
-        table_exists = sqlalchemy.inspect(engine).has_table(
-            table_name=self.table_name,
-            schema=self.schema_name,
-        )
-        if not table_exists:
-            raise TestConnectionError(
-                f'Attempt to connect to table: "{table_str}" failed because the table '
-                f'"{self.table_name}" does not exist.'
-            )
-
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
@@ -372,6 +340,9 @@ class QueryAsset(_SQLAsset):
     type: Literal["query"] = "query"  # type: ignore[assignment]
     query: str
 
+    def test_connection(self) -> None:
+        pass
+
     @pydantic.validator("query")
     def query_must_start_with_select(cls, v: str):
         query = v.lstrip()
@@ -401,29 +372,38 @@ class TableAsset(_SQLAsset):
     # Instance fields
     type: Literal["table"] = "table"  # type: ignore[assignment]
     table_name: str
+    schema_name: Optional[str] = None
 
     def test_connection(self) -> None:
-        """Test the connection for the TableAsset.
+        """Test the connection for the _SQLAsset.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         assert isinstance(self.datasource, SQLDatasource)
-        schema: Optional[str] = None
-        table_name: str
-        if "." in self.table_name:
-            schema, table_name = self.table_name.split(".")
-        else:
-            table_name = self.table_name
         engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
-        exists = sqlalchemy.inspect(engine).has_table(
-            table_name=table_name,
-            schema=schema,
+        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+
+        table_str = (
+            f"{self.schema_name}.{self.table_name}"
+            if self.schema_name
+            else self.table_name
         )
-        if not exists:
+
+        if self.schema_name and self.schema_name not in inspector.get_schema_names():
             raise TestConnectionError(
-                f"Attempt to connect to table: {self.table_name} failed because the table "
-                "does not exist."
+                f'Attempt to connect to table: "{table_str}" failed because the schema '
+                f'"{self.schema_name}" does not exist.'
+            )
+
+        table_exists = sqlalchemy.inspect(engine).has_table(
+            table_name=self.table_name,
+            schema=self.schema_name,
+        )
+        if not table_exists:
+            raise TestConnectionError(
+                f'Attempt to connect to table: "{table_str}" failed because the table '
+                f'"{self.table_name}" does not exist.'
             )
 
     def as_selectable(self) -> sqlalchemy.sql.Selectable:
@@ -440,6 +420,7 @@ class TableAsset(_SQLAsset):
             "type": "table",
             "data_asset_name": self.name,
             "table_name": self.table_name,
+            "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
 
