@@ -223,8 +223,8 @@ ignore = [
     "UP007", # use-pep604-annotation
     # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
     "TCH001", # typing-only-first-party-import TODO enable
-    "TCH002", # typing-only-third-party-import TODO enable
-    "TCH003", # typing-only-standard-library-import TODO enable
+    # minimal cost for standard lib imports; keep this disabled
+    "TCH003", # typing-only-standard-library-import
 ]
 extend-exclude = [
     "scripts/*",
