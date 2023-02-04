@@ -121,6 +121,10 @@
                 "table_name": {
                     "title": "Table Name",
                     "type": "string"
+                },
+                "schema_name": {
+                    "title": "Schema Name",
+                    "type": "string"
                 }
             },
             "required": [

@@ -66,7 +66,7 @@ class SparkDatasource(Datasource):
             test_assets: If assets have been passed to the SparkDatasource, whether to test them as well.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         # Only self.assets can be tested for PandasDatasource
         if self.assets and test_assets:

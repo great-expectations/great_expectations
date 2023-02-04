@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import Iterator, List, Optional, cast
 
 import great_expectations.exceptions as gx_exceptions
