@@ -32,7 +32,7 @@ except ImportError:
     sa = None
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TCH004 # try imported above
     from sqlalchemy.sql.expression import ColumnElement
 
 

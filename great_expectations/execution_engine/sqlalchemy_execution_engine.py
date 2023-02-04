@@ -201,7 +201,7 @@ except ImportError:
     teradatatypes = None
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TCH004 # try imported above
     from sqlalchemy.engine import Engine as SaEngine
 
 

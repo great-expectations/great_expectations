@@ -26,7 +26,7 @@ except ImportError:
 
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TCH004 # try imported above
 
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
