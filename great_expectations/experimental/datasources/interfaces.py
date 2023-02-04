@@ -143,7 +143,7 @@ class DataAsset(ExperimentalBaseModel):
     type: str
     order_by: List[BatchSorter] = Field(default_factory=list)
 
-    # non-field private attrs
+    # non-field private attributes
     _datasource: Datasource = pydantic.PrivateAttr()
 
     @property
