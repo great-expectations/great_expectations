@@ -2509,7 +2509,6 @@ def _sqlalchemy_map_condition_query(
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
 
-    domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     result_format: dict = metric_value_kwargs["result_format"]
 
     # We will not return map_condition_query if return_unexpected_index_query = False
