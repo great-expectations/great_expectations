@@ -261,7 +261,11 @@ max-complexity = 15
 convention = "google"
 
 [tool.ruff.flake8-type-checking]
-exempt-modules = ["typing", "typing_extensions"]
+exempt-modules = [
+    "typing",
+    "typing_extensions",
+    "pydantic",  # pydantic annotations are used at runtime
+]
 
 [tool.pytest.ini_options]
 filterwarnings = [
