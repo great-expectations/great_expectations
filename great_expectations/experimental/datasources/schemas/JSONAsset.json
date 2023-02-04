@@ -1,0 +1,144 @@
+{
+    "title": "JSONAsset",
+    "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "json",
+            "enum": [
+                "json"
+            ],
+            "type": "string"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/BatchSorter"
+            }
+        },
+        "base_directory": {
+            "title": "Base Directory",
+            "type": "string",
+            "format": "path"
+        },
+        "regex": {
+            "title": "Regex",
+            "type": "string",
+            "format": "regex"
+        },
+        "orient": {
+            "title": "Orient"
+        },
+        "typ": {
+            "title": "Typ",
+            "default": "frame"
+        },
+        "dtype": {
+            "title": "Dtype",
+            "type": "object"
+        },
+        "convert_axes": {
+            "title": "Convert Axes"
+        },
+        "convert_dates": {
+            "title": "Convert Dates",
+            "default": true
+        },
+        "keep_default_dates": {
+            "title": "Keep Default Dates",
+            "default": true,
+            "type": "boolean"
+        },
+        "numpy": {
+            "title": "Numpy",
+            "default": false,
+            "type": "boolean"
+        },
+        "precise_float": {
+            "title": "Precise Float",
+            "default": false,
+            "type": "boolean"
+        },
+        "date_unit": {
+            "title": "Date Unit"
+        },
+        "encoding": {
+            "title": "Encoding"
+        },
+        "encoding_errors": {
+            "title": "Encoding Errors",
+            "default": "strict",
+            "type": "string"
+        },
+        "lines": {
+            "title": "Lines",
+            "default": false,
+            "type": "boolean"
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        },
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "nrows": {
+            "title": "Nrows",
+            "type": "integer"
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name",
+        "base_directory",
+        "regex"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "BatchSorter": {
+            "title": "BatchSorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}
