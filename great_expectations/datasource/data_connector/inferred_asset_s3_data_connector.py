@@ -15,7 +15,10 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.util import list_s3_keys
+from great_expectations.datasource.data_connector.util import (
+    list_s3_keys,
+    sanitize_prefix_for_s3,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -83,7 +86,7 @@ class InferredAssetS3DataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._bucket = bucket
-        self._prefix = ConfiguredAssetS3DataConnector.sanitize_prefix_for_s3(prefix)
+        self._prefix = sanitize_prefix_for_s3(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 
