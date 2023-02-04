@@ -394,6 +394,14 @@ class TableAsset(_SQLAsset):
     table_name: str
     schema_name: Optional[str] = None
 
+    @property
+    def qualified_name(self) -> str:
+        return (
+            f"{self.schema_name}.{self.table_name}"
+            if self.schema_name
+            else self.table_name
+        )
+
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
 
@@ -404,15 +412,9 @@ class TableAsset(_SQLAsset):
         engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
         inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
 
-        table_str = (
-            f"{self.schema_name}.{self.table_name}"
-            if self.schema_name
-            else self.table_name
-        )
-
         if self.schema_name and self.schema_name not in inspector.get_schema_names():
             raise TestConnectionError(
-                f'Attempt to connect to table: "{table_str}" failed because the schema '
+                f'Attempt to connect to table: "{self.qualified_name}" failed because the schema '
                 f'"{self.schema_name}" does not exist.'
             )
 
@@ -422,7 +424,7 @@ class TableAsset(_SQLAsset):
         )
         if not table_exists:
             raise TestConnectionError(
-                f'Attempt to connect to table: "{table_str}" failed because the table '
+                f'Attempt to connect to table: "{self.qualified_name}" failed because the table '
                 f'"{self.table_name}" does not exist.'
             )
 
