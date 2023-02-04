@@ -10,15 +10,16 @@ datasource_config = DatasourceConfig(...)
 serializer = DictConfigSerializer(schema=datasourceConfigSchema)
 serialized_value = serializer.serialize(datasource_config)
 """
+from __future__ import annotations
 
 import abc
 from typing import TYPE_CHECKING
 
-from marshmallow import Schema
-
 from great_expectations.core.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
+    from marshmallow import Schema
+
     from great_expectations.core.configuration import AbstractConfig
 
 

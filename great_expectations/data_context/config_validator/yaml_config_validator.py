@@ -15,7 +15,6 @@ import traceback
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union, cast
 
 from ruamel.yaml import YAML
-from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Literal
 
 from great_expectations.alias_types import JSONValues
@@ -39,6 +38,8 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
+
     from great_expectations.data_context import AbstractDataContext
 
 

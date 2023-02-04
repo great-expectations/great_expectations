@@ -6,7 +6,6 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, overload
 
 import numpy as np
-import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 
@@ -133,6 +132,7 @@ except ImportError:
     teradatatypes = None
 
 if TYPE_CHECKING:
+    import pandas as pd
     import sqlalchemy
 
 

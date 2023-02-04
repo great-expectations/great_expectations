@@ -1,6 +1,6 @@
-from typing import Optional
+from __future__ import annotations
 
-import pandas as pd
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_function_types import (
@@ -19,6 +19,9 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     column_function_partial,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class ColumnValuesZScore(ColumnMapMetricProvider):

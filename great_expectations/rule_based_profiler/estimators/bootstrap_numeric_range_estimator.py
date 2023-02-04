@@ -1,7 +1,7 @@
-import logging
-from typing import Dict, Optional
+from __future__ import annotations
 
-import numpy as np
+import logging
+from typing import TYPE_CHECKING, Dict, Optional
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain
@@ -22,6 +22,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_ndarray_datetime_dtype
+
+if TYPE_CHECKING:
+    import numpy as np
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

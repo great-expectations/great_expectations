@@ -1,7 +1,7 @@
 import logging
 import uuid
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import TYPE_CHECKING, Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -14,13 +14,15 @@ from great_expectations.util import (
 try:
     import sqlalchemy as sa
     from sqlalchemy import Column, MetaData, String, Table, and_, column, select
-    from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 
     make_url = import_make_url()
 except ImportError:
     sa = None
     create_engine = None
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine.url import URL
 
 
 logger = logging.getLogger(__name__)

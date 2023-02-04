@@ -1,9 +1,7 @@
 import datetime
 import json
 import os
-from typing import Optional
-
-from ruamel.yaml.comments import CommentedMap
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations import DataContext
 from great_expectations.cli.v012.upgrade_helpers.base_upgrade_helper import (
@@ -14,6 +12,9 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
 )
+
+if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
 
 """
 NOTE (Shinnnyshinshin): This is not the UpgradeHelperV13 that is normally used by the CLI.

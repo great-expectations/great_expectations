@@ -52,7 +52,6 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
-from pkg_resources import Distribution
 from typing_extensions import Literal, TypeGuard
 
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
@@ -93,6 +92,7 @@ except ImportError:
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
+    from pkg_resources import Distribution
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import FileDataContext

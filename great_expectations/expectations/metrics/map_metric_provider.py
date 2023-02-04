@@ -17,7 +17,6 @@ from typing import (
 )
 
 import numpy as np
-import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration
@@ -68,6 +67,7 @@ from great_expectations.util import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
+    import pandas as pd
     import pyspark
 
 logger = logging.getLogger(__name__)

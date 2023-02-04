@@ -1,6 +1,6 @@
-from typing import Any, Dict, List, Optional, Set
+from __future__ import annotations
 
-import pandas as pd
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -28,6 +28,9 @@ from great_expectations.expectations.metrics.import_manager import (
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class ColumnDistinctValues(ColumnAggregateMetricProvider):

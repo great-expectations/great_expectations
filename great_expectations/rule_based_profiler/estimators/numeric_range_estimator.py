@@ -1,8 +1,8 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
-
-import numpy as np
+from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.core.domain import Domain
 from great_expectations.core.util import convert_to_json_serializable
@@ -14,6 +14,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.attributes import Attributes
+
+if TYPE_CHECKING:
+    import numpy as np
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

@@ -1,4 +1,6 @@
-import pandas as pd
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -11,6 +13,9 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 class ColumnValuesLengthMin(ColumnAggregateMetricProvider):

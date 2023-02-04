@@ -1,7 +1,13 @@
-from pydantic import PostgresDsn
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from typing_extensions import Literal
 
 from great_expectations.experimental.datasources.sql_datasource import SQLDatasource
+
+if TYPE_CHECKING:
+    from pydantic import PostgresDsn
 
 
 class PostgresDatasource(SQLDatasource):

@@ -5,7 +5,6 @@ import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, post_load
-from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.util import convert_to_json_serializable
@@ -25,6 +24,8 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
+    from ruamel.yaml.comments import CommentedMap
+
     from great_expectations.rule_based_profiler.rule.rule import Rule
     from great_expectations.rule_based_profiler.rule_based_profiler import (
         RuleBasedProfiler,
