@@ -4,7 +4,6 @@ from typing import List, Optional
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
 
 try:
     import boto3
