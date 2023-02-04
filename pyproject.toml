@@ -201,6 +201,8 @@ select = [
     "UP", # pyupgrade
     # https://github.com/charliermarsh/ruff#isort-i
     # "I", # isort # TODO: replace isort usage with this
+    # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
+    "TCH",
 ]
 ignore = [
     # https://github.com/charliermarsh/ruff#pyflakes-f
@@ -219,6 +221,10 @@ ignore = [
     # https://github.com/charliermarsh/ruff#pyupgrade-up
     "UP006", # use-pep585-annotation
     "UP007", # use-pep604-annotation
+    # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
+    "TCH001", # typing-only-first-party-import TODO enable
+    "TCH002", # typing-only-third-party-import TODO enable
+    "TCH003", # typing-only-standard-library-import TODO enable
 ]
 extend-exclude = [
     "scripts/*",
