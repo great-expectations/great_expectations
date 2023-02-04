@@ -1,0 +1,11 @@
+# great_expectations/dataset specific ruff linter overrides
+
+# root linter settings are defined in the file below
+extend = "../../pyproject.toml"
+
+# relaxing linting rules for legacy dataset module
+extend-ignore = [
+    # https://github.com/charliermarsh/ruff#error-e
+    "E711", # none-comparison
+    "E712", # true-false-comparison
+]
