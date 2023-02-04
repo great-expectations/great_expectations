@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 from contextlib import contextmanager
 from pprint import pprint
 from typing import Callable, ContextManager, Generator, Optional, Tuple
-from unittest import mock
 
 import pytest
 from pydantic import ValidationError
@@ -14,6 +15,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     BatchSorter,
+    TestConnectionError,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
     PostgresDatasource,
@@ -25,6 +27,9 @@ from great_expectations.experimental.datasources.sql_datasource import (
 from tests.experimental.datasources.conftest import (
     DEFAULT_MAX_DT,
     DEFAULT_MIN_DT,
+    Dialect,
+    MockSaEngine,
+    MockSaInspector,
     sqlachemy_execution_engine_mock_cls,
 )
 
@@ -46,12 +51,10 @@ def _source(
     original_override = PostgresDatasource.execution_engine_override
     try:
         PostgresDatasource.execution_engine_override = execution_eng_cls
-        with mock.patch("sqlalchemy.create_engine"):
-            postgres_datasource = PostgresDatasource(
-                name="my_datasource",
-                connection_string=connection_string,  # type: ignore[arg-type] # coerced
-            )
-        yield postgres_datasource
+        yield PostgresDatasource(
+            name="my_datasource",
+            connection_string=connection_string,  # type: ignore[arg-type] # coerced
+        )
     finally:
         PostgresDatasource.execution_engine_override = original_override
 
@@ -98,11 +101,13 @@ def assert_batch_request(
 
 
 @pytest.mark.unit
-def test_add_table_asset_with_splitter(create_source: CreateSourceFixture):
+def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        with mock.patch("sqlalchemy.inspect"):
+        with mocker.patch("sqlalchemy.create_engine"), mocker.patch(
+            "sqlalchemy.engine"
+        ), mocker.patch("sqlalchemy.inspect"):
             asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_year_and_month_splitter("my_column")
         assert len(source.assets) == 1
@@ -123,11 +128,13 @@ def test_add_table_asset_with_splitter(create_source: CreateSourceFixture):
 
 
 @pytest.mark.unit
-def test_add_table_asset_with_no_splitter(create_source: CreateSourceFixture):
+def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
     ) as source:
-        with mock.patch("sqlalchemy.inspect"):
+        with mocker.patch("sqlalchemy.create_engine"), mocker.patch(
+            "sqlalchemy.engine"
+        ), mocker.patch("sqlalchemy.inspect"):
             asset = source.add_table_asset(name="my_asset", table_name="my_table")
         assert len(source.assets) == 1
         assert asset == list(source.assets.values())[0]
@@ -213,6 +220,7 @@ def test_datasource_gets_batch_list_no_splitter(create_source):
             "batch_identifiers": {},
             "data_asset_name": "my_asset",
             "table_name": "my_table",
+            "schema_name": None,
             "type": "table",
         }
 
@@ -235,6 +243,7 @@ def assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs):
                 "type": "table",
                 "data_asset_name": "my_asset",
                 "table_name": "my_table",
+                "schema_name": None,
                 "batch_identifiers": {"my_col": {"year": year, "month": month}},
                 "splitter_method": "split_on_year_and_month",
                 "splitter_kwargs": {"column_name": "my_col"},
@@ -326,6 +335,7 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
                 "type": "table",
                 "data_asset_name": "my_asset",
                 "table_name": "my_table",
+                "schema_name": None,
                 "batch_identifiers": {"my_col": {"year": 2022, "month": month}},
                 "splitter_method": "split_on_year_and_month",
                 "splitter_kwargs": {"column_name": "my_col"},
@@ -350,6 +360,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
             "splitter_kwargs": {"column_name": "my_col"},
             "splitter_method": "split_on_year_and_month",
             "table_name": "my_table",
+            "schema_name": None,
             "type": "table",
         }
 
@@ -700,6 +711,137 @@ def test_validate_invalid_postgres_connection_string(
             connection_string=connection_string,
         ):
             pass
+
+
+def bad_connection_string_config() -> tuple[
+    str, str, str, str | None, TestConnectionError
+]:
+    connection_string = "postgresql+psycopg2://postgres:@localhost/bad_database"
+    table_name = "good_table"
+    schema_name = "good_schema"
+    mock_sqlalchemy_engine_connect_error_raised = (
+        '(psycopg2.OperationalError) connection to server at "localhost" (::1), port '
+        '5432 failed: FATAL:  database "bad_database" does not exist\n'
+        "\n"
+        "(Background on this error at: https://sqlalche.me/e/14/e3q8)"
+    )
+    test_connection_error = TestConnectionError(
+        "Attempt to connect to datasource failed with the following error message: "
+        f"{mock_sqlalchemy_engine_connect_error_raised}"
+    )
+    return (
+        connection_string,
+        table_name,
+        schema_name,
+        mock_sqlalchemy_engine_connect_error_raised,
+        test_connection_error,
+    )
+
+
+def bad_table_name_config() -> tuple[str, str, str, str | None, TestConnectionError]:
+    connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
+    table_name = "bad_table"
+    schema_name = "good_schema"
+    mock_sqlalchemy_engine_connect_error_raised = None
+    test_connection_error = TestConnectionError(
+        'Attempt to connect to table: "good_schema.bad_table" failed because the table '
+        '"bad_table" does not exist.'
+    )
+    return (
+        connection_string,
+        table_name,
+        schema_name,
+        mock_sqlalchemy_engine_connect_error_raised,
+        test_connection_error,
+    )
+
+
+def bad_schema_name_config() -> tuple[str, str, str, str | None, TestConnectionError]:
+    connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
+    table_name = "good_table"
+    schema_name = "bad_schema"
+    mock_sqlalchemy_engine_connect_error_raised = None
+    test_connection_error = TestConnectionError(
+        'Attempt to connect to table: "bad_schema.good_table" failed because the schema '
+        '"bad_schema" does not exist.'
+    )
+    return (
+        connection_string,
+        table_name,
+        schema_name,
+        mock_sqlalchemy_engine_connect_error_raised,
+        test_connection_error,
+    )
+
+
+@pytest.fixture(
+    params=[
+        bad_connection_string_config,
+        bad_table_name_config,
+        bad_schema_name_config,
+    ]
+)
+def datasource_test_connection_error_messages(
+    request,
+) -> tuple[PostgresDatasource, str | None, TestConnectionError]:
+    (
+        connection_string,
+        table_name,
+        schema_name,
+        mock_sqlalchemy_engine_connect_error_raised,
+        test_connection_error,
+    ) = request.param()
+    table_asset = TableAsset(
+        name="table_asset",
+        table_name=table_name,
+        schema_name=schema_name,
+    )
+    postgres_datasource = PostgresDatasource(
+        name="postgres_datasource",
+        connection_string=connection_string,
+        assets={"table_asset": table_asset},
+    )
+    return (
+        postgres_datasource,
+        mock_sqlalchemy_engine_connect_error_raised,
+        test_connection_error,
+    )
+
+
+@pytest.mark.unit
+def test_test_connection_failures(
+    mocker,
+    datasource_test_connection_error_messages: tuple[
+        PostgresDatasource, str | None, TestConnectionError
+    ],
+):
+    (
+        postgres_datasource,
+        mock_sqlalchemy_engine_connect_error_raised,
+        test_connection_error,
+    ) = datasource_test_connection_error_messages
+
+    create_engine = mocker.patch("sqlalchemy.create_engine")
+    create_engine.return_value = MockSaEngine(dialect=Dialect("postgresql"))
+    connect = mocker.patch(
+        "tests.experimental.datasources.conftest.MockSaEngine.connect"
+    )
+    if mock_sqlalchemy_engine_connect_error_raised:
+        connect.side_effect = Exception(mock_sqlalchemy_engine_connect_error_raised)
+    inspect = mocker.patch("sqlalchemy.inspect")
+    inspect.return_value = MockSaInspector()
+    get_schema_names = mocker.patch(
+        "tests.experimental.datasources.conftest.MockSaInspector.get_schema_names"
+    )
+    get_schema_names.return_value = ["good_schema"]
+    has_table = mocker.patch(
+        "tests.experimental.datasources.conftest.MockSaInspector.has_table"
+    )
+    has_table.return_value = False
+
+    with pytest.raises(type(test_connection_error)) as e:
+        postgres_datasource.test_connection()
+    assert str(e.value) == str(test_connection_error)
 
 
 @pytest.mark.unit

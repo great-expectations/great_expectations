@@ -159,14 +159,6 @@ class _SQLAsset(DataAsset):
     column_splitter: Optional[SqlYearMonthSplitter] = None
     name: str
 
-    def test_connection(self) -> None:
-        """Test the connection for the _SQLAsset.
-
-        Raises:
-            TestConnectionError
-        """
-        assert isinstance(self.datasource, SQLDatasource)
-
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
@@ -269,6 +261,7 @@ class _SQLAsset(DataAsset):
 
         batch_list: List[Batch] = []
         column_splitter = self.column_splitter
+        batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
             batch_metadata = copy.deepcopy(request.options)
             batch_spec_kwargs = self._create_batch_spec_kwargs()
@@ -347,6 +340,9 @@ class QueryAsset(_SQLAsset):
     type: Literal["query"] = "query"  # type: ignore[assignment]
     query: str
 
+    def test_connection(self) -> None:
+        pass
+
     @pydantic.validator("query")
     def query_must_start_with_select(cls, v: str):
         query = v.lstrip()
@@ -376,29 +372,38 @@ class TableAsset(_SQLAsset):
     # Instance fields
     type: Literal["table"] = "table"  # type: ignore[assignment]
     table_name: str
+    schema_name: Optional[str] = None
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         assert isinstance(self.datasource, SQLDatasource)
-        schema: Optional[str] = None
-        table_name: str
-        if "." in self.table_name:
-            schema, table_name = self.table_name.split(".")
-        else:
-            table_name = self.table_name
         engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
-        exists = sqlalchemy.inspect(engine).has_table(
-            table_name=table_name,
-            schema=schema,
+        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+
+        table_str = (
+            f"{self.schema_name}.{self.table_name}"
+            if self.schema_name
+            else self.table_name
         )
-        if not exists:
+
+        if self.schema_name and self.schema_name not in inspector.get_schema_names():
             raise TestConnectionError(
-                f"Attempt to connect to table: {self.table_name} failed because the table "
-                "does not exist."
+                f'Attempt to connect to table: "{table_str}" failed because the schema '
+                f'"{self.schema_name}" does not exist.'
+            )
+
+        table_exists = sqlalchemy.inspect(engine).has_table(
+            table_name=self.table_name,
+            schema=self.schema_name,
+        )
+        if not table_exists:
+            raise TestConnectionError(
+                f'Attempt to connect to table: "{table_str}" failed because the table '
+                f'"{self.table_name}" does not exist.'
             )
 
     def as_selectable(self) -> sqlalchemy.sql.Selectable:
@@ -415,6 +420,7 @@ class TableAsset(_SQLAsset):
             "type": "table",
             "data_asset_name": self.name,
             "table_name": self.table_name,
+            "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
 
@@ -442,7 +448,8 @@ class SQLDatasource(Datasource):
     assets: Dict[str, Union[TableAsset, QueryAsset]] = {}
 
     # private attrs
-    _engine: sqlalchemy.engine.Engine = pydantic.PrivateAttr()
+    _cached_connection_string: str = pydantic.PrivateAttr("")
+    _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
 
     @property
     def execution_engine_type(self) -> Type[ExecutionEngine]:
@@ -451,30 +458,25 @@ class SQLDatasource(Datasource):
 
         return SqlAlchemyExecutionEngine
 
-    class Config:
-        arbitrary_types_allowed = True
-
-    def __init__(self, **kwargs) -> None:
-        super().__init__(**kwargs)
-        # validate that SQL Alchemy was successfully imported and attempt to create an engine
-        if SQLALCHEMY_IMPORTED:
-            if "connection_string" in kwargs and kwargs["connection_string"]:
+    def get_engine(self) -> sqlalchemy.engine.Engine:
+        if self.connection_string != self._cached_connection_string or not self._engine:
+            # validate that SQL Alchemy was successfully imported and attempt to create an engine
+            if SQLALCHEMY_IMPORTED:
                 try:
-                    self._engine = sqlalchemy.create_engine(kwargs["connection_string"])
+                    self._engine = sqlalchemy.create_engine(self.connection_string)
                 except Exception as e:
-                    # connection_string has passed pydantic validation,
-                    # but still fails to create a sqlalchemy engine
+                    # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
+                    # one possible case is a missing plugin (e.g. psycopg2)
                     raise SQLDatasourceError(
                         "Unable to create a SQLAlchemy engine from "
-                        f"connection_string: {kwargs['connection_string']} due to the "
+                        f"connection_string: {self.connection_string} due to the "
                         f"following exception: {str(e)}"
-                    )
-        else:
-            raise SQLDatasourceError(
-                "Unable to create SQLDatasource due to missing sqlalchemy dependency."
-            )
-
-    def get_engine(self) -> sqlalchemy.engine.Engine:
+                    ) from e
+                self._cached_connection_string = self.connection_string
+            else:
+                raise SQLDatasourceError(
+                    "Unable to create SQLDatasource due to missing sqlalchemy dependency."
+                )
         return self._engine
 
     def test_connection(self, test_assets: bool = True) -> None:
@@ -484,7 +486,7 @@ class SQLDatasource(Datasource):
             test_assets: If assets have been passed to the SQLDatasource, whether to test them as well.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         try:
             engine: sqlalchemy.engine.Engine = self.get_engine()
@@ -493,15 +495,17 @@ class SQLDatasource(Datasource):
             raise TestConnectionError(
                 "Attempt to connect to datasource failed with the following error message: "
                 f"{str(e)}"
-            )
+            ) from e
         if self.assets and test_assets:
             for asset in self.assets.values():
+                asset._datasource = self
                 asset.test_connection()
 
     def add_table_asset(
         self,
         name: str,
         table_name: str,
+        schema_name: Optional[str] = None,
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> TableAsset:
         """Adds a table asset to this datasource.
@@ -509,6 +513,7 @@ class SQLDatasource(Datasource):
         Args:
             name: The name of this table asset.
             table_name: The table where the data resides.
+            schema_name: The schema that holds the table.
             order_by: A list of BatchSorters or BatchSorter strings.
 
         Returns:
@@ -517,6 +522,7 @@ class SQLDatasource(Datasource):
         asset = TableAsset(
             name=name,
             table_name=table_name,
+            schema_name=schema_name,
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             # see DataAsset._parse_order_by_sorter()
         )
