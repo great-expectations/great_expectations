@@ -24,7 +24,7 @@ repos:
     rev: 'v0.0.238'
     hooks:
       - id: ruff
-        files: ^(great_expectations)
+        files: ^(great_expectations|contrib) # TODO: add tests/ scripts/ etc.
         args: ["--fix"]
 # https://pre-commit.ci/
 ci:
