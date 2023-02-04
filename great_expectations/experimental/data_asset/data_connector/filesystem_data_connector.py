@@ -1,4 +1,6 @@
 import logging
+import pathlib
+import re
 from typing import List, Optional
 
 from great_expectations.core._docs_decorators import public_api
@@ -23,30 +25,35 @@ class FilesystemDataConnector(FilePathDataConnector):
 
     Args:
         name (str): name of ConfiguredAssetFilesystemDataConnector
-        default_regex (dict): Optional dict the filter and organize the data_references.
+        regex (pattern): Optional regex pattern for filtering data references
         glob_directive (str): glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-        sorters (list): Optional list if you want to sort the data_references
-        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+        # TODO: <Alex>ALEX</Alex>
+        # sorters (list): Optional list if you want to sort the data_references
+        # TODO: <Alex>ALEX</Alex>
     """
 
     def __init__(
         self,
         name: str,
-        base_directory: str,
-        default_regex: Optional[dict] = None,
+        data_asset_name: str,
+        base_directory: pathlib.Path,
+        regex: Optional[re.Pattern] = None,
         glob_directive: str = "**/*",
-        sorters: Optional[list] = None,
-        batch_spec_passthrough: Optional[dict] = None,
+        # TODO: <Alex>ALEX</Alex>
+        # sorters: Optional[list] = None,
+        # TODO: <Alex>ALEX</Alex>
     ) -> None:
         super().__init__(
             name=name,
-            default_regex=default_regex,
-            sorters=sorters,
-            batch_spec_passthrough=batch_spec_passthrough,
+            data_asset_name=data_asset_name,
+            base_directory=base_directory,
+            regex=regex,
+            # TODO: <Alex>ALEX</Alex>
+            # sorters=sorters,
+            # TODO: <Alex>ALEX</Alex>
         )
 
-        self._base_directory = base_directory
-        self._glob_directive = glob_directive
+        self._glob_directive: str = glob_directive
 
     @property
     def base_directory(self) -> str:

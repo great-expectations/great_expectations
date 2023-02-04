@@ -8,7 +8,7 @@ import sre_constants
 import sre_parse
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Set
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
@@ -48,9 +48,6 @@ except ImportError:
     logger.debug(
         "Unable to load pyspark and pyspark.sql; install optional Spark dependency for support."
     )
-
-
-DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
 
 
 def batch_definition_matches_batch_request(
@@ -111,8 +108,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     datasource_name: str,
     data_connector_name: str,
     data_reference: str,
-    regex_pattern: str,
-    group_names: List[str],
+    regex_pattern: re.Pattern,
     data_asset_name: Optional[str] = None,
 ) -> Optional[List[BatchDefinition]]:
     batch_identifiers: Optional[
@@ -120,7 +116,6 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     ] = convert_data_reference_string_to_batch_identifiers_using_regex(
         data_reference=data_reference,
         regex_pattern=regex_pattern,
-        group_names=group_names,
     )
     if batch_identifiers is None:
         return None
@@ -137,46 +132,50 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
 
 def convert_data_reference_string_to_batch_identifiers_using_regex(
     data_reference: str,
-    regex_pattern: str,
-    group_names: List[str],
+    regex_pattern: re.Pattern,
+    unnamed_regex_group_prefix: str = "unnamed_group_",
 ) -> Optional[IDDict]:
     # noinspection PyUnresolvedReferences
-    pattern = re.compile(regex_pattern)
-    matches: Optional[re.Match] = pattern.match(data_reference)
+    matches: Optional[re.Match] = regex_pattern.match(data_reference)
     if matches is None:
         return None
 
+    num_all_matched_group_values: int = regex_pattern.groups
+
     # Check for `(?P<name>)` named group syntax
-    match_dict = matches.groupdict()
-    if match_dict:  # Only named groups will populate this dict
-        batch_identifiers = _determine_batch_identifiers_using_named_groups(
-            match_dict, group_names
-        )
-    else:
-        groups: list = list(matches.groups())
-        batch_identifiers = IDDict(dict(zip(group_names, groups)))
+    defined_group_name_to_group_index_mapping: Dict[str, int] = dict(
+        regex_pattern.groupindex
+    )
+    defined_group_name_indexes: Set[int] = set(
+        defined_group_name_to_group_index_mapping.values()
+    )
+    defined_group_name_to_group_value_mapping: Dict[str, str] = matches.groupdict()
 
-    return batch_identifiers
+    all_matched_group_values: List[str] = list(matches.groups())
 
+    assert len(all_matched_group_values) == num_all_matched_group_values
 
-def _determine_batch_identifiers_using_named_groups(
-    match_dict: dict, group_names: List[str]
-) -> IDDict:
-    batch_identifiers = IDDict()
-    for key, value in match_dict.items():
-        if key in group_names:
-            batch_identifiers[key] = value
-        else:
-            logger.warning(
-                f"The named group '{key}' must explicitly be stated in group_names to be parsed"
-            )
+    group_name_to_group_value_mapping: Dict[str, str] = copy.deepcopy(
+        defined_group_name_to_group_value_mapping
+    )
+
+    idx: int
+    group_idx: int
+    matched_group_value: str
+    for idx, matched_group_value in enumerate(all_matched_group_values):
+        group_idx = idx + 1
+        if group_idx not in defined_group_name_indexes:
+            group_name: str = f"{unnamed_regex_group_prefix}{group_idx}"
+            group_name_to_group_value_mapping[group_name] = matched_group_value
+
+    batch_identifiers = IDDict(group_name_to_group_value_mapping)
 
     return batch_identifiers
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
     batch_definition: BatchDefinition,
-    regex_pattern: str,
+    regex_pattern: re.Pattern,
     group_names: List[str],
 ) -> str:
     if not isinstance(batch_definition, BatchDefinition):
@@ -200,17 +199,16 @@ def map_batch_definition_to_data_reference_string_using_regex(
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
 def convert_batch_identifiers_to_data_reference_string_using_regex(
     batch_identifiers: IDDict,
-    regex_pattern: str,
+    regex_pattern: re.Pattern,
     group_names: List[str],
-    data_asset_name: Optional[str] = None,
+    data_asset_name: str,
 ) -> str:
     if not isinstance(batch_identifiers, IDDict):
         raise TypeError("batch_identifiers is not " "an instance of type IDDict")
 
     template_arguments: dict = copy.deepcopy(batch_identifiers)
     # TODO: <Alex>How does "data_asset_name" factor in the computation of "converted_string"?  Does it have any effect?</Alex>
-    if data_asset_name is not None:
-        template_arguments["data_asset_name"] = data_asset_name
+    template_arguments["data_asset_name"] = data_asset_name
 
     filepath_template: str = _invert_regex_to_data_reference_template(
         regex_pattern=regex_pattern,
@@ -223,7 +221,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
 
 # noinspection PyUnresolvedReferences
 def _invert_regex_to_data_reference_template(
-    regex_pattern: str,
+    regex_pattern: Union[re.Pattern, str],
     group_names: List[str],
 ) -> str:
     r"""Create a string template based on a regex and corresponding list of group names.
@@ -253,6 +251,9 @@ def _invert_regex_to_data_reference_template(
     group_name_index: int = 0
 
     num_groups = len(group_names)
+
+    if isinstance(regex_pattern, re.Pattern):
+        regex_pattern = regex_pattern.pattern
 
     # print("-"*80)
     parsed_sre = sre_parse.parse(regex_pattern)

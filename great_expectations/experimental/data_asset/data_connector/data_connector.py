@@ -1,5 +1,4 @@
 import logging
-from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
 from great_expectations.core._docs_decorators import public_api
@@ -33,33 +32,32 @@ class DataConnector:
 
     Args:
         name: The name of the Data Connector.
-        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
     """
 
     def __init__(
         self,
         name: str,
-        batch_spec_passthrough: Optional[dict] = None,
+        data_asset_name: str,
     ) -> None:
-        self._name = name
+        self._name: str = name
+        self._data_asset_name: str = data_asset_name
 
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict = {}
 
         self._data_context_root_directory: Optional[str] = None
-        self._batch_spec_passthrough = batch_spec_passthrough or {}
-
-    @property
-    def batch_spec_passthrough(self) -> dict:
-        return self._batch_spec_passthrough
 
     @property
     def name(self) -> str:
         return self._name
 
     @property
+    def data_asset_name(self) -> str:
+        return self._data_asset_name
+
+    @property
     def data_context_root_directory(self) -> str:
-        return self._data_context_root_directory  # type: ignore[return-value]
+        return self._data_context_root_directory
 
     @data_context_root_directory.setter
     def data_context_root_directory(self, data_context_root_directory: str) -> None:
@@ -80,14 +78,6 @@ class DataConnector:
                 batch_definition=batch_definition
             )
         )
-        # batch_spec_passthrough via Data Connector config
-        batch_spec_passthrough: dict = deepcopy(self.batch_spec_passthrough)
-
-        # batch_spec_passthrough from batch_definition supersedes batch_spec_passthrough from Data Connector config
-        if isinstance(batch_definition.batch_spec_passthrough, dict):
-            batch_spec_passthrough.update(batch_definition.batch_spec_passthrough)
-
-        batch_spec_params.update(batch_spec_passthrough)
         batch_spec = BatchSpec(**batch_spec_params)
         return batch_spec
 
@@ -100,14 +90,6 @@ class DataConnector:
         """
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache by classes that extend this base DataConnector class
-        """
-        raise NotImplementedError
-
-    def _get_data_reference_list_from_cache_by_data_asset_name(
-        self, data_asset_name: str
-    ) -> List[Any]:
-        """
-        Fetch data_references corresponding to data_asset_name from the cache.
         """
         raise NotImplementedError
 
@@ -124,7 +106,7 @@ class DataConnector:
         raise NotImplementedError
 
     def _map_data_reference_to_batch_definition_list(
-        self, data_reference: Any, data_asset_name: Optional[str] = None
+        self, data_reference: Any
     ) -> Optional[List[BatchDefinition]]:
         raise NotImplementedError
 
