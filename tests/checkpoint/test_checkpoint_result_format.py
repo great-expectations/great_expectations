@@ -283,7 +283,7 @@ def expected_unexpected_indices_output() -> List[Dict[str, Union[str, int]]]:
 
 @pytest.fixture
 def expected_sql_query_output() -> str:
-    return "SELECT animals, pk_1 \n\
+    return "SELECT pk_1, animals \n\
 FROM animal_names \n\
 WHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"
 
@@ -451,19 +451,10 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
     reference_sql_checkpoint_config_for_column_pairs_table,
     expectation_config_expect_column_pair_values_to_be_equal,
 ):
-    """
-    What does this test?
-        - unexpected_index_column defined in Checkpoint only.
-        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
-        - 1 Expectations added to suite
-        - return_unexpected_index_query flag set to True
-    """
-
     dict_to_update_checkpoint: dict = {
         "result_format": {
             "result_format": "COMPLETE",
             "unexpected_index_column_names": ["pk_1"],
-            "return_unexpected_index_query": True,
         }
     }
 
@@ -473,7 +464,6 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
         expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
-
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
     )
@@ -485,17 +475,75 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
     first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
         "unexpected_index_list"
     ]
-    assert first_result_full_list == []
+    assert first_result_full_list == [
+        {"pk_1": 3, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 4, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 5, "ordered_item": "eraser", "received_item": "desk"},
+    ]
 
-    # first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
-    #     "partial_unexpected_index_list"
-    # ]
-    # assert first_result_partial_list == expected_unexpected_indices_output
-    #
-    # unexpected_index_query: str = evrs[0]["results"][0]["result"][
-    #     "unexpected_index_query"
-    # ]
-    # assert unexpected_index_query == expected_sql_query_output
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [
+        {"pk_1": 3, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 4, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 5, "ordered_item": "eraser", "received_item": "desk"},
+    ]
+
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert (
+        unexpected_index_query
+        == "SELECT pk_1, ordered_item, received_item \nFROM column_pairs \nWHERE NOT (ordered_item = received_item AND NOT (ordered_item IS NULL OR received_item IS NULL));"
+    )
+
+
+@pytest.mark.integration
+def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summary_output(
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_column_pairs_table,
+    expectation_config_expect_column_pair_values_to_be_equal,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "SUMMARY",
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    }
+
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_column_pairs_table,
+        expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [
+        {"pk_1": 3, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 4, "ordered_item": "eraser", "received_item": "desk"},
+        {"pk_1": 5, "ordered_item": "eraser", "received_item": "desk"},
+    ]
+
+    unexpected_index_query: str = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_query"
+    )
+    assert not unexpected_index_query
 
 
 @pytest.mark.integration
@@ -531,26 +579,90 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
         checkpoint_name="my_checkpoint",
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
-    print(evrs)
-    # index_column_names: List[str] = evrs[0]["results"][0]["result"][
-    #     "unexpected_index_column_names"
-    # ]
-    # assert index_column_names == ["pk_1"]
-    #
-    # first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
-    #     "unexpected_index_list"
-    # ]
-    # assert first_result_full_list == expected_unexpected_indices_output
-    #
-    # first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
-    #     "partial_unexpected_index_list"
-    # ]
-    # assert first_result_partial_list == expected_unexpected_indices_output
-    #
-    # unexpected_index_query: str = evrs[0]["results"][0]["result"][
-    #     "unexpected_index_query"
-    # ]
-    # assert unexpected_index_query == expected_sql_query_output
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "unexpected_index_list"
+    ]
+    assert first_result_full_list == [
+        {"pk_1": 1, "a": 20, "b": 20, "c": 20},
+        {"pk_1": 2, "a": 30, "b": 30, "c": 30},
+        {"pk_1": 3, "a": 40, "b": 40, "c": 40},
+        {"pk_1": 4, "a": 50, "b": 50, "c": 50},
+        {"pk_1": 5, "a": 60, "b": 60, "c": 60},
+    ]
+
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [
+        {"pk_1": 1, "a": 20, "b": 20, "c": 20},
+        {"pk_1": 2, "a": 30, "b": 30, "c": 30},
+        {"pk_1": 3, "a": 40, "b": 40, "c": 40},
+        {"pk_1": 4, "a": 50, "b": 50, "c": 50},
+        {"pk_1": 5, "a": 60, "b": 60, "c": 60},
+    ]
+
+    unexpected_index_query: str = evrs[0]["results"][0]["result"][
+        "unexpected_index_query"
+    ]
+    assert (
+        unexpected_index_query
+        == "SELECT pk_1, a, b, c \nFROM multi_column_sums \nWHERE 0 + a + b + c != 30;"
+    )
+
+
+@pytest.mark.integration
+def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_summary_output(
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_multi_column_sum_table,
+    expectation_config_expect_multicolumn_sum_to_equal,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "SUMMARY",
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    }
+
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_multi_column_sum_table,
+        expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [
+        {"pk_1": 1, "a": 20, "b": 20, "c": 20},
+        {"pk_1": 2, "a": 30, "b": 30, "c": 30},
+        {"pk_1": 3, "a": 40, "b": 40, "c": 40},
+        {"pk_1": 4, "a": 50, "b": 50, "c": 50},
+        {"pk_1": 5, "a": 60, "b": 60, "c": 60},
+    ]
+    unexpected_index_query: str = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_query"
+    )
+    assert not unexpected_index_query
 
 
 @pytest.mark.integration

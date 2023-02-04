@@ -2488,7 +2488,6 @@ def _sqlalchemy_map_condition_rows(
         )
 
 
-# marker
 def _sqlalchemy_map_condition_query(
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
@@ -2520,7 +2519,26 @@ def _sqlalchemy_map_condition_query(
     if return_unexpected_index_query is False:
         return
 
-    column_selector: List[sa.Column] = [sa.column(domain_kwargs["column"])]
+    domain_column_name_list: List[str] = list()
+    # column map expectations
+    if "column" in accessor_domain_kwargs:
+        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        domain_column_name_list.append(column_name)
+    # multi-column map expectations
+    elif "column_list" in accessor_domain_kwargs:
+        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+            "column_list"
+        ]
+        domain_column_name_list = column_list
+    # column-map expectations
+    elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
+        column_list: List[Union[str, quoted_name]] = list()
+        column_list.append(accessor_domain_kwargs["column_A"])
+        column_list.append(accessor_domain_kwargs["column_B"])
+        domain_column_name_list = column_list
+
+    column_selector: List[sa.Column] = []
+
     all_table_columns: List[str] = metrics.get("table.columns")
     unexpected_index_column_names: List[str] = result_format.get(
         "unexpected_index_column_names"
@@ -2532,6 +2550,9 @@ def _sqlalchemy_map_condition_query(
                 f"Please check your configuration and try again."
             )
 
+        column_selector.append(sa.column(column_name))
+
+    for column_name in domain_column_name_list:
         column_selector.append(sa.column(column_name))
 
     unexpected_condition_query_with_selected_columns: sa.select = sa.select(
@@ -2599,13 +2620,13 @@ def _sqlalchemy_map_condition_index(
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     result_format: dict = metric_value_kwargs["result_format"]
 
-    column_selector: List[sa.Column] = []
     all_table_columns: List[str] = metrics.get("table.columns")
 
     unexpected_index_column_names: Optional[List[str]] = result_format.get(
         "unexpected_index_column_names"
     )
 
+    column_selector: List[sa.Column] = []
     for column_name in unexpected_index_column_names:
         if column_name not in all_table_columns:
             raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
@@ -2614,7 +2635,7 @@ def _sqlalchemy_map_condition_index(
             )
         column_selector.append(sa.column(column_name))
 
-    expectation_domain_column_name: str = domain_kwargs["column"]
+    # expectation_domain_column_name: str = domain_kwargs["column"]
 
     # the last column we SELECT is the column the Expectation is being run on
     for column_name in domain_column_name_list:
@@ -2645,12 +2666,11 @@ def _sqlalchemy_map_condition_index(
     for row in query_result:
         primary_key_dict: Dict[str, Any] = {}
         # add the actual unexpected value
-        primary_key_dict[expectation_domain_column_name] = row[-1]
-        for index in range(len(unexpected_index_column_names)):
-            name: str = unexpected_index_column_names[index]
+        all_columns = unexpected_index_column_names + domain_column_name_list
+        for index in range(len(all_columns)):
+            name: str = all_columns[index]
             primary_key_dict[name] = row[index]
         unexpected_index_list.append(primary_key_dict)
-
     return unexpected_index_list
 
 
