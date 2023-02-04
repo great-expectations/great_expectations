@@ -24,7 +24,7 @@ repos:
     rev: 'v0.0.238'
     hooks:
       - id: ruff
-        files: ^(great_expectations/core)  # TODO: expand to all of gx
+        files: ^(great_expectations)
         args: ["--fix"]
 # https://pre-commit.ci/
 ci:
