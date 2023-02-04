@@ -70,6 +70,11 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         Raises:
             TestConnectionError: If the connection test fails.
         """
+        if not self.base_directory.exists():
+            raise TestConnectionError(
+                f"Path: {self.base_directory.resolve()} does not exist."
+            )
+
         success = False
         for filepath in self.base_directory.iterdir():
             if self.regex.match(filepath.name):
@@ -78,7 +83,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
                 break
         if not success:
             raise TestConnectionError(
-                f"No file at path: {self.base_directory} matched the regex: {self.regex}."
+                f"No file at path: {self.base_directory} matched the regex: {self.regex.pattern}"
             )
 
     def _fully_specified_batch_requests_with_path(
