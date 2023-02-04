@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 def reference_checkpoint_config_for_unexpected_column_names() -> dict:
     """
     This is a reference checkpoint dict. It connects to Datasource defined in
-    data_context_with_connection_to_animal_names_db fixture
+    data_context_with_connection_to_metrics_db fixture
     """
     checkpoint_dict: dict = {
         "name": "my_checkpoint",
@@ -54,21 +54,63 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
 
 
 @pytest.fixture()
-def reference_sql_checkpoint_config_for_unexpected_column_names(
+def reference_sql_checkpoint_config_for_animal_names_table(
     reference_checkpoint_config_for_unexpected_column_names,
 ) -> dict:
     """
     This is a reference checkpoint dict. It connects to Datasource defined in
-    data_context_with_connection_to_animal_names_db fixture
+    data_context_with_connection_to_metrics_db fixture
     """
     reference_checkpoint_config_for_unexpected_column_names["validations"] = [
         {
             "batch_request": {
                 "datasource_name": "my_datasource",
                 "data_connector_name": "my_sql_data_connector",
-                "data_asset_name": "my_asset",
+                "data_asset_name": "animals_names_asset",
             },
-            "expectation_suite_name": "animal_names_exp",
+            "expectation_suite_name": "metrics_exp",
+        }
+    ]
+    return reference_checkpoint_config_for_unexpected_column_names
+
+
+@pytest.fixture()
+def reference_sql_checkpoint_config_for_column_pairs_table(
+    reference_checkpoint_config_for_unexpected_column_names,
+) -> dict:
+    """
+    This is a reference checkpoint dict. It connects to Datasource defined in
+    data_context_with_connection_to_metrics_db fixture
+    """
+    reference_checkpoint_config_for_unexpected_column_names["validations"] = [
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_sql_data_connector",
+                "data_asset_name": "column_pair_asset",
+            },
+            "expectation_suite_name": "metrics_exp",
+        }
+    ]
+    return reference_checkpoint_config_for_unexpected_column_names
+
+
+@pytest.fixture()
+def reference_sql_checkpoint_config_for_multi_column_sum_table(
+    reference_checkpoint_config_for_unexpected_column_names,
+) -> dict:
+    """
+    This is a reference checkpoint dict. It connects to Datasource defined in
+    data_context_with_connection_to_metrics_db fixture
+    """
+    reference_checkpoint_config_for_unexpected_column_names["validations"] = [
+        {
+            "batch_request": {
+                "datasource_name": "my_datasource",
+                "data_connector_name": "my_sql_data_connector",
+                "data_asset_name": "multi_column_sum_asset",
+            },
+            "expectation_suite_name": "metrics_exp",
         }
     ]
     return reference_checkpoint_config_for_unexpected_column_names
@@ -261,7 +303,7 @@ def _add_expectations_and_checkpoint(
     Helper method for adding Checkpoint and Expectations to DataContext.
 
     Args:
-        data_context (DataContext): data_context_with_connection_to_animal_names_db
+        data_context (DataContext): data_context_with_connection_to_metrics_db
         checkpoint_config : Checkpoint to add
         expectations_list : Expectations to add
 
@@ -272,15 +314,13 @@ def _add_expectations_and_checkpoint(
         checkpoint_config["runtime_configuration"] = dict_to_update_checkpoint
 
     context: DataContext = data_context
-    context.create_expectation_suite(expectation_suite_name="animal_names_exp")
-    animals_suite = context.get_expectation_suite(
-        expectation_suite_name="animal_names_exp"
-    )
+    context.create_expectation_suite(expectation_suite_name="metrics_exp")
+    animals_suite = context.get_expectation_suite(expectation_suite_name="metrics_exp")
     for expectation in expectations_list:
         animals_suite.add_expectation(expectation_configuration=expectation)
     context.save_expectation_suite(
         expectation_suite=animals_suite,
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         overwriting_existing=True,
     )
     checkpoint_config = CheckpointConfig(**checkpoint_config)
@@ -297,8 +337,8 @@ def _add_expectations_and_checkpoint(
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
-    data_context_with_connection_to_animal_names_db,
-    reference_sql_checkpoint_config_for_unexpected_column_names,
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_animal_names_table,
     expectation_config_expect_column_values_to_be_in_set,
     expected_unexpected_indices_output,
     expected_sql_query_output,
@@ -318,8 +358,8 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     }
 
     context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
@@ -351,8 +391,8 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_with_query(
-    data_context_with_connection_to_animal_names_db,
-    reference_sql_checkpoint_config_for_unexpected_column_names,
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_animal_names_table,
     expectation_config_expect_column_values_to_be_in_set,
     expected_unexpected_indices_output,
     expected_sql_query_output,
@@ -374,8 +414,8 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     }
 
     context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
@@ -406,9 +446,117 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 
 @pytest.mark.integration
+def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_complete_output_with_query(
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_column_pairs_table,
+    expectation_config_expect_column_pair_values_to_be_equal,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.
+        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
+        - 1 Expectations added to suite
+        - return_unexpected_index_query flag set to True
+    """
+
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+            "return_unexpected_index_query": True,
+        }
+    }
+
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_column_pairs_table,
+        expectations_list=[expectation_config_expect_column_pair_values_to_be_equal],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "unexpected_index_list"
+    ]
+    assert first_result_full_list == []
+
+    # first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+    #     "partial_unexpected_index_list"
+    # ]
+    # assert first_result_partial_list == expected_unexpected_indices_output
+    #
+    # unexpected_index_query: str = evrs[0]["results"][0]["result"][
+    #     "unexpected_index_query"
+    # ]
+    # assert unexpected_index_query == expected_sql_query_output
+
+
+@pytest.mark.integration
+def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_complete_output_with_query(
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_multi_column_sum_table,
+    expectation_config_expect_multicolumn_sum_to_equal,
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.
+        - COMPLETE output, which means we have `unexpected_index_list` and `partial_unexpected_index_list`
+        - 1 Expectations added to suite
+        - return_unexpected_index_query flag set to True
+    """
+
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+            "unexpected_index_column_names": ["pk_1"],
+            "return_unexpected_index_query": True,
+        }
+    }
+
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_multi_column_sum_table,
+        expectations_list=[expectation_config_expect_multicolumn_sum_to_equal],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    print(evrs)
+    # index_column_names: List[str] = evrs[0]["results"][0]["result"][
+    #     "unexpected_index_column_names"
+    # ]
+    # assert index_column_names == ["pk_1"]
+    #
+    # first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+    #     "unexpected_index_list"
+    # ]
+    # assert first_result_full_list == expected_unexpected_indices_output
+    #
+    # first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+    #     "partial_unexpected_index_list"
+    # ]
+    # assert first_result_partial_list == expected_unexpected_indices_output
+    #
+    # unexpected_index_query: str = evrs[0]["results"][0]["result"][
+    #     "unexpected_index_query"
+    # ]
+    # assert unexpected_index_query == expected_sql_query_output
+
+
+@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_no_query(
-    data_context_with_connection_to_animal_names_db,
-    reference_sql_checkpoint_config_for_unexpected_column_names,
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_animal_names_table,
     expectation_config_expect_column_values_to_be_in_set,
     expected_unexpected_indices_output,
 ):
@@ -429,8 +577,8 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
     }
 
     context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
@@ -459,8 +607,8 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 @pytest.mark.integration
 def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
-    data_context_with_connection_to_animal_names_db,
-    reference_sql_checkpoint_config_for_unexpected_column_names,
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_animal_names_table,
     expectation_config_expect_column_values_to_be_in_set,
     expected_unexpected_indices_output,
     expected_sql_query_output,
@@ -474,8 +622,8 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
     # intentionally empty, since we are updating at run_checkpoint()
     dict_to_update_checkpoint: dict = {}
     context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
@@ -509,8 +657,8 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 @pytest.mark.integration
 def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_limit_1(
-    data_context_with_connection_to_animal_names_db,
-    reference_sql_checkpoint_config_for_unexpected_column_names,
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_animal_names_table,
     expectation_config_expect_column_values_to_be_in_set,
     expected_sql_query_output,
 ):
@@ -521,8 +669,8 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         - 1 Expectations added to suite
     """
     context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
     )
     result_format: dict = {
@@ -555,8 +703,8 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 @pytest.mark.integration
 def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
-    data_context_with_connection_to_animal_names_db,
-    reference_sql_checkpoint_config_for_unexpected_column_names,
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_animal_names_table,
     expectation_config_expect_column_values_to_be_in_set,
 ):
     """
@@ -565,8 +713,8 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
         - unexpected_index_column is passed in an incorrect column
     """
     context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
     )
 
@@ -590,8 +738,8 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
-    data_context_with_connection_to_animal_names_db,
-    reference_sql_checkpoint_config_for_unexpected_column_names,
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_animal_names_table,
     expectation_config_expect_column_values_to_be_in_set,
     expectation_config_expect_column_values_to_not_be_in_set,
     expected_unexpected_indices_output,
@@ -604,8 +752,8 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
         - 2 Expectations added to suite
     """
     context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[
             expectation_config_expect_column_values_to_be_in_set,
             expectation_config_expect_column_values_to_not_be_in_set,
@@ -653,8 +801,8 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
-    data_context_with_connection_to_animal_names_db,
-    reference_sql_checkpoint_config_for_unexpected_column_names,
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_animal_names_table,
     expectation_config_expect_column_values_to_be_in_set,
     expected_unexpected_indices_output,
 ):
@@ -671,8 +819,8 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
         }
     }
     context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
@@ -699,8 +847,8 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
-    data_context_with_connection_to_animal_names_db,
-    reference_sql_checkpoint_config_for_unexpected_column_names,
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_animal_names_table,
     expectation_config_expect_column_values_to_be_in_set,
 ):
     """
@@ -716,8 +864,8 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
         }
     }
     context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_animal_names_db,
-        checkpoint_config=reference_sql_checkpoint_config_for_unexpected_column_names,
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
         expectations_list=[expectation_config_expect_column_values_to_be_in_set],
         dict_to_update_checkpoint=dict_to_update_checkpoint,
     )
@@ -769,7 +917,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -819,7 +967,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -869,7 +1017,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -916,7 +1064,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -961,7 +1109,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     }
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         result_format=result_format,
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
@@ -1006,7 +1154,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     }
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         result_format=result_format,
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
@@ -1047,7 +1195,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     with pytest.raises(CheckpointError) as e:
         result: CheckpointResult = context.run_checkpoint(
             checkpoint_name="my_checkpoint",
-            expectation_suite_name="animal_names_exp",
+            expectation_suite_name="metrics_exp",
             batch_request=batch_request_for_pandas_unexpected_rows_and_index,
             runtime_configuration={"catch_exceptions": False},
         )
@@ -1085,7 +1233,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -1146,7 +1294,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -1191,7 +1339,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     }
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         result_format=result_format,
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
@@ -1228,7 +1376,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     }
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         result_format=result_format,
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
@@ -1263,7 +1411,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
     with pytest.raises(CheckpointError) as e:
         result: CheckpointResult = context.run_checkpoint(
             checkpoint_name="my_checkpoint",
-            expectation_suite_name="animal_names_exp",
+            expectation_suite_name="metrics_exp",
             batch_request=batch_request_for_pandas_unexpected_rows_and_index,
             runtime_configuration={"catch_exceptions": False},
         )
@@ -1301,7 +1449,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -1353,7 +1501,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -1391,7 +1539,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -1439,7 +1587,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
         runtime_configuration={"catch_exceptions": False},
     )
@@ -1485,7 +1633,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     }
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
         result_format=result_format,
     )
@@ -1541,7 +1689,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     }
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
         result_format=result_format,
     )
@@ -1597,7 +1745,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     }
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
         result_format=result_format,
     )
@@ -1644,7 +1792,7 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
     with pytest.raises(CheckpointError) as e:
         result: CheckpointResult = context.run_checkpoint(
             checkpoint_name="my_checkpoint",
-            expectation_suite_name="animal_names_exp",
+            expectation_suite_name="metrics_exp",
             batch_request=batch_request_for_spark_unexpected_rows_and_index,
             result_format=result_format,
             runtime_configuration={"catch_exceptions": False},
@@ -1688,7 +1836,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_two_expectation_complete_o
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
         result_format=result_format,
     )
@@ -1754,7 +1902,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -1803,7 +1951,7 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_outp
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -1846,7 +1994,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_complete_
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_column_pair,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -1901,7 +2049,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_o
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_column_pair,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -1949,7 +2097,7 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_basic_out
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_column_pair,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -1995,7 +2143,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_compl
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2055,7 +2203,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_summa
     )
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2103,7 +2251,7 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2151,7 +2299,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2216,7 +2364,7 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column(
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2287,7 +2435,7 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_c
     with pytest.raises(CheckpointError) as e:
         result: CheckpointResult = context.run_checkpoint(
             checkpoint_name="my_checkpoint",
-            expectation_suite_name="animal_names_exp",
+            expectation_suite_name="metrics_exp",
             batch_request=batch_request,
             runtime_configuration={"catch_exceptions": False},
         )
@@ -2342,7 +2490,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column(
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2414,7 +2562,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2476,7 +2624,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2550,7 +2698,7 @@ def test_pandas_result_format_in_checkpoint_named_index_different_column_specifi
     with pytest.raises(CheckpointError) as e:
         result: CheckpointResult = context.run_checkpoint(
             checkpoint_name="my_checkpoint",
-            expectation_suite_name="animal_names_exp",
+            expectation_suite_name="metrics_exp",
             batch_request=batch_request,
             runtime_configuration={"catch_exceptions": False},
         )
@@ -2604,7 +2752,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_set(
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2655,7 +2803,7 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output(
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2693,7 +2841,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index_column_pair,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2764,7 +2912,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2835,7 +2983,7 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2889,7 +3037,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request_for_pandas_unexpected_rows_and_index_multicolumn_sum,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -2966,7 +3114,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
@@ -3042,7 +3190,7 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="animal_names_exp",
+        expectation_suite_name="metrics_exp",
         batch_request=batch_request,
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()

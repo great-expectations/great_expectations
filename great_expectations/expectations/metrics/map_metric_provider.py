@@ -2578,6 +2578,24 @@ def _sqlalchemy_map_condition_index(
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
 
+    domain_column_name_list: List[str] = list()
+    # column map expectations
+    if "column" in accessor_domain_kwargs:
+        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        domain_column_name_list.append(column_name)
+    # multi-column map expectations
+    elif "column_list" in accessor_domain_kwargs:
+        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+            "column_list"
+        ]
+        domain_column_name_list = column_list
+    # column-map expectations
+    elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
+        column_list: List[Union[str, quoted_name]] = list()
+        column_list.append(accessor_domain_kwargs["column_A"])
+        column_list.append(accessor_domain_kwargs["column_B"])
+        domain_column_name_list = column_list
+
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     result_format: dict = metric_value_kwargs["result_format"]
 
@@ -2594,12 +2612,13 @@ def _sqlalchemy_map_condition_index(
                 message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '
                 f"Please check your configuration and try again."
             )
-
         column_selector.append(sa.column(column_name))
 
     expectation_domain_column_name: str = domain_kwargs["column"]
+
     # the last column we SELECT is the column the Expectation is being run on
-    column_selector.append(sa.column(expectation_domain_column_name))
+    for column_name in domain_column_name_list:
+        column_selector.append(sa.column(column_name))
 
     domain_records_as_selectable: sa.sql.Selectable = (
         execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
