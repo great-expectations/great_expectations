@@ -375,7 +375,7 @@ class TableAsset(_SQLAsset):
     schema_name: Optional[str] = None
 
     def test_connection(self) -> None:
-        """Test the connection for the _SQLAsset.
+        """Test the connection for the TableAsset.
 
         Raises:
             TestConnectionError: If the connection test fails.

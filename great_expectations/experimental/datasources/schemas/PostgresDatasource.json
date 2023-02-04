@@ -124,6 +124,10 @@
                 "table_name": {
                     "title": "Table Name",
                     "type": "string"
+                },
+                "schema_name": {
+                    "title": "Schema Name",
+                    "type": "string"
                 }
             },
             "required": [
@@ -155,10 +159,6 @@
                     "items": {
                         "$ref": "#/definitions/BatchSorter"
                     }
-                },
-                "schema_name": {
-                    "title": "Schema Name",
-                    "type": "string"
                 },
                 "column_splitter": {
                     "$ref": "#/definitions/SqlYearMonthSplitter"
