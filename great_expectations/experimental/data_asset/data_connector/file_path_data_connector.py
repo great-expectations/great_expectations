@@ -121,53 +121,9 @@ class FilePathDataConnector(DataConnector):
         )
         return PathBatchSpec(batch_spec)
 
-    def _refresh_data_references_cache(self) -> None:
-        # Map data_references to batch_definitions
-        self._data_references_cache = {}
-
-        for data_reference in self._get_data_reference_list():
-            mapped_batch_definition_list: List[
-                BatchDefinition
-            ] = self._map_data_reference_to_batch_definition_list(
-                data_reference=data_reference
-            )
-            self._data_references_cache[data_reference] = mapped_batch_definition_list
-
-    def get_data_reference_list_count(self) -> int:
-        """
-        Returns the list of data_references known by this DataConnector from its _data_references_cache
-
-        Returns:
-            number of data_references known by this DataConnector.
-        """
-        total_references: int = len(self._data_references_cache)
-        return total_references
-
-    def get_unmatched_data_references(self) -> List[str]:
-        """
-        Returns the list of data_references unmatched by configuration by looping through items in _data_references_cache
-        and returning data_reference that do not have an associated data_asset.
-
-        Returns:
-            list of data_references that are not matched by configuration.
-        """
-
-        # TODO: <Alex>ALEX</Alex>
-        # noinspection PyTypeChecker
-        unmatched_data_references: List[str] = list(
-            dict(
-                filter(
-                    lambda element: element[1] is None,
-                    self._data_references_cache.items(),
-                )
-            ).values()
-        )
-        # TODO: <Alex>ALEX</Alex>
-        return unmatched_data_references
-
+    # Interface Method
     def get_batch_definition_list_from_batch_request(
-        self,
-        batch_request: BatchRequest,
+        self, batch_request: BatchRequest
     ) -> List[BatchDefinition]:
         """
         Retrieve batch_definitions and that match batch_request.
@@ -190,9 +146,96 @@ class FilePathDataConnector(DataConnector):
             batch_request=batch_request_base
         )
 
+    # Interface Method
+    def get_data_reference_list_count(self) -> int:
+        """
+        Returns the list of data_references known by this DataConnector from its _data_references_cache
+
+        Returns:
+            number of data_references known by this DataConnector.
+        """
+        total_references: int = len(self._data_references_cache)
+        return total_references
+
+    # Interface Method
+    def get_unmatched_data_references(self) -> List[str]:
+        """
+        Returns the list of data_references unmatched by configuration by looping through items in
+        _data_references_cache and returning data_references that do not have an associated data_asset.
+
+        Returns:
+            list of data_references that are not matched by configuration.
+        """
+
+        # TODO: <Alex>ALEX</Alex>
+        # noinspection PyTypeChecker
+        unmatched_data_references: List[str] = list(
+            dict(
+                filter(
+                    lambda element: element[1] is None,
+                    self._data_references_cache.items(),
+                )
+            ).values()
+        )
+        # TODO: <Alex>ALEX</Alex>
+        return unmatched_data_references
+
+    # Interface Method
+    def _generate_batch_spec_parameters_from_batch_definition(
+        self, batch_definition: BatchDefinition
+    ) -> dict:
+        path: str = self._map_batch_definition_to_data_reference(
+            batch_definition=batch_definition
+        )
+        if not path:
+            raise ValueError(
+                f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
+batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
+"""
+            )
+
+        path = str(self.base_directory.joinpath(path))
+
+        return {"path": path}
+
+    # Interface Method
+    def _refresh_data_references_cache(self) -> None:
+        # Map data_references to batch_definitions
+        self._data_references_cache = {}
+
+        for data_reference in self._get_data_reference_list():
+            mapped_batch_definition_list: List[
+                BatchDefinition
+            ] = self._map_data_reference_to_batch_definition_list(
+                data_reference=data_reference
+            )
+            self._data_references_cache[data_reference] = mapped_batch_definition_list
+
+    # Interface Method
+    def _map_data_reference_to_batch_definition_list(
+        self, data_reference: str
+    ) -> Optional[List[BatchDefinition]]:
+        return map_data_reference_string_to_batch_definition_list_using_regex(
+            datasource_name=self.datasource_name,
+            data_connector_name=self.name,
+            data_asset_name=self.data_asset_name,
+            data_reference=data_reference,
+            regex_pattern=self._regex,
+        )
+
+    # Interface Method
+    def _map_batch_definition_to_data_reference(
+        self, batch_definition: BatchDefinition
+    ) -> str:
+        group_names: List[str] = self._regex_parser.get_all_group_names()
+        return map_batch_definition_to_data_reference_string_using_regex(
+            batch_definition=batch_definition,
+            regex_pattern=self._regex,
+            group_names=group_names,
+        )
+
     def _get_batch_definition_list_from_batch_request(
-        self,
-        batch_request: BatchRequestBase,
+        self, batch_request: BatchRequestBase
     ) -> List[BatchDefinition]:
         """
         Retrieve batch_definitions that match batch_request.
@@ -256,44 +299,6 @@ class FilePathDataConnector(DataConnector):
 
         return batch_definition_list
 
-    def _map_data_reference_to_batch_definition_list(
-        self, data_reference: str
-    ) -> Optional[List[BatchDefinition]]:
-        return map_data_reference_string_to_batch_definition_list_using_regex(
-            datasource_name=self.datasource_name,
-            data_connector_name=self.name,
-            data_asset_name=self.data_asset_name,
-            data_reference=data_reference,
-            regex_pattern=self._regex,
-        )
-
-    def _map_batch_definition_to_data_reference(
-        self, batch_definition: BatchDefinition
-    ) -> str:
-        group_names: List[str] = self._regex_parser.get_all_group_names()
-        return map_batch_definition_to_data_reference_string_using_regex(
-            batch_definition=batch_definition,
-            regex_pattern=self._regex,
-            group_names=group_names,
-        )
-
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(
-            batch_definition=batch_definition
-        )
-        if not path:
-            raise ValueError(
-                f"""No data reference for data asset name "{batch_definition.data_asset_name}" matches the given
-batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
-"""
-            )
-
-        path = self._get_full_file_path(path=path)
-
-        return {"path": path}
-
     # TODO: <Alex>ALEX</Alex>
     # def _sort_batch_definition_list(
     #     self, batch_definition_list: List[BatchDefinition]
@@ -355,10 +360,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     #                 )
     # TODO: <Alex>ALEX</Alex>
 
-    def _get_full_file_path(self, path: str) -> str:
-        base_directory: pathlib.Path = self.base_directory
-        return str(base_directory.joinpath(path))
-
+    # Interface Method
     def _get_data_reference_list(self) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.

@@ -81,16 +81,9 @@ class DataConnector:
         batch_spec = BatchSpec(**batch_spec_params)
         return batch_spec
 
-    def _refresh_data_references_cache(
-        self,
-    ) -> None:
-        raise NotImplementedError
-
-    def _get_data_reference_list(self) -> List[str]:
-        """
-        List objects in the underlying data store to create a list of data_references.
-        This method is used to refresh the cache by classes that extend this base DataConnector class
-        """
+    def get_batch_definition_list_from_batch_request(
+        self, batch_request: BatchRequestBase
+    ) -> List[BatchDefinition]:
         raise NotImplementedError
 
     def get_data_reference_list_count(self) -> int:
@@ -99,10 +92,14 @@ class DataConnector:
     def get_unmatched_data_references(self) -> List[Any]:
         raise NotImplementedError
 
-    def get_batch_definition_list_from_batch_request(
+    def _generate_batch_spec_parameters_from_batch_definition(
+        self, batch_definition: BatchDefinition
+    ) -> dict:
+        raise NotImplementedError
+
+    def _refresh_data_references_cache(
         self,
-        batch_request: BatchRequestBase,
-    ) -> List[BatchDefinition]:
+    ) -> None:
         raise NotImplementedError
 
     def _map_data_reference_to_batch_definition_list(
@@ -115,9 +112,11 @@ class DataConnector:
     ) -> Any:
         raise NotImplementedError
 
-    def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> dict:
+    def _get_data_reference_list(self) -> List[str]:
+        """
+        List objects in the underlying data store to create a list of data_references.
+        This method is used to refresh the cache by classes that extend this base DataConnector class
+        """
         raise NotImplementedError
 
     def self_check(self, pretty_print=True, max_examples=3):
