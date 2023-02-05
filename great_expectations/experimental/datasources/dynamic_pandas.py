@@ -169,8 +169,8 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
 def _extract_io_methods(
     whitelist: Optional[Sequence[str]] = None,
 ) -> List[Tuple[str, DataFrameFactoryFn]]:
-    # temporarily suppress pandas future warnings that may be emitted by inspecting
-    # pandas io method signatures
+    # temporarily suppress pandas future warnings that may be emitted by collecting
+    # pandas io methods
     with warnings.catch_warnings():
         warnings.simplefilter(action="ignore", category=FutureWarning)
 
