@@ -70,6 +70,11 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         Raises:
             TestConnectionError: If the connection test fails.
         """
+        if not self.base_directory.exists():
+            raise TestConnectionError(
+                f"Path: {self.base_directory.resolve()} does not exist."
+            )
+
         success = False
         for filepath in self.base_directory.iterdir():
             if self.regex.match(filepath.name):
@@ -78,7 +83,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
                 break
         if not success:
             raise TestConnectionError(
-                f"No file at path: {self.base_directory} matched the regex: {self.regex}."
+                f"No file at path: {self.base_directory} matched the regex: {self.regex.pattern}"
             )
 
     def _fully_specified_batch_requests_with_path(
@@ -159,10 +164,13 @@ to use as its "include" directive for File-Path style DataAsset processing."""
 
     def _option_name_to_regex_group_id(self) -> BatchRequestOptions:
         option_to_group: BatchRequestOptions = dict(self.regex.groupindex)
-        named_groups = set(self.regex.groupindex.values())
-        for i in range(1, self.regex.groups + 1):
-            if i not in named_groups:
-                option_to_group[f"{self._unnamed_regex_param_prefix}{i}"] = i
+        named_groups: set[int] = set(option_to_group.values())
+
+        idx: int
+        for idx in range(1, self.regex.groups + 1):
+            if idx not in named_groups:
+                option_to_group[f"{self._unnamed_regex_param_prefix}{idx}"] = idx
+
         return option_to_group
 
     def get_batch_list_from_batch_request(
