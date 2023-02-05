@@ -30,7 +30,7 @@ from great_expectations.experimental.datasources.sql_datasource import (
 class SqliteTableAsset(TableAsset):
     # Subclass overrides
     type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]
-    column_splitter: Optional[SqliteYearMonthSplitter] = None  # type: ignore[assignment]
+    column_splitter: Optional[ColumnSplitter] = None  # type: ignore[assignment]
 
     def add_year_and_month_splitter(
         self,
@@ -55,7 +55,7 @@ class SqliteTableAsset(TableAsset):
 class SqliteQueryAsset(QueryAsset):
     # Subclass overrides
     type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]
-    column_splitter: Optional[SqliteYearMonthSplitter] = None  # type: ignore[assignment]
+    column_splitter: Optional[ColumnSplitter] = None  # type: ignore[assignment]
 
     def add_year_and_month_splitter(
         self,

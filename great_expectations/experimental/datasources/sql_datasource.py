@@ -350,7 +350,7 @@ class QueryAsset(_SQLAsset):
     # Instance fields
     type: Literal["query"] = "query"  # type: ignore[assignment]
     query: str
-    column_splitter: Optional[SqlYearMonthSplitter] = None
+    column_splitter: Optional[ColumnSplitter] = None
 
     def test_connection(self) -> None:
         pass
@@ -402,7 +402,7 @@ class TableAsset(_SQLAsset):
     type: Literal["table"] = "table"  # type: ignore[assignment]
     table_name: str
     schema_name: Optional[str] = None
-    column_splitter: Optional[SqlYearMonthSplitter] = None
+    column_splitter: Optional[ColumnSplitter] = None
 
     @property
     def qualified_name(self) -> str:
