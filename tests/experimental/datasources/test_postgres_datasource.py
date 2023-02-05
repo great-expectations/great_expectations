@@ -774,12 +774,11 @@ def bad_configuration_datasource(
         table_name=table_name,
         schema_name=schema_name,
     )
-    bad_configuration_datasource = PostgresDatasource(
+    return PostgresDatasource(
         name="postgres_datasource",
         connection_string=connection_string,
         assets={"table_asset": table_asset},
     )
-    return bad_configuration_datasource
 
 
 @pytest.mark.unit
