@@ -53,7 +53,7 @@ class _MockConnection:
 
 
 class MockSaInspector:
-    def get_columns(self) -> list[str]:  # type: ignore[empty-body]
+    def get_columns(self) -> list[dict[str, Any]]:  # type: ignore[empty-body]
         ...
 
     def get_schema_names(self) -> list[str]:  # type: ignore[empty-body]
