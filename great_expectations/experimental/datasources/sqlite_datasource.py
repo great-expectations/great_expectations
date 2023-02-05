@@ -21,20 +21,22 @@ from great_expectations.experimental.datasources.sql_datasource import (
     SQLDatasource,
     SQLDatasourceError,
     TableAsset,
-    _ColumnSplitter,
+    ColumnSplitter,
     _query_for_year_and_month,
     _SQLAsset,
 )
 
 
-class _SplitterMixin:
+class SqliteTableAsset(TableAsset):
+    # Subclass overrides
+    type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]
+    column_splitter: Optional[SqliteYearMonthSplitter] = None  # type: ignore[assignment]
+
     def add_year_and_month_splitter(
         self,
         column_name: str,
-    ) -> _SQLAsset:
-        """Associates a year month splitter with this sqlite data asset.
-
-        This must be used as a mixin for a sqlite data asset.
+    ) -> SqliteTableAsset:
+        """Associates a year month splitter with this SqliteTableAsset
 
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
@@ -42,29 +44,40 @@ class _SplitterMixin:
         Returns:
             This SqliteTableAsset so we can use this method fluently.
         """
-        assert isinstance(
-            self, tuple(_SqliteAssets)
-        ), "_SplitterMixin can only be mixed into a sqlite data asset."
-        self.column_splitter = SqliteYearMonthSplitter(
+        column_splitter = SqliteYearMonthSplitter(
             column_name=column_name,
         )
-        return self  # type: ignore[return-value]  # See isinstance check above.
+        column_splitter.test_connection(table_asset=self)
+        self.column_splitter = column_splitter
+        return self
 
 
-class SqliteTableAsset(_SplitterMixin, TableAsset):
-    # Subclass overrides
-    type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]
-    column_splitter: Optional[SqliteYearMonthSplitter] = None  # type: ignore[assignment]
-
-
-class SqliteQueryAsset(_SplitterMixin, QueryAsset):
+class SqliteQueryAsset(QueryAsset):
     # Subclass overrides
     type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]
     column_splitter: Optional[SqliteYearMonthSplitter] = None  # type: ignore[assignment]
 
+    def add_year_and_month_splitter(
+        self,
+        column_name: str,
+    ) -> SqliteQueryAsset:
+        """Associates a year month splitter with this SqliteQueryAsset
+
+        Args:
+            column_name: A column name of the date column where year and month will be parsed out.
+
+        Returns:
+            This SqliteQueryAsset so we can use this method fluently.
+        """
+        column_splitter = SqliteYearMonthSplitter(
+            column_name=column_name,
+        )
+        self.column_splitter = column_splitter
+        return self
+
 
 @pydantic_dc.dataclass(frozen=True)
-class SqliteYearMonthSplitter(_ColumnSplitter):
+class SqliteYearMonthSplitter(ColumnSplitter):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
     # noinspection Pydantic
     param_names: List[Literal["year", "month"]] = pydantic.Field(

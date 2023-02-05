@@ -8,6 +8,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Generic,
     List,
     NamedTuple,
     Optional,
@@ -54,7 +55,7 @@ class SQLDatasourceWarning(UserWarning):
 
 
 @pydantic_dc.dataclass(frozen=True)
-class _ColumnSplitter:
+class ColumnSplitter:
     column_name: str
     method_name: str
     param_names: Sequence[str]
@@ -103,7 +104,7 @@ class _ColumnSplitter:
             )
 
 
-ColumnSplitter = TypeVar("ColumnSplitter", bound=_ColumnSplitter)
+ColumnSplitterType = TypeVar("ColumnSplitterType", bound=ColumnSplitter)
 
 
 class DatetimeRange(NamedTuple):
@@ -112,7 +113,7 @@ class DatetimeRange(NamedTuple):
 
 
 @pydantic_dc.dataclass(frozen=True)
-class SqlYearMonthSplitter(_ColumnSplitter):
+class SqlYearMonthSplitter(ColumnSplitter):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
     param_names: List[Literal["year", "month"]] = pydantic.Field(
         default_factory=lambda: ["year", "month"]
@@ -178,10 +179,10 @@ def _get_sql_datetime_range(
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
 
 
-class _SQLAsset(DataAsset):
+class _SQLAsset(DataAsset, Generic[ColumnSplitterType]):
     # Instance fields
     type: Literal["_sqlasset"] = "_sqlasset"
-    column_splitter: Optional[SqlYearMonthSplitter] = None
+    column_splitter: Optional[ColumnSplitterType] = None
     name: str
 
     def batch_request_options_template(
@@ -197,24 +198,6 @@ class _SQLAsset(DataAsset):
         if not self.column_splitter:
             return template
         return {p: None for p in self.column_splitter.param_names}
-
-    # This asset type will support a variety of splitters
-    def add_year_and_month_splitter(
-        self,
-        column_name: str,
-    ) -> _SQLAsset:
-        """Associates a year month splitter with this SQLAsset
-
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-
-        Returns:
-            This SQLAsset so we can use this method fluently.
-        """
-        self.column_splitter = SqlYearMonthSplitter(
-            column_name=column_name,
-        )
-        return self
 
     def _fully_specified_batch_requests(self, batch_request) -> List[BatchRequest]:
         """Populates a batch requests unspecified params producing a list of batch requests."""
@@ -367,6 +350,7 @@ class QueryAsset(_SQLAsset):
     # Instance fields
     type: Literal["query"] = "query"  # type: ignore[assignment]
     query: str
+    column_splitter: Optional[SqlYearMonthSplitter] = None
 
     def test_connection(self) -> None:
         pass
@@ -377,6 +361,23 @@ class QueryAsset(_SQLAsset):
         if not (query.upper().startswith("SELECT") and query[6].isspace()):
             raise ValueError("query must start with 'SELECT' followed by a whitespace.")
         return v
+
+    def add_year_and_month_splitter(
+        self,
+        column_name: str,
+    ) -> QueryAsset:
+        """Associates a year month splitter with this QueryAsset
+
+        Args:
+            column_name: A column name of the date column where year and month will be parsed out.
+
+        Returns:
+            This QueryAsset so we can use this method fluently.
+        """
+        self.column_splitter = SqlYearMonthSplitter(
+            column_name=column_name,
+        )
+        return self
 
     def as_selectable(self) -> sqlalchemy.sql.Selectable:
         """Returns the Selectable that is used to retrieve the data.
@@ -401,6 +402,7 @@ class TableAsset(_SQLAsset):
     type: Literal["table"] = "table"  # type: ignore[assignment]
     table_name: str
     schema_name: Optional[str] = None
+    column_splitter: Optional[SqlYearMonthSplitter] = None
 
     @property
     def qualified_name(self) -> str:
@@ -439,7 +441,7 @@ class TableAsset(_SQLAsset):
     def add_year_and_month_splitter(
         self,
         column_name: str,
-    ) -> _SQLAsset:
+    ) -> TableAsset:
         """Associates a year month splitter with this TableAsset
 
         Args:
@@ -448,9 +450,11 @@ class TableAsset(_SQLAsset):
         Returns:
             This TableAsset so we can use this method fluently.
         """
-        super().add_year_and_month_splitter(column_name=column_name)
-        assert self.column_splitter is not None
-        self.column_splitter.test_connection(table_asset=self)
+        column_splitter = SqlYearMonthSplitter(
+            column_name=column_name,
+        )
+        column_splitter.test_connection(table_asset=self)
+        self.column_splitter = column_splitter
         return self
 
     def as_selectable(self) -> sqlalchemy.sql.Selectable:
