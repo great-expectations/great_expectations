@@ -164,10 +164,13 @@ to use as its "include" directive for File-Path style DataAsset processing."""
 
     def _option_name_to_regex_group_id(self) -> BatchRequestOptions:
         option_to_group: BatchRequestOptions = dict(self.regex.groupindex)
-        named_groups = set(self.regex.groupindex.values())
-        for i in range(1, self.regex.groups + 1):
-            if i not in named_groups:
-                option_to_group[f"{self._unnamed_regex_param_prefix}{i}"] = i
+        named_groups: set[int] = set(option_to_group.values())
+
+        idx: int
+        for idx in range(1, self.regex.groups + 1):
+            if idx not in named_groups:
+                option_to_group[f"{self._unnamed_regex_param_prefix}{idx}"] = idx
+
         return option_to_group
 
     def get_batch_list_from_batch_request(
