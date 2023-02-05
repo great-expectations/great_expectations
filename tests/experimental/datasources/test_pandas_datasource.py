@@ -149,20 +149,27 @@ class TestDynamicPandasAssets:
 
     @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
     def test_minimal_validation(self, asset_class: Type[_FilesystemDataAsset]):
+        """
+        These parametrized tests ensures that every `PandasDatasource` asset model does some minimal
+        validation, and doesn't accept arbitrary keyword arguments.
+        This is also a proxy for testing that the dynamic pydantic model creation was successful.
+        """
         with pytest.raises(pydantic.ValidationError) as exc_info:
-            asset_class(  # type: ignore[call-arg] # type has default
+            asset_class(  # type: ignore[call-arg] # type has a default
                 name="test",
                 base_directory=pathlib.Path(__file__),
                 regex=re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
-                foo="bar",
+                invalid_keyword_arg="bad",
             )
 
         errors_dict = exc_info.value.errors()
         assert {
-            "loc": ("foo",),
+            "loc": ("invalid_keyword_arg",),
             "msg": "extra fields not permitted",
             "type": "value_error.extra",
-        } == errors_dict[-1]
+        } == errors_dict[  # the extra keyword error will always be the last error
+            -1  # we don't care about any other errors for this test
+        ]
 
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],
