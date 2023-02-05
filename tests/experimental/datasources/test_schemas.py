@@ -51,6 +51,7 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     if schema_path.name in (
         "SqliteDatasource.json",
         "SqliteTableAsset.json",
+        "SqliteQueryAsset.json",
     ):
         pytest.xfail(f"{schema_path.name} does not exist")
 
