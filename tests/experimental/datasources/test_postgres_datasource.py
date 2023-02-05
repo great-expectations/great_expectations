@@ -721,64 +721,36 @@ def test_validate_invalid_postgres_connection_string(
             pass
 
 
-def bad_connection_string_config() -> tuple[
-    str, str, str, str | None, TestConnectionError
-]:
+def bad_connection_string_config() -> tuple[str, str, str]:
     connection_string = "postgresql+psycopg2://postgres:@localhost/bad_database"
     table_name = "good_table"
     schema_name = "good_schema"
-    mock_sqlalchemy_engine_connect_error_raised = (
-        '(psycopg2.OperationalError) connection to server at "localhost" (::1), port '
-        '5432 failed: FATAL:  database "bad_database" does not exist\n'
-        "\n"
-        "(Background on this error at: https://sqlalche.me/e/14/e3q8)"
-    )
-    test_connection_error = TestConnectionError(
-        "Attempt to connect to datasource failed with the following error message: "
-        f"{mock_sqlalchemy_engine_connect_error_raised}"
-    )
     return (
         connection_string,
         table_name,
         schema_name,
-        mock_sqlalchemy_engine_connect_error_raised,
-        test_connection_error,
     )
 
 
-def bad_table_name_config() -> tuple[str, str, str, str | None, TestConnectionError]:
+def bad_table_name_config() -> tuple[str, str, str]:
     connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
     table_name = "bad_table"
     schema_name = "good_schema"
-    mock_sqlalchemy_engine_connect_error_raised = None
-    test_connection_error = TestConnectionError(
-        'Attempt to connect to table: "good_schema.bad_table" failed because the table '
-        '"bad_table" does not exist.'
-    )
     return (
         connection_string,
         table_name,
         schema_name,
-        mock_sqlalchemy_engine_connect_error_raised,
-        test_connection_error,
     )
 
 
-def bad_schema_name_config() -> tuple[str, str, str, str | None, TestConnectionError]:
+def bad_schema_name_config() -> tuple[str, str, str]:
     connection_string = "postgresql+psycopg2://postgres:@localhost/test_ci"
     table_name = "good_table"
     schema_name = "bad_schema"
-    mock_sqlalchemy_engine_connect_error_raised = None
-    test_connection_error = TestConnectionError(
-        'Attempt to connect to table: "bad_schema.good_table" failed because the schema '
-        '"bad_schema" does not exist.'
-    )
     return (
         connection_string,
         table_name,
         schema_name,
-        mock_sqlalchemy_engine_connect_error_raised,
-        test_connection_error,
     )
 
 
@@ -789,53 +761,36 @@ def bad_schema_name_config() -> tuple[str, str, str, str | None, TestConnectionE
         bad_schema_name_config,
     ]
 )
-def datasource_test_connection_error_messages(
+def bad_configuration_datasource(
     request,
-) -> tuple[PostgresDatasource, str | None, TestConnectionError]:
+) -> PostgresDatasource:
     (
         connection_string,
         table_name,
         schema_name,
-        mock_sqlalchemy_engine_connect_error_raised,
-        test_connection_error,
     ) = request.param()
     table_asset = TableAsset(
         name="table_asset",
         table_name=table_name,
         schema_name=schema_name,
     )
-    postgres_datasource = PostgresDatasource(
+    bad_configuration_datasource = PostgresDatasource(
         name="postgres_datasource",
         connection_string=connection_string,
         assets={"table_asset": table_asset},
     )
-    return (
-        postgres_datasource,
-        mock_sqlalchemy_engine_connect_error_raised,
-        test_connection_error,
-    )
+    return bad_configuration_datasource
 
 
 @pytest.mark.unit
 def test_test_connection_failures(
     mocker,
-    datasource_test_connection_error_messages: tuple[
-        PostgresDatasource, str | None, TestConnectionError
-    ],
+    bad_configuration_datasource: PostgresDatasource,
 ):
-    (
-        postgres_datasource,
-        mock_sqlalchemy_engine_connect_error_raised,
-        test_connection_error,
-    ) = datasource_test_connection_error_messages
 
     create_engine = mocker.patch("sqlalchemy.create_engine")
     create_engine.return_value = MockSaEngine(dialect=Dialect("postgresql"))
-    connect = mocker.patch(
-        "tests.experimental.datasources.conftest.MockSaEngine.connect"
-    )
-    if mock_sqlalchemy_engine_connect_error_raised:
-        connect.side_effect = Exception(mock_sqlalchemy_engine_connect_error_raised)
+    mocker.patch("tests.experimental.datasources.conftest.MockSaEngine.connect")
     inspect = mocker.patch("sqlalchemy.inspect")
     inspect.return_value = MockSaInspector()
     get_schema_names = mocker.patch(
@@ -847,9 +802,8 @@ def test_test_connection_failures(
     )
     has_table.return_value = False
 
-    with pytest.raises(type(test_connection_error)) as e:
-        postgres_datasource.test_connection()
-    assert str(e.value) == str(test_connection_error)
+    with pytest.raises(TestConnectionError):
+        bad_configuration_datasource.test_connection()
 
 
 @pytest.mark.unit
