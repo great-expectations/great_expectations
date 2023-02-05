@@ -2206,8 +2206,6 @@ class Expectation(metaclass=MetaExpectation):
                 backend_test_result_counts
             )
         )
-        experimental_checks.append(ExpectationDiagnostics._check_linting(self))
-
         beta_checks.append(
             ExpectationDiagnostics._check_input_validation(self, examples)
         )
