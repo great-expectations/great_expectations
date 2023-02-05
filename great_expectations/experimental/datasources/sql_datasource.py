@@ -209,10 +209,9 @@ class _SQLAsset(DataAsset):
         Returns:
             This SQLAsset so we can use this method fluently.
         """
-        year_and_month_splitter = SqlYearMonthSplitter(
+        self.column_splitter = SqlYearMonthSplitter(
             column_name=column_name,
         )
-        self.column_splitter = year_and_month_splitter
         return self
 
     def _fully_specified_batch_requests(self, batch_request) -> List[BatchRequest]:
@@ -448,7 +447,8 @@ class TableAsset(_SQLAsset):
             This TableAsset so we can use this method fluently.
         """
         super().add_year_and_month_splitter(column_name=column_name)
-        self.test_connection()
+        assert self.column_splitter is not None
+        self.column_splitter.test_connection(table_asset=self)
         return self
 
     def as_selectable(self) -> sqlalchemy.sql.Selectable:
