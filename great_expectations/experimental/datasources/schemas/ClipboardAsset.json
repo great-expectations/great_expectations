@@ -1,6 +1,6 @@
 {
     "title": "ClipboardAsset",
-    "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+    "description": "Read text from clipboard and pass to read_csv.\n\nParameters\n----------\nsep : str, default '\\s+'\n    A string or regex delimiter. The default of '\\s+' denotes\n    one or more whitespace characters.\n\n**kwargs\n    See read_csv for the full argument list.\n\nReturns\n-------\nDataFrame\n    A parsed DataFrame object.",
     "type": "object",
     "properties": {
         "name": {
