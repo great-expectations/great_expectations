@@ -28,8 +28,6 @@ from great_expectations.experimental.datasources.sql_datasource import (
 
 
 class _SplitterMixin:
-    column_splitter: Optional[SqliteYearMonthSplitter] = None
-
     def add_year_and_month_splitter(
         self,
         column_name: str,
