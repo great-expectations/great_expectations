@@ -19,9 +19,8 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt
+from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
 from pydantic import dataclasses as pydantic_dc
-from pydantic import root_validator, validate_arguments
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
 import great_expectations.exceptions as ge_exceptions
@@ -142,7 +141,7 @@ class DataAsset(ExperimentalBaseModel):
     type: str
     order_by: List[BatchSorter] = Field(default_factory=list)
 
-    # non-field private attrs
+    # non-field private attributes
     _datasource: Datasource = pydantic.PrivateAttr()
 
     @property
