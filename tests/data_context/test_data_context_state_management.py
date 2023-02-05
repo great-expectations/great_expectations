@@ -5,13 +5,16 @@ from typing import Mapping
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore, ProfilerStore
+from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.types.base import (
+    CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
     InMemoryStoreBackendDefaults,
@@ -44,6 +47,19 @@ class ProfilerStoreSpy(ProfilerStore):
         return super().set(key=key, value=value, **kwargs)
 
 
+class CheckpointStoreSpy(CheckpointStore):
+
+    STORE_NAME = "checkpoint_store"
+
+    def __init__(self) -> None:
+        self.save_count = 0
+        super().__init__(CheckpointStoreSpy.STORE_NAME)
+
+    def set(self, key, value, **kwargs):
+        self.save_count += 1
+        return super().set(key=key, value=value, **kwargs)
+
+
 class EphemeralDataContextSpy(EphemeralDataContext):
     """
     Simply wraps around EphemeralDataContext but keeps tabs on specific method calls around state management.
@@ -57,6 +73,7 @@ class EphemeralDataContextSpy(EphemeralDataContext):
         self.save_count = 0
         self._expectations_store = ExpectationsStoreSpy()
         self._profiler_store = ProfilerStoreSpy()
+        self._checkpoint_store = CheckpointStoreSpy()
 
     @property
     def expectations_store(self):
@@ -65,6 +82,10 @@ class EphemeralDataContextSpy(EphemeralDataContext):
     @property
     def profiler_store(self):
         return self._profiler_store
+
+    @property
+    def checkpoint_store(self):
+        return self._checkpoint_store
 
     def _save_project_config(self):
         """
@@ -548,3 +569,189 @@ def test_add_or_update_profiler_updates_successfully(
     # Rules get converted to a list within the RBP constructor
     assert sorted(rule.name for rule in profiler.rules) == sorted(new_rules.keys())
     assert context.profiler_store.save_count == 2
+
+
+@pytest.mark.unit
+def test_update_checkpoint_success(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+):
+    context = in_memory_data_context
+    name = "my_checkpoint"
+    checkpoint_config["name"] = name
+
+    checkpoint = context.add_checkpoint(**checkpoint_config)
+
+    assert context.checkpoint_store.save_count == 1
+
+    action_list = [
+        {
+            "name": "store_validation_result",
+            "action": {
+                "class_name": "StoreValidationResultAction",
+            },
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {
+                "class_name": "StoreEvaluationParametersAction",
+            },
+        },
+        {
+            "name": "update_data_docs",
+            "action": {
+                "class_name": "UpdateDataDocsAction",
+            },
+        },
+    ]
+    checkpoint.config.action_list = action_list
+    context.update_checkpoint(checkpoint)
+
+    assert context.checkpoint_store.save_count == 2
+
+
+@pytest.mark.unit
+def test_update_checkpoint_failure(in_memory_data_context: EphemeralDataContextSpy):
+    context = in_memory_data_context
+
+    name = "my_checkpoint"
+    checkpoint = Checkpoint(
+        name=name,
+        data_context=context,
+    )
+
+    with pytest.raises(gx_exceptions.CheckpointNotFoundError) as e:
+        context.update_checkpoint(checkpoint)
+
+    assert f"Could not find a Checkpoint named {name}" in str(e.value)
+
+
+@pytest.mark.unit
+def test_add_or_update_checkpoint_adds_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+):
+    context = in_memory_data_context
+    name = "my_checkpoint"
+    checkpoint_config["name"] = name
+
+    checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
+
+    actual_config = checkpoint.config
+
+    assert actual_config.name == name
+    assert (
+        actual_config.expectation_suite_name
+        == checkpoint_config["expectation_suite_name"]
+    )
+    assert actual_config.validations == checkpoint_config["validations"]
+    assert context.checkpoint_store.save_count == 1
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "update_kwargs,expected_config",
+    [
+        pytest.param(
+            {
+                "action_list": [],
+                "batch_request": {},
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "evaluation_parameters": {},
+                "expectation_suite_name": "oss_test_expectation_suite",
+                "module_name": "great_expectations.checkpoint",
+                "profilers": [],
+                "runtime_configuration": {},
+                "validations": [
+                    {"expectation_suite_name": "taxi.demo_pass"},
+                    {
+                        "batch_request": {
+                            "datasource_name": "oss_test_datasource",
+                            "data_connector_name": "oss_test_data_connector",
+                            "data_asset_name": "users",
+                        }
+                    },
+                ],
+            },
+            CheckpointConfig(
+                **{
+                    "action_list": [],
+                    "batch_request": {},
+                    "class_name": "Checkpoint",
+                    "config_version": 1.0,
+                    "evaluation_parameters": {},
+                    "expectation_suite_name": "oss_test_expectation_suite",
+                    "module_name": "great_expectations.checkpoint",
+                    "name": "my_checkpoint",
+                    "profilers": [],
+                    "runtime_configuration": {},
+                    "validations": [
+                        {"expectation_suite_name": "taxi.demo_pass"},
+                        {
+                            "batch_request": {
+                                "datasource_name": "oss_test_datasource",
+                                "data_connector_name": "oss_test_data_connector",
+                                "data_asset_name": "users",
+                            }
+                        },
+                    ],
+                }
+            ),
+            id="no updates",
+        ),
+        pytest.param(
+            {
+                "class_name": "Checkpoint",
+                "module_name": "great_expectations.checkpoint",
+                "config_version": 1.0,
+                "validations": [],
+                "evaluation_parameters": {
+                    "environment": "$GE_ENVIRONMENT",
+                    "tolerance": 1.0e-2,
+                    "aux_param_0": "$MY_PARAM",
+                    "aux_param_1": "1 + $MY_PARAM",
+                },
+            },
+            CheckpointConfig(
+                **{
+                    "action_list": [],
+                    "batch_request": {},
+                    "class_name": "Checkpoint",
+                    "config_version": 1.0,
+                    "evaluation_parameters": {
+                        "environment": "$GE_ENVIRONMENT",
+                        "tolerance": 1.0e-2,
+                        "aux_param_0": "$MY_PARAM",
+                        "aux_param_1": "1 + $MY_PARAM",
+                    },
+                    "expectation_suite_name": None,
+                    "module_name": "great_expectations.checkpoint",
+                    "name": "my_checkpoint",
+                    "profilers": [],
+                    "runtime_configuration": {},
+                    "validations": [],
+                }
+            ),
+            id="some updates",
+        ),
+    ],
+)
+def test_add_or_update_checkpoint_updates_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+    update_kwargs: dict,
+    expected_config: CheckpointConfig,
+):
+    context = in_memory_data_context
+    name = "my_checkpoint"
+    checkpoint_config["name"] = name
+
+    checkpoint = context.add_checkpoint(**checkpoint_config)
+
+    assert context.checkpoint_store.save_count == 1
+
+    checkpoint = context.add_or_update_checkpoint(name=name, **update_kwargs)
+
+    assert checkpoint.config.to_dict() == expected_config.to_dict()
+    assert context.checkpoint_store.save_count == 2

@@ -168,17 +168,44 @@ class CheckpointStore(ConfigurationStore):
 
         return checkpoint_config
 
-    def add_checkpoint(
-        self, checkpoint: Checkpoint, name: str | None, id: str | None
-    ) -> None:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=id
-        )
-        checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment]
+    def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        key = self._construct_key_from_checkpoint(checkpoint)
+        return self._add_checkpoint(key=key, checkpoint=checkpoint)
+
+    def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        key = self._construct_key_from_checkpoint(checkpoint)
+        if not self.has_key(key):
+            raise gx_exceptions.CheckpointNotFoundError(
+                f"Could not find a Checkpoint named {checkpoint.name}"
+            )
+        return self._add_checkpoint(key=key, checkpoint=checkpoint)
+
+    def add_or_update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        key = self._construct_key_from_checkpoint(checkpoint)
+        if self.has_key(key):
+            return self.update_checkpoint(checkpoint)
+        return self._add_checkpoint(key=key, checkpoint=checkpoint)
+
+    def _construct_key_from_checkpoint(
+        self, checkpoint: Checkpoint
+    ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
+        name = checkpoint.name
+        id = checkpoint.ge_cloud_id
+        if id:
+            return self.determine_key(ge_cloud_id=str(id))
+        return self.determine_key(name=name)
+
+    def _add_checkpoint(
+        self,
+        key: GXCloudIdentifier | ConfigurationIdentifier,
+        checkpoint: Checkpoint,
+    ) -> Checkpoint:
+        checkpoint_config = checkpoint.get_config()
         checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
             cloud_id = checkpoint_ref.cloud_id
             checkpoint.ge_cloud_id = uuid.UUID(cloud_id)  # type: ignore[misc]
+        return checkpoint
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
         """Create a checkpoint config in the store using a store_backend-specific key.
