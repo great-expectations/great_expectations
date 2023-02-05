@@ -22,12 +22,15 @@ from great_expectations.experimental.datasources.sql_datasource import (
     SQLDatasource,
     SQLDatasourceError,
     TableAsset,
+    _ColumnSplitter,
     _query_for_year_and_month,
     _SQLAsset,
 )
 
 
 class _SplitterMixin:
+    column_splitter: Optional[SqliteYearMonthSplitter] = None
+
     def add_year_and_month_splitter(
         self,
         column_name: str,
@@ -64,7 +67,7 @@ class SqliteQueryAsset(_SplitterMixin, QueryAsset):
 
 
 @pydantic_dc.dataclass(frozen=True)
-class SqliteYearMonthSplitter(ColumnSplitter):
+class SqliteYearMonthSplitter(_ColumnSplitter):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
     # noinspection Pydantic
     param_names: List[Literal["year", "month"]] = pydantic.Field(

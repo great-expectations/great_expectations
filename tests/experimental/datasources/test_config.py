@@ -13,9 +13,9 @@ from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
-    ColumnSplitter,
     SqlYearMonthSplitter,
     TableAsset,
+    _ColumnSplitter,
 )
 
 try:
@@ -370,7 +370,7 @@ def test_general_column_splitter_errors(
 ):
 
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        ColumnSplitter(**bad_column_kwargs)
+        _ColumnSplitter(**bad_column_kwargs)
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 

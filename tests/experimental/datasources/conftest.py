@@ -53,10 +53,13 @@ class _MockConnection:
 
 
 class MockSaInspector:
-    def get_schema_names(self):
+    def get_columns(self) -> list[str]:  # type: ignore[empty-body]
         ...
 
-    def has_table(self):
+    def get_schema_names(self) -> list[str]:  # type: ignore[empty-body]
+        ...
+
+    def has_table(self, table_name: str, schema: str) -> bool:  # type: ignore[empty-body]
         ...
 
 

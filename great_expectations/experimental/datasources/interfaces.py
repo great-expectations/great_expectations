@@ -209,7 +209,7 @@ class DataAsset(ExperimentalBaseModel):
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
         return BatchRequest(
-            datasource_name=self._datasource.name,
+            datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
         )

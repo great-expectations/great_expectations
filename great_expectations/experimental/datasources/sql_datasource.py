@@ -13,6 +13,7 @@ from typing import (
     Optional,
     Sequence,
     Type,
+    TypeVar,
     Union,
     cast,
 )
@@ -53,7 +54,7 @@ class SQLDatasourceWarning(UserWarning):
 
 
 @pydantic_dc.dataclass(frozen=True)
-class ColumnSplitter:
+class _ColumnSplitter:
     column_name: str
     method_name: str
     param_names: Sequence[str]
@@ -89,6 +90,7 @@ class ColumnSplitter:
         Raises:
             TestConnectionError: If the connection test fails.
         """
+        assert isinstance(table_asset.datasource, SQLDatasource)
         engine: sqlalchemy.engine.Engine = table_asset.datasource.get_engine()
         inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
         if self.column_name not in inspector.get_columns(
@@ -99,13 +101,16 @@ class ColumnSplitter:
             )
 
 
+ColumnSplitter = TypeVar("ColumnSplitter", bound=_ColumnSplitter)
+
+
 class DatetimeRange(NamedTuple):
     min: datetime
     max: datetime
 
 
 @pydantic_dc.dataclass(frozen=True)
-class SqlYearMonthSplitter(ColumnSplitter):
+class SqlYearMonthSplitter(_ColumnSplitter):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
     param_names: List[Literal["year", "month"]] = pydantic.Field(
         default_factory=lambda: ["year", "month"]
@@ -196,18 +201,17 @@ class _SQLAsset(DataAsset):
         self,
         column_name: str,
     ) -> _SQLAsset:
-        """Associates a year month splitter with this DataAsset
+        """Associates a year month splitter with this SQLAsset
 
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
 
         Returns:
-            This DataAsset so we can use this method fluently.
+            This SQLAsset so we can use this method fluently.
         """
         year_and_month_splitter = SqlYearMonthSplitter(
             column_name=column_name,
         )
-        year_and_month_splitter.test_connection(table_asset=self)
         self.column_splitter = year_and_month_splitter
         return self
 
@@ -355,6 +359,9 @@ class _SQLAsset(DataAsset):
         raise NotImplementedError
 
 
+SQLAsset = TypeVar("SQLAsset", bound=_SQLAsset)
+
+
 class QueryAsset(_SQLAsset):
     # Instance fields
     type: Literal["query"] = "query"  # type: ignore[assignment]
@@ -427,6 +434,22 @@ class TableAsset(_SQLAsset):
                 f'Attempt to connect to table: "{self.qualified_name}" failed because the table '
                 f'"{self.table_name}" does not exist.'
             )
+
+    def add_year_and_month_splitter(
+        self,
+        column_name: str,
+    ) -> _SQLAsset:
+        """Associates a year month splitter with this TableAsset
+
+        Args:
+            column_name: A column name of the date column where year and month will be parsed out.
+
+        Returns:
+            This TableAsset so we can use this method fluently.
+        """
+        super().add_year_and_month_splitter(column_name=column_name)
+        self.test_connection()
+        return self
 
     def as_selectable(self) -> sqlalchemy.sql.Selectable:
         """Returns the table as a sqlalchemy Selectable.
