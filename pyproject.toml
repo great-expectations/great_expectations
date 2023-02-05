@@ -260,6 +260,9 @@ max-complexity = 15
 [tool.ruff.pydocstyle]
 convention = "google"
 
+[tool.ruff.isort]
+known-first-party = ["great_expectations"]
+
 [tool.ruff.flake8-type-checking]
 exempt-modules = [
     "typing",
