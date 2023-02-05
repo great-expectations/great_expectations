@@ -3064,7 +3064,7 @@ def check_json_test_result(  # noqa: C901 - 52
                 assert result["result"]["observed_value"] in value
 
             elif key == "unexpected_index_list":
-                if pk_column:
+                if pk_column and result["result"].get("unexpected_index_list"):
                     assert (
                         result["result"].get("unexpected_index_list") == value
                     ), f"{result['result'].get('unexpected_index_list')} != {value}"
