@@ -175,9 +175,9 @@ def _extract_io_methods(
         warnings.simplefilter(action="ignore", category=FutureWarning)
 
         member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
-        if whitelist:
-            return [t for t in member_functions if t[0] in whitelist]
-        return [t for t in member_functions if t[0].startswith("read_")]
+    if whitelist:
+        return [t for t in member_functions if t[0] in whitelist]
+    return [t for t in member_functions if t[0].startswith("read_")]
 
 
 def _extract_io_signatures(
