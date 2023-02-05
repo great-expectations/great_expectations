@@ -143,7 +143,8 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
             Optional[str],  # type: ignore[arg-type]
             Field(
                 None,
-                description="This will passed to pandas as 'schema'",
+                description="'schema_name' on the instance model."
+                " Will be passed to pandas reader method as 'schema'",
                 alias="schema",
             ),
         )
