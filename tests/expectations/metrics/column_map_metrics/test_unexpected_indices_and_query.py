@@ -270,8 +270,9 @@ def test_sa_unexpected_index_query_metric_with_id_pk(
     )
     for (key, val) in results.items():
         assert (
-            val
-            == "SELECT animals, pk_1 \nFROM test \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"
+            "SELECT pk_1, animals \n"
+            "FROM test \n"
+            "WHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"
         )
 
 
