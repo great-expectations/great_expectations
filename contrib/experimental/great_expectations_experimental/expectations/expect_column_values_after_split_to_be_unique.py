@@ -4,16 +4,10 @@ For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
 """
 
-import json
 from typing import Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -95,11 +89,15 @@ class ExpectColumnValuesAfterSplitToBeUnique(ColumnMapExpectation):
                     "title": "positive_test_with_mostly",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "duplicate_sports", "delimiter": ",", "mostly": 0.65},
+                    "in": {
+                        "column": "duplicate_sports",
+                        "delimiter": ",",
+                        "mostly": 0.65,
+                    },
                     "out": {
                         "success": True,
                     },
-                }
+                },
             ],
         }
     ]
@@ -147,7 +145,7 @@ class ExpectColumnValuesAfterSplitToBeUnique(ColumnMapExpectation):
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "tags": ['pandas'],  # Tags for this Expectation in the Gallery
+        "tags": ["pandas"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@ace-racer",  # Don't forget to add your github handle here!
         ],
