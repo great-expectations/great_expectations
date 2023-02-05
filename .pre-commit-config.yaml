@@ -12,16 +12,12 @@ repos:
         exclude: docs/.*|tests/.*.fixture
       - id: requirements-txt-fixer
         exclude: docs/.*
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
   - repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:
       - id: black
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.0.236'
+    rev: 'v0.0.238'
     hooks:
       - id: ruff
         files: ^(great_expectations/core)  # TODO: expand to all of gx

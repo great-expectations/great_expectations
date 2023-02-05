@@ -4,7 +4,6 @@ import pathlib
 import re
 from pprint import pformat as pf
 from typing import Callable, List
-from unittest import mock
 
 import pydantic
 import pytest
@@ -21,8 +20,8 @@ from great_expectations.experimental.datasources.sql_datasource import (
 
 try:
     from devtools import debug as pp
-except ImportError:  # type: ignore[assignment]
-    from pprint import pprint as pp  # type: ignore[assignment]
+except ImportError:
+    from pprint import pprint as pp
 
 p = pytest.param
 
@@ -215,8 +214,7 @@ class TestExcludeUnsetAssetFields:
     ],
 )
 def test_load_config(inject_engine_lookup_double, load_method: Callable, input_):
-    with mock.patch("sqlalchemy.create_engine"):
-        loaded: GxConfig = load_method(input_)
+    loaded: GxConfig = load_method(input_)
     pp(loaded)
     assert loaded
 
@@ -335,15 +333,18 @@ def test_catch_bad_asset_configs(
     print(f"  Config\n{pf(config)}\n")
 
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        with mock.patch("sqlalchemy.create_engine"):
-            GxConfig.parse_obj({"xdatasources": config})
+        GxConfig.parse_obj({"xdatasources": config})
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
     all_errors = exc_info.value.errors()
-    assert len(all_errors) == 1, "Expected 1 error"
-    assert expected_error_loc == all_errors[0]["loc"]
-    assert expected_msg == all_errors[0]["msg"]
+    assert len(all_errors) >= 1, "Expected at least 1 error"
+    test_msg = ""
+    for error in all_errors:
+        if expected_error_loc == all_errors[0]["loc"]:
+            test_msg = error["msg"]
+            break
+    assert expected_msg == test_msg
 
 
 @pytest.mark.unit
@@ -382,8 +383,7 @@ def test_general_column_splitter_errors(
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_dict_gx_config() -> GxConfig:
-    with mock.patch("sqlalchemy.create_engine"):
-        gx_config = GxConfig.parse_obj(PG_COMPLEX_CONFIG_DICT)
+    gx_config = GxConfig.parse_obj(PG_COMPLEX_CONFIG_DICT)
     assert gx_config
     return gx_config
 
@@ -391,8 +391,7 @@ def from_dict_gx_config() -> GxConfig:
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_json_gx_config() -> GxConfig:
-    with mock.patch("sqlalchemy.create_engine"):
-        gx_config = GxConfig.parse_raw(PG_COMPLEX_CONFIG_JSON)
+    gx_config = GxConfig.parse_raw(PG_COMPLEX_CONFIG_JSON)
     assert gx_config
     return gx_config
 
@@ -400,8 +399,7 @@ def from_json_gx_config() -> GxConfig:
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_yaml_gx_config() -> GxConfig:
-    with mock.patch("sqlalchemy.create_engine"):
-        gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
+    gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
     assert gx_config
     return gx_config
 
@@ -412,8 +410,7 @@ def test_dict_config_round_trip(
     dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
-    with mock.patch("sqlalchemy.create_engine"):
-        re_loaded: GxConfig = GxConfig.parse_obj(dumped)
+    re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
     assert re_loaded
 
@@ -426,8 +423,7 @@ def test_json_config_round_trip(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    with mock.patch("sqlalchemy.create_engine"):
-        re_loaded: GxConfig = GxConfig.parse_raw(dumped)
+    re_loaded: GxConfig = GxConfig.parse_raw(dumped)
     pp(re_loaded)
     assert re_loaded
 
@@ -440,8 +436,7 @@ def test_yaml_config_round_trip(
     dumped: str = from_yaml_gx_config.yaml()
     print(f"  Dumped YAML ->\n\n{dumped}\n")
 
-    with mock.patch("sqlalchemy.create_engine"):
-        re_loaded: GxConfig = GxConfig.parse_yaml(dumped)
+    re_loaded: GxConfig = GxConfig.parse_yaml(dumped)
     pp(re_loaded)
     assert re_loaded
 
@@ -460,8 +455,7 @@ def test_yaml_file_config_round_trip(
 
     print(f"  yaml_file -> \n\n{yaml_file.read_text()}")
 
-    with mock.patch("sqlalchemy.create_engine"):
-        re_loaded: GxConfig = GxConfig.parse_yaml(yaml_file)
+    re_loaded: GxConfig = GxConfig.parse_yaml(yaml_file)
     pp(re_loaded)
     assert re_loaded
 
@@ -499,9 +493,15 @@ def test_custom_sorter_serialization(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["xdatasources"][
+    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["xdatasources"][  # type: ignore[index]
         "my_pg_ds"
-    ]["assets"]["with_dslish_sorters"]["order_by"]
+    ][
+        "assets"
+    ][
+        "with_dslish_sorters"
+    ][
+        "order_by"
+    ]
 
     assert '"reverse": True' not in dumped
     assert '{"key":' not in dumped

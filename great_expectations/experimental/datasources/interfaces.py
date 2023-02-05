@@ -19,9 +19,8 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt
+from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
 from pydantic import dataclasses as pydantic_dc
-from pydantic import root_validator, validate_arguments
 from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
 import great_expectations.exceptions as ge_exceptions
@@ -142,7 +141,7 @@ class DataAsset(ExperimentalBaseModel):
     type: str
     order_by: List[BatchSorter] = Field(default_factory=list)
 
-    # non-field private attrs
+    # non-field private attributes
     _datasource: Datasource = pydantic.PrivateAttr()
 
     @property
@@ -161,10 +160,10 @@ class DataAsset(ExperimentalBaseModel):
         """Test the connection for the DataAsset.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         raise NotImplementedError(
-            "One needs to implement 'test_connection' on a DataAsset subclass"
+            """One needs to implement "test_connection" on a DataAsset subclass."""
         )
 
     # Abstract Methods
@@ -327,7 +326,7 @@ class Datasource(
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
-    _excluded_eng_args: ClassVar[Set[str]] = {
+    _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
         "type",
         "execution_engine",
@@ -344,7 +343,7 @@ class Datasource(
 
     # private attrs
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
-    _execution_engine: ExecutionEngine | None = pydantic.PrivateAttr(None)
+    _execution_engine: Union[ExecutionEngine, None] = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -378,7 +377,9 @@ class Datasource(
         return self.execution_engine_override or self.execution_engine_type
 
     def get_execution_engine(self) -> ExecutionEngine:
-        current_execution_engine_kwargs = self.dict(exclude=self._excluded_eng_args)
+        current_execution_engine_kwargs = self.dict(
+            exclude=self._EXCLUDED_EXEC_ENG_ARGS
+        )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
             or not self._execution_engine
@@ -435,7 +436,7 @@ class Datasource(
     def execution_engine_type(self) -> Type[ExecutionEngine]:
         """Return the ExecutionEngine type use for this Datasource"""
         raise NotImplementedError(
-            "One needs to implement 'execution_engine_type' on a Datasource subclass"
+            """One needs to implement "execution_engine_type" on a Datasource subclass."""
         )
 
     def test_connection(self, test_assets: bool = True) -> None:
@@ -448,7 +449,7 @@ class Datasource(
             TestConnectionError
         """
         raise NotImplementedError(
-            "One needs to implement 'test_connection' on a Datasource subclass"
+            """One needs to implement "test_connection" on a Datasource subclass."""
         )
 
     # End Abstract Methods

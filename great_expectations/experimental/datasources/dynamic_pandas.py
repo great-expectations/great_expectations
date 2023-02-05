@@ -189,6 +189,9 @@ def _get_default_value(
 ) -> object:
     if param.default is inspect.Parameter.empty:
         default = ...
+    # this is the pandas sentinel value for determining if a parameter has been passed
+    # we can treat it as `None` because we only pass down kwargs that have been explicitly
+    # set by the user
     elif param.default is _NoDefault.no_default:
         default = None
     else:
@@ -273,10 +276,20 @@ def _create_pandas_asset_model(
     model = pydantic.create_model(model_name, __base__=model_base, type=type_field, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
     # can't set both __base__ & __config__ when dynamically creating model
     model.__config__.extra = extra
+
+    def _get_reader_method(self) -> str:
+        return f"read_{self.type}"
+
+    def _get_reader_options_include(self) -> set[str] | None:
+        return None
+
+    setattr(model, "_get_reader_method", _get_reader_method)
+    setattr(model, "_get_reader_options_include", _get_reader_options_include)
+
     return model
 
 
-def _generate_data_asset_models(
+def _generate_pandas_data_asset_models(
     base_model_class: M, whitelist: Optional[Sequence[str]] = None
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(whitelist)
