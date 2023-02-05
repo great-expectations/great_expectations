@@ -116,6 +116,7 @@ FIELD_SKIPPED_NO_ANNOTATION: Set[str] = set()
 class _SignatureTuple(NamedTuple):
     name: str
     signature: inspect.Signature
+    docstring: str
 
 
 class _FieldSpec(NamedTuple):
@@ -205,7 +206,7 @@ def _extract_io_signatures(
     signatures = []
     for name, method in io_methods:
         sig = inspect.signature(method)
-        signatures.append(_SignatureTuple(name, sig))
+        signatures.append(_SignatureTuple(name, sig, method.__doc__))
     return signatures
 
 
@@ -296,11 +297,19 @@ def _create_pandas_asset_model(
     type_field: Tuple[Union[Type, str], str],
     fields_dict: Dict[str, _FieldSpec],
     extra: pydantic.Extra,
+    model_docstring: str = "",
 ) -> M:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
-    model = pydantic.create_model(model_name, __base__=model_base, type=type_field, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
+    model = pydantic.create_model(  # type: ignore[call-overload] # FieldSpec is a tuple
+        model_name,
+        __base__=model_base,
+        type=type_field,
+        **fields_dict,
+    )
     # can't set both __base__ & __config__ when dynamically creating model
     model.__config__.extra = extra
+    if model_docstring:
+        model.__doc__ = model_docstring
 
     def _get_reader_method(self) -> str:
         return f"read_{self.type}"
@@ -317,6 +326,7 @@ def _create_pandas_asset_model(
 def _generate_pandas_data_asset_models(
     base_model_class: M,
     blacklist: Optional[Sequence[str]] = None,
+    use_docstring_from_method: bool = False,
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(blacklist)
     io_method_sigs = _extract_io_signatures(io_methods)
@@ -338,6 +348,9 @@ def _generate_pandas_data_asset_models(
                 type_field=(f"Literal['{type_name}']", type_name),
                 fields_dict=fields,
                 extra=pydantic.Extra.forbid,
+                model_docstring=signature_tuple.docstring
+                if use_docstring_from_method
+                else "",
             )
             logger.debug(f"{model_name}\n{pf(fields)}")
         except NameError as err:

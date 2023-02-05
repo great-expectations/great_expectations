@@ -52,7 +52,9 @@ _BLACK_LIST = (
 )
 
 _ASSET_MODELS = _generate_pandas_data_asset_models(
-    _FilesystemDataAsset, blacklist=_BLACK_LIST
+    _FilesystemDataAsset,
+    blacklist=_BLACK_LIST,
+    use_docstring_from_method=True,
 )
 
 ClipboardAsset = _ASSET_MODELS["clipboard"]
