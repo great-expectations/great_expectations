@@ -1,13 +1,13 @@
 {
-    "title": "PostgresDatasource",
-    "description": "Adds a postgres datasource to the data context.\n\nArgs:\n    name: The name of this postgres datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"postgresql+psycopg2://postgres:@localhost/test_database\"\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
+    "title": "SqliteDatasource",
+    "description": "Adds a sqlite datasource to the data context.\n\nArgs:\n    name: The name of this sqlite datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the sqlite database.\n        For example: \"sqlite:///path/to/file.db\"\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
     "type": "object",
     "properties": {
         "type": {
             "title": "Type",
-            "default": "postgres",
+            "default": "sqlite",
             "enum": [
-                "postgres"
+                "sqlite"
             ],
             "type": "string"
         },
@@ -22,10 +22,10 @@
             "additionalProperties": {
                 "anyOf": [
                     {
-                        "$ref": "#/definitions/TableAsset"
+                        "$ref": "#/definitions/SqliteTableAsset"
                     },
                     {
-                        "$ref": "#/definitions/QueryAsset"
+                        "$ref": "#/definitions/SqliteQueryAsset"
                     }
                 ]
             }
@@ -88,8 +88,8 @@
                 "param_names"
             ]
         },
-        "TableAsset": {
-            "title": "TableAsset",
+        "SqliteTableAsset": {
+            "title": "SqliteTableAsset",
             "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -99,9 +99,9 @@
                 },
                 "type": {
                     "title": "Type",
-                    "default": "table",
+                    "default": "sqlite_table",
                     "enum": [
-                        "table"
+                        "sqlite_table"
                     ],
                     "type": "string"
                 },
@@ -130,8 +130,8 @@
             ],
             "additionalProperties": false
         },
-        "QueryAsset": {
-            "title": "QueryAsset",
+        "SqliteQueryAsset": {
+            "title": "SqliteQueryAsset",
             "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -141,9 +141,9 @@
                 },
                 "type": {
                     "title": "Type",
-                    "default": "query",
+                    "default": "sqlite_query",
                     "enum": [
-                        "query"
+                        "sqlite_query"
                     ],
                     "type": "string"
                 },

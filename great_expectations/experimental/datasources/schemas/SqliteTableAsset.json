@@ -1,5 +1,5 @@
 {
-    "title": "TableAsset",
+    "title": "SqliteTableAsset",
     "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
     "type": "object",
     "properties": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "table",
+            "default": "sqlite_table",
             "enum": [
-                "table"
+                "sqlite_table"
             ],
             "type": "string"
         },

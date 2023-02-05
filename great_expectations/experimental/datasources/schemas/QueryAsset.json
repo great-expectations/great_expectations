@@ -23,7 +23,7 @@
             }
         },
         "column_splitter": {
-            "$ref": "#/definitions/SqlYearMonthSplitter"
+            "$ref": "#/definitions/ColumnSplitter"
         },
         "query": {
             "title": "Query",
@@ -54,8 +54,8 @@
                 "key"
             ]
         },
-        "SqlYearMonthSplitter": {
-            "title": "SqlYearMonthSplitter",
+        "ColumnSplitter": {
+            "title": "ColumnSplitter",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -64,26 +64,20 @@
                 },
                 "method_name": {
                     "title": "Method Name",
-                    "default": "split_on_year_and_month",
-                    "enum": [
-                        "split_on_year_and_month"
-                    ],
                     "type": "string"
                 },
                 "param_names": {
                     "title": "Param Names",
                     "type": "array",
                     "items": {
-                        "enum": [
-                            "year",
-                            "month"
-                        ],
                         "type": "string"
                     }
                 }
             },
             "required": [
-                "column_name"
+                "column_name",
+                "method_name",
+                "param_names"
             ]
         }
     }
