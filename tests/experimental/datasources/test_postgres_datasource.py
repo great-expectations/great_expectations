@@ -112,7 +112,7 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
         get_column_names = mocker.patch(
             "tests.experimental.datasources.conftest.MockSaInspector.get_columns"
         )
-        get_column_names.return_value = ["my_col"]
+        get_column_names.return_value = [{"name": "my_col"}]
         has_table = mocker.patch(
             "tests.experimental.datasources.conftest.MockSaInspector.has_table"
         )
