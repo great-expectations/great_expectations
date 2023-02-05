@@ -343,9 +343,6 @@ class _SQLAsset(DataAsset, Generic[ColumnSplitterType]):
         raise NotImplementedError
 
 
-SQLAsset = TypeVar("SQLAsset", bound=_SQLAsset)
-
-
 class QueryAsset(_SQLAsset):
     # Instance fields
     type: Literal["query"] = "query"  # type: ignore[assignment]
