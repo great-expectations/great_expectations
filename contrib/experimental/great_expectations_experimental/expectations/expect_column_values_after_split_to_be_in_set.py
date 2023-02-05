@@ -121,6 +121,26 @@ class ExpectColumnValuesAfterSplitToBeInSet(ColumnMapExpectation):
                         "success": False,
                     },
                 },
+                 {
+                    "title": "postive_test_with_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "column": "not_sports",
+                        "delimiter": ",",
+                        "value_set": [
+                            "hockey",
+                            "football",
+                            "tennis",
+                            "badminton",
+                            "cricket",
+                        ],
+                        "mostly": 0.33
+                    },
+                    "out": {
+                        "success": True,
+                    },
+                }
             ],
         }
     ]

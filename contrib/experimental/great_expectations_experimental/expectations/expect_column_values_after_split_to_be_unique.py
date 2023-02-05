@@ -91,6 +91,15 @@ class ExpectColumnValuesAfterSplitToBeUnique(ColumnMapExpectation):
                         "success": False,
                     },
                 },
+                {
+                    "title": "positive_test_with_mostly",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "duplicate_sports", "delimiter": ",", "mostly": 0.65},
+                    "out": {
+                        "success": True,
+                    },
+                }
             ],
         }
     ]
