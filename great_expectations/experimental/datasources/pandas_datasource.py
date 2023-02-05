@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
@@ -195,3 +196,5 @@ class PandasDatasource(Datasource):
             **kwargs,
         )
         return self.add_asset(asset)
+
+    print(inspect.signature(add_csv_asset))
