@@ -13,9 +13,9 @@ from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
+    ColumnSplitter,
     SqlYearMonthSplitter,
     TableAsset,
-    ColumnSplitter,
 )
 
 try:

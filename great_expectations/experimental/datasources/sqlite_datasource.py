@@ -16,12 +16,12 @@ from typing_extensions import Literal
 
 from great_expectations.experimental.datasources.sql_datasource import (
     BatchSortersDefinition,
+    ColumnSplitter,
     DatetimeRange,
     QueryAsset,
     SQLDatasource,
     SQLDatasourceError,
     TableAsset,
-    ColumnSplitter,
     _query_for_year_and_month,
     _SQLAsset,
 )
