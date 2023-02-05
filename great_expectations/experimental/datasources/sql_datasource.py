@@ -94,7 +94,7 @@ class _ColumnSplitter:
         engine: sqlalchemy.engine.Engine = table_asset.datasource.get_engine()
         inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
         if self.column_name not in inspector.get_columns(
-            table_name=table_asset.table_name, schema=table_asset.schema
+            table_name=table_asset.table_name, schema=table_asset.schema_name
         ):
             raise TestConnectionError(
                 f'The column "{self.column_name}" was not found in table "{table_asset.qualified_name}"'
