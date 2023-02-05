@@ -27,7 +27,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import FilePath
+from pydantic import Field, FilePath
 
 # from pydantic.typing import resolve_annotations
 from typing_extensions import Final, Literal, TypeAlias
@@ -119,6 +119,7 @@ class _SignatureTuple(NamedTuple):
 
 
 class _FieldSpec(NamedTuple):
+    # mypy doesn't consider Optional[SOMETHING] or Union[SOMETHING] a type. So what is it?
     type: Type
     default_value: object  # ... for required value
 
@@ -136,7 +137,16 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     # JSONAsset
     "path_or_buf": {"base_directory": _FieldSpec(pathlib.Path, ...)},
     # SQLTable
-    "schema": {"schema_name": _FieldSpec(str, None)},  # NOTE: maybe use an alias?
+    "schema": {
+        "schema_name": _FieldSpec(
+            Optional[str],  # type: ignore[arg-type]
+            Field(
+                None,
+                description="This will passed to pandas as 'schema'",
+                alias="schema",
+            ),
+        )
+    },
     # misc
     "filepath": {"base_directory": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
