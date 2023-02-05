@@ -9,3 +9,7 @@ extend-ignore = [
     # don't need to care about. It may disincentivize type-hinting.
     "TCH",
 ]
+
+[isort]
+known-first-party = ["great_expectations", "tests"]
+known-third-party = ["dataprofiler", "capitalone_dataprofiler_expectations"]
