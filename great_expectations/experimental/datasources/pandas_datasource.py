@@ -197,4 +197,6 @@ class PandasDatasource(Datasource):
         )
         return self.add_asset(asset)
 
-    print(inspect.signature(add_csv_asset))
+    # https://github.com/pydantic/pydantic/blob/v1.10.4/pydantic/main.py#L285
+    print(f"\tadd_csv_asset ->\n{inspect.signature(add_csv_asset)}\n")
+    print(f"\tCSVAsset ->\n{inspect.signature(CSVAsset)}")
