@@ -9,3 +9,6 @@ extend-ignore = [
     # Let's differ this for tests until there are auto-fixes
     "TCH",
 ]
+
+[isort]
+known-first-party = ["great_expectations", "tests"]
