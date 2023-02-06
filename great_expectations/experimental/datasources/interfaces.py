@@ -39,7 +39,6 @@ if TYPE_CHECKING:
     # TODO: When the Batch class is moved out of the experimental directory, we should try to import the annotations
     #       from core.batch so we no longer need to call Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import BatchData, BatchDefinition, BatchMarkers
-    from great_expectations.execution_engine import ExecutionEngine
 
 try:
     import pyspark
@@ -339,7 +338,7 @@ class Datasource(
     }
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
-    execution_engine_override: ClassVar[Optional[Type[ExecutionEngineType]]] = None
+    execution_engine_override: ClassVar[Optional[Type[ExecutionEngineType]]] = None  # type: ignore[misc]
 
     # instance attrs
     type: str
@@ -353,7 +352,7 @@ class Datasource(
     @pydantic.validator("assets", each_item=True)
     @classmethod
     def _load_asset_subtype(
-        cls: Type[Datasource[DataAssetType]], data_asset: DataAsset
+        cls: Type[Datasource[DataAssetType, ExecutionEngineType]], data_asset: DataAsset
     ) -> DataAssetType:
         """
         Some `data_asset` may be loaded as a less specific asset subtype different than
