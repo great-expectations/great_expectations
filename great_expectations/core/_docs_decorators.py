@@ -265,11 +265,13 @@ def _add_text_below_string_docstring_argument(
     Returns:
         Modified docstring.
     """
-    parsed_docstring = docstring_parser.parse(docstring)
+    parsed_docstring = docstring_parser.parse(
+        text=docstring,
+        style=DocstringStyle.GOOGLE,
+    )
 
-    arg_names = list(param.arg_name for param in parsed_docstring.params)
-    if argument_name not in arg_names:
-        breakpoint()
+    arg_list = list(param.arg_name for param in parsed_docstring.params)
+    if argument_name not in arg_list:
         raise ValueError(
             f"Please specify an existing argument, you specified {argument_name}."
         )
