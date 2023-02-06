@@ -53,7 +53,7 @@
       "only_for": ["mssql"]
     },
     {
-      "title": "positive_test_column_name_has_space",
+      "title": "positive_test_column_name_has_space_mssql",
       "exact_match_out" : false,
       "in": {
         "column": "column_name with space",
@@ -62,7 +62,7 @@
       },
       "out": {
         "success":true,
-        "unexpected_index_list": [{"pk_index": 4, "a": "bee"}],
+        "unexpected_index_list": [{"pk_index": 4, "column_name with space": "bee"}],
         "unexpected_list": ["bee"]
       },
       "only_for": ["mssql"]
@@ -215,7 +215,7 @@
       },
       "out": {
         "success":true,
-        "unexpected_index_list": [{"pk_index": 4, "a": "bee"}],
+        "unexpected_index_list": [{"pk_index": 4, "column_name with space": "bee"}],
         "unexpected_list": ["bee"]
       },
       "only_for": ["sqlite", "postgresql", "mysql", "trino", "snowflake", "redshift"]
