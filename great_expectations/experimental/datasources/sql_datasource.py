@@ -43,7 +43,7 @@ except ImportError:
     pass
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 class SQLDatasourceError(Exception):
@@ -138,10 +138,9 @@ def _query_for_year_and_month(
         DatetimeRange,
     ],
 ) -> Dict[str, List]:
-    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
-    execution_engine = sql_asset.datasource.get_execution_engine()
-    assert isinstance(execution_engine, SqlAlchemyExecutionEngine)
+    execution_engine: SqlAlchemyExecutionEngine = (
+        sql_asset.datasource.get_execution_engine()
+    )
 
     with execution_engine.engine.connect() as conn:
         datetimes: DatetimeRange = query_datetime_range(
@@ -285,7 +284,9 @@ class _SQLAsset(DataAsset, Generic[ColumnSplitterType]):
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
-            execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
+            execution_engine: SqlAlchemyExecutionEngine = (
+                self.datasource.get_execution_engine()
+            )
             data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
@@ -500,7 +501,7 @@ class SQLDatasource(Datasource):
     _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
 
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
+    def execution_engine_type(self) -> Type[SqlAlchemyExecutionEngine]:
         """Returns the default execution engine type."""
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 

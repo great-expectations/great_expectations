@@ -20,7 +20,7 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import PandasExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class PandasDatasource(Datasource):
     ] = {}
 
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
+    def execution_engine_type(self) -> Type[PandasExecutionEngine]:
         """Return the PandasExecutionEngine unless the override is set"""
         from great_expectations.execution_engine.pandas_execution_engine import (
             PandasExecutionEngine,

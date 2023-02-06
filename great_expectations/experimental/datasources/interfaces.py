@@ -310,8 +310,13 @@ class DataAsset(ExperimentalBaseModel):
 DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
 
 
+ExecutionEngineType = TypeVar("ExecutionEngineType")
+
+
 class Datasource(
-    ExperimentalBaseModel, Generic[DataAssetType], metaclass=MetaDatasource
+    ExperimentalBaseModel,
+    Generic[DataAssetType, ExecutionEngineType],
+    metaclass=MetaDatasource,
 ):
     # To subclass Datasource one needs to define:
     # asset_types
@@ -372,11 +377,11 @@ class Datasource(
         logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
         return asset_of_intended_type
 
-    def _execution_engine_type(self) -> Type[ExecutionEngine]:
+    def _execution_engine_type(self) -> Type[ExecutionEngineType]:
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
-    def get_execution_engine(self) -> ExecutionEngine:
+    def get_execution_engine(self) -> ExecutionEngineType:
         current_execution_engine_kwargs = self.dict(
             exclude=self._EXCLUDED_EXEC_ENG_ARGS
         )
@@ -433,7 +438,7 @@ class Datasource(
 
     # Abstract Methods
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
+    def execution_engine_type(self) -> Type[ExecutionEngineType]:
         """Return the ExecutionEngine type use for this Datasource"""
         raise NotImplementedError(
             """One needs to implement "execution_engine_type" on a Datasource subclass."""
