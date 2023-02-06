@@ -17,7 +17,7 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import SparkDFExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class SparkDatasource(Datasource):
     assets: Dict[str, CSVSparkAsset] = {}
 
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
+    def execution_engine_type(self) -> Type[SparkDFExecutionEngine]:
         """Return the SparkDFExecutionEngine unless the override is set"""
         from great_expectations.execution_engine.sparkdf_execution_engine import (
             SparkDFExecutionEngine,

@@ -18,7 +18,10 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import (
+        PandasExecutionEngine,
+        SparkDFExecutionEngine,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -191,7 +194,9 @@ to use as its "include" directive for File-Path style DataAsset processing."""
                     by_alias=True,
                 ),
             )
-            execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
+            execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (
+                self.datasource.get_execution_engine()
+            )
             data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
