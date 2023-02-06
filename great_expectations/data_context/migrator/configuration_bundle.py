@@ -132,7 +132,7 @@ class ConfigurationBundle:
             )
 
         return [
-            round_trip_profiler_config(self._context.get_profiler(name).config)  # type: ignore[arg-type]
+            round_trip_profiler_config(self._context.get_profiler(name).config)
             for name in self._context.list_profilers()
         ]
 
