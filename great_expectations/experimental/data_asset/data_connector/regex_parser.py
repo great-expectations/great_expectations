@@ -16,7 +16,7 @@ class RegExParser:
         self._num_all_matched_group_values: int = regex_pattern.groups
 
         # Check for `(?P<name>)` named group syntax
-        self._defined_group_name_to_group_index_mapping: Dict[str, int] = dict(
+        self._named_group_name_to_group_index_mapping: Dict[str, int] = dict(
             regex_pattern.groupindex
         )
 
@@ -26,16 +26,16 @@ class RegExParser:
     def get_num_all_matched_group_values(self) -> int:
         return self._num_all_matched_group_values
 
-    def get_num_defined_matched_group_values(self) -> int:
-        return len(self._defined_group_name_to_group_index_mapping)
+    def get_num_named_matched_group_values(self) -> int:
+        return len(self._named_group_name_to_group_index_mapping)
 
-    def get_defined_group_name_to_group_index_mapping(self) -> Dict[str, int]:
-        return self._defined_group_name_to_group_index_mapping
+    def get_named_group_name_to_group_index_mapping(self) -> Dict[str, int]:
+        return self._named_group_name_to_group_index_mapping
 
     def get_matches(self, target: str) -> Optional[re.Match]:
         return self._regex_pattern.match(target)
 
-    def get_defined_group_name_to_group_value_mapping(
+    def get_named_group_name_to_group_value_mapping(
         self, target: str
     ) -> Dict[str, str]:
         # Check for `(?P<name>)` named group syntax
@@ -47,31 +47,31 @@ class RegExParser:
     def get_all_group_names_to_group_indexes_bidirectional_mappings(
         self,
     ) -> Tuple[Dict[str, int], Dict[int, str]]:
-        defined_group_index_to_group_name_mapping: Dict[int, str] = dict(
+        named_group_index_to_group_name_mapping: Dict[int, str] = dict(
             zip(
-                self._defined_group_name_to_group_index_mapping.values(),
-                self._defined_group_name_to_group_index_mapping.keys(),
+                self._named_group_name_to_group_index_mapping.values(),
+                self._named_group_name_to_group_index_mapping.keys(),
             )
         )
 
         idx: int
-        undefined_group_indexes: List[int] = list(
+        common_group_indexes: List[int] = list(
             filter(
                 lambda idx: idx
-                not in self._defined_group_name_to_group_index_mapping.values(),
+                not in self._named_group_name_to_group_index_mapping.values(),
                 range(1, self._num_all_matched_group_values + 1),
             )
         )
 
         group_idx: int
-        undefined_group_index_to_group_name_mapping: Dict[int, str] = {
+        common_group_index_to_group_name_mapping: Dict[int, str] = {
             group_idx: f"{self._unnamed_regex_group_prefix}{group_idx}"
-            for group_idx in undefined_group_indexes
+            for group_idx in common_group_indexes
         }
 
         all_group_index_to_group_name_mapping: Dict[int, str] = (
-            defined_group_index_to_group_name_mapping
-            | undefined_group_index_to_group_name_mapping
+            named_group_index_to_group_name_mapping
+            | common_group_index_to_group_name_mapping
         )
 
         all_group_name_to_group_index_mapping: Dict[str, int] = dict(
