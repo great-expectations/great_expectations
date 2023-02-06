@@ -3,14 +3,14 @@ import json
 import pathlib
 import re
 from pprint import pformat as pf
-from typing import Callable, List
+from typing import Callable, List, Type
 
 import pydantic
 import pytest
 
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
-from great_expectations.experimental.datasources.interfaces import Datasource
+from great_expectations.experimental.datasources.interfaces import DataAsset, Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
@@ -509,3 +509,32 @@ def test_custom_sorter_serialization(
 
     for sorter_str in expected_sorter_strings:
         assert sorter_str in dumped, f"`{sorter_str}` not found in dumped json"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "ds_w_assets",
+    [
+        p(
+            PG_COMPLEX_CONFIG_DICT["xdatasources"]["my_pg_ds"],
+            id=PG_COMPLEX_CONFIG_DICT["xdatasources"]["my_pg_ds"]["type"],
+        ),
+        p(
+            PG_COMPLEX_CONFIG_DICT["xdatasources"]["my_pandas_ds"],
+            id=PG_COMPLEX_CONFIG_DICT["xdatasources"]["my_pandas_ds"]["type"],
+        ),
+    ],
+)
+def test_type_field_always_dumped(ds_w_assets: dict):
+
+    ds_type: str = ds_w_assets["type"]
+    ds_class: Type[Datasource] = _SourceFactories.type_lookup[ds_type]
+    ds: Datasource = ds_class.parse_obj(ds_w_assets)
+
+    ds_dumped: str = ds.yaml(exclude_unset=True)
+    assert f"type: {ds_type}" in ds_dumped
+
+    asset: DataAsset
+    for asset in ds.assets.values():
+        assert f"type: {asset.type}" in ds_dumped
+        assert f"type: {asset.type}" in asset.yaml(exclude_unset=True)
