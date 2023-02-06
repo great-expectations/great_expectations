@@ -169,12 +169,16 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
 def _extract_io_methods(
     whitelist: Optional[Sequence[str]] = None,
 ) -> List[Tuple[str, DataFrameFactoryFn]]:
-    # temporarily suppress pandas future warnings that may be emitted by collecting
+    # suppress pandas future warnings that may be emitted by collecting
     # pandas io methods
+    # Once the context manager exits, the warning filter is removed.
+    # Do not remove this filter.
+    # https://docs.python.org/3/library/warnings.html#temporarily-suppressing-warnings
     with warnings.catch_warnings():
         warnings.simplefilter(action="ignore", category=FutureWarning)
 
         member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
+
     if whitelist:
         return [t for t in member_functions if t[0] in whitelist]
     return [t for t in member_functions if t[0].startswith("read_")]
