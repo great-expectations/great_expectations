@@ -57,7 +57,7 @@
           "out": {
             "success": true,
             "unexpected_list": [null],
-            "unexpected_index_list": [{"pk_index": 2, "all_null": null}]
+            "unexpected_index_list": [{"pk_index": 2, "one_null": null}]
           }
         },{
           "title": "negative_no_mostly_one_missing",
@@ -69,7 +69,7 @@
           "out": {
             "success": false,
             "unexpected_list": [null],
-            "unexpected_index_list": [{"pk_index": 2, "all_null": null}]
+            "unexpected_index_list": [{"pk_index": 2, "one_null": null}]
           }
         },{
           "title": "negative_mostly",
