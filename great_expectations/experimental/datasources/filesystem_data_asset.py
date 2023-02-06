@@ -31,6 +31,7 @@ class _FilesystemDataAsset(DataAsset):
         "base_directory",
         "regex",
         "order_by",
+        "type",
     }
 
     # Filesystem specific attributes
