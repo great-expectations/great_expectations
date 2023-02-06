@@ -339,7 +339,7 @@ class Datasource(
     }
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
-    execution_engine_override: ClassVar[Optional[Type[ExecutionEngine]]] = None
+    execution_engine_override: ClassVar[Optional[Type[ExecutionEngineType]]] = None
 
     # instance attrs
     type: str
@@ -348,7 +348,7 @@ class Datasource(
 
     # private attrs
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
-    _execution_engine: Union[ExecutionEngine, None] = pydantic.PrivateAttr(None)
+    _execution_engine: Union[ExecutionEngineType, None] = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod

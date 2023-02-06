@@ -48,15 +48,15 @@ def _source(
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=validate_batch_spec, dialect=dialect
     )
-    original_override = PostgresDatasource.execution_engine_override
+    original_override = PostgresDatasource.execution_engine_override  # type: ignore[misc]
     try:
-        PostgresDatasource.execution_engine_override = execution_eng_cls
+        PostgresDatasource.execution_engine_override = execution_eng_cls  # type: ignore[misc]
         yield PostgresDatasource(
             name="my_datasource",
             connection_string=connection_string,  # type: ignore[arg-type] # coerced
         )
     finally:
-        PostgresDatasource.execution_engine_override = original_override
+        PostgresDatasource.execution_engine_override = original_override  # type: ignore[misc]
 
 
 # We may be able to parameterize this fixture so we can instantiate _source in the fixture.
