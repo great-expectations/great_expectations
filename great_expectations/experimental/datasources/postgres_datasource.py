@@ -11,8 +11,8 @@ class PostgresDatasource(SQLDatasource):
         name: The name of this postgres datasource.
         connection_string: The SQLAlchemy connection string used to connect to the postgres database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
-        assets: An optional dictionary whose keys are SQLAsset names and whose values
-            are SQLAsset objects.
+        assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values
+            are TableAsset or QueryAsset objects.
     """
 
     type: Literal["postgres"] = "postgres"  # type: ignore[assignment]

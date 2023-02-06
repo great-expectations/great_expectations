@@ -17,7 +17,7 @@ from great_expectations.experimental.datasources.sql_datasource import (
     BatchSortersDefinition,
     DatetimeRange,
     QueryAsset,
-    SQLAsset,
+    _SQLAsset,
     SQLDatasource,
     SQLDatasourceError,
     SqlYearMonthSplitter,
@@ -82,7 +82,7 @@ class SqliteYearMonthSplitter(SqlYearMonthSplitter):
         default_factory=lambda: ["year", "month"]
     )
 
-    def param_defaults(self, sql_asset: SQLAsset) -> Dict[str, List]:
+    def param_defaults(self, sql_asset: _SQLAsset) -> Dict[str, List]:
         """Query sqlite database to get the years and months to split over.
 
         Args:
