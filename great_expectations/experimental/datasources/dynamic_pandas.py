@@ -6,6 +6,7 @@ import inspect
 import logging
 import pathlib
 import re
+import warnings
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import (
@@ -191,7 +192,16 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
 def _extract_io_methods(
     blacklist: Optional[Sequence[str]] = None,
 ) -> List[Tuple[str, DataFrameFactoryFn]]:
-    member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
+    # suppress pandas future warnings that may be emitted by collecting
+    # pandas io methods
+    # Once the context manager exits, the warning filter is removed.
+    # Do not remove this context-manager.
+    # https://docs.python.org/3/library/warnings.html#temporarily-suppressing-warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter(action="ignore", category=FutureWarning)
+
+        member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
+    # filter removed
     if blacklist:
         return [
             t
