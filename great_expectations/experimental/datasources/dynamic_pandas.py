@@ -116,7 +116,7 @@ FIELD_SKIPPED_NO_ANNOTATION: Set[str] = set()
 class _SignatureTuple(NamedTuple):
     name: str
     signature: inspect.Signature
-    docstring: str
+    docstring: str = ""
 
 
 class _FieldSpec(NamedTuple):
@@ -207,7 +207,7 @@ def _extract_io_signatures(
     signatures = []
     for name, method in io_methods:
         sig = inspect.signature(method)
-        signatures.append(_SignatureTuple(name, sig, method.__doc__))
+        signatures.append(_SignatureTuple(name, sig, method.__doc__ or ""))
     return signatures
 
 
