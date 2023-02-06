@@ -795,7 +795,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _update_datasource(
         self,
-        datasource: LegacyDatasource | BaseDatasource,
+        datasource: LegacyDatasource | BaseDatasource | XDatasource,
         save_changes: bool | None = None,
         **kwargs,
     ) -> Datasource:
@@ -839,7 +839,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The Datasource added or updated by the input `kwargs`.
         """
-        existing_datasource = None
+        existing_datasource: LegacyDatasource | BaseDatasource | XDatasource | None = (
+            None
+        )
         try:
             existing_datasource = self.get_datasource(name)
         except ValueError:

@@ -131,7 +131,9 @@ class CheckpointStore(ConfigurationStore):
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
             )
 
-    def get_checkpoint(self, name: str | None, id: str | None) -> CheckpointConfig:
+    def get_checkpoint(
+        self, name: ConfigurationIdentifier | str | None, id: str | None
+    ) -> CheckpointConfig:
         key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
             name=name, ge_cloud_id=id
         )
