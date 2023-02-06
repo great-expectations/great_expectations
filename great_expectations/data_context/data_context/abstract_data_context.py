@@ -2644,6 +2644,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         ...
 
     @public_api
+    @new_argument(
+        argument_name="profiler",
+        version="0.15.48",
+        message="Pass in an existing profiler instead of individual constructor args",
+    )
     def add_profiler(
         self,
         name: str | None = None,
