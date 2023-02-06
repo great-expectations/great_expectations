@@ -1,7 +1,5 @@
 import pathlib
 
-import pandas
-
 from great_expectations.experimental.datasources.pandas_datasource import (
     PandasDatasource,
 )
