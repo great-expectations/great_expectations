@@ -2829,6 +2829,13 @@ def _spark_map_condition_index(
     if unexpected_condition is None:
         return None
 
+    if "column" not in accessor_domain_kwargs:
+        raise ValueError(
+            """No "column" found in provided metric_domain_kwargs, but it is required for a column map metric
+(_spark_column_map_condition_values).
+"""
+        )
+
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
