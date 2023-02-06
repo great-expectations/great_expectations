@@ -69,10 +69,9 @@ class SqliteQueryAsset(QueryAsset):
         Returns:
             This SqliteQueryAsset so we can use this method fluently.
         """
-        column_splitter = SqliteYearMonthSplitter(
+        self.column_splitter = SqliteYearMonthSplitter(
             column_name=column_name,
         )
-        self.column_splitter = column_splitter
         return self
 
 
