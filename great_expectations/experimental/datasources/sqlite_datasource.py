@@ -17,12 +17,12 @@ from great_expectations.experimental.datasources.sql_datasource import (
     BatchSortersDefinition,
     DatetimeRange,
     QueryAsset,
-    _SQLAsset,
     SQLDatasource,
     SQLDatasourceError,
     SqlYearMonthSplitter,
     TableAsset,
     _query_for_year_and_month,
+    _SQLAsset,
 )
 
 
