@@ -26,6 +26,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    overload,
 )
 
 from dateutil.parser import parse
@@ -2297,6 +2298,44 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite_name=expectation_suite_name,
             overwrite_existing=overwrite_existing,
         )
+
+    @overload
+    def add_expectation_suite(
+        self,
+        expectation_suite_name: str,
+        id: str | None = ...,
+        expectations: list[dict | ExpectationConfiguration] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        data_asset_type: str | None = ...,
+        execution_engine_type: Type[ExecutionEngine] | None = ...,
+        meta: dict | None = ...,
+        expectation_suite: None = ...,
+    ) -> ExpectationSuite:
+        """
+        Two possible patterns:
+            - An expectation_suite_name and optional constructor args
+            - An expectation_suite
+        """
+        ...
+
+    @overload
+    def add_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        id: str | None = ...,
+        expectations: list[dict | ExpectationConfiguration] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        data_asset_type: str | None = ...,
+        execution_engine_type: Type[ExecutionEngine] | None = ...,
+        meta: dict | None = ...,
+        expectation_suite: ExpectationSuite = ...,
+    ) -> ExpectationSuite:
+        """
+        Two possible patterns:
+            - An expectation_suite_name and optional constructor args
+            - An expectation_suite
+        """
+        ...
 
     def add_expectation_suite(
         self,
