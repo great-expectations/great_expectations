@@ -28,7 +28,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import FilePath
+from pydantic import Field, FilePath
 
 # from pydantic.typing import resolve_annotations
 from typing_extensions import Final, Literal, TypeAlias
@@ -117,9 +117,11 @@ FIELD_SKIPPED_NO_ANNOTATION: Set[str] = set()
 class _SignatureTuple(NamedTuple):
     name: str
     signature: inspect.Signature
+    docstring: str = ""
 
 
 class _FieldSpec(NamedTuple):
+    # mypy doesn't consider Optional[SOMETHING] or Union[SOMETHING] a type. So what is it?
     type: Type
     default_value: object  # ... for required value
 
@@ -136,6 +138,18 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     "filepath_or_buffer": {"base_directory": _FieldSpec(pathlib.Path, ...)},
     # JSONAsset
     "path_or_buf": {"base_directory": _FieldSpec(pathlib.Path, ...)},
+    # SQLTable
+    "schema": {
+        "schema_name": _FieldSpec(
+            Optional[str],  # type: ignore[arg-type]
+            Field(
+                None,
+                description="'schema_name' on the instance model."
+                " Will be passed to pandas reader method as 'schema'",
+                alias="schema",
+            ),
+        )
+    },
     # misc
     "filepath": {"base_directory": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
@@ -146,8 +160,17 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
     "csv": "CSVAsset",
-    "json": "JSONAsset",
+    "gbq": "GBQAsset",
+    "hdf": "HDFAsset",
     "html": "HTMLAsset",
+    "json": "JSONAsset",
+    "orc": "ORCAsset",
+    "sas": "SASAsset",
+    "spss": "SPSSAsset",
+    "sql_query": "SQLQueryAsset",
+    "sql_table": "SQLTableAsset",
+    "stata": "STATAAsset",
+    "xml": "XMLAsset",
 }
 
 _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
@@ -167,7 +190,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
 
 
 def _extract_io_methods(
-    whitelist: Optional[Sequence[str]] = None,
+    blacklist: Optional[Sequence[str]] = None,
 ) -> List[Tuple[str, DataFrameFactoryFn]]:
     # suppress pandas future warnings that may be emitted by collecting
     # pandas io methods
@@ -179,8 +202,12 @@ def _extract_io_methods(
 
         member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
     # filter removed
-    if whitelist:
-        return [t for t in member_functions if t[0] in whitelist]
+    if blacklist:
+        return [
+            t
+            for t in member_functions
+            if t[0] not in blacklist and t[0].startswith("read_")
+        ]
     return [t for t in member_functions if t[0].startswith("read_")]
 
 
@@ -190,7 +217,7 @@ def _extract_io_signatures(
     signatures = []
     for name, method in io_methods:
         sig = inspect.signature(method)
-        signatures.append(_SignatureTuple(name, sig))
+        signatures.append(_SignatureTuple(name, sig, method.__doc__ or ""))
     return signatures
 
 
@@ -281,11 +308,19 @@ def _create_pandas_asset_model(
     type_field: Tuple[Union[Type, str], str],
     fields_dict: Dict[str, _FieldSpec],
     extra: pydantic.Extra,
+    model_docstring: str = "",
 ) -> M:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
-    model = pydantic.create_model(model_name, __base__=model_base, type=type_field, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
+    model = pydantic.create_model(  # type: ignore[call-overload] # FieldSpec is a tuple
+        model_name,
+        __base__=model_base,
+        type=type_field,
+        **fields_dict,
+    )
     # can't set both __base__ & __config__ when dynamically creating model
     model.__config__.extra = extra
+    if model_docstring:
+        model.__doc__ = model_docstring
 
     def _get_reader_method(self) -> str:
         return f"read_{self.type}"
@@ -300,9 +335,11 @@ def _create_pandas_asset_model(
 
 
 def _generate_pandas_data_asset_models(
-    base_model_class: M, whitelist: Optional[Sequence[str]] = None
+    base_model_class: M,
+    blacklist: Optional[Sequence[str]] = None,
+    use_docstring_from_method: bool = False,
 ) -> Dict[str, M]:
-    io_methods = _extract_io_methods(whitelist)
+    io_methods = _extract_io_methods(blacklist)
     io_method_sigs = _extract_io_signatures(io_methods)
 
     data_asset_models: Dict[str, M] = {}
@@ -322,12 +359,15 @@ def _generate_pandas_data_asset_models(
                 type_field=(f"Literal['{type_name}']", type_name),
                 fields_dict=fields,
                 extra=pydantic.Extra.forbid,
+                model_docstring=signature_tuple.docstring.partition("\n\nParameters")[0]
+                if use_docstring_from_method
+                else "",
             )
             logger.debug(f"{model_name}\n{pf(fields)}")
         except NameError as err:
             # TODO: sql_table has a `schema` param that is a pydantic reserved attribute.
             # Solution is to use an alias field.
-            logger.debug(f"{model_name} - {type(err).__name__}:{err}")
+            logger.info(f"{model_name} - {type(err).__name__}:{err}")
             continue
         except TypeError as err:
             # may fail on python <3.10 due to use of builtin as generic

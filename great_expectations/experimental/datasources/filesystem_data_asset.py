@@ -188,6 +188,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
                     include=self._get_reader_options_include(),
                     exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                     exclude_unset=True,
+                    by_alias=True,
                 ),
             )
             execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
