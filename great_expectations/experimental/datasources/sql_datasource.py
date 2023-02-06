@@ -7,6 +7,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
+    ClassVar,
     Dict,
     Generic,
     List,
@@ -21,7 +22,7 @@ from typing import (
 
 import pydantic
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import ClassVar, Literal, TypeAlias
+from typing_extensions import Literal, TypeAlias
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.experimental.datasources.interfaces import (

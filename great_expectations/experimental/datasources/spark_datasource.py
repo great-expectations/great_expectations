@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
-from typing_extensions import ClassVar, Literal
+from typing_extensions import Literal
 
 from great_expectations.alias_types import PathStr
 from great_expectations.experimental.datasources.filesystem_data_asset import (

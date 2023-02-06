@@ -3,10 +3,9 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, List, Optional, Pattern, Set, Tuple
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Pattern, Set, Tuple
 
 import pydantic
-from typing_extensions import ClassVar
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec

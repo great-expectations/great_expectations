@@ -1,9 +1,8 @@
 import copy
 from pprint import pformat as pf
-from typing import List, Optional, Type
+from typing import ClassVar, List, Optional, Type
 
 import pytest
-from typing_extensions import ClassVar
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.experimental.context import get_context
