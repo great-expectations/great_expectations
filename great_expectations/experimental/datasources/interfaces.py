@@ -25,7 +25,7 @@ from typing_extensions import ClassVar, TypeAlias, TypeGuard
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.experimental.datasources.constants import _FIELD_ALWAYS_SET
+from great_expectations.experimental.datasources.constants import _FIELDS_ALWAYS_SET
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
@@ -428,7 +428,7 @@ class Datasource(
         self.assets[asset.name] = asset
         # pydantic needs to know that an asset has been set so that it doesn't get excluded
         # when dumping to dict, json, yaml etc.
-        self.__fields_set__.add(_FIELD_ALWAYS_SET)
+        self.__fields_set__.update(_FIELDS_ALWAYS_SET)
         return asset
 
     # Abstract Methods
