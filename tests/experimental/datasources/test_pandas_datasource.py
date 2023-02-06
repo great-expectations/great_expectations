@@ -13,6 +13,7 @@ from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     JSONAsset,
@@ -99,26 +100,40 @@ class TestDynamicPandasAssets:
     @pytest.mark.parametrize(
         "method_name",
         [
-            param("read_clipboard", marks=pytest.mark.xfail),
-            "read_csv",
-            "read_excel",
-            param("read_feather", marks=pytest.mark.xfail),
-            param("read_fwf", marks=pytest.mark.xfail),
-            param("read_gbq", marks=pytest.mark.xfail),
-            param("read_hdf", marks=pytest.mark.xfail),
-            param("read_html", marks=pytest.mark.xfail),
-            "read_json",
-            param("read_orc", marks=pytest.mark.xfail),
-            "read_parquet",
-            param("read_pickle", marks=pytest.mark.xfail),
-            param("read_sas", marks=pytest.mark.xfail),
-            param("read_spss", marks=pytest.mark.xfail),
-            param("read_sql", marks=pytest.mark.xfail),
-            param("read_sql_query", marks=pytest.mark.xfail),
-            param("read_sql_table", marks=pytest.mark.xfail),
-            param("read_stata", marks=pytest.mark.xfail),
-            param("read_table", marks=pytest.mark.xfail),
-            param("read_xml", marks=pytest.mark.xfail),
+            param("read_clipboard"),
+            param("read_csv"),
+            param("read_excel"),
+            param("read_feather"),
+            param(
+                "read_fwf", marks=pytest.mark.xfail(reason="unhandled type annotation")
+            ),
+            param("read_gbq"),
+            param("read_hdf"),
+            param("read_html"),
+            param("read_json"),
+            param("read_orc"),
+            param("read_parquet"),
+            param("read_pickle"),
+            param("read_sas"),
+            param("read_spss"),
+            param(
+                "read_sql",
+                marks=pytest.mark.xfail(reason="conflict with 'sql' type name"),
+            ),
+            param(
+                "read_sql_query",
+                marks=pytest.mark.xfail(reason="type name logic expects 'sqlquery'"),
+            ),
+            param(
+                "read_sql_table",
+                marks=pytest.mark.xfail(reason="type name logic expects 'sqltable'"),
+            ),
+            param("read_stata"),
+            param(
+                "read_table",
+                marks=pytest.mark.xfail(reason="conflict with 'table' type name"),
+            ),
+            param("read_xml"),
         ],
     )
     def test_data_asset_defined_for_io_read_method(self, method_name: str):
@@ -131,6 +146,30 @@ class TestDynamicPandasAssets:
         print(asset_class_names)
 
         assert type_name in asset_class_names
+
+    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    def test_minimal_validation(self, asset_class: Type[_FilesystemDataAsset]):
+        """
+        These parametrized tests ensures that every `PandasDatasource` asset model does some minimal
+        validation, and doesn't accept arbitrary keyword arguments.
+        This is also a proxy for testing that the dynamic pydantic model creation was successful.
+        """
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            asset_class(  # type: ignore[call-arg] # type has a default
+                name="test",
+                base_directory=pathlib.Path(__file__),
+                regex=re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
+                invalid_keyword_arg="bad",
+            )
+
+        errors_dict = exc_info.value.errors()
+        assert {
+            "loc": ("invalid_keyword_arg",),
+            "msg": "extra fields not permitted",
+            "type": "value_error.extra",
+        } == errors_dict[  # the extra keyword error will always be the last error
+            -1  # we don't care about any other errors for this test
+        ]
 
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],
@@ -434,3 +473,56 @@ def test_pandas_sorter(
             metadata = batches[batch_index].metadata
             assert metadata[key1] == range1
             assert metadata[key2] == range2
+
+
+def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
+    base_directory = pathlib.Path("/this/path/is/not/here")
+    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    test_connection_error = TestConnectionError(
+        f"Path: {base_directory.resolve()} does not exist."
+    )
+    return base_directory, regex, test_connection_error
+
+
+def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
+    relative_path = pathlib.Path(
+        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+    )
+    base_directory = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    test_connection_error = TestConnectionError(
+        f"No file at path: {base_directory.resolve()} matched the regex: {regex.pattern}"
+    )
+    return base_directory, regex, test_connection_error
+
+
+@pytest.fixture(params=[bad_base_directory_config, bad_regex_config])
+def datasource_test_connection_error_messages(
+    pandas_datasource: PandasDatasource, request
+) -> tuple[PandasDatasource, TestConnectionError]:
+    base_directory, regex, test_connection_error = request.param()
+    csv_asset = CSVAsset(  # type: ignore[call-arg]
+        name="csv_asset",
+        base_directory=base_directory,
+        regex=regex,
+    )
+    pandas_datasource.assets = {"csv_asset": csv_asset}
+    return pandas_datasource, test_connection_error
+
+
+@pytest.mark.unit
+def test_test_connection_failures(
+    datasource_test_connection_error_messages: tuple[
+        PandasDatasource, TestConnectionError
+    ]
+):
+    (
+        pandas_datasource,
+        test_connection_error,
+    ) = datasource_test_connection_error_messages
+
+    with pytest.raises(type(test_connection_error)) as e:
+        pandas_datasource.test_connection()
+    assert str(e.value) == str(test_connection_error)

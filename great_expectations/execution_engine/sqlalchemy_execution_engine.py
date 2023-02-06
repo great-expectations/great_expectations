@@ -1147,6 +1147,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
+        if (
+            batch_spec.get("query") is not None
+            and batch_spec.get("sampling_method") is not None
+        ):
+            raise ValueError(
+                "Sampling is not supported on query data. "
+                "It is currently only supported on table data."
+            )
+
         if "splitter_method" in batch_spec:
             splitter_fn: Callable = self._get_splitter_method(
                 splitter_method_name=batch_spec["splitter_method"]
@@ -1162,7 +1171,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             else:
                 split_clause = sa.true()
 
-        table_name: str = batch_spec["table_name"]
+        selectable: Selectable = self._subselectable(batch_spec)
         sampling_method: Optional[str] = batch_spec.get("sampling_method")
         if sampling_method is not None:
             if sampling_method in [
@@ -1181,9 +1190,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
                 return (
                     sa.select("*")
-                    .select_from(
-                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                    )
+                    .select_from(selectable)
                     .where(
                         sa.and_(
                             split_clause,
@@ -1192,13 +1199,23 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
 
-        return (
-            sa.select("*")
-            .select_from(
-                sa.table(table_name, schema=batch_spec.get("schema_name", None))
+        return sa.select("*").select_from(selectable).where(split_clause)
+
+    def _subselectable(self, batch_spec: BatchSpec) -> Selectable:
+        table_name = batch_spec.get("table_name")
+        query = batch_spec.get("query")
+        selectable: Selectable
+        if table_name:
+            selectable = sa.table(
+                table_name, schema=batch_spec.get("schema_name", None)
             )
-            .where(split_clause)
-        )
+        else:
+            if not isinstance(query, str):
+                raise ValueError(f"SQL query should be a str but got {query}")
+            # Query is a valid SELECT query that begins with r"\w+select\w"
+            selectable = sa.select(sa.text(query.lstrip()[6:].lstrip())).subquery()
+
+        return selectable
 
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
@@ -1210,6 +1227,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
         RuntimeQueryBatchSpec (illegal type "{str(type(batch_spec))}" was received).
                         """
+            )
+        if (
+            sum(
+                1 if x else 0
+                for x in [batch_spec.get("query"), batch_spec.get("table_name")]
+            )
+            != 1
+        ):
+            raise InvalidBatchSpecError(
+                "SqlAlchemyExecutionEngine only accepts a batch_spec where exactly 1 of "
+                "'query' or 'table_name' is specified. "
+                f"table_name={batch_spec.get('table_name')}, query={batch_spec.get('query')}"
             )
 
         batch_data: Optional[SqlAlchemyBatchData] = None

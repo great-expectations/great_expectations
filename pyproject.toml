@@ -200,7 +200,7 @@ select = [
     # https://github.com/charliermarsh/ruff#pyupgrade-up
     "UP", # pyupgrade
     # https://github.com/charliermarsh/ruff#isort-i
-    # "I", # isort # TODO: replace isort usage with this
+    "I", # isort
 ]
 ignore = [
     # https://github.com/charliermarsh/ruff#pyflakes-f
@@ -228,7 +228,6 @@ extend-exclude = [
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
-    "great_expectations/dataset", # 52 warnings
     "tests/checkpoint", # 15 warnings
     "tests/cli", # 34 warnings
     "tests/data_asset", # 10 warnings
