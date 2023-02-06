@@ -91,9 +91,12 @@ class ColumnSplitter:
         Raises:
             TestConnectionError: If the connection test fails.
         """
+        # A TypeVar for Datasource would get rid of this assertion,
+        # but circularity between Datasource <-> DataAsset is an issue.
         assert isinstance(table_asset.datasource, SQLDatasource)
         engine: sqlalchemy.engine.Engine = table_asset.datasource.get_engine()
         inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+
         columns: list[dict[str, Any]] = inspector.get_columns(
             table_name=table_asset.table_name, schema=table_asset.schema_name
         )
