@@ -416,6 +416,8 @@ class TableAsset(_SQLAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
+        # A TypeVar for Datasource would get rid of this assertion,
+        # but circularity between Datasource <-> DataAsset is an issue.
         assert isinstance(self.datasource, SQLDatasource)
         engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
         inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
