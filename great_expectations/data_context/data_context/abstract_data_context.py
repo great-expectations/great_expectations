@@ -2472,9 +2472,47 @@ class AbstractDataContext(ConfigPeer, ABC):
             overwrite_existing=True,
         )
 
+    @overload
     def add_or_update_expectation_suite(
         self,
         expectation_suite_name: str,
+        id: str | None = ...,
+        expectations: list[dict | ExpectationConfiguration] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        data_asset_type: str | None = ...,
+        execution_engine_type: Type[ExecutionEngine] | None = ...,
+        meta: dict | None = ...,
+        expectation_suite: None = ...,
+    ) -> ExpectationSuite:
+        """
+        Two possible patterns:
+            - An expectation_suite_name and optional constructor args
+            - An expectation_suite
+        """
+        ...
+
+    @overload
+    def add_or_update_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        id: str | None = ...,
+        expectations: list[dict | ExpectationConfiguration] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        data_asset_type: str | None = ...,
+        execution_engine_type: Type[ExecutionEngine] | None = ...,
+        meta: dict | None = ...,
+        expectation_suite: ExpectationSuite = ...,
+    ) -> ExpectationSuite:
+        """
+        Two possible patterns:
+            - An expectation_suite_name and optional constructor args
+            - An expectation_suite
+        """
+        ...
+
+    def add_or_update_expectation_suite(
+        self,
+        expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
         evaluation_parameters: dict | None = None,
