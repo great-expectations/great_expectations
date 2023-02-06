@@ -172,13 +172,13 @@ def _extract_io_methods(
     # suppress pandas future warnings that may be emitted by collecting
     # pandas io methods
     # Once the context manager exits, the warning filter is removed.
-    # Do not remove this filter.
+    # Do not remove this context-manager.
     # https://docs.python.org/3/library/warnings.html#temporarily-suppressing-warnings
     with warnings.catch_warnings():
         warnings.simplefilter(action="ignore", category=FutureWarning)
 
         member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
-
+    # filter removed
     if whitelist:
         return [t for t in member_functions if t[0] in whitelist]
     return [t for t in member_functions if t[0].startswith("read_")]
