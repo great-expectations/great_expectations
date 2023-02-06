@@ -394,26 +394,6 @@ def test_add_expectation_suite_conflicting_args_failure(
 
 
 @pytest.mark.unit
-def test_add_expectation_suite_(
-    in_memory_data_context: EphemeralDataContextSpy,
-):
-    context = in_memory_data_context
-
-    suite_name = "default"
-    context.add_expectation_suite(expectation_suite_name=suite_name)
-
-    with pytest.raises(gx_exceptions.DataContextError) as e:
-        context.add_expectation_suite(expectation_suite_name=suite_name)
-
-    assert f"expectation_suite with name {suite_name} already exists" in str(e.value)
-    assert (
-        "please delete or update it using `delete_expectation_suite` or `update_expectation_suite`"
-        in str(e.value)
-    )
-    assert context.expectations_store.save_count == 1
-
-
-@pytest.mark.unit
 def test_update_expectation_suite_success(
     in_memory_data_context: EphemeralDataContextSpy,
 ):
