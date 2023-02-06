@@ -10,8 +10,6 @@ except ImportError:
 
 WHITELISTED_TAG = "--Public API--"
 
-DOCSTRING_STYLE = DocstringStyle.GOOGLE
-
 F = TypeVar("F", bound=Callable[..., Any])
 
 
@@ -269,7 +267,7 @@ def _add_text_below_string_docstring_argument(
     """
     parsed_docstring = docstring_parser.parse(
         text=docstring,
-        style=DOCSTRING_STYLE,
+        style=DocstringStyle.GOOGLE,
     )
 
     arg_list = list(param.arg_name for param in parsed_docstring.params)
@@ -295,7 +293,7 @@ def _add_text_below_string_docstring_argument(
     # after the added text are included (for Sphinx html rendering).
     composed_docstring = docstring_parser.compose(
         docstring=parsed_docstring,
-        style=DOCSTRING_STYLE,
+        style=DocstringStyle.GOOGLE,
         rendering_style=docstring_parser.RenderingStyle.EXPANDED,
     )
 
