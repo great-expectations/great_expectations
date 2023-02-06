@@ -16,11 +16,11 @@ from typing_extensions import Literal
 
 from great_expectations.experimental.datasources.sql_datasource import (
     BatchSortersDefinition,
-    ColumnSplitter,
     DatetimeRange,
     QueryAsset,
     SQLDatasource,
     SQLDatasourceError,
+    SqlYearMonthSplitter,
     TableAsset,
     _query_for_year_and_month,
     _SQLAsset,
@@ -30,7 +30,7 @@ from great_expectations.experimental.datasources.sql_datasource import (
 class SqliteTableAsset(TableAsset):
     # Subclass overrides
     type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]
-    column_splitter: Optional[ColumnSplitter] = None
+    column_splitter: Optional[SqliteYearMonthSplitter] = None
 
     def add_year_and_month_splitter(
         self,
@@ -55,7 +55,7 @@ class SqliteTableAsset(TableAsset):
 class SqliteQueryAsset(QueryAsset):
     # Subclass overrides
     type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]
-    column_splitter: Optional[ColumnSplitter] = None
+    column_splitter: Optional[SqliteYearMonthSplitter] = None
 
     def add_year_and_month_splitter(
         self,
@@ -77,7 +77,7 @@ class SqliteQueryAsset(QueryAsset):
 
 
 @pydantic_dc.dataclass(frozen=True)
-class SqliteYearMonthSplitter(ColumnSplitter):
+class SqliteYearMonthSplitter(SqlYearMonthSplitter):
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
     # noinspection Pydantic
     param_names: List[Literal["year", "month"]] = pydantic.Field(
