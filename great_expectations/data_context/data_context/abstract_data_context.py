@@ -2356,8 +2356,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_asset_type=data_asset_type,
             execution_engine_type=execution_engine_type,
             meta=meta,
-            overwrite_existing=False,  # `add` does not resolve collisions
             expectation_suite=expectation_suite,
+            overwrite_existing=False,  # `add` does not resolve collisions
         )
 
     def _add_expectation_suite(

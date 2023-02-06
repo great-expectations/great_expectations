@@ -318,7 +318,58 @@ def test_add_expectation_suite_success(
 
 
 @pytest.mark.unit
-def test_add_expectation_suite_failure(
+def test_add_expectation_suite_namespace_collision_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+
+    suite_name = "default"
+    context.add_expectation_suite(expectation_suite_name=suite_name)
+
+    with pytest.raises(gx_exceptions.DataContextError) as e:
+        context.add_expectation_suite(expectation_suite_name=suite_name)
+
+    assert f"expectation_suite with name {suite_name} already exists" in str(e.value)
+    assert (
+        "please delete or update it using `delete_expectation_suite` or `update_expectation_suite`"
+        in str(e.value)
+    )
+    assert context.expectations_store.save_count == 1
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "suite,suite_name",
+    [
+        pytest.param(
+            ExpectationSuite(expectation_suite_name="default"),
+            "default",
+            id="both suite and suite_name",
+        ),
+        pytest.param(None, None, id="neither suite nor suite_name"),
+    ],
+)
+def test_add_expectation_suite_conflicting_args_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    suite: ExpectationSuite | None,
+    suite_name: str | None,
+):
+    context = in_memory_data_context
+
+    with pytest.raises(ValueError) as e:
+        context.add_expectation_suite(
+            expectation_suite=suite, expectation_suite_name=suite_name
+        )
+
+    assert (
+        "an existing expectation_suite or individual constructor arguments (but not both)"
+        in str(e.value)
+    )
+    assert context.expectations_store.save_count == 0
+
+
+@pytest.mark.unit
+def test_add_expectation_suite_(
     in_memory_data_context: EphemeralDataContextSpy,
 ):
     context = in_memory_data_context
