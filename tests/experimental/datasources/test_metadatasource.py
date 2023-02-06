@@ -1,9 +1,8 @@
 import copy
 from pprint import pformat as pf
-from typing import List, Optional, Type
+from typing import ClassVar, List, Optional, Type
 
 import pytest
-from typing_extensions import ClassVar
 
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.experimental.context import get_context
@@ -153,6 +152,9 @@ class TestMisconfiguredMetaDatasource:
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
+                def test_connection(self) -> None:
+                    ...
+
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
 
@@ -162,8 +164,11 @@ class TestMisconfiguredMetaDatasource:
         class MissingExecEngineTypeDatasource(Datasource):
             type: str = "valid"
 
+            def test_connection(self) -> None:
+                ...
+
         with pytest.raises(NotImplementedError):
-            MissingExecEngineTypeDatasource(name="name")
+            MissingExecEngineTypeDatasource(name="name").get_execution_engine()
 
     def test_ds_assets_type_field_not_set(self, empty_sources: _SourceFactories):
 
@@ -183,8 +188,22 @@ class TestMisconfiguredMetaDatasource:
                 def execution_engine_type(self) -> Type[ExecutionEngine]:
                     return DummyExecutionEngine
 
+                def test_connection(self) -> None:
+                    ...
+
         # check that no types were registered
         assert len(empty_sources.type_lookup) < 1
+
+    def test_ds_test_connection_not_defined(self, empty_sources: _SourceFactories):
+        class MissingTestConnectionDatasource(Datasource):
+            type: str = "valid"
+
+            @property
+            def execution_engine_type(self) -> Type[ExecutionEngine]:
+                return DummyExecutionEngine
+
+        with pytest.raises(NotImplementedError):
+            MissingTestConnectionDatasource(name="name").test_connection()
 
 
 def test_minimal_ds_to_asset_flow(context_sources_cleanup):
@@ -203,6 +222,9 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
         @property
         def execution_engine_type(self) -> Type[ExecutionEngine]:
             return DummyExecutionEngine
+
+        def test_connection(self):
+            ...
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)

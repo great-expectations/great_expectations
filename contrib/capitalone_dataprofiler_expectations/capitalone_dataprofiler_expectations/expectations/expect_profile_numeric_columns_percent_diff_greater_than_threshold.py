@@ -37,7 +37,7 @@ class DataProfilerProfileNumericColumnsPercentDiffGreaterThanThreshold(
     )
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: C901 - 22
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
