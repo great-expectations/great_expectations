@@ -2300,13 +2300,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def add_expectation_suite(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
         evaluation_parameters: dict | None = None,
         data_asset_type: str | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
+        expectation_suite: ExpectationSuite | None = None,
     ) -> ExpectationSuite:
         """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
 
@@ -2356,11 +2357,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             execution_engine_type=execution_engine_type,
             meta=meta,
             overwrite_existing=False,  # `add` does not resolve collisions
+            expectation_suite=expectation_suite,
         )
 
     def _add_expectation_suite(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: Sequence[dict | ExpectationConfiguration] | None = None,
         evaluation_parameters: dict | None = None,
@@ -2368,21 +2370,32 @@ class AbstractDataContext(ConfigPeer, ABC):
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         overwrite_existing: bool = False,
+        expectation_suite: ExpectationSuite | None = None,
         **kwargs,
     ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
+        if not ((expectation_suite_name is None) ^ (expectation_suite is None)):
+            raise ValueError(
+                "Must either pass in an existing expectation_suite or individual constructor arguments (but not both)"
+            )
 
-        expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name,
-            data_context=self,
-            ge_cloud_id=id,
-            expectations=expectations,
-            evaluation_parameters=evaluation_parameters,
-            data_asset_type=data_asset_type,
-            execution_engine_type=execution_engine_type,
-            meta=meta,
-        )
+        if not expectation_suite:
+            assert (
+                expectation_suite_name
+            ), "If constructing a suite with individual args, suite name must be guaranteed"
+            expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name,
+                data_context=self,
+                ge_cloud_id=id,
+                expectations=expectations,
+                evaluation_parameters=evaluation_parameters,
+                data_asset_type=data_asset_type,
+                execution_engine_type=execution_engine_type,
+                meta=meta,
+            )
+
+        expectation_suite_name = expectation_suite.expectation_suite_name
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
         if (
             self.expectations_store.has_key(key)  # noqa: W601
@@ -2416,13 +2429,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         return self._add_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            id=expectation_suite.ge_cloud_id,
-            expectations=expectation_suite.expectations,
-            evaluation_parameters=expectation_suite.evaluation_parameters,
-            data_asset_type=expectation_suite.data_asset_type,
-            execution_engine_type=expectation_suite.execution_engine_type,
-            meta=expectation_suite.meta,  # type: ignore[has-type] # Should just be a dict but mypy has trouble inferring
+            expectation_suite=expectation_suite,
             overwrite_existing=True,
         )
 
@@ -2435,6 +2442,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         data_asset_type: str | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
+        expectation_suite: ExpectationSuite | None = None,
     ) -> ExpectationSuite:
         """Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.
 
@@ -2446,6 +2454,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_asset_type: Type of data asset to associate with this suite.
             execution_engine_type: Name of the execution engine type.
             meta: Metadata related to the suite.
+            expectation_suite: An existing ExpectationSuite object you wish to persist.
 
         Returns:
             A new ExpectationSuite or an updated once (depending on whether or not it existed before this method call).
@@ -2458,6 +2467,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_asset_type=data_asset_type,
             execution_engine_type=execution_engine_type,
             meta=meta,
+            expectation_suite=expectation_suite,
             overwrite_existing=True,  # `add_or_update` always overwrites.
         )
 
