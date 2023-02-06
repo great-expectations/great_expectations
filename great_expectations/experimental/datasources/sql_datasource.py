@@ -108,7 +108,7 @@ class ColumnSplitter:
             )
 
 
-ColumnSplitterType = TypeVar("ColumnSplitterType", bound=ColumnSplitter)
+_ColumnSplitterT = TypeVar("_ColumnSplitterT", bound=ColumnSplitter)
 
 
 class DatetimeRange(NamedTuple):
@@ -182,10 +182,10 @@ def _get_sql_datetime_range(
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
 
 
-class _SQLAsset(DataAsset, Generic[ColumnSplitterType]):
+class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
     # Instance fields
     type: Literal["_sqlasset"] = "_sqlasset"
-    column_splitter: Optional[ColumnSplitterType] = None
+    column_splitter: Optional[_ColumnSplitterT] = None
     name: str
 
     def batch_request_options_template(
