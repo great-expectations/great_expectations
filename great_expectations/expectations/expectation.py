@@ -3343,7 +3343,6 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
-        # TODO: ensure this metrics works for ID/PK
         if self.map_metric == "compound_columns.unique":
             return validation_dependencies
         metric_kwargs = get_metric_kwargs(

@@ -4,8 +4,7 @@
     "data" : {
       "a" : [1, 2, 3, 4],
       "b" : [1, 2, 3, 1],
-      "c" : [1, 2, 3, 1],
-      "pk_index": [0, 1, 2, 3]
+      "c" : [1, 2, 3, 1]
     },
     "schemas": {
       "spark": {
@@ -20,7 +19,6 @@
         "title": "mostly_default_successful_expectation",
         "include_in_gallery": true,
         "exact_match_out" : false,
-        "suppress_test_for": ["mssql", "snowflake"],
         "in": {
           "column_list": ["a", "b"]
         },
@@ -33,7 +31,6 @@
         "title": "mostly_default_fails_expectation",
         "include_in_gallery": true,
         "exact_match_out" : false,
-        "suppress_test_for": ["mssql", "snowflake"],
         "in": {
           "column_list": ["b", "c"]
         },
@@ -46,7 +43,6 @@
         "title": "mostly_set_successful_expectation",
         "include_in_gallery": true,
         "exact_match_out" : false,
-        "suppress_test_for": ["mssql", "snowflake"],
         "in": {
           "column_list": ["b", "c"],
           "mostly": 0.4
@@ -60,7 +56,6 @@
         "title": "mostly_set_fails_expectation",
         "include_in_gallery": true,
         "exact_match_out" : false,
-        "suppress_test_for": ["mssql", "snowflake"],
         "in": {
           "column_list": ["b", "c"],
           "mostly": 0.9
@@ -74,7 +69,6 @@
         "title": "mostly_set_incorrectly",
         "include_in_gallery": true,
         "exact_match_out" : false,
-        "suppress_test_for": ["mssql", "snowflake"],
         "in": {
           "column_list": ["a", "b"],
           "mostly": 1.1,
@@ -103,15 +97,13 @@
         "y": "IntegerType",
         "z": "IntegerType",
         "a": "IntegerType",
-        "b": "IntegerType",
-        "pk_index": "IntegerType"
+        "b": "IntegerType"
       }
     },
     "tests" : [{
       "title": "basic_test_ignore_if_all_are_missing_the_default_behavior",
       "include_in_gallery": true,
       "exact_match_out" : false,
-      "suppress_test_for": ["mssql", "snowflake"],
       "in": {
         "column_list": ["w", "x"]
       },
@@ -123,7 +115,6 @@
     },{
       "title": "basic_test_ignore_if_any_are_missing",
       "exact_match_out" : false,
-      "suppress_test_for": ["mssql", "snowflake"],
       "in": {
         "column_list": ["w", "x"],
         "ignore_row_if": "any_value_is_missing"
@@ -252,7 +243,6 @@
     },{
       "title": "unexpected_values_without_unexpected_index_list",
       "exact_match_out" : false,
-      "suppress_test_for": ["mssql", "snowflake"],
       "in": {
         "column_list": ["a", "b"]
       },
@@ -536,7 +526,6 @@
     },{
       "title": "unexpected_values_exact_match_out_without_unexpected_index_list",
       "exact_match_out" : true,
-      "suppress_test_for": ["mssql", "snowflake"],
       "in": {
         "column_list": ["a", "b"]
       },

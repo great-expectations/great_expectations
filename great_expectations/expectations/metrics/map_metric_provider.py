@@ -2576,7 +2576,6 @@ def _sqlalchemy_map_condition_query(
     return query_as_string
 
 
-# marker
 def _sqlalchemy_map_condition_index(
     cls,
     execution_engine: SqlAlchemyExecutionEngine,
@@ -2634,8 +2633,6 @@ def _sqlalchemy_map_condition_index(
             )
         column_selector.append(sa.column(column_name))
 
-    # expectation_domain_column_name: str = domain_kwargs["column"]
-
     # the last column we SELECT is the column the Expectation is being run on
     for column_name in domain_column_name_list:
         column_selector.append(sa.column(column_name))
@@ -2670,6 +2667,7 @@ def _sqlalchemy_map_condition_index(
             name: str = all_columns[index]
             primary_key_dict[name] = row[index]
         unexpected_index_list.append(primary_key_dict)
+
     return unexpected_index_list
 
 
