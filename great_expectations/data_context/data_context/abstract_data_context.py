@@ -38,6 +38,8 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     deprecated_method_or_class,
+    new_argument,
+    new_method_or_class,
     public_api,
 )
 from great_expectations.core.batch import (
@@ -320,13 +322,17 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def update_project_config(
         self, project_config: DataContextConfig | Mapping
-    ) -> None:
+    ) -> DataContextConfig:
         """Update the context's config with the values from another config object.
 
         Args:
             project_config: The config to use to update the context's internal state.
+
+        Returns:
+            The updated project config.
         """
         self.config.update(project_config)
+        return self.config
 
     @public_api
     @deprecated_method_or_class(
@@ -779,6 +785,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         return datasource
 
+    @public_api
     def update_datasource(
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
@@ -789,6 +796,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             datasource: The Datasource object to update.
             save_changes: do I save changes to disk?
+
+        Returns:
+            The updated Datasource.
         """
         save_changes = self._determine_save_changes_flag(save_changes)
         return self._update_datasource(datasource=datasource, save_changes=save_changes)
@@ -824,6 +834,8 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return updated_datasource
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def add_or_update_datasource(
         self,
         name: str,
@@ -1344,6 +1356,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._save_project_config()
         return store
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def delete_store(self, store_name: str) -> None:
         """Delete an existing Store from the DataContext.
 
@@ -1430,6 +1444,16 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
     @deprecated_argument(argument_name="batches", version="0.14.0")
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
+    @new_argument(
+        argument_name="expectation_suite_id",
+        version="0.15.48",
+        message="To be used in place of `expectation_suite_ge_cloud_id`",
+    )
     def add_checkpoint(
         self,
         name: str,
@@ -1487,6 +1511,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
             expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
+            id: The ID to use in generating this checkpoint (preferred over `ge_cloud_id`).
+            expectation_suite_id: The expectation suite ID to use in generating this checkpoint (preferred over `expectation_suite_ge_cloud_id`).
 
         Returns:
             The Checkpoint object created.
@@ -1532,6 +1558,8 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return self.checkpoint_store.add_checkpoint(checkpoint)
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
         """Update a Checkpoint that already exists.
 
@@ -1540,9 +1568,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Raises:
             DataContextError: A suite with the given name does not already exist.
+
+        Returns:
+            The updated Checkpoint.
         """
         return self.checkpoint_store.update_checkpoint(checkpoint)
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
         self,
         name: str,
@@ -1623,6 +1656,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
 
+    @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
     def get_checkpoint(
         self,
         name: str | None = None,
@@ -1634,12 +1673,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             name: The name of the target Checkpoint.
             ge_cloud_id: The id associated with the target Checkpoint.
+            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
 
         Returns:
             The requested Checkpoint.
 
         Raises:
-            CheckpointNotFoundError if the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exists.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
@@ -1659,6 +1699,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         return checkpoint
 
     @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
     def delete_checkpoint(
         self,
         name: str | None = None,
@@ -1670,9 +1715,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             name: The name of the target Checkpoint.
             ge_cloud_id: The id associated with the target Checkpoint.
+            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
 
         Raises:
-            CheckpointNotFoundError if the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exists.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
@@ -1681,6 +1727,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.checkpoint_store.delete_checkpoint(name=name, id=id)
 
     @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
+    @new_argument(
+        argument_name="expectation_suite_id",
+        version="0.15.48",
+        message="To be used in place of `expectation_suite_ge_cloud_id`",
+    )
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
     )
@@ -1725,6 +1781,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             result_format: One of several supported formatting directives for expectation validation results
             ge_cloud_id: Great Expectations Cloud id for the checkpoint
             expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
+            id: Great Expectations Cloud id for the checkpoint (preferred over `ge_cloud_id`)
+            expectation_suite_id: Great Expectations Cloud id for the expectation suite (preferred over `expectation_suite_ge_cloud_id`)
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
@@ -2298,6 +2356,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             overwrite_existing=overwrite_existing,
         )
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def add_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -2396,6 +2456,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.expectations_store.set(key, expectation_suite, **kwargs)
         return expectation_suite
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def update_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -2426,6 +2488,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             overwrite_existing=True,
         )
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def add_or_update_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -2461,16 +2525,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             overwrite_existing=True,  # `add_or_update` always overwrites.
         )
 
+    @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
     def delete_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
         ge_cloud_id: str | None = None,
         id: str | None = None,
-    ) -> bool:
+    ) -> None:
         """Delete specified expectation suite from data_context expectation store.
 
         Args:
-            expectation_suite_name: The name of the expectation_suite to create
+            expectation_suite_name: The name of the expectation suite to delete
+            ge_cloud_id: The identifier of the expectation suite to delete
+            id: The identifier of the expectation suite to delete (preferred over `ge_cloud_id`)
 
         Returns:
             True for Success and False for Failure.
@@ -2481,7 +2553,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"expectation_suite with name {expectation_suite_name} does not exist."
             )
         self.expectations_store.remove_key(key)
-        return True
 
     @public_api
     @deprecated_argument(argument_name="ge_cloud_id", version="0.15.45")
@@ -2539,6 +2610,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"expectation_suite {expectation_suite_name} not found"
             )
 
+    @public_api
     def add_profiler(
         self,
         name: str,
@@ -2598,6 +2670,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         return profiler
 
+    @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
     def get_profiler(
         self,
         name: str | None = None,
@@ -2609,12 +2687,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             name: The name of the target Profiler.
             ge_cloud_id: The id associated with the target Profiler.
+            id: The id associated with the target Profiler (preferred over `ge_cloud_id`).
 
         Returns:
             The requested Profiler.
 
         Raises:
-            ProfilerNotFoundError if the requested Profiler does not exists.
+            ProfilerNotFoundError: If the requested Profiler does not exists.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
@@ -2627,6 +2706,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
+    @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
     def delete_profiler(
         self,
         name: str | None = None,
@@ -2638,9 +2723,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             name: The name of the target Profiler.
             ge_cloud_id: The id associated with the target Profiler.
+            id: The id associated with the target Profiler (preferred over `ge_cloud_id`).
 
         Raises:
-            ProfilerNotFoundError if the requested Profiler does not exists.
+            ProfilerNotFoundError: If the requested Profiler does not exists.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
@@ -2652,6 +2738,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             id=id,
         )
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def update_profiler(self, profiler: RuleBasedProfiler) -> RuleBasedProfiler:
         """Update a Profiler that already exists.
 
@@ -2667,6 +2755,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_context=self,
         )
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def add_or_update_profiler(
         self,
         name: str,
@@ -2719,12 +2809,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GX Cloud specific).
             variables: Attribute name/value pairs (overrides)
             rules: Key-value pairs of name/configuration-dictionary (overrides)
+            id: Identifier used to retrieve the profiler from a store (preferred over `ge_cloud_id`).
 
         Returns:
             Set of rule evaluation results in the form of an RuleBasedProfilerResult
 
         Raises:
-            AssertionError if both a `name` and `ge_cloud_id` are provided.
+            AssertionError if both a `name` and `id` are provided.
             AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
         """
         # <GX_RENAME>
