@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, List, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, TypeVar, Union
 
 import pydantic
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import ClassVar
 
 from great_expectations.experimental.datasources.interfaces import DataAsset
 
