@@ -1095,7 +1095,7 @@ def test_get_profiler_with_too_many_args_raises_error(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id="my_ge_cloud_id",
+            id="my_ge_cloud_id",
         )
 
     assert "either name or id" in str(e.value)
@@ -1268,7 +1268,7 @@ def test_get_profiler(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
 
     assert isinstance(profiler, RuleBasedProfiler)
@@ -1284,7 +1284,7 @@ def test_get_profiler_non_existent_profiler_raises_error(
             data_context=mock_data_context,
             profiler_store=empty_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
 
     assert "Non-existent Profiler" in str(e.value)
@@ -1300,7 +1300,7 @@ def test_delete_profiler(
         RuleBasedProfiler.delete_profiler(
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
 
     assert mock_remove_key.call_count == 1
@@ -1317,7 +1317,7 @@ def test_delete_profiler_with_too_many_args_raises_error(
         RuleBasedProfiler.delete_profiler(
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id="my_ge_cloud_id",
+            id="my_ge_cloud_id",
         )
 
     assert "either name or id" in str(e.value)
@@ -1331,7 +1331,7 @@ def test_delete_profiler_non_existent_profiler_raises_error(
         RuleBasedProfiler.delete_profiler(
             profiler_store=populated_profiler_store,
             name="my_non_existent_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
 
     assert "Non-existent Profiler" in str(e.value)

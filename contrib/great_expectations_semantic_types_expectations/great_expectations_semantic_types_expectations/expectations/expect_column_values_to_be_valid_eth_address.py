@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 from typing import Optional
 
 from cryptoaddress import EthereumAddress

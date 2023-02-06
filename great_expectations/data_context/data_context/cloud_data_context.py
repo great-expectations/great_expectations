@@ -506,8 +506,9 @@ class CloudDataContext(SerializableDataContext):
 
     def delete_expectation_suite(
         self,
-        expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: str | None = None,
+        ge_cloud_id: str | None = None,
+        id: str | None = None,
     ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
 
@@ -517,9 +518,13 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             True for Success and False for Failure.
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        del ge_cloud_id
+
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=ge_cloud_id,
+            cloud_id=id,
         )
 
         return self.expectations_store.remove_key(key)

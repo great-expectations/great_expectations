@@ -1,47 +1,20 @@
-import json
-from typing import Any, Dict, Optional, Tuple
+from typing import Dict
 
-import numpy as np
-import pandas as pd
 import scipy.stats as stats
 
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import (
-    ColumnExpectation,
-    Expectation,
-    ExpectationConfiguration,
-    InvalidExpectationConfigurationError,
-    _format_map_output,
-    render_evaluation_parameter_string,
-)
+from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import column_aggregate_partial
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-    metric_value,
-)
-from great_expectations.render import RenderedStringTemplateContent
-from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import (
-    handle_strict_min_max,
-    num_to_str,
-    parse_row_condition_string_pandas_engine,
-    substitute_none_for_missing,
-)
-from great_expectations.validator.validation_graph import MetricConfiguration
+from great_expectations.expectations.metrics.import_manager import F
 
 
 class ColumnKurtosis(ColumnMetricProvider):
@@ -53,7 +26,7 @@ class ColumnKurtosis(ColumnMetricProvider):
     def _pandas(cls, column, **kwargs):
         return stats.kurtosis(column)
 
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
