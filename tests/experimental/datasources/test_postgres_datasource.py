@@ -629,7 +629,7 @@ def test_data_source_json_has_properties(create_source: CreateSourceFixture):
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]
         )
-        source_json = source.json(indent=4, sort_keys=True, exclude_unset=True)
+        source_json = source.json(indent=4, sort_keys=True)
         print(source_json)
         assert '"order_by": ' in source_json
         # type should be in dumped json even if not explicitly set
@@ -664,7 +664,7 @@ def test_datasource_dict_has_properties(create_source):
         asset.add_year_and_month_splitter(column_name="my_col").add_sorters(
             ["year", "month"]
         )
-        source_dict = source.dict(exclude_unset=True)
+        source_dict = source.dict()
         pprint(source_dict)
         assert isinstance(source_dict["assets"]["my_asset"]["order_by"], list)
         # type should be in dumped dict even if not explicitly set
