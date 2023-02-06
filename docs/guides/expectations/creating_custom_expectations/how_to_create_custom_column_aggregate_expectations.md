@@ -281,13 +281,12 @@ Completeness checklist for ExpectColumnMaxToBeBetweenCustom:
 
 ### 8. Linting
 
-Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, `isort`, and `ruff`.
+Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
 If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
 ```console
 black <PATH/TO/YOUR/EXPECTATION.py>
-isort <PATH/TO/YOUR/EXPECTATION.py>
 ruff <PATH/TO/YOUR/EXPECTATION.py> --fix
 ```
 

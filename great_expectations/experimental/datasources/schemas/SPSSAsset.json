@@ -1,6 +1,6 @@
 {
-    "title": "ParquetAsset",
-    "description": "Load a parquet object from the file path, returning a DataFrame.",
+    "title": "SPSSAsset",
+    "description": "Load an SPSS file from the file path, returning a DataFrame.\n\n.. versionadded:: 0.25.0\n\nParameters\n----------\npath : str or Path\n    File path.\nusecols : list-like, optional\n    Return a subset of the columns. If None, return all columns.\nconvert_categoricals : bool, default is True\n    Convert categorical columns into pd.Categorical.\n\nReturns\n-------\nDataFrame",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "parquet",
+            "default": "spss",
             "enum": [
-                "parquet"
+                "spss"
             ],
             "type": "string"
         },
@@ -33,35 +33,45 @@
             "format": "regex"
         },
         "path": {
-            "title": "Path"
+            "title": "Path",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "string",
+                    "format": "path"
+                }
+            ]
         },
-        "engine": {
-            "title": "Engine",
-            "default": "auto",
-            "type": "string"
+        "usecols": {
+            "title": "Usecols",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            ]
         },
-        "columns": {
-            "title": "Columns"
-        },
-        "storage_options": {
-            "title": "Storage Options",
-            "type": "object"
-        },
-        "use_nullable_dtypes": {
-            "title": "Use Nullable Dtypes",
-            "default": false,
+        "convert_categoricals": {
+            "title": "Convert Categoricals",
+            "default": true,
             "type": "boolean"
-        },
-        "kwargs": {
-            "title": "Kwargs"
         }
     },
     "required": [
         "name",
         "base_directory",
         "regex",
-        "path",
-        "kwargs"
+        "path"
     ],
     "additionalProperties": false,
     "definitions": {

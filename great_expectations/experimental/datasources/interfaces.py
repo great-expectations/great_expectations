@@ -6,6 +6,7 @@ from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
+    ClassVar,
     Dict,
     Generic,
     List,
@@ -19,10 +20,9 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt
+from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
 from pydantic import dataclasses as pydantic_dc
-from pydantic import root_validator, validate_arguments
-from typing_extensions import ClassVar, TypeAlias, TypeGuard
+from typing_extensions import TypeAlias, TypeGuard
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec

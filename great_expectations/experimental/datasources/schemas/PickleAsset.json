@@ -1,6 +1,6 @@
 {
-    "title": "ParquetAsset",
-    "description": "Load a parquet object from the file path, returning a DataFrame.",
+    "title": "PickleAsset",
+    "description": "Load pickled pandas object (or any object) from file.\n\n.. warning::\n\n   Loading pickled data received from untrusted sources can be\n   unsafe. See `here <https://docs.python.org/3/library/pickle.html>`__.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "parquet",
+            "default": "pickle",
             "enum": [
-                "parquet"
+                "pickle"
             ],
             "type": "string"
         },
@@ -32,36 +32,27 @@
             "type": "string",
             "format": "regex"
         },
-        "path": {
-            "title": "Path"
-        },
-        "engine": {
-            "title": "Engine",
-            "default": "auto",
-            "type": "string"
-        },
-        "columns": {
-            "title": "Columns"
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
         },
         "storage_options": {
             "title": "Storage Options",
             "type": "object"
-        },
-        "use_nullable_dtypes": {
-            "title": "Use Nullable Dtypes",
-            "default": false,
-            "type": "boolean"
-        },
-        "kwargs": {
-            "title": "Kwargs"
         }
     },
     "required": [
         "name",
         "base_directory",
-        "regex",
-        "path",
-        "kwargs"
+        "regex"
     ],
     "additionalProperties": false,
     "definitions": {

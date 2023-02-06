@@ -3,10 +3,9 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, List, Optional, Pattern, Set, Tuple
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Pattern, Set, Tuple
 
 import pydantic
-from typing_extensions import ClassVar
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec
@@ -189,6 +188,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
                     include=self._get_reader_options_include(),
                     exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                     exclude_unset=True,
+                    by_alias=True,
                 ),
             )
             execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
