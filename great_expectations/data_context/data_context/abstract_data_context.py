@@ -1679,7 +1679,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             The requested Checkpoint.
 
         Raises:
-            CheckpointNotFoundError if the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exists.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
@@ -1718,7 +1718,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
 
         Raises:
-            CheckpointNotFoundError if the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exists.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
@@ -2693,7 +2693,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             The requested Profiler.
 
         Raises:
-            ProfilerNotFoundError if the requested Profiler does not exists.
+            ProfilerNotFoundError: If the requested Profiler does not exists.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
@@ -2726,7 +2726,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             id: The id associated with the target Profiler (preferred over `ge_cloud_id`).
 
         Raises:
-            ProfilerNotFoundError if the requested Profiler does not exists.
+            ProfilerNotFoundError: If the requested Profiler does not exists.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
