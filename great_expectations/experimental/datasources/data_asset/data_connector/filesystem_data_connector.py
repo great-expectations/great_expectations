@@ -4,10 +4,10 @@ import re
 from typing import List, Optional
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.experimental.data_asset.data_connector.file_path_data_connector import (
+from great_expectations.experimental.datasources.data_asset.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
-from great_expectations.experimental.data_asset.data_connector.util import (
+from great_expectations.experimental.datasources.data_asset.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
     normalize_directory_path,
 )

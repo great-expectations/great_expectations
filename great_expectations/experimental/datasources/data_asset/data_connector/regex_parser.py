@@ -69,10 +69,10 @@ class RegExParser:
             for group_idx in common_group_indexes
         }
 
-        all_group_index_to_group_name_mapping: Dict[int, str] = (
-            named_group_index_to_group_name_mapping
-            | common_group_index_to_group_name_mapping
-        )
+        all_group_index_to_group_name_mapping: Dict[int, str] = {
+            **named_group_index_to_group_name_mapping,
+            **common_group_index_to_group_name_mapping,
+        }
 
         all_group_name_to_group_index_mapping: Dict[str, int] = dict(
             zip(

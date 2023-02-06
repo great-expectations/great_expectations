@@ -9,7 +9,7 @@ import pydantic
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.experimental.data_asset.data_connector.regex_parser import (
+from great_expectations.experimental.datasources.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
 from great_expectations.experimental.datasources.interfaces import (

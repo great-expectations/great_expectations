@@ -1,5 +1,3 @@
-# Utility methods for dealing with DataConnector objects
-
 import copy
 import logging
 import os
@@ -8,7 +6,7 @@ import sre_constants
 import sre_parse
 import warnings
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Set
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase

@@ -29,17 +29,17 @@ from great_expectations.core.batch_spec import PathBatchSpec
 #     build_batch_filter,
 # )
 # TODO: <Alex>ALEX</Alex>
-from great_expectations.experimental.data_asset.data_connector.data_connector import (
+from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
     DataConnector,
 )
-from great_expectations.experimental.data_asset.data_connector.regex_parser import (
+from great_expectations.experimental.datasources.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
 
 # TODO: <Alex>ALEX</Alex>
 # from great_expectations.experimental.data_asset.data_connector.sorter import Sorter
 # TODO: <Alex>ALEX</Alex>
-from great_expectations.experimental.data_asset.data_connector.util import (  # TODO: <Alex>ALEX</Alex>; build_sorters_from_config,
+from great_expectations.experimental.datasources.data_asset.data_connector.util import (  # TODO: <Alex>ALEX</Alex>; build_sorters_from_config,
     batch_definition_matches_batch_request,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,

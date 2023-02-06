@@ -1,5 +1,5 @@
 from copy import deepcopy
-from typing import Dict, Iterator, List, Optional, Tuple, Union, cast
+from typing import Dict, Iterator, List, Optional, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
