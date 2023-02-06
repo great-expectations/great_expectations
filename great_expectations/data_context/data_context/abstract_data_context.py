@@ -26,6 +26,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    overload,
 )
 
 from dateutil.parser import parse
@@ -2539,22 +2540,56 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"expectation_suite {expectation_suite_name} not found"
             )
 
+    @overload
     def add_profiler(
         self,
         name: str,
         config_version: float,
-        rules: Dict[str, dict],
-        variables: Optional[dict] = None,
+        rules: dict[str, dict],
+        variables: dict | None = ...,
+        profiler: None = ...,
+    ) -> RuleBasedProfiler:
+        """
+        Two possible patterns:
+            - A collection of required constructor args
+            - A profiler
+        """
+        ...
+
+    @overload
+    def add_profiler(
+        self,
+        name: None = ...,
+        config_version: None = ...,
+        rules: None = ...,
+        variables: None = ...,
+        profiler: RuleBasedProfiler = ...,
+    ) -> RuleBasedProfiler:
+        """
+        Two possible patterns:
+            - A collection of required constructor args
+            - A profiler
+        """
+        ...
+
+    def add_profiler(
+        self,
+        name: str | None = None,
+        config_version: float | None = None,
+        rules: dict[str, dict] | None = None,
+        variables: dict | None = None,
+        profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfiler:
         """
         Constructs a Profiler, persists it utilizing the context's underlying ProfilerStore,
         and returns it to the user for subsequent usage.
 
         Args:
-            name: The name of the RBP instance
-            config_version: The version of the RBP (currently only 1.0 is supported)
-            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
-            variables: Any variables to be substituted within the rules
+            name: The name of the RBP instance.
+            config_version: The version of the RBP (currently only 1.0 is supported).
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and expectation_configuration_builders.
+            variables: Any variables to be substituted within the rules.
+            profiler: An existing RuleBasedProfiler to persist.
 
         Returns:
             The persisted Profiler constructed by the input arguments.
@@ -2565,31 +2600,41 @@ class AbstractDataContext(ConfigPeer, ABC):
             config_version=config_version,
             rules=rules,
             variables=variables,
+            profiler=profiler,
         )
 
     def _add_profiler(
         self,
-        name: str,
+        name: str | None,
         id: str | None,
-        config_version: float,
-        rules: dict[str, dict],
+        config_version: float | None,
+        rules: dict[str, dict] | None,
         variables: dict | None,
+        profiler: RuleBasedProfiler | None,
     ) -> RuleBasedProfiler:
-        config_data = {
-            "name": name,
-            "id": id,
-            "config_version": config_version,
-            "rules": rules,
-            "variables": variables,
-        }
+        if not ((profiler) ^ (arg is None for arg in (name, config_version, rules))):
+            raise ValueError(
+                "Must either pass in an existing profiler or individual constructor arguments (but not both)"
+            )
 
-        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
-        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
-        profiler_config.pop("class_name")
-        profiler_config.pop("module_name")
+        if profiler:
+            config = profiler.config
+        else:
+            config_data = {
+                "name": name,
+                "id": id,
+                "config_version": config_version,
+                "rules": rules,
+                "variables": variables,
+            }
 
-        config = RuleBasedProfilerConfig(**profiler_config)
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
+            profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
+            profiler_config.pop("class_name")
+            profiler_config.pop("module_name")
+
+            config = RuleBasedProfilerConfig(**profiler_config)
 
         profiler = RuleBasedProfiler.add_profiler(
             config=config,
@@ -2674,6 +2719,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         config_version: float | None = None,
         rules: dict[str, dict] | None = None,
         variables: dict | None = None,
+        profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfiler:
         """Add a new Profiler or update an existing one on the context depending on whether it already exists or not.
 
@@ -2683,18 +2729,18 @@ class AbstractDataContext(ConfigPeer, ABC):
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and expectation_configuration_builders.
             variables: Any variables to be substituted within the rules.
             id: The id associated with the RBP instance (if applicable).
+            profiler: An existing RuleBasedProfiler to persist.
 
         Returns:
             A new Profiler or an updated one (depending on whether or not it existed before this method call).
         """
-        config_version = config_version or 1.0
-        rules = rules or {}
         return self._add_profiler(
             name=name,
             id=id,
             config_version=config_version,
             rules=rules,
             variables=variables,
+            profiler=profiler,
         )
 
     @usage_statistics_enabled_method(
