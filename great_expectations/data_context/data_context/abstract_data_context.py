@@ -795,7 +795,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _update_datasource(
         self,
-        datasource: LegacyDatasource | BaseDatasource | XDatasource,
+        datasource: LegacyDatasource | BaseDatasource,
         save_changes: bool | None = None,
         **kwargs,
     ) -> Datasource:
@@ -849,7 +849,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"Could not find an existing datasource named '{name}'; creating a new one."
             )
 
-        if existing_datasource:
+        if existing_datasource and isinstance(
+            existing_datasource, (LegacyDatasource, BaseDatasource)
+        ):
             result_datasource = self._update_datasource(
                 datasource=existing_datasource, **kwargs
             )
@@ -1048,7 +1050,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
-        datasource = self.get_datasource(batch_kwargs.get("datasource"))
+        datasource_name: Optional[Any] = batch_kwargs.get("datasource")
+        datasource: LegacyDatasource | BaseDatasource | XDatasource
+        if isinstance(datasource_name, str):
+            datasource = self.get_datasource(datasource_name)
+        else:
+            datasource = self.get_datasource()
+        assert isinstance(
+            datasource, LegacyDatasource
+        ), "batch_kwargs datasource must be of type LegacyDatasource"
         batch = datasource.get_batch(
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
@@ -1423,7 +1433,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if datasource is None:
             raise ValueError(f"Datasource {datasource_name} not found")
 
-        if save_changes:
+        if save_changes and isinstance(datasource, (LegacyDatasource, BaseDatasource)):
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)  # type: ignore[attr-defined]
         self._cached_datasources.pop(datasource_name, None)

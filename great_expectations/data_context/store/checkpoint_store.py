@@ -134,9 +134,13 @@ class CheckpointStore(ConfigurationStore):
     def get_checkpoint(
         self, name: ConfigurationIdentifier | str | None, id: str | None
     ) -> CheckpointConfig:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=id
-        )
+        if isinstance(name, str, None):
+            key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
+                name=name, ge_cloud_id=id
+            )
+        else:
+            key = name
+
         try:
             checkpoint_config: CheckpointConfig = self.get(key=key)  # type: ignore[assignment]
         except gx_exceptions.InvalidKeyError as exc_ik:
