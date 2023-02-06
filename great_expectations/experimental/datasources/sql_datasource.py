@@ -21,7 +21,7 @@ from typing import (
 
 import pydantic
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import ClassVar, Literal
+from typing_extensions import ClassVar, Literal, TypeAlias
 
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.experimental.datasources.interfaces import (
@@ -60,7 +60,7 @@ class ColumnSplitter:
     method_name: str
     param_names: Sequence[str]
 
-    def param_defaults(self, sql_asset: _SQLAsset) -> Dict[str, List]:
+    def param_defaults(self, sql_asset: SQLAsset) -> Dict[str, List]:
         raise NotImplementedError
 
     @pydantic.validator("method_name")
@@ -119,7 +119,7 @@ class SqlYearMonthSplitter(ColumnSplitter):
         default_factory=lambda: ["year", "month"]
     )
 
-    def param_defaults(self, sql_asset: _SQLAsset) -> Dict[str, List]:
+    def param_defaults(self, sql_asset: SQLAsset) -> Dict[str, List]:
         """Query sql database to get the years and months to split over.
 
         Args:
@@ -131,7 +131,7 @@ class SqlYearMonthSplitter(ColumnSplitter):
 
 
 def _query_for_year_and_month(
-    sql_asset: _SQLAsset,
+    sql_asset: SQLAsset,
     column_name: str,
     query_datetime_range: Callable[
         [sqlalchemy.engine.base.Connection, sqlalchemy.sql.Selectable, str],
@@ -474,6 +474,9 @@ class TableAsset(_SQLAsset):
             "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
+
+
+SQLAsset: TypeAlias = Union[_SQLAsset, QueryAsset, TableAsset]
 
 
 class SQLDatasource(Datasource):
