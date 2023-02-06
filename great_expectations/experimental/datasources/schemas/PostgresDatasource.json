@@ -1,6 +1,6 @@
 {
     "title": "PostgresDatasource",
-    "description": "Adds a postgres datasource to the data context.\n\nArgs:\n    name: The name of this postgres datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"postgresql+psycopg2://postgres:@localhost/test_database\"\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
+    "description": "Adds a postgres datasource to the data context.\n\nArgs:\n    name: The name of this postgres datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"postgresql+psycopg2://postgres:@localhost/test_database\"\n    assets: An optional dictionary whose keys are _SQLAsset names and whose values\n        are _SQLAsset objects.",
     "type": "object",
     "properties": {
         "type": {
@@ -62,8 +62,8 @@
                 "key"
             ]
         },
-        "ColumnSplitter": {
-            "title": "ColumnSplitter",
+        "SqlYearMonthSplitter": {
+            "title": "SqlYearMonthSplitter",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -72,20 +72,26 @@
                 },
                 "method_name": {
                     "title": "Method Name",
+                    "default": "split_on_year_and_month",
+                    "enum": [
+                        "split_on_year_and_month"
+                    ],
                     "type": "string"
                 },
                 "param_names": {
                     "title": "Param Names",
                     "type": "array",
                     "items": {
+                        "enum": [
+                            "year",
+                            "month"
+                        ],
                         "type": "string"
                     }
                 }
             },
             "required": [
-                "column_name",
-                "method_name",
-                "param_names"
+                "column_name"
             ]
         },
         "TableAsset": {
@@ -113,7 +119,7 @@
                     }
                 },
                 "column_splitter": {
-                    "$ref": "#/definitions/ColumnSplitter"
+                    "$ref": "#/definitions/SqlYearMonthSplitter"
                 },
                 "table_name": {
                     "title": "Table Name",
@@ -155,7 +161,7 @@
                     }
                 },
                 "column_splitter": {
-                    "$ref": "#/definitions/ColumnSplitter"
+                    "$ref": "#/definitions/SqlYearMonthSplitter"
                 },
                 "query": {
                     "title": "Query",
