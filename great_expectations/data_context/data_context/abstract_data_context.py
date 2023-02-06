@@ -1530,8 +1530,98 @@ class AbstractDataContext(ConfigPeer, ABC):
             default_validation_id=default_validation_id,
         )
 
-        self.checkpoint_store.add_checkpoint(checkpoint=checkpoint, name=name, id=id)
-        return checkpoint
+        return self.checkpoint_store.add_checkpoint(checkpoint)
+
+    def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        """Update a Checkpoint that already exists.
+
+        Args:
+            checkpoint: The checkpoint to use to update.
+
+        Raises:
+            DataContextError: A suite with the given name does not already exist.
+        """
+        return self.checkpoint_store.update_checkpoint(checkpoint)
+
+    def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
+        self,
+        name: str,
+        id: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: str | list[str] | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | list[str] | None = None,
+        expectation_suite_id: str | None = None,
+        default_validation_id: str | None = None,
+    ) -> Checkpoint:
+        """Add a new Checkpoint or update an existing one on the context depending on whether it already exists or not.
+
+        Args:
+            name: The name to give the checkpoint.
+            id: The ID to associate with this checkpoint.
+            config_version: The config version of this checkpoint.
+            template_name: The template to use in generating this checkpoint.
+            module_name: The module name to use in generating this checkpoint.
+            class_name: The class name to use in generating this checkpoint.
+            run_name_template: The run name template to use in generating this checkpoint.
+            expectation_suite_name: The expectation suite name to use in generating this checkpoint.
+            batch_request: The batch request to use in generating this checkpoint.
+            action_list: The action list to use in generating this checkpoint.
+            evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
+            runtime_configuration: The runtime configuration to use in generating this checkpoint.
+            validations: The validations to use in generating this checkpoint.
+            profilers: The profilers to use in generating this checkpoint.
+            site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            default_validation_id: The default validation ID to use in generating this checkpoint.
+
+        Returns:
+            A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
+        """
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        checkpoint = Checkpoint.construct_from_config_args(
+            data_context=self,
+            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
+            name=name,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            # the following four arguments are used by SimpleCheckpoint
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+            ge_cloud_id=id,
+            expectation_suite_ge_cloud_id=expectation_suite_id,
+            default_validation_id=default_validation_id,
+        )
+        return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
 
     def get_checkpoint(
         self,
