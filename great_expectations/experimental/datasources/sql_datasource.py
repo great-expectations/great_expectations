@@ -198,6 +198,21 @@ class _SQLAsset(DataAsset, Generic[ColumnSplitterType]):
             return template
         return {p: None for p in self.column_splitter.param_names}
 
+    # This asset type will support a variety of splitters
+    def add_year_and_month_splitter(
+        self,
+        column_name: str,
+    ) -> _SQLAsset:
+        """Associates a year month splitter with this _SQLAsset
+        Args:
+            column_name: A column name of the date column where year and month will be parsed out.
+        Returns:
+            This _SQLAsset so we can use this method fluently.
+        """
+        raise NotImplementedError(
+            """One needs to implement "add_year_and_month_splitter" on a _SQLAsset subclass."""
+        )
+
     def _fully_specified_batch_requests(self, batch_request) -> List[BatchRequest]:
         """Populates a batch requests unspecified params producing a list of batch requests."""
         if self.column_splitter is None:
