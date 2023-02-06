@@ -306,6 +306,9 @@ def test_csv_asset_with_some_regex_named_parameters(
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
     )
     options = asset.batch_request_options_template()  # type: ignore[attr-defined]
+    print(
+        f"\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE::test_csv_asset_with_some_regex_named_parameters()] OPTIONS:\n{options} ; TYPE: {str(type(options))}"
+    )
     assert options == {"batch_request_param_1": None, "month": None}
 
 

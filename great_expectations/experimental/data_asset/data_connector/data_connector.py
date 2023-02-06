@@ -1,11 +1,93 @@
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 
 logger = logging.getLogger(__name__)
+
+
+class DataConnectorStorageDataReferenceResolver:
+    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
+        "InferredAssetS3DataConnector": "S3",
+        "ConfiguredAssetS3DataConnector": "S3",
+        "InferredAssetGCSDataConnector": "GCS",
+        "ConfiguredAssetGCSDataConnector": "GCS",
+        "InferredAssetAzureDataConnector": "ABS",
+        "ConfiguredAssetAzureDataConnector": "ABS",
+        "InferredAssetDBFSDataConnector": "DBFS",
+        "ConfiguredAssetDBFSDataConnector": "DBFS",
+    }
+    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
+        tuple[str, str], Callable
+    ] = {
+        (
+            "S3",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "S3",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "GCS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "GCS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "ABS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "ABS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "DBFS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
+            **template_arguments
+        ),
+        (
+            "DBFS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
+            **template_arguments
+        ),
+    }
+
+
+def resolve_data_reference(
+    data_connector_name: str,
+    execution_engine_name: str,
+    template_arguments: dict,
+):
+    """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
+    storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
+        data_connector_name
+    ]
+    return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
+        (storage_name, execution_engine_name)
+    ](
+        template_arguments
+    )
 
 
 # noinspection SpellCheckingInspection
