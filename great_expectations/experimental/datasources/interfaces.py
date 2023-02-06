@@ -309,6 +309,7 @@ class DataAsset(ExperimentalBaseModel):
 DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
 
 
+# It would be best to bind this to ExecutionEngine, but we can't now due to circular imports
 ExecutionEngineType = TypeVar("ExecutionEngineType")
 
 
