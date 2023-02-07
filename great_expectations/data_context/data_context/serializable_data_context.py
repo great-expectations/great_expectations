@@ -307,23 +307,30 @@ class SerializableDataContext(AbstractDataContext):
         shutil.copyfile(styles_template, styles_destination_path)
 
     @classmethod
-    def find_context_root_dir(cls) -> str:
-        """
-        TODO
+    def find_context_root_dir(cls) -> pathlib.Path:
+        """Search through filesystem to determine the user's project context root directory.
+
+        While this starts from the present working directory, the start location can be
+        set with the `GX_HOME` environment variable.
+
+        Returns:
+            The path of the context root directory.
+
+        Raises:
+            ConfigNotFoundError: If no context root directory could be found in the filesystem
         """
         result = None
         yml_path = None
-        gx_home_environment = os.getenv("GX_HOME")
-        if gx_home_environment:
-            gx_home_environment = os.path.expanduser(gx_home_environment)
-            if os.path.isdir(gx_home_environment) and os.path.isfile(
-                os.path.join(gx_home_environment, "great_expectations.yml")
-            ):
-                result = gx_home_environment
+        gx_home_env_var = os.getenv("GX_HOME")
+        if gx_home_env_var:
+            gx_home_path = pathlib.Path.expanduser(pathlib.Path(gx_home_env_var))
+            gx_yml_path = pathlib.Path.joinpath(gx_home_path, "great_expectations.yml")
+            if gx_home_path.is_dir() and gx_yml_path.is_file():
+                result = gx_home_path
         else:
             yml_path = cls._find_context_yml_file()
             if yml_path:
-                result = os.path.dirname(yml_path)
+                result = pathlib.Path(yml_path).parent
 
         if result is None:
             raise gx_exceptions.ConfigNotFoundError()
