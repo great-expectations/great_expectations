@@ -11,8 +11,8 @@ pytestmark = [pytest.mark.integration]
 
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
-from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.interfaces import Datasource
 
 logger = logging.getLogger(__file__)
 
