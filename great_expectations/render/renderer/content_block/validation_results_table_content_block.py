@@ -3,7 +3,11 @@ import traceback
 import warnings
 from copy import deepcopy
 
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,
+)
+
+# noqa: TCH001
 from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (  # noqa: F401
     ExpectColumnKlDivergenceToBeLessThan,
 )

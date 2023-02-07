@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,

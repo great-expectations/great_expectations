@@ -12,7 +12,10 @@ from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
-from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    GXCloudConfig,
+)
 
 
 @deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")

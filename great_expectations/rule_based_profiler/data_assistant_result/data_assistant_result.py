@@ -28,7 +28,12 @@ from IPython.display import HTML, display
 
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.core import ExpectationConfiguration, ExpectationSuite
+from great_expectations.core import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+)
+
+# noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -44,7 +49,7 @@ from great_expectations.core.util import (
     nested_update,
 )
 from great_expectations.rule_based_profiler.altair import AltairDataTypes, AltairThemes
-from great_expectations.rule_based_profiler.config import RuleConfig
+from great_expectations.rule_based_profiler.config import RuleConfig  # noqa: TCH001
 from great_expectations.rule_based_profiler.data_assistant_result.plot_components import (
     BatchPlotComponent,
     DomainPlotComponent,
@@ -62,7 +67,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     sanitize_parameter_name,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValues,
+    MetricValues,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,

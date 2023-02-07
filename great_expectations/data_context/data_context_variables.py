@@ -7,15 +7,19 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
-from great_expectations.core.config_provider import _ConfigurationProvider
-from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.config_provider import (
+    _ConfigurationProvider,
+)
+
+# noqa: TCH001
+from great_expectations.core.data_context_key import DataContextKey  # noqa: TCH001
 from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
-    ConcurrencyConfig,
-    DataContextConfig,
-    IncludeRenderedContentConfig,
-    NotebookConfig,
-    ProgressBarsConfig,
+    AnonymizedUsageStatisticsConfig,  # noqa: TCH001
+    ConcurrencyConfig,  # noqa: TCH001
+    DataContextConfig,  # noqa: TCH001
+    IncludeRenderedContentConfig,  # noqa: TCH001
+    NotebookConfig,  # noqa: TCH001
+    ProgressBarsConfig,  # noqa: TCH001
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,

@@ -18,9 +18,13 @@ from pyparsing import (
 from pyparsing import Optional as ppOptional
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,
+)
+
+# noqa: TCH001
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
@@ -28,7 +32,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

@@ -12,7 +12,11 @@ from typing_extensions import Final
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
-from great_expectations.experimental.datasources.interfaces import Datasource
+from great_expectations.experimental.datasources.interfaces import (
+    Datasource,
+)
+
+# noqa: TCH001
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
 if TYPE_CHECKING:
