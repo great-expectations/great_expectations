@@ -25,7 +25,8 @@ from great_expectations.core._docs_decorators import public_api
 # )
 # TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
-# from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
+from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
+
 # TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
 # from great_expectations.experimental.data_asset.data_connector.batch_filter import (
@@ -57,7 +58,6 @@ if TYPE_CHECKING:
         BatchRequest,
         BatchRequestBase,
     )
-    from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 
 
 logger = logging.getLogger(__name__)
