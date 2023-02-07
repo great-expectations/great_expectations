@@ -21,8 +21,6 @@ from great_expectations.core import IDDict  # noqa: TCH001
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001

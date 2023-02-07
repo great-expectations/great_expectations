@@ -32,8 +32,6 @@ from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationSuite,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes

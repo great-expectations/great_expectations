@@ -14,16 +14,12 @@ from great_expectations.rule_based_profiler import BaseRuleBasedProfiler  # noqa
 from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.rule_based_profiler.domain_builder import (
     DomainBuilder,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
     get_validator_with_expectation_suite,

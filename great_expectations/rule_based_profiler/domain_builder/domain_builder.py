@@ -8,8 +8,6 @@ from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.metric_domain_types import (
     MetricDomainTypes,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,

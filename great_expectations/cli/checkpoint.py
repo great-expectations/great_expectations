@@ -8,8 +8,6 @@ from great_expectations import DataContext  # noqa: TCH001
 from great_expectations.checkpoint.types.checkpoint_result import (
     CheckpointResult,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.events import UsageStatsEvents

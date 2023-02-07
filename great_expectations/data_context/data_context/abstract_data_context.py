@@ -59,8 +59,6 @@ from great_expectations.core.config_provider import (
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -78,24 +76,16 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
 from great_expectations.data_context.data_context_variables import (
     DataContextVariables,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import (
     ExpectationsStore,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.data_context.store.profiler_store import (
     ProfilerStore,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.data_context.store.validations_store import (
     ValidationsStore,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,

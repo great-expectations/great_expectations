@@ -18,8 +18,6 @@ from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.util import filter_properties_dict
 
 

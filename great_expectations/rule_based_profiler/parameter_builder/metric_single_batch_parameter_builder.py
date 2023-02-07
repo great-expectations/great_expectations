@@ -6,8 +6,6 @@ from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )

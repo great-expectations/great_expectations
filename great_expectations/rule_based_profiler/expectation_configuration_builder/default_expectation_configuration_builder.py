@@ -23,8 +23,6 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )

@@ -25,8 +25,6 @@ from great_expectations.render.util import num_to_str, substitute_none_for_missi
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.validator.validator import (
     ValidationDependencies,  # noqa: TCH001
 )

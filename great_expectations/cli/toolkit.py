@@ -16,8 +16,6 @@ from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint  # noqa: 
 from great_expectations.checkpoint.types.checkpoint_result import (
     CheckpointResult,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message

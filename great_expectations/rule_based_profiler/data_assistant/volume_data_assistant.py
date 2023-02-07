@@ -20,8 +20,6 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,

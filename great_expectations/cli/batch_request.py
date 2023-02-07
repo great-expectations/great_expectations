@@ -21,8 +21,6 @@ from great_expectations.datasource import (
 from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import filter_properties_dict
 

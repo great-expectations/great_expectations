@@ -62,14 +62,9 @@ from great_expectations.expectations.registry import (
     list_registered_expectation_implementations,
 )
 from great_expectations.experimental.datasources.interfaces import Batch as XBatch
-
-# noqa: TCH001
-# noqa: TCH001
 from great_expectations.rule_based_profiler import (
     RuleBasedProfilerResult,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,  # noqa: TCH001
@@ -82,8 +77,6 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,  # noqa: TCH001
 )
@@ -98,8 +91,6 @@ from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,

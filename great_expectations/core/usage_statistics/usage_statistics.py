@@ -28,8 +28,6 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 from great_expectations.core.usage_statistics.events import (
     UsageStatsEvents,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.core.usage_statistics.execution_environment import (
     GXExecutionEnvironment,
     PackageInfo,

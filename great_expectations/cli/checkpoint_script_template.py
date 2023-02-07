@@ -21,8 +21,6 @@ import sys
 from great_expectations.checkpoint.types.checkpoint_result import (
     CheckpointResult,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.data_context import FileDataContext  # noqa: TCH001
 from great_expectations.util import get_context
 

@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Set, Type
 from great_expectations.rule_based_profiler.data_assistant import (
     DataAssistant,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
     DataAssistantRunner,
 )

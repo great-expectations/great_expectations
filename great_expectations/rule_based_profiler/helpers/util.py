@@ -41,8 +41,6 @@ from great_expectations.core.domain import (
 from great_expectations.core.metric_domain_types import (
     MetricDomainTypes,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
     NumericRangeEstimationResult,

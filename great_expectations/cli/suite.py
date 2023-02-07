@@ -25,8 +25,6 @@ from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.render.renderer.notebook_renderer import (
     BaseNotebookRenderer,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )

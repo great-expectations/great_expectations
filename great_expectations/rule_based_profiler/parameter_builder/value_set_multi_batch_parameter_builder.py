@@ -22,8 +22,6 @@ from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
 from great_expectations.rule_based_profiler.config import (
     ParameterBuilderConfig,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.helpers.util import (
     datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,

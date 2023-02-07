@@ -19,8 +19,6 @@ from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,

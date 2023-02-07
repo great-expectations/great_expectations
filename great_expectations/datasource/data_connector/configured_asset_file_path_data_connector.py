@@ -8,8 +8,6 @@ from great_expectations.core.batch_spec import PathBatchSpec  # noqa: TCH001
 from great_expectations.datasource.data_connector.asset.asset import (
     Asset,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )

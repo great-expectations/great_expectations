@@ -16,8 +16,6 @@ from great_expectations.rule_based_profiler.config.base import (
 from great_expectations.rule_based_profiler.domain_builder import (
     DomainBuilder,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,  # noqa: TCH001
 )
@@ -32,8 +30,6 @@ from great_expectations.rule_based_profiler.helpers.util import (
 from great_expectations.rule_based_profiler.parameter_builder import (
     ParameterBuilder,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     build_parameter_container_for_variables,

@@ -10,8 +10,6 @@ from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,  # noqa: TCH001
 )
-
-# noqa: TCH001
 from great_expectations.core.data_context_key import DataContextKey  # noqa: TCH001
 from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,  # noqa: TCH001
