@@ -17,10 +17,10 @@ repos:
     hooks:
       - id: black
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.0.238'
+    rev: 'v0.0.241'
     hooks:
       - id: ruff
-        files: ^(great_expectations/core)  # TODO: expand to all of gx
+        files: ^(great_expectations|contrib) # TODO: add tests/ scripts/ etc.
         args: ["--fix"]
 # https://pre-commit.ci/
 ci:

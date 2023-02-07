@@ -490,6 +490,13 @@ def type_schema(
 
     --list to show all available types
     """
+    import pandas
+
+    from great_expectations.experimental.datasources import _PANDAS_SCHEMA_VERSION
+    from great_expectations.experimental.datasources.interfaces import Datasource
+    from great_expectations.experimental.datasources.pandas_datasource import (
+        PandasDatasource,
+    )
     from great_expectations.experimental.datasources.sources import _SourceFactories
 
     buffer = io.StringIO()
@@ -512,19 +519,33 @@ def type_schema(
         schema_dir = GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
         for name in _SourceFactories.type_lookup.type_names():
             model = _SourceFactories.type_lookup[name]
+
+            if (
+                model in {*PandasDatasource.asset_types, PandasDatasource}
+                and _PANDAS_SCHEMA_VERSION != pandas.__version__
+            ):
+                print(
+                    f"🙈  {name} - was generated with pandas {_PANDAS_SCHEMA_VERSION}; skipping"
+                )
+                continue
+
             try:
                 schema_path = schema_dir.joinpath(f"{model.__name__}.json")
                 json_str: str = model.schema_json(indent=indent) + "\n"
 
+                if issubclass(model, Datasource):
+                    print(f"🙈  {name} - is a Datasource; skipping")
+                    continue
+
                 if schema_path.exists():
                     if json_str == schema_path.read_text():
-                        print(f"  {name} - {schema_path.name} unchanged")
+                        print(f"✅  {name} - {schema_path.name} unchanged")
                         continue
 
                 schema_path.write_text(json_str)
-                print(f"  {name} - {schema_path.name} schema updated")
+                print(f"✅  {name} - {schema_path.name} schema updated")
             except TypeError as err:
-                print(f"  Could not sync {name} schema - {type(err).__name__}:{err}")
+                print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
 
     text: str = buffer.getvalue()
     if save_path:
