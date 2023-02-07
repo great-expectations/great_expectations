@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,7 @@ class RegExParser:
         self._num_all_matched_group_values: int = regex_pattern.groups
 
         # Check for `(?P<name>)` named group syntax
-        self._named_group_name_to_group_index_mapping: dict[str, int] = dict(
+        self._named_group_name_to_group_index_mapping: Dict[str, int] = dict(
             regex_pattern.groupindex
         )
 
@@ -28,7 +29,7 @@ class RegExParser:
     def get_num_named_matched_group_values(self) -> int:
         return len(self._named_group_name_to_group_index_mapping)
 
-    def get_named_group_name_to_group_index_mapping(self) -> dict[str, int]:
+    def get_named_group_name_to_group_index_mapping(self) -> Dict[str, int]:
         return self._named_group_name_to_group_index_mapping
 
     def get_matches(self, target: str) -> re.Match:
@@ -36,7 +37,7 @@ class RegExParser:
 
     def get_named_group_name_to_group_value_mapping(
         self, target: str
-    ) -> dict[str, str]:
+    ) -> Dict[str, str]:
         # Check for `(?P<name>)` named group syntax
         return self.get_matches(target=target).groupdict()
 
@@ -45,8 +46,8 @@ class RegExParser:
 
     def get_all_group_names_to_group_indexes_bidirectional_mappings(
         self,
-    ) -> tuple[dict[str, int], dict[int, str]]:
-        named_group_index_to_group_name_mapping: dict[int, str] = dict(
+    ) -> tuple[Dict[str, int], Dict[int, str]]:
+        named_group_index_to_group_name_mapping: Dict[int, str] = dict(
             zip(
                 self._named_group_name_to_group_index_mapping.values(),
                 self._named_group_name_to_group_index_mapping.keys(),
@@ -63,12 +64,12 @@ class RegExParser:
         )
 
         group_idx: int
-        common_group_index_to_group_name_mapping: dict[int, str] = {
+        common_group_index_to_group_name_mapping: Dict[int, str] = {
             group_idx: f"{self._unnamed_regex_group_prefix}{group_idx}"
             for group_idx in common_group_indexes
         }
 
-        all_group_index_to_group_name_mapping: dict[int, str] = {
+        all_group_index_to_group_name_mapping: Dict[int, str] = {
             **named_group_index_to_group_name_mapping,
             **common_group_index_to_group_name_mapping,
         }
@@ -83,7 +84,7 @@ class RegExParser:
             )
         )
 
-        all_group_name_to_group_index_mapping: dict[str, int] = dict(
+        all_group_name_to_group_index_mapping: Dict[str, int] = dict(
             zip(
                 all_group_index_to_group_name_mapping.values(),
                 all_group_index_to_group_name_mapping.keys(),
@@ -95,33 +96,33 @@ class RegExParser:
             all_group_index_to_group_name_mapping,
         )
 
-    def get_all_group_name_to_group_index_mapping(self) -> dict[str, int]:
+    def get_all_group_name_to_group_index_mapping(self) -> Dict[str, int]:
         all_group_names_to_group_indexes_bidirectional_mappings: tuple[
-            dict[str, int], dict[int, str]
+            Dict[str, int], Dict[int, str]
         ] = self.get_all_group_names_to_group_indexes_bidirectional_mappings()
-        all_group_name_to_group_index_mapping: dict[
+        all_group_name_to_group_index_mapping: Dict[
             str, int
         ] = all_group_names_to_group_indexes_bidirectional_mappings[0]
         return all_group_name_to_group_index_mapping
 
-    def get_all_group_index_to_group_name_mapping(self) -> dict[int, str]:
+    def get_all_group_index_to_group_name_mapping(self) -> Dict[int, str]:
         all_group_names_to_group_indexes_bidirectional_mappings: tuple[
-            dict[str, int], dict[int, str]
+            Dict[str, int], Dict[int, str]
         ] = self.get_all_group_names_to_group_indexes_bidirectional_mappings()
-        all_group_index_to_group_name_mapping: dict[
+        all_group_index_to_group_name_mapping: Dict[
             int, str
         ] = all_group_names_to_group_indexes_bidirectional_mappings[1]
         return all_group_index_to_group_name_mapping
 
     def get_all_group_names(self) -> list[str]:
-        all_group_name_to_group_index_mapping: dict[
+        all_group_name_to_group_index_mapping: Dict[
             str, int
         ] = self.get_all_group_name_to_group_index_mapping()
         all_group_names: list[str] = list(all_group_name_to_group_index_mapping.keys())
         return all_group_names
 
     def get_all_group_indexes(self) -> list[int]:
-        all_group_index_to_group_name_mapping: dict[
+        all_group_index_to_group_name_mapping: Dict[
             int, str
         ] = self.get_all_group_index_to_group_name_mapping()
         all_group_indexes: list[int] = list(
@@ -132,12 +133,12 @@ class RegExParser:
     def get_group_name_to_group_value_mapping(
         self,
         target: str,
-    ) -> dict[str, str]:
+    ) -> Dict[str, str]:
         all_group_names: list[str] = self.get_all_group_names()
         all_matched_group_values: list[str] = self.get_all_matched_group_values(
             target=target
         )
-        group_name_to_group_value_mapping: dict[str, str] = dict(
+        group_name_to_group_value_mapping: Dict[str, str] = dict(
             zip(all_group_names, all_matched_group_values)
         )
         return group_name_to_group_value_mapping
@@ -145,12 +146,12 @@ class RegExParser:
     def get_group_index_to_group_value_mapping(
         self,
         target: str,
-    ) -> dict[int, str]:
+    ) -> Dict[int, str]:
         all_group_indexes: list[int] = self.get_all_group_indexes()
         all_matched_group_values: list[str] = self.get_all_matched_group_values(
             target=target
         )
-        group_index_to_group_value_mapping: dict[int, str] = dict(
+        group_index_to_group_value_mapping: Dict[int, str] = dict(
             zip(all_group_indexes, all_matched_group_values)
         )
         return group_index_to_group_value_mapping

@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, Optional, Pattern
+from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Pattern
 
 import pydantic
 
@@ -48,8 +48,8 @@ class _FilesystemDataAsset(DataAsset):
     )
     _regex_parser: RegExParser = pydantic.PrivateAttr()
 
-    _all_group_name_to_group_index_mapping: dict[str, int] = pydantic.PrivateAttr()
-    _all_group_index_to_group_name_mapping: dict[int, str] = pydantic.PrivateAttr()
+    _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
+    _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
     _all_group_names: list[str] = pydantic.PrivateAttr()
 
     class Config:
