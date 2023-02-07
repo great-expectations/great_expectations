@@ -2705,9 +2705,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         profiler: None = ...,
     ) -> RuleBasedProfiler:
         """
-        Two possible patterns:
-            - A collection of required constructor args
-            - A profiler
+        Individual constructors args (`name`, `config_version`, and `rules`) are provided.
+        `profiler` should not be provided.
         """
         ...
 
@@ -2721,9 +2720,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         profiler: RuleBasedProfiler = ...,
     ) -> RuleBasedProfiler:
         """
-        Two possible patterns:
-            - A collection of required constructor args
-            - A profiler
+        `profiler` is provided.
+        Individual constructors args (`name`, `config_version`, and `rules`) should not be provided.
         """
         ...
 
@@ -2773,7 +2771,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         variables: dict | None,
         profiler: RuleBasedProfiler | None,
     ) -> RuleBasedProfiler:
-        if not ((profiler) ^ (arg is None for arg in (name, config_version, rules))):
+        if not (
+            (profiler is None)
+            ^ all(arg is None for arg in (name, config_version, rules))
+        ):
             raise ValueError(
                 "Must either pass in an existing profiler or individual constructor arguments (but not both)"
             )
@@ -2889,11 +2890,41 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_context=self,
         )
 
+    @overload
+    def add_or_update_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: dict[str, dict],
+        variables: dict | None = ...,
+        profiler: None = ...,
+    ) -> RuleBasedProfiler:
+        """
+        Individual constructors args (`name`, `config_version`, and `rules`) are provided.
+        `profiler` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_or_update_profiler(
+        self,
+        name: None = ...,
+        config_version: None = ...,
+        rules: None = ...,
+        variables: None = ...,
+        profiler: RuleBasedProfiler = ...,
+    ) -> RuleBasedProfiler:
+        """
+        `profiler` is provided.
+        Individual constructors args (`name`, `config_version`, and `rules`) should not be provided.
+        """
+        ...
+
     @public_api
     @new_method_or_class(version="0.15.48")
     def add_or_update_profiler(
         self,
-        name: str,
+        name: str | None = None,
         id: str | None = None,
         config_version: float | None = None,
         rules: dict[str, dict] | None = None,
