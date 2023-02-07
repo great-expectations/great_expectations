@@ -100,26 +100,40 @@ class TestDynamicPandasAssets:
     @pytest.mark.parametrize(
         "method_name",
         [
-            param("read_clipboard", marks=pytest.mark.xfail),
-            "read_csv",
-            "read_excel",
-            param("read_feather", marks=pytest.mark.xfail),
-            param("read_fwf", marks=pytest.mark.xfail),
-            param("read_gbq", marks=pytest.mark.xfail),
-            param("read_hdf", marks=pytest.mark.xfail),
-            param("read_html", marks=pytest.mark.xfail),
-            "read_json",
-            param("read_orc", marks=pytest.mark.xfail),
-            "read_parquet",
-            param("read_pickle", marks=pytest.mark.xfail),
-            param("read_sas", marks=pytest.mark.xfail),
-            param("read_spss", marks=pytest.mark.xfail),
-            param("read_sql", marks=pytest.mark.xfail),
-            param("read_sql_query", marks=pytest.mark.xfail),
-            param("read_sql_table", marks=pytest.mark.xfail),
-            param("read_stata", marks=pytest.mark.xfail),
-            param("read_table", marks=pytest.mark.xfail),
-            param("read_xml", marks=pytest.mark.xfail),
+            param("read_clipboard"),
+            param("read_csv"),
+            param("read_excel"),
+            param("read_feather"),
+            param(
+                "read_fwf", marks=pytest.mark.xfail(reason="unhandled type annotation")
+            ),
+            param("read_gbq"),
+            param("read_hdf"),
+            param("read_html"),
+            param("read_json"),
+            param("read_orc"),
+            param("read_parquet"),
+            param("read_pickle"),
+            param("read_sas"),
+            param("read_spss"),
+            param(
+                "read_sql",
+                marks=pytest.mark.xfail(reason="conflict with 'sql' type name"),
+            ),
+            param(
+                "read_sql_query",
+                marks=pytest.mark.xfail(reason="type name logic expects 'sqlquery'"),
+            ),
+            param(
+                "read_sql_table",
+                marks=pytest.mark.xfail(reason="type name logic expects 'sqltable'"),
+            ),
+            param("read_stata"),
+            param(
+                "read_table",
+                marks=pytest.mark.xfail(reason="conflict with 'table' type name"),
+            ),
+            param("read_xml"),
         ],
     )
     def test_data_asset_defined_for_io_read_method(self, method_name: str):
@@ -132,6 +146,30 @@ class TestDynamicPandasAssets:
         print(asset_class_names)
 
         assert type_name in asset_class_names
+
+    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    def test_minimal_validation(self, asset_class: Type[_FilesystemDataAsset]):
+        """
+        These parametrized tests ensures that every `PandasDatasource` asset model does some minimal
+        validation, and doesn't accept arbitrary keyword arguments.
+        This is also a proxy for testing that the dynamic pydantic model creation was successful.
+        """
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            asset_class(  # type: ignore[call-arg] # type has a default
+                name="test",
+                base_directory=pathlib.Path(__file__),
+                regex=re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
+                invalid_keyword_arg="bad",
+            )
+
+        errors_dict = exc_info.value.errors()
+        assert {
+            "loc": ("invalid_keyword_arg",),
+            "msg": "extra fields not permitted",
+            "type": "value_error.extra",
+        } == errors_dict[  # the extra keyword error will always be the last error
+            -1  # we don't care about any other errors for this test
+        ]
 
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],

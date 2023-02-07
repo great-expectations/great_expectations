@@ -1,6 +1,6 @@
 {
-    "title": "JSONAsset",
-    "description": "Convert a JSON string to pandas object.",
+    "title": "STATAAsset",
+    "description": "Read Stata file into DataFrame.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "json",
+            "default": "stata",
             "enum": [
-                "json"
+                "stata"
             ],
             "type": "string"
         },
@@ -32,58 +32,50 @@
             "type": "string",
             "format": "regex"
         },
-        "orient": {
-            "title": "Orient"
-        },
-        "typ": {
-            "title": "Typ",
-            "default": "frame"
-        },
-        "dtype": {
-            "title": "Dtype",
-            "type": "object"
-        },
-        "convert_axes": {
-            "title": "Convert Axes"
-        },
         "convert_dates": {
             "title": "Convert Dates",
-            "default": true
-        },
-        "keep_default_dates": {
-            "title": "Keep Default Dates",
             "default": true,
             "type": "boolean"
         },
-        "numpy": {
-            "title": "Numpy",
-            "default": false,
+        "convert_categoricals": {
+            "title": "Convert Categoricals",
+            "default": true,
             "type": "boolean"
         },
-        "precise_float": {
-            "title": "Precise Float",
-            "default": false,
-            "type": "boolean"
-        },
-        "date_unit": {
-            "title": "Date Unit"
-        },
-        "encoding": {
-            "title": "Encoding"
-        },
-        "encoding_errors": {
-            "title": "Encoding Errors",
-            "default": "strict",
+        "index_col": {
+            "title": "Index Col",
             "type": "string"
         },
-        "lines": {
-            "title": "Lines",
+        "convert_missing": {
+            "title": "Convert Missing",
             "default": false,
+            "type": "boolean"
+        },
+        "preserve_dtypes": {
+            "title": "Preserve Dtypes",
+            "default": true,
+            "type": "boolean"
+        },
+        "columns": {
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "order_categoricals": {
+            "title": "Order Categoricals",
+            "default": true,
             "type": "boolean"
         },
         "chunksize": {
             "title": "Chunksize",
             "type": "integer"
+        },
+        "iterator": {
+            "title": "Iterator",
+            "default": false,
+            "type": "boolean"
         },
         "compression": {
             "title": "Compression",
@@ -105,10 +97,6 @@
                     "type": "object"
                 }
             ]
-        },
-        "nrows": {
-            "title": "Nrows",
-            "type": "integer"
         },
         "storage_options": {
             "title": "Storage Options",
