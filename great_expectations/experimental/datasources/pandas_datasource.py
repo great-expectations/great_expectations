@@ -56,13 +56,20 @@ _ASSET_MODELS = _generate_pandas_data_asset_models(
     blacklist=_BLACK_LIST,
     use_docstring_from_method=True,
 )
-
-# variables only needed for type-hinting
-CSVAsset = _ASSET_MODELS["csv"]
-ExcelAsset = _ASSET_MODELS["excel"]
-JSONAsset = _ASSET_MODELS["json"]
-ORCAsset = _ASSET_MODELS["orc"]
-ParquetAsset = _ASSET_MODELS["parquet"]
+try:
+    # variables only needed for type-hinting
+    CSVAsset = _ASSET_MODELS["csv"]
+    ExcelAsset = _ASSET_MODELS["excel"]
+    JSONAsset = _ASSET_MODELS["json"]
+    ORCAsset = _ASSET_MODELS["orc"]
+    ParquetAsset = _ASSET_MODELS["parquet"]
+except KeyError as key_err:
+    logger.info(f"zep - {key_err} asset model could not be generated")
+    CSVAsset = _FilesystemDataAsset
+    ExcelAsset = _FilesystemDataAsset
+    JSONAsset = _FilesystemDataAsset
+    ORCAsset = _FilesystemDataAsset
+    ParquetAsset = _FilesystemDataAsset
 
 
 class PandasDatasource(Datasource):
