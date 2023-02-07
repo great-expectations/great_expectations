@@ -2370,9 +2370,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite: None = ...,
     ) -> ExpectationSuite:
         """
-        Two possible patterns:
-            - An expectation_suite_name and optional constructor args
-            - An expectation_suite
+        An `expectation_suite_name` is provided.
+        `expectation_suite` should not be provided.
         """
         ...
 
@@ -2389,9 +2388,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite: ExpectationSuite = ...,
     ) -> ExpectationSuite:
         """
-        Two possible patterns:
-            - An expectation_suite_name and optional constructor args
-            - An expectation_suite
+        An `expectation_suite` is provided.
+        `expectation_suite_name` should not be provided.
         """
         ...
 
