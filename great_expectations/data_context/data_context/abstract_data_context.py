@@ -1067,7 +1067,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if isinstance(datasource_name, str):
             datasource = self.get_datasource(datasource_name)
         else:
-            datasource = self.get_datasource()
+            datasource = self.get_datasource(None)
         assert not isinstance(
             datasource, XDatasource
         ), "Experimental Datasource cannot be built from batch_kwargs"
