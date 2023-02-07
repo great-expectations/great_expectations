@@ -15,21 +15,27 @@ ARG BRANCH=develop
 RUN git clone --filter=tree:0 --branch ${BRANCH} https://github.com/great-expectations/great_expectations.git
 WORKDIR /great_expectations
 
+FROM base as build_local
+WORKDIR /great_expectations
+COPY ./requirements.txt ./requirements.txt
+COPY ./requirements-dev.txt ./requirements-dev.txt
+COPY ./constraints-dev.txt ./constraints-dev.txt
+COPY ./reqs ./reqs
+
 FROM build_${SOURCE} AS dev
 ARG GE_USAGE_STATISTICS_URL="https://dev.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 env GE_USAGE_STATISTICS_URL="${GE_USAGE_STATISTICS_URL}"
 RUN pip install --no-cache-dir --requirement requirements-dev.txt --constraint constraints-dev.txt
-RUN pip install .
 CMD [ "python", "--version"]
 
 FROM dev as test
 RUN pip install --no-cache-dir --requirement requirements-dev.txt --requirement reqs/requirements-dev-test.txt \
     --constraint constraints-dev.txt
+COPY . .
+RUN pip install .
 
 FROM dev as dev-tools
 RUN pip install --no-cache-dir --requirement requirements-dev.txt --requirement reqs/requirements-dev-test.txt \
     --requirement reqs/requirements-dev-tools.txt --constraint constraints-dev.txt
-
-FROM base as build_local
-WORKDIR /great_expectations
 COPY . .
+RUN pip install .
