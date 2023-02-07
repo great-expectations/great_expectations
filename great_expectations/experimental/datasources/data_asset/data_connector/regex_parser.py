@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ class RegExParser:
 
     def get_all_group_names_to_group_indexes_bidirectional_mappings(
         self,
-    ) -> tuple[Dict[str, int], Dict[int, str]]:
+    ) -> Tuple[Dict[str, int], Dict[int, str]]:
         named_group_index_to_group_name_mapping: Dict[int, str] = dict(
             zip(
                 self._named_group_name_to_group_index_mapping.values(),
@@ -74,7 +74,7 @@ class RegExParser:
             **common_group_index_to_group_name_mapping,
         }
 
-        element: tuple[int, str]
+        element: Tuple[int, str]
         # noinspection PyTypeChecker
         all_group_index_to_group_name_mapping = dict(
             sorted(
@@ -97,7 +97,7 @@ class RegExParser:
         )
 
     def get_all_group_name_to_group_index_mapping(self) -> Dict[str, int]:
-        all_group_names_to_group_indexes_bidirectional_mappings: tuple[
+        all_group_names_to_group_indexes_bidirectional_mappings: Tuple[
             Dict[str, int], Dict[int, str]
         ] = self.get_all_group_names_to_group_indexes_bidirectional_mappings()
         all_group_name_to_group_index_mapping: Dict[
@@ -106,7 +106,7 @@ class RegExParser:
         return all_group_name_to_group_index_mapping
 
     def get_all_group_index_to_group_name_mapping(self) -> Dict[int, str]:
-        all_group_names_to_group_indexes_bidirectional_mappings: tuple[
+        all_group_names_to_group_indexes_bidirectional_mappings: Tuple[
             Dict[str, int], Dict[int, str]
         ] = self.get_all_group_names_to_group_indexes_bidirectional_mappings()
         all_group_index_to_group_name_mapping: Dict[

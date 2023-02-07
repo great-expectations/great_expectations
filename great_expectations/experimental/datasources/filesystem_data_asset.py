@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Pattern, Set
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Pattern, Set, Tuple
 
 import pydantic
 
@@ -114,7 +114,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
-    ) -> List[tuple[BatchRequest, pathlib.Path]]:
+    ) -> List[Tuple[BatchRequest, pathlib.Path]]:
         """Generates a list fully specified batch requests from partial specified batch request
 
         Args:
@@ -126,7 +126,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This list will be empty if no files exist on disk that correspond to the input
             batch request.
         """
-        batch_requests_with_path: List[tuple[BatchRequest, pathlib.Path]] = []
+        batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
 
         all_files: List[pathlib.Path] = list(
             pathlib.Path(self.base_directory).iterdir()
