@@ -1,0 +1,14 @@
+# tests/ specific ruff linter overrides
+
+# root linter settings are defined in the file below
+extend = "../pyproject.toml"
+
+extend-ignore = [
+    # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
+    # this likely to be a high touch set of rules.
+    # Let's differ this for tests until there are auto-fixes
+    "TCH",
+]
+
+[isort]
+known-first-party = ["great_expectations", "tests"]
