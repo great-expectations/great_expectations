@@ -370,12 +370,11 @@ def _generate_pandas_data_asset_models(
             logger.info(f"{model_name} - {type(err).__name__}:{err}")
             continue
         except TypeError as err:
-            # may fail on python <3.10 due to use of builtin as generic
             logger.warning(
-                f"{model_name} could not be created normally - {type(err).__name__}:{err}"
+                f"pandas {pd.__version__}  {model_name} could not be created normally - {type(err).__name__}:{err} , skipping"
             )
-            logger.warning(f"{model_name} fields\n{pf(fields)}")
-            raise
+            logger.info(f"{model_name} fields\n{pf(fields)}")
+            continue
 
         data_asset_models[type_name] = asset_model
         asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
