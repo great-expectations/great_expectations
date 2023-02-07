@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, Type, cast
 
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.types.base import GXCloudConfig
+from great_expectations.data_context.types.base import GXCloudConfig  # noqa: TCH001
 
 yaml = YAMLHandler()
 

@@ -33,7 +33,9 @@ from pydantic import Field, FilePath
 # from pydantic.typing import resolve_annotations
 from typing_extensions import Final, Literal, TypeAlias
 
-from great_expectations.experimental.datasources.interfaces import DataAsset
+from great_expectations.experimental.datasources.interfaces import (
+    DataAsset,  # noqa: TCH001
+)
 
 try:
     # https://github.com/pandas-dev/pandas/blob/main/pandas/_typing.py
