@@ -22,9 +22,6 @@ def are_values_after_split_in_value_set(
 
     for val in all_split_values:
         if val not in value_set:
-            print(
-                f'The current value "{val}" is not present in the acceptable value set: {value_set}'
-            )
             return False
 
     return True
