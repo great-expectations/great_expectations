@@ -144,7 +144,7 @@
           }
         },
         {
-          "title": "basic_negative_now_test_pandas_spark",
+          "title": "basic_negative_now_test_pandas_spark_select_sql",
           "include_in_gallery": true,
           "exact_match_out": false,
           "only_for": ["pandas", "spark", "postgresql", "mysql", "mssql"],
@@ -160,7 +160,7 @@
           }
         },
         {
-          "title": "basic_negative_now_test_sql",
+          "title": "basic_negative_now_test_other_sql",
           "include_in_gallery": true,
           "exact_match_out": false,
           "suppress_test_for": ["pandas", "spark", "mysql", "mssql", "postgresql"],
@@ -191,7 +191,7 @@
           }
         },
         {
-          "title": "basic_negative_now_timedelta_test_pandas_spark",
+          "title": "basic_negative_now_timedelta_test_pandas_spark_select_sql",
           "exact_match_out": false,
           "only_for": ["pandas", "spark","postgresql", "mssql", "mysql"],
           "out": {
@@ -206,7 +206,7 @@
           }
         },
         {
-          "title": "basic_negative_now_timedelta_test_sql",
+          "title": "basic_negative_now_timedelta_test_other_sql",
           "exact_match_out": false,
           "suppress_test_for": ["pandas", "spark", "postgresql", "mssql", "mysql"],
           "out": {
@@ -237,7 +237,7 @@
           }
         },
         {
-          "title": "basic_negative_datetime_test_pandas_spark",
+          "title": "basic_negative_datetime_test_pandas_spark_select_sql",
           "exact_match_out": false,
           "only_for": ["pandas", "spark", "postgresql", "mssql", "mysql"],
           "out": {
@@ -251,7 +251,7 @@
             }
           }
         }, {
-          "title": "basic_negative_datetime_test_sql",
+          "title": "basic_negative_datetime_test_other_sql",
           "exact_match_out": false,
           "suppress_test_for": ["pandas", "spark", "postgresql", "mssql", "mysql"],
           "out": {

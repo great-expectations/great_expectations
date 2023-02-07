@@ -1200,7 +1200,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
     """Utility to create datasets for json-formatted tests."""
 
     # if pk_column is defined in our test, then we add a index column to our test set
-    if pk_column and "pk_index" not in data:
+    if pk_column:
         first_column: List[Any] = list(data.values())[0]
         data["pk_index"] = list(range(len(first_column)))
 
