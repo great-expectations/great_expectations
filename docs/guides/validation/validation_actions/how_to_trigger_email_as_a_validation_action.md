@@ -66,7 +66,7 @@ Our [guide on how to Validate data by running a Checkpoint](../how_to_validate_d
 
 If successful, you should receive an email that looks like this:
 
-![image](../../../../docs/images/email_example.png)
+![image](../../../images/email_example.png)
 
 ## Additional notes
 
