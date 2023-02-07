@@ -8,10 +8,6 @@ FROM python:${PYTHON_VERSION} AS base
 RUN apt update && apt install default-jre unixodbc unixodbc-dev default-mysql-client locales locales-all -y && apt clean
 RUN python -m pip install --no-cache-dir --upgrade pip
 
-FROM base as build_local
-WORKDIR /great_expectations
-COPY . .
-
 FROM base AS build_github
 # BRANCH is the branch name you want to build
 ARG BRANCH=develop
@@ -33,3 +29,7 @@ RUN pip install --no-cache-dir --requirement requirements-dev.txt --requirement 
 FROM dev as dev-tools
 RUN pip install --no-cache-dir --requirement requirements-dev.txt --requirement reqs/requirements-dev-test.txt \
     --requirement reqs/requirements-dev-tools.txt --constraint constraints-dev.txt
+
+FROM base as build_local
+WORKDIR /great_expectations
+COPY . .
