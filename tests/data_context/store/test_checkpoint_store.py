@@ -520,11 +520,12 @@ def test_add_checkpoint(
 
     context = mock.MagicMock(spec=FileDataContext)
     context._usage_statistics_handler = mock.MagicMock()
-    checkpoint = Checkpoint(name="my_checkpoint", data_context=context)
+    checkpoint_name = "my_checkpoint"
+    checkpoint = Checkpoint(name=checkpoint_name, data_context=context)
 
-    store.add_checkpoint(checkpoint=checkpoint, name="my_checkpoint", id=None)
+    store.add_checkpoint(checkpoint=checkpoint)
 
     mock_backend.set.assert_called_once_with(
-        ("my_checkpoint",),
+        (checkpoint_name,),
         "name: my_checkpoint\nconfig_version:\nmodule_name: great_expectations.checkpoint\nclass_name: LegacyCheckpoint\n",
     )
