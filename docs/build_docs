@@ -2,7 +2,11 @@
 
 # Build API docs then build docusaurus docs.
 # Currently used in our netlify pipeline.
-# Note: Will be modified to build API docs on latest tagged release.
+
+# Get latest version, check out and build API docs using the latest
+GX_LATEST=$(git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V | tail -1)
+echo "Using latest version ${GX_LATEST} to build docs."
+git checkout $GX_LATEST
 
 echo "Installing dev dependencies"
 pip install -c constraints-dev.txt -e ".[test]"
@@ -13,5 +17,9 @@ echo "Installing dev dependencies"
 echo "Building sphinx API docs."
 (cd docs/sphinx_api_docs_source; invoke docs)
 
+echo "Checking out develop to build the rest of the docs."
+git checkout develop
+
 echo "Building docusaurus docs."
+yarn install
 yarn build
