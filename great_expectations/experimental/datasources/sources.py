@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, List, Type, Union
-
-from typing_extensions import ClassVar
+from typing import TYPE_CHECKING, Callable, ClassVar, Dict, List, Type, Union
 
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 

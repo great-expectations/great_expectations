@@ -1,0 +1,87 @@
+{
+    "title": "ParquetAsset",
+    "description": "Load a parquet object from the file path, returning a DataFrame.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "parquet",
+            "enum": [
+                "parquet"
+            ],
+            "type": "string"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/BatchSorter"
+            }
+        },
+        "base_directory": {
+            "title": "Base Directory",
+            "type": "string",
+            "format": "path"
+        },
+        "regex": {
+            "title": "Regex",
+            "type": "string",
+            "format": "regex"
+        },
+        "path": {
+            "title": "Path"
+        },
+        "engine": {
+            "title": "Engine",
+            "default": "auto",
+            "type": "string"
+        },
+        "columns": {
+            "title": "Columns"
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        },
+        "use_nullable_dtypes": {
+            "title": "Use Nullable Dtypes",
+            "default": false,
+            "type": "boolean"
+        },
+        "kwargs": {
+            "title": "Kwargs"
+        }
+    },
+    "required": [
+        "name",
+        "base_directory",
+        "regex",
+        "path",
+        "kwargs"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "BatchSorter": {
+            "title": "BatchSorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

@@ -7295,6 +7295,53 @@ def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index():
 
 
 @pytest.fixture
+def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
+    spark_session,
+) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "ordered_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "eraser",
+                "eraser",
+                "eraser",
+            ],
+            "received_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "desk",
+                "desk",
+                "desk",
+            ],
+        }
+    )
+    test_df = spark_session.createDataFrame(data=df)
+    return test_df
+
+
+@pytest.fixture
+def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
+    spark_session,
+) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "a": [10, 20, 30, 40, 50, 60],
+            "b": [10, 20, 30, 40, 50, 60],
+            "c": [10, 20, 30, 40, 50, 60],
+        }
+    )
+    test_df = spark_session.createDataFrame(data=df)
+    return test_df
+
+
+@pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
 ) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821

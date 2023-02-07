@@ -6,6 +6,7 @@ from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
+    ClassVar,
     Dict,
     Generic,
     List,
@@ -19,14 +20,13 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt
+from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
 from pydantic import dataclasses as pydantic_dc
-from pydantic import root_validator, validate_arguments
-from typing_extensions import ClassVar, TypeAlias, TypeGuard
+from typing_extensions import TypeAlias, TypeGuard
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.experimental.datasources.constants import _FIELD_ALWAYS_SET
+from great_expectations.experimental.datasources.constants import _FIELDS_ALWAYS_SET
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
@@ -40,7 +40,6 @@ if TYPE_CHECKING:
     # TODO: When the Batch class is moved out of the experimental directory, we should try to import the annotations
     #       from core.batch so we no longer need to call Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import BatchData, BatchDefinition, BatchMarkers
-    from great_expectations.execution_engine import ExecutionEngine
 
 try:
     import pyspark
@@ -142,7 +141,7 @@ class DataAsset(ExperimentalBaseModel):
     type: str
     order_by: List[BatchSorter] = Field(default_factory=list)
 
-    # non-field private attrs
+    # non-field private attributes
     _datasource: Datasource = pydantic.PrivateAttr()
 
     @property
@@ -161,10 +160,10 @@ class DataAsset(ExperimentalBaseModel):
         """Test the connection for the DataAsset.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         raise NotImplementedError(
-            "One needs to implement 'test_connection' on a DataAsset subclass"
+            """One needs to implement "test_connection" on a DataAsset subclass."""
         )
 
     # Abstract Methods
@@ -209,7 +208,7 @@ class DataAsset(ExperimentalBaseModel):
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
         return BatchRequest(
-            datasource_name=self._datasource.name,
+            datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
         )
@@ -252,9 +251,7 @@ class DataAsset(ExperimentalBaseModel):
             return _batch_sorter_from_str(v)
         return v
 
-    def add_sorters(
-        self: DataAssetType, sorters: BatchSortersDefinition
-    ) -> DataAssetType:
+    def add_sorters(self: _DataAssetT, sorters: BatchSortersDefinition) -> _DataAssetT:
         """Associates a sorter to this DataAsset
 
         The passed in sorters will replace any previously associated sorters.
@@ -307,12 +304,18 @@ class DataAsset(ExperimentalBaseModel):
                 ) from e
 
 
-# If a Datasource can have more than 1 DataAssetType, this will need to change.
-DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
+# If a Datasource can have more than 1 _DataAssetT, this will need to change.
+_DataAssetT = TypeVar("_DataAssetT", bound=DataAsset)
+
+
+# It would be best to bind this to ExecutionEngine, but we can't now due to circular imports
+_ExecutionEngineT = TypeVar("_ExecutionEngineT")
 
 
 class Datasource(
-    ExperimentalBaseModel, Generic[DataAssetType], metaclass=MetaDatasource
+    ExperimentalBaseModel,
+    Generic[_DataAssetT, _ExecutionEngineT],
+    metaclass=MetaDatasource,
 ):
     # To subclass Datasource one needs to define:
     # asset_types
@@ -327,7 +330,7 @@ class Datasource(
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
-    _excluded_eng_args: ClassVar[Set[str]] = {
+    _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
         "type",
         "execution_engine",
@@ -335,22 +338,22 @@ class Datasource(
     }
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
-    execution_engine_override: ClassVar[Optional[Type[ExecutionEngine]]] = None
+    execution_engine_override: ClassVar[Optional[Type[_ExecutionEngineT]]] = None  # type: ignore[misc]
 
     # instance attrs
     type: str
     name: str
-    assets: MutableMapping[str, DataAssetType] = {}
+    assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
-    _execution_engine: ExecutionEngine | None = pydantic.PrivateAttr(None)
+    _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
     def _load_asset_subtype(
-        cls: Type[Datasource[DataAssetType]], data_asset: DataAsset
-    ) -> DataAssetType:
+        cls: Type[Datasource[_DataAssetT, _ExecutionEngineT]], data_asset: DataAsset
+    ) -> _DataAssetT:
         """
         Some `data_asset` may be loaded as a less specific asset subtype different than
         what was intended.
@@ -359,7 +362,7 @@ class Datasource(
         """
         logger.info(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
         asset_type_name: str = data_asset.type
-        asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[asset_type_name]
+        asset_type: Type[_DataAssetT] = _SourceFactories.type_lookup[asset_type_name]
 
         if asset_type is type(data_asset):
             # asset is already the intended type
@@ -373,12 +376,14 @@ class Datasource(
         logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
         return asset_of_intended_type
 
-    def _execution_engine_type(self) -> Type[ExecutionEngine]:
+    def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
 
-    def get_execution_engine(self) -> ExecutionEngine:
-        current_execution_engine_kwargs = self.dict(exclude=self._excluded_eng_args)
+    def get_execution_engine(self) -> _ExecutionEngineT:
+        current_execution_engine_kwargs = self.dict(
+            exclude=self._EXCLUDED_EXEC_ENG_ARGS
+        )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
             or not self._execution_engine
@@ -404,7 +409,7 @@ class Datasource(
         data_asset = self.get_asset(batch_request.data_asset_name)
         return data_asset.get_batch_list_from_batch_request(batch_request)
 
-    def get_asset(self, asset_name: str) -> DataAssetType:
+    def get_asset(self, asset_name: str) -> _DataAssetT:
         """Returns the DataAsset referred to by name"""
         # This default implementation will be used if protocol is inherited
         try:
@@ -414,7 +419,7 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(self, asset: DataAssetType) -> DataAssetType:
+    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
@@ -427,15 +432,15 @@ class Datasource(
         self.assets[asset.name] = asset
         # pydantic needs to know that an asset has been set so that it doesn't get excluded
         # when dumping to dict, json, yaml etc.
-        self.__fields_set__.add(_FIELD_ALWAYS_SET)
+        self.__fields_set__.update(_FIELDS_ALWAYS_SET)
         return asset
 
     # Abstract Methods
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
+    def execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Return the ExecutionEngine type use for this Datasource"""
         raise NotImplementedError(
-            "One needs to implement 'execution_engine_type' on a Datasource subclass"
+            """One needs to implement "execution_engine_type" on a Datasource subclass."""
         )
 
     def test_connection(self, test_assets: bool = True) -> None:
@@ -448,7 +453,7 @@ class Datasource(
             TestConnectionError
         """
         raise NotImplementedError(
-            "One needs to implement 'test_connection' on a Datasource subclass"
+            """One needs to implement "test_connection" on a Datasource subclass."""
         )
 
     # End Abstract Methods

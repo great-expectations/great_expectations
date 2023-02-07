@@ -6,6 +6,7 @@ import pathlib
 import pytest
 
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.experimental.datasources import SqliteDatasource
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
@@ -35,9 +36,9 @@ def pandas_data(
     return context, pandas_ds, asset, batch_request
 
 
-def sql_data(
-    context: AbstractDataContext,
-) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+def sqlite_datasource(
+    context: AbstractDataContext, db_filename: str
+) -> SqliteDatasource:
     relative_path = pathlib.Path(
         "..",
         "..",
@@ -45,13 +46,20 @@ def sql_data(
         "test_sets",
         "taxi_yellow_tripdata_samples",
         "sqlite",
-        "yellow_tripdata.db",
+        db_filename,
     )
     db_file = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     datasource = context.sources.add_sqlite(
         name="test_datasource",
         connection_string=f"sqlite:///{db_file}",
     )
+    return datasource
+
+
+def sql_data(
+    context: AbstractDataContext,
+) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    datasource = sqlite_datasource(context, "yellow_tripdata.db")
     asset = (
         datasource.add_table_asset(
             name="my_asset",
@@ -79,6 +87,8 @@ def spark_data(
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
+        header=True,
+        infer_schema=True,
     )
     batch_request = asset.get_batch_request({"year": "2019", "month": "01"})
     return context, spark_ds, asset, batch_request
@@ -107,19 +117,8 @@ def multibatch_pandas_data(
 def multibatch_sql_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    relative_path = pathlib.Path(
-        "..",
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "sqlite",
-        "yellow_tripdata_sample_2020_all_months_combined.db",
-    )
-    db_file = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    datasource = context.sources.add_sqlite(
-        name="test_datasource",
-        connection_string=f"sqlite:///{db_file}",
+    datasource = sqlite_datasource(
+        context, "yellow_tripdata_sample_2020_all_months_combined.db"
     )
     asset = (
         datasource.add_table_asset(
@@ -148,6 +147,8 @@ def multibatch_spark_data(
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
+        header=True,
+        infer_schema=True,
     )
     batch_request = asset.get_batch_request({"year": "2020"})
     return context, spark_ds, asset, batch_request
