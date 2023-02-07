@@ -70,7 +70,9 @@ logger = logging.getLogger(__name__)
 @public_api
 @deprecated_argument(argument_name="data_asset_type", version="0.14.0")
 @new_argument(
-    argument_name="ge_cloud_id", version="0.13.33", message="Used in cloud deployments."
+    argument_name="ge_cloud_id",
+    version="0.13.33",
+    message="Used in GX Cloud deployments.",
 )
 class ExpectationSuite(SerializableDictDot):
     """Suite of expectations plus create, read, update, and delete functionality.
