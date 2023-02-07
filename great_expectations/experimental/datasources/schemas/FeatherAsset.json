@@ -1,6 +1,6 @@
 {
-    "title": "ParquetAsset",
-    "description": "Load a parquet object from the file path, returning a DataFrame.",
+    "title": "FeatherAsset",
+    "description": "Load a feather-format object from the file path.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "parquet",
+            "default": "feather",
             "enum": [
-                "parquet"
+                "feather"
             ],
             "type": "string"
         },
@@ -35,33 +35,24 @@
         "path": {
             "title": "Path"
         },
-        "engine": {
-            "title": "Engine",
-            "default": "auto",
-            "type": "string"
-        },
         "columns": {
             "title": "Columns"
+        },
+        "use_threads": {
+            "title": "Use Threads",
+            "default": true,
+            "type": "boolean"
         },
         "storage_options": {
             "title": "Storage Options",
             "type": "object"
-        },
-        "use_nullable_dtypes": {
-            "title": "Use Nullable Dtypes",
-            "default": false,
-            "type": "boolean"
-        },
-        "kwargs": {
-            "title": "Kwargs"
         }
     },
     "required": [
         "name",
         "base_directory",
         "regex",
-        "path",
-        "kwargs"
+        "path"
     ],
     "additionalProperties": false,
     "definitions": {
