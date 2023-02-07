@@ -1,6 +1,6 @@
 {
-    "title": "ParquetAsset",
-    "description": "Load a parquet object from the file path, returning a DataFrame.",
+    "title": "ClipboardAsset",
+    "description": "Read text from clipboard and pass to read_csv.\n\nParameters\n----------\nsep : str, default '\\s+'\n    A string or regex delimiter. The default of '\\s+' denotes\n    one or more whitespace characters.\n\n**kwargs\n    See read_csv for the full argument list.\n\nReturns\n-------\nDataFrame\n    A parsed DataFrame object.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "parquet",
+            "default": "clipboard",
             "enum": [
-                "parquet"
+                "clipboard"
             ],
             "type": "string"
         },
@@ -32,25 +32,9 @@
             "type": "string",
             "format": "regex"
         },
-        "path": {
-            "title": "Path"
-        },
-        "engine": {
-            "title": "Engine",
-            "default": "auto",
-            "type": "string"
-        },
-        "columns": {
-            "title": "Columns"
-        },
-        "storage_options": {
-            "title": "Storage Options",
-            "type": "object"
-        },
-        "use_nullable_dtypes": {
-            "title": "Use Nullable Dtypes",
-            "default": false,
-            "type": "boolean"
+        "sep": {
+            "title": "Sep",
+            "default": "\\s+"
         },
         "kwargs": {
             "title": "Kwargs"
@@ -60,7 +44,6 @@
         "name",
         "base_directory",
         "regex",
-        "path",
         "kwargs"
     ],
     "additionalProperties": false,

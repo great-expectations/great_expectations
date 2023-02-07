@@ -20,7 +20,7 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import PandasExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -29,30 +29,77 @@ class PandasDatasourceError(Exception):
     pass
 
 
-_ASSET_MODELS = _generate_pandas_data_asset_models(
-    _FilesystemDataAsset,
-    whitelist=(
-        "read_csv",
-        "read_json",
-        "read_excel",
-        "read_parquet",
-    ),
+_BLACK_LIST = (
+    # "read_csv",
+    # "read_json",
+    # "read_excel",
+    # "read_parquet",
+    # "read_clipboard",
+    # "read_feather",
+    "read_fwf",  # unhandled type
+    # "read_gbq",
+    # "read_hdf",
+    # "read_html",
+    # "read_orc",
+    # "read_pickle",
+    # "read_sas",  # invalid json schema
+    # "read_spss",
+    "read_sql",  # type-name conflict
+    # "read_sql_query",
+    # "read_sql_table",
+    "read_table",  # type-name conflict
+    # "read_xml",
 )
 
+_ASSET_MODELS = _generate_pandas_data_asset_models(
+    _FilesystemDataAsset,
+    blacklist=_BLACK_LIST,
+    use_docstring_from_method=True,
+)
 
+ClipboardAsset = _ASSET_MODELS["clipboard"]
 CSVAsset = _ASSET_MODELS["csv"]
 ExcelAsset = _ASSET_MODELS["excel"]
+FeatherAsset = _ASSET_MODELS["feather"]
+GBQAsset = _ASSET_MODELS["gbq"]
+HDFAsset = _ASSET_MODELS["hdf"]
+HTMLAsset = _ASSET_MODELS["html"]
 JSONAsset = _ASSET_MODELS["json"]
+ORCAsset = _ASSET_MODELS["orc"]
 ParquetAsset = _ASSET_MODELS["parquet"]
+PickleAsset = _ASSET_MODELS["pickle"]
+SASAsset = _ASSET_MODELS["sas"]
+SPSSAsset = _ASSET_MODELS["spss"]
+# SqlAsset = _ASSET_MODELS["sql"]
+SQLQueryAsset = _ASSET_MODELS["sql_query"]
+SQLTableAsset = _ASSET_MODELS["sql_table"]
+STATAAsset = _ASSET_MODELS["stata"]
+# TableAsset = _ASSET_MODELS["table"]
+XMLAsset = _ASSET_MODELS["xml"]
 
 
 class PandasDatasource(Datasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [
+        ClipboardAsset,
         CSVAsset,
         ExcelAsset,
+        FeatherAsset,
+        GBQAsset,
+        HDFAsset,
+        HTMLAsset,
         JSONAsset,
+        ORCAsset,
         ParquetAsset,
+        PickleAsset,
+        SASAsset,
+        SPSSAsset,
+        SQLQueryAsset,
+        # SqlAsset,
+        SQLTableAsset,
+        STATAAsset,
+        # TableAsset,
+        XMLAsset,
     ]
 
     # instance attributes
@@ -62,15 +109,30 @@ class PandasDatasource(Datasource):
         str,
         Union[
             _FilesystemDataAsset,
+            ClipboardAsset,
             CSVAsset,
             ExcelAsset,
+            FeatherAsset,
+            GBQAsset,
+            HDFAsset,
+            HTMLAsset,
             JSONAsset,
+            ORCAsset,
             ParquetAsset,
+            PickleAsset,
+            SASAsset,
+            SPSSAsset,
+            SQLQueryAsset,
+            # SqlAsset,
+            SQLTableAsset,
+            STATAAsset,
+            # TableAsset,
+            XMLAsset,
         ],
     ] = {}
 
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
+    def execution_engine_type(self) -> Type[PandasExecutionEngine]:
         """Return the PandasExecutionEngine unless the override is set"""
         from great_expectations.execution_engine.pandas_execution_engine import (
             PandasExecutionEngine,

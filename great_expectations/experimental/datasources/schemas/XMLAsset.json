@@ -1,6 +1,6 @@
 {
-    "title": "JSONAsset",
-    "description": "Convert a JSON string to pandas object.",
+    "title": "XMLAsset",
+    "description": "Read XML document into a ``DataFrame`` object.\n\n.. versionadded:: 1.3.0",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "json",
+            "default": "xml",
             "enum": [
-                "json"
+                "xml"
             ],
             "type": "string"
         },
@@ -32,58 +32,41 @@
             "type": "string",
             "format": "regex"
         },
-        "orient": {
-            "title": "Orient"
-        },
-        "typ": {
-            "title": "Typ",
-            "default": "frame"
-        },
-        "dtype": {
-            "title": "Dtype",
-            "type": "object"
-        },
-        "convert_axes": {
-            "title": "Convert Axes"
-        },
-        "convert_dates": {
-            "title": "Convert Dates",
-            "default": true
-        },
-        "keep_default_dates": {
-            "title": "Keep Default Dates",
-            "default": true,
-            "type": "boolean"
-        },
-        "numpy": {
-            "title": "Numpy",
-            "default": false,
-            "type": "boolean"
-        },
-        "precise_float": {
-            "title": "Precise Float",
-            "default": false,
-            "type": "boolean"
-        },
-        "date_unit": {
-            "title": "Date Unit"
-        },
-        "encoding": {
-            "title": "Encoding"
-        },
-        "encoding_errors": {
-            "title": "Encoding Errors",
-            "default": "strict",
+        "xpath": {
+            "title": "Xpath",
+            "default": "./*",
             "type": "string"
         },
-        "lines": {
-            "title": "Lines",
+        "namespaces": {
+            "title": "Namespaces",
+            "type": "object"
+        },
+        "elems_only": {
+            "title": "Elems Only",
             "default": false,
             "type": "boolean"
         },
-        "chunksize": {
-            "title": "Chunksize",
-            "type": "integer"
+        "attrs_only": {
+            "title": "Attrs Only",
+            "default": false,
+            "type": "boolean"
+        },
+        "names": {
+            "title": "Names",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "encoding": {
+            "title": "Encoding",
+            "default": "utf-8",
+            "type": "string"
+        },
+        "parser": {
+            "title": "Parser",
+            "default": "lxml",
+            "type": "string"
         },
         "compression": {
             "title": "Compression",
@@ -105,10 +88,6 @@
                     "type": "object"
                 }
             ]
-        },
-        "nrows": {
-            "title": "Nrows",
-            "type": "integer"
         },
         "storage_options": {
             "title": "Storage Options",
