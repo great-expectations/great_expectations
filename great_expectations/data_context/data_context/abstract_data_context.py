@@ -1620,6 +1620,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
+            validation_operator_name=validation_operator_name,
+            batches=batches,
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
@@ -1816,6 +1818,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = None,
         validations: list[dict] | None = None,
         profilers: list[dict] | None = None,
+        validation_operator_name: str | None = None,
+        batches: list[dict] | None = None,
         site_names: str | list[str] | None = None,
         slack_webhook: str | None = None,
         notify_on: str | None = None,
@@ -1832,6 +1836,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if not checkpoint:
+            assert (
+                name
+            ), "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
             checkpoint = Checkpoint.construct_from_config_args(
                 data_context=self,
                 checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
@@ -1848,7 +1855,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 runtime_configuration=runtime_configuration,
                 validations=validations,
                 profilers=profilers,
-                # the following four arguments are used by SimpleCheckpoint
+                validation_operator_name=validation_operator_name,
+                batches=batches,
                 site_names=site_names,
                 slack_webhook=slack_webhook,
                 notify_on=notify_on,
