@@ -36,6 +36,7 @@ class _FilesystemDataAsset(DataAsset):
         "base_directory",
         "regex",
         "order_by",
+        "type",
     }
 
     # Filesystem specific attributes
@@ -83,7 +84,7 @@ class _FilesystemDataAsset(DataAsset):
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> Set[str] | None:
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""
@@ -133,11 +134,13 @@ to use as its "include" directive for File-Path style DataAsset processing."""
 
         file_name: pathlib.Path
         for file_name in all_files:
-            match = self.regex.match(file_name.name)
+            match = self._regex_parser.get_matches(target=file_name.name)
             if match:
                 # Create the batch request that would correlate to this regex match
                 match_options = {}
-                for group_id in range(1, self.regex.groups + 1):
+                for group_id in range(
+                    1, self._regex_parser.get_num_all_matched_group_values() + 1
+                ):
                     match_options[
                         self._all_group_index_to_group_name_mapping[group_id]
                     ] = match.group(group_id)

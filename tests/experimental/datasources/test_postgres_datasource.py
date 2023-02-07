@@ -642,6 +642,8 @@ def test_data_source_json_has_properties(create_source: CreateSourceFixture):
         source_json = source.json(indent=4, sort_keys=True)
         print(source_json)
         assert '"order_by": ' in source_json
+        # type should be in dumped json even if not explicitly set
+        assert f'"type": "{asset.type}"'
 
 
 @pytest.mark.unit
@@ -656,6 +658,8 @@ def test_data_source_yaml_has_properties(create_source: CreateSourceFixture):
         asset.add_sorters(["year", "month"])
         source_str = source.__str__()
         assert "order_by:" in source_str
+        # type should be in dumped str even if not explicitly set
+        assert f"type: {asset.type}" in source_str
 
 
 @pytest.mark.unit
@@ -671,6 +675,8 @@ def test_datasource_dict_has_properties(create_source):
         source_dict = source.dict()
         pprint(source_dict)
         assert isinstance(source_dict["assets"]["my_asset"]["order_by"], list)
+        # type should be in dumped dict even if not explicitly set
+        assert "type" in source_dict["assets"]["my_asset"]
 
 
 @pytest.mark.unit

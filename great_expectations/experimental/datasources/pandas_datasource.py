@@ -173,9 +173,9 @@ class PandasDatasource(Datasource):
         """
         asset = CSVAsset(
             name=name,
-            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
-            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            base_directory=base_directory,
+            regex=regex,
+            order_by=order_by or [],
             **kwargs,
         )
         return self.add_asset(asset)
@@ -199,9 +199,9 @@ class PandasDatasource(Datasource):
         """
         asset = ExcelAsset(
             name=name,
-            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
-            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            base_directory=base_directory,
+            regex=regex,
+            order_by=order_by or [],
             **kwargs,
         )
         return self.add_asset(asset)
@@ -225,9 +225,9 @@ class PandasDatasource(Datasource):
         """
         asset = JSONAsset(
             name=name,
-            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
-            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            base_directory=base_directory,
+            regex=regex,
+            order_by=order_by or [],
             **kwargs,
         )
         return self.add_asset(asset)
@@ -251,9 +251,9 @@ class PandasDatasource(Datasource):
         """
         asset = ParquetAsset(
             name=name,
-            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
-            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            base_directory=base_directory,
+            regex=regex,
+            order_by=order_by or [],
             **kwargs,
         )
         return self.add_asset(asset)
