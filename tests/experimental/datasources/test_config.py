@@ -10,7 +10,7 @@ import pytest
 
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
-from great_expectations.experimental.datasources.interfaces import DataAsset, Datasource
+from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
