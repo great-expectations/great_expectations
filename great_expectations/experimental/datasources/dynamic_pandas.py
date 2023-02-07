@@ -257,6 +257,8 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
             types.append(type_str)
         else:
             NEED_SPECIAL_HANDLING[param.name].add(type_str)
+            logger.debug(f"skipping {param.name} type - {type_str}")
+            continue
     if not types:
         return UNSUPPORTED_TYPE
     if len(types) > 1:
