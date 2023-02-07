@@ -34,6 +34,7 @@ from great_expectations.util import get_context
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
+    from great_expectations.core.batch import JSONValues
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.experimental.datasources.interfaces import (
         Datasource as XDatasource,
@@ -1046,7 +1047,7 @@ def get_batch_request_from_json_file(
     data_context: FileDataContext,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
+) -> dict[str, JSONValues]:
     batch_request: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = load_json_file_into_dict(
@@ -1055,7 +1056,9 @@ def get_batch_request_from_json_file(
         usage_event=usage_event,
     )
     try:
-        batch_request = BatchRequest(**batch_request).to_json_dict()  # type: ignore[arg-type] # values union
+        batch_request_json_dict: dict[str, JSONValues] = BatchRequest(
+            **batch_request
+        ).to_json_dict()
     except TypeError as e:
         cli_message(
             string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
@@ -1069,7 +1072,7 @@ def get_batch_request_from_json_file(
             )
         sys.exit(1)
 
-    return batch_request
+    return batch_request_json_dict
 
 
 def get_batch_request_using_datasource_name(

@@ -1056,10 +1056,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource = self.get_datasource(datasource_name)
         else:
             datasource = self.get_datasource()
-        assert isinstance(
-            datasource, LegacyDatasource
-        ), "batch_kwargs datasource must be of type LegacyDatasource"
-        batch = datasource.get_batch(
+        batch = datasource.get_batch(  #  type: ignore[func-returns-value]
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
         if data_asset_type is None:
@@ -3255,6 +3252,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             for datasource_name in datasource_names:
                 try:
                     datasource = self.get_datasource(datasource_name)
+                    assert not isinstance(
+                        datasource, XDatasource
+                    ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
                     data_asset_names[
                         datasource_name
                     ] = datasource.get_available_data_asset_names()

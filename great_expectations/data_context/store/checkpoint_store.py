@@ -134,7 +134,7 @@ class CheckpointStore(ConfigurationStore):
     def get_checkpoint(
         self, name: ConfigurationIdentifier | str | None, id: str | None
     ) -> CheckpointConfig:
-        if isinstance(name, str, None):
+        if isinstance(name, (str, None)):
             key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
                 name=name, ge_cloud_id=id
             )
