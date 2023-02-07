@@ -92,7 +92,7 @@ class ExpectColumnValuesAfterSplitToBeUnique(ColumnMapExpectation):
                     "in": {
                         "column": "duplicate_sports",
                         "delimiter": ",",
-                        "mostly": 0.65,
+                        "mostly": 0.66,
                     },
                     "out": {
                         "success": True,
