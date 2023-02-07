@@ -18,7 +18,7 @@ from great_expectations.rule_based_profiler.helpers.cardinality_checker import (
     CardinalityLimitMode,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,
+    ParameterBuilder,  # noqa: TCH001
 )
 
 # noqa: TCH001

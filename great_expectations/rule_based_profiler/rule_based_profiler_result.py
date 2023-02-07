@@ -4,8 +4,8 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationSuite,  # noqa: TCH001
 )
 
 # noqa: TCH001
@@ -22,7 +22,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_or_create_expectation_suite,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterNode,
+    ParameterNode,  # noqa: TCH001
 )
 
 # noqa: TCH001

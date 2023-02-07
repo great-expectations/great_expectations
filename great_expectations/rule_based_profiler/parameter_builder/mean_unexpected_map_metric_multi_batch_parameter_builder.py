@@ -9,7 +9,7 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
+    ParameterBuilderConfig,  # noqa: TCH001
 )
 
 # noqa: TCH001

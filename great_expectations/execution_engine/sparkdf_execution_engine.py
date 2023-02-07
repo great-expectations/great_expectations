@@ -31,7 +31,7 @@ from great_expectations.core.batch_spec import (
 )
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import (
-    MetricDomainTypes,
+    MetricDomainTypes,  # noqa: TCH001
 )
 
 # noqa: TCH001
@@ -66,7 +66,7 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import (
-    MetricConfiguration,
+    MetricConfiguration,  # noqa: TCH001
 )
 
 logger = logging.getLogger(__name__)

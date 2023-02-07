@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.metric_domain_types import (
-    MetricDomainTypes,
+    MetricDomainTypes,  # noqa: TCH001
 )
 
 # noqa: TCH001

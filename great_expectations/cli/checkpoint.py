@@ -6,7 +6,7 @@ import click
 
 from great_expectations import DataContext  # noqa: TCH001
 from great_expectations.checkpoint.types.checkpoint_result import (
-    CheckpointResult,
+    CheckpointResult,  # noqa: TCH001
 )
 
 # noqa: TCH001

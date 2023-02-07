@@ -12,7 +12,7 @@ from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.data_context.types.base import BaseYamlConfig  # noqa: TCH001
 from great_expectations.rule_based_profiler import BaseRuleBasedProfiler  # noqa: TCH001
 from great_expectations.rule_based_profiler.data_assistant import (
-    DataAssistant,
+    DataAssistant,  # noqa: TCH001
 )
 
 # noqa: TCH001
@@ -20,7 +20,7 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.rule_based_profiler.domain_builder import (
-    DomainBuilder,
+    DomainBuilder,  # noqa: TCH001
 )
 
 # noqa: TCH001

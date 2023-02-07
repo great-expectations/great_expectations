@@ -19,7 +19,7 @@ from tqdm.auto import tqdm
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import IDDict  # noqa: TCH001
 from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
+    ExpectationConfiguration,  # noqa: TCH001
 )
 
 # noqa: TCH001
@@ -28,7 +28,7 @@ from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import (
-    MetricConfiguration,
+    MetricConfiguration,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

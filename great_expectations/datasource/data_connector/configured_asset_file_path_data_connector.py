@@ -6,7 +6,7 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
 from great_expectations.core.batch_spec import PathBatchSpec  # noqa: TCH001
 from great_expectations.datasource.data_connector.asset.asset import (
-    Asset,
+    Asset,  # noqa: TCH001
 )
 
 # noqa: TCH001

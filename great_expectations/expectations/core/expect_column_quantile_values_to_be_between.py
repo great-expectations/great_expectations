@@ -50,7 +50,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.util import isclose
 from great_expectations.validator.validator import (
-    ValidationDependencies,
+    ValidationDependencies,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

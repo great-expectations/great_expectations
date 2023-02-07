@@ -23,7 +23,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.render.renderer.notebook_renderer import (
-    BaseNotebookRenderer,
+    BaseNotebookRenderer,  # noqa: TCH001
 )
 
 # noqa: TCH001

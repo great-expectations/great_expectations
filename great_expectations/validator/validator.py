@@ -64,8 +64,9 @@ from great_expectations.expectations.registry import (
 from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 
 # noqa: TCH001
+# noqa: TCH001
 from great_expectations.rule_based_profiler import (
-    RuleBasedProfilerResult,
+    RuleBasedProfilerResult,  # noqa: TCH001
 )
 
 # noqa: TCH001
@@ -79,7 +80,7 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     ReconciliationStrategy,
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,
+    ParameterBuilder,  # noqa: TCH001
 )
 
 # noqa: TCH001
@@ -95,7 +96,7 @@ from great_expectations.util import load_class, verify_dynamic_loading_support
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo
 from great_expectations.validator.metric_configuration import (
-    MetricConfiguration,
+    MetricConfiguration,  # noqa: TCH001
 )
 
 # noqa: TCH001

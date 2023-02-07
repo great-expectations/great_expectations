@@ -14,7 +14,7 @@ import click
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint  # noqa: TCH001
 from great_expectations.checkpoint.types.checkpoint_result import (
-    CheckpointResult,
+    CheckpointResult,  # noqa: TCH001
 )
 
 # noqa: TCH001

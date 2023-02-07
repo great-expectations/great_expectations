@@ -48,7 +48,7 @@ from great_expectations.validator.computed_metric import MetricValue  # noqa: TC
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validator import (
-    ValidationDependencies,
+    ValidationDependencies,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

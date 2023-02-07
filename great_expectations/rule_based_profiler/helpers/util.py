@@ -39,7 +39,7 @@ from great_expectations.core.domain import (
     SemanticDomainTypes,
 )
 from great_expectations.core.metric_domain_types import (
-    MetricDomainTypes,
+    MetricDomainTypes,  # noqa: TCH001
 )
 
 # noqa: TCH001
@@ -65,7 +65,7 @@ from great_expectations.util import (
 )
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import (
-    MetricConfiguration,
+    MetricConfiguration,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

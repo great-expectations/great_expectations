@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, Dict, List, Optional, Set, Type
 
 from great_expectations.rule_based_profiler.data_assistant import (
-    DataAssistant,
+    DataAssistant,  # noqa: TCH001
 )
 
 # noqa: TCH001

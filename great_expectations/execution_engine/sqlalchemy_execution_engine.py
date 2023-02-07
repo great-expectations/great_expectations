@@ -82,7 +82,7 @@ from great_expectations.util import (
     import_make_url,
 )
 from great_expectations.validator.metric_configuration import (
-    MetricConfiguration,
+    MetricConfiguration,  # noqa: TCH001
 )
 
 logger = logging.getLogger(__name__)
@@ -203,7 +203,7 @@ except ImportError:
     teradatatypes = None
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TCH004
     from sqlalchemy.engine import Engine as SaEngine
 
 

@@ -11,7 +11,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     get_parameter_values_for_fully_qualified_parameter_names,
 )
 from great_expectations.rule_based_profiler.rule.rule_state import (
-    RuleState,
+    RuleState,  # noqa: TCH001
 )
 
 

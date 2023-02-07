@@ -13,7 +13,7 @@ from great_expectations.experimental.datasources.experimental_base_model import 
     ExperimentalBaseModel,
 )
 from great_expectations.experimental.datasources.interfaces import (
-    Datasource,
+    Datasource,  # noqa: TCH001
 )
 
 # noqa: TCH001

@@ -38,7 +38,7 @@ from great_expectations.render.util import (
 from great_expectations.util import get_pyathena_potential_type
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import (
-    ValidationDependencies,
+    ValidationDependencies,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

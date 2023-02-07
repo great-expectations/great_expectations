@@ -34,7 +34,7 @@ from pydantic import Field, FilePath
 from typing_extensions import Final, Literal, TypeAlias
 
 from great_expectations.experimental.datasources.interfaces import (
-    DataAsset,
+    DataAsset,  # noqa: TCH001
 )
 
 try:

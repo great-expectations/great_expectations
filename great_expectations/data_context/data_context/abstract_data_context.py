@@ -57,7 +57,7 @@ from great_expectations.core.config_provider import (
     _RuntimeEnvironmentConfigurationProvider,
 )
 from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
+    ExpectationConfiguration,  # noqa: TCH001
 )
 
 # noqa: TCH001
@@ -76,23 +76,23 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
     _YamlConfigValidator,
 )
 from great_expectations.data_context.data_context_variables import (
-    DataContextVariables,
+    DataContextVariables,  # noqa: TCH001
 )
 
 # noqa: TCH001
 from great_expectations.data_context.store import Store, TupleStoreBackend
 from great_expectations.data_context.store.expectations_store import (
-    ExpectationsStore,
+    ExpectationsStore,  # noqa: TCH001
 )
 
 # noqa: TCH001
 from great_expectations.data_context.store.profiler_store import (
-    ProfilerStore,
+    ProfilerStore,  # noqa: TCH001
 )
 
 # noqa: TCH001
 from great_expectations.data_context.store.validations_store import (
-    ValidationsStore,
+    ValidationsStore,  # noqa: TCH001
 )
 
 # noqa: TCH001

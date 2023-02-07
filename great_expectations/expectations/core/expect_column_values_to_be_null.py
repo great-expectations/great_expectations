@@ -31,7 +31,7 @@ from great_expectations.render.util import (
     substitute_none_for_missing,
 )
 from great_expectations.validator.validator import (
-    ValidationDependencies,
+    ValidationDependencies,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

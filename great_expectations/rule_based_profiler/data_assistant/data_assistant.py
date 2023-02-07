@@ -15,8 +15,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 
 # noqa: TCH001
+# noqa: TCH001
 from great_expectations.rule_based_profiler import (
-    RuleBasedProfilerResult,
+    RuleBasedProfilerResult,  # noqa: TCH001
 )
 
 # noqa: TCH001

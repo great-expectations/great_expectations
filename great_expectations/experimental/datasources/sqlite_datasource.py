@@ -7,7 +7,7 @@ import pydantic
 from pydantic import dataclasses as pydantic_dc
 
 from great_expectations.experimental.datasources.interfaces import (
-    DataAsset,
+    DataAsset,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

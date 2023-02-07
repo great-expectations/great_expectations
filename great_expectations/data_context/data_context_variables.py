@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
 from great_expectations.core.config_provider import (
-    _ConfigurationProvider,
+    _ConfigurationProvider,  # noqa: TCH001
 )
 
 # noqa: TCH001

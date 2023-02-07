@@ -17,7 +17,7 @@ from great_expectations.core.batch import (
 from great_expectations.core.config_peer import ConfigPeer
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,
+    ExpectationConfiguration,  # noqa: TCH001
 )
 
 # noqa: TCH001

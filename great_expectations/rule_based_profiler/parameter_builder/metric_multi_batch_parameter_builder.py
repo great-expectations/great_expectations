@@ -6,7 +6,7 @@ import numpy as np
 
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
+    ParameterBuilderConfig,  # noqa: TCH001
 )
 
 # noqa: TCH001

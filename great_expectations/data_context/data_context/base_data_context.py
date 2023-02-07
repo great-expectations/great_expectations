@@ -13,8 +13,8 @@ from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    GXCloudConfig,
+    DataContextConfig,  # noqa: TCH001
+    GXCloudConfig,  # noqa: TCH001
 )
 
 

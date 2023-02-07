@@ -26,7 +26,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,  # noqa: TCH001
 )
 from great_expectations.core.usage_statistics.events import (
-    UsageStatsEvents,
+    UsageStatsEvents,  # noqa: TCH001
 )
 
 # noqa: TCH001

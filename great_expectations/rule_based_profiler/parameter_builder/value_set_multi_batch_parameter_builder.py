@@ -20,7 +20,7 @@ from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
 )
 from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
+    ParameterBuilderConfig,  # noqa: TCH001
 )
 
 # noqa: TCH001

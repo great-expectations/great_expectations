@@ -19,7 +19,7 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.execution_engine import (
-    SqlAlchemyExecutionEngine,
+    SqlAlchemyExecutionEngine,  # noqa: TCH001
 )
 
 # noqa: TCH001

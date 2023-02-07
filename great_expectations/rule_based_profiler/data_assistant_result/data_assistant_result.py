@@ -29,8 +29,8 @@ from IPython.display import HTML, display
 from great_expectations import __version__ as ge_version
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationSuite,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationSuite,  # noqa: TCH001
 )
 
 # noqa: TCH001

@@ -19,7 +19,7 @@ Usage:
 import sys
 
 from great_expectations.checkpoint.types.checkpoint_result import (
-    CheckpointResult,
+    CheckpointResult,  # noqa: TCH001
 )
 
 # noqa: TCH001

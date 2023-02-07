@@ -33,7 +33,7 @@ from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
 )
 from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.config import (
-    ParameterBuilderConfig,
+    ParameterBuilderConfig,  # noqa: TCH001
 )
 
 # noqa: TCH001
@@ -64,7 +64,7 @@ from great_expectations.validator.computed_metric import MetricValue  # noqa: TC
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import (
-    ValidationGraph,
+    ValidationGraph,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:
