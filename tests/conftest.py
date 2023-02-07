@@ -788,7 +788,7 @@ def empty_data_context(
 
 
 @pytest.fixture(scope="function")
-def data_context_with_connection_to_animal_names_db(
+def data_context_with_connection_to_metrics_db(
     tmp_path,
 ) -> FileDataContext:
     """
@@ -830,8 +830,14 @@ def data_context_with_connection_to_animal_names_db(
                 module_name: great_expectations.datasource.data_connector
                 class_name: ConfiguredAssetSqlDataConnector
                 assets:
-                    my_asset:
+                    animals_names_asset:
                         table_name: animal_names
+                        class_name: Asset
+                    column_pair_asset:
+                        table_name: column_pairs
+                        class_name: Asset
+                    multi_column_sum_asset:
+                        table_name: multi_column_sums
                         class_name: Asset
     """
     # noinspection PyUnusedLocal
