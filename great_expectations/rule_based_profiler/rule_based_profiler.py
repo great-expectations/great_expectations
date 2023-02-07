@@ -8,6 +8,7 @@ import sys
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -232,6 +233,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return domain_builder
 
+    @public_api
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.RULE_BASED_PROFILER_RUN,
         args_payload_fn=get_profiler_run_usage_statistics,
@@ -252,22 +254,21 @@ class BaseRuleBasedProfiler(ConfigPeer):
         ] = None,
         comment: Optional[str] = None,
     ) -> RuleBasedProfilerResult:
-        """
-        Executes and collects "RuleState" side-effect from all "Rule" objects of this "RuleBasedProfiler".
+        """Run the Rule-Based Profiler.
 
         Args:
-            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
-            rules: name/(configuration-dictionary) (overrides)
-            batch_list: Explicit list of Batch objects to supply data at runtime
-            batch_request: Explicit batch_request used to supply data at runtime
-            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
-            reconciliation_directives: directives for how each rule component should be overwritten
-            variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
-            domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
-            comment: Optional comment for "citation" of "ExpectationSuite" returned as part of "RuleBasedProfilerResult"
+            variables: Attribute name/value pairs (overrides), commonly-used in `Builder` objects.
+            rules: A collection of rule configurations (overrides).
+            batch_list: The batches of data supplied at runtime.
+            batch_request: An explicit Batch Request used to supply data at runtime.
+            runtime_configuration: Additional runtime settings (see `Validator.DEFAULT_RUNTIME_CONFIGURATION`).
+            reconciliation_directives: Directives for how each rule component should be overwritten.
+            variables_directives_list: Additional override runtime variables directives (modify `BaseRuleBasedProfiler`).
+            domain_type_directives_list: Additional override runtime domain directives (modify `BaseRuleBasedProfiler`).
+            comment: A citation for the Expectation Suite returned as part of the `RuleBasedProfilerResult`.
 
         Returns:
-            "RuleBasedProfilerResult" dataclass object, containing essential outputs of profiling.
+            A `RuleBasedProfilerResult` instance that contains the profiling output.
         """
         # Check to see if the user has disabled progress bars
         disable = False
@@ -1056,7 +1057,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
     ) -> RuleBasedProfilerResult:
@@ -1064,7 +1065,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             data_context=data_context,
             profiler_store=profiler_store,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
         return profiler.run(
@@ -1086,13 +1087,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> RuleBasedProfilerResult:
         profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
             data_context=data_context,
             profiler_store=profiler_store,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
         rule: Rule
@@ -1187,31 +1188,19 @@ class BaseRuleBasedProfiler(ConfigPeer):
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> RuleBasedProfiler:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id (but not both)"
-
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
-            )
-        else:
-            key = ConfigurationIdentifier(
-                configuration_key=name,
-            )
+        key = RuleBasedProfiler._construct_profiler_key(name=name, id=id)
         try:
             profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
         except gx_exceptions.InvalidKeyError as exc_ik:
-            id: Union[GXCloudIdentifier, ConfigurationIdentifier] = (
+            config_id: Union[GXCloudIdentifier, ConfigurationIdentifier] = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
             )
             raise gx_exceptions.ProfilerNotFoundError(
-                message=f'Non-existent Profiler configuration named "{id}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Profiler configuration named "{config_id}".\n\nDetails: {exc_ik}'
             )
 
         config: dict = profiler_config.to_json_dict()
@@ -1237,31 +1226,58 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def delete_profiler(
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
     ) -> None:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id (but not both)"
-
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id:
-            key = GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, cloud_id=ge_cloud_id
-            )
-        else:
-            key = ConfigurationIdentifier(configuration_key=name)
+        key = RuleBasedProfiler._construct_profiler_key(name=name, id=id)
 
         try:
             profiler_store.remove_key(key=key)
         except (gx_exceptions.InvalidKeyError, KeyError) as exc_ik:
-            id = (
+            config_id = (
                 key.configuration_key
                 if isinstance(key, ConfigurationIdentifier)
                 else key
             )
             raise gx_exceptions.ProfilerNotFoundError(
-                message=f'Non-existent Profiler configuration named "{id}".\n\nDetails: {exc_ik}'
+                message=f'Non-existent Profiler configuration named "{config_id}".\n\nDetails: {exc_ik}'
             )
+
+    @staticmethod
+    def update_profiler(
+        profiler: RuleBasedProfiler,
+        profiler_store: ProfilerStore,
+        data_context: AbstractDataContext,
+    ) -> RuleBasedProfiler:
+        name = profiler.name
+        id = profiler.ge_cloud_id
+
+        key = RuleBasedProfiler._construct_profiler_key(name=name, id=id)
+        if not profiler_store.has_key(key):
+            msg = "Non-existent Profiler configuration "
+            if name:
+                msg += f"named {name}"
+            elif id:
+                msg += f"with id {id}"
+            raise gx_exceptions.ProfilerNotFoundError(message=msg)
+
+        # Prioritize deletion by id if present (providing both will result in a downstream assertion error)
+        if id:
+            RuleBasedProfiler.delete_profiler(
+                ge_cloud_id=id, profiler_store=profiler_store
+            )
+        else:
+            RuleBasedProfiler.delete_profiler(name=name, profiler_store=profiler_store)
+
+        config = profiler.config
+        config.config_version = profiler.config_version
+        config.rules = {rule.name: rule.to_dict() for rule in profiler.rules}
+        config.variables = convert_variables_to_dict(profiler.variables)
+
+        return RuleBasedProfiler.add_profiler(
+            config=config,
+            data_context=data_context,
+            profiler_store=profiler_store,
+        )
 
     @staticmethod
     def list_profilers(
@@ -1271,6 +1287,21 @@ class BaseRuleBasedProfiler(ConfigPeer):
         if ge_cloud_mode:
             return profiler_store.list_keys()
         return [x.configuration_key for x in profiler_store.list_keys()]
+
+    @staticmethod
+    def _construct_profiler_key(
+        name: Optional[str] = None,
+        id: Optional[str] = None,
+    ) -> ConfigurationIdentifier | GXCloudIdentifier:
+        assert bool(name) ^ bool(id), "Must provide either name or id (but not both)"
+
+        if id:
+            return GXCloudIdentifier(
+                resource_type=GXCloudRESTResource.PROFILER, cloud_id=id
+            )
+        return ConfigurationIdentifier(
+            configuration_key=name,
+        )
 
     def self_check(self, pretty_print: bool = True) -> dict:
         """
@@ -1327,7 +1358,13 @@ class BaseRuleBasedProfiler(ConfigPeer):
     def rule_states(self) -> List[RuleState]:
         return self._rule_states
 
+    @public_api
     def to_json_dict(self) -> dict:
+        """Returns a JSON-serializable dict representation of this RuleBasedProfiler.
+
+        Returns:
+            A JSON-serializable dict representation of this RuleBasedProfiler.
+        """
         variables_dict: Optional[Dict[str, Any]] = convert_variables_to_dict(
             variables=self.variables
         )
@@ -1351,10 +1388,23 @@ class BaseRuleBasedProfiler(ConfigPeer):
         return self.__repr__()
 
 
+@public_api
 class RuleBasedProfiler(BaseRuleBasedProfiler):
-    """
-    RuleBasedProfiler object serves to profile, or automatically evaluate a set of rules, upon a given
-    batch / multiple batches of data.
+    """Create a `RuleBasedProfiler` to profile one or more batches of data.
+
+    For each rule in the `rules` configuration, instantiate the following if
+    available: a domain builder, a parameter builder, and a configuration builder.
+    These will be used to define profiler computation patterns.
+
+    Args:
+        name: Give the Profiler a name.
+        config_version: Specify the version of the Profiler to use (currently only `1.0` is supported).
+        variables: Variables to be substituted within the rules.
+        rules: A collection of rule configurations, each having its own `domain_builder`, `parameter_builders`, and `expectation_configuration_builders`.
+        data_context: Define the full runtime environment (data access, etc.).
+
+    Returns:
+        A `RuleBasedProfiler` instance.
 
     --ge-feature-maturity-info--
 
@@ -1434,21 +1484,8 @@ class RuleBasedProfiler(BaseRuleBasedProfiler):
         data_context: Optional[AbstractDataContext] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        Create a new Profiler using configured rules.
-        For a Rule or an item in a Rule configuration, instantiates the following if
-        available: a domain builder, a parameter builder, and a configuration builder.
-        These will be used to define profiler computation patterns.
+        """Initialize a RuleBasedProfiler."""
 
-        Args:
-            name: The name of the RBP instance
-            id: Identifier specific to this RBP instance.
-            config_version: The version of the RBP (currently only 1.0 is supported)
-            variables: Any variables to be substituted within the rules
-            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
-            expectation_configuration_builders configuration components
-            data_context: AbstractDataContext object that defines full runtime environment (data access, etc.)
-        """
         profiler_config = RuleBasedProfilerConfig(
             name=name,
             id=id,

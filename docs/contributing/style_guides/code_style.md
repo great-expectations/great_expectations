@@ -54,13 +54,12 @@ Options:
 
 ### Linting
 
-Our CI system will check using `black`, `isort`, and `ruff`.
+Our CI system will check using `black`, and `ruff`.
 
 If you have already committed files but are seeing errors during the continuous integration tests, you can run tests manually:
 
 ```console
 black <PATH/TO/YOUR/CHANGES>
-isort <PATH/TO/YOUR/CHANGES> --check-only --skip docs
 ruff <PATH/TO/YOUR/CHANGES> --fix
 ```
 

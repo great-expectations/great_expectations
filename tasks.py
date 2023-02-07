@@ -16,11 +16,12 @@ import os
 import pathlib
 import shutil
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Type
 
 import invoke
+from typing_extensions import Final
 
-from scripts import check_public_api_docstrings, check_type_hint_coverage
+from scripts import check_public_api_docstrings
 
 try:
     from tests.integration.usage_statistics import usage_stats_utils
@@ -35,6 +36,8 @@ if TYPE_CHECKING:
     from great_expectations.experimental.datasources.experimental_base_model import (
         ExperimentalBaseModel,
     )
+
+GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
 
 _CHECK_HELP_DESC = "Only checks for needed changes without writing back. Exit with error code if changes needed."
 _EXCLUDE_HELP_DESC = "Exclude files or directories"
@@ -61,14 +64,14 @@ def sort(
     path: str = ".",
     check: bool = False,
     exclude: str | None = None,
-    ruff: bool = False,
-    isort: bool = False,  # isort is the current default
+    ruff: bool = False,  # isort is the current default
+    isort: bool = False,
     pty: bool = True,
 ):
     """Sort module imports."""
     if ruff and isort:
         raise invoke.Exit("cannot use both `--ruff` and `--isort`", code=1)
-    if ruff:
+    if not isort:
         cmds = [
             "ruff",
             path,
@@ -205,19 +208,6 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         raise invoke.Exit(
             message=f"{err}\n\nGenerated with {check_public_api_docstrings.__file__}",
             code=1,
-        )
-
-
-@invoke.task(aliases=["type-cov"])  # type: ignore
-def type_coverage(ctx: Context):
-    """
-    Check total type-hint coverage compared to `develop`.
-    """
-    try:
-        check_type_hint_coverage.main()
-    except AssertionError as err:
-        raise invoke.Exit(
-            message=f"{err}\n\n  See {check_type_hint_coverage.__file__}", code=1
         )
 
 
@@ -475,20 +465,22 @@ def docker(
 
 
 @invoke.task(
-    aliases=("schema",),
+    aliases=("schema", "schemas"),
     help={
-        "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class. Or '--list'",
+        "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class.",
+        "sync": "Update the json schemas at `great_expectations/experimental/datasources/schemas`",
+        "indent": "Indent size for nested json objects. Default: 4",
         "save_path": (
             "Filepath to write the schema to. Will overwrite or create the file if it does not exist."
             " If not provided the schema will be sent to the console."
         ),
-        "indent": "Indent size for nested json objects. Default: 4",
     },
 )
 def type_schema(
     ctx: Context,
-    type: str,
+    type_: str | None = None,
     save_path: str | pathlib.Path | None = None,
+    sync: bool = False,
     indent: int = 4,
 ):
     """
@@ -498,26 +490,62 @@ def type_schema(
 
     --list to show all available types
     """
+    import pandas
+
+    from great_expectations.experimental.datasources import _PANDAS_SCHEMA_VERSION
+    from great_expectations.experimental.datasources.interfaces import Datasource
+    from great_expectations.experimental.datasources.pandas_datasource import (
+        PandasDatasource,
+    )
     from great_expectations.experimental.datasources.sources import _SourceFactories
 
     buffer = io.StringIO()
 
-    if type == "--list":
+    if not type_:
         buffer.write(
             "--------------------\nRegistered ZEP types\n--------------------\n"
         )
         buffer.write("\t" + "\n\t".join(_SourceFactories.type_lookup.type_names()))
-    elif type == "--help" or type == "-h":
-        ctx.run("invoke --help schema")
     else:
         try:
-            model: ExperimentalBaseModel = _SourceFactories.type_lookup[type]
+            model: Type[ExperimentalBaseModel] = _SourceFactories.type_lookup[type_]
             buffer.write(model.schema_json(indent=indent))
         except KeyError:
             raise invoke.Exit(
-                f"No '{type}' type found. Try 'invoke schema --list' to see available types",
+                f"No '{type_}' type found. Try 'invoke schema --list' to see available types",
                 code=1,
             )
+    if sync:
+        schema_dir = GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
+        for name in _SourceFactories.type_lookup.type_names():
+            model = _SourceFactories.type_lookup[name]
+
+            if (
+                model in {*PandasDatasource.asset_types, PandasDatasource}
+                and _PANDAS_SCHEMA_VERSION != pandas.__version__
+            ):
+                print(
+                    f"🙈  {name} - was generated with pandas {_PANDAS_SCHEMA_VERSION}; skipping"
+                )
+                continue
+
+            try:
+                schema_path = schema_dir.joinpath(f"{model.__name__}.json")
+                json_str: str = model.schema_json(indent=indent) + "\n"
+
+                if issubclass(model, Datasource):
+                    print(f"🙈  {name} - is a Datasource; skipping")
+                    continue
+
+                if schema_path.exists():
+                    if json_str == schema_path.read_text():
+                        print(f"✅  {name} - {schema_path.name} unchanged")
+                        continue
+
+                schema_path.write_text(json_str)
+                print(f"✅  {name} - {schema_path.name} schema updated")
+            except TypeError as err:
+                print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
 
     text: str = buffer.getvalue()
     if save_path:

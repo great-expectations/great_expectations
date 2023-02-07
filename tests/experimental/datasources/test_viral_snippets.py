@@ -13,23 +13,22 @@ from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 
-LOGGER = logging.getLogger(__file__)
+logger = logging.getLogger(__file__)
 
 
 @pytest.fixture
 def db_file() -> pathlib.Path:
-    db = pathlib.Path(
-        __file__,
-        "..",
+    relative_path = pathlib.Path(
         "..",
         "..",
         "test_sets",
         "taxi_yellow_tripdata_samples",
         "sqlite",
         "yellow_tripdata.db",
-    ).resolve()
-    assert db.exists()
-    return db
+    )
+    db_file = pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    assert db_file.exists()
+    return db_file
 
 
 @pytest.fixture
@@ -82,7 +81,7 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     assert gx_yml.exists()
 
     tmp_gx_dir = gx_yml.parent.absolute()
-    LOGGER.info(f"tmp_gx_dir -> {tmp_gx_dir}")
+    logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
     return tmp_gx_dir
 
 
@@ -106,18 +105,8 @@ def zep_yaml_config_file(
     for ds_name in zep_only_config.datasources.keys():
         assert ds_name in yaml_string
 
-    LOGGER.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
+    logger.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
     return config_file_path
-
-
-def test_load_an_existing_config(
-    zep_yaml_config_file: pathlib.Path, zep_only_config: GxConfig
-):
-    context = get_context(
-        context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
-    )
-
-    assert context.zep_config == zep_only_config
 
 
 @pytest.fixture
@@ -128,6 +117,16 @@ def zep_file_context(zep_yaml_config_file: pathlib.Path) -> FileDataContext:
     )
     assert isinstance(context, FileDataContext)
     return context
+
+
+def test_load_an_existing_config(
+    zep_yaml_config_file: pathlib.Path, zep_only_config: GxConfig
+):
+    context = get_context(
+        context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
+    )
+
+    assert context.zep_config == zep_only_config
 
 
 def test_serialize_zep_config(zep_file_context: FileDataContext):
@@ -195,7 +194,9 @@ def test_save_datacontext_persists_zep_config(
 
 
 def test_add_and_save_zep_datasource(
-    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+    file_dc_config_dir_init: pathlib.Path,
+    zep_only_config: GxConfig,
+    db_file: pathlib.Path,
 ):
     datasource_name = "save_ds_test"
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML

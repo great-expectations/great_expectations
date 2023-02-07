@@ -12,9 +12,11 @@ import time
 import traceback
 import warnings
 from functools import wraps
+from logging import Logger
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
+    Any,
     Dict,
     Iterable,
     List,
@@ -62,7 +64,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -139,8 +140,8 @@ except (ImportError, KeyError):
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
     # noinspection PyPep8Naming
-    import sqlalchemy_bigquery as sqla_bigquery
     import sqlalchemy_bigquery as BigQueryDialect
+    import sqlalchemy_bigquery as sqla_bigquery
 
     sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     # noinspection PyTypeChecker
@@ -169,8 +170,8 @@ try:
         pass
 except ImportError:
     try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
         import pybigquery.sqlalchemy_bigquery as BigQueryDialect
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
         # deprecated-v0.14.7
         warnings.warn(
@@ -349,8 +350,8 @@ except (ImportError, KeyError):
     TRINO_TYPES = {}
 
 try:
-    import sqlalchemy_redshift.dialect as redshifttypes
     import sqlalchemy_redshift.dialect as redshiftDialect
+    import sqlalchemy_redshift.dialect as redshifttypes
 
     REDSHIFT_TYPES = {
         "BIGINT": redshifttypes.BIGINT,
@@ -1194,13 +1195,21 @@ def get_test_validator_with_data(  # noqa: C901 - 31
     extra_debug_info="",
     debug_logger: Optional[logging.Logger] = None,
     context: Optional[AbstractDataContext] = None,
+    pk_column: bool = False,
 ):
     """Utility to create datasets for json-formatted tests."""
+
+    # if pk_column is defined in our test, then we add a index column to our test set
+    if pk_column:
+        first_column: List[Any] = list(data.values())[0]
+        data["pk_index"] = list(range(len(first_column)))
 
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
         if schemas and "pandas" in schemas:
             schema = schemas["pandas"]
+            if pk_column:
+                schema["pk_index"] = "int"
             pandas_schema = {}
             for (key, value) in schema.items():
                 # Note, these are just names used in our internal schemas to build datasets *for internal tests*
@@ -1260,6 +1269,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
             debug_logger=debug_logger,
             batch_definition=None,
             context=context,
+            pk_column=pk_column,
         )
 
     elif execution_engine == "spark":
@@ -1292,6 +1302,8 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         )  # create a list of rows
         if schemas and "spark" in schemas:
             schema = schemas["spark"]
+            if pk_column:
+                schema["pk_index"] = "IntegerType"
             # sometimes first method causes Spark to throw a TypeError
             try:
                 spark_schema = sparktypes.StructType(
@@ -1420,6 +1432,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
     context: Optional[AbstractDataContext] = None,
+    pk_column: bool = False,
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
@@ -1525,6 +1538,8 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         and isinstance(engine.dialect, dialect_classes[sa_engine_name])
     ):
         schema = schemas[sa_engine_name]
+        if pk_column:
+            schema["pk_index"] = "INTEGER"
 
         sql_dtypes = {
             col: dialect_types[sa_engine_name][dtype] for (col, dtype) in schema.items()
@@ -2772,8 +2787,13 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(
-    validator, expectation_type, test, raise_exception=True, debug_logger=None
+def evaluate_json_test_v3_api(  # noqa: C901 - 16
+    validator: Validator,
+    expectation_type: str,
+    test: Dict[str, Any],
+    raise_exception: bool = True,
+    debug_logger: Optional[Logger] = None,
+    pk_column: bool = False,
 ):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
@@ -2797,6 +2817,7 @@ def evaluate_json_test_v3_api(
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :param raise_exception: (bool) If False, capture any failed AssertionError from the call to check_json_test_result and return with validation_result
     :param debug_logger: logger instance or None
+    :param pk_column: If True, then the primary-key column has been defined in the json test data.
     :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
     if debug_logger is not None:
@@ -2847,10 +2868,21 @@ def evaluate_json_test_v3_api(
             result = getattr(validator, expectation_type)(*kwargs)
         # As well as keyword arguments
         else:
-            runtime_kwargs = {
-                "result_format": "COMPLETE",
-                "include_config": False,
-            }
+            if pk_column:
+                runtime_kwargs = {
+                    "result_format": {
+                        "result_format": "COMPLETE",
+                        "unexpected_index_column_names": ["pk_index"],
+                    },
+                    "include_config": False,
+                }
+            else:
+                runtime_kwargs = {
+                    "result_format": {
+                        "result_format": "COMPLETE",
+                    },
+                    "include_config": False,
+                }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)
     except (
@@ -2869,6 +2901,7 @@ def evaluate_json_test_v3_api(
                 test=test,
                 result=result,
                 data_asset=validator.execution_engine.batch_manager.active_batch_data,
+                pk_column=pk_column,
             )
         except Exception as e:
             _debug(
@@ -2882,8 +2915,17 @@ def evaluate_json_test_v3_api(
     return (result, error_message, stack_trace)
 
 
-def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901 - 49
-    # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
+def check_json_test_result(  # noqa: C901 - 52
+    test, result, data_asset=None, pk_column=False
+) -> None:
+
+    # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists
+    # this will work for testing since result_format is COMPLETE
+    if pk_column:
+        if not result["success"]:
+            if "unexpected_index_list" in result["result"]:
+                assert "unexpected_index_query" in result["result"]
+
     if "unexpected_list" in result["result"]:
         if ("result" in test["output"]) and (
             "unexpected_list" in test["output"]["result"]
@@ -2956,8 +2998,6 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
         for key, value in test["output"].items():
-            # Apply our great expectations-specific test logic
-
             if key == "success":
                 if isinstance(value, (np.floating, float)):
                     try:
@@ -3024,14 +3064,15 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
                 assert result["result"]["observed_value"] in value
 
             elif key == "unexpected_index_list":
-                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
+                if isinstance(data_asset, SqlAlchemyDataset):
                     pass
-                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
+                elif isinstance(data_asset, SqlAlchemyBatchData):
                     pass
                 else:
-                    assert (
-                        result["result"]["unexpected_index_list"] == value
-                    ), f"{result['result']['unexpected_index_list']} != {value}"
+                    if pk_column:
+                        assert (
+                            result["result"].get("unexpected_index_list") == value
+                        ), f"{result['result'].get('unexpected_index_list')} != {value}"
 
             elif key == "unexpected_list":
                 try:
