@@ -1048,7 +1048,7 @@ def get_batch_request_from_json_file(
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
 ) -> dict[str, JSONValues]:
-    batch_request: Optional[
+    batch_request_or_error_message: Optional[
         Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
     ] = load_json_file_into_dict(
         filepath=batch_request_json_file_path,
@@ -1056,9 +1056,14 @@ def get_batch_request_from_json_file(
         usage_event=usage_event,
     )
     try:
-        batch_request_json_dict: dict[str, JSONValues] = BatchRequest(
-            **batch_request
-        ).to_json_dict()
+        if not batch_request_or_error_message or isinstance(
+            batch_request_or_error_message, str
+        ):
+            raise TypeError(batch_request_or_error_message)
+        else:
+            batch_request_json_dict: dict[str, JSONValues] = BatchRequest(
+                **batch_request_or_error_message
+            ).to_json_dict()
     except TypeError as e:
         cli_message(
             string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
