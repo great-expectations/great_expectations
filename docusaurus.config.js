@@ -86,19 +86,11 @@ module.exports = {
           position: 'left',
           dropdownItemsAfter: [
             {
-              to: '/versions',
-              label: 'All versions'
+              to: 'https://legacy.docs.greatexpectations.io/',
+              label: '0.13.x and earlier'
             }
           ],
           dropdownActiveClassDisabled: true,
-        },
-        {
-          to: 'https://legacy.docs.greatexpectations.io/',
-          // Only one of "to" or "href" should be used
-          // href: 'https://www.facebook.com',
-          label: 'V2 DOCS',
-          target: '_blank',
-          position:'right'
         },
         {
           label: 'Product',
