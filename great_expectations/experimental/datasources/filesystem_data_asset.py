@@ -3,10 +3,9 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, List, Optional, Pattern, Set, Tuple
+from typing import TYPE_CHECKING, ClassVar, List, Optional, Pattern, Set, Tuple
 
 import pydantic
-from typing_extensions import ClassVar
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec
@@ -19,7 +18,10 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import (
+        PandasExecutionEngine,
+        SparkDFExecutionEngine,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +72,11 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         Raises:
             TestConnectionError: If the connection test fails.
         """
+        if not self.base_directory.exists():
+            raise TestConnectionError(
+                f"Path: {self.base_directory.resolve()} does not exist."
+            )
+
         success = False
         for filepath in self.base_directory.iterdir():
             if self.regex.match(filepath.name):
@@ -78,7 +85,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
                 break
         if not success:
             raise TestConnectionError(
-                f"No file at path: {self.base_directory} matched the regex: {self.regex}."
+                f"No file at path: {self.base_directory} matched the regex: {self.regex.pattern}"
             )
 
     def _fully_specified_batch_requests_with_path(
@@ -159,10 +166,13 @@ to use as its "include" directive for File-Path style DataAsset processing."""
 
     def _option_name_to_regex_group_id(self) -> BatchRequestOptions:
         option_to_group: BatchRequestOptions = dict(self.regex.groupindex)
-        named_groups = set(self.regex.groupindex.values())
-        for i in range(1, self.regex.groups + 1):
-            if i not in named_groups:
-                option_to_group[f"{self._unnamed_regex_param_prefix}{i}"] = i
+        named_groups: set[int] = set(option_to_group.values())
+
+        idx: int
+        for idx in range(1, self.regex.groups + 1):
+            if idx not in named_groups:
+                option_to_group[f"{self._unnamed_regex_param_prefix}{idx}"] = idx
+
         return option_to_group
 
     def get_batch_list_from_batch_request(
@@ -181,9 +191,12 @@ to use as its "include" directive for File-Path style DataAsset processing."""
                     include=self._get_reader_options_include(),
                     exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                     exclude_unset=True,
+                    by_alias=True,
                 ),
             )
-            execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
+            execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (
+                self.datasource.get_execution_engine()
+            )
             data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
-from typing_extensions import ClassVar, Literal
+from typing_extensions import Literal
 
 from great_expectations.alias_types import PathStr
 from great_expectations.experimental.datasources.filesystem_data_asset import (
@@ -17,7 +17,7 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import SparkDFExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,7 @@ class SparkDatasource(Datasource):
     assets: Dict[str, CSVSparkAsset] = {}
 
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
+    def execution_engine_type(self) -> Type[SparkDFExecutionEngine]:
         """Return the SparkDFExecutionEngine unless the override is set"""
         from great_expectations.execution_engine.sparkdf_execution_engine import (
             SparkDFExecutionEngine,
@@ -66,7 +66,7 @@ class SparkDatasource(Datasource):
             test_assets: If assets have been passed to the SparkDatasource, whether to test them as well.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         # Only self.assets can be tested for PandasDatasource
         if self.assets and test_assets:

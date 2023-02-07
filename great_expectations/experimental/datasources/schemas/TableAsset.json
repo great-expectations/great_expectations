@@ -22,12 +22,16 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
+        "column_splitter": {
+            "$ref": "#/definitions/SqlYearMonthSplitter"
+        },
         "table_name": {
             "title": "Table Name",
             "type": "string"
         },
-        "column_splitter": {
-            "$ref": "#/definitions/SqlYearMonthSplitter"
+        "schema_name": {
+            "title": "Schema Name",
+            "type": "string"
         }
     },
     "required": [
