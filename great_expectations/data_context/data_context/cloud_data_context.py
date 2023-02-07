@@ -701,6 +701,8 @@ class CloudDataContext(SerializableDataContext):
             checkpoint_config=checkpoint.config
         )
 
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
         return Checkpoint.instantiate_from_config_with_runtime_args(
             checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
