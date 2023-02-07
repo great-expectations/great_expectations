@@ -5,7 +5,7 @@ import logging
 import os
 import random
 import uuid
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
@@ -132,17 +132,19 @@ class CheckpointStore(ConfigurationStore):
             )
 
     def get_checkpoint(
-        self, name: ConfigurationIdentifier | str | None, id: str | None
+        self, name: Optional[ConfigurationIdentifier | str], id: Optional[str]
     ) -> CheckpointConfig:
-        if isinstance(name, (str, None)):
-            key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-                name=name, ge_cloud_id=id
-            )
+        key: GXCloudIdentifier | ConfigurationIdentifier
+        if not isinstance(name, ConfigurationIdentifier):
+            key = self.determine_key(name=name, ge_cloud_id=id)
         else:
             key = name
 
         try:
-            checkpoint_config: CheckpointConfig = self.get(key=key)  # type: ignore[assignment]
+            checkpoint_config: Optional[Any] = self.get(key=key)
+            assert isinstance(
+                checkpoint_config, CheckpointConfig
+            ), "checkpoint_config retrieved was not of type CheckpointConfig"
         except gx_exceptions.InvalidKeyError as exc_ik:
             raise gx_exceptions.CheckpointNotFoundError(
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]

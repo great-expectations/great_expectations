@@ -10,7 +10,10 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    ConfigurationIdentifier,
+    GXCloudIdentifier,
+)
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
@@ -150,7 +153,9 @@ class Store:
     def deserialize(self, value: Any) -> Any:
         return value
 
-    def get(self, key: DataContextKey) -> Optional[Any]:
+    def get(
+        self, key: DataContextKey | GXCloudIdentifier | ConfigurationIdentifier
+    ) -> Optional[Any]:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
 
