@@ -302,6 +302,31 @@ def test_add_or_update_datasource_adds_successfully(
             ),
             id="misc args",
         ),
+        pytest.param(
+            {
+                "expectation_suite": ExpectationSuite(
+                    expectations=[
+                        ExpectationConfiguration(
+                            expectation_type="expect_column_values_to_be_in_set",
+                            kwargs={"column": "x", "value_set": [1, 2, 4]},
+                        ),
+                    ],
+                    expectation_suite_name="default",
+                    meta={"great_expectations_version": "0.15.44"},
+                ),
+            },
+            ExpectationSuite(
+                expectations=[
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_values_to_be_in_set",
+                        kwargs={"column": "x", "value_set": [1, 2, 4]},
+                    ),
+                ],
+                expectation_suite_name="default",
+                meta={"great_expectations_version": "0.15.44"},
+            ),
+            id="existing suite",
+        ),
     ],
 )
 def test_add_expectation_suite_success(
@@ -318,7 +343,7 @@ def test_add_expectation_suite_success(
 
 
 @pytest.mark.unit
-def test_add_expectation_suite_failure(
+def test_add_expectation_suite_namespace_collision_failure(
     in_memory_data_context: EphemeralDataContextSpy,
 ):
     context = in_memory_data_context
@@ -335,6 +360,37 @@ def test_add_expectation_suite_failure(
         in str(e.value)
     )
     assert context.expectations_store.save_count == 1
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "suite,suite_name",
+    [
+        pytest.param(
+            ExpectationSuite(expectation_suite_name="default"),
+            "default",
+            id="both suite and suite_name",
+        ),
+        pytest.param(None, None, id="neither suite nor suite_name"),
+    ],
+)
+def test_add_expectation_suite_conflicting_args_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    suite: ExpectationSuite | None,
+    suite_name: str | None,
+):
+    context = in_memory_data_context
+
+    with pytest.raises(ValueError) as e:
+        context.add_expectation_suite(
+            expectation_suite=suite, expectation_suite_name=suite_name
+        )
+
+    assert (
+        "an existing expectation_suite or individual constructor arguments (but not both)"
+        in str(e.value)
+    )
+    assert context.expectations_store.save_count == 0
 
 
 @pytest.mark.unit
@@ -376,8 +432,42 @@ def test_update_expectation_suite_failure(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        pytest.param(
+            {
+                "expectation_suite_name": "default",
+                "expectations": [
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_values_to_be_in_set",
+                        kwargs={"column": "x", "value_set": [1, 2, 4]},
+                    ),
+                ],
+                "meta": {"great_expectations_version": "0.15.44"},
+            },
+            id="individual args",
+        ),
+        pytest.param(
+            {
+                "expectation_suite": ExpectationSuite(
+                    expectations=[
+                        ExpectationConfiguration(
+                            expectation_type="expect_column_values_to_be_in_set",
+                            kwargs={"column": "x", "value_set": [1, 2, 4]},
+                        ),
+                    ],
+                    expectation_suite_name="default",
+                    meta={"great_expectations_version": "0.15.44"},
+                ),
+            },
+            id="existing suite",
+        ),
+    ],
+)
 def test_add_or_update_expectation_suite_adds_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
+    kwargs: dict,
 ):
     context = in_memory_data_context
 
@@ -390,11 +480,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
     ]
     meta = {"great_expectations_version": "0.15.44"}
 
-    suite = context.add_or_update_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
-        expectations=expectations,
-        meta=meta,
-    )
+    suite = context.add_or_update_expectation_suite(**kwargs)
 
     assert suite.expectation_suite_name == expectation_suite_name
     assert suite.expectations == expectations
@@ -446,6 +532,37 @@ def test_add_or_update_expectation_suite_updates_successfully(
 
     assert suite.expectations == new_expectations
     assert context.expectations_store.save_count == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "suite,suite_name",
+    [
+        pytest.param(
+            ExpectationSuite(expectation_suite_name="default"),
+            "default",
+            id="both suite and suite_name",
+        ),
+        pytest.param(None, None, id="neither suite nor suite_name"),
+    ],
+)
+def test_add_or_update_expectation_suite_conflicting_args_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    suite: ExpectationSuite | None,
+    suite_name: str | None,
+):
+    context = in_memory_data_context
+
+    with pytest.raises(ValueError) as e:
+        context.add_or_update_expectation_suite(
+            expectation_suite=suite, expectation_suite_name=suite_name
+        )
+
+    assert (
+        "an existing expectation_suite or individual constructor arguments (but not both)"
+        in str(e.value)
+    )
+    assert context.expectations_store.save_count == 0
 
 
 @pytest.mark.unit
