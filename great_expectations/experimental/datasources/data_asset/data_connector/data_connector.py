@@ -73,21 +73,21 @@ class DataConnectorStorageDataReferenceResolver:
         ),
     }
 
-
-def resolve_data_reference(
-    data_connector_name: str,
-    execution_engine_name: str,
-    template_arguments: dict,
-):
-    """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-    storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
-        data_connector_name
-    ]
-    return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
-        (storage_name, execution_engine_name)
-    ](
-        template_arguments
-    )
+    @staticmethod
+    def resolve_data_reference(
+        data_connector_name: str,
+        execution_engine_name: str,
+        template_arguments: dict,
+    ):
+        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
+        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
+            data_connector_name
+        ]
+        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
+            (storage_name, execution_engine_name)
+        ](
+            template_arguments
+        )
 
 
 # noinspection SpellCheckingInspection
@@ -200,6 +200,14 @@ class DataConnector:
         This method is used to refresh the cache by classes that extend this base DataConnector class
         """
         raise NotImplementedError
+
+    def resolve_data_reference(self, template_arguments: dict):
+        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
+        return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            execution_engine_name=self._execution_engine.__class__.__name__,
+            template_arguments=template_arguments,
+        )
 
     def self_check(self, pretty_print=True, max_examples=3):
         """
