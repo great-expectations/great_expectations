@@ -3,7 +3,7 @@ import json
 import pathlib
 import re
 from pprint import pformat as pf
-from typing import Callable, List, Type
+from typing import Callable, List
 
 import pydantic
 import pytest
