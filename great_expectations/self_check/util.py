@@ -64,7 +64,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -141,8 +140,8 @@ except (ImportError, KeyError):
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
     # noinspection PyPep8Naming
-    import sqlalchemy_bigquery as sqla_bigquery
     import sqlalchemy_bigquery as BigQueryDialect
+    import sqlalchemy_bigquery as sqla_bigquery
 
     sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     # noinspection PyTypeChecker
@@ -171,8 +170,8 @@ try:
         pass
 except ImportError:
     try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
         import pybigquery.sqlalchemy_bigquery as BigQueryDialect
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
         # deprecated-v0.14.7
         warnings.warn(
@@ -351,8 +350,8 @@ except (ImportError, KeyError):
     TRINO_TYPES = {}
 
 try:
-    import sqlalchemy_redshift.dialect as redshifttypes
     import sqlalchemy_redshift.dialect as redshiftDialect
+    import sqlalchemy_redshift.dialect as redshifttypes
 
     REDSHIFT_TYPES = {
         "BIGINT": redshifttypes.BIGINT,
@@ -2873,7 +2872,7 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
                 runtime_kwargs = {
                     "result_format": {
                         "result_format": "COMPLETE",
-                        "unexpected_index_columns": ["pk_index"],
+                        "unexpected_index_column_names": ["pk_index"],
                     },
                     "include_config": False,
                 }
@@ -2999,8 +2998,6 @@ def check_json_test_result(  # noqa: C901 - 52
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
         for key, value in test["output"].items():
-            # Apply our great expectations-specific test logic
-
             if key == "success":
                 if isinstance(value, (np.floating, float)):
                     try:
@@ -3067,14 +3064,10 @@ def check_json_test_result(  # noqa: C901 - 52
                 assert result["result"]["observed_value"] in value
 
             elif key == "unexpected_index_list":
-                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
-                    pass
-                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
-                    pass
-                else:
+                if pk_column and result["result"].get("unexpected_index_list"):
                     assert (
-                        result["result"]["unexpected_index_list"] == value
-                    ), f"{result['result']['unexpected_index_list']} != {value}"
+                        result["result"].get("unexpected_index_list") == value
+                    ), f"{result['result'].get('unexpected_index_list')} != {value}"
 
             elif key == "unexpected_list":
                 try:

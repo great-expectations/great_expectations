@@ -119,9 +119,7 @@ class ConfigurationBundle:
 
     def _get_all_checkpoints(self) -> List[CheckpointConfig]:
         return [
-            self._context.checkpoint_store.get_checkpoint(
-                name=checkpoint_name, ge_cloud_id=None
-            )
+            self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, id=None)
             for checkpoint_name in self._context.list_checkpoints()
         ]
 
@@ -134,7 +132,7 @@ class ConfigurationBundle:
             )
 
         return [
-            round_trip_profiler_config(self._context.get_profiler(name).config)  # type: ignore[arg-type]
+            round_trip_profiler_config(self._context.get_profiler(name).config)
             for name in self._context.list_profilers()
         ]
 

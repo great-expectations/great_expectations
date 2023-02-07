@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import enum
+import operator
 from dataclasses import dataclass
+from string import punctuation
 from typing import TYPE_CHECKING
 
 from pyparsing import (
@@ -49,11 +51,14 @@ lt = Literal("<")
 ge = Literal(">=")
 le = Literal("<=")
 eq = Literal("==")
-ops = (gt ^ lt ^ ge ^ le ^ eq).setResultsName("op")
+ne = Literal("!=")
+ops = (gt ^ lt ^ ge ^ le ^ eq ^ ne).setResultsName("op")
 fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?").setResultsName("fnumber")
-condition_value = Suppress('"') + Word(f"{alphanums}._").setResultsName(
+punctuation_without_apostrophe = punctuation.replace('"', "").replace("'", "")
+condition_value_chars = alphanums + punctuation_without_apostrophe
+condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
-) + Suppress('"') ^ Suppress("'") + Word(f"{alphanums}._").setResultsName(
+) + Suppress('"') ^ Suppress("'") + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
 ) + Suppress(
     "'"
@@ -155,34 +160,30 @@ def parse_condition_to_spark(
         raise ConditionParserError(f"unrecognized column condition: {row_condition}")
 
 
-def parse_condition_to_sqlalchemy(
-    row_condition: str,
-) -> ColumnElement:
+def generate_condition_by_operator(column, op, value):
+    operators = {
+        "==": operator.eq,
+        "<": operator.lt,
+        ">": operator.gt,
+        ">=": operator.ge,
+        "<=": operator.le,
+        "!=": operator.ne,
+    }
+    return operators[op](column, value)
+
+
+def parse_condition_to_sqlalchemy(row_condition: str) -> ColumnElement:
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
-        if parsed["op"] == "==":
-            return sa.column(column) == parsed["condition_value"]
-        else:
-            raise ConditionParserError(
-                f"Invalid operator: {parsed['op']} for string literal spark condition."
-            )
+        return generate_condition_by_operator(
+            sa.column(column), parsed["op"], parsed["condition_value"]
+        )
     elif "fnumber" in parsed:
-        try:
-            num = int(parsed["fnumber"])
-        except ValueError:
-            num = float(parsed["fnumber"])
-        op = parsed["op"]
-        if op == ">":
-            return sa.column(column) > num
-        elif op == "<":
-            return sa.column(column) < num
-        elif op == ">=":
-            return sa.column(column) >= num
-        elif op == "<=":
-            return sa.column(column) <= num
-        elif op == "==":
-            return sa.column(column) == num
+        number_value = parsed["fnumber"]
+        num = int(number_value) if number_value.isdigit() else float(number_value)
+        return generate_condition_by_operator(sa.column(column), parsed["op"], num)
+
     elif "notnull" in parsed and parsed["notnull"] is True:
         return sa.not_(sa.column(column).is_(None))
     else:

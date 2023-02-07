@@ -13,7 +13,10 @@ from great_expectations.datasource.data_connector.asset import Asset
 from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
     ConfiguredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.util import list_s3_keys
+from great_expectations.datasource.data_connector.util import (
+    list_s3_keys,
+    sanitize_prefix_for_s3,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -72,7 +75,7 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             batch_spec_passthrough=batch_spec_passthrough,
         )
         self._bucket = bucket
-        self._prefix = self.sanitize_prefix_for_s3(prefix)
+        self._prefix = sanitize_prefix_for_s3(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 
@@ -85,26 +88,6 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             raise ImportError(
                 "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
             )
-
-    @staticmethod
-    def sanitize_prefix_for_s3(text: str) -> str:
-        """
-        Takes in a given user-prefix and cleans it to work with file-system traversal methods
-        (i.e. add '/' to the end of a string meant to represent a directory)
-
-        Customized for S3 paths, ignoring the path separator used by the host OS
-        """
-        text = text.strip()
-        if not text:
-            return text
-
-        path_parts = text.split("/")
-        if not path_parts:  # Empty prefix
-            return text
-        elif "." in path_parts[-1]:  # File, not folder
-            return text
-        else:  # Folder, should have trailing /
-            return f"{text.rstrip('/')}/"
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
         """
@@ -158,7 +141,4 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             "bucket": self._bucket,
             "path": path,
         }
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)

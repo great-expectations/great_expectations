@@ -174,12 +174,9 @@ exclude = [
     'validation_operators/validation_operators\.py',  # 16
     'validator/validator\.py', # 54
     # tests
-    'tests/experimental/datasources/conftest\.py',
     'tests/experimental/datasources/tasks\.py',
-    'tests/experimental/datasources/test_config\.py',
-    'tests/experimental/datasources/test_integration_datasource\.py',
-    'tests/experimental/datasources/test_pandas_datasource\.py',
-    'tests/experimental/datasources/test_postgres_datasource\.py',
+    'tests/experimental/datasources/integration/integration_test_utils\.py',
+    'tests/experimental/datasources/test_spark_datasource\.py',
 ]
 
 [tool.pydantic-mypy]
@@ -203,7 +200,7 @@ select = [
     # https://github.com/charliermarsh/ruff#pyupgrade-up
     "UP", # pyupgrade
     # https://github.com/charliermarsh/ruff#isort-i
-    # "I", # isort # TODO: replace isort usage with this
+    "I", # isort
 ]
 ignore = [
     # https://github.com/charliermarsh/ruff#pyflakes-f
@@ -228,11 +225,9 @@ extend-exclude = [
     "docs/*",
     "build/*",
     "assets/*",
-    "contrib/*",
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
-    "great_expectations/dataset", # 52 warnings
     "tests/checkpoint", # 15 warnings
     "tests/cli", # 34 warnings
     "tests/data_asset", # 10 warnings

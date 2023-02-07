@@ -5,13 +5,13 @@ from typing import List, Optional
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
-from great_expectations.datasource.data_connector.file_path_data_connector import (
-    FilePathDataConnector,
-)
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
-from great_expectations.datasource.data_connector.util import list_azure_keys
+from great_expectations.datasource.data_connector.util import (
+    list_azure_keys,
+    sanitize_prefix,
+)
 from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -78,7 +78,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         )
 
         self._container = container
-        self._name_starts_with = FilePathDataConnector.sanitize_prefix(name_starts_with)
+        self._name_starts_with = sanitize_prefix(name_starts_with)
         self._delimiter = delimiter
 
         if azure_options is None:
@@ -158,7 +158,4 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
             "container": self._container,
             "path": path,
         }
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)
