@@ -716,6 +716,34 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._cached_datasources[datasource_name] = updated_datasource
         return updated_datasource
 
+    @overload
+    def add_datasource(
+        self,
+        name: str = ...,
+        initialize: bool = ...,
+        save_changes: bool | None = ...,
+        datasource: None = ...,
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource | None:
+        ...
+        """
+        TODO
+        """
+
+    @overload
+    def add_datasource(
+        self,
+        name: None = ...,
+        initialize: bool = ...,
+        save_changes: bool | None = ...,
+        datasource: LegacyDatasource | BaseDatasource = ...,
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource | None:
+        """
+        TODO
+        """
+        ...
+
     @public_api
     @deprecated_argument(argument_name="save_changes", version="0.15.32")
     @usage_statistics_enabled_method(
@@ -724,9 +752,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     )
     def add_datasource(
         self,
-        name: str,
+        name: str | None = None,
         initialize: bool = True,
-        save_changes: Optional[bool] = None,
+        save_changes: bool | None = None,
+        datasource: LegacyDatasource | BaseDatasource | None = None,
         **kwargs,
     ) -> LegacyDatasource | BaseDatasource | None:
         """Add a new Datasource to the data context, with configuration provided as kwargs.
@@ -739,52 +768,62 @@ class AbstractDataContext(ConfigPeer, ABC):
             initialize: if False, add the Datasource to the config, but do not
                 initialize it, for example if a user needs to debug database connectivity.
             save_changes: should GX save the Datasource config?
+            datasource: an existing Datasource you wish to persist
             kwargs: the configuration for the new Datasource
 
         Returns:
             Datasource instance added.
         """
         return self._add_datasource(
-            name=name, initialize=initialize, save_changes=save_changes, **kwargs
+            name=name,
+            initialize=initialize,
+            save_changes=save_changes,
+            datasource=datasource,
+            **kwargs,
         )
 
     def _add_datasource(
         self,
-        name: str,
+        name: str | None = None,
         initialize: bool = True,
-        save_changes: Optional[bool] = None,
-        **kwargs: Optional[dict],
-    ) -> Optional[Union[LegacyDatasource, BaseDatasource]]:
+        save_changes: bool | None = None,
+        datasource: LegacyDatasource | BaseDatasource | None = None,
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource | None:
         save_changes = self._determine_save_changes_flag(save_changes)
 
         logger.debug(f"Starting AbstractDataContext.add_datasource for {name}")
 
-        module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
-        verify_dynamic_loading_support(module_name=module_name)
-        class_name: Optional[str] = kwargs.get("class_name")  # type: ignore[assignment]
-        datasource_class = load_class(module_name=module_name, class_name=class_name)  # type: ignore[arg-type]
-
-        # For any class that should be loaded, it may control its configuration construction
-        # by implementing a classmethod called build_configuration
-        config: Union[CommentedMap, dict]
-        if hasattr(datasource_class, "build_configuration"):
-            config = datasource_class.build_configuration(**kwargs)
+        if datasource:
+            config = datasource.config
         else:
-            config = kwargs
+            module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
+            verify_dynamic_loading_support(module_name=module_name)
+            class_name: Optional[str] = kwargs.get("class_name")  # type: ignore[assignment]
+            datasource_class = load_class(module_name=module_name, class_name=class_name)  # type: ignore[arg-type]
+
+            # For any class that should be loaded, it may control its configuration construction
+            # by implementing a classmethod called build_configuration
+            config: Union[CommentedMap, dict]
+            if hasattr(datasource_class, "build_configuration"):
+                config = datasource_class.build_configuration(**kwargs)
+            else:
+                config = kwargs
 
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
-        datasource_config.name = name
+        if name:
+            datasource_config.name = name
 
-        datasource: Optional[
-            Union[LegacyDatasource, BaseDatasource]
-        ] = self._instantiate_datasource_from_config_and_update_project_config(
-            config=datasource_config,
-            initialize=initialize,
-            save_changes=save_changes,
+        return_datasource: LegacyDatasource | BaseDatasource | None = (
+            self._instantiate_datasource_from_config_and_update_project_config(
+                config=datasource_config,
+                initialize=initialize,
+                save_changes=save_changes,
+            )
         )
-        return datasource
+        return return_datasource
 
     @public_api
     def update_datasource(
@@ -840,6 +879,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_datasource(
         self,
         name: str,
+        datasource: LegacyDatasource | BaseDatasource | None = None,
         **kwargs,
     ) -> LegacyDatasource | BaseDatasource:
         """Add a new Datasource or update an existing one on the context depending on whether
@@ -865,7 +905,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 datasource=existing_datasource, **kwargs
             )
         else:
-            result_datasource = self.add_datasource(name=name, **kwargs)
+            result_datasource = self.add_datasource(
+                name=name, datasource=datasource, **kwargs
+            )
 
         # Invariant based on `initialize=True` in both add/update branches
         assert result_datasource is not None
