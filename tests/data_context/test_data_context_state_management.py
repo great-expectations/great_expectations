@@ -792,19 +792,24 @@ def test_update_checkpoint_failure(in_memory_data_context: EphemeralDataContextS
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("use_existing_checkpoint", [True, False])
 def test_add_or_update_checkpoint_adds_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
     checkpoint_config: dict,
+    use_existing_checkpoint: bool,
 ):
     context = in_memory_data_context
-    name = "my_checkpoint"
-    checkpoint_config["name"] = name
 
-    checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
+    if use_existing_checkpoint:
+        checkpoint_config.pop("class_name")
+        checkpoint = Checkpoint(**checkpoint_config, data_context=context)
+        checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
+    else:
+        checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 
     actual_config = checkpoint.config
 
-    assert actual_config.name == name
+    assert actual_config.name == checkpoint_config["name"]
     assert (
         actual_config.expectation_suite_name
         == checkpoint_config["expectation_suite_name"]
@@ -902,7 +907,7 @@ def test_add_or_update_checkpoint_adds_successfully(
         ),
     ],
 )
-def test_add_or_update_checkpoint_updates_successfully(
+def test_add_or_update_checkpoint_individual_args_updates_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
     checkpoint_config: dict,
     update_kwargs: dict,
@@ -919,6 +924,29 @@ def test_add_or_update_checkpoint_updates_successfully(
     checkpoint = context.add_or_update_checkpoint(name=name, **update_kwargs)
 
     assert checkpoint.config.to_dict() == expected_config.to_dict()
+    assert context.checkpoint_store.save_count == 2
+
+
+@pytest.mark.unit
+def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+):
+    context = in_memory_data_context
+
+    name = "my_checkpoint"
+    checkpoint_config["name"] = name
+
+    checkpoint = context.add_checkpoint(name=name, class_name="Checkpoint")
+
+    assert len(checkpoint.validations) == 0
+    assert context.checkpoint_store.save_count == 1
+
+    checkpoint_config.pop("class_name")
+    checkpoint = Checkpoint(**checkpoint_config, data_context=context)
+    checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
+
+    assert len(checkpoint.validations) == len(checkpoint_config["validations"])
     assert context.checkpoint_store.save_count == 2
 
 
