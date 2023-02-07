@@ -74,6 +74,16 @@ class RegExParser:
             **common_group_index_to_group_name_mapping,
         }
 
+        element: Tuple[int, str]
+        # noinspection PyTypeChecker
+        all_group_index_to_group_name_mapping = dict(
+            sorted(
+                all_group_index_to_group_name_mapping.items(),
+                key=lambda element: element[0],
+                reverse=False,
+            )
+        )
+
         all_group_name_to_group_index_mapping: Dict[str, int] = dict(
             zip(
                 all_group_index_to_group_name_mapping.values(),
@@ -112,11 +122,11 @@ class RegExParser:
         return all_group_names
 
     def get_all_group_indexes(self) -> List[int]:
-        all_group_name_to_group_index_mapping: Dict[
-            str, int
-        ] = self.get_all_group_name_to_group_index_mapping()
+        all_group_index_to_group_name_mapping: Dict[
+            int, str
+        ] = self.get_all_group_index_to_group_name_mapping()
         all_group_indexes: List[int] = list(
-            all_group_name_to_group_index_mapping.values()
+            all_group_index_to_group_name_mapping.keys()
         )
         return all_group_indexes
 
