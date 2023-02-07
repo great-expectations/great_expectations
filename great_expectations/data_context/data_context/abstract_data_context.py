@@ -1626,6 +1626,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            checkpoint=checkpoint,
         )
 
         return self.checkpoint_store.add_checkpoint(checkpoint)
@@ -1794,6 +1795,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with=notify_with,
             expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            checkpoint=checkpoint,
         )
 
         return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
@@ -1855,6 +1857,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                 expectation_suite_ge_cloud_id=expectation_suite_id,
                 default_validation_id=default_validation_id,
             )
+
+        return checkpoint
 
     @public_api
     @new_argument(
