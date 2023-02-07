@@ -8,16 +8,30 @@ import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Set, Union
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+# TODO: <Alex>ALEX</Alex>
+# import great_expectations.exceptions as gx_exceptions
+# TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.id_dict import IDDict
-from great_expectations.data_context.types.base import assetConfigSchema
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector.asset import Asset
-from great_expectations.datasource.data_connector.sorter import Sorter
+
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.data_context.types.base import assetConfigSchema
+# TODO: <Alex>ALEX</Alex>
+
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.datasource.data_connector.asset import Asset
+# TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.datasource.data_connector.sorter import Sorter
+# TODO: <Alex>ALEX</Alex>
 
 if TYPE_CHECKING:
-    from great_expectations.datasource import DataConnector
+    # TODO: <Alex>ALEX</Alex>
+    # from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import DataConnector
+    # TODO: <Alex>ALEX</Alex>
+    from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 
 logger = logging.getLogger(__name__)
 
@@ -49,55 +63,76 @@ except ImportError:
 
 
 def batch_definition_matches_batch_request(
-    batch_definition: BatchDefinition,
-    batch_request: BatchRequestBase,
+    batch_definition: "BatchDefinition",  # noqa: E731
+    batch_request: "BatchRequestBase",  # noqa: E731
 ) -> bool:
-    assert isinstance(batch_definition, BatchDefinition)
-    assert isinstance(batch_request, BatchRequestBase)
+    # TODO: <Alex>ALEX</Alex>
+    # assert isinstance(batch_definition, BatchDefinition)
+    # assert isinstance(batch_request, BatchRequestBase)
+    # TODO: <Alex>ALEX</Alex>
 
     if (
         batch_request.datasource_name
         and batch_request.datasource_name != batch_definition.datasource_name
     ):
         return False
-    if (
-        batch_request.data_connector_name
-        and batch_request.data_connector_name != batch_definition.data_connector_name
-    ):
-        return False
+    # TODO: <Alex>ALEX</Alex>
+    # if (
+    #     batch_request.data_connector_name
+    #     and batch_request.data_connector_name != batch_definition.data_connector_name
+    # ):
+    #     return False
+    # TODO: <Alex>ALEX</Alex>
     if (
         batch_request.data_asset_name
         and batch_request.data_asset_name != batch_definition.data_asset_name
     ):
         return False
 
-    if batch_request.data_connector_query:
-        batch_filter_parameters: Any = batch_request.data_connector_query.get(
-            "batch_filter_parameters"
-        )
-        if batch_filter_parameters:
-            if not isinstance(batch_filter_parameters, dict):
-                return False
+    # TODO: <Alex>ALEX</Alex>
+    # if batch_request.data_connector_query:
+    #     batch_filter_parameters: Any = batch_request.data_connector_query.get(
+    #         "batch_filter_parameters"
+    #     )
+    #     if batch_filter_parameters:
+    #         if not isinstance(batch_filter_parameters, dict):
+    #             return False
+    #
+    #         for key in batch_filter_parameters.keys():
+    #             if not (
+    #                 key in batch_definition.batch_identifiers
+    #                 and batch_definition.batch_identifiers[key]
+    #                 == batch_filter_parameters[key]
+    #             ):
+    #                 return False
+    # TODO: <Alex>ALEX</Alex>
 
-            for key in batch_filter_parameters.keys():
-                if not (
-                    key in batch_definition.batch_identifiers
-                    and batch_definition.batch_identifiers[key]
-                    == batch_filter_parameters[key]
-                ):
-                    return False
-
-    if batch_request.batch_identifiers:
-        if not isinstance(batch_request.batch_identifiers, dict):
+    # TODO: <Alex>ALEX</Alex>
+    # if batch_request.batch_identifiers:
+    #     if not isinstance(batch_request.batch_identifiers, dict):
+    #         return False
+    #
+    #     for key in batch_request.batch_identifiers.keys():
+    #         if not (
+    #             key in batch_definition.batch_identifiers
+    #             and batch_definition.batch_identifiers[key]
+    #             == batch_request.batch_identifiers[key]
+    #         ):
+    #             return False
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    if batch_request.options:
+        if not isinstance(batch_request.options, dict):
             return False
 
-        for key in batch_request.batch_identifiers.keys():
+        for key in batch_request.options.keys():
             if not (
                 key in batch_definition.batch_identifiers
                 and batch_definition.batch_identifiers[key]
-                == batch_request.batch_identifiers[key]
+                == batch_request.options[key]
             ):
                 return False
+    # TODO: <Alex>ALEX</Alex>
 
     return True
 
@@ -108,7 +143,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     data_reference: str,
     regex_pattern: re.Pattern,
     data_asset_name: Optional[str] = None,
-) -> Optional[List[BatchDefinition]]:
+) -> Optional[List["BatchDefinition"]]:  # noqa: E731
     batch_identifiers: Optional[
         IDDict
     ] = convert_data_reference_string_to_batch_identifiers_using_regex(
@@ -118,6 +153,10 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     if batch_identifiers is None:
         return None
 
+    # TODO: <Alex>ALEX</Alex>
+    from great_expectations.core.batch import BatchDefinition
+
+    # TODO: <Alex>ALEX</Alex>
     return [
         BatchDefinition(
             datasource_name=datasource_name,
@@ -172,14 +211,16 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
-    batch_definition: BatchDefinition,
+    batch_definition: "BatchDefinition",  # noqa: E731
     regex_pattern: re.Pattern,
     group_names: List[str],
 ) -> str:
-    if not isinstance(batch_definition, BatchDefinition):
-        raise TypeError(
-            "batch_definition is not of an instance of type BatchDefinition"
-        )
+    # TODO: <Alex>ALEX</Alex>
+    # if not isinstance(batch_definition, BatchDefinition):
+    #     raise TypeError(
+    #         "batch_definition is not of an instance of type BatchDefinition"
+    #     )
+    # TODO: <Alex>ALEX</Alex>
 
     data_asset_name: str = batch_definition.data_asset_name
     batch_identifiers: IDDict = batch_definition.batch_identifiers
@@ -190,6 +231,9 @@ def map_batch_definition_to_data_reference_string_using_regex(
             group_names=group_names,
             data_asset_name=data_asset_name,
         )
+    )
+    print(
+        f"\n[ALEX_TEST] [DATA_CONNECTOR::UTIL.PY::map_batch_definition_to_data_reference_string_using_regex()] DATA_REFERENCE:\n{data_reference} ; TYPE: {str(type(data_reference))}"
     )
     return data_reference
 
@@ -212,7 +256,13 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
+    print(
+        f"\n[ALEX_TEST] [DATA_CONNECTOR::UTIL.PY::convert_batch_identifiers_to_data_reference_string_using_regex()] FILEPATH_TEMPLATE:\n{filepath_template} ; TYPE: {str(type(filepath_template))}"
+    )
     converted_string: str = filepath_template.format(**template_arguments)
+    print(
+        f"\n[ALEX_TEST] [DATA_CONNECTOR::UTIL.PY::convert_batch_identifiers_to_data_reference_string_using_regex()] converted_string:\n{converted_string} ; TYPE: {str(type(converted_string))}"
+    )
 
     return converted_string
 
@@ -254,7 +304,13 @@ def _invert_regex_to_data_reference_template(
         regex_pattern = regex_pattern.pattern
 
     # print("-"*80)
+    print(
+        f"\n[ALEX_TEST] [DATA_CONNECTOR::UTIL.PY::_invert_regex_to_data_reference_template()] regex_pattern:\n{regex_pattern} ; TYPE: {str(type(regex_pattern))}"
+    )
     parsed_sre = sre_parse.parse(regex_pattern)
+    print(
+        f"\n[ALEX_TEST] [DATA_CONNECTOR::UTIL.PY::_invert_regex_to_data_reference_template()] parsed_sre:\n{parsed_sre} ; TYPE: {str(type(parsed_sre))}"
+    )
     for token, value in parsed_sre:  # type: ignore[attr-defined]
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
@@ -273,8 +329,13 @@ def _invert_regex_to_data_reference_template(
             sre_constants.BRANCH,
             sre_constants.ANY,
         ]:
-            # Replace the uncaptured group a wildcard in the template
-            data_reference_template += "*"
+            # TODO: <Alex>ALEX</Alex>
+            # # Replace the uncaptured group a wildcard in the template
+            # data_reference_template += "*"
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            data_reference_template += "."
+            # TODO: <Alex>ALEX</Alex>
 
         elif token in [
             sre_constants.AT,
@@ -499,58 +560,64 @@ def list_s3_keys(
         del iterator_dict["continuation_token"]
 
 
-# TODO: <Alex>We need to move sorters and _validate_sorters_configuration() to DataConnector</Alex>
-# As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is
-# called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this
-# method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).
-def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
-    sorter_dict: Dict[str, Sorter] = {}
-    if config_list is not None:
-        for sorter_config in config_list:
-            # if sorters were not configured
-            if sorter_config is None:
-                return None
-            if "name" not in sorter_config:
-                raise ValueError("Sorter config should have a name")
-            sorter_name: str = sorter_config["name"]
-            new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
-            sorter_dict[sorter_name] = new_sorter
-
-    return sorter_dict
-
-
-def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
-    """Build a Sorter using the provided configuration and return the newly-built Sorter."""
-    runtime_environment: dict = {"name": sorter_config["name"]}
-    sorter: Sorter = instantiate_class_from_config(
-        config=sorter_config,
-        runtime_environment=runtime_environment,
-        config_defaults={
-            "module_name": "great_expectations.datasource.data_connector.sorter"
-        },
-    )
-    return sorter
+# TODO: <Alex>ALEX</Alex>
+# # TODO: <Alex>We need to move sorters and _validate_sorters_configuration() to DataConnector</Alex>
+# # As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is
+# # called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this
+# # method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).
+# def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
+#     sorter_dict: Dict[str, Sorter] = {}
+#     if config_list is not None:
+#         for sorter_config in config_list:
+#             # if sorters were not configured
+#             if sorter_config is None:
+#                 return None
+#             if "name" not in sorter_config:
+#                 raise ValueError("Sorter config should have a name")
+#             sorter_name: str = sorter_config["name"]
+#             new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
+#             sorter_dict[sorter_name] = new_sorter
+#
+#     return sorter_dict
+# TODO: <Alex>ALEX</Alex>
 
 
-def _build_asset_from_config(
-    runtime_environment: "DataConnector", config: dict
-) -> Asset:
-    """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""
-    runtime_environment_dict: Dict[str, "DataConnector"] = {
-        "data_connector": runtime_environment
-    }
-    config = assetConfigSchema.load(config)
-    config = assetConfigSchema.dump(config)
-    asset: Asset = instantiate_class_from_config(
-        config=config,
-        runtime_environment=runtime_environment_dict,
-        config_defaults={},
-    )
-    if not asset:
-        raise gx_exceptions.ClassInstantiationError(
-            module_name="great_expectations.datasource.data_connector.asset",
-            package_name=None,
-            class_name=config["class_name"],
-        )
+# TODO: <Alex>ALEX</Alex>
+# def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
+#     """Build a Sorter using the provided configuration and return the newly-built Sorter."""
+#     runtime_environment: dict = {"name": sorter_config["name"]}
+#     sorter: Sorter = instantiate_class_from_config(
+#         config=sorter_config,
+#         runtime_environment=runtime_environment,
+#         config_defaults={
+#             "module_name": "great_expectations.datasource.data_connector.sorter"
+#         },
+#     )
+#     return sorter
+# TODO: <Alex>ALEX</Alex>
 
-    return asset
+
+# TODO: <Alex>ALEX</Alex>
+# def _build_asset_from_config(
+#     runtime_environment: "DataConnector", config: dict
+# ) -> Asset:
+#     """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""
+#     runtime_environment_dict: Dict[str, "DataConnector"] = {
+#         "data_connector": runtime_environment
+#     }
+#     config = assetConfigSchema.load(config)
+#     config = assetConfigSchema.dump(config)
+#     asset: Asset = instantiate_class_from_config(
+#         config=config,
+#         runtime_environment=runtime_environment_dict,
+#         config_defaults={},
+#     )
+#     if not asset:
+#         raise gx_exceptions.ClassInstantiationError(
+#             module_name="great_expectations.datasource.data_connector.asset",
+#             package_name=None,
+#             class_name=config["class_name"],
+#         )
+#
+#     return asset
+# TODO: <Alex>ALEX</Alex>

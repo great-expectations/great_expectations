@@ -333,6 +333,9 @@ def test_get_batch_list_from_fully_specified_batch_request(
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
     request = asset.get_batch_request({"year": "2018", "month": "04"})  # type: ignore[attr-defined]
+    print(
+        f"\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE.test_get_batch_list_from_fully_specified_batch_request()] BATCH_REQUEST:\n{request} ; TYPE: {str(type(request))}"
+    )
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert len(batches) == 1
     batch = batches[0]
@@ -372,9 +375,19 @@ def test_get_batch_list_from_partially_specified_batch_request(
     request = asset.get_batch_request({"year": "2018"})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert (len(batches)) == 12
+    # print(f'\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE.test_get_batch_list_from_partially_specified_batch_request()] BATCHES:\n{batches} ; TYPE: {str(type(batches))}')
+    # TODO: <Alex>ALEX</Alex>
     batch_filenames = [
         pathlib.Path(batch.metadata["base_directory"]).stem for batch in batches
     ]
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # batch_filenames = []
+    # for batch in batches:
+    #     a = pathlib.Path(batch.metadata["base_directory"]).stem
+    #     print(f'\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE.test_get_batch_list_from_partially_specified_batch_request()] BATCH_FILENAME:\n{a} ; TYPE: {str(type(a))}')
+    #     batch_filenames.append(a)
+    # TODO: <Alex>ALEX</Alex>
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)
@@ -385,6 +398,13 @@ def test_get_batch_list_from_partially_specified_batch_request(
     expected_year_month = {
         YearMonth(year="2018", month=format(m, "02d")) for m in range(1, 13)
     }
+    # TODO: <Alex>ALEX</Alex>
+    for batch in batches:
+        a = batch.metadata
+        print(
+            f"\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE.test_get_batch_list_from_partially_specified_batch_request()] BATCH_METADATA:\n{a} ; TYPE: {str(type(a))}"
+        )
+    # TODO: <Alex>ALEX</Alex>
     batch_year_month = {
         YearMonth(year=batch.metadata["year"], month=batch.metadata["month"])
         for batch in batches

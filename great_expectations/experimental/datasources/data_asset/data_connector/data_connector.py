@@ -1,10 +1,17 @@
 import logging
-from typing import Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+
 
 logger = logging.getLogger(__name__)
 
@@ -119,9 +126,12 @@ class DataConnector:
     def __init__(
         self,
         name: str,
+        datasource_name: str,
         data_asset_name: str,
     ) -> None:
         self._name: str = name
+
+        self._datasource_name: str = datasource_name
         self._data_asset_name: str = data_asset_name
 
         # This is a dictionary which maps data_references onto batch_requests.
@@ -138,6 +148,10 @@ class DataConnector:
         return self._data_asset_name
 
     @property
+    def datasource_name(self) -> str:
+        return self._datasource_name
+
+    @property
     def data_context_root_directory(self) -> str:
         return self._data_context_root_directory
 
@@ -145,7 +159,29 @@ class DataConnector:
     def data_context_root_directory(self, data_context_root_directory: str) -> None:
         self._data_context_root_directory = data_context_root_directory
 
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
+    # TODO: <Alex>ALEX</Alex>
+    # def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
+    #     """
+    #     Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
+    #
+    #     Args:
+    #         batch_definition (BatchDefinition): required batch_definition parameter for retrieval
+    #     Returns:
+    #         BatchSpec object built from BatchDefinition
+    #
+    #     """
+    #     batch_spec_params: dict = (
+    #         self._generate_batch_spec_parameters_from_batch_definition(
+    #             batch_definition=batch_definition
+    #         )
+    #     )
+    #     batch_spec = BatchSpec(**batch_spec_params)
+    #     return batch_spec
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    def build_batch_spec(
+        self, batch_definition: "BatchDefinition"
+    ) -> BatchSpec:  # noqa: E731
         """
         Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
 
@@ -163,10 +199,22 @@ class DataConnector:
         batch_spec = BatchSpec(**batch_spec_params)
         return batch_spec
 
+    # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX</Alex>
+    # def get_batch_definition_list_from_batch_request(
+    #     self, batch_request: BatchRequestBase
+    # ) -> List[BatchDefinition]:
+    #     raise NotImplementedError
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX-REPLACE_BY_REAL_ZEP_BATCH_REQUEST</Alex>
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequestBase
-    ) -> List[BatchDefinition]:
+        self, batch_request: "BatchRequestBase"  # noqa: E731
+    ) -> List["BatchDefinition"]:  # noqa: E731
         raise NotImplementedError
+
+    # TODO: <Alex>ALEX</Alex>
 
     def get_data_reference_list_count(self) -> int:
         raise NotImplementedError
@@ -174,25 +222,52 @@ class DataConnector:
     def get_unmatched_data_references(self) -> List[Any]:
         raise NotImplementedError
 
+    # TODO: <Alex>ALEX</Alex>
+    # def _generate_batch_spec_parameters_from_batch_definition(
+    #     self, batch_definition: BatchDefinition
+    # ) -> dict:
+    #     raise NotImplementedError
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: "BatchDefinition"  # noqa: E731
     ) -> dict:
         raise NotImplementedError
+
+    # TODO: <Alex>ALEX</Alex>
 
     def _refresh_data_references_cache(
         self,
     ) -> None:
         raise NotImplementedError
 
+    # TODO: <Alex>ALEX</Alex>
+    # def _map_data_reference_to_batch_definition_list(
+    #     self, data_reference: Any
+    # ) -> Optional[List[BatchDefinition]]:
+    #     raise NotImplementedError
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: Any
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> Optional[List["BatchDefinition"]]:  # noqa: E731
         raise NotImplementedError
 
+    # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX</Alex>
+    # def _map_batch_definition_to_data_reference(
+    #     self, batch_definition: BatchDefinition
+    # ) -> Any:
+    #     raise NotImplementedError
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
     def _map_batch_definition_to_data_reference(
-        self, batch_definition: BatchDefinition
+        self, batch_definition: "BatchDefinition"  # noqa: E731
     ) -> Any:
         raise NotImplementedError
+
+    # TODO: <Alex>ALEX</Alex>
 
     def _get_data_reference_list(self) -> List[str]:
         """

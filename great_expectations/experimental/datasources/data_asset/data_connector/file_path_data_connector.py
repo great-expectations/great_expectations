@@ -1,28 +1,32 @@
+from __future__ import annotations
+
 # TODO: <Alex>ALEX</Alex>
 # import copy
 # TODO: <Alex>ALEX</Alex>
 import logging
-import pathlib
 import re
 
 # TODO: <Alex>ALEX</Alex>
 # from typing import Iterator, List, Optional, cast
 # TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
-from typing import List, Optional, cast
+from typing import TYPE_CHECKING, List, Optional, cast
 
 # TODO: <Alex>ALEX</Alex>
 # import great_expectations.exceptions as gx_exceptions
 # TODO: <Alex>ALEX</Alex>
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchRequest,
-    BatchRequestBase,
-    BatchSpec,
-)
-from great_expectations.core.batch_spec import PathBatchSpec
 
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.core.batch import (
+#     BatchDefinition,
+#     BatchRequest,
+#     BatchRequestBase,
+# )
+# TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
+# TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
 # from great_expectations.experimental.data_asset.data_connector.batch_filter import (
 #     BatchFilter,
@@ -46,6 +50,14 @@ from great_expectations.experimental.datasources.data_asset.data_connector.util 
 )
 
 # TODO: <Alex>ALEX</Alex>
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import (
+        BatchDefinition,
+        BatchRequest,
+        BatchRequestBase,
+    )
+    from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 
 
 logger = logging.getLogger(__name__)
@@ -75,17 +87,18 @@ class FilePathDataConnector(DataConnector):
     def __init__(
         self,
         name: str,
+        datasource_name: str,
         data_asset_name: str,
-        base_directory: pathlib.Path,
         regex: Optional[re.Pattern] = None,
         unnamed_regex_group_prefix: str = "batch_request_param_",
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
     ) -> None:
-        super().__init__(name=name, data_asset_name=data_asset_name)
+        super().__init__(
+            name=name, datasource_name=datasource_name, data_asset_name=data_asset_name
+        )
 
-        self.base_directory: pathlib.Path = base_directory
         # TODO: <Alex>ALEX</Alex>
         self._regex: Optional[re.Pattern] = regex
         # TODO: <Alex>ALEX</Alex>
@@ -141,6 +154,10 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """
+        # TODO: <Alex>ALEX</Alex>
+        from great_expectations.core.batch import BatchRequestBase
+
+        # TODO: <Alex>ALEX</Alex>
         batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request_base
@@ -194,7 +211,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 """
             )
 
-        path = str(self.base_directory.joinpath(path))
+        path = self._get_full_file_path(path=path)
 
         return {"path": path}
 

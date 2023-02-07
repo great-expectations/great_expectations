@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import pathlib
 import re
@@ -35,6 +37,7 @@ class FilesystemDataConnector(FilePathDataConnector):
     def __init__(
         self,
         name: str,
+        datasource_name: str,
         data_asset_name: str,
         base_directory: pathlib.Path,
         regex: Optional[re.Pattern] = None,
@@ -45,14 +48,15 @@ class FilesystemDataConnector(FilePathDataConnector):
     ) -> None:
         super().__init__(
             name=name,
+            datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            base_directory=base_directory,
             regex=regex,
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
         )
 
+        self._base_directory = base_directory
         self._glob_directive: str = glob_directive
 
     @property
@@ -62,7 +66,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         root directory. If it is absolute, then keep as-is.
         """
         return normalize_directory_path(
-            dir_path=self._base_directory,
+            dir_path=str(self._base_directory),
             root_directory_path=self.data_context_root_directory,
         )
 
@@ -73,3 +77,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             base_directory_path=base_directory, glob_directive=glob_directive
         )
         return sorted(path_list)
+
+    def _get_full_file_path(self, path: str) -> str:
+        base_directory: str = self.base_directory
+        return str(pathlib.Path(base_directory).joinpath(path))
