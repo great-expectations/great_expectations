@@ -9,7 +9,7 @@ from great_expectations.cli.datasource import (
     MySQLCredentialYamlHelper,
     PandasYamlHelper,
     PostgresCredentialYamlHelper,
-    RedshiftCredentialYamlHelper,
+    AthenaCredentialYamlHelper,
     SnowflakeAuthMethod,
     SnowflakeCredentialYamlHelper,
     SparkYamlHelper,
@@ -265,7 +265,7 @@ data_connectors:
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_RedshiftCredentialYamlHelper(mock_emit, empty_data_context_stats_enabled):
-    helper = RedshiftCredentialYamlHelper("my_datasource")
+    helper = AthenaCredentialYamlHelper("my_datasource")
     expected_credentials_snippet = '''\
 host = "YOUR_HOST"
 port = "5439"

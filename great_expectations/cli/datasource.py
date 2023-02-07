@@ -47,6 +47,7 @@ class SupportedDatabaseBackends(enum.Enum):
     SNOWFLAKE = "Snowflake"
     BIGQUERY = "BigQuery"
     TRINO = "Trino"
+    ATHENA = "Athena"
     OTHER = "other - Do you have a working SQLAlchemy connection string?"
     # TODO MSSQL
 
@@ -557,7 +558,7 @@ class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
         return psycopg2_success and postgresql_psycopg2_success
 
 
-class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
+class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
     def __init__(self, datasource_name: Optional[str]) -> None:
         # We are insisting on psycopg2 driver when adding a Redshift datasource
         # through the CLI to avoid over-complication of this flow. If user wants
@@ -745,6 +746,38 @@ schema_name = "{self.schema_name}"
 # A table that you would like to add initially as a Data Asset
 table_name = "{self.table_name}"'''
 
+class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]) -> None:
+        # We are insisting on psycopg2 driver when adding a Redshift datasource
+        # through the CLI to avoid over-complication of this flow. If user wants
+        # to use another driver, they must use a sqlalchemy connection string.
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.ATHENA.value,
+                "api_version": "v3",
+            },
+            driver="awsathena+rest",
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        # noinspection SpellCheckingInspection
+        pyathena_success: bool = verify_library_dependent_modules(
+            python_import_name="pyathena",
+            pip_library_name="pyathena[SQLAlchemy]",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        return pyathena_success
+
+    def _yaml_innards(self) -> str:
+        return (
+            super()._yaml_innards()
+            + """
+    query:
+      sslmode: prefer"""
+        )
+
 
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
     def __init__(self, datasource_name: Optional[str]) -> None:
@@ -780,7 +813,7 @@ table_name = "YOUR_TABLE_NAME"'''
 SQLYAMLHelpers: TypeAlias = Union[
     MySQLCredentialYamlHelper,
     PostgresCredentialYamlHelper,
-    RedshiftCredentialYamlHelper,
+    AthenaCredentialYamlHelper,
     SnowflakeCredentialYamlHelper,
     BigqueryCredentialYamlHelper,
     ConnectionStringCredentialYamlHelper,
@@ -794,7 +827,7 @@ def _get_sql_yaml_helper_class(
     helper_class_by_backend: Dict[SupportedDatabaseBackends, Type[SQLYAMLHelpers]] = {
         SupportedDatabaseBackends.POSTGRES: PostgresCredentialYamlHelper,
         SupportedDatabaseBackends.MYSQL: MySQLCredentialYamlHelper,
-        SupportedDatabaseBackends.REDSHIFT: RedshiftCredentialYamlHelper,
+        SupportedDatabaseBackends.REDSHIFT: AthenaCredentialYamlHelper,
         SupportedDatabaseBackends.SNOWFLAKE: SnowflakeCredentialYamlHelper,
         SupportedDatabaseBackends.BIGQUERY: BigqueryCredentialYamlHelper,
         SupportedDatabaseBackends.TRINO: TrinoCredentialYamlHelper,
