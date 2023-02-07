@@ -5,8 +5,7 @@ extend = "../pyproject.toml"
 
 extend-ignore = [
     # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
-    # this likely to be a high touch set of rules that most contribs
-    # don't need to care about. It may disincentivize type-hinting.
+    # This is likely to be a high-touch rule that most contribs don't need to care about.
     "TCH001",
 ]
 
