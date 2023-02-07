@@ -2148,7 +2148,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         ]
         execution_engine: ExecutionEngine
         if isinstance(datasource, XDatasource):
-            execution_engine = datasource.get_execution_engine()
+            batch = batch_list[-1]
+            assert isinstance(batch, XBatch)
+            execution_engine = batch.data.execution_engine
         elif isinstance(datasource, BaseDatasource):
             execution_engine = datasource.execution_engine
         else:
