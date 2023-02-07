@@ -441,6 +441,7 @@ def test_yaml_config_round_trip(
     assert re_loaded
 
     assert from_yaml_gx_config.dict() == re_loaded.dict()
+    assert dumped == re_loaded.yaml()
 
 
 def test_yaml_file_config_round_trip(
