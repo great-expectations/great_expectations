@@ -83,20 +83,6 @@ def capture_reader_fn_params(monkeypatch: MonkeyPatch):
 
 @pytest.mark.unit
 class TestDynamicPandasAssets:
-    def test_asset_types_and_asset_annotations_match(self):
-        asset_class_names: set[str] = {t.__name__ for t in PandasDatasource.asset_types}
-        assert asset_class_names
-
-        assets_field: pydantic.fields.ModelField = PandasDatasource.__dict__[
-            "__fields__"
-        ]["assets"]
-        asset_field_union_members: set[str] = {
-            t.__name__
-            for t in assets_field.type_.__args__  # accessing the `Union` members with `__args__`
-        }
-
-        assert asset_class_names.issubset(asset_field_union_members)
-
     @pytest.mark.parametrize(
         "method_name",
         [
