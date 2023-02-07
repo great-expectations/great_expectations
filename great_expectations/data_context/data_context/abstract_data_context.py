@@ -115,6 +115,7 @@ from great_expectations.datasource.datasource_serializer import (
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.experimental.datasources.interfaces import (
     Datasource as XDatasource,
 )
@@ -158,7 +159,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
-    from great_expectations.experimental.datasources.interfaces import Batch as XBatch
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
