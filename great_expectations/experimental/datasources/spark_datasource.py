@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 from typing_extensions import Literal
 
-from great_expectations.alias_types import PathStr
+from great_expectations.alias_types import PathStr  # noqa: TCH001
 from great_expectations.experimental.datasources.filesystem_data_asset import (
     _FilesystemDataAsset,
 )
