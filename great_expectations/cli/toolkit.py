@@ -1049,7 +1049,7 @@ def get_batch_request_from_json_file(
     suppress_usage_message: bool = False,
 ) -> dict[str, JSONValues]:
     batch_request_or_error_message: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+        str | dict[str, str | int | dict[str, Any]]
     ] = load_json_file_into_dict(
         filepath=batch_request_json_file_path,
         data_context=data_context,
@@ -1062,7 +1062,7 @@ def get_batch_request_from_json_file(
             raise TypeError(batch_request_or_error_message)
         else:
             batch_request_json_dict: dict[str, JSONValues] = BatchRequest(
-                **batch_request_or_error_message
+                **batch_request_or_error_message  # type: ignore[arg-type]
             ).to_json_dict()
     except TypeError as e:
         cli_message(
