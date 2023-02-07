@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Dict, List, Tuple
+from typing import Dict, List, Match, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class RegExParser:
     def get_named_group_name_to_group_index_mapping(self) -> Dict[str, int]:
         return self._named_group_name_to_group_index_mapping
 
-    def get_matches(self, target: str) -> re.Match:
+    def get_matches(self, target: str) -> Optional[Match[str]]:
         return self._regex_pattern.match(target)
 
     def get_named_group_name_to_group_value_mapping(
