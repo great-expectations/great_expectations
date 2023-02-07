@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from contextlib import contextmanager
 from datetime import datetime
-from typing import Callable, Dict, Generator, Tuple, Type
+from typing import Any, Callable, Generator, Type
 
 import pytest
 from pytest import MonkeyPatch
@@ -53,10 +53,13 @@ class _MockConnection:
 
 
 class MockSaInspector:
-    def get_schema_names(self):
+    def get_columns(self) -> list[dict[str, Any]]:  # type: ignore[empty-body]
         ...
 
-    def has_table(self):
+    def get_schema_names(self) -> list[str]:  # type: ignore[empty-body]
+        ...
+
+    def has_table(self, table_name: str, schema: str) -> bool:  # type: ignore[empty-body]
         ...
 
 
@@ -90,7 +93,7 @@ def sqlachemy_execution_engine_mock_cls(
 
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec
-        ) -> Tuple[BatchData, BatchMarkers]:
+        ) -> tuple[BatchData, BatchMarkers]:
             validate_batch_spec(batch_spec)
             return BatchData(self), BatchMarkers(ge_load_time=None)
 
@@ -101,7 +104,7 @@ class ExecutionEngineDouble(ExecutionEngine):
     def __init__(self, *args, **kwargs):
         pass
 
-    def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:  # type: ignore[override]
+    def get_batch_data_and_markers(self, batch_spec) -> tuple[BatchData, BatchMarkers]:  # type: ignore[override]
         return BatchData(self), BatchMarkers(ge_load_time=None)
 
 
@@ -114,7 +117,7 @@ def inject_engine_lookup_double(
     so that all Datasources use the execution engine double.
     Dynamically create a new subclass so that runtime type validation does not fail.
     """
-    original_engine_override: Dict[Type[Datasource], Type[ExecutionEngine]] = {}
+    original_engine_override: dict[Type[Datasource], Type[ExecutionEngine]] = {}
     for key in _SourceFactories.type_lookup.keys():
         if issubclass(type(key), Datasource):
             original_engine_override[key] = key.execution_engine_override
