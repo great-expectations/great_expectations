@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Dict
+from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ class RegExParser:
         # Check for `(?P<name>)` named group syntax
         return self.get_matches(target=target).groupdict()
 
-    def get_all_matched_group_values(self, target: str) -> list[str]:
+    def get_all_matched_group_values(self, target: str) -> List[str]:
         return list(self.get_matches(target=target).groups())
 
     def get_all_group_names_to_group_indexes_bidirectional_mappings(
@@ -55,7 +55,7 @@ class RegExParser:
         )
 
         idx: int
-        common_group_indexes: list[int] = list(
+        common_group_indexes: List[int] = list(
             filter(
                 lambda idx: idx
                 not in self._named_group_name_to_group_index_mapping.values(),
@@ -114,18 +114,18 @@ class RegExParser:
         ] = all_group_names_to_group_indexes_bidirectional_mappings[1]
         return all_group_index_to_group_name_mapping
 
-    def get_all_group_names(self) -> list[str]:
+    def get_all_group_names(self) -> List[str]:
         all_group_name_to_group_index_mapping: Dict[
             str, int
         ] = self.get_all_group_name_to_group_index_mapping()
-        all_group_names: list[str] = list(all_group_name_to_group_index_mapping.keys())
+        all_group_names: List[str] = list(all_group_name_to_group_index_mapping.keys())
         return all_group_names
 
-    def get_all_group_indexes(self) -> list[int]:
+    def get_all_group_indexes(self) -> List[int]:
         all_group_index_to_group_name_mapping: Dict[
             int, str
         ] = self.get_all_group_index_to_group_name_mapping()
-        all_group_indexes: list[int] = list(
+        all_group_indexes: List[int] = list(
             all_group_index_to_group_name_mapping.keys()
         )
         return all_group_indexes
@@ -134,8 +134,8 @@ class RegExParser:
         self,
         target: str,
     ) -> Dict[str, str]:
-        all_group_names: list[str] = self.get_all_group_names()
-        all_matched_group_values: list[str] = self.get_all_matched_group_values(
+        all_group_names: List[str] = self.get_all_group_names()
+        all_matched_group_values: List[str] = self.get_all_matched_group_values(
             target=target
         )
         group_name_to_group_value_mapping: Dict[str, str] = dict(
@@ -147,8 +147,8 @@ class RegExParser:
         self,
         target: str,
     ) -> Dict[int, str]:
-        all_group_indexes: list[int] = self.get_all_group_indexes()
-        all_matched_group_values: list[str] = self.get_all_matched_group_values(
+        all_group_indexes: List[int] = self.get_all_group_indexes()
+        all_matched_group_values: List[str] = self.get_all_matched_group_values(
             target=target
         )
         group_index_to_group_value_mapping: Dict[int, str] = dict(

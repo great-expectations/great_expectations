@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, Dict, Optional, Pattern
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Pattern, Set
 
 import pydantic
 
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 class _FilesystemDataAsset(DataAsset):
     # Pandas specific class attrs
-    _EXCLUDE_FROM_READER_OPTIONS: ClassVar[set[str]] = {
+    _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "name",
         "base_directory",
         "regex",
@@ -50,7 +50,7 @@ class _FilesystemDataAsset(DataAsset):
 
     _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
     _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
-    _all_group_names: list[str] = pydantic.PrivateAttr()
+    _all_group_names: List[str] = pydantic.PrivateAttr()
 
     class Config:
         """
@@ -83,7 +83,7 @@ class _FilesystemDataAsset(DataAsset):
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> Set[str] | None:
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""
@@ -113,7 +113,7 @@ to use as its "include" directive for File-Path style DataAsset processing."""
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
-    ) -> list[tuple[BatchRequest, pathlib.Path]]:
+    ) -> List[tuple[BatchRequest, pathlib.Path]]:
         """Generates a list fully specified batch requests from partial specified batch request
 
         Args:
@@ -125,9 +125,9 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This list will be empty if no files exist on disk that correspond to the input
             batch request.
         """
-        batch_requests_with_path: list[tuple[BatchRequest, pathlib.Path]] = []
+        batch_requests_with_path: List[tuple[BatchRequest, pathlib.Path]] = []
 
-        all_files: list[pathlib.Path] = list(
+        all_files: List[pathlib.Path] = list(
             pathlib.Path(self.base_directory).iterdir()
         )
 
@@ -190,9 +190,9 @@ to use as its "include" directive for File-Path style DataAsset processing."""
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
-    ) -> list[Batch]:
+    ) -> List[Batch]:
         self._validate_batch_request(batch_request)
-        batch_list: list[Batch] = []
+        batch_list: List[Batch] = []
 
         for request, path in self._fully_specified_batch_requests_with_path(
             batch_request
