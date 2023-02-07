@@ -154,7 +154,4 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
             "container": self._container,
             "path": path,
         }
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)
