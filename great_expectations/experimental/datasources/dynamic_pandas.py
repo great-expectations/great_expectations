@@ -243,7 +243,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     https://docs.python.org/3/howto/annotations.html#manually-un-stringizing-stringized-annotations
     """
     annotation = param.annotation
-    # this section is only needed for when users a running our min supported pandas
+    # this section is only needed for when user is running our min supported pandas (1.1)
     # pandas now exclusively uses postponed/str annotations
     if not isinstance(annotation, str):
         # `__args__` contains the actual members of a `Union[TYPE_1, TYPE_2]` object
