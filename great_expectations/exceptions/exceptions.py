@@ -36,6 +36,10 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
+class ExpectationSuiteError(DataContextError):
+    pass
+
+
 class CheckpointError(DataContextError):
     pass
 

@@ -183,6 +183,33 @@ class Store:
             self.key_to_tuple(key), self.serialize(value), **kwargs
         )
 
+    def add(self, key: DataContextKey, value: Any, **kwargs) -> None:
+        """
+        Essentially `set` but validates that a given key-value pair does not already exist.
+        """
+        self._validate_key(key)
+        return self._store_backend.add(
+            self.key_to_tuple(key), self.serialize(value), **kwargs
+        )
+
+    def update(self, key: DataContextKey, value: Any, **kwargs) -> None:
+        """
+        Essentially `set` but validates that a given key-value pair does already exist.
+        """
+        self._validate_key(key)
+        return self._store_backend.update(
+            self.key_to_tuple(key), self.serialize(value), **kwargs
+        )
+
+    def add_or_update(self, key: DataContextKey, value: Any, **kwargs) -> None:
+        """
+        Conditionally calls `add` or `update` based on the presence of the given key.
+        """
+        self._validate_key(key)
+        return self._store_backend.add_or_update(
+            self.key_to_tuple(key), self.serialize(value), **kwargs
+        )
+
     def list_keys(self) -> List[DataContextKey]:
         keys_without_store_backend_id = [
             key
