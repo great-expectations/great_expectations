@@ -82,12 +82,15 @@ module.exports = {
           position: 'right'
         },
         {
-          to: 'https://legacy.docs.greatexpectations.io/',
-          // Only one of "to" or "href" should be used
-          // href: 'https://www.facebook.com',
-          label: 'V2 DOCS',
-          target: '_blank',
-          position:'right'
+          type: 'docsVersionDropdown',
+          position: 'left',
+          dropdownItemsAfter: [
+            {
+              to: 'https://legacy.docs.greatexpectations.io/',
+              label: '0.13.x and earlier'
+            }
+          ],
+          dropdownActiveClassDisabled: true,
         },
         {
           label: 'Product',
@@ -248,7 +251,14 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           remarkPlugins: [remarkCodeImport, remarkNamedSnippets],
-          editUrl: 'https://github.com/great-expectations/great_expectations/tree/develop/'
+          editUrl: 'https://github.com/great-expectations/great_expectations/tree/develop/',
+          lastVersion: 'current',
+          versions: {
+            current: {
+              label: 'Current',
+              path: ''
+            }
+          }
         },
         theme: {
           customCss: require.resolve('./src/css/custom.scss')
