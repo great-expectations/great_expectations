@@ -8,7 +8,7 @@ from typing_extensions import Literal
 
 from great_expectations.alias_types import PathStr  # noqa: TCH001
 from great_expectations.experimental.datasources.filesystem_data_asset import (
-    FilesystemDataAsset,
+    _FilesystemDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
@@ -26,7 +26,7 @@ class SparkDatasourceError(Exception):
     pass
 
 
-class CSVSparkAsset(FilesystemDataAsset):
+class CSVSparkAsset(_FilesystemDataAsset):
     # Overridden inherited instance fields
     type: Literal["csv_spark"] = "csv_spark"
 

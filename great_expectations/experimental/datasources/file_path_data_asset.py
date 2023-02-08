@@ -19,7 +19,7 @@ from great_expectations.experimental.datasources.interfaces import (
 logger = logging.getLogger(__name__)
 
 
-class FilePathDataAsset(DataAsset):
+class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "name",
         "regex",
@@ -43,7 +43,7 @@ class FilePathDataAsset(DataAsset):
     class Config:
         """
         Need to allow extra fields for the base type because pydantic will first create
-        an instance of `FilesystemDataAsset` before we select and create the more specific
+        an instance of `_FilesystemDataAsset` before we select and create the more specific
         asset subtype.
         Each specific subtype should `forbid` extra fields.
         """
@@ -94,7 +94,7 @@ class FilePathDataAsset(DataAsset):
             TestConnectionError: If the connection test fails.
         """
         raise NotImplementedError(
-            """One needs to implement "test_connection" on a FilePathDataAsset subclass."""
+            """One needs to implement "test_connection" on a _FilePathDataAsset subclass."""
         )
 
     def get_batch_list_from_batch_request(

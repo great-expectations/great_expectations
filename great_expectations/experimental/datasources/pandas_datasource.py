@@ -11,7 +11,7 @@ from great_expectations.experimental.datasources.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
 from great_expectations.experimental.datasources.filesystem_data_asset import (
-    FilesystemDataAsset,
+    _FilesystemDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
@@ -52,7 +52,7 @@ _BLACK_LIST = (
 )
 
 _ASSET_MODELS = _generate_pandas_data_asset_models(
-    FilesystemDataAsset,
+    _FilesystemDataAsset,
     blacklist=_BLACK_LIST,
     use_docstring_from_method=True,
 )
@@ -65,11 +65,11 @@ try:
     ParquetAsset = _ASSET_MODELS["parquet"]
 except KeyError as key_err:
     logger.info(f"zep - {key_err} asset model could not be generated")
-    CSVAsset = FilesystemDataAsset
-    ExcelAsset = FilesystemDataAsset
-    JSONAsset = FilesystemDataAsset
-    ORCAsset = FilesystemDataAsset
-    ParquetAsset = FilesystemDataAsset
+    CSVAsset = _FilesystemDataAsset
+    ExcelAsset = _FilesystemDataAsset
+    JSONAsset = _FilesystemDataAsset
+    ORCAsset = _FilesystemDataAsset
+    ParquetAsset = _FilesystemDataAsset
 
 
 class PandasDatasource(Datasource):
@@ -81,7 +81,7 @@ class PandasDatasource(Datasource):
     name: str
     assets: Dict[
         str,
-        FilesystemDataAsset,
+        _FilesystemDataAsset,
     ] = {}
 
     @property

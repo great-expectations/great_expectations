@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, ClassVar, List, Optional, Set, Tuple
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.experimental.datasources.file_path_data_asset import (
-    FilePathDataAsset,
+    _FilePathDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
@@ -26,10 +26,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class FilesystemDataAsset(FilePathDataAsset):
+class _FilesystemDataAsset(_FilePathDataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[
         Set[str]
-    ] = FilePathDataAsset._EXCLUDE_FROM_READER_OPTIONS | {
+    ] = _FilePathDataAsset._EXCLUDE_FROM_READER_OPTIONS | {
         "base_directory",
     }
 

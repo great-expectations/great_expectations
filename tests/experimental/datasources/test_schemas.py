@@ -60,5 +60,5 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     json_str = schema_path.read_text().rstrip()
 
     assert (
-        json.loads(json_str) == zep_ds_or_asset_model.schema()
+        json.loads(json_str, sort_keys=True) == zep_ds_or_asset_model.schema_json()
     ), "Schemas are out of sync. Run `invoke schema --sync`. Also check your pandas version."
