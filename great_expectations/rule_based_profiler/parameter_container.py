@@ -16,7 +16,7 @@ from pyparsing import (
 from typing_extensions import Final
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot, SerializableDotDict
 

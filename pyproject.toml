@@ -201,6 +201,8 @@ select = [
     "UP", # pyupgrade
     # https://github.com/charliermarsh/ruff#isort-i
     "I", # isort
+    # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
+    "TCH", # flake8-type-checking-tch
 ]
 ignore = [
     # https://github.com/charliermarsh/ruff#pyflakes-f
@@ -219,6 +221,13 @@ ignore = [
     # https://github.com/charliermarsh/ruff#pyupgrade-up
     "UP006", # use-pep585-annotation
     "UP007", # use-pep604-annotation
+    # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
+    # doesn't catch errors or help with circular imports and tedious to apply
+    "TCH002", # typing-only-third-party-import
+    # minimal cost for standard lib imports; keep this disabled
+    "TCH003", # typing-only-standard-library-import
+    # gives false positives if we use try imports and type-checking import
+    "TCH004", # runtime-import-in-type-checking-block
 ]
 extend-exclude = [
     "scripts/*",

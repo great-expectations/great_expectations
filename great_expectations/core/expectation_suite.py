@@ -23,7 +23,7 @@ from marshmallow import Schema, ValidationError, fields, pre_dump
 
 import great_expectations as gx
 from great_expectations import __version__ as ge_version
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,

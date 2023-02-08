@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 
 import pyparsing as pp
 
-from great_expectations.alias_types import PathStr
+from great_expectations.alias_types import PathStr  # noqa: TCH001
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class, verify_dynamic_loading_support
 

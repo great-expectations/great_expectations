@@ -5,19 +5,19 @@ from typing import Dict
 import click
 from ruamel.yaml import YAML
 
-from great_expectations import DataContext
-from great_expectations.checkpoint import Checkpoint
+from great_expectations import DataContext  # noqa: TCH001
+from great_expectations.checkpoint import Checkpoint  # noqa: TCH001
 from great_expectations.cli.v012 import toolkit
 from great_expectations.cli.v012.mark import Mark as mark
 from great_expectations.cli.v012.util import cli_message, cli_message_list
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite  # noqa: TCH001
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidTopLevelConfigKeyError
 from great_expectations.util import lint_code
 from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
+    ValidationOperatorResult,  # noqa: TCH001
 )
 
 try:

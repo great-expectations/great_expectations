@@ -7,11 +7,11 @@ import pandas as pd
 from scipy import stats as stats
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.execution_engine.util import (
     is_valid_categorical_partition_object,
     is_valid_partition_object,
@@ -44,10 +44,12 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.validator import (
+    ValidationDependencies,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs

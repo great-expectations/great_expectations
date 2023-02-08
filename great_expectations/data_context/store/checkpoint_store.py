@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from marshmallow import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.data_context_key import DataContextKey  # noqa: TCH001
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import (
@@ -22,8 +22,8 @@ from great_expectations.data_context.types.refs import (
     GXCloudResourceRef,
 )
 from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-    GXCloudIdentifier,
+    ConfigurationIdentifier,  # noqa: TCH001
+    GXCloudIdentifier,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

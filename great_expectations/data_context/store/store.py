@@ -4,7 +4,7 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Type
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.configuration import AbstractConfig  # noqa: TCH001
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,

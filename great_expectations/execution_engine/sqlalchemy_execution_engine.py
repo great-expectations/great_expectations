@@ -44,7 +44,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
 
@@ -81,7 +81,9 @@ from great_expectations.util import (
     import_library_module,
     import_make_url,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 logger = logging.getLogger(__name__)
 
@@ -201,7 +203,7 @@ except ImportError:
     teradatatypes = None
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TCH004
     from sqlalchemy.engine import Engine as SaEngine
 
 

@@ -56,7 +56,9 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,  # noqa: TCH001
+)
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -71,11 +73,19 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     _YamlConfigValidator,
 )
-from great_expectations.data_context.data_context_variables import DataContextVariables
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariables,  # noqa: TCH001
+)
 from great_expectations.data_context.store import Store, TupleStoreBackend
-from great_expectations.data_context.store.expectations_store import ExpectationsStore
-from great_expectations.data_context.store.profiler_store import ProfilerStore
-from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.store.expectations_store import (
+    ExpectationsStore,  # noqa: TCH001
+)
+from great_expectations.data_context.store.profiler_store import (
+    ProfilerStore,  # noqa: TCH001
+)
+from great_expectations.data_context.store.validations_store import (
+    ValidationsStore,  # noqa: TCH001
+)
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
@@ -113,7 +123,7 @@ from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.experimental.datasources.interfaces import (

@@ -15,14 +15,14 @@ from great_expectations.datasource.data_connector.batch_filter import (
     build_batch_filter,
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector
-from great_expectations.datasource.data_connector.sorter import Sorter
+from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
     build_sorters_from_config,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 

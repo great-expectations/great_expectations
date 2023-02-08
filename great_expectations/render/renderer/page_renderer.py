@@ -7,7 +7,7 @@ from dateutil.parser import parse
 
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
+    ExpectationSuiteValidationResult,  # noqa: TCH001
 )
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -27,7 +27,7 @@ from great_expectations.render import (
 from great_expectations.render.renderer.renderer import Renderer
 from great_expectations.render.util import num_to_str
 from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
+    ValidationOperatorResult,  # noqa: TCH001
 )
 
 logger = logging.getLogger(__name__)
