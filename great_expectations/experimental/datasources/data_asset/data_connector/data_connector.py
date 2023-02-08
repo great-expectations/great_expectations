@@ -10,7 +10,8 @@ from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.experimental.datasources.interfaces import BatchRequest
 
 
 logger = logging.getLogger(__name__)
@@ -210,7 +211,7 @@ class DataConnector:
     # TODO: <Alex>ALEX</Alex>
     # TODO: <Alex>ALEX-REPLACE_BY_REAL_ZEP_BATCH_REQUEST</Alex>
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: "BatchRequestBase"  # noqa: E731
+        self, batch_request: BatchRequest
     ) -> List["BatchDefinition"]:  # noqa: E731
         raise NotImplementedError
 

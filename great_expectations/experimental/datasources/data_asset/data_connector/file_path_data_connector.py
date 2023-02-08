@@ -10,7 +10,7 @@ import re
 # from typing import Iterator, List, Optional, cast
 # TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
-from typing import TYPE_CHECKING, List, Optional, cast
+from typing import TYPE_CHECKING, List, Optional
 
 # TODO: <Alex>ALEX</Alex>
 # import great_expectations.exceptions as gx_exceptions
@@ -57,7 +57,6 @@ if TYPE_CHECKING:
     from great_expectations.core.batch import (
         BatchDefinition,
         BatchRequest,
-        BatchRequestBase,
     )
 
 
@@ -156,9 +155,8 @@ class FilePathDataConnector(DataConnector):
 
         """
         # TODO: <Alex>ALEX</Alex>
-        batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         return self._get_batch_definition_list_from_batch_request(
-            batch_request=batch_request_base
+            batch_request=batch_request
         )
 
     # Interface Method
@@ -248,7 +246,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         )
 
     def _get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequestBase
+        self, batch_request: BatchRequest
     ) -> List[BatchDefinition]:
         """
         Retrieve batch_definitions that match batch_request.
@@ -260,7 +258,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             # TODO: <Alex>ALEX</Alex>
 
         Args:
-            batch_request (BatchRequestBase): BatchRequestBase (BatchRequest without attribute validation) to process
+            batch_request (BatchRequest): BatchRequest to process
 
         Returns:
             A list of BatchDefinition objects that match BatchRequest

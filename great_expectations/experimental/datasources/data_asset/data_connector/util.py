@@ -31,7 +31,8 @@ if TYPE_CHECKING:
     # TODO: <Alex>ALEX</Alex>
     # from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import DataConnector
     # TODO: <Alex>ALEX</Alex>
-    from great_expectations.core.batch import BatchDefinition, BatchRequestBase
+    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.experimental.datasources.interfaces import BatchRequest
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +65,7 @@ except ImportError:
 
 def batch_definition_matches_batch_request(
     batch_definition: "BatchDefinition",  # noqa: E731
-    batch_request: "BatchRequestBase",  # noqa: E731
+    batch_request: BatchRequest,
 ) -> bool:
     # TODO: <Alex>ALEX</Alex>
     # assert isinstance(batch_definition, BatchDefinition)

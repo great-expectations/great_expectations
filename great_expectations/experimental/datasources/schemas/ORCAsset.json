@@ -32,6 +32,11 @@
             "type": "string",
             "format": "path"
         },
+        "glob_directive": {
+            "title": "Glob Directive",
+            "default": "**/*",
+            "type": "string"
+        },
         "columns": {
             "title": "Columns",
             "type": "array",
