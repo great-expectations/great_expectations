@@ -33,8 +33,8 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
 from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-    ExpectationSuiteValidationResultMeta,
+    ExpectationSuiteValidationResult,  # noqa: TCH001
+    ExpectationSuiteValidationResultMeta,  # noqa: TCH001
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -58,7 +58,7 @@ from great_expectations.util import (
 )
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
+    ValidationOperatorResult,  # noqa: TCH001
 )
 from great_expectations.validator.validator import Validator
 

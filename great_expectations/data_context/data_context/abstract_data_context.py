@@ -26,6 +26,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    overload,
 )
 
 from dateutil.parser import parse
@@ -38,6 +39,8 @@ from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     deprecated_method_or_class,
+    new_argument,
+    new_method_or_class,
     public_api,
 )
 from great_expectations.core.batch import (
@@ -53,7 +56,6 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -68,11 +70,7 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     _YamlConfigValidator,
 )
-from great_expectations.data_context.data_context_variables import DataContextVariables
 from great_expectations.data_context.store import Store, TupleStoreBackend
-from great_expectations.data_context.store.expectations_store import ExpectationsStore
-from great_expectations.data_context.store.profiler_store import ProfilerStore
-from great_expectations.data_context.store.validations_store import ValidationsStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
@@ -110,22 +108,15 @@ from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.experimental.datasources.interfaces import (
     Datasource as XDatasource,
 )
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from great_expectations.rule_based_profiler.config.base import (
-    RuleBasedProfilerConfig,
-    ruleBasedProfilerConfigSchema,
-)
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
-)
-from great_expectations.rule_based_profiler.helpers.util import (
-    convert_variables_to_dict,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import load_class, verify_dynamic_loading_support
@@ -151,14 +142,25 @@ except ImportError:
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
+    )
+    from great_expectations.data_context.data_context_variables import (
+        DataContextVariables,
+    )
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
     )
+    from great_expectations.data_context.store.expectations_store import (
+        ExpectationsStore,
+    )
+    from great_expectations.data_context.store.profiler_store import ProfilerStore
+    from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
-    from great_expectations.experimental.datasources.interfaces import Batch as XBatch
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
@@ -323,15 +325,22 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def update_project_config(
         self, project_config: DataContextConfig | Mapping
-    ) -> None:
+    ) -> DataContextConfig:
         """Update the context's config with the values from another config object.
 
         Args:
             project_config: The config to use to update the context's internal state.
+
+        Returns:
+            The updated project config.
         """
         self.config.update(project_config)
+        return self.config
 
     @public_api
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         args_payload_fn=save_expectation_suite_usage_statistics,
@@ -360,6 +369,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: If a suite with the same name exists and `overwrite_existing` is set to `False`.
         """
+        # deprecated-v0.15.48
+        warnings.warn(
+            "save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. "
+            "Please use update_expectation_suite or add_or_update_expectation_suite instead.",
+            DeprecationWarning,
+        )
         return self._save_expectation_suite(
             expectation_suite=expectation_suite,
             expectation_suite_name=expectation_suite_name,
@@ -647,6 +662,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._project_config = project_config
         self.variables.config = project_config
 
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     def save_datasource(
         self, datasource: Union[LegacyDatasource, BaseDatasource]
     ) -> Union[LegacyDatasource, BaseDatasource]:
@@ -664,6 +682,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The datasource, after storing and retrieving the stored config.
         """
+        # deprecated-v0.15.48
+        warnings.warn(
+            "save_datasource is deprecated as of v0.15.48 and will be removed in v0.18. "
+            "Please use update_datasource or add_or_update_datasource instead.",
+            DeprecationWarning,
+        )
         # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.
         # This is to be removed once substitution logic is migrated from the context to the individual object level.
         config = datasource._raw_config
@@ -764,6 +788,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         return datasource
 
+    @public_api
     def update_datasource(
         self,
         datasource: Union[LegacyDatasource, BaseDatasource],
@@ -774,6 +799,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             datasource: The Datasource object to update.
             save_changes: do I save changes to disk?
+
+        Returns:
+            The updated Datasource.
         """
         save_changes = self._determine_save_changes_flag(save_changes)
         return self._update_datasource(datasource=datasource, save_changes=save_changes)
@@ -809,6 +837,8 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return updated_datasource
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def add_or_update_datasource(
         self,
         name: str,
@@ -824,7 +854,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The Datasource added or updated by the input `kwargs`.
         """
-        existing_datasource = None
+        existing_datasource: LegacyDatasource | BaseDatasource | XDatasource | None = (
+            None
+        )
         try:
             existing_datasource = self.get_datasource(name)
         except ValueError:
@@ -832,7 +864,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"Could not find an existing datasource named '{name}'; creating a new one."
             )
 
-        if existing_datasource:
+        if existing_datasource and isinstance(
+            existing_datasource, (LegacyDatasource, BaseDatasource)
+        ):
             result_datasource = self._update_datasource(
                 datasource=existing_datasource, **kwargs
             )
@@ -964,8 +998,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             datasource_name = arg1
         try:
-            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(
-                datasource_name=datasource_name
+            datasource: LegacyDatasource | BaseDatasource | XDatasource = (
+                self.get_datasource(datasource_name=datasource_name)
             )
             if issubclass(type(datasource), BaseDatasource):
                 api_version = "v3"
@@ -1031,8 +1065,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
-        datasource = self.get_datasource(batch_kwargs.get("datasource"))
-        batch = datasource.get_batch(
+        datasource_name: Optional[Any] = batch_kwargs.get("datasource")
+        datasource: LegacyDatasource | BaseDatasource | XDatasource
+        if isinstance(datasource_name, str):
+            datasource = self.get_datasource(datasource_name)
+        else:
+            datasource = self.get_datasource(None)  #  type: ignore[arg-type]
+        assert not isinstance(
+            datasource, XDatasource
+        ), "Experimental Datasource cannot be built from batch_kwargs"
+        batch = datasource.get_batch(  #  type: ignore[union-attr]
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
         if data_asset_type is None:
@@ -1206,6 +1248,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return RuleBasedProfiler.list_profilers(self.profiler_store)
 
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     def save_profiler(
         self,
         profiler: RuleBasedProfiler,
@@ -1218,6 +1263,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The input profiler - may be modified with an id depending on the backing store.
         """
+        # deprecated-v0.15.48
+        warnings.warn(
+            "save_profiler is deprecated as of v0.15.48 and will be removed in v0.18. "
+            "Please use update_profiler or add_or_update_profiler instead.",
+            DeprecationWarning,
+        )
         name = profiler.name
         ge_cloud_id = profiler.ge_cloud_id
         key = self._determine_key_for_profiler_save(name=name, id=ge_cloud_id)
@@ -1320,6 +1371,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._save_project_config()
         return store
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def delete_store(self, store_name: str) -> None:
         """Delete an existing Store from the DataContext.
 
@@ -1397,41 +1450,131 @@ class AbstractDataContext(ConfigPeer, ABC):
         if datasource is None:
             raise ValueError(f"Datasource {datasource_name} not found")
 
-        if save_changes:
+        if save_changes and isinstance(datasource, (LegacyDatasource, BaseDatasource)):
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)  # type: ignore[attr-defined]
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
+    @overload
+    def add_checkpoint(
+        self,
+        name: str = ...,
+        config_version: int | float | None = ...,
+        template_name: str | None = ...,
+        module_name: str | None = ...,
+        class_name: str | None = ...,
+        run_name_template: str | None = ...,
+        expectation_suite_name: str | None = ...,
+        batch_request: dict | None = ...,
+        action_list: list[dict] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        runtime_configuration: dict | None = ...,
+        validations: list[dict] | None = ...,
+        profilers: list[dict] | None = ...,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: str | None = ...,
+        batches: list[dict] | None = ...,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: str | list[str] | None = ...,
+        slack_webhook: str | None = ...,
+        notify_on: str | None = ...,
+        notify_with: str | list[str] | None = ...,
+        ge_cloud_id: str | None = ...,
+        expectation_suite_ge_cloud_id: str | None = ...,
+        default_validation_id: str | None = ...,
+        id: str | None = ...,
+        expectation_suite_id: str | None = ...,
+        checkpoint: None = ...,
+    ) -> Checkpoint:
+        """
+        Individual constructor arguments are provided.
+        `checkpoint` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_checkpoint(
+        self,
+        name: None = ...,
+        config_version: None = ...,
+        template_name: None = ...,
+        module_name: None = ...,
+        class_name: None = ...,
+        run_name_template: None = ...,
+        expectation_suite_name: None = ...,
+        batch_request: None = ...,
+        action_list: None = ...,
+        evaluation_parameters: None = ...,
+        runtime_configuration: None = ...,
+        validations: None = ...,
+        profilers: None = ...,
+        validation_operator_name: None = ...,
+        batches: None = ...,
+        site_names: None = ...,
+        slack_webhook: None = ...,
+        notify_on: None = ...,
+        notify_with: None = ...,
+        ge_cloud_id: None = ...,
+        expectation_suite_ge_cloud_id: None = ...,
+        default_validation_id: None = ...,
+        id: None = ...,
+        expectation_suite_id: None = ...,
+        checkpoint: Checkpoint = ...,
+    ) -> Checkpoint:
+        """
+        A `checkpoint` is provided.
+        Individual constructor arguments should not be provided.
+        """
+        ...
+
     @public_api
     @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
     @deprecated_argument(argument_name="batches", version="0.14.0")
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
+    @new_argument(
+        argument_name="expectation_suite_id",
+        version="0.15.48",
+        message="To be used in place of `expectation_suite_ge_cloud_id`",
+    )
+    @new_argument(
+        argument_name="checkpoint",
+        version="0.15.48",
+        message="Pass in an existing checkpoint instead of individual constructor args",
+    )
     def add_checkpoint(
         self,
-        name: str,
-        config_version: Optional[Union[int, float]] = None,
-        template_name: Optional[str] = None,
-        module_name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        name: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
         # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
+        validation_operator_name: str | None = None,
+        batches: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
-        site_names: Optional[Union[str, List[str]]] = None,
-        slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = None,
-        notify_with: Optional[Union[str, List[str]]] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
-        default_validation_id: Optional[str] = None,
+        site_names: str | list[str] | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | list[str] | None = None,
+        ge_cloud_id: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
+        default_validation_id: str | None = None,
+        id: str | None = None,
+        expectation_suite_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a Checkpoint to the DataContext.
 
@@ -1461,16 +1604,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             ge_cloud_id: The GE Cloud ID to use in generating this checkpoint.
             expectation_suite_ge_cloud_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
+            id: The ID to use in generating this checkpoint (preferred over `ge_cloud_id`).
+            expectation_suite_id: The expectation suite ID to use in generating this checkpoint (preferred over `expectation_suite_ge_cloud_id`).
+            checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
             The Checkpoint object created.
         """
-        from great_expectations.checkpoint.checkpoint import Checkpoint
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
+        del ge_cloud_id
+        del expectation_suite_ge_cloud_id
 
-        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
-            data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
+        checkpoint = self._resolve_add_checkpoint_args(
             name=name,
+            id=id,
             config_version=config_version,
             template_name=template_name,
             module_name=module_name,
@@ -1483,43 +1634,287 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            # Next two fields are for LegacyCheckpoint configuration
             validation_operator_name=validation_operator_name,
             batches=batches,
-            # the following four arguments are used by SimpleCheckpoint
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=ge_cloud_id,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            checkpoint=checkpoint,
         )
 
-        self.checkpoint_store.add_checkpoint(checkpoint, name, ge_cloud_id)
+        return self.checkpoint_store.add_checkpoint(checkpoint)
+
+    @public_api
+    @new_method_or_class(version="0.15.48")
+    def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        """Update a Checkpoint that already exists.
+
+        Args:
+            checkpoint: The checkpoint to use to update.
+
+        Raises:
+            DataContextError: A suite with the given name does not already exist.
+
+        Returns:
+            The updated Checkpoint.
+        """
+        return self.checkpoint_store.update_checkpoint(checkpoint)
+
+    @overload
+    def add_or_update_checkpoint(
+        self,
+        name: str = ...,
+        config_version: int | float | None = ...,
+        template_name: str | None = ...,
+        module_name: str | None = ...,
+        class_name: str | None = ...,
+        run_name_template: str | None = ...,
+        expectation_suite_name: str | None = ...,
+        batch_request: dict | None = ...,
+        action_list: list[dict] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        runtime_configuration: dict | None = ...,
+        validations: list[dict] | None = ...,
+        profilers: list[dict] | None = ...,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: str | None = ...,
+        batches: list[dict] | None = ...,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: str | list[str] | None = ...,
+        slack_webhook: str | None = ...,
+        notify_on: str | None = ...,
+        notify_with: str | list[str] | None = ...,
+        ge_cloud_id: str | None = ...,
+        expectation_suite_ge_cloud_id: str | None = ...,
+        default_validation_id: str | None = ...,
+        id: str | None = ...,
+        expectation_suite_id: str | None = ...,
+        checkpoint: None = ...,
+    ) -> Checkpoint:
+        """
+        Individual constructor arguments are provided.
+        `checkpoint` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_or_update_checkpoint(
+        self,
+        name: None = ...,
+        config_version: None = ...,
+        template_name: None = ...,
+        module_name: None = ...,
+        class_name: None = ...,
+        run_name_template: None = ...,
+        expectation_suite_name: None = ...,
+        batch_request: None = ...,
+        action_list: None = ...,
+        evaluation_parameters: None = ...,
+        runtime_configuration: None = ...,
+        validations: None = ...,
+        profilers: None = ...,
+        validation_operator_name: None = ...,
+        batches: None = ...,
+        site_names: None = ...,
+        slack_webhook: None = ...,
+        notify_on: None = ...,
+        notify_with: None = ...,
+        ge_cloud_id: None = ...,
+        expectation_suite_ge_cloud_id: None = ...,
+        default_validation_id: None = ...,
+        id: None = ...,
+        expectation_suite_id: None = ...,
+        checkpoint: Checkpoint = ...,
+    ) -> Checkpoint:
+        """
+        A `checkpoint` is provided.
+        Individual constructor arguments should not be provided.
+        """
+        ...
+
+    @public_api
+    @new_method_or_class(version="0.15.48")
+    def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: str | list[str] | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | list[str] | None = None,
+        expectation_suite_id: str | None = None,
+        default_validation_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
+    ) -> Checkpoint:
+        """Add a new Checkpoint or update an existing one on the context depending on whether it already exists or not.
+
+        Args:
+            name: The name to give the checkpoint.
+            id: The ID to associate with this checkpoint.
+            config_version: The config version of this checkpoint.
+            template_name: The template to use in generating this checkpoint.
+            module_name: The module name to use in generating this checkpoint.
+            class_name: The class name to use in generating this checkpoint.
+            run_name_template: The run name template to use in generating this checkpoint.
+            expectation_suite_name: The expectation suite name to use in generating this checkpoint.
+            batch_request: The batch request to use in generating this checkpoint.
+            action_list: The action list to use in generating this checkpoint.
+            evaluation_parameters: The evaluation parameters to use in generating this checkpoint.
+            runtime_configuration: The runtime configuration to use in generating this checkpoint.
+            validations: The validations to use in generating this checkpoint.
+            profilers: The profilers to use in generating this checkpoint.
+            site_names: The site names to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            slack_webhook: The slack webhook to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            notify_on: The notify on setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
+            expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
+            default_validation_id: The default validation ID to use in generating this checkpoint.
+            checkpoint: An existing checkpoint you wish to persist.
+
+        Returns:
+            A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
+        """
+        checkpoint = self._resolve_add_checkpoint_args(
+            name=name,
+            id=id,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+            expectation_suite_id=expectation_suite_id,
+            default_validation_id=default_validation_id,
+            checkpoint=checkpoint,
+        )
+
+        return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+
+    def _resolve_add_checkpoint_args(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        validation_operator_name: str | None = None,
+        batches: list[dict] | None = None,
+        site_names: str | list[str] | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | list[str] | None = None,
+        expectation_suite_id: str | None = None,
+        default_validation_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
+    ) -> Checkpoint:
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        if not ((checkpoint is None) ^ (name is None)):
+            raise ValueError(
+                "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
+            )
+
+        if not checkpoint:
+            assert (
+                name
+            ), "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
+            checkpoint = Checkpoint.construct_from_config_args(
+                data_context=self,
+                checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
+                name=name,
+                config_version=config_version,
+                template_name=template_name,
+                module_name=module_name,
+                class_name=class_name,
+                run_name_template=run_name_template,
+                expectation_suite_name=expectation_suite_name,
+                batch_request=batch_request,
+                action_list=action_list,
+                evaluation_parameters=evaluation_parameters,
+                runtime_configuration=runtime_configuration,
+                validations=validations,
+                profilers=profilers,
+                validation_operator_name=validation_operator_name,
+                batches=batches,
+                site_names=site_names,
+                slack_webhook=slack_webhook,
+                notify_on=notify_on,
+                notify_with=notify_with,
+                ge_cloud_id=id,
+                expectation_suite_ge_cloud_id=expectation_suite_id,
+                default_validation_id=default_validation_id,
+            )
+
         return checkpoint
 
+    @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
     def get_checkpoint(
         self,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        name: str | None = None,
+        ge_cloud_id: str | None = None,
+        id: str | None = None,
     ) -> Checkpoint:
         """Retrieves a given Checkpoint by either name or id.
 
         Args:
             name: The name of the target Checkpoint.
             ge_cloud_id: The id associated with the target Checkpoint.
+            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
 
         Returns:
             The requested Checkpoint.
 
         Raises:
-            CheckpointNotFoundError if the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exists.
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        del ge_cloud_id
+
         from great_expectations.checkpoint.checkpoint import Checkpoint
 
         checkpoint_config: CheckpointConfig = self.checkpoint_store.get_checkpoint(
-            name=name, ge_cloud_id=ge_cloud_id
+            name=name, id=id
         )
         checkpoint: Checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
             checkpoint_config=checkpoint_config,
@@ -1530,46 +1925,67 @@ class AbstractDataContext(ConfigPeer, ABC):
         return checkpoint
 
     @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
     def delete_checkpoint(
         self,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        name: str | None = None,
+        ge_cloud_id: str | None = None,
+        id: str | None = None,
     ) -> None:
         """Deletes a given Checkpoint by either name or id.
 
         Args:
             name: The name of the target Checkpoint.
             ge_cloud_id: The id associated with the target Checkpoint.
+            id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
 
         Raises:
-            CheckpointNotFoundError if the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exists.
         """
-        return self.checkpoint_store.delete_checkpoint(
-            name=name, ge_cloud_id=ge_cloud_id
-        )
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        del ge_cloud_id
+
+        return self.checkpoint_store.delete_checkpoint(name=name, id=id)
 
     @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
+    @new_argument(
+        argument_name="expectation_suite_id",
+        version="0.15.48",
+        message="To be used in place of `expectation_suite_ge_cloud_id`",
+    )
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_RUN_CHECKPOINT,
     )
     def run_checkpoint(
         self,
-        checkpoint_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
-        run_id: Optional[Union[str, int, float]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[datetime.datetime] = None,
-        result_format: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        checkpoint_name: str | None = None,
+        ge_cloud_id: str | None = None,
+        template_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: BatchRequestBase | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        run_id: str | int | float | None = None,
+        run_name: str | None = None,
+        run_time: datetime.datetime | None = None,
+        result_format: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
+        id: str | None = None,
+        expectation_suite_id: str | None = None,
         **kwargs,
     ) -> CheckpointResult:
         """Validate using an existing Checkpoint.
@@ -1591,14 +2007,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             result_format: One of several supported formatting directives for expectation validation results
             ge_cloud_id: Great Expectations Cloud id for the checkpoint
             expectation_suite_ge_cloud_id: Great Expectations Cloud id for the expectation suite
+            id: Great Expectations Cloud id for the checkpoint (preferred over `ge_cloud_id`)
+            expectation_suite_id: Great Expectations Cloud id for the expectation suite (preferred over `expectation_suite_ge_cloud_id`)
             **kwargs: Additional kwargs to pass to the validation operator
 
         Returns:
             CheckpointResult
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
+        del ge_cloud_id
+        del expectation_suite_ge_cloud_id
+
         return self._run_checkpoint(
             checkpoint_name=checkpoint_name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
@@ -1612,33 +2038,33 @@ class AbstractDataContext(ConfigPeer, ABC):
             run_name=run_name,
             run_time=run_time,
             result_format=result_format,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            expectation_suite_ge_cloud_id=expectation_suite_id,
             **kwargs,
         )
 
     def _run_checkpoint(
         self,
-        checkpoint_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
-        run_id: Optional[Union[str, int, float]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[datetime.datetime] = None,
-        result_format: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        checkpoint_name: str | None = None,
+        id: str | None = None,
+        template_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: BatchRequestBase | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        run_id: str | int | float | None = None,
+        run_name: str | None = None,
+        run_time: datetime.datetime | None = None,
+        result_format: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
         **kwargs,
     ) -> CheckpointResult:
         checkpoint: Checkpoint = self.get_checkpoint(
             name=checkpoint_name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
         result: CheckpointResult = checkpoint.run_with_runtime_args(
             template_name=template_name,
@@ -1732,7 +2158,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         expectation_suite: Optional[ExpectationSuite] = None,
         create_expectation_suite_with_name: Optional[str] = None,
         include_rendered_content: Optional[bool] = None,
-        **kwargs: Optional[dict],
+        expectation_suite_id: Optional[str] = None,
+        **kwargs,
     ) -> Validator:
         """Retrieve a Validator with a batch list and an `ExpectationSuite`.
 
@@ -1788,6 +2215,12 @@ class AbstractDataContext(ConfigPeer, ABC):
                 of `batch_data`, `query` or `path`), or if the `ExpectationSuite` cannot be created or
                 retrieved using either the provided name or identifier
         """
+        # <GX_RENAME>
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
+        del expectation_suite_ge_cloud_id
+
         include_rendered_content = (
             self._determine_if_expectation_validation_result_include_rendered_content(
                 include_rendered_content=include_rendered_content
@@ -1801,7 +2234,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     expectation_suite is not None,
                     expectation_suite_name is not None,
                     create_expectation_suite_with_name is not None,
-                    expectation_suite_ge_cloud_id is not None,
+                    expectation_suite_id is not None,
                 ]
             )
             > 1
@@ -1811,14 +2244,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
             raise ValueError(
                 "No more than one of expectation_suite_name,"
-                f"{'expectation_suite_ge_cloud_id,' if ge_cloud_mode else ''}"
+                f"{'expectation_suite_id,' if ge_cloud_mode else ''}"
                 " expectation_suite, or create_expectation_suite_with_name can be specified"
             )
 
-        if expectation_suite_ge_cloud_id is not None:
+        if expectation_suite_id is not None:
             expectation_suite = self.get_expectation_suite(
                 include_rendered_content=include_rendered_content,
-                ge_cloud_id=expectation_suite_ge_cloud_id,
+                ge_cloud_id=expectation_suite_id,
             )
         if expectation_suite_name is not None:
             expectation_suite = self.get_expectation_suite(
@@ -1920,9 +2353,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         )
 
-        # We get a single BatchData so we can get the execution_engine here. All batches will share the same one
+        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        execution_engine: ExecutionEngine = batch_list[-1].data.execution_engine
+        datasource_name: str = batch_list[-1].batch_definition.datasource_name
+        datasource: LegacyDatasource | BaseDatasource | XDatasource = self.datasources[
+            datasource_name
+        ]
+        execution_engine: ExecutionEngine
+        if isinstance(datasource, XDatasource):
+            batch = batch_list[-1]
+            assert isinstance(batch, XBatch)
+            execution_engine = batch.data.execution_engine
+        elif isinstance(datasource, BaseDatasource):
+            execution_engine = datasource.execution_engine
+        else:
+            raise gx_exceptions.DatasourceError(
+                message="LegacyDatasource cannot be used to create a Validator",
+                datasource_name=datasource_name,
+            )
 
         validator = Validator(
             execution_engine=execution_engine,
@@ -2091,6 +2539,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     @public_api
+    @deprecated_method_or_class(
+        version="0.15.48", message="Part of the deprecated DataContext CRUD API"
+    )
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -2135,20 +2586,65 @@ class AbstractDataContext(ConfigPeer, ABC):
             ValueError: The input `overwrite_existing` is of the wrong type.
             DataContextError: A suite with the same name already exists (and `overwrite_existing` is not enabled).
         """
+        # deprecated-v0.15.48
+        warnings.warn(
+            "create_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. "
+            "Please use add_expectation_suite or add_or_update_expectation_suite instead.",
+            DeprecationWarning,
+        )
         return self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             overwrite_existing=overwrite_existing,
         )
 
+    @overload
     def add_expectation_suite(
         self,
         expectation_suite_name: str,
+        id: str | None = ...,
+        expectations: list[dict | ExpectationConfiguration] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        data_asset_type: str | None = ...,
+        execution_engine_type: Type[ExecutionEngine] | None = ...,
+        meta: dict | None = ...,
+        expectation_suite: None = ...,
+    ) -> ExpectationSuite:
+        """
+        An `expectation_suite_name` is provided.
+        `expectation_suite` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        id: str | None = ...,
+        expectations: list[dict | ExpectationConfiguration] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        data_asset_type: str | None = ...,
+        execution_engine_type: Type[ExecutionEngine] | None = ...,
+        meta: dict | None = ...,
+        expectation_suite: ExpectationSuite = ...,
+    ) -> ExpectationSuite:
+        """
+        An `expectation_suite` is provided.
+        `expectation_suite_name` should not be provided.
+        """
+        ...
+
+    @public_api
+    @new_method_or_class(version="0.15.48")
+    def add_expectation_suite(
+        self,
+        expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
         evaluation_parameters: dict | None = None,
         data_asset_type: str | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
+        expectation_suite: ExpectationSuite | None = None,
     ) -> ExpectationSuite:
         """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
 
@@ -2197,12 +2693,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_asset_type=data_asset_type,
             execution_engine_type=execution_engine_type,
             meta=meta,
+            expectation_suite=expectation_suite,
             overwrite_existing=False,  # `add` does not resolve collisions
         )
 
     def _add_expectation_suite(
         self,
-        expectation_suite_name: str,
+        expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: Sequence[dict | ExpectationConfiguration] | None = None,
         evaluation_parameters: dict | None = None,
@@ -2210,34 +2707,45 @@ class AbstractDataContext(ConfigPeer, ABC):
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
         overwrite_existing: bool = False,
+        expectation_suite: ExpectationSuite | None = None,
         **kwargs,
     ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
-
-        expectation_suite = ExpectationSuite(
-            expectation_suite_name=expectation_suite_name,
-            data_context=self,
-            ge_cloud_id=id,
-            expectations=expectations,
-            evaluation_parameters=evaluation_parameters,
-            data_asset_type=data_asset_type,
-            execution_engine_type=execution_engine_type,
-            meta=meta,
-        )
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
-        if (
-            self.expectations_store.has_key(key)  # noqa: W601
-            and not overwrite_existing
-        ):
-            raise gx_exceptions.DataContextError(
-                f"expectation_suite with name {expectation_suite_name} already exists."
-                " If you would like to overwrite this expectation_suite, please delete or"
-                " update it using `delete_expectation_suite` or `update_expectation_suite`, respectively."
+        if not ((expectation_suite_name is None) ^ (expectation_suite is None)):
+            raise ValueError(
+                "Must either pass in an existing expectation_suite or individual constructor arguments (but not both)"
             )
-        self.expectations_store.set(key, expectation_suite, **kwargs)
+
+        if not expectation_suite:
+            assert (
+                expectation_suite_name
+            ), "If constructing a suite with individual args, suite name must be guaranteed"
+            expectation_suite = ExpectationSuite(
+                expectation_suite_name=expectation_suite_name,
+                data_context=self,
+                ge_cloud_id=id,
+                expectations=expectations,
+                evaluation_parameters=evaluation_parameters,
+                data_asset_type=data_asset_type,
+                execution_engine_type=execution_engine_type,
+                meta=meta,
+            )
+
+        expectation_suite_name = expectation_suite.expectation_suite_name
+        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+
+        persistence_fn: Callable
+        if overwrite_existing:
+            persistence_fn = self.expectations_store.add_or_update
+        else:
+            persistence_fn = self.expectations_store.add
+
+        persistence_fn(key=key, value=expectation_suite, **kwargs)
         return expectation_suite
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def update_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -2252,31 +2760,59 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         expectation_suite_name: str = expectation_suite.expectation_suite_name
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
-        if not self.expectations_store.has_key(key):  # noqa: W601
-            raise gx_exceptions.DataContextError(
-                f"expectation_suite with name {expectation_suite_name} does not exist."
-            )
+        self.expectations_store.update(key=key, value=expectation_suite)
+        return expectation_suite
 
-        return self._add_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            id=expectation_suite.ge_cloud_id,
-            expectations=expectation_suite.expectations,
-            evaluation_parameters=expectation_suite.evaluation_parameters,
-            data_asset_type=expectation_suite.data_asset_type,
-            execution_engine_type=expectation_suite.execution_engine_type,
-            meta=expectation_suite.meta,  # type: ignore[has-type] # Should just be a dict but mypy has trouble inferring
-            overwrite_existing=True,
-        )
-
+    @overload
     def add_or_update_expectation_suite(
         self,
         expectation_suite_name: str,
+        id: str | None = ...,
+        expectations: list[dict | ExpectationConfiguration] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        data_asset_type: str | None = ...,
+        execution_engine_type: Type[ExecutionEngine] | None = ...,
+        meta: dict | None = ...,
+        expectation_suite: None = ...,
+    ) -> ExpectationSuite:
+        """
+        Two possible patterns:
+            - An expectation_suite_name and optional constructor args
+            - An expectation_suite
+        """
+        ...
+
+    @overload
+    def add_or_update_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        id: str | None = ...,
+        expectations: list[dict | ExpectationConfiguration] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        data_asset_type: str | None = ...,
+        execution_engine_type: Type[ExecutionEngine] | None = ...,
+        meta: dict | None = ...,
+        expectation_suite: ExpectationSuite = ...,
+    ) -> ExpectationSuite:
+        """
+        Two possible patterns:
+            - An expectation_suite_name and optional constructor args
+            - An expectation_suite
+        """
+        ...
+
+    @public_api
+    @new_method_or_class(version="0.15.48")
+    def add_or_update_expectation_suite(
+        self,
+        expectation_suite_name: str | None = None,
         id: str | None = None,
         expectations: list[dict | ExpectationConfiguration] | None = None,
         evaluation_parameters: dict | None = None,
         data_asset_type: str | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
+        expectation_suite: ExpectationSuite | None = None,
     ) -> ExpectationSuite:
         """Add a new ExpectationSuite or update an existing one on the context depending on whether it already exists or not.
 
@@ -2288,39 +2824,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_asset_type: Type of data asset to associate with this suite.
             execution_engine_type: Name of the execution engine type.
             meta: Metadata related to the suite.
+            expectation_suite: An existing ExpectationSuite object you wish to persist.
 
         Returns:
             A new ExpectationSuite or an updated once (depending on whether or not it existed before this method call).
         """
-        existing_suite = None
-        try:
-            existing_suite = self.get_expectation_suite(
-                expectation_suite_name=expectation_suite_name, ge_cloud_id=id
-            )
-        except gx_exceptions.DataContextError:
-            logger.info(
-                f"Could not find an existing suite named '{expectation_suite_name}'; creating a new one."
-            )
-
-        if existing_suite:
-            self.delete_expectation_suite(
-                expectation_suite_name=existing_suite.name,
-                ge_cloud_id=existing_suite.ge_cloud_id,
-            )
-            if id is None:
-                id = existing_suite.ge_cloud_id
-            if expectations is None:
-                expectations = existing_suite.expectations
-            if evaluation_parameters is None:
-                evaluation_parameters = existing_suite.evaluation_parameters
-            if data_asset_type is None:
-                data_asset_type = existing_suite.data_asset_type
-            if execution_engine_type is None:
-                execution_engine_type = existing_suite.execution_engine_type
-            if meta is None:
-                meta = existing_suite.meta
-
-        return self.add_expectation_suite(
+        return self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             id=id,
             expectations=expectations,
@@ -2328,17 +2837,28 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_asset_type=data_asset_type,
             execution_engine_type=execution_engine_type,
             meta=meta,
+            expectation_suite=expectation_suite,
+            overwrite_existing=True,  # `add_or_update` always overwrites.
         )
 
+    @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
     def delete_expectation_suite(
         self,
-        expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-    ) -> bool:
+        expectation_suite_name: str | None = None,
+        ge_cloud_id: str | None = None,
+        id: str | None = None,
+    ) -> None:
         """Delete specified expectation suite from data_context expectation store.
 
         Args:
-            expectation_suite_name: The name of the expectation_suite to create
+            expectation_suite_name: The name of the expectation suite to delete
+            ge_cloud_id: The identifier of the expectation suite to delete
+            id: The identifier of the expectation suite to delete (preferred over `ge_cloud_id`)
 
         Returns:
             True for Success and False for Failure.
@@ -2349,15 +2869,14 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"expectation_suite with name {expectation_suite_name} does not exist."
             )
         self.expectations_store.remove_key(key)
-        return True
 
     @public_api
     @deprecated_argument(argument_name="ge_cloud_id", version="0.15.45")
     def get_expectation_suite(
         self,
-        expectation_suite_name: Optional[str] = None,
-        include_rendered_content: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: str | None = None,
+        include_rendered_content: bool | None = None,
+        ge_cloud_id: str | None = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name.
 
@@ -2407,92 +2926,144 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"expectation_suite {expectation_suite_name} not found"
             )
 
+    @overload
     def add_profiler(
         self,
         name: str,
         config_version: float,
-        rules: Dict[str, dict],
-        variables: Optional[dict] = None,
+        rules: dict[str, dict],
+        variables: dict | None = ...,
+        profiler: None = ...,
+    ) -> RuleBasedProfiler:
+        """
+        Individual constructors args (`name`, `config_version`, and `rules`) are provided.
+        `profiler` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_profiler(
+        self,
+        name: None = ...,
+        config_version: None = ...,
+        rules: None = ...,
+        variables: None = ...,
+        profiler: RuleBasedProfiler = ...,
+    ) -> RuleBasedProfiler:
+        """
+        `profiler` is provided.
+        Individual constructors args (`name`, `config_version`, and `rules`) should not be provided.
+        """
+        ...
+
+    @public_api
+    @new_argument(
+        argument_name="profiler",
+        version="0.15.48",
+        message="Pass in an existing profiler instead of individual constructor args",
+    )
+    def add_profiler(
+        self,
+        name: str | None = None,
+        config_version: float | None = None,
+        rules: dict[str, dict] | None = None,
+        variables: dict | None = None,
+        profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfiler:
         """
         Constructs a Profiler, persists it utilizing the context's underlying ProfilerStore,
         and returns it to the user for subsequent usage.
 
         Args:
-            name: The name of the RBP instance
-            config_version: The version of the RBP (currently only 1.0 is supported)
-            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
-            variables: Any variables to be substituted within the rules
+            name: The name of the RBP instance.
+            config_version: The version of the RBP (currently only 1.0 is supported).
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and expectation_configuration_builders.
+            variables: Any variables to be substituted within the rules.
+            profiler: An existing RuleBasedProfiler to persist.
 
         Returns:
             The persisted Profiler constructed by the input arguments.
         """
-        config_data = {
-            "name": name,
-            "config_version": config_version,
-            "rules": rules,
-            "variables": variables,
-        }
-
-        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
-        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
-        profiler_config.pop("class_name")
-        profiler_config.pop("module_name")
-
-        config = RuleBasedProfilerConfig(**profiler_config)
-
-        profiler = RuleBasedProfiler.add_profiler(
-            config=config,
+        return RuleBasedProfiler.add_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
+            name=name,
+            config_version=config_version,
+            rules=rules,
+            variables=variables,
+            profiler=profiler,
         )
-        return profiler
 
+    @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
     def get_profiler(
         self,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        name: str | None = None,
+        ge_cloud_id: str | None = None,
+        id: str | None = None,
     ) -> RuleBasedProfiler:
         """Retrieves a given Profiler by either name or id.
 
         Args:
             name: The name of the target Profiler.
             ge_cloud_id: The id associated with the target Profiler.
+            id: The id associated with the target Profiler (preferred over `ge_cloud_id`).
 
         Returns:
             The requested Profiler.
 
         Raises:
-            ProfilerNotFoundError if the requested Profiler does not exists.
+            ProfilerNotFoundError: If the requested Profiler does not exists.
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        del ge_cloud_id
+
         return RuleBasedProfiler.get_profiler(
             data_context=self,
             profiler_store=self.profiler_store,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
+    @public_api
+    @new_argument(
+        argument_name="id",
+        version="0.15.48",
+        message="To be used in place of `ge_cloud_id`",
+    )
     def delete_profiler(
         self,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        name: str | None = None,
+        ge_cloud_id: str | None = None,
+        id: str | None = None,
     ) -> None:
         """Deletes a given Profiler by either name or id.
 
         Args:
             name: The name of the target Profiler.
             ge_cloud_id: The id associated with the target Profiler.
+            id: The id associated with the target Profiler (preferred over `ge_cloud_id`).
 
         Raises:
-            ProfilerNotFoundError if the requested Profiler does not exists.
+            ProfilerNotFoundError: If the requested Profiler does not exists.
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        del ge_cloud_id
+
         RuleBasedProfiler.delete_profiler(
             profiler_store=self.profiler_store,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
+    @public_api
+    @new_method_or_class(version="0.15.48")
     def update_profiler(self, profiler: RuleBasedProfiler) -> RuleBasedProfiler:
         """Update a Profiler that already exists.
 
@@ -2503,18 +3074,51 @@ class AbstractDataContext(ConfigPeer, ABC):
             ProfilerNotFoundError: A profiler with the given name/id does not already exist.
         """
         return RuleBasedProfiler.update_profiler(
-            profiler=profiler,
             profiler_store=self.profiler_store,
             data_context=self,
+            profiler=profiler,
         )
 
+    @overload
     def add_or_update_profiler(
         self,
         name: str,
+        config_version: float,
+        rules: dict[str, dict],
+        variables: dict | None = ...,
+        profiler: None = ...,
+    ) -> RuleBasedProfiler:
+        """
+        Individual constructors args (`name`, `config_version`, and `rules`) are provided.
+        `profiler` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_or_update_profiler(
+        self,
+        name: None = ...,
+        config_version: None = ...,
+        rules: None = ...,
+        variables: None = ...,
+        profiler: RuleBasedProfiler = ...,
+    ) -> RuleBasedProfiler:
+        """
+        `profiler` is provided.
+        Individual constructors args (`name`, `config_version`, and `rules`) should not be provided.
+        """
+        ...
+
+    @public_api
+    @new_method_or_class(version="0.15.48")
+    def add_or_update_profiler(
+        self,
+        name: str | None = None,
         id: str | None = None,
         config_version: float | None = None,
         rules: dict[str, dict] | None = None,
         variables: dict | None = None,
+        profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfiler:
         """Add a new Profiler or update an existing one on the context depending on whether it already exists or not.
 
@@ -2524,35 +3128,20 @@ class AbstractDataContext(ConfigPeer, ABC):
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and expectation_configuration_builders.
             variables: Any variables to be substituted within the rules.
             id: The id associated with the RBP instance (if applicable).
+            profiler: An existing RuleBasedProfiler to persist.
 
         Returns:
             A new Profiler or an updated one (depending on whether or not it existed before this method call).
         """
-        existing_profiler = None
-        try:
-            existing_profiler = self.get_profiler(name=name, ge_cloud_id=id)
-        except gx_exceptions.ProfilerNotFoundError:
-            logger.info(
-                f"Could not find an existing profiler named '{name}'; creating a new one."
-            )
-
-        if existing_profiler:
-            self.delete_profiler(
-                name=existing_profiler.name, ge_cloud_id=existing_profiler.ge_cloud_id
-            )
-            if id is None:
-                id = existing_profiler.ge_cloud_id
-            if config_version is None:
-                config_version = existing_profiler.config_version
-            if rules is None:
-                rules = {rule.name: rule.to_dict() for rule in existing_profiler.rules}
-            if variables is None:
-                variables = convert_variables_to_dict(existing_profiler.variables)
-
-        config_version = config_version or 1.0
-        rules = rules or {}
-        return self.add_profiler(
-            name=name, config_version=config_version, rules=rules, variables=variables
+        return RuleBasedProfiler.add_or_update_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
+            name=name,
+            id=id,
+            config_version=config_version,
+            rules=rules,
+            variables=variables,
+            profiler=profiler,
         )
 
     @usage_statistics_enabled_method(
@@ -2560,12 +3149,13 @@ class AbstractDataContext(ConfigPeer, ABC):
     )
     def run_profiler_with_dynamic_arguments(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
-        variables: Optional[dict] = None,
-        rules: Optional[dict] = None,
+        batch_list: list[Batch] | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
+        name: str | None = None,
+        ge_cloud_id: str | None = None,
+        variables: dict | None = None,
+        rules: dict | None = None,
+        id: str | None = None,
     ) -> RuleBasedProfilerResult:
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with rules/variables supplied at runtime.
 
@@ -2576,19 +3166,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             ge_cloud_id: Identifier used to retrieve the profiler from a store (GX Cloud specific).
             variables: Attribute name/value pairs (overrides)
             rules: Key-value pairs of name/configuration-dictionary (overrides)
+            id: Identifier used to retrieve the profiler from a store (preferred over `ge_cloud_id`).
 
         Returns:
             Set of rule evaluation results in the form of an RuleBasedProfilerResult
 
         Raises:
-            AssertionError if both a `name` and `ge_cloud_id` are provided.
+            AssertionError if both a `name` and `id` are provided.
             AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        del ge_cloud_id
+
         return self._run_profiler_with_dynamic_arguments(
             batch_list=batch_list,
             batch_request=batch_request,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
             variables=variables,
             rules=rules,
         )
@@ -2598,7 +3193,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
     ) -> RuleBasedProfilerResult:
@@ -2608,7 +3203,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_list=batch_list,
             batch_request=batch_request,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
             variables=variables,
             rules=rules,
         )
@@ -2618,10 +3213,11 @@ class AbstractDataContext(ConfigPeer, ABC):
     )
     def run_profiler_on_data(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        batch_list: list[Batch] | None = None,
+        batch_request: BatchRequestBase | None = None,
+        name: str | None = None,
+        ge_cloud_id: str | None = None,
+        id: str | None = None,
     ) -> RuleBasedProfilerResult:
         """Retrieve a RuleBasedProfiler from a ProfilerStore and run it with a batch request supplied at runtime.
 
@@ -2639,19 +3235,23 @@ class AbstractDataContext(ConfigPeer, ABC):
             AssertionError if both a `name` and `ge_cloud_id` are provided.
             AssertionError if both an `expectation_suite` and `expectation_suite_name` are provided.
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        del ge_cloud_id
+
         return self._run_profiler_on_data(
             batch_list=batch_list,
             batch_request=batch_request,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
     def _run_profiler_on_data(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        batch_list: list[Batch] | None = None,
+        batch_request: BatchRequestBase | None = None,
+        name: str | None = None,
+        id: str | None = None,
     ) -> RuleBasedProfilerResult:
         return RuleBasedProfiler.run_profiler_on_data(
             data_context=self,
@@ -2659,7 +3259,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_list=batch_list,
             batch_request=batch_request,
             name=name,
-            ge_cloud_id=ge_cloud_id,
+            id=id,
         )
 
     def add_validation_operator(
@@ -3066,6 +3666,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
+                    assert not isinstance(
+                        datasource, XDatasource
+                    ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
                     data_asset_names[
                         datasource_name
                     ] = datasource.get_available_data_asset_names(
@@ -3074,6 +3677,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
             elif len(batch_kwargs_generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
+                assert not isinstance(
+                    datasource, XDatasource
+                ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
                 # 20230120 - Chetan - I believe this is a latent bug - we should not be doing string-based indexing
                 #                     within a list. This will result in a runtime error.
                 datasource_names[  # type:ignore[call-overload]
@@ -3091,6 +3697,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             for datasource_name in datasource_names:
                 try:
                     datasource = self.get_datasource(datasource_name)
+                    assert not isinstance(
+                        datasource, XDatasource
+                    ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
                     data_asset_names[
                         datasource_name
                     ] = datasource.get_available_data_asset_names()
@@ -4668,3 +5277,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if xdatasources:
             self.zep_config.xdatasources.update(xdatasources)
         return self.zep_config.xdatasources
+
+    @staticmethod
+    def _resolve_id_and_ge_cloud_id(
+        id: str | None, ge_cloud_id: str | None
+    ) -> str | None:
+        if id and ge_cloud_id:
+            raise ValueError("Please only pass in either id or ge_cloud_id (not both)")
+        return id or ge_cloud_id

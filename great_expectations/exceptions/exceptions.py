@@ -36,6 +36,10 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
+class ExpectationSuiteError(DataContextError):
+    pass
+
+
 class CheckpointError(DataContextError):
     pass
 
@@ -61,6 +65,10 @@ class InvalidTopLevelConfigKeyError(GreatExpectationsError):
 
 
 class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
+    pass
+
+
+class RenderingError(GreatExpectationsError):
     pass
 
 

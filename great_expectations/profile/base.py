@@ -10,7 +10,7 @@ from typing import Any, Optional
 from dateutil.parser import parse
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite  # noqa: TCH001
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset import DataAsset

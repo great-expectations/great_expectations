@@ -14,7 +14,9 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
 )
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.data_context_variables import DataContextVariables
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariables,  # noqa: TCH001
+)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointConfigSchema,
@@ -119,9 +121,7 @@ class ConfigurationBundle:
 
     def _get_all_checkpoints(self) -> List[CheckpointConfig]:
         return [
-            self._context.checkpoint_store.get_checkpoint(
-                name=checkpoint_name, ge_cloud_id=None
-            )
+            self._context.checkpoint_store.get_checkpoint(name=checkpoint_name, id=None)
             for checkpoint_name in self._context.list_checkpoints()
         ]
 
@@ -134,7 +134,7 @@ class ConfigurationBundle:
             )
 
         return [
-            round_trip_profiler_config(self._context.get_profiler(name).config)  # type: ignore[arg-type]
+            round_trip_profiler_config(self._context.get_profiler(name).config)
             for name in self._context.list_profilers()
         ]
 

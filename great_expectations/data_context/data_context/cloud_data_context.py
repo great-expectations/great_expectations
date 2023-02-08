@@ -40,7 +40,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions.exceptions import DataContextError
-from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.render.renderer.site_builder import SiteBuilder  # noqa: TCH001
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
@@ -506,8 +506,9 @@ class CloudDataContext(SerializableDataContext):
 
     def delete_expectation_suite(
         self,
-        expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: str | None = None,
+        ge_cloud_id: str | None = None,
+        id: str | None = None,
     ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
 
@@ -517,9 +518,13 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             True for Success and False for Failure.
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        del ge_cloud_id
+
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=ge_cloud_id,
+            cloud_id=id,
         )
 
         return self.expectations_store.remove_key(key)
@@ -627,41 +632,48 @@ class CloudDataContext(SerializableDataContext):
 
     def add_checkpoint(
         self,
-        name: str,
-        config_version: Optional[Union[int, float]] = None,
-        template_name: Optional[str] = None,
-        module_name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        name: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
         # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
+        validation_operator_name: str | None = None,
+        batches: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
-        site_names: Optional[Union[str, List[str]]] = None,
-        slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = None,
-        notify_with: Optional[Union[str, List[str]]] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
-        default_validation_id: Optional[str] = None,
+        site_names: str | list[str] | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | list[str] | None = None,
+        ge_cloud_id: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
+        default_validation_id: str | None = None,
+        id: str | None = None,
+        expectation_suite_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """
         See `AbstractDataContext.add_checkpoint` for more information.
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
+        del ge_cloud_id
+        del expectation_suite_ge_cloud_id
 
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
-            data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
+        checkpoint = self._resolve_add_checkpoint_args(
             name=name,
+            id=id,
             config_version=config_version,
             template_name=template_name,
             module_name=module_name,
@@ -674,27 +686,26 @@ class CloudDataContext(SerializableDataContext):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            # Next two fields are for LegacyCheckpoint configuration
             validation_operator_name=validation_operator_name,
             batches=batches,
-            # the following four arguments are used by SimpleCheckpoint
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=ge_cloud_id,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            checkpoint=checkpoint,
         )
 
         checkpoint_config = self.checkpoint_store.create(
             checkpoint_config=checkpoint.config
         )
 
-        checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        return Checkpoint.instantiate_from_config_with_runtime_args(
             checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
-        return checkpoint
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)

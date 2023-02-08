@@ -8,7 +8,7 @@ from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 

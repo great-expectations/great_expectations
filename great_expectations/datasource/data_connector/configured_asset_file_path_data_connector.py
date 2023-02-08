@@ -3,14 +3,16 @@ from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.datasource.data_connector.asset.asset import Asset
+from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
+from great_expectations.core.batch_spec import PathBatchSpec  # noqa: TCH001
+from great_expectations.datasource.data_connector.asset.asset import (
+    Asset,  # noqa: TCH001
+)
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +63,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
 
         if assets is None:
             assets = {}
+
         _assets: Dict[str, Union[dict, Asset]] = assets
         self._assets = _assets
         self._build_assets_from_config(config=assets)
@@ -90,7 +93,6 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         return list(self.assets.keys())
 
     def _refresh_data_references_cache(self) -> None:
-
         # Map data_references to batch_definitions
         self._data_references_cache = {}
 
@@ -170,6 +172,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
+
         return self._get_full_file_path_for_asset(path=path, asset=asset)
 
     def _get_regex_config(self, data_asset_name: Optional[str] = None) -> dict:
@@ -177,12 +180,14 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         asset: Optional[Asset] = None
         if data_asset_name:
             asset = self._get_asset(data_asset_name=data_asset_name)
+
         if asset is not None:
             # Override the defaults
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern
             if asset.group_names:
                 regex_config["group_names"] = asset.group_names
+
         return regex_config
 
     def _get_asset(self, data_asset_name: Optional[str]) -> Union[Asset, None]:
@@ -193,6 +198,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             and data_asset_name in self.assets
         ):
             asset = self.assets[data_asset_name]  # type: ignore[assignment]
+
         return asset
 
     def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:

@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 import itertools
 import logging
 import os
 import random
 import uuid
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.data_context_key import DataContextKey  # noqa: TCH001
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import (
@@ -19,7 +21,7 @@ from great_expectations.data_context.types.refs import (
     GXCloudIDAwareRef,
     GXCloudResourceRef,
 )
-from great_expectations.data_context.types.resource_identifiers import (
+from great_expectations.data_context.types.resource_identifiers import (  # noqa: TCH001
     ConfigurationIdentifier,
     GXCloudIdentifier,
 )
@@ -116,11 +118,11 @@ class CheckpointStore(ConfigurationStore):
 
     def delete_checkpoint(
         self,
-        name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        name: str | None = None,
+        id: str | None = None,
     ) -> None:
         key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=ge_cloud_id
+            name=name, ge_cloud_id=id
         )
         try:
             self.remove_key(key=key)
@@ -130,13 +132,19 @@ class CheckpointStore(ConfigurationStore):
             )
 
     def get_checkpoint(
-        self, name: Optional[str], ge_cloud_id: Optional[str]
+        self, name: Optional[ConfigurationIdentifier | str], id: Optional[str]
     ) -> CheckpointConfig:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=ge_cloud_id
-        )
+        key: GXCloudIdentifier | ConfigurationIdentifier
+        if not isinstance(name, ConfigurationIdentifier):
+            key = self.determine_key(name=name, ge_cloud_id=id)
+        else:
+            key = name
+
         try:
-            checkpoint_config: CheckpointConfig = self.get(key=key)  # type: ignore[assignment]
+            checkpoint_config: Optional[Any] = self.get(key=key)
+            assert isinstance(
+                checkpoint_config, CheckpointConfig
+            ), "checkpoint_config retrieved was not of type CheckpointConfig"
         except gx_exceptions.InvalidKeyError as exc_ik:
             raise gx_exceptions.CheckpointNotFoundError(
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
@@ -168,17 +176,84 @@ class CheckpointStore(ConfigurationStore):
 
         return checkpoint_config
 
-    def add_checkpoint(
-        self, checkpoint: "Checkpoint", name: Optional[str], ge_cloud_id: Optional[str]
-    ) -> None:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=ge_cloud_id
+    def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        """Persist a stand-alone Checkpoint object.
+
+        Args:
+            checkpoint: The Checkpoint to persist.
+
+        Returns:
+            The persisted Checkpoint (possibly modified state based on store backend).
+
+        Raises:
+            CheckpointError: If a Checkpoint with the given name already exists.
+        """
+        key = self._construct_key_from_checkpoint(checkpoint)
+        try:
+            return self._persist_checkpoint(
+                key=key, checkpoint=checkpoint, persistence_fn=self.add
+            )
+        except gx_exceptions.StoreBackendError:
+            raise gx_exceptions.CheckpointError(
+                f"A Checkpoint named {checkpoint.name} already exists."
+            )
+
+    def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        """Use a stand-alone Checkpoint object to update a persisted value.
+
+        Args:
+            checkpoint: The Checkpoint to use for updating.
+
+        Returns:
+            The persisted Checkpoint (possibly modified state based on store backend).
+
+        Raises:
+            CheckpointNotFoundError: If a Checkpoint with the given name does not exist in the store.
+        """
+        key = self._construct_key_from_checkpoint(checkpoint)
+        try:
+            return self._persist_checkpoint(
+                key=key, checkpoint=checkpoint, persistence_fn=self.update
+            )
+        except gx_exceptions.StoreBackendError:
+            raise gx_exceptions.CheckpointNotFoundError(
+                f"Could not find an existing Checkpoint named {checkpoint.name}."
+            )
+
+    def add_or_update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        """Use a stand-alone Checkpoint object to either add or update a persisted value.
+
+        Args:
+            checkpoint: The Checkpoint to use for adding or updating.
+
+        Returns:
+            The persisted Checkpoint (possibly modified state based on store backend).
+        """
+        key = self._construct_key_from_checkpoint(checkpoint)
+        return self._persist_checkpoint(
+            key=key, checkpoint=checkpoint, persistence_fn=self.add_or_update
         )
-        checkpoint_config: CheckpointConfig = checkpoint.get_config()  # type: ignore[assignment]
-        checkpoint_ref = self.set(key=key, value=checkpoint_config)  # type: ignore[func-returns-value]
+
+    def _construct_key_from_checkpoint(
+        self, checkpoint: Checkpoint
+    ) -> GXCloudIdentifier | ConfigurationIdentifier:
+        name = checkpoint.name
+        id = checkpoint.ge_cloud_id
+        if id:
+            return self.determine_key(ge_cloud_id=str(id))
+        return self.determine_key(name=name)
+
+    def _persist_checkpoint(
+        self,
+        key: GXCloudIdentifier | ConfigurationIdentifier,
+        checkpoint: Checkpoint,
+        persistence_fn: Callable,
+    ) -> Checkpoint:
+        checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
-            ge_cloud_id = checkpoint_ref.cloud_id
-            checkpoint.ge_cloud_id = uuid.UUID(ge_cloud_id)  # type: ignore[misc]
+            cloud_id = checkpoint_ref.cloud_id
+            checkpoint.config.ge_cloud_id = uuid.UUID(cloud_id)
+        return checkpoint
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
         """Create a checkpoint config in the store using a store_backend-specific key.

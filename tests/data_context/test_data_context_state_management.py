@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 from typing import Mapping
+from unittest import mock
 
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore, ProfilerStore
+from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.types.base import (
+    CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
     InMemoryStoreBackendDefaults,
@@ -26,9 +30,20 @@ class ExpectationsStoreSpy(ExpectationsStore):
         self.save_count = 0
         super().__init__()
 
-    def set(self, key, value, **kwargs):
+    def add(self, key, value, **kwargs):
+        ret = super().add(key=key, value=value, **kwargs)
         self.save_count += 1
-        return super().set(key=key, value=value, **kwargs)
+        return ret
+
+    def update(self, key, value, **kwargs):
+        ret = super().update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def add_or_update(self, key, value, **kwargs):
+        ret = super().add_or_update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
 
 
 class ProfilerStoreSpy(ProfilerStore):
@@ -39,9 +54,44 @@ class ProfilerStoreSpy(ProfilerStore):
         self.save_count = 0
         super().__init__(ProfilerStoreSpy.STORE_NAME)
 
-    def set(self, key, value, **kwargs):
+    def add(self, key, value, **kwargs):
+        ret = super().add(key=key, value=value, **kwargs)
         self.save_count += 1
-        return super().set(key=key, value=value, **kwargs)
+        return ret
+
+    def update(self, key, value, **kwargs):
+        ret = super().update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def add_or_update(self, key, value, **kwargs):
+        ret = super().add_or_update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+
+class CheckpointStoreSpy(CheckpointStore):
+
+    STORE_NAME = "checkpoint_store"
+
+    def __init__(self) -> None:
+        self.save_count = 0
+        super().__init__(CheckpointStoreSpy.STORE_NAME)
+
+    def add(self, key, value, **kwargs):
+        ret = super().add(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def update(self, key, value, **kwargs):
+        ret = super().update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def add_or_update(self, key, value, **kwargs):
+        ret = super().add_or_update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
 
 
 class EphemeralDataContextSpy(EphemeralDataContext):
@@ -57,6 +107,7 @@ class EphemeralDataContextSpy(EphemeralDataContext):
         self.save_count = 0
         self._expectations_store = ExpectationsStoreSpy()
         self._profiler_store = ProfilerStoreSpy()
+        self._checkpoint_store = CheckpointStoreSpy()
 
     @property
     def expectations_store(self):
@@ -65,6 +116,10 @@ class EphemeralDataContextSpy(EphemeralDataContext):
     @property
     def profiler_store(self):
         return self._profiler_store
+
+    @property
+    def checkpoint_store(self):
+        return self._checkpoint_store
 
     def _save_project_config(self):
         """
@@ -281,6 +336,31 @@ def test_add_or_update_datasource_adds_successfully(
             ),
             id="misc args",
         ),
+        pytest.param(
+            {
+                "expectation_suite": ExpectationSuite(
+                    expectations=[
+                        ExpectationConfiguration(
+                            expectation_type="expect_column_values_to_be_in_set",
+                            kwargs={"column": "x", "value_set": [1, 2, 4]},
+                        ),
+                    ],
+                    expectation_suite_name="default",
+                    meta={"great_expectations_version": "0.15.44"},
+                ),
+            },
+            ExpectationSuite(
+                expectations=[
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_values_to_be_in_set",
+                        kwargs={"column": "x", "value_set": [1, 2, 4]},
+                    ),
+                ],
+                expectation_suite_name="default",
+                meta={"great_expectations_version": "0.15.44"},
+            ),
+            id="existing suite",
+        ),
     ],
 )
 def test_add_expectation_suite_success(
@@ -297,7 +377,7 @@ def test_add_expectation_suite_success(
 
 
 @pytest.mark.unit
-def test_add_expectation_suite_failure(
+def test_add_expectation_suite_namespace_collision_failure(
     in_memory_data_context: EphemeralDataContextSpy,
 ):
     context = in_memory_data_context
@@ -308,12 +388,39 @@ def test_add_expectation_suite_failure(
     with pytest.raises(gx_exceptions.DataContextError) as e:
         context.add_expectation_suite(expectation_suite_name=suite_name)
 
-    assert f"expectation_suite with name {suite_name} already exists" in str(e.value)
+    assert f"An ExpectationSuite named {suite_name} already exists" in str(e.value)
+    assert context.expectations_store.save_count == 1
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "suite,suite_name",
+    [
+        pytest.param(
+            ExpectationSuite(expectation_suite_name="default"),
+            "default",
+            id="both suite and suite_name",
+        ),
+        pytest.param(None, None, id="neither suite nor suite_name"),
+    ],
+)
+def test_add_expectation_suite_conflicting_args_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    suite: ExpectationSuite | None,
+    suite_name: str | None,
+):
+    context = in_memory_data_context
+
+    with pytest.raises(ValueError) as e:
+        context.add_expectation_suite(
+            expectation_suite=suite, expectation_suite_name=suite_name
+        )
+
     assert (
-        "please delete or update it using `delete_expectation_suite` or `update_expectation_suite`"
+        "an existing expectation_suite or individual constructor arguments (but not both)"
         in str(e.value)
     )
-    assert context.expectations_store.save_count == 1
+    assert context.expectations_store.save_count == 0
 
 
 @pytest.mark.unit
@@ -348,15 +455,51 @@ def test_update_expectation_suite_failure(
     suite_name = "my_brand_new_suite"
     suite = ExpectationSuite(expectation_suite_name=suite_name)
 
-    with pytest.raises(gx_exceptions.DataContextError) as e:
+    with pytest.raises(gx_exceptions.ExpectationSuiteError) as e:
         _ = context.update_expectation_suite(suite)
 
-    assert f"expectation_suite with name {suite_name} does not exist." in str(e.value)
+    assert f"Could not find an existing ExpectationSuite named {suite_name}." in str(
+        e.value
+    )
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        pytest.param(
+            {
+                "expectation_suite_name": "default",
+                "expectations": [
+                    ExpectationConfiguration(
+                        expectation_type="expect_column_values_to_be_in_set",
+                        kwargs={"column": "x", "value_set": [1, 2, 4]},
+                    ),
+                ],
+                "meta": {"great_expectations_version": "0.15.44"},
+            },
+            id="individual args",
+        ),
+        pytest.param(
+            {
+                "expectation_suite": ExpectationSuite(
+                    expectations=[
+                        ExpectationConfiguration(
+                            expectation_type="expect_column_values_to_be_in_set",
+                            kwargs={"column": "x", "value_set": [1, 2, 4]},
+                        ),
+                    ],
+                    expectation_suite_name="default",
+                    meta={"great_expectations_version": "0.15.44"},
+                ),
+            },
+            id="existing suite",
+        ),
+    ],
+)
 def test_add_or_update_expectation_suite_adds_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
+    kwargs: dict,
 ):
     context = in_memory_data_context
 
@@ -369,11 +512,7 @@ def test_add_or_update_expectation_suite_adds_successfully(
     ]
     meta = {"great_expectations_version": "0.15.44"}
 
-    suite = context.add_or_update_expectation_suite(
-        expectation_suite_name=expectation_suite_name,
-        expectations=expectations,
-        meta=meta,
-    )
+    suite = context.add_or_update_expectation_suite(**kwargs)
 
     assert suite.expectation_suite_name == expectation_suite_name
     assert suite.expectations == expectations
@@ -428,6 +567,114 @@ def test_add_or_update_expectation_suite_updates_successfully(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "suite,suite_name",
+    [
+        pytest.param(
+            ExpectationSuite(expectation_suite_name="default"),
+            "default",
+            id="both suite and suite_name",
+        ),
+        pytest.param(None, None, id="neither suite nor suite_name"),
+    ],
+)
+def test_add_or_update_expectation_suite_conflicting_args_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    suite: ExpectationSuite | None,
+    suite_name: str | None,
+):
+    context = in_memory_data_context
+
+    with pytest.raises(ValueError) as e:
+        context.add_or_update_expectation_suite(
+            expectation_suite=suite, expectation_suite_name=suite_name
+        )
+
+    assert (
+        "an existing expectation_suite or individual constructor arguments (but not both)"
+        in str(e.value)
+    )
+    assert context.expectations_store.save_count == 0
+
+
+@pytest.mark.unit
+def test_add_profiler_with_existing_profiler(
+    in_memory_data_context: EphemeralDataContextSpy,
+    profiler_rules: dict,
+):
+    context = in_memory_data_context
+
+    name = "my_rbp"
+    profiler = RuleBasedProfiler(
+        name=name,
+        config_version=1.0,
+        rules=profiler_rules,
+        data_context=context,
+    )
+
+    persisted_profiler = context.add_profiler(profiler=profiler)
+
+    assert profiler.name == persisted_profiler.name
+    assert profiler.config_version == persisted_profiler.config_version
+    assert len(profiler.rules) == len(persisted_profiler.rules)
+    assert context.profiler_store.save_count == 1
+
+
+@pytest.mark.unit
+def test_add_profiler_namespace_collision_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    profiler_rules: dict,
+):
+    context = in_memory_data_context
+
+    name = "my_rbp"
+    profiler = RuleBasedProfiler(
+        name=name,
+        config_version=1.0,
+        rules=profiler_rules,
+        data_context=context,
+    )
+
+    _ = context.add_profiler(profiler=profiler)
+    assert context.profiler_store.save_count == 1
+
+    with pytest.raises(gx_exceptions.ProfilerError) as e:
+        _ = context.add_profiler(profiler=profiler)
+
+    assert f"Profiler named {name} already exists" in str(e.value)
+    assert context.profiler_store.save_count == 1  # Should not have changed
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "profiler,profiler_name",
+    [
+        pytest.param(
+            mock.MagicMock(),
+            "my_rbp",
+            id="both profiler and profiler_name",
+        ),
+        pytest.param(None, None, id="neither profiler nor profiler_name"),
+    ],
+)
+def test_add_profiler_conflicting_args_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    profiler: mock.MagicMock | None,
+    profiler_name: str | None,
+):
+    context = in_memory_data_context
+
+    with pytest.raises(ValueError) as e:
+        context.add_profiler(profiler=profiler, name=profiler_name)
+
+    assert (
+        "an existing profiler or individual constructor arguments (but not both)"
+        in str(e.value)
+    )
+    assert context.profiler_store.save_count == 0
+
+
+@pytest.mark.unit
 def test_update_profiler_success(
     in_memory_data_context: EphemeralDataContextSpy,
     profiler_rules: dict,
@@ -452,20 +699,23 @@ def test_update_profiler_success(
 
 
 @pytest.mark.unit
-def test_update_profiler_failure(in_memory_data_context: EphemeralDataContextSpy):
+def test_update_profiler_failure(
+    in_memory_data_context: EphemeralDataContextSpy, profiler_rules: dict
+):
     context = in_memory_data_context
 
     name = "my_rbp"
     profiler = RuleBasedProfiler(
         name=name,
         config_version=1.0,
+        rules=profiler_rules,
         data_context=context,
     )
 
     with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         _ = context.update_profiler(profiler)
 
-    assert f"Non-existent Profiler configuration named {name}" in str(e.value)
+    assert f"Could not find an existing Profiler named {name}" in str(e.value)
 
 
 @pytest.mark.unit
@@ -543,8 +793,350 @@ def test_add_or_update_profiler_updates_successfully(
 
     assert context.profiler_store.save_count == 1
 
-    profiler = context.add_or_update_profiler(name=name, rules=new_rules)
+    profiler = context.add_or_update_profiler(
+        name=name, rules=new_rules, config_version=config_version
+    )
 
     # Rules get converted to a list within the RBP constructor
     assert sorted(rule.name for rule in profiler.rules) == sorted(new_rules.keys())
     assert context.profiler_store.save_count == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "profiler,profiler_name",
+    [
+        pytest.param(
+            mock.MagicMock(),  # Only care about the presence of the value (no need to construct a full RBP obj)
+            "my_rbp",
+            id="both profiler and profiler_name",
+        ),
+        pytest.param(None, None, id="neither profiler nor profiler_name"),
+    ],
+)
+def test_add_or_update_profiler_conflicting_args_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    profiler: mock.MagicMock | None,
+    profiler_name: str | None,
+):
+    context = in_memory_data_context
+
+    with pytest.raises(ValueError) as e:
+        context.add_or_update_profiler(profiler=profiler, name=profiler_name)
+
+    assert (
+        "an existing profiler or individual constructor arguments (but not both)"
+        in str(e.value)
+    )
+    assert context.profiler_store.save_count == 0
+
+
+@pytest.mark.unit
+def test_add_checkpoint_with_existing_checkpoint(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+    checkpoint_name = "my_checkpoint"
+    checkpoint = Checkpoint(name=checkpoint_name, data_context=context)
+
+    persisted_checkpoint = context.add_checkpoint(checkpoint=checkpoint)
+
+    assert checkpoint == persisted_checkpoint
+    assert context.checkpoint_store.save_count == 1
+
+
+@pytest.mark.unit
+def test_add_checkpoint_namespace_collision_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+    checkpoint_name = "my_checkpoint"
+
+    _ = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
+    assert context.checkpoint_store.save_count == 1
+
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
+        _ = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
+
+    assert f"Checkpoint named {checkpoint_name} already exists" in str(e.value)
+    assert context.checkpoint_store.save_count == 1  # Should not have changed
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "checkpoint, checkpoint_name",
+    [
+        pytest.param(
+            mock.MagicMock(),
+            "my_checkpoint_name",
+            id="both checkpoint and checkpoint_name",
+        ),
+        pytest.param(None, None, id="neither checkpoint nor checkpoint_name"),
+    ],
+)
+def test_add_checkpoint_conflicting_args_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    # Only care about the presence of the value (no need to construct a full Checkpoint obj)
+    checkpoint: mock.MagicMock | None,
+    checkpoint_name: str | None,
+):
+    context = in_memory_data_context
+
+    with pytest.raises(ValueError) as e:
+        context.add_checkpoint(
+            checkpoint=checkpoint,
+            name=checkpoint_name,
+        )
+
+    assert (
+        "an existing checkpoint or individual constructor arguments (but not both)"
+        in str(e.value)
+    )
+    assert context.checkpoint_store.save_count == 0
+
+
+@pytest.mark.unit
+def test_update_checkpoint_success(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+):
+    context = in_memory_data_context
+    name = "my_checkpoint"
+    checkpoint_config["name"] = name
+
+    checkpoint = context.add_checkpoint(**checkpoint_config)
+
+    assert context.checkpoint_store.save_count == 1
+
+    action_list = [
+        {
+            "name": "store_validation_result",
+            "action": {
+                "class_name": "StoreValidationResultAction",
+            },
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {
+                "class_name": "StoreEvaluationParametersAction",
+            },
+        },
+        {
+            "name": "update_data_docs",
+            "action": {
+                "class_name": "UpdateDataDocsAction",
+            },
+        },
+    ]
+    checkpoint.config.action_list = action_list
+    context.update_checkpoint(checkpoint)
+
+    assert context.checkpoint_store.save_count == 2
+
+
+@pytest.mark.unit
+def test_update_checkpoint_failure(in_memory_data_context: EphemeralDataContextSpy):
+    context = in_memory_data_context
+
+    name = "my_checkpoint"
+    checkpoint = Checkpoint(
+        name=name,
+        data_context=context,
+    )
+
+    with pytest.raises(gx_exceptions.CheckpointNotFoundError) as e:
+        context.update_checkpoint(checkpoint)
+
+    assert f"Could not find an existing Checkpoint named {name}" in str(e.value)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("use_existing_checkpoint", [True, False])
+def test_add_or_update_checkpoint_adds_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+    use_existing_checkpoint: bool,
+):
+    context = in_memory_data_context
+
+    if use_existing_checkpoint:
+        checkpoint_config.pop("class_name")
+        checkpoint = Checkpoint(**checkpoint_config, data_context=context)
+        checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
+    else:
+        checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
+
+    actual_config = checkpoint.config
+
+    assert actual_config.name == checkpoint_config["name"]
+    assert (
+        actual_config.expectation_suite_name
+        == checkpoint_config["expectation_suite_name"]
+    )
+    assert actual_config.validations == checkpoint_config["validations"]
+    assert context.checkpoint_store.save_count == 1
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "update_kwargs,expected_config",
+    [
+        pytest.param(
+            {
+                "action_list": [],
+                "batch_request": {},
+                "class_name": "Checkpoint",
+                "config_version": 1.0,
+                "evaluation_parameters": {},
+                "expectation_suite_name": "oss_test_expectation_suite",
+                "module_name": "great_expectations.checkpoint",
+                "profilers": [],
+                "runtime_configuration": {},
+                "validations": [
+                    {"expectation_suite_name": "taxi.demo_pass"},
+                    {
+                        "batch_request": {
+                            "datasource_name": "oss_test_datasource",
+                            "data_connector_name": "oss_test_data_connector",
+                            "data_asset_name": "users",
+                        }
+                    },
+                ],
+            },
+            CheckpointConfig(
+                **{
+                    "action_list": [],
+                    "batch_request": {},
+                    "class_name": "Checkpoint",
+                    "config_version": 1.0,
+                    "evaluation_parameters": {},
+                    "expectation_suite_name": "oss_test_expectation_suite",
+                    "module_name": "great_expectations.checkpoint",
+                    "name": "my_checkpoint",
+                    "profilers": [],
+                    "runtime_configuration": {},
+                    "validations": [
+                        {"expectation_suite_name": "taxi.demo_pass"},
+                        {
+                            "batch_request": {
+                                "datasource_name": "oss_test_datasource",
+                                "data_connector_name": "oss_test_data_connector",
+                                "data_asset_name": "users",
+                            }
+                        },
+                    ],
+                }
+            ),
+            id="no updates",
+        ),
+        pytest.param(
+            {
+                "class_name": "Checkpoint",
+                "module_name": "great_expectations.checkpoint",
+                "config_version": 1.0,
+                "validations": [],
+                "evaluation_parameters": {
+                    "environment": "$GE_ENVIRONMENT",
+                    "tolerance": 1.0e-2,
+                    "aux_param_0": "$MY_PARAM",
+                    "aux_param_1": "1 + $MY_PARAM",
+                },
+            },
+            CheckpointConfig(
+                **{
+                    "action_list": [],
+                    "batch_request": {},
+                    "class_name": "Checkpoint",
+                    "config_version": 1.0,
+                    "evaluation_parameters": {
+                        "environment": "$GE_ENVIRONMENT",
+                        "tolerance": 1.0e-2,
+                        "aux_param_0": "$MY_PARAM",
+                        "aux_param_1": "1 + $MY_PARAM",
+                    },
+                    "expectation_suite_name": None,
+                    "module_name": "great_expectations.checkpoint",
+                    "name": "my_checkpoint",
+                    "profilers": [],
+                    "runtime_configuration": {},
+                    "validations": [],
+                }
+            ),
+            id="some updates",
+        ),
+    ],
+)
+def test_add_or_update_checkpoint_individual_args_updates_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+    update_kwargs: dict,
+    expected_config: CheckpointConfig,
+):
+    context = in_memory_data_context
+    name = "my_checkpoint"
+    checkpoint_config["name"] = name
+
+    checkpoint = context.add_checkpoint(**checkpoint_config)
+
+    assert context.checkpoint_store.save_count == 1
+
+    checkpoint = context.add_or_update_checkpoint(name=name, **update_kwargs)
+
+    assert checkpoint.config.to_dict() == expected_config.to_dict()
+    assert context.checkpoint_store.save_count == 2
+
+
+@pytest.mark.unit
+def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+):
+    context = in_memory_data_context
+
+    name = "my_checkpoint"
+    checkpoint_config["name"] = name
+
+    checkpoint = context.add_checkpoint(name=name, class_name="Checkpoint")
+
+    assert len(checkpoint.validations) == 0
+    assert context.checkpoint_store.save_count == 1
+
+    checkpoint_config.pop("class_name")
+    checkpoint = Checkpoint(**checkpoint_config, data_context=context)
+    checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
+
+    assert len(checkpoint.validations) == len(checkpoint_config["validations"])
+    assert context.checkpoint_store.save_count == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "checkpoint, checkpoint_name",
+    [
+        pytest.param(
+            mock.MagicMock(),
+            "my_checkpoint_name",
+            id="both checkpoint and checkpoint_name",
+        ),
+        pytest.param(None, None, id="neither checkpoint nor checkpoint_name"),
+    ],
+)
+def test_add_or_update_checkpoint_conflicting_args_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    # Only care about the presence of the value (no need to construct a full Checkpoint obj)
+    checkpoint: mock.MagicMock | None,
+    checkpoint_name: str | None,
+):
+    context = in_memory_data_context
+
+    with pytest.raises(ValueError) as e:
+        context.add_or_update_checkpoint(
+            checkpoint=checkpoint,
+            name=checkpoint_name,
+        )
+
+    assert (
+        "an existing checkpoint or individual constructor arguments (but not both)"
+        in str(e.value)
+    )
+    assert context.checkpoint_store.save_count == 0

@@ -1,0 +1,97 @@
+{
+    "title": "SPSSAsset",
+    "description": "Load an SPSS file from the file path, returning a DataFrame.\n\n.. versionadded:: 0.25.0\n\nParameters\n----------\npath : str or Path\n    File path.\nusecols : list-like, optional\n    Return a subset of the columns. If None, return all columns.\nconvert_categoricals : bool, default is True\n    Convert categorical columns into pd.Categorical.\n\nReturns\n-------\nDataFrame",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "spss",
+            "enum": [
+                "spss"
+            ],
+            "type": "string"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/BatchSorter"
+            }
+        },
+        "regex": {
+            "title": "Regex",
+            "type": "string",
+            "format": "regex"
+        },
+        "base_directory": {
+            "title": "Base Directory",
+            "type": "string",
+            "format": "path"
+        },
+        "path": {
+            "title": "Path",
+            "anyOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "string",
+                    "format": "path"
+                }
+            ]
+        },
+        "usecols": {
+            "title": "Usecols",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            ]
+        },
+        "convert_categoricals": {
+            "title": "Convert Categoricals",
+            "default": true,
+            "type": "boolean"
+        }
+    },
+    "required": [
+        "name",
+        "regex",
+        "base_directory",
+        "path"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "BatchSorter": {
+            "title": "BatchSorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

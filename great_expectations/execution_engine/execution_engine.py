@@ -21,13 +21,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import (
-    AzureUrl,
-    DBFSPath,
-    GCSUrl,
-    S3Url,
-    convert_to_json_serializable,
-)
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
     RowCondition,
@@ -35,8 +29,10 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.types import DictDot
 from great_expectations.util import filter_properties_dict
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     # noinspection PyPep8Naming
@@ -477,16 +473,6 @@ class ExecutionEngine(ABC):
         )
         new_domain_kwargs.setdefault("filter_conditions", []).append(row_condition)
         return new_domain_kwargs
-
-    def resolve_data_reference(
-        self, data_connector_name: str, template_arguments: dict
-    ):
-        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
-            data_connector_name=data_connector_name,
-            execution_engine_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
 
     def _build_direct_and_bundled_metric_computation_configurations(
         self,

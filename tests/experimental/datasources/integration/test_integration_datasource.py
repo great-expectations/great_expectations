@@ -8,6 +8,7 @@ from great_expectations.experimental.datasources.interfaces import (
     DataAsset,
     Datasource,
 )
+from tests.experimental.datasources.integration.conftest import sqlite_datasource
 from tests.experimental.datasources.integration.integration_test_utils import (
     run_batch_head,
     run_checkpoint_and_data_doc,
@@ -87,3 +88,26 @@ def test_batch_head(
         n_rows=n_rows,
         success=success,
     )
+
+
+def test_sql_query_data_asset(empty_data_context):
+    context = empty_data_context
+    datasource = sqlite_datasource(context, "yellow_tripdata.db")
+    passenger_count_value = 5
+    asset = (
+        datasource.add_query_asset(
+            name="query_asset",
+            query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
+        )
+        .add_year_and_month_splitter(column_name="pickup_datetime")
+        .add_sorters(["year"])
+    )
+    validator = context.get_validator(
+        batch_request=asset.get_batch_request({"year": 2019})
+    )
+    result = validator.expect_column_distinct_values_to_equal_set(
+        column="passenger_count",
+        value_set=[passenger_count_value],
+        result_format={"result_format": "BOOLEAN_ONLY"},
+    )
+    assert result.success

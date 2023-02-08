@@ -5,7 +5,18 @@ import datetime
 import logging
 import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 from dateutil.parser import parse
 
@@ -19,7 +30,9 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import (
+    MetricDomainTypes,  # noqa: TCH001
+)
 from great_expectations.core.util import (
     AzureUrl,
     convert_to_json_serializable,
@@ -34,8 +47,8 @@ from great_expectations.exceptions import (
 from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
-    MetricComputationConfiguration,
-    SplitDomainKwargs,
+    MetricComputationConfiguration,  # noqa: TCH001
+    SplitDomainKwargs,  # noqa: TCH001
 )
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
@@ -49,8 +62,10 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_spark,
 )
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 logger = logging.getLogger(__name__)
 
@@ -346,6 +361,7 @@ illegal.  Please check your config."""
                     reader = self.spark.read.schema(schema).options(**reader_options)
                 else:
                     reader = self.spark.read.options(**reader_options)
+
                 reader_fn = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
@@ -429,7 +445,19 @@ illegal.  Please check your config."""
             f"Unable to determine reader method from path: {path}"
         )
 
-    def _get_reader_fn(self, reader, reader_method=None, path=None):
+    @overload
+    def _get_reader_fn(
+        self, reader, reader_method: str = ..., path: Optional[str] = ...
+    ) -> Callable:
+        ...
+
+    @overload
+    def _get_reader_fn(
+        self, reader, reader_method: None = ..., path: str = ...
+    ) -> Callable:
+        ...
+
+    def _get_reader_fn(self, reader, reader_method=None, path=None) -> Callable:
         """Static helper for providing reader_fn
 
         Args:

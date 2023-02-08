@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import Iterator, List, Optional, cast
 
 import great_expectations.exceptions as gx_exceptions
@@ -16,14 +15,14 @@ from great_expectations.datasource.data_connector.batch_filter import (
     build_batch_filter,
 )
 from great_expectations.datasource.data_connector.data_connector import DataConnector
-from great_expectations.datasource.data_connector.sorter import Sorter
+from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
 from great_expectations.datasource.data_connector.util import (
     batch_definition_matches_batch_request,
     build_sorters_from_config,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +72,7 @@ class FilePathDataConnector(DataConnector):
 
         if default_regex is None:
             default_regex = {}
+
         self._default_regex = default_regex
 
         self._sorters = build_sorters_from_config(config_list=sorters)  # type: ignore[arg-type]
@@ -181,7 +181,6 @@ class FilePathDataConnector(DataConnector):
             )
 
         if batch_request.data_connector_query is not None:
-
             data_connector_query_dict = batch_request.data_connector_query.copy()
             if (
                 batch_request.limit is not None
@@ -216,6 +215,7 @@ class FilePathDataConnector(DataConnector):
             batch_definition_list = sorter.get_sorted_batch_definitions(
                 batch_definitions=batch_definition_list
             )
+
         return batch_definition_list
 
     def _map_data_reference_to_batch_definition_list(
@@ -261,19 +261,6 @@ class FilePathDataConnector(DataConnector):
         )
         return PathBatchSpec(batch_spec)
 
-    @staticmethod
-    def sanitize_prefix(text: str) -> str:
-        """
-        Takes in a given user-prefix and cleans it to work with file-system traversal methods
-        (i.e. add '/' to the end of a string meant to represent a directory)
-        """
-        _, ext = os.path.splitext(text)
-        if ext:
-            # Provided prefix is a filename so no adjustment is necessary
-            return text
-        # Provided prefix is a directory (so we want to ensure we append it with '/')
-        return os.path.join(text, "")
-
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
@@ -286,9 +273,11 @@ class FilePathDataConnector(DataConnector):
 batch identifiers {batch_definition.batch_identifiers} from batch definition {batch_definition}.
 """
             )
+
         path = self._get_full_file_path(
             path=path, data_asset_name=batch_definition.data_asset_name
         )
+
         return {"path": path}
 
     def _validate_batch_request(self, batch_request: BatchRequestBase) -> None:
@@ -312,6 +301,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 configured group_name.
                     """
                 )
+
             if len(group_names) < len(self.sorters):
                 raise gx_exceptions.DataConnectorError(
                     f"""DataConnector "{self.name}" is configured with {len(group_names)} group names;
