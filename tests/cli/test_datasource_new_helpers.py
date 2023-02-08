@@ -840,18 +840,19 @@ data_connectors:
         schema_name: {schema_name}
 """'''
     )
-    # helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
-    # assert mock_emit.call_count == 1
-    # assert mock_emit.call_args_list == [
-    #     mock.call(
-    #         {
-    #             "event": "cli.new_ds_choice",
-    #             "event_payload": {
-    #                 "type": "sqlalchemy",
-    #                 "db": "Athena",
-    #                 "api_version": "v3",
-    #             },
-    #             "success": True,
-    #         }
-    #     ),
-    # ]
+
+    helper.send_backend_choice_usage_message(empty_data_context_stats_enabled)
+    assert mock_emit.call_count == 1
+    assert mock_emit.call_args_list == [
+        mock.call(
+            {
+                "event": "cli.new_ds_choice",
+                "event_payload": {
+                    "type": "sqlalchemy",
+                    "db": "Athena",
+                    "api_version": "v3",
+                },
+                "success": True,
+            }
+        ),
+    ]
