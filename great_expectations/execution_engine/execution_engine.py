@@ -29,8 +29,10 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.types import DictDot
 from great_expectations.util import filter_properties_dict
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     # noinspection PyPep8Naming
