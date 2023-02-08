@@ -567,58 +567,6 @@ def test_add_or_update_expectation_suite_conflicting_args_failure(
 
 
 @pytest.mark.unit
-def test_add_profiler_with_existing_profiler(
-    in_memory_data_context: EphemeralDataContextSpy,
-    profiler_rules: dict,
-):
-    context = in_memory_data_context
-
-    name = "my_rbp"
-    profiler = RuleBasedProfiler(
-        name=name,
-        config_version=1.0,
-        rules=profiler_rules,
-        data_context=context,
-    )
-
-    persisted_profiler = context.add_profiler(profiler=profiler)
-
-    assert profiler.name == persisted_profiler.name
-    assert profiler.config_version == persisted_profiler.config_version
-    assert len(profiler.rules) == len(persisted_profiler.rules)
-    assert context.profiler_store.save_count == 1
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "profiler,profiler_name",
-    [
-        pytest.param(
-            mock.MagicMock(),
-            "my_rbp",
-            id="both profiler and profiler_name",
-        ),
-        pytest.param(None, None, id="neither profiler nor profiler_name"),
-    ],
-)
-def test_add_profiler_conflicting_args_failure(
-    in_memory_data_context: EphemeralDataContextSpy,
-    profiler: mock.MagicMock | None,
-    profiler_name: str | None,
-):
-    context = in_memory_data_context
-
-    with pytest.raises(ValueError) as e:
-        context.add_profiler(profiler=profiler, name=profiler_name)
-
-    assert (
-        "an existing profiler or individual constructor arguments (but not both)"
-        in str(e.value)
-    )
-    assert context.profiler_store.save_count == 0
-
-
-@pytest.mark.unit
 def test_update_profiler_success(
     in_memory_data_context: EphemeralDataContextSpy,
     profiler_rules: dict,
@@ -734,9 +682,7 @@ def test_add_or_update_profiler_updates_successfully(
 
     assert context.profiler_store.save_count == 1
 
-    profiler = context.add_or_update_profiler(
-        name=name, rules=new_rules, config_version=config_version
-    )
+    profiler = context.add_or_update_profiler(name=name, rules=new_rules)
 
     # Rules get converted to a list within the RBP constructor
     assert sorted(rule.name for rule in profiler.rules) == sorted(new_rules.keys())
@@ -744,32 +690,50 @@ def test_add_or_update_profiler_updates_successfully(
 
 
 @pytest.mark.unit
+def test_add_checkpoint_with_existing_checkpoint(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+    checkpoint_name = "my_checkpoint"
+    checkpoint = Checkpoint(name=checkpoint_name, data_context=context)
+
+    persisted_checkpoint = context.add_checkpoint(checkpoint=checkpoint)
+
+    assert checkpoint == persisted_checkpoint
+    assert context.checkpoint_store.save_count == 1
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
-    "profiler,profiler_name",
+    "checkpoint, checkpoint_name",
     [
         pytest.param(
-            mock.MagicMock(),  # Only care about the presence of the value (no need to construct a full RBP obj)
-            "my_rbp",
-            id="both profiler and profiler_name",
+            mock.MagicMock(),
+            "my_checkpoint_name",
+            id="both checkpoint and checkpoint_name",
         ),
-        pytest.param(None, None, id="neither profiler nor profiler_name"),
+        pytest.param(None, None, id="neither checkpoint nor checkpoint_name"),
     ],
 )
-def test_add_or_update_profiler_conflicting_args_failure(
+def test_add_checkpoint_conflicting_args_failure(
     in_memory_data_context: EphemeralDataContextSpy,
-    profiler: mock.MagicMock | None,
-    profiler_name: str | None,
+    # Only care about the presence of the value (no need to construct a full Checkpoint obj)
+    checkpoint: mock.MagicMock | None,
+    checkpoint_name: str | None,
 ):
     context = in_memory_data_context
 
     with pytest.raises(ValueError) as e:
-        context.add_or_update_profiler(profiler=profiler, name=profiler_name)
+        context.add_checkpoint(
+            checkpoint=checkpoint,
+            name=checkpoint_name,
+        )
 
     assert (
-        "an existing profiler or individual constructor arguments (but not both)"
+        "an existing checkpoint or individual constructor arguments (but not both)"
         in str(e.value)
     )
-    assert context.profiler_store.save_count == 0
+    assert context.checkpoint_store.save_count == 0
 
 
 @pytest.mark.unit
@@ -828,19 +792,24 @@ def test_update_checkpoint_failure(in_memory_data_context: EphemeralDataContextS
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("use_existing_checkpoint", [True, False])
 def test_add_or_update_checkpoint_adds_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
     checkpoint_config: dict,
+    use_existing_checkpoint: bool,
 ):
     context = in_memory_data_context
-    name = "my_checkpoint"
-    checkpoint_config["name"] = name
 
-    checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
+    if use_existing_checkpoint:
+        checkpoint_config.pop("class_name")
+        checkpoint = Checkpoint(**checkpoint_config, data_context=context)
+        checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
+    else:
+        checkpoint = context.add_or_update_checkpoint(**checkpoint_config)
 
     actual_config = checkpoint.config
 
-    assert actual_config.name == name
+    assert actual_config.name == checkpoint_config["name"]
     assert (
         actual_config.expectation_suite_name
         == checkpoint_config["expectation_suite_name"]
@@ -938,7 +907,7 @@ def test_add_or_update_checkpoint_adds_successfully(
         ),
     ],
 )
-def test_add_or_update_checkpoint_updates_successfully(
+def test_add_or_update_checkpoint_individual_args_updates_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
     checkpoint_config: dict,
     update_kwargs: dict,
@@ -956,3 +925,59 @@ def test_add_or_update_checkpoint_updates_successfully(
 
     assert checkpoint.config.to_dict() == expected_config.to_dict()
     assert context.checkpoint_store.save_count == 2
+
+
+@pytest.mark.unit
+def test_add_or_update_checkpoint_existing_checkpoint_updates_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    checkpoint_config: dict,
+):
+    context = in_memory_data_context
+
+    name = "my_checkpoint"
+    checkpoint_config["name"] = name
+
+    checkpoint = context.add_checkpoint(name=name, class_name="Checkpoint")
+
+    assert len(checkpoint.validations) == 0
+    assert context.checkpoint_store.save_count == 1
+
+    checkpoint_config.pop("class_name")
+    checkpoint = Checkpoint(**checkpoint_config, data_context=context)
+    checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
+
+    assert len(checkpoint.validations) == len(checkpoint_config["validations"])
+    assert context.checkpoint_store.save_count == 2
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "checkpoint, checkpoint_name",
+    [
+        pytest.param(
+            mock.MagicMock(),
+            "my_checkpoint_name",
+            id="both checkpoint and checkpoint_name",
+        ),
+        pytest.param(None, None, id="neither checkpoint nor checkpoint_name"),
+    ],
+)
+def test_add_or_update_checkpoint_conflicting_args_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    # Only care about the presence of the value (no need to construct a full Checkpoint obj)
+    checkpoint: mock.MagicMock | None,
+    checkpoint_name: str | None,
+):
+    context = in_memory_data_context
+
+    with pytest.raises(ValueError) as e:
+        context.add_or_update_checkpoint(
+            checkpoint=checkpoint,
+            name=checkpoint_name,
+        )
+
+    assert (
+        "an existing checkpoint or individual constructor arguments (but not both)"
+        in str(e.value)
+    )
+    assert context.checkpoint_store.save_count == 0

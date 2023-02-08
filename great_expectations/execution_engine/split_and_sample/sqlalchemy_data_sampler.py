@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
@@ -26,7 +26,7 @@ except ImportError:
 
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TCH004
 
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 

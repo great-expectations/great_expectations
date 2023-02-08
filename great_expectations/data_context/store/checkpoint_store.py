@@ -5,12 +5,12 @@ import logging
 import os
 import random
 import uuid
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.data_context_key import DataContextKey  # noqa: TCH001
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import (
@@ -22,8 +22,8 @@ from great_expectations.data_context.types.refs import (
     GXCloudResourceRef,
 )
 from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-    GXCloudIdentifier,
+    ConfigurationIdentifier,  # noqa: TCH001
+    GXCloudIdentifier,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:
@@ -131,12 +131,20 @@ class CheckpointStore(ConfigurationStore):
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]
             )
 
-    def get_checkpoint(self, name: str | None, id: str | None) -> CheckpointConfig:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=id
-        )
+    def get_checkpoint(
+        self, name: Optional[ConfigurationIdentifier | str], id: Optional[str]
+    ) -> CheckpointConfig:
+        key: GXCloudIdentifier | ConfigurationIdentifier
+        if not isinstance(name, ConfigurationIdentifier):
+            key = self.determine_key(name=name, ge_cloud_id=id)
+        else:
+            key = name
+
         try:
-            checkpoint_config: CheckpointConfig = self.get(key=key)  # type: ignore[assignment]
+            checkpoint_config: Optional[Any] = self.get(key=key)
+            assert isinstance(
+                checkpoint_config, CheckpointConfig
+            ), "checkpoint_config retrieved was not of type CheckpointConfig"
         except gx_exceptions.InvalidKeyError as exc_ik:
             raise gx_exceptions.CheckpointNotFoundError(
                 message=f'Non-existent Checkpoint configuration named "{key.configuration_key}".\n\nDetails: {exc_ik}'  # type: ignore[union-attr]

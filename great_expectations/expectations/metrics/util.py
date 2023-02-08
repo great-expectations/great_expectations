@@ -12,8 +12,8 @@ from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SqlAlchemyExecutionEngine,
+    PandasExecutionEngine,  # noqa: TCH001
+    SqlAlchemyExecutionEngine,  # noqa: TCH001
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,

@@ -1195,11 +1195,9 @@ def _context_to_validator_and_expectation_sql(
     batch_request = BatchRequest(
         datasource_name="my_datasource",
         data_connector_name="my_sql_data_connector",
-        data_asset_name="my_asset",  # this is the name of the table you want to retrieve
+        data_asset_name="animals_names_asset",  # this is the name of the table you want to retrieve
     )
-    context.create_expectation_suite(
-        expectation_suite_name="test_suite", overwrite_existing=True
-    )
+    context.add_expectation_suite(expectation_suite_name="test_suite")
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )
@@ -1208,14 +1206,14 @@ def _context_to_validator_and_expectation_sql(
 
 @pytest.mark.integration
 def test_validator_result_format_config_from_validator(
-    data_context_with_connection_to_animal_names_db,
+    data_context_with_connection_to_metrics_db,
 ):
     result_format_config: dict = {
         "result_format": "COMPLETE",
         "unexpected_index_column_names": ["pk_1"],
     }
     (validator, _) = _context_to_validator_and_expectation_sql(
-        context=data_context_with_connection_to_animal_names_db,
+        context=data_context_with_connection_to_metrics_db,
     )
 
     with pytest.warns(UserWarning) as config_warning:
@@ -1233,7 +1231,7 @@ def test_validator_result_format_config_from_validator(
 
 @pytest.mark.integration
 def test_validator_result_format_config_from_expectation(
-    data_context_with_connection_to_animal_names_db,
+    data_context_with_connection_to_metrics_db,
 ):
     runtime_configuration: dict = {
         "result_format": {
@@ -1242,7 +1240,7 @@ def test_validator_result_format_config_from_expectation(
         }
     }
     (validator, expectation) = _context_to_validator_and_expectation_sql(
-        context=data_context_with_connection_to_animal_names_db,
+        context=data_context_with_connection_to_metrics_db,
     )
     with pytest.warns(UserWarning) as config_warning:
         _: ExpectationValidationResult = expectation.validate(
