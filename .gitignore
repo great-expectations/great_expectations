@@ -108,6 +108,7 @@ celerybeat-schedule
 venv/
 ENV/
 ge_dev/
+gx_dev/
 
 # Spyder project settings
 .spyderproject
