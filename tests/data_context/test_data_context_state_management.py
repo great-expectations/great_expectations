@@ -621,6 +621,31 @@ def test_add_profiler_with_existing_profiler(
 
 
 @pytest.mark.unit
+def test_add_profiler_namespace_collision_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    profiler_rules: dict,
+):
+    context = in_memory_data_context
+
+    name = "my_rbp"
+    profiler = RuleBasedProfiler(
+        name=name,
+        config_version=1.0,
+        rules=profiler_rules,
+        data_context=context,
+    )
+
+    _ = context.add_profiler(profiler=profiler)
+    assert context.profiler_store.save_count == 1
+
+    with pytest.raises(gx_exceptions.ProfilerError) as e:
+        _ = context.add_profiler(profiler=profiler)
+
+    assert f"Profiler named {name} already exists" in str(e.value)
+    assert context.profiler_store.save_count == 1  # Should not have changed
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "profiler,profiler_name",
     [
@@ -827,15 +852,14 @@ def test_add_checkpoint_namespace_collision_failure(
     context = in_memory_data_context
     checkpoint_name = "my_checkpoint"
 
-    checkpoint = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
-
+    _ = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
     assert context.checkpoint_store.save_count == 1
 
     with pytest.raises(gx_exceptions.CheckpointError) as e:
         _ = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
 
     assert f"Checkpoint named {checkpoint_name} already exists" in str(e.value)
-    assert context.checkpoint_store.save_count == 1
+    assert context.checkpoint_store.save_count == 1  # Should not have changed
 
 
 @pytest.mark.unit
