@@ -746,6 +746,7 @@ schema_name = "{self.schema_name}"
 # A table that you would like to add initially as a Data Asset
 table_name = "{self.table_name}"'''
 
+
 class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
     def __init__(self, datasource_name: Optional[str]) -> None:
         # We are insisting on psycopg2 driver when adding a Redshift datasource
@@ -758,7 +759,6 @@ class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
                 "db": SupportedDatabaseBackends.ATHENA.value,
                 "api_version": "v3",
             },
-            driver="awsathena+rest",
         )
 
     def verify_libraries_installed(self) -> bool:
@@ -770,13 +770,21 @@ class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
         )
         return pyathena_success
 
+    def credentials_snippet(self) -> str:
+        return '''\
+            # The SQLAlchemy url/connection string for the Athena connection
+            # (reference: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena or https://github.com/laughingman7743/PyAthena/#sqlalchemy)"""
+
+            schema_name = ""  # or database name. It is optional
+            table_name = ""
+            region = ""
+            s3_path = "s3://YOUR_S3_BUCKET/path/to/"  # ignore partitioning
+            
+            connection_string = "awsathena+rest://@athena.{region}.amazonaws.com/{schema_name}?s3_staging_dir={s3_path}"
+            '''
+
     def _yaml_innards(self) -> str:
-        return (
-            super()._yaml_innards()
-            + """
-    query:
-      sslmode: prefer"""
-        )
+        return "\n  connection_string: {connection_string}"
 
 
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
