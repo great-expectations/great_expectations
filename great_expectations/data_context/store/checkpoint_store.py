@@ -186,7 +186,7 @@ class CheckpointStore(ConfigurationStore):
             checkpoint_ref = self.add(key=key, value=checkpoint.get_config())  # type: ignore[func-returns-value]
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.CheckpointError(
-                f"A Checkpoint named {checkpoint.name} already exists"
+                f"A Checkpoint named {checkpoint.name} already exists."
             )
 
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):

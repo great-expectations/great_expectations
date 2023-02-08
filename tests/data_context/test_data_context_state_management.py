@@ -31,8 +31,9 @@ class ExpectationsStoreSpy(ExpectationsStore):
         super().__init__()
 
     def set(self, key, value, **kwargs):
+        ret = super().set(key=key, value=value, **kwargs)
         self.save_count += 1
-        return super().set(key=key, value=value, **kwargs)
+        return ret
 
 
 class ProfilerStoreSpy(ProfilerStore):
@@ -44,8 +45,9 @@ class ProfilerStoreSpy(ProfilerStore):
         super().__init__(ProfilerStoreSpy.STORE_NAME)
 
     def set(self, key, value, **kwargs):
+        ret = super().set(key=key, value=value, **kwargs)
         self.save_count += 1
-        return super().set(key=key, value=value, **kwargs)
+        return ret
 
 
 class CheckpointStoreSpy(CheckpointStore):
@@ -57,16 +59,19 @@ class CheckpointStoreSpy(CheckpointStore):
         super().__init__(CheckpointStoreSpy.STORE_NAME)
 
     def add(self, key, value, **kwargs):
+        ret = super().add(key=key, value=value, **kwargs)
         self.save_count += 1
-        return super().add(key=key, value=value, **kwargs)
+        return ret
 
     def update(self, key, value, **kwargs):
+        ret = super().update(key=key, value=value, **kwargs)
         self.save_count += 1
-        return super().update(key=key, value=value, **kwargs)
+        return ret
 
     def add_or_update(self, key, value, **kwargs):
+        ret = super().add_or_update(key=key, value=value, **kwargs)
         self.save_count += 1
-        return super().add_or_update(key=key, value=value, **kwargs)
+        return ret
 
 
 class EphemeralDataContextSpy(EphemeralDataContext):
@@ -791,6 +796,24 @@ def test_add_checkpoint_with_existing_checkpoint(
     persisted_checkpoint = context.add_checkpoint(checkpoint=checkpoint)
 
     assert checkpoint == persisted_checkpoint
+    assert context.checkpoint_store.save_count == 1
+
+
+@pytest.mark.unit
+def test_add_checkpoint_namespace_collision_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+    checkpoint_name = "my_checkpoint"
+
+    checkpoint = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
+
+    assert context.checkpoint_store.save_count == 1
+
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
+        _ = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
+
+    assert f"Checkpoint named {checkpoint_name} already exists" in str(e.value)
     assert context.checkpoint_store.save_count == 1
 
 
