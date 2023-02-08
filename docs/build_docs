@@ -4,6 +4,7 @@
 # Currently used in our netlify pipeline.
 
 # Get latest version, check out and build API docs using the latest
+git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V
 GX_LATEST=$(git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V | tail -1)
 echo "Using latest version ${GX_LATEST} to build docs."
 git checkout $GX_LATEST
