@@ -31,9 +31,20 @@ class ExpectationsStoreSpy(ExpectationsStore):
         self.save_count = 0
         super().__init__()
 
-    def set(self, key, value, **kwargs):
+    def add(self, key, value, **kwargs):
+        ret = super().add(key=key, value=value, **kwargs)
         self.save_count += 1
-        return super().set(key=key, value=value, **kwargs)
+        return ret
+
+    def update(self, key, value, **kwargs):
+        ret = super().update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def add_or_update(self, key, value, **kwargs):
+        ret = super().add_or_update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
 
 
 class ProfilerStoreSpy(ProfilerStore):
@@ -44,9 +55,20 @@ class ProfilerStoreSpy(ProfilerStore):
         self.save_count = 0
         super().__init__(ProfilerStoreSpy.STORE_NAME)
 
-    def set(self, key, value, **kwargs):
+    def add(self, key, value, **kwargs):
+        ret = super().add(key=key, value=value, **kwargs)
         self.save_count += 1
-        return super().set(key=key, value=value, **kwargs)
+        return ret
+
+    def update(self, key, value, **kwargs):
+        ret = super().update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def add_or_update(self, key, value, **kwargs):
+        ret = super().add_or_update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
 
 
 class CheckpointStoreSpy(CheckpointStore):
@@ -57,9 +79,20 @@ class CheckpointStoreSpy(CheckpointStore):
         self.save_count = 0
         super().__init__(CheckpointStoreSpy.STORE_NAME)
 
-    def set(self, key, value, **kwargs):
+    def add(self, key, value, **kwargs):
+        ret = super().add(key=key, value=value, **kwargs)
         self.save_count += 1
-        return super().set(key=key, value=value, **kwargs)
+        return ret
+
+    def update(self, key, value, **kwargs):
+        ret = super().update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def add_or_update(self, key, value, **kwargs):
+        ret = super().add_or_update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
 
 
 class EphemeralDataContextSpy(EphemeralDataContext):
@@ -480,11 +513,7 @@ def test_add_expectation_suite_namespace_collision_failure(
     with pytest.raises(gx_exceptions.DataContextError) as e:
         context.add_expectation_suite(expectation_suite_name=suite_name)
 
-    assert f"expectation_suite with name {suite_name} already exists" in str(e.value)
-    assert (
-        "please delete or update it using `delete_expectation_suite` or `update_expectation_suite`"
-        in str(e.value)
-    )
+    assert f"An ExpectationSuite named {suite_name} already exists" in str(e.value)
     assert context.expectations_store.save_count == 1
 
 
@@ -551,10 +580,12 @@ def test_update_expectation_suite_failure(
     suite_name = "my_brand_new_suite"
     suite = ExpectationSuite(expectation_suite_name=suite_name)
 
-    with pytest.raises(gx_exceptions.DataContextError) as e:
+    with pytest.raises(gx_exceptions.ExpectationSuiteError) as e:
         _ = context.update_expectation_suite(suite)
 
-    assert f"expectation_suite with name {suite_name} does not exist." in str(e.value)
+    assert f"Could not find an existing ExpectationSuite named {suite_name}." in str(
+        e.value
+    )
 
 
 @pytest.mark.unit
@@ -715,6 +746,31 @@ def test_add_profiler_with_existing_profiler(
 
 
 @pytest.mark.unit
+def test_add_profiler_namespace_collision_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+    profiler_rules: dict,
+):
+    context = in_memory_data_context
+
+    name = "my_rbp"
+    profiler = RuleBasedProfiler(
+        name=name,
+        config_version=1.0,
+        rules=profiler_rules,
+        data_context=context,
+    )
+
+    _ = context.add_profiler(profiler=profiler)
+    assert context.profiler_store.save_count == 1
+
+    with pytest.raises(gx_exceptions.ProfilerError) as e:
+        _ = context.add_profiler(profiler=profiler)
+
+    assert f"Profiler named {name} already exists" in str(e.value)
+    assert context.profiler_store.save_count == 1  # Should not have changed
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "profiler,profiler_name",
     [
@@ -768,20 +824,23 @@ def test_update_profiler_success(
 
 
 @pytest.mark.unit
-def test_update_profiler_failure(in_memory_data_context: EphemeralDataContextSpy):
+def test_update_profiler_failure(
+    in_memory_data_context: EphemeralDataContextSpy, profiler_rules: dict
+):
     context = in_memory_data_context
 
     name = "my_rbp"
     profiler = RuleBasedProfiler(
         name=name,
         config_version=1.0,
+        rules=profiler_rules,
         data_context=context,
     )
 
     with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         _ = context.update_profiler(profiler)
 
-    assert f"Non-existent Profiler configuration named {name}" in str(e.value)
+    assert f"Could not find an existing Profiler named {name}" in str(e.value)
 
 
 @pytest.mark.unit
@@ -912,6 +971,23 @@ def test_add_checkpoint_with_existing_checkpoint(
 
 
 @pytest.mark.unit
+def test_add_checkpoint_namespace_collision_failure(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    context = in_memory_data_context
+    checkpoint_name = "my_checkpoint"
+
+    _ = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
+    assert context.checkpoint_store.save_count == 1
+
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
+        _ = context.add_checkpoint(name=checkpoint_name, class_name="Checkpoint")
+
+    assert f"Checkpoint named {checkpoint_name} already exists" in str(e.value)
+    assert context.checkpoint_store.save_count == 1  # Should not have changed
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "checkpoint, checkpoint_name",
     [
@@ -996,7 +1072,7 @@ def test_update_checkpoint_failure(in_memory_data_context: EphemeralDataContextS
     with pytest.raises(gx_exceptions.CheckpointNotFoundError) as e:
         context.update_checkpoint(checkpoint)
 
-    assert f"Could not find a Checkpoint named {name}" in str(e.value)
+    assert f"Could not find an existing Checkpoint named {name}" in str(e.value)
 
 
 @pytest.mark.unit

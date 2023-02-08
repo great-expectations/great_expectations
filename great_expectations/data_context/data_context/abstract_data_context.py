@@ -108,7 +108,6 @@ from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.experimental.datasources.interfaces import (
@@ -116,10 +115,6 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
-from great_expectations.rule_based_profiler.config.base import (
-    RuleBasedProfilerConfig,
-    ruleBasedProfilerConfigSchema,
-)
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
 )
@@ -165,6 +160,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
@@ -2797,16 +2793,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         expectation_suite_name = expectation_suite.expectation_suite_name
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
-        if (
-            self.expectations_store.has_key(key)  # noqa: W601
-            and not overwrite_existing
-        ):
-            raise gx_exceptions.DataContextError(
-                f"expectation_suite with name {expectation_suite_name} already exists."
-                " If you would like to overwrite this expectation_suite, please delete or"
-                " update it using `delete_expectation_suite` or `update_expectation_suite`, respectively."
-            )
-        self.expectations_store.set(key, expectation_suite, **kwargs)
+
+        persistence_fn: Callable
+        if overwrite_existing:
+            persistence_fn = self.expectations_store.add_or_update
+        else:
+            persistence_fn = self.expectations_store.add
+
+        persistence_fn(key=key, value=expectation_suite, **kwargs)
         return expectation_suite
 
     @public_api
@@ -2825,15 +2819,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         expectation_suite_name: str = expectation_suite.expectation_suite_name
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
-        if not self.expectations_store.has_key(key):  # noqa: W601
-            raise gx_exceptions.DataContextError(
-                f"expectation_suite with name {expectation_suite_name} does not exist."
-            )
-
-        return self._add_expectation_suite(
-            expectation_suite=expectation_suite,
-            overwrite_existing=True,
-        )
+        self.expectations_store.update(key=key, value=expectation_suite)
+        return expectation_suite
 
     @overload
     def add_or_update_expectation_suite(
@@ -3056,57 +3043,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted Profiler constructed by the input arguments.
         """
-        return self._add_profiler(
+        return RuleBasedProfiler.add_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
             name=name,
-            id=None,
             config_version=config_version,
             rules=rules,
             variables=variables,
             profiler=profiler,
         )
-
-    def _add_profiler(
-        self,
-        name: str | None,
-        id: str | None,
-        config_version: float | None,
-        rules: dict[str, dict] | None,
-        variables: dict | None,
-        profiler: RuleBasedProfiler | None,
-    ) -> RuleBasedProfiler:
-        if not (
-            (profiler is None)
-            ^ all(arg is None for arg in (name, config_version, rules))
-        ):
-            raise ValueError(
-                "Must either pass in an existing profiler or individual constructor arguments (but not both)"
-            )
-
-        if profiler:
-            config = profiler.config
-        else:
-            config_data = {
-                "name": name,
-                "id": id,
-                "config_version": config_version,
-                "rules": rules,
-                "variables": variables,
-            }
-
-            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-            validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
-            profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
-            profiler_config.pop("class_name")
-            profiler_config.pop("module_name")
-
-            config = RuleBasedProfilerConfig(**profiler_config)
-
-        profiler = RuleBasedProfiler.add_profiler(
-            config=config,
-            data_context=self,
-            profiler_store=self.profiler_store,
-        )
-        return profiler
 
     @public_api
     @new_argument(
@@ -3188,9 +3133,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             ProfilerNotFoundError: A profiler with the given name/id does not already exist.
         """
         return RuleBasedProfiler.update_profiler(
-            profiler=profiler,
             profiler_store=self.profiler_store,
             data_context=self,
+            profiler=profiler,
         )
 
     @overload
@@ -3247,7 +3192,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new Profiler or an updated one (depending on whether or not it existed before this method call).
         """
-        return self._add_profiler(
+        return RuleBasedProfiler.add_or_update_profiler(
+            data_context=self,
+            profiler_store=self.profiler_store,
             name=name,
             id=id,
             config_version=config_version,
