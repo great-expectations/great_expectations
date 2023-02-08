@@ -33,14 +33,12 @@ class _FilesystemDataAsset(DataAsset):
     # Pandas specific class attrs
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "name",
-        "base_directory",
         "regex",
         "order_by",
         "type",
     }
 
     # Filesystem specific attributes
-    base_directory: pathlib.Path
     regex: Pattern
 
     # Internal attributes
@@ -96,20 +94,22 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if not self.base_directory.exists():
-            raise TestConnectionError(
-                f"Path: {self.base_directory.resolve()} does not exist."
-            )
+        from great_expectations.experimental.datasources import (
+            PandasDatasource,
+            SparkDatasource,
+        )
+
+        assert isinstance(self.datasource, (PandasDatasource, SparkDatasource))
 
         success = False
-        for filepath in self.base_directory.iterdir():
+        for filepath in self.datasource.base_directory.iterdir():
             if self.regex.match(filepath.name):
                 # if one file in the path matches the regex, we consider this asset valid
                 success = True
                 break
         if not success:
             raise TestConnectionError(
-                f"No file at path: {self.base_directory} matched the regex: {self.regex.pattern}"
+                f"No file at path: {self.datasource.base_directory} matched the regex: {self.regex.pattern}"
             )
 
     def _fully_specified_batch_requests_with_path(
@@ -126,11 +126,17 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This list will be empty if no files exist on disk that correspond to the input
             batch request.
         """
-        batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
-
-        all_files: List[pathlib.Path] = list(
-            pathlib.Path(self.base_directory).iterdir()
+        from great_expectations.experimental.datasources import (
+            PandasDatasource,
+            SparkDatasource,
         )
+
+        assert isinstance(self.datasource, (PandasDatasource, SparkDatasource))
+
+        base_directory: pathlib.Path = self.datasource.base_directory
+        all_files: List[pathlib.Path] = list(pathlib.Path(base_directory).iterdir())
+
+        batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
 
         file_name: pathlib.Path
         for file_name in all_files:
@@ -158,10 +164,10 @@ to use as its "include" directive for File-Path style DataAsset processing."""
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),
-                            self.base_directory / file_name,
+                            base_directory / file_name,
                         )
                     )
-                    logger.debug(f"Matching path: {self.base_directory / file_name}")
+                    logger.debug(f"Matching path: {base_directory / file_name}")
         if not batch_requests_with_path:
             logger.warning(
                 f"Batch request {batch_request} corresponds to no data files."

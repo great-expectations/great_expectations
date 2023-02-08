@@ -6,12 +6,10 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, TypeVar,
 import pydantic
 from pydantic import dataclasses as pydantic_dc
 
-from great_expectations.experimental.datasources.interfaces import (
-    DataAsset,  # noqa: TCH001
-)
-
 if TYPE_CHECKING:
     import sqlalchemy
+
+    from great_expectations.experimental.datasources.interfaces import DataAsset
 
 from typing_extensions import Literal
 

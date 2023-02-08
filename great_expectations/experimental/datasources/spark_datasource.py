@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 import re
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 from typing_extensions import Literal
 
-from great_expectations.alias_types import PathStr  # noqa: TCH001
 from great_expectations.experimental.datasources.filesystem_data_asset import (
     _FilesystemDataAsset,
 )
@@ -48,6 +48,7 @@ class SparkDatasource(Datasource):
     # instance attributes
     type: Literal["spark"] = "spark"
     name: str
+    base_directory: pathlib.Path
     assets: Dict[str, CSVSparkAsset] = {}
 
     @property
@@ -76,7 +77,6 @@ class SparkDatasource(Datasource):
     def add_csv_asset(
         self,
         name: str,
-        base_directory: PathStr,
         regex: Union[str, re.Pattern],
         header: bool = False,
         infer_schema: bool = False,
@@ -86,7 +86,6 @@ class SparkDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
@@ -94,7 +93,6 @@ class SparkDatasource(Datasource):
         """
         asset = CSVSparkAsset(
             name=name,
-            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
             regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
             header=header,
             inferSchema=infer_schema,
