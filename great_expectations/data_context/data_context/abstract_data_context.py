@@ -870,13 +870,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         datasource: LegacyDatasource | BaseDatasource,
         save_changes: bool | None = None,
-        **kwargs,
     ) -> Datasource:
         name = datasource.name
         config = datasource.config
         # `instantiate_class_from_config` requires `class_name`
         config["class_name"] = datasource.__class__.__name__
-        config.update(kwargs)
 
         datasource_config_dict: dict = datasourceConfigSchema.dump(config)
         datasource_config = DatasourceConfig(**datasource_config_dict)
@@ -942,32 +940,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             The Datasource added or updated by the input `kwargs`.
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
-        existing_datasource: LegacyDatasource | BaseDatasource | XDatasource | None = (
-            None
-        )
-        try:
-            existing_datasource = self.get_datasource(name)
-        except ValueError:
-            logger.info(
-                f"Could not find an existing datasource named '{name}'; creating a new one."
-            )
-
-        if existing_datasource and isinstance(
-            existing_datasource, (LegacyDatasource, BaseDatasource)
-        ):
-            if datasource:
-                kwargs.update(datasource.config)
-            result_datasource = self._update_datasource(
-                datasource=existing_datasource, **kwargs
-            )
-        else:
-            result_datasource = self.add_datasource(
-                name=name, datasource=datasource, **kwargs
-            )
-
-        # Invariant based on `initialize=True` in both add/update branches
-        assert result_datasource is not None
-        return result_datasource
+        return self.add_datasource(name=name, datasource=datasource, **kwargs)
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""

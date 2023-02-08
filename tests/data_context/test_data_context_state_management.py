@@ -257,28 +257,10 @@ def test_add_datasource_conflicting_args_failure(
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize(
-    "kwargs,expected_id",
-    [
-        pytest.param(
-            {},
-            None,
-            id="no kwargs",
-        ),
-        pytest.param(
-            {
-                "id": "d53c2384-f973-4a0c-9c85-af1d67c06f58",
-            },
-            "d53c2384-f973-4a0c-9c85-af1d67c06f58",
-            id="kwargs",
-        ),
-    ],
-)
-def test_add_or_update_datasource_updates_successfully(
+def test_add_or_update_datasource_updates_with_individual_args_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
     datasource_name: str,
-    kwargs: dict,
-    expected_id: str | None,
+    datasource_config: DatasourceConfig,
 ):
     context = in_memory_data_context
 
@@ -289,9 +271,15 @@ def test_add_or_update_datasource_updates_successfully(
         datasource_name in context.datasources
     ), f"Downstream logic in the test relies on {datasource_name} being a datasource; please check your fixtures."
 
-    datasource = context.add_or_update_datasource(name=datasource_name, **kwargs)
+    config_dict = datasource_config.to_dict()
+    config_dict["name"] = datasource_name
+
+    id = "d53c2384-f973-4a0c-9c85-af1d67c06f58"
+    config_dict["id"] = id
+
+    datasource = context.add_or_update_datasource(**config_dict)
     # Let's `id` as an example attr to change so we don't need to assert against the whole config
-    assert datasource.config["id"] == expected_id
+    assert datasource.config["id"] == id
 
     num_datasource_after = len(context.datasources)
     num_datasource_configs_after = len(context.config.datasources)
@@ -299,6 +287,48 @@ def test_add_or_update_datasource_updates_successfully(
     assert num_datasource_after == num_datasource_before
     assert num_datasource_configs_after == num_datasource_configs_before
     assert context.save_count == 1
+
+
+@pytest.mark.unit
+def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
+    in_memory_data_context: EphemeralDataContextSpy,
+    datasource_name: str,
+    datasource_config: DatasourceConfig,
+):
+    context = in_memory_data_context
+
+    num_datasource_before = len(context.datasources)
+    num_datasource_configs_before = len(context.config.datasources)
+
+    assert (
+        datasource_name in context.datasources
+    ), f"Downstream logic in the test relies on {datasource_name} being a datasource; please check your fixtures."
+
+    config_dict = datasource_config.to_dict()
+    config_dict["name"] = datasource_name
+    for attr in ("class_name", "module_name"):
+        config_dict.pop(attr)
+
+    datasource = Datasource(**config_dict)
+    persisted_datasource = context.add_or_update_datasource(datasource=datasource)
+
+    num_datasource_after = len(context.datasources)
+    num_datasource_configs_after = len(context.config.datasources)
+
+    assert num_datasource_after == num_datasource_before
+    assert num_datasource_configs_after == num_datasource_configs_before
+    assert context.save_count == 1
+
+    expected_config = datasource.config
+    actual_config = persisted_datasource.config
+
+    # Name gets injected into data connector as part of serialization hook
+    # Removing for purposes of test assertion
+    data_connectors = actual_config["data_connectors"]
+    data_connector_name = tuple(data_connectors.keys())[0]
+    data_connectors[data_connector_name].pop("name")
+
+    assert actual_config == expected_config
 
 
 @pytest.mark.unit
