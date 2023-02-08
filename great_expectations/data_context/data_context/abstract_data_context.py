@@ -56,9 +56,6 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,  # noqa: TCH001
-)
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -73,19 +70,7 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     _YamlConfigValidator,
 )
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariables,  # noqa: TCH001
-)
 from great_expectations.data_context.store import Store, TupleStoreBackend
-from great_expectations.data_context.store.expectations_store import (
-    ExpectationsStore,  # noqa: TCH001
-)
-from great_expectations.data_context.store.profiler_store import (
-    ProfilerStore,  # noqa: TCH001
-)
-from great_expectations.data_context.store.validations_store import (
-    ValidationsStore,  # noqa: TCH001
-)
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
@@ -162,10 +147,21 @@ except ImportError:
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
+    )
+    from great_expectations.data_context.data_context_variables import (
+        DataContextVariables,
+    )
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
     )
+    from great_expectations.data_context.store.expectations_store import (
+        ExpectationsStore,
+    )
+    from great_expectations.data_context.store.profiler_store import ProfilerStore
+    from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
@@ -791,6 +787,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             Datasource instance added.
         """
+        self._validate_add_datasource_args(name=name, datasource=datasource)
         return self._add_datasource(
             name=name,
             initialize=initialize,
@@ -798,6 +795,15 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource=datasource,
             **kwargs,
         )
+
+    @staticmethod
+    def _validate_add_datasource_args(
+        name: str | None, datasource: LegacyDatasource | BaseDatasource | None
+    ) -> None:
+        if not ((datasource is None) ^ (name is None)):
+            raise ValueError(
+                "Must either pass in an existing datasource or individual constructor arguments (but not both)"
+            )
 
     def _add_datasource(
         self,
@@ -935,6 +941,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The Datasource added or updated by the input `kwargs`.
         """
+        self._validate_add_datasource_args(name=name, datasource=datasource)
         existing_datasource: LegacyDatasource | BaseDatasource | XDatasource | None = (
             None
         )
@@ -948,7 +955,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         if existing_datasource and isinstance(
             existing_datasource, (LegacyDatasource, BaseDatasource)
         ):
-            result_datasource = self._update_datasource(datasource=datasource, **kwargs)
+            if datasource:
+                kwargs.update(datasource.config)
+            result_datasource = self._update_datasource(
+                datasource=existing_datasource, **kwargs
+            )
         else:
             result_datasource = self.add_datasource(
                 name=name, datasource=datasource, **kwargs
@@ -956,8 +967,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # Invariant based on `initialize=True` in both add/update branches
         assert result_datasource is not None
-
-        self._save_project_config()
         return result_datasource
 
     def get_site_names(self) -> List[str]:
@@ -4352,6 +4361,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 raise e
 
         self.config.datasources[config.name] = config  # type: ignore[index,assignment]
+        self._save_project_config()
 
         return datasource
 

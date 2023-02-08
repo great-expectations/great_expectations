@@ -22,12 +22,6 @@ import requests
 from great_expectations import __version__ as ge_version
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.types.base import (
-    CLISuiteInteractiveFlagCombinations,  # noqa: TCH001
-)
-from great_expectations.core.usage_statistics.events import (
-    UsageStatsEvents,  # noqa: TCH001
-)
 from great_expectations.core.usage_statistics.execution_environment import (
     GXExecutionEnvironment,
     PackageInfo,
@@ -42,10 +36,19 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.core.usage_statistics.anonymizers.types.base import (
+        CLISuiteInteractiveFlagCombinations,
+    )
+    from great_expectations.core.usage_statistics.events import (
+        UsageStatsEvents,
+    )
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource import LegacyDatasource
+    from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.rule_based_profiler.rule_based_profiler import (
         RuleBasedProfiler,
     )
+
 
 STOP_SIGNAL = object()
 
@@ -449,7 +452,10 @@ def edit_expectation_suite_usage_statistics(
 
 
 def add_datasource_usage_statistics(
-    data_context: AbstractDataContext, name: str, **kwargs
+    data_context: AbstractDataContext,
+    name: str | None = None,
+    datasource: LegacyDatasource | BaseDatasource | None = None,
+    **kwargs,
 ) -> dict:
     if not data_context._usage_statistics_handler:
         return {}
@@ -470,6 +476,10 @@ def add_datasource_usage_statistics(
     payload = {}
     # noinspection PyBroadException
     try:
+        assert (
+            name or datasource
+        ), "Guaranteed to have either one of these values due to prior validation"
+        name = name or datasource.name
         payload = datasource_anonymizer._anonymize_datasource_info(name, kwargs)
     except Exception as e:
         logger.debug(
