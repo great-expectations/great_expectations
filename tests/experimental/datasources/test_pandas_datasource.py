@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Type
 
+import pandas as pd
 import pydantic
 import pytest
 from pytest import MonkeyPatch, param
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__file__)
+PANDAS_VERSION: str = pd.__version__
 
 
 @pytest.fixture
@@ -119,7 +121,13 @@ class TestDynamicPandasAssets:
                 "read_table",
                 marks=pytest.mark.xfail(reason="conflict with 'table' type name"),
             ),
-            param("read_xml"),
+            param(
+                "read_xml",
+                marks=pytest.mark.skipif(
+                    PANDAS_VERSION.startswith("1.1"),
+                    reason=f"read_xml does not exist on {PANDAS_VERSION} ",
+                ),
+            ),
         ],
     )
     def test_data_asset_defined_for_io_read_method(self, method_name: str):
