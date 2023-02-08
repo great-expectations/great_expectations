@@ -13,6 +13,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Sequence,
     Tuple,
     Type,
     Union,
@@ -22,6 +23,7 @@ from marshmallow import Schema, ValidationError, fields, pre_dump
 
 import great_expectations as gx
 from great_expectations import __version__ as ge_version
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,
@@ -68,7 +70,9 @@ logger = logging.getLogger(__name__)
 @public_api
 @deprecated_argument(argument_name="data_asset_type", version="0.14.0")
 @new_argument(
-    argument_name="ge_cloud_id", version="0.13.33", message="Used in cloud deployments."
+    argument_name="ge_cloud_id",
+    version="0.13.33",
+    message="Used in GX Cloud deployments.",
 )
 class ExpectationSuite(SerializableDictDot):
     """Suite of expectations plus create, read, update, and delete functionality.
@@ -93,7 +97,7 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_suite_name: str,
         data_context: Optional[AbstractDataContext] = None,
-        expectations: Optional[List[Union[dict, ExpectationConfiguration]]] = None,
+        expectations: Optional[Sequence[Union[dict, ExpectationConfiguration]]] = None,
         evaluation_parameters: Optional[dict] = None,
         data_asset_type: Optional[str] = None,
         execution_engine_type: Optional[Type[ExecutionEngine]] = None,
@@ -252,7 +256,13 @@ class ExpectationSuite(SerializableDictDot):
 
         return result
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this ExpectationSuite.
+
+        Returns:
+            A JSON-serializable dict representation of this ExpectationSuite.
+        """
         myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
@@ -739,9 +749,11 @@ class ExpectationSuite(SerializableDictDot):
             overwrite_existing=overwrite_existing,
         )
 
+    @public_api
     def show_expectations_by_domain_type(self) -> None:
-        """
-        Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
+        """Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
+
+        The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
         """
         expectation_configurations_by_domain: Dict[
             str, List[ExpectationConfiguration]
@@ -762,8 +774,9 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_configurations: Optional[List[ExpectationConfiguration]] = None,
     ) -> None:
-        """
-        Displays "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
+        """Displays "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
+
+        The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
         """
         if expectation_configurations is None:
             expectation_configurations = (

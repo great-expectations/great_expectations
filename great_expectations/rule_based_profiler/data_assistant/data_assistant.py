@@ -2,17 +2,22 @@ from abc import ABCMeta, abstractmethod
 from inspect import isabstract
 from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
 
-from great_expectations.core.batch import Batch, BatchRequestBase
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.id_dict import deep_convert_properties_iterable_to_id_dict
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.usage_statistics.usage_statistics import (
-    UsageStatisticsHandler,
+    UsageStatisticsHandler,  # noqa: TCH001
 )
-from great_expectations.experimental.datasources.interfaces import Batch as XBatch
-from great_expectations.rule_based_profiler import RuleBasedProfilerResult
+from great_expectations.experimental.datasources.interfaces import (
+    Batch as XBatch,  # noqa: TCH001
+)
+from great_expectations.rule_based_profiler import (
+    RuleBasedProfilerResult,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
@@ -28,8 +33,8 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     DEFAULT_RECONCILATION_DIRECTIVES,
 )
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (
-    RuntimeEnvironmentDomainTypeDirectives,
-    RuntimeEnvironmentVariablesDirectives,
+    RuntimeEnvironmentDomainTypeDirectives,  # noqa: TCH001
+    RuntimeEnvironmentVariablesDirectives,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.helpers.util import sanitize_parameter_name
 from great_expectations.rule_based_profiler.parameter_builder import (
@@ -57,7 +62,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import (
     RuleBasedProfiler,
 )
 from great_expectations.util import camel_to_snake, measure_execution_time
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 # noinspection PyMethodParameters
 
@@ -517,6 +522,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 rule.parameter_builders or []
             )
 
+    @public_api
     def run(
         self,
         variables: Optional[Dict[str, Any]] = None,
@@ -528,17 +534,27 @@ class DataAssistant(metaclass=MetaDataAssistant):
             List[RuntimeEnvironmentDomainTypeDirectives]
         ] = None,
     ) -> DataAssistantResult:
-        """
-        Run the DataAssistant as it is currently configured.
+        """Run the DataAssistant as it is currently configured.
+
+        Example Usage::
+
+            data_assistant = VolumeDataAssistant(
+                name="my_volume_data_assistant",
+                validator=validator,
+            )
+            result: DataAssistantResult = data_assistant.run(
+                variables=None,
+                rules=None,
+            )
 
         Args:
-            variables: attribute name/value pairs (overrides), commonly-used in Builder objects
-            rules: name/(configuration-dictionary) (overrides)
-            variables_directives_list: additional/override runtime variables directives (modify "BaseRuleBasedProfiler")
-            domain_type_directives_list: additional/override runtime domain directives (modify "BaseRuleBasedProfiler")
+            variables: Attribute name/value pairs (overrides); commonly-used in Builder objects.
+            rules: Name/configuration dictionary (overrides)
+            variables_directives_list: Additional/override runtime variables directives (modify `BaseRuleBasedProfiler`).
+            domain_type_directives_list: Additional/override runtime domain directives (modify `BaseRuleBasedProfiler`).
 
         Returns:
-            DataAssistantResult: The result object for the DataAssistant
+            An instance of `DataAssistantResult`.
         """
         usage_statistics_handler: Optional[UsageStatisticsHandler]
         if self._data_context is None:

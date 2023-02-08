@@ -15,8 +15,8 @@ from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector.asset import Asset
-from great_expectations.datasource.data_connector.sorter import Sorter
+from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
+from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.datasource import DataConnector
@@ -122,8 +122,10 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
+
     if processed_data_reference is None:
         return None
+
     data_asset_name_from_batch_identifiers: str = processed_data_reference[0]
     batch_identifiers: IDDict = processed_data_reference[1]
     if data_asset_name is None:
@@ -165,6 +167,7 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     data_asset_name: str = batch_identifiers.pop(
         "data_asset_name", DEFAULT_DATA_ASSET_NAME
     )
+
     return data_asset_name, batch_identifiers
 
 
@@ -179,6 +182,7 @@ def _determine_batch_identifiers_using_named_groups(
             logger.warning(
                 f"The named group '{key}' must explicitly be stated in group_names to be parsed"
             )
+
     return batch_identifiers
 
 
@@ -298,7 +302,42 @@ def _invert_regex_to_data_reference_template(
 
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)  # type: ignore[no-redef]
+
     return data_reference_template
+
+
+def sanitize_prefix(text: str) -> str:
+    """
+    Takes in a given user-prefix and cleans it to work with file-system traversal methods
+    (i.e. add '/' to the end of a string meant to represent a directory)
+    """
+    _, ext = os.path.splitext(text)
+    if ext:
+        # Provided prefix is a filename so no adjustment is necessary
+        return text
+
+    # Provided prefix is a directory (so we want to ensure we append it with '/')
+    return os.path.join(text, "")
+
+
+def sanitize_prefix_for_s3(text: str) -> str:
+    """
+    Takes in a given user-prefix and cleans it to work with file-system traversal methods
+    (i.e. add '/' to the end of a string meant to represent a directory)
+
+    Customized for S3 paths, ignoring the path separator used by the host OS
+    """
+    text = text.strip()
+    if not text:
+        return text
+
+    path_parts = text.split("/")
+    if not path_parts:  # Empty prefix
+        return text
+    elif "." in path_parts[-1]:  # File, not folder
+        return text
+    else:  # Folder, should have trailing /
+        return f"{text.rstrip('/')}/"
 
 
 def normalize_directory_path(
@@ -307,8 +346,8 @@ def normalize_directory_path(
     # If directory is a relative path, interpret it as relative to the root directory.
     if Path(dir_path).is_absolute() or root_directory_path is None:
         return dir_path
-    else:
-        return str(Path(root_directory_path).joinpath(dir_path))
+
+    return str(Path(root_directory_path).joinpath(dir_path))
 
 
 def get_filesystem_one_level_directory_glob_path_list(
@@ -509,6 +548,7 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
             sorter_name: str = sorter_config["name"]
             new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
             sorter_dict[sorter_name] = new_sorter
+
     return sorter_dict
 
 
@@ -545,4 +585,5 @@ def _build_asset_from_config(
             package_name=None,
             class_name=config["class_name"],
         )
+
     return asset

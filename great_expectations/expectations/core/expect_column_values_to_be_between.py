@@ -1,9 +1,11 @@
 from typing import TYPE_CHECKING, List, Optional
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -235,20 +237,32 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         "strict_max",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_between` it is required that:
+
+        - One of `min_value` or `max_value` is not `None`.
+
+        - `min_value` and `max_value` are one of the following types: `datetime`, `float`, `int`, or `dict`
+
+        - If `min_value` or `max_value` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
+          dictionary keys must be `$PARAMETER`.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
 
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         # Setting up a configuration
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
@@ -259,9 +273,12 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
             min_val = configuration.kwargs["min_value"]
         if "max_value" in configuration.kwargs:
             max_val = configuration.kwargs["max_value"]
-        assert (
-            min_val is not None or max_val is not None
-        ), "min_value and max_value cannot both be None"
+        try:
+            assert (
+                min_val is not None or max_val is not None
+            ), "min_value and max_value cannot both be None"
+        except AssertionError as e:
+            raise gx_exceptions.InvalidExpectationConfigurationError(str(e))
 
         self.validate_metric_value_between_configuration(configuration=configuration)
 

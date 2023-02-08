@@ -2,7 +2,6 @@ from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.metric_function_types import MetricFunctionTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -18,11 +17,7 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
 
     metric_name = "column.distinct_dates"
 
-    @metric_value(
-        engine=SqlAlchemyExecutionEngine,
-        metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
-        domain_type=MetricDomainTypes.COLUMN,
-    )
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -130,7 +125,6 @@ class ExpectColumnToHaveNoDaysMissing(ColumnExpectation):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        import math
         from datetime import datetime, timedelta
 
         # returns the distinct dates of the column

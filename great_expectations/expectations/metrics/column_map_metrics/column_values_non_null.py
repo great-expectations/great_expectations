@@ -1,6 +1,6 @@
 from typing import Optional
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -31,7 +31,7 @@ class ColumnValuesNonNull(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, **kwargs):
-        return column != None
+        return column != None  # noqa: E711
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):

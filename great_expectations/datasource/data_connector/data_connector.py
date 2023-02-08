@@ -1,42 +1,132 @@
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchMarkers,
-    BatchRequestBase,
+    BatchDefinition,  # noqa: TCH001
+    BatchMarkers,  # noqa: TCH001
+    BatchRequestBase,  # noqa: TCH001
 )
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
 
+class DataConnectorStorageDataReferenceResolver:
+    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
+        "InferredAssetS3DataConnector": "S3",
+        "ConfiguredAssetS3DataConnector": "S3",
+        "InferredAssetGCSDataConnector": "GCS",
+        "ConfiguredAssetGCSDataConnector": "GCS",
+        "InferredAssetAzureDataConnector": "ABS",
+        "ConfiguredAssetAzureDataConnector": "ABS",
+        "InferredAssetDBFSDataConnector": "DBFS",
+        "ConfiguredAssetDBFSDataConnector": "DBFS",
+    }
+    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
+        Tuple[str, str], Callable
+    ] = {
+        (
+            "S3",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "S3",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "GCS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "GCS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "ABS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "ABS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "DBFS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
+            **template_arguments
+        ),
+        (
+            "DBFS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
+            **template_arguments
+        ),
+    }
+
+    @staticmethod
+    def resolve_data_reference(
+        data_connector_name: str,
+        execution_engine_name: str,
+        template_arguments: dict,
+    ):
+        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
+        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
+            data_connector_name
+        ]
+        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
+            (storage_name, execution_engine_name)
+        ](
+            template_arguments
+        )
+
+
 # noinspection SpellCheckingInspection
+@public_api
 class DataConnector:
-    """
-    DataConnectors produce identifying information, called "batch_spec" that ExecutionEngines
+    """The base class for all Data Connectors.
+
+    Data Connectors produce identifying information, called Batch Specs, that Execution Engines
     can use to get individual batches of data. They add flexibility in how to obtain data
     such as with time-based partitioning, downsampling, or other techniques appropriate
     for the Datasource.
 
     For example, a DataConnector could produce a SQL query that logically represents "rows in
-    the Events table with a timestamp on February 7, 2012," which a SqlAlchemyDatasource
-    could use to materialize a SqlAlchemyDataset corresponding to that batch of data and
+    the Events table with a timestamp on February 7, 2012," which an SqlAlchemy Datasource
+    could use to materialize a SqlAlchemy Dataset corresponding to that Batch of data and
     ready for validation.
 
-    A batch is a sample from a data asset, sliced according to a particular rule. For
-    example, an hourly slide of the Events table or “most recent `users` records.”
+    A Batch is a sample from a data asset, sliced according to a particular rule. For example,
+    an hourly slide of the Events table or “most recent Users records.” It is the primary
+    unit of validation in the Great Expectations Data Context. Batches include metadata that
+    identifies how they were constructed--the same Batch Spec assembled by the data connector.
+    While not every Datasource will enable re-fetching a specific batch of data, GX can store
+    snapshots of batches or store metadata from an external data version control system.
 
-    A Batch is the primary unit of validation in the Great Expectations DataContext.
-    Batches include metadata that identifies how they were constructed--the same “batch_spec”
-    assembled by the data connector, While not every Datasource will enable re-fetching a
-    specific batch of data, GX can store snapshots of batches or store metadata from an
-    external data version control system.
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
@@ -47,15 +137,6 @@ class DataConnector:
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        Base class for DataConnectors
-
-        Args:
-            name (str): required name for DataConnector
-            datasource_name (str): required name for datasource
-            execution_engine (ExecutionEngine): reference to ExecutionEngine
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
         if execution_engine is None:
             raise gx_exceptions.DataConnectorError(
                 "A non-existent/unknown ExecutionEngine instance was referenced."
@@ -181,6 +262,7 @@ class DataConnector:
     def get_unmatched_data_references(self) -> List[Any]:
         raise NotImplementedError
 
+    @public_api
     def get_available_data_asset_names(self) -> List[str]:
         """Return the list of asset names known by this data connector.
 
@@ -219,6 +301,14 @@ class DataConnector:
         self, batch_definition: BatchDefinition
     ) -> dict:
         raise NotImplementedError
+
+    def resolve_data_reference(self, template_arguments: dict):
+        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
+        return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            execution_engine_name=self._execution_engine.__class__.__name__,
+            template_arguments=template_arguments,
+        )
 
     def self_check(self, pretty_print=True, max_examples=3):
         """

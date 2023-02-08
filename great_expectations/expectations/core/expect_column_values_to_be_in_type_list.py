@@ -7,9 +7,10 @@ import pandas as pd
 from packaging import version
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -39,7 +40,9 @@ from great_expectations.render.util import (
 )
 from great_expectations.util import get_pyathena_potential_type
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.validator import (
+    ValidationDependencies,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
@@ -133,9 +136,32 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "type_list",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_in_type_list` it is required that:
+
+        - `type_list` has been provided.
+
+        - `type_list` is one of the following types: `list`, `dict`, or `None`
+
+        - If `type_list` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
+          dictionary keys must be `$PARAMETER`.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:

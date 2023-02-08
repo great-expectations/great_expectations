@@ -9,10 +9,21 @@ import re
 import uuid
 import warnings
 from numbers import Number
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import numpy as np
 import scipy.stats as stats
+from typing_extensions import Protocol, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
@@ -27,7 +38,9 @@ from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     SemanticDomainTypes,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import (
+    MetricDomainTypes,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
     NumericRangeEstimationResult,
@@ -48,8 +61,10 @@ from great_expectations.util import (
     convert_ndarray_to_datetime_dtype_best_effort,
     numpy_quantile,
 )
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -1080,3 +1095,17 @@ def sanitize_parameter_name(
         name = f"{name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{suffix}"
 
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
+
+
+class _NumericIterableWithDtype(Iterable, Protocol):
+    @property
+    def dtype(self) -> Any:
+        ...
+
+
+def _is_iterable_of_numeric_dtypes(
+    obj: Any,
+) -> TypeGuard[_NumericIterableWithDtype]:
+    if hasattr(obj, "dtype") and np.issubdtype(obj.dtype, np.number):
+        return True
+    return False

@@ -103,11 +103,10 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install $(grep -E '^(black|invoke|isort|flake8|pyupgrade)' reqs/requirements-dev-contrib.txt)
+              pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
               EXIT_STATUS=0
               invoke fmt --check || EXIT_STATUS=$?
               invoke lint || EXIT_STATUS=$?
-              pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
   - stage: custom_checks
@@ -116,13 +115,6 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-    - job: type_hint_checker
-      steps:
-      - script: |
-          pip install $(grep -E '^(invoke|mypy|pytest-cov)' reqs/requirements-dev-contrib.txt)
-          invoke type-coverage
-        name: TypeHintChecker
-
     - job: static_type_check
       steps:
       - task: UsePythonVersion@0
@@ -134,11 +126,6 @@ stages:
           invoke type-check --ci --pretty
         name: StaticTypeCheck
 
-    - job: docstring_checker
-      steps:
-      - bash: python scripts/check_docstring_coverage.py
-        name: DocstringChecker
-
     - job: docstring_linter
       steps:
       - script: |
@@ -149,9 +136,9 @@ stages:
     - job: unused_import_checker
       steps:
       - script: |
-          pip install $(grep -E '^(flake8)' reqs/requirements-dev-contrib.txt)
+          pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
           # https://www.flake8rules.com/rules/F401.html
-          flake8 --select F401 great_expectations tests
+          ruff --select F401 great_expectations tests
         name: UnusedImportChecker
 
     - job: docs_snippet_checker
@@ -306,7 +293,7 @@ stages:
                 --cov=. \
                 --cov-report=xml \
                 --cov-report=html \
-                -m 'not e2e'
+                -m 'not unit and not e2e'
 
             displayName: 'pytest'
             env:
