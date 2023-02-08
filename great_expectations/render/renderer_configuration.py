@@ -33,8 +33,8 @@ from pydantic.generics import GenericModel
 from typing_extensions import TypeAlias, TypedDict
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.render.exceptions import RendererConfigurationError
 

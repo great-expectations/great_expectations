@@ -15,8 +15,10 @@ from great_expectations.core.batch import (
     batch_request_contains_batch_data,
 )
 from great_expectations.core.config_peer import ConfigPeer
-from great_expectations.core.domain import Domain
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,  # noqa: TCH001
+)
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
@@ -46,7 +48,7 @@ from great_expectations.rule_based_profiler.config.base import (
     parameterBuilderConfigSchema,
 )
 from great_expectations.rule_based_profiler.domain_builder.domain_builder import (
-    DomainBuilder,
+    DomainBuilder,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
@@ -59,8 +61,8 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
     reconcile_rule_variables,
 )
 from great_expectations.rule_based_profiler.helpers.runtime_environment import (
-    RuntimeEnvironmentDomainTypeDirectives,
-    RuntimeEnvironmentVariablesDirectives,
+    RuntimeEnvironmentDomainTypeDirectives,  # noqa: TCH001
+    RuntimeEnvironmentVariablesDirectives,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,

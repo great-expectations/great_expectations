@@ -3,12 +3,15 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Pattern, Set, Tuple
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Pattern, Set, Tuple
 
 import pydantic
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec
+from great_expectations.experimental.datasources.data_asset.data_connector.regex_parser import (
+    RegExParser,
+)
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
@@ -44,6 +47,11 @@ class _FilesystemDataAsset(DataAsset):
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
+    _regex_parser: RegExParser = pydantic.PrivateAttr()
+
+    _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
+    _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
+    _all_group_names: List[str] = pydantic.PrivateAttr()
 
     class Config:
         """
@@ -55,13 +63,28 @@ class _FilesystemDataAsset(DataAsset):
 
         extra = pydantic.Extra.allow
 
+    def __init__(self, **data):
+        super().__init__(**data)
+        self._regex_parser = RegExParser(
+            regex_pattern=self.regex,
+            unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
+        )
+
+        self._all_group_name_to_group_index_mapping = (
+            self._regex_parser.get_all_group_name_to_group_index_mapping()
+        )
+        self._all_group_index_to_group_name_mapping = (
+            self._regex_parser.get_all_group_index_to_group_name_mapping()
+        )
+        self._all_group_names = self._regex_parser.get_all_group_names()
+
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "reader_method" for File-Path style DataAsset extensions as temporary \
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> Set[str] | None:
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""
@@ -103,8 +126,6 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             This list will be empty if no files exist on disk that correspond to the input
             batch request.
         """
-        option_to_group_id = self._option_name_to_regex_group_id()
-        group_id_to_option = {v: k for k, v in option_to_group_id.items()}
         batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
 
         all_files: List[pathlib.Path] = list(
@@ -113,12 +134,16 @@ to use as its "include" directive for File-Path style DataAsset processing."""
 
         file_name: pathlib.Path
         for file_name in all_files:
-            match = self.regex.match(file_name.name)
+            match = self._regex_parser.get_matches(target=file_name.name)
             if match:
                 # Create the batch request that would correlate to this regex match
                 match_options = {}
-                for group_id in range(1, self.regex.groups + 1):
-                    match_options[group_id_to_option[group_id]] = match.group(group_id)
+                for group_id in range(
+                    1, self._regex_parser.get_num_all_matched_group_values() + 1
+                ):
+                    match_options[
+                        self._all_group_index_to_group_name_mapping[group_id]
+                    ] = match.group(group_id)
                 # Determine if this file_name matches the batch_request
                 allowed_match = True
                 for key, value in batch_request.options.items():
@@ -146,35 +171,23 @@ to use as its "include" directive for File-Path style DataAsset processing."""
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        template: BatchRequestOptions = self._option_name_to_regex_group_id()
-        for k in template.keys():
-            template[k] = None
-        return template
+        idx: int
+        return {idx: None for idx in self._all_group_names}
 
     def get_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
-        # All regex values passed to options must be strings to be used in the regex
-        option_names_to_group = self._option_name_to_regex_group_id()
         if options:
             for option, value in options.items():
-                if option in option_names_to_group and not isinstance(value, str):
+                if (
+                    option in self._all_group_name_to_group_index_mapping
+                    and not isinstance(value, str)
+                ):
                     raise ge_exceptions.InvalidBatchRequestError(
                         f"All regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )
         return super().get_batch_request(options)
-
-    def _option_name_to_regex_group_id(self) -> BatchRequestOptions:
-        option_to_group: BatchRequestOptions = dict(self.regex.groupindex)
-        named_groups: set[int] = set(option_to_group.values())
-
-        idx: int
-        for idx in range(1, self.regex.groups + 1):
-            if idx not in named_groups:
-                option_to_group[f"{self._unnamed_regex_param_prefix}{idx}"] = idx
-
-        return option_to_group
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
