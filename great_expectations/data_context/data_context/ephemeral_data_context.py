@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Mapping, Optional, Union, cast
+from typing import Any, Dict, Mapping, Optional, Union, cast
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.serializer import DictConfigSerializer
@@ -13,6 +13,10 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     datasourceConfigSchema,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ExpectationSuiteIdentifier,
+    ValidationResultIdentifier,
 )
 
 logger = logging.getLogger(__name__)
@@ -72,3 +76,15 @@ class EphemeralDataContext(AbstractDataContext):
             datasource_store.set_by_name(datasource_name=name, datasource_config=config)
 
         self._datasource_store = datasource_store
+
+    def _build_data_docs(
+        self,
+        site_names: list[str] | None = None,
+        resource_identifiers: list[
+            ExpectationSuiteIdentifier | ValidationResultIdentifier
+        ]
+        | None = None,
+        dry_run: bool = False,
+        build_index: bool = True,
+    ) -> dict[str, Any]:
+        pass

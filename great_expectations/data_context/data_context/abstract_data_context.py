@@ -4774,11 +4774,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @public_api
     def build_data_docs(
         self,
-        site_names=None,
-        resource_identifiers=None,
-        dry_run=False,
+        site_names: list[str] | None = None,
+        resource_identifiers: list[
+            ExpectationSuiteIdentifier | ValidationResultIdentifier
+        ]
+        | None = None,
+        dry_run: bool = False,
         build_index: bool = True,
-    ):
+    ) -> dict[str, Any]:
         """Build Data Docs for your project.
 
         --Documentation--
@@ -4814,11 +4817,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _build_data_docs(
         self,
-        site_names=None,
-        resource_identifiers=None,
-        dry_run=False,
+        site_names: list[str] | None = None,
+        resource_identifiers: list[
+            ExpectationSuiteIdentifier | ValidationResultIdentifier
+        ]
+        | None = None,
+        dry_run: bool = False,
         build_index: bool = True,
-    ):
+    ) -> dict[str, Any]:
         logger.debug("Starting DataContext.build_data_docs")
 
         index_page_locator_infos = {}
