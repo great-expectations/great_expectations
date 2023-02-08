@@ -2,6 +2,7 @@
 
 # Build API docs then build docusaurus docs.
 # Currently used in our netlify pipeline.
+
 # Note: Will be modified to build API docs on latest tagged release.
 
 echo "Installing dev dependencies"
