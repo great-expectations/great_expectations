@@ -737,7 +737,8 @@ class AbstractDataContext(ConfigPeer, ABC):
     ) -> LegacyDatasource | BaseDatasource | None:
         ...
         """
-        TODO
+        A `name` is provided.
+        `datasource` should not be provided.
         """
 
     @overload
@@ -750,12 +751,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         **kwargs,
     ) -> LegacyDatasource | BaseDatasource | None:
         """
-        TODO
+        A `datasource` is provided.
+        `name` should not be provided.
         """
         ...
 
     @public_api
     @deprecated_argument(argument_name="save_changes", version="0.15.32")
+    @new_argument(
+        argument_name="datasource",
+        version="0.15.48",
+        message="Pass in an existing Datasource instead of individual constructor arguments",
+    )
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
         args_payload_fn=add_datasource_usage_statistics,
@@ -884,11 +891,36 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return updated_datasource
 
+    @overload
+    def add_or_update_datasource(
+        self,
+        name: str = ...,
+        datasource: None = ...,
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource | None:
+        ...
+        """
+        A `name` is provided.
+        `datasource` should not be provided.
+        """
+
+    @overload
+    def add_or_update_datasource(
+        self,
+        name: None = ...,
+        datasource: LegacyDatasource | BaseDatasource = ...,
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource | None:
+        """
+        A `datasource` is provided.
+        `name` should not be provided.
+        """
+
     @public_api
     @new_method_or_class(version="0.15.48")
     def add_or_update_datasource(
         self,
-        name: str,
+        name: str | None = None,
         datasource: LegacyDatasource | BaseDatasource | None = None,
         **kwargs,
     ) -> LegacyDatasource | BaseDatasource:
@@ -897,6 +929,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Args:
             name: The name of the Datasource to add or update.
+            datasource: an existing Datasource you wish to persist.
             kwargs: Any relevant keyword args to use when adding or updating the target Datasource.
 
         Returns:
@@ -915,9 +948,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if existing_datasource and isinstance(
             existing_datasource, (LegacyDatasource, BaseDatasource)
         ):
-            result_datasource = self._update_datasource(
-                datasource=existing_datasource, **kwargs
-            )
+            result_datasource = self._update_datasource(datasource=datasource, **kwargs)
         else:
             result_datasource = self.add_datasource(
                 name=name, datasource=datasource, **kwargs
