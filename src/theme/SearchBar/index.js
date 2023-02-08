@@ -17,7 +17,7 @@ const aa = require('search-insights')
 aa('init', {
   appId: 'B4HD9FJQCB',
   apiKey: 'b910554b878b1ad33ec7eb6afb6714c1',
-+ useCookie: true,  
+  useCookie: true,  
 })
 function Hit ({ hit, children }) {
   return <Link to={hit.url}>{children}</Link>
