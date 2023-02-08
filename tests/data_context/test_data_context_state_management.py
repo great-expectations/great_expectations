@@ -54,8 +54,18 @@ class ProfilerStoreSpy(ProfilerStore):
         self.save_count = 0
         super().__init__(ProfilerStoreSpy.STORE_NAME)
 
-    def set(self, key, value, **kwargs):
-        ret = super().set(key=key, value=value, **kwargs)
+    def add(self, key, value, **kwargs):
+        ret = super().add(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def update(self, key, value, **kwargs):
+        ret = super().update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def add_or_update(self, key, value, **kwargs):
+        ret = super().add_or_update(key=key, value=value, **kwargs)
         self.save_count += 1
         return ret
 
@@ -664,20 +674,23 @@ def test_update_profiler_success(
 
 
 @pytest.mark.unit
-def test_update_profiler_failure(in_memory_data_context: EphemeralDataContextSpy):
+def test_update_profiler_failure(
+    in_memory_data_context: EphemeralDataContextSpy, profiler_rules: dict
+):
     context = in_memory_data_context
 
     name = "my_rbp"
     profiler = RuleBasedProfiler(
         name=name,
         config_version=1.0,
+        rules=profiler_rules,
         data_context=context,
     )
 
     with pytest.raises(gx_exceptions.ProfilerNotFoundError) as e:
         _ = context.update_profiler(profiler)
 
-    assert f"Non-existent Profiler configuration named {name}" in str(e.value)
+    assert f"Could not find an existing Profiler named {name}" in str(e.value)
 
 
 @pytest.mark.unit
