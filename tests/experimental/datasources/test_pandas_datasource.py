@@ -217,7 +217,7 @@ class TestDynamicPandasAssets:
             .add_csv_asset(
                 "my_csv",
                 base_directory=csv_path,
-                regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
                 **extra_kwargs,
             )
             .get_batch_request({"year": "2018"})
@@ -244,7 +244,7 @@ def test_add_csv_asset_to_datasource(
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
     )
     assert asset.name == "csv_asset"  # type: ignore[attr-defined]
     assert asset.base_directory == csv_path  # type: ignore[attr-defined]
@@ -260,7 +260,7 @@ def test_construct_csv_asset_directly(csv_path: pathlib.Path):
     asset = CSVAsset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
     )
     assert asset.name == "csv_asset"
     assert asset.base_directory == csv_path
@@ -277,7 +277,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
     )
     options = asset.batch_request_options_template()  # type: ignore[attr-defined]
     assert options == {"batch_request_param_1": None, "batch_request_param_2": None}
@@ -290,7 +290,7 @@ def test_csv_asset_with_regex_named_parameters(
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
     options = asset.batch_request_options_template()  # type: ignore[attr-defined]
     assert options == {"year": None, "month": None}
@@ -303,7 +303,7 @@ def test_csv_asset_with_some_regex_named_parameters(
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
     )
     options = asset.batch_request_options_template()  # type: ignore[attr-defined]
     assert options == {"batch_request_param_1": None, "month": None}
@@ -316,7 +316,7 @@ def test_csv_asset_with_non_string_regex_named_parameters(
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # year is an int which will raise an error
@@ -330,12 +330,9 @@ def test_get_batch_list_from_fully_specified_batch_request(
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
     request = asset.get_batch_request({"year": "2018", "month": "04"})  # type: ignore[attr-defined]
-    print(
-        f"\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE.test_get_batch_list_from_fully_specified_batch_request()] BATCH_REQUEST:\n{request} ; TYPE: {str(type(request))}"
-    )
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert len(batches) == 1
     batch = batches[0]
@@ -370,24 +367,14 @@ def test_get_batch_list_from_partially_specified_batch_request(
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
     request = asset.get_batch_request({"year": "2018"})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert (len(batches)) == 12
-    # print(f'\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE.test_get_batch_list_from_partially_specified_batch_request()] BATCHES:\n{batches} ; TYPE: {str(type(batches))}')
-    # TODO: <Alex>ALEX</Alex>
     batch_filenames = [
         pathlib.Path(batch.metadata["base_directory"]).stem for batch in batches
     ]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # batch_filenames = []
-    # for batch in batches:
-    #     a = pathlib.Path(batch.metadata["base_directory"]).stem
-    #     print(f'\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE.test_get_batch_list_from_partially_specified_batch_request()] BATCH_FILENAME:\n{a} ; TYPE: {str(type(a))}')
-    #     batch_filenames.append(a)
-    # TODO: <Alex>ALEX</Alex>
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)
@@ -398,13 +385,6 @@ def test_get_batch_list_from_partially_specified_batch_request(
     expected_year_month = {
         YearMonth(year="2018", month=format(m, "02d")) for m in range(1, 13)
     }
-    # TODO: <Alex>ALEX</Alex>
-    for batch in batches:
-        a = batch.metadata
-        print(
-            f"\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE.test_get_batch_list_from_partially_specified_batch_request()] BATCH_METADATA:\n{a} ; TYPE: {str(type(a))}"
-        )
-    # TODO: <Alex>ALEX</Alex>
     batch_year_month = {
         YearMonth(year=batch.metadata["year"], month=batch.metadata["month"])
         for batch in batches
@@ -460,7 +440,7 @@ def test_pandas_sorter(
     asset = pandas_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=order_by,
     )
     batches = asset.get_batch_list_from_batch_request(asset.get_batch_request())  # type: ignore[attr-defined]
@@ -497,7 +477,7 @@ def test_pandas_sorter(
 
 def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     base_directory = pathlib.Path("/this/path/is/not/here")
-    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
     test_connection_error = TestConnectionError(
         f"Path: {base_directory.resolve()} does not exist."
     )
@@ -511,7 +491,7 @@ def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     base_directory = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
     test_connection_error = TestConnectionError(
         f"No file at path: {base_directory.resolve()} matched the regex: {regex.pattern}"
     )

@@ -53,7 +53,7 @@ def test_add_csv_asset_to_datasource(
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -71,7 +71,7 @@ def test_construct_csv_asset_directly(csv_path: pathlib.Path):
     asset = CSVSparkAsset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",  # Ignoring IDE warning (type declarations are consistent).
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",  # Ignoring IDE warning (type declarations are consistent).
     )
     assert asset.name == "csv_asset"
     assert asset.base_directory == csv_path
@@ -88,7 +88,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -103,7 +103,7 @@ def test_csv_asset_with_regex_named_parameters(
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -118,7 +118,7 @@ def test_csv_asset_with_some_regex_named_parameters(
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -133,7 +133,7 @@ def test_csv_asset_with_non_string_regex_named_parameters(
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -150,7 +150,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -190,7 +190,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -265,7 +265,7 @@ def test_spark_sorter(
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=order_by,
     )
     batches = asset.get_batch_list_from_batch_request(asset.get_batch_request())
@@ -302,7 +302,7 @@ def test_spark_sorter(
 
 def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     base_directory = pathlib.Path("/this/path/is/not/here")
-    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
     test_connection_error = TestConnectionError(
         f"Path: {base_directory.resolve()} does not exist."
     )
@@ -316,7 +316,7 @@ def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     base_directory = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
     test_connection_error = TestConnectionError(
         f"No file at path: {base_directory.resolve()} matched the regex: {regex.pattern}",
     )

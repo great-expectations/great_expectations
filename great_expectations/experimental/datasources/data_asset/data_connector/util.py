@@ -232,9 +232,6 @@ def map_batch_definition_to_data_reference_string_using_regex(
             data_asset_name=data_asset_name,
         )
     )
-    print(
-        f"\n[ALEX_TEST] [DATA_CONNECTOR::UTIL.PY::map_batch_definition_to_data_reference_string_using_regex()] DATA_REFERENCE:\n{data_reference} ; TYPE: {str(type(data_reference))}"
-    )
     return data_reference
 
 
@@ -256,13 +253,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
-    print(
-        f"\n[ALEX_TEST] [DATA_CONNECTOR::UTIL.PY::convert_batch_identifiers_to_data_reference_string_using_regex()] FILEPATH_TEMPLATE:\n{filepath_template} ; TYPE: {str(type(filepath_template))}"
-    )
     converted_string: str = filepath_template.format(**template_arguments)
-    print(
-        f"\n[ALEX_TEST] [DATA_CONNECTOR::UTIL.PY::convert_batch_identifiers_to_data_reference_string_using_regex()] converted_string:\n{converted_string} ; TYPE: {str(type(converted_string))}"
-    )
 
     return converted_string
 
@@ -304,13 +295,7 @@ def _invert_regex_to_data_reference_template(
         regex_pattern = regex_pattern.pattern
 
     # print("-"*80)
-    print(
-        f"\n[ALEX_TEST] [DATA_CONNECTOR::UTIL.PY::_invert_regex_to_data_reference_template()] regex_pattern:\n{regex_pattern} ; TYPE: {str(type(regex_pattern))}"
-    )
     parsed_sre = sre_parse.parse(regex_pattern)
-    print(
-        f"\n[ALEX_TEST] [DATA_CONNECTOR::UTIL.PY::_invert_regex_to_data_reference_template()] parsed_sre:\n{parsed_sre} ; TYPE: {str(type(parsed_sre))}"
-    )
     for token, value in parsed_sre:  # type: ignore[attr-defined]
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
@@ -331,10 +316,10 @@ def _invert_regex_to_data_reference_template(
         ]:
             # TODO: <Alex>ALEX</Alex>
             # # Replace the uncaptured group a wildcard in the template
-            # data_reference_template += "*"
+            data_reference_template += "*"
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX</Alex>
-            data_reference_template += "."
+            # data_reference_template += "."
             # TODO: <Alex>ALEX</Alex>
 
         elif token in [

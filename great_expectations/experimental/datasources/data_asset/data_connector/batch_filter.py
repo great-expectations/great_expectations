@@ -1,13 +1,19 @@
 import itertools
 import logging
-from typing import Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchDefinition
+
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.core.batch import BatchDefinition
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.id_dict import IDDict
 from great_expectations.util import is_int
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDefinition
 
 
 def build_batch_filter(
@@ -35,6 +41,7 @@ def build_batch_filter(
             index=None,
             limit=None,
         )
+
     data_connector_query_keys: set = set(data_connector_query_dict.keys())
     if not data_connector_query_keys <= BatchFilter.RECOGNIZED_KEYS:
         raise gx_exceptions.BatchFilterError(
@@ -42,6 +49,7 @@ def build_batch_filter(
 "{str(data_connector_query_keys - BatchFilter.RECOGNIZED_KEYS)}" detected.
             """
         )
+
     custom_filter_function: Optional[Callable] = data_connector_query_dict.get(  # type: ignore[assignment]
         "custom_filter_function"
     )
@@ -51,6 +59,7 @@ def build_batch_filter(
 "{str(type(custom_filter_function))}", which is illegal.
             """
         )
+
     batch_filter_parameters: Optional[
         Union[dict, IDDict]
     ] = data_connector_query_dict.get(  # type: ignore[assignment]
@@ -63,11 +72,14 @@ def build_batch_filter(
 "{str(type(batch_filter_parameters))}", which is illegal.
                 """
             )
+
         if not all([isinstance(key, str) for key in batch_filter_parameters.keys()]):
             raise gx_exceptions.BatchFilterError(
                 'All batch_filter_parameters keys must strings (Python "str").'
             )
+
         batch_filter_parameters = IDDict(batch_filter_parameters)
+
     index: Optional[
         Union[int, list, tuple, slice, str]
     ] = data_connector_query_dict.get(  # type: ignore[assignment]
@@ -80,10 +92,12 @@ def build_batch_filter(
 type and value given are "{str(type(limit))}" and "{limit}", respectively, which is illegal.
             """
         )
+
     if index is not None and limit is not None:
         raise gx_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
+
     index = _parse_index(index=index)
     return BatchFilter(
         custom_filter_function=custom_filter_function,
@@ -98,9 +112,11 @@ def _parse_index(
 ) -> Optional[Union[int, slice]]:
     if index is None:
         return None
-    elif isinstance(index, (int, slice)):
+
+    if isinstance(index, (int, slice)):
         return index
-    elif isinstance(index, (list, tuple)):
+
+    if isinstance(index, (list, tuple)):
         if len(index) > 3:
             raise gx_exceptions.BatchFilterError(
                 f"""The number of index slice components must be between 1 and 3 (the given number is
@@ -109,13 +125,17 @@ def _parse_index(
             )
         if len(index) == 1:
             return index[0]
+
         if len(index) == 2:
             return slice(index[0], index[1], None)
+
         if len(index) == 3:
             return slice(index[0], index[1], index[2])
+
     elif isinstance(index, str):
         if is_int(value=index):
             return _parse_index(index=int(index))
+
         index_as_list: List[Union[str, int, None]]
         if index:
             index_as_list = index.split(":")  # type: ignore[assignment]
@@ -123,6 +143,7 @@ def _parse_index(
                 index_as_list = [None, index_as_list[0]]
         else:
             index_as_list = []
+
         idx_str: str
         index_as_list = [int(idx_str) if idx_str else None for idx_str in index_as_list]
         return _parse_index(index=index_as_list)
@@ -133,6 +154,7 @@ def _parse_index(
 The type given is "{str(type(index))}", which is illegal.
             """
         )
+
     return None
 
 
@@ -182,15 +204,18 @@ class BatchFilter:
         return str(doc_fields_dict)
 
     def select_from_data_connector_query(
-        self, batch_definition_list: Optional[List[BatchDefinition]] = None
-    ) -> List[BatchDefinition]:
+        self,
+        batch_definition_list: Optional[List["BatchDefinition"]] = None,  # noqa: E731
+    ) -> List["BatchDefinition"]:  # noqa: E731
         if batch_definition_list is None:
             return []
+
         filter_function: Callable
         if self.custom_filter_function:
             filter_function = self.custom_filter_function
         else:
             filter_function = self.best_effort_batch_definition_matcher()
+
         selected_batch_definitions: List[BatchDefinition]
         selected_batch_definitions = list(
             filter(
@@ -214,6 +239,7 @@ class BatchFilter:
                         [selected_batch_definitions[self.index]]
                     )
                 )
+
         return selected_batch_definitions
 
     def best_effort_batch_definition_matcher(self) -> Callable:

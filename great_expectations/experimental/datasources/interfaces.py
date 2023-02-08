@@ -143,9 +143,6 @@ class DataAsset(ExperimentalBaseModel):
 
     # non-field private attributes
     _datasource: Datasource = pydantic.PrivateAttr()
-    # TODO: <Alex>ALEX</Alex>
-    # _data_connector: DataConnector = pydantic.PrivateAttr()
-    # TODO: <Alex>ALEX</Alex>
 
     @property
     def datasource(self) -> Datasource:
@@ -507,9 +504,11 @@ class Batch(ExperimentalBaseModel):
         options_list = []
         for k, v in values["batch_request"].options.items():
             options_list.append(f"{k}_{v}")
+
         values["id"] = "-".join(
             [values["datasource"].name, values["data_asset"].name, *options_list]
         )
+
         return values
 
     @classmethod
