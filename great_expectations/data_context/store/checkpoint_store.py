@@ -177,8 +177,16 @@ class CheckpointStore(ConfigurationStore):
         return checkpoint_config
 
     def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
-        """
-        TODO
+        """Persist a stand-alone Checkpoint object.
+
+        Args:
+            checkpoint: The Checkpoint to persist.
+
+        Returns:
+            The persisted Checkpoint (possibly modified state based on store backend).
+
+        Raises:
+            CheckpointError: If a Checkpoint with the given name already exists.
         """
         key = self._construct_key_from_checkpoint(checkpoint)
 
@@ -196,8 +204,16 @@ class CheckpointStore(ConfigurationStore):
         return checkpoint
 
     def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
-        """
-        TODO
+        """Use a stand-alone Checkpoint object to update a persisted value.
+
+        Args:
+            checkpoint: The Checkpoint to use for updating.
+
+        Returns:
+            The persisted Checkpoint (possibly modified state based on store backend).
+
+        Raises:
+            CheckpointNotFoundError: If a Checkpoint with the given name does not exist in the store.
         """
         key = self._construct_key_from_checkpoint(checkpoint)
 
@@ -215,8 +231,13 @@ class CheckpointStore(ConfigurationStore):
         return checkpoint
 
     def add_or_update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
-        """
-        TODO
+        """Use a stand-alone Checkpoint object to either add or update a persisted value.
+
+        Args:
+            checkpoint: The Checkpoint to use for adding or updating.
+
+        Returns:
+            The persisted Checkpoint (possibly modified state based on store backend).
         """
         key = self._construct_key_from_checkpoint(checkpoint)
 
