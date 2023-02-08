@@ -143,7 +143,7 @@ class TestDynamicPandasAssets:
         with pytest.raises(pydantic.ValidationError) as exc_info:
             asset_class(  # type: ignore[call-arg]
                 name="test",
-                base_directory=pathlib.Path(__file__),  # type: ignore[carg-type]
+                base_directory=pathlib.Path(__file__),
                 regex=re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
                 invalid_keyword_arg="bad",
             )
