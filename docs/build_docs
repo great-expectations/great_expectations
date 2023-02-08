@@ -15,7 +15,7 @@ echo "Building sphinx API docs."
 
 echo "Copying previous versions"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"
-unzip oss_docs_versions.zip
+unzip -o oss_docs_versions.zip -d .
 
 echo "Building docusaurus docs."
 yarn build
