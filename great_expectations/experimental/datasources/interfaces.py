@@ -454,7 +454,7 @@ class Datasource(
             test_assets: If assets have been passed to the Datasource, an attempt can be made to test them as well.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         raise NotImplementedError(
             """One needs to implement "test_connection" on a Datasource subclass."""

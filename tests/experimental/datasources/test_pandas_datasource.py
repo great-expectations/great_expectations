@@ -17,7 +17,7 @@ from great_expectations.experimental.datasources.interfaces import TestConnectio
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     JSONAsset,
-    PandasDatasource,
+    PandasFilesystemDatasource,
     _FilesystemDataAsset,
 )
 
@@ -32,7 +32,7 @@ logger = logging.getLogger(__file__)
 
 
 @pytest.fixture
-def pandas_datasource() -> PandasDatasource:
+def pandas_filesystem_datasource() -> PandasFilesystemDatasource:
     base_directory_rel_path = pathlib.Path(
         "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
@@ -41,8 +41,8 @@ def pandas_datasource() -> PandasDatasource:
         .parent.joinpath(base_directory_rel_path)
         .resolve(strict=True)
     )
-    return PandasDatasource(
-        name="pandas_datasource",
+    return PandasFilesystemDatasource(
+        name="pandas_filesystem_datasource",
         base_directory=base_directory_abs_path,
     )
 
@@ -127,16 +127,17 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            t.__name__.lower().split("asset")[0] for t in PandasDatasource.asset_types
+            t.__name__.lower().split("asset")[0]
+            for t in PandasFilesystemDatasource.asset_types
         }
         print(asset_class_names)
 
         assert type_name in asset_class_names
 
-    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
     def test_minimal_validation(self, asset_class: Type[_FilesystemDataAsset]):
         """
-        These parametrized tests ensures that every `PandasDatasource` asset model does some minimal
+        These parametrized tests ensures that every `PandasFilesystemDatasource` asset model does some minimal
         validation, and doesn't accept arbitrary keyword arguments.
         This is also a proxy for testing that the dynamic pydantic model creation was successful.
         """
@@ -217,15 +218,17 @@ class TestDynamicPandasAssets:
 
 
 @pytest.mark.unit
-def test_construct_pandas_datasource(pandas_datasource: PandasDatasource):
-    assert pandas_datasource.name == "pandas_datasource"
+def test_construct_pandas_filesystem_datasource(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+):
+    assert pandas_filesystem_datasource.name == "pandas_filesystem_datasource"
 
 
 @pytest.mark.unit
 def test_add_csv_asset_to_datasource(
-    pandas_datasource: PandasDatasource,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
-    asset = pandas_datasource.add_csv_asset(
+    asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
@@ -252,9 +255,9 @@ def test_construct_csv_asset_directly():
 
 @pytest.mark.unit
 def test_csv_asset_with_regex_unnamed_parameters(
-    pandas_datasource: PandasDatasource,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
-    asset = pandas_datasource.add_csv_asset(
+    asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
@@ -264,9 +267,9 @@ def test_csv_asset_with_regex_unnamed_parameters(
 
 @pytest.mark.unit
 def test_csv_asset_with_regex_named_parameters(
-    pandas_datasource: PandasDatasource,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
-    asset = pandas_datasource.add_csv_asset(
+    asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
@@ -276,9 +279,9 @@ def test_csv_asset_with_regex_named_parameters(
 
 @pytest.mark.unit
 def test_csv_asset_with_some_regex_named_parameters(
-    pandas_datasource: PandasDatasource,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
-    asset = pandas_datasource.add_csv_asset(
+    asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
     )
@@ -288,9 +291,9 @@ def test_csv_asset_with_some_regex_named_parameters(
 
 @pytest.mark.unit
 def test_csv_asset_with_non_string_regex_named_parameters(
-    pandas_datasource: PandasDatasource,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
-    asset = pandas_datasource.add_csv_asset(
+    asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
     )
@@ -301,9 +304,9 @@ def test_csv_asset_with_non_string_regex_named_parameters(
 
 @pytest.mark.unit
 def test_get_batch_list_from_fully_specified_batch_request(
-    pandas_datasource: PandasDatasource,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
-    asset = pandas_datasource.add_csv_asset(
+    asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
@@ -311,7 +314,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert len(batches) == 1
     batch = batches[0]
-    assert batch.batch_request.datasource_name == pandas_datasource.name
+    assert batch.batch_request.datasource_name == pandas_filesystem_datasource.name
     assert batch.batch_request.data_asset_name == asset.name  # type: ignore[attr-defined]
     assert batch.batch_request.options == {"year": "2018", "month": "04"}
     assert batch.metadata == {
@@ -319,18 +322,20 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "month": "04",
         "base_directory": asset.base_directory / "yellow_tripdata_sample_2018-04.csv",  # type: ignore[attr-defined]
     }
-    assert batch.id == "pandas_datasource-csv_asset-year_2018-month_04"
+    assert batch.id == "pandas_filesystem_datasource-csv_asset-year_2018-month_04"
 
 
 @pytest.mark.unit
 def test_get_batch_list_from_partially_specified_batch_request(
-    pandas_datasource: PandasDatasource,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
     # Verify test directory has files that don't match what we will query for
     file_name: PathStr
     all_files: list[str] = [
         file_name.stem
-        for file_name in list(pathlib.Path(pandas_datasource.base_directory).iterdir())
+        for file_name in list(
+            pathlib.Path(pandas_filesystem_datasource.base_directory).iterdir()
+        )
     ]
     # assert there are files that are not csv files
     assert any([not file_name.endswith("csv") for file_name in all_files])
@@ -340,7 +345,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     ]
     assert len(files_for_2018) == 12
 
-    asset = pandas_datasource.add_csv_asset(
+    asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
@@ -392,7 +397,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     ],
 )
 def test_pandas_sorter(
-    pandas_datasource: PandasDatasource,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
     order_by: BatchSortersDefinition,
 ):
     # Verify test directory has files we expect
@@ -401,7 +406,9 @@ def test_pandas_sorter(
     file_name: PathStr
     all_files: list[str] = [
         file_name.stem
-        for file_name in list(pathlib.Path(pandas_datasource.base_directory).iterdir())
+        for file_name in list(
+            pathlib.Path(pandas_filesystem_datasource.base_directory).iterdir()
+        )
     ]
     # assert there are 12 files for each year
     for year in years:
@@ -412,7 +419,7 @@ def test_pandas_sorter(
         ]
         assert len(files_for_year) == 12
 
-    asset = pandas_datasource.add_csv_asset(
+    asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
         order_by=order_by,
@@ -474,29 +481,29 @@ def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
 
 @pytest.fixture(params=[bad_base_directory_config, bad_regex_config])
 def datasource_test_connection_error_messages(
-    pandas_datasource: PandasDatasource, request
-) -> tuple[PandasDatasource, TestConnectionError]:
+    pandas_filesystem_datasource: PandasFilesystemDatasource, request
+) -> tuple[PandasFilesystemDatasource, TestConnectionError]:
     base_directory, regex, test_connection_error = request.param()
     csv_asset = CSVAsset(
         name="csv_asset",
         base_directory=base_directory,
         regex=regex,
     )
-    pandas_datasource.assets = {"csv_asset": csv_asset}
-    return pandas_datasource, test_connection_error
+    pandas_filesystem_datasource.assets = {"csv_asset": csv_asset}
+    return pandas_filesystem_datasource, test_connection_error
 
 
 @pytest.mark.unit
 def test_test_connection_failures(
     datasource_test_connection_error_messages: tuple[
-        PandasDatasource, TestConnectionError
+        PandasFilesystemDatasource, TestConnectionError
     ]
 ):
     (
-        pandas_datasource,
+        pandas_filesystem_datasource,
         test_connection_error,
     ) = datasource_test_connection_error_messages
 
     with pytest.raises(type(test_connection_error)) as e:
-        pandas_datasource.test_connection()
+        pandas_filesystem_datasource.test_connection()
     assert str(e.value) == str(test_connection_error)

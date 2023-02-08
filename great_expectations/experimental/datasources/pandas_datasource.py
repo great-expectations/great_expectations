@@ -5,6 +5,7 @@ import pathlib
 import re
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
+import pydantic
 from typing_extensions import Literal
 
 from great_expectations.experimental.datasources.dynamic_pandas import (
@@ -73,19 +74,18 @@ except KeyError as key_err:
     ParquetAsset = _FilesystemDataAsset
 
 
-class PandasDatasource(Datasource):
+class _PandasDatasource(Datasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_ASSET_MODELS.values())
 
     # instance attributes
-    type: Literal["pandas"] = "pandas"
-    name: str
-    base_directory: pathlib.Path
+    type: str = pydantic.Field("_pandas")
     assets: Dict[
         str,
         _FilesystemDataAsset,
     ] = {}
 
+    # Abstract Methods
     @property
     def execution_engine_type(self) -> Type[PandasExecutionEngine]:
         """Return the PandasExecutionEngine unless the override is set"""
@@ -96,13 +96,40 @@ class PandasDatasource(Datasource):
         return PandasExecutionEngine
 
     def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the _PandasDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the _PandasDatasource,
+                         an attempt can be made to test them as well.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        raise NotImplementedError(
+            """One needs to implement "test_connection" on a _PandasDatasource subclass."""
+        )
+
+    # End Abstract Methods
+
+
+class PandasFilesystemDatasource(_PandasDatasource):
+    # instance attributes
+    type: Literal["pandas_filesystem"] = "pandas_filesystem"
+    name: str
+    base_directory: pathlib.Path
+    assets: Dict[
+        str,
+        _FilesystemDataAsset,
+    ] = {}
+
+    def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the PandasDatasource.
 
         Args:
             test_assets: If assets have been passed to the PandasDatasource, whether to test them as well.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
         if not self.base_directory.exists():
             raise TestConnectionError(

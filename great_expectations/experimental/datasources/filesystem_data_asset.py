@@ -95,11 +95,13 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             TestConnectionError: If the connection test fails.
         """
         from great_expectations.experimental.datasources import (
-            PandasDatasource,
+            PandasFilesystemDatasource,
             SparkDatasource,
         )
 
-        assert isinstance(self.datasource, (PandasDatasource, SparkDatasource))
+        assert isinstance(
+            self.datasource, (PandasFilesystemDatasource, SparkDatasource)
+        )
 
         success = False
         for filepath in self.datasource.base_directory.iterdir():
@@ -127,11 +129,13 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             batch request.
         """
         from great_expectations.experimental.datasources import (
-            PandasDatasource,
+            PandasFilesystemDatasource,
             SparkDatasource,
         )
 
-        assert isinstance(self.datasource, (PandasDatasource, SparkDatasource))
+        assert isinstance(
+            self.datasource, (PandasFilesystemDatasource, SparkDatasource)
+        )
 
         base_directory: pathlib.Path = self.datasource.base_directory
         all_files: List[pathlib.Path] = list(pathlib.Path(base_directory).iterdir())

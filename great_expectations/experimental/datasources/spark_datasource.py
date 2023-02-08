@@ -5,6 +5,7 @@ import pathlib
 import re
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
+import pydantic
 from typing_extensions import Literal
 
 from great_expectations.experimental.datasources.filesystem_data_asset import (
@@ -14,6 +15,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     Datasource,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
@@ -41,16 +43,18 @@ class CSVSparkAsset(_FilesystemDataAsset):
         return {"header", "inferSchema"}
 
 
-class SparkDatasource(Datasource):
+class _SparkDatasource(Datasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVSparkAsset]
 
     # instance attributes
-    type: Literal["spark"] = "spark"
-    name: str
-    base_directory: pathlib.Path
-    assets: Dict[str, CSVSparkAsset] = {}
+    type: str = pydantic.Field("_spark")
+    assets: Dict[
+        str,
+        CSVSparkAsset,
+    ] = {}
 
+    # Abstract Methods
     @property
     def execution_engine_type(self) -> Type[SparkDFExecutionEngine]:
         """Return the SparkDFExecutionEngine unless the override is set"""
@@ -61,6 +65,30 @@ class SparkDatasource(Datasource):
         return SparkDFExecutionEngine
 
     def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the _SparkDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the _SparkDatasource,
+                         an attempt can be made to test them as well.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        raise NotImplementedError(
+            """One needs to implement "test_connection" on a _SparkDatasource subclass."""
+        )
+
+    # End Abstract Methods
+
+
+class SparkDatasource(_SparkDatasource):
+    # instance attributes
+    type: Literal["spark"] = "spark"
+    name: str
+    base_directory: pathlib.Path
+    assets: Dict[str, CSVSparkAsset] = {}
+
+    def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SparkDatasource.
 
         Args:
@@ -69,7 +97,11 @@ class SparkDatasource(Datasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        # Only self.assets can be tested for PandasDatasource
+        if not self.base_directory.exists():
+            raise TestConnectionError(
+                f"Path: {self.base_directory.resolve()} does not exist."
+            )
+
         if self.assets and test_assets:
             for asset in self.assets.values():
                 asset.test_connection()

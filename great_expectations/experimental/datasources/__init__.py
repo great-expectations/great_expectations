@@ -1,7 +1,7 @@
 import pathlib
 
 from great_expectations.experimental.datasources.pandas_datasource import (
-    PandasDatasource,
+    PandasFilesystemDatasource,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
     PostgresDatasource,
