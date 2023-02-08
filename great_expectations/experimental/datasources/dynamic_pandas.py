@@ -63,6 +63,8 @@ except ImportError:
 
 logger = logging.getLogger(__file__)
 
+PANDAS_VERSION: float = float(pd.__version__.rsplit(".", maxsplit=1)[0])
+
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 
 # sentinel values
@@ -242,10 +244,18 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     """
     https://docs.python.org/3/howto/annotations.html#manually-un-stringizing-stringized-annotations
     """
-    # TODO: parse the annotation string
     annotation = param.annotation
+    # this section is only needed for when user is running our min supported pandas (1.1)
+    # pandas now exclusively uses postponed/str annotations
     if not isinstance(annotation, str):
-        logger.debug(type(annotation), annotation)
+        logger.debug(f"{param.name} has non-string annotations")
+        # `__args__` contains the actual members of a `Union[TYPE_1, TYPE_2]` object
+        union_types = getattr(annotation, "__args__", None)
+        if union_types and PANDAS_VERSION <= 1.1:
+            # we could examine these types and only kick out certain blacklisted types
+            # but once we drop python 3.7 support our min pandas version will make this
+            # unneeded
+            return UNSUPPORTED_TYPE
         return annotation
 
     types: list = []
@@ -374,7 +384,7 @@ def _generate_pandas_data_asset_models(
             logger.info(f"{model_name} - {type(err).__name__}:{err}")
             continue
         except TypeError as err:
-            logger.warning(
+            logger.info(
                 f"pandas {pd.__version__}  {model_name} could not be created normally - {type(err).__name__}:{err} , skipping"
             )
             logger.info(f"{model_name} fields\n{pf(fields)}")
