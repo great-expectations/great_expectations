@@ -130,6 +130,23 @@ class StoreBackend(metaclass=ABCMeta):
             logger.debug(str(e))
             raise StoreBackendError("ValueError while calling _set on store backend.")
 
+    def add(self, key, value, **kwargs):
+        if self.has_key(key):
+            raise StoreBackendError(f"Store already has the following key: {key}.")
+        return self.set(key=key, value=value, **kwargs)
+
+    def update(self, key, value, **kwargs):
+        if not self.has_key(key):
+            raise StoreBackendError(
+                f"Store does not have a value associated the following key: {key}."
+            )
+        return self.set(key=key, value=value, **kwargs)
+
+    def add_or_update(self, key, value, **kwargs):
+        if self.has_key(key):
+            return self.update(key=key, value=value, **kwargs)
+        return self.add(key=key, value=value, **kwargs)
+
     def move(self, source_key, dest_key, **kwargs):
         self._validate_key(source_key)
         self._validate_key(dest_key)

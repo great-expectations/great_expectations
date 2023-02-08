@@ -56,9 +56,17 @@ class CheckpointStoreSpy(CheckpointStore):
         self.save_count = 0
         super().__init__(CheckpointStoreSpy.STORE_NAME)
 
-    def set(self, key, value, **kwargs):
+    def add(self, key, value, **kwargs):
         self.save_count += 1
-        return super().set(key=key, value=value, **kwargs)
+        return super().add(key=key, value=value, **kwargs)
+
+    def update(self, key, value, **kwargs):
+        self.save_count += 1
+        return super().update(key=key, value=value, **kwargs)
+
+    def add_or_update(self, key, value, **kwargs):
+        self.save_count += 1
+        return super().add_or_update(key=key, value=value, **kwargs)
 
 
 class EphemeralDataContextSpy(EphemeralDataContext):
@@ -871,7 +879,7 @@ def test_update_checkpoint_failure(in_memory_data_context: EphemeralDataContextS
     with pytest.raises(gx_exceptions.CheckpointNotFoundError) as e:
         context.update_checkpoint(checkpoint)
 
-    assert f"Could not find a Checkpoint named {name}" in str(e.value)
+    assert f"Could not find an existing Checkpoint named {name}" in str(e.value)
 
 
 @pytest.mark.unit
