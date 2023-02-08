@@ -216,7 +216,7 @@ class DataConnector:
 
     # TODO: <Alex>ALEX</Alex>
 
-    def get_data_reference_list_count(self) -> int:
+    def get_data_reference_count(self) -> int:
         raise NotImplementedError
 
     def get_unmatched_data_references(self) -> List[Any]:
@@ -313,13 +313,27 @@ class DataConnector:
             "class_name": self.__class__.__name__,
         }
 
+        data_reference_list = self._get_data_reference_list()
+        len_batch_definition_list = len(data_reference_list)
+        example_data_references = data_reference_list[:max_examples]
+
+        if pretty_print:
+            print(
+                f"\t\t({min(len_batch_definition_list, max_examples)} of {len_batch_definition_list}):",
+                example_data_references,
+            )
+
+        report_obj["batch_definition_count"] = len_batch_definition_list
+        report_obj["example_data_references"] = example_data_references
         unmatched_data_references = self.get_unmatched_data_references()
         len_unmatched_data_references = len(unmatched_data_references)
+
         if pretty_print:
             print(
                 f"\n\tUnmatched data_references ({min(len_unmatched_data_references, max_examples)} of {len_unmatched_data_references}):{unmatched_data_references[:max_examples]}\n"
             )
 
+        report_obj["data_reference_count"] = self.get_data_reference_count()
         report_obj["unmatched_data_reference_count"] = len_unmatched_data_references
         report_obj["example_unmatched_data_references"] = unmatched_data_references[
             :max_examples

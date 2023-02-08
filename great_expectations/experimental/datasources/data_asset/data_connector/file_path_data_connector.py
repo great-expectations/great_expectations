@@ -156,16 +156,13 @@ class FilePathDataConnector(DataConnector):
 
         """
         # TODO: <Alex>ALEX</Alex>
-        from great_expectations.core.batch import BatchRequestBase
-
-        # TODO: <Alex>ALEX</Alex>
         batch_request_base: BatchRequestBase = cast(BatchRequestBase, batch_request)
         return self._get_batch_definition_list_from_batch_request(
             batch_request=batch_request_base
         )
 
     # Interface Method
-    def get_data_reference_list_count(self) -> int:
+    def get_data_reference_count(self) -> int:
         """
         Returns the list of data_references known by this DataConnector from its _data_references_cache
 
@@ -185,7 +182,6 @@ class FilePathDataConnector(DataConnector):
             list of data_references that are not matched by configuration.
         """
 
-        # TODO: <Alex>ALEX</Alex>
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
@@ -193,9 +189,8 @@ class FilePathDataConnector(DataConnector):
                     lambda element: element[1] is None,
                     self._data_references_cache.items(),
                 )
-            ).values()
+            ).keys()
         )
-        # TODO: <Alex>ALEX</Alex>
         return unmatched_data_references
 
     # Interface Method
@@ -407,4 +402,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         List objects in the underlying data store to create a list of data_references.
         This method is used to refresh the cache by classes that extend this base DataConnector class
         """
+        raise NotImplementedError
+
+    def _get_full_file_path(self, path: str) -> str:
         raise NotImplementedError
