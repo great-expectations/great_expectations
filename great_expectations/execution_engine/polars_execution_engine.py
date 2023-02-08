@@ -6,7 +6,6 @@ import warnings
 from functools import partial
 from io import BytesIO
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -80,9 +79,9 @@ except ImportError:
     pl_DataFrame = None
     pl = None
 
-if TYPE_CHECKING:
-    from great_expectations.core.metric_domain_types import MetricDomainTypes
-
+from great_expectations.core.metric_domain_types import (
+    MetricDomainTypes,  # noqa: TCH001
+)
 
 HASH_THRESHOLD = 1e9
 
