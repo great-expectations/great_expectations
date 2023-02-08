@@ -242,10 +242,17 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     """
     https://docs.python.org/3/howto/annotations.html#manually-un-stringizing-stringized-annotations
     """
-    # TODO: parse the annotation string
     annotation = param.annotation
+    # this section is only needed for when users a running our min supported pandas
+    # pandas now exclusively uses postponed/str annotations
     if not isinstance(annotation, str):
-        logger.debug(type(annotation), annotation)
+        # `__args__` contains the actual members of a `Union[TYPE_1, TYPE_2]` object
+        union_types = getattr(annotation, "__args__", None)
+        if union_types:
+            # we could examine these types and only kick out certain blacklisted types
+            # but once we drop python 3.7 support our min pandas version will make this
+            # unneeded
+            return UNSUPPORTED_TYPE
         return annotation
 
     types: list = []
