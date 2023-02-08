@@ -191,19 +191,21 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     One of the primary responsibilities of the DataContext is managing CRUD operations for core GX objects:
 
-    .. list-table:: Title
+    .. list-table:: Supported CRUD Methods
        :widths: 25 25 50
        :header-rows: 1
 
-       * - Heading row 1, column 1
-         - Heading row 1, column 2
-         - Heading row 1, column 3
-       * - Row 1, column 1
-         -
-         - Row 1, column 3
-       * - Row 2, column 1
-         - Row 2, column 2
-         - Row 2, column 3
+       * -
+         - Stores
+         - Datasources
+         - ExpectationSuites
+         - Checkpoints
+         - Profilers
+       * - get
+         - add
+         - update
+         - add_or_update
+         - delete
     """
 
     # NOTE: <DataContextRefactor> These can become a property like ExpectationsStore.__name__ or placed in a separate
