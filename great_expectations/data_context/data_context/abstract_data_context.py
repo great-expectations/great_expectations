@@ -56,9 +56,6 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,  # noqa: TCH001
-)
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -73,19 +70,7 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     _YamlConfigValidator,
 )
-from great_expectations.data_context.data_context_variables import (
-    DataContextVariables,  # noqa: TCH001
-)
 from great_expectations.data_context.store import Store, TupleStoreBackend
-from great_expectations.data_context.store.expectations_store import (
-    ExpectationsStore,  # noqa: TCH001
-)
-from great_expectations.data_context.store.profiler_store import (
-    ProfilerStore,  # noqa: TCH001
-)
-from great_expectations.data_context.store.validations_store import (
-    ValidationsStore,  # noqa: TCH001
-)
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
@@ -123,7 +108,6 @@ from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.experimental.datasources.interfaces import (
@@ -162,13 +146,25 @@ except ImportError:
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
     from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
+    )
+    from great_expectations.data_context.data_context_variables import (
+        DataContextVariables,
+    )
     from great_expectations.data_context.store import (
         CheckpointStore,
         EvaluationParameterStore,
     )
+    from great_expectations.data_context.store.expectations_store import (
+        ExpectationsStore,
+    )
+    from great_expectations.data_context.store.profiler_store import ProfilerStore
+    from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+    from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
@@ -2742,16 +2738,14 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         expectation_suite_name = expectation_suite.expectation_suite_name
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
-        if (
-            self.expectations_store.has_key(key)  # noqa: W601
-            and not overwrite_existing
-        ):
-            raise gx_exceptions.DataContextError(
-                f"expectation_suite with name {expectation_suite_name} already exists."
-                " If you would like to overwrite this expectation_suite, please delete or"
-                " update it using `delete_expectation_suite` or `update_expectation_suite`, respectively."
-            )
-        self.expectations_store.set(key, expectation_suite, **kwargs)
+
+        fn: Callable
+        if overwrite_existing:
+            fn = self.expectations_store.add_or_update
+        else:
+            fn = self.expectations_store.add
+
+        fn(key=key, value=expectation_suite, **kwargs)
         return expectation_suite
 
     @public_api
@@ -2770,15 +2764,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         expectation_suite_name: str = expectation_suite.expectation_suite_name
         key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
-        if not self.expectations_store.has_key(key):  # noqa: W601
-            raise gx_exceptions.DataContextError(
-                f"expectation_suite with name {expectation_suite_name} does not exist."
-            )
-
-        return self._add_expectation_suite(
-            expectation_suite=expectation_suite,
-            overwrite_existing=True,
-        )
+        self.expectations_store.update(key=key, value=expectation_suite)
+        return expectation_suite
 
     @overload
     def add_or_update_expectation_suite(

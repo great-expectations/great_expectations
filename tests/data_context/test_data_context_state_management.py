@@ -30,8 +30,18 @@ class ExpectationsStoreSpy(ExpectationsStore):
         self.save_count = 0
         super().__init__()
 
-    def set(self, key, value, **kwargs):
-        ret = super().set(key=key, value=value, **kwargs)
+    def add(self, key, value, **kwargs):
+        ret = super().add(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def update(self, key, value, **kwargs):
+        ret = super().update(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
+
+    def add_or_update(self, key, value, **kwargs):
+        ret = super().add_or_update(key=key, value=value, **kwargs)
         self.save_count += 1
         return ret
 
@@ -368,11 +378,7 @@ def test_add_expectation_suite_namespace_collision_failure(
     with pytest.raises(gx_exceptions.DataContextError) as e:
         context.add_expectation_suite(expectation_suite_name=suite_name)
 
-    assert f"expectation_suite with name {suite_name} already exists" in str(e.value)
-    assert (
-        "please delete or update it using `delete_expectation_suite` or `update_expectation_suite`"
-        in str(e.value)
-    )
+    assert f"An ExpectationSuite named {suite_name} already exists" in str(e.value)
     assert context.expectations_store.save_count == 1
 
 
@@ -439,10 +445,12 @@ def test_update_expectation_suite_failure(
     suite_name = "my_brand_new_suite"
     suite = ExpectationSuite(expectation_suite_name=suite_name)
 
-    with pytest.raises(gx_exceptions.DataContextError) as e:
+    with pytest.raises(gx_exceptions.ExpectationSuiteError) as e:
         _ = context.update_expectation_suite(suite)
 
-    assert f"expectation_suite with name {suite_name} does not exist." in str(e.value)
+    assert f"Could not find an existing ExpectationSuite named {suite_name}." in str(
+        e.value
+    )
 
 
 @pytest.mark.unit
