@@ -18,7 +18,7 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     JSONAsset,
     PandasDatasource,
-    _FilesystemDataAsset,
+    FilesystemDataAsset,
 )
 
 if TYPE_CHECKING:
@@ -134,7 +134,7 @@ class TestDynamicPandasAssets:
         assert type_name in asset_class_names
 
     @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
-    def test_minimal_validation(self, asset_class: Type[_FilesystemDataAsset]):
+    def test_minimal_validation(self, asset_class: Type[FilesystemDataAsset]):
         """
         These parametrized tests ensures that every `PandasDatasource` asset model does some minimal
         validation, and doesn't accept arbitrary keyword arguments.
@@ -166,7 +166,7 @@ class TestDynamicPandasAssets:
     )
     def test_data_asset_defaults(
         self,
-        asset_model: Type[_FilesystemDataAsset],
+        asset_model: Type[FilesystemDataAsset],
         extra_kwargs: dict,
     ):
         """
