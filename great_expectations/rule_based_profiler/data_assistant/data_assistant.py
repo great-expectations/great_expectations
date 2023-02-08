@@ -12,7 +12,9 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,  # noqa: TCH001
 )
-from great_expectations.experimental.datasources.interfaces import Batch as XBatch
+from great_expectations.experimental.datasources.interfaces import (
+    Batch as XBatch,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler import (
     RuleBasedProfilerResult,  # noqa: TCH001
 )
