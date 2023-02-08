@@ -18,9 +18,9 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_resolved_metrics_by_key,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:

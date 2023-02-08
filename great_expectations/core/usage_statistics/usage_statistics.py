@@ -23,9 +23,11 @@ from great_expectations import __version__ as ge_version
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
-    CLISuiteInteractiveFlagCombinations,
+    CLISuiteInteractiveFlagCombinations,  # noqa: TCH001
 )
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.usage_statistics.events import (
+    UsageStatsEvents,  # noqa: TCH001
+)
 from great_expectations.core.usage_statistics.execution_environment import (
     GXExecutionEnvironment,
     PackageInfo,

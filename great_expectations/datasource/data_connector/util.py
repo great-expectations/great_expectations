@@ -15,8 +15,8 @@ from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector.asset import Asset
-from great_expectations.datasource.data_connector.sorter import Sorter
+from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
+from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.datasource import DataConnector

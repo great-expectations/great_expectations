@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
@@ -40,7 +40,7 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
-from great_expectations.expectations.metrics import MetaMetricProvider
+from great_expectations.expectations.metrics import MetaMetricProvider  # noqa: TCH001
 from great_expectations.expectations.metrics.import_manager import F, quoted_name, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
