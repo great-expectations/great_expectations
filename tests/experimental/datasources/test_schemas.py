@@ -1,6 +1,6 @@
 import json
 import sys
-from typing import Type, Union
+from typing import Any, Type
 
 import pandas
 import pydantic
@@ -47,7 +47,7 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
 
         """
         key: str
-        value: Union[dict, list]
+        value: Any
         for key, value in schema_as_dict.items():
             if key == "required":
                 schema_as_dict[key] = sorted(value)
