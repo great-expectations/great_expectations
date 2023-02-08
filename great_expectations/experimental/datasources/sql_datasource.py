@@ -184,7 +184,7 @@ def _get_sql_datetime_range(
 
 class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
     # Instance fields
-    type: Literal["_sqlasset"] = "_sqlasset"
+    type: str = pydantic.Field("_sql_asset")
     column_splitter: Optional[_ColumnSplitterT] = None
     name: str
 
@@ -365,7 +365,7 @@ class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
 
 class QueryAsset(_SQLAsset):
     # Instance fields
-    type: Literal["query"] = "query"  # type: ignore[assignment]
+    type: Literal["query"] = "query"
     query: str
     column_splitter: Optional[SqlYearMonthSplitter] = None
 
@@ -416,7 +416,7 @@ class QueryAsset(_SQLAsset):
 
 class TableAsset(_SQLAsset):
     # Instance fields
-    type: Literal["table"] = "table"  # type: ignore[assignment]
+    type: Literal["table"] = "table"
     table_name: str
     schema_name: Optional[str] = None
     column_splitter: Optional[SqlYearMonthSplitter] = None
