@@ -7,7 +7,7 @@ from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
+    AbstractDataContext,  # noqa: TCH001
 )
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
@@ -21,7 +21,7 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
-from great_expectations.data_context.types.base import GXCloudConfig
+from great_expectations.data_context.types.base import GXCloudConfig  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 from typing_extensions import Literal
 
-from great_expectations.alias_types import PathStr
+from great_expectations.alias_types import PathStr  # noqa: TCH001
 from great_expectations.experimental.datasources.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
@@ -56,79 +56,32 @@ _ASSET_MODELS = _generate_pandas_data_asset_models(
     blacklist=_BLACK_LIST,
     use_docstring_from_method=True,
 )
-
-ClipboardAsset = _ASSET_MODELS["clipboard"]
-CSVAsset = _ASSET_MODELS["csv"]
-ExcelAsset = _ASSET_MODELS["excel"]
-FeatherAsset = _ASSET_MODELS["feather"]
-GBQAsset = _ASSET_MODELS["gbq"]
-HDFAsset = _ASSET_MODELS["hdf"]
-HTMLAsset = _ASSET_MODELS["html"]
-JSONAsset = _ASSET_MODELS["json"]
-ORCAsset = _ASSET_MODELS["orc"]
-ParquetAsset = _ASSET_MODELS["parquet"]
-PickleAsset = _ASSET_MODELS["pickle"]
-SASAsset = _ASSET_MODELS["sas"]
-SPSSAsset = _ASSET_MODELS["spss"]
-# SqlAsset = _ASSET_MODELS["sql"]
-SQLQueryAsset = _ASSET_MODELS["sql_query"]
-SQLTableAsset = _ASSET_MODELS["sql_table"]
-STATAAsset = _ASSET_MODELS["stata"]
-# TableAsset = _ASSET_MODELS["table"]
-XMLAsset = _ASSET_MODELS["xml"]
+try:
+    # variables only needed for type-hinting
+    CSVAsset = _ASSET_MODELS["csv"]
+    ExcelAsset = _ASSET_MODELS["excel"]
+    JSONAsset = _ASSET_MODELS["json"]
+    ORCAsset = _ASSET_MODELS["orc"]
+    ParquetAsset = _ASSET_MODELS["parquet"]
+except KeyError as key_err:
+    logger.info(f"zep - {key_err} asset model could not be generated")
+    CSVAsset = _FilesystemDataAsset
+    ExcelAsset = _FilesystemDataAsset
+    JSONAsset = _FilesystemDataAsset
+    ORCAsset = _FilesystemDataAsset
+    ParquetAsset = _FilesystemDataAsset
 
 
 class PandasDatasource(Datasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = [
-        ClipboardAsset,
-        CSVAsset,
-        ExcelAsset,
-        FeatherAsset,
-        GBQAsset,
-        HDFAsset,
-        HTMLAsset,
-        JSONAsset,
-        ORCAsset,
-        ParquetAsset,
-        PickleAsset,
-        SASAsset,
-        SPSSAsset,
-        SQLQueryAsset,
-        # SqlAsset,
-        SQLTableAsset,
-        STATAAsset,
-        # TableAsset,
-        XMLAsset,
-    ]
+    asset_types: ClassVar[List[Type[DataAsset]]] = list(_ASSET_MODELS.values())
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
     name: str
-    assets: Dict[  # type: ignore[valid-type]
+    assets: Dict[
         str,
-        Union[
-            _FilesystemDataAsset,
-            ClipboardAsset,
-            CSVAsset,
-            ExcelAsset,
-            FeatherAsset,
-            GBQAsset,
-            HDFAsset,
-            HTMLAsset,
-            JSONAsset,
-            ORCAsset,
-            ParquetAsset,
-            PickleAsset,
-            SASAsset,
-            SPSSAsset,
-            SQLQueryAsset,
-            # SqlAsset,
-            SQLTableAsset,
-            STATAAsset,
-            # TableAsset,
-            XMLAsset,
-        ],
+        _FilesystemDataAsset,
     ] = {}
 
     @property
@@ -152,7 +105,7 @@ class PandasDatasource(Datasource):
         # Only self.assets can be tested for PandasDatasource
         if self.assets and test_assets:
             for asset in self.assets.values():
-                asset.test_connection()  # type: ignore[union-attr]
+                asset.test_connection()
 
     def add_csv_asset(
         self,

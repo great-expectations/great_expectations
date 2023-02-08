@@ -25,7 +25,7 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.experimental.datasources.constants import _FIELDS_ALWAYS_SET
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,

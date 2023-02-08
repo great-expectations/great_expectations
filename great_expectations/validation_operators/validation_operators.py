@@ -8,9 +8,9 @@ from dateutil.parser import parse
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.async_executor import AsyncExecutor
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_asset import DataAsset
+from great_expectations.data_asset import DataAsset  # noqa: TCH001
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.resource_identifiers import (
