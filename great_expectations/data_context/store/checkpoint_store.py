@@ -5,7 +5,7 @@ import logging
 import os
 import random
 import uuid
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 
 from marshmallow import ValidationError
 
@@ -189,19 +189,14 @@ class CheckpointStore(ConfigurationStore):
             CheckpointError: If a Checkpoint with the given name already exists.
         """
         key = self._construct_key_from_checkpoint(checkpoint)
-
         try:
-            checkpoint_ref = self.add(key=key, value=checkpoint.get_config())  # type: ignore[func-returns-value]
+            return self._persist_checkpoint(
+                key=key, checkpoint=checkpoint, persistence_fn=self.add
+            )
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.CheckpointError(
                 f"A Checkpoint named {checkpoint.name} already exists."
             )
-
-        if isinstance(checkpoint_ref, GXCloudIDAwareRef):
-            cloud_id = checkpoint_ref.cloud_id
-            checkpoint.ge_cloud_id = uuid.UUID(cloud_id)  # type: ignore[misc]
-
-        return checkpoint
 
     def update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
         """Use a stand-alone Checkpoint object to update a persisted value.
@@ -216,19 +211,14 @@ class CheckpointStore(ConfigurationStore):
             CheckpointNotFoundError: If a Checkpoint with the given name does not exist in the store.
         """
         key = self._construct_key_from_checkpoint(checkpoint)
-
         try:
-            checkpoint_ref = self.update(key=key, value=checkpoint.get_config())  # type: ignore[func-returns-value]
+            return self._persist_checkpoint(
+                key=key, checkpoint=checkpoint, persistence_fn=self.update
+            )
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.CheckpointNotFoundError(
                 f"Could not find an existing Checkpoint named {checkpoint.name}."
             )
-
-        if isinstance(checkpoint_ref, GXCloudIDAwareRef):
-            cloud_id = checkpoint_ref.cloud_id
-            checkpoint.ge_cloud_id = uuid.UUID(cloud_id)  # type: ignore[misc]
-
-        return checkpoint
 
     def add_or_update_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
         """Use a stand-alone Checkpoint object to either add or update a persisted value.
@@ -240,22 +230,30 @@ class CheckpointStore(ConfigurationStore):
             The persisted Checkpoint (possibly modified state based on store backend).
         """
         key = self._construct_key_from_checkpoint(checkpoint)
-
-        checkpoint_ref = self.add_or_update(key=key, value=checkpoint.get_config())  # type: ignore[func-returns-value]
-        if isinstance(checkpoint_ref, GXCloudIDAwareRef):
-            cloud_id = checkpoint_ref.cloud_id
-            checkpoint.ge_cloud_id = uuid.UUID(cloud_id)  # type: ignore[misc]
-
-        return checkpoint
+        return self._persist_checkpoint(
+            key=key, checkpoint=checkpoint, persistence_fn=self.add_or_update
+        )
 
     def _construct_key_from_checkpoint(
         self, checkpoint: Checkpoint
-    ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
+    ) -> GXCloudIdentifier | ConfigurationIdentifier:
         name = checkpoint.name
         id = checkpoint.ge_cloud_id
         if id:
             return self.determine_key(ge_cloud_id=str(id))
         return self.determine_key(name=name)
+
+    def _persist_checkpoint(
+        self,
+        key: GXCloudIdentifier | ConfigurationIdentifier,
+        checkpoint: Checkpoint,
+        persistence_fn: Callable,
+    ) -> Checkpoint:
+        checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
+        if isinstance(checkpoint_ref, GXCloudIDAwareRef):
+            cloud_id = checkpoint_ref.cloud_id
+            checkpoint.config.ge_cloud_id = uuid.UUID(cloud_id)
+        return checkpoint
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
         """Create a checkpoint config in the store using a store_backend-specific key.

@@ -584,8 +584,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
         effective_rules.update(override_rules)
         return effective_rules
 
-    @staticmethod
+    @classmethod
     def _reconcile_rule_config(
+        cls,
         existing_rules: Dict[str, Rule],
         rule_name: str,
         rule_config: dict,
@@ -632,7 +633,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
             domain_builder_config: dict = rule_config.get("domain_builder", {})
             effective_domain_builder_config: dict = (
-                RuleBasedProfiler._reconcile_rule_domain_builder_config(
+                cls._reconcile_rule_domain_builder_config(
                     domain_builder=rule.domain_builder,
                     domain_builder_config=domain_builder_config,
                     reconciliation_strategy=reconciliation_directives.domain_builder,
@@ -644,7 +645,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
             effective_parameter_builder_configs: Optional[
                 List[dict]
-            ] = RuleBasedProfiler._reconcile_rule_parameter_builder_configs(
+            ] = cls._reconcile_rule_parameter_builder_configs(
                 rule=rule,
                 parameter_builder_configs=parameter_builder_configs,
                 reconciliation_strategy=reconciliation_directives.parameter_builder,
@@ -655,7 +656,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             )
             effective_expectation_configuration_builder_configs: List[
                 dict
-            ] = RuleBasedProfiler._reconcile_rule_expectation_configuration_builder_configs(
+            ] = cls._reconcile_rule_expectation_configuration_builder_configs(
                 rule=rule,
                 expectation_configuration_builder_configs=expectation_configuration_builder_configs,
                 reconciliation_strategy=reconciliation_directives.expectation_configuration_builder,
@@ -1053,8 +1054,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return dest_property_value
 
-    @staticmethod
+    @classmethod
     def run_profiler(
+        cls,
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
@@ -1064,7 +1066,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         variables: Optional[dict] = None,
         rules: Optional[dict] = None,
     ) -> RuleBasedProfilerResult:
-        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
+        profiler: RuleBasedProfiler = cls.get_profiler(
             data_context=data_context,
             profiler_store=profiler_store,
             name=name,
@@ -1083,8 +1085,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
             comment=None,
         )
 
-    @staticmethod
+    @classmethod
     def run_profiler_on_data(
+        cls,
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
         batch_list: Optional[List[Batch]] = None,
@@ -1092,7 +1095,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         name: Optional[str] = None,
         id: Optional[str] = None,
     ) -> RuleBasedProfilerResult:
-        profiler: RuleBasedProfiler = RuleBasedProfiler.get_profiler(
+        profiler: RuleBasedProfiler = cls.get_profiler(
             data_context=data_context,
             profiler_store=profiler_store,
             name=name,
@@ -1116,8 +1119,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
             comment=None,
         )
 
-    @staticmethod
+    @classmethod
     def add_profiler(
+        cls,
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
         name: str | None = None,
@@ -1127,7 +1131,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         variables: dict | None = None,
         profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfiler:
-        return RuleBasedProfiler._persist_profiler(
+        return cls._persist_profiler(
             data_context=data_context,
             persistence_fn=profiler_store.add,
             name=name,
@@ -1138,8 +1142,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
             profiler=profiler,
         )
 
-    @staticmethod
+    @classmethod
     def update_profiler(
+        cls,
         profiler_store: ProfilerStore,
         data_context: AbstractDataContext,
         name: str | None = None,
@@ -1149,7 +1154,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         variables: dict | None = None,
         profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfiler:
-        return RuleBasedProfiler._persist_profiler(
+        return cls._persist_profiler(
             data_context=data_context,
             persistence_fn=profiler_store.update,
             name=name,
@@ -1160,8 +1165,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
             profiler=profiler,
         )
 
-    @staticmethod
+    @classmethod
     def add_or_update_profiler(
+        cls,
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
         name: str | None = None,
@@ -1171,7 +1177,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         variables: dict | None = None,
         profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfiler:
-        return RuleBasedProfiler._persist_profiler(
+        return cls._persist_profiler(
             data_context=data_context,
             persistence_fn=profiler_store.add_or_update,
             name=name,
@@ -1182,8 +1188,9 @@ class BaseRuleBasedProfiler(ConfigPeer):
             profiler=profiler,
         )
 
-    @staticmethod
+    @classmethod
     def _persist_profiler(
+        cls,
         data_context: AbstractDataContext,
         persistence_fn: Callable,
         name: str | None = None,
@@ -1308,14 +1315,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return True
 
-    @staticmethod
+    @classmethod
     def get_profiler(
+        cls,
         data_context: AbstractDataContext,
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
         id: Optional[str] = None,
     ) -> RuleBasedProfiler:
-        key = RuleBasedProfiler._construct_profiler_key(name=name, id=id)
+        key = cls._construct_profiler_key(name=name, id=id)
         try:
             profiler_config: RuleBasedProfilerConfig = profiler_store.get(key=key)
         except gx_exceptions.InvalidKeyError as exc_ik:
@@ -1347,13 +1355,14 @@ class BaseRuleBasedProfiler(ConfigPeer):
 
         return profiler
 
-    @staticmethod
+    @classmethod
     def delete_profiler(
+        cls,
         profiler_store: ProfilerStore,
         name: Optional[str] = None,
         id: Optional[str] = None,
     ) -> None:
-        key = RuleBasedProfiler._construct_profiler_key(name=name, id=id)
+        key = cls._construct_profiler_key(name=name, id=id)
 
         try:
             profiler_store.remove_key(key=key)
