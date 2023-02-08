@@ -246,6 +246,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     # this section is only needed for when user is running our min supported pandas (1.1)
     # pandas now exclusively uses postponed/str annotations
     if not isinstance(annotation, str):
+        logger.debug(f"{param.name} has non-string annotations")
         # `__args__` contains the actual members of a `Union[TYPE_1, TYPE_2]` object
         union_types = getattr(annotation, "__args__", None)
         if union_types:
