@@ -731,11 +731,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource: None = ...,
         **kwargs,
     ) -> LegacyDatasource | BaseDatasource | None:
-        ...
         """
         A `name` is provided.
         `datasource` should not be provided.
         """
+        ...
 
     @overload
     def add_datasource(
@@ -827,7 +827,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
             # For any class that should be loaded, it may control its configuration construction
             # by implementing a classmethod called build_configuration
-            config: Union[CommentedMap, dict]
             if hasattr(datasource_class, "build_configuration"):
                 config = datasource_class.build_configuration(**kwargs)
             else:
@@ -895,30 +894,31 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return updated_datasource
 
-    @overload
-    def add_or_update_datasource(
-        self,
-        name: str = ...,
-        datasource: None = ...,
-        **kwargs,
-    ) -> LegacyDatasource | BaseDatasource | None:
-        ...
-        """
-        A `name` is provided.
-        `datasource` should not be provided.
-        """
+    # @overload
+    # def add_or_update_datasource(
+    #     self,
+    #     name: str = ...,
+    #     datasource: None = ...,
+    #     **kwargs,
+    # ) -> LegacyDatasource | BaseDatasource | None:
+    #     """
+    #     A `name` is provided.
+    #     `datasource` should not be provided.
+    #     """
+    #     ...
 
-    @overload
-    def add_or_update_datasource(
-        self,
-        name: None = ...,
-        datasource: LegacyDatasource | BaseDatasource = ...,
-        **kwargs,
-    ) -> LegacyDatasource | BaseDatasource | None:
-        """
-        A `datasource` is provided.
-        `name` should not be provided.
-        """
+    # @overload
+    # def add_or_update_datasource(
+    #     self,
+    #     name: None = ...,
+    #     datasource: LegacyDatasource | BaseDatasource = ...,
+    #     **kwargs,
+    # ) -> LegacyDatasource | BaseDatasource | None:
+    #     """
+    #     A `datasource` is provided.
+    #     `name` should not be provided.
+    #     """
+    #     ...
 
     @public_api
     @new_method_or_class(version="0.15.48")
@@ -940,7 +940,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             The Datasource added or updated by the input `kwargs`.
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
-        return self.add_datasource(name=name, datasource=datasource, **kwargs)
+        return self.add_datasource(name=name, datasource=datasource, **kwargs)  # type: ignore[arg-type,return-value]
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
