@@ -1464,6 +1464,78 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
+    @overload
+    def add_checkpoint(
+        self,
+        name: str = ...,
+        config_version: int | float | None = ...,
+        template_name: str | None = ...,
+        module_name: str | None = ...,
+        class_name: str | None = ...,
+        run_name_template: str | None = ...,
+        expectation_suite_name: str | None = ...,
+        batch_request: dict | None = ...,
+        action_list: list[dict] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        runtime_configuration: dict | None = ...,
+        validations: list[dict] | None = ...,
+        profilers: list[dict] | None = ...,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: str | None = ...,
+        batches: list[dict] | None = ...,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: str | list[str] | None = ...,
+        slack_webhook: str | None = ...,
+        notify_on: str | None = ...,
+        notify_with: str | list[str] | None = ...,
+        ge_cloud_id: str | None = ...,
+        expectation_suite_ge_cloud_id: str | None = ...,
+        default_validation_id: str | None = ...,
+        id: str | None = ...,
+        expectation_suite_id: str | None = ...,
+        checkpoint: None = ...,
+    ) -> Checkpoint:
+        """
+        Individual constructor arguments are provided.
+        `checkpoint` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_checkpoint(
+        self,
+        name: None = ...,
+        config_version: None = ...,
+        template_name: None = ...,
+        module_name: None = ...,
+        class_name: None = ...,
+        run_name_template: None = ...,
+        expectation_suite_name: None = ...,
+        batch_request: None = ...,
+        action_list: None = ...,
+        evaluation_parameters: None = ...,
+        runtime_configuration: None = ...,
+        validations: None = ...,
+        profilers: None = ...,
+        validation_operator_name: None = ...,
+        batches: None = ...,
+        site_names: None = ...,
+        slack_webhook: None = ...,
+        notify_on: None = ...,
+        notify_with: None = ...,
+        ge_cloud_id: None = ...,
+        expectation_suite_ge_cloud_id: None = ...,
+        default_validation_id: None = ...,
+        id: None = ...,
+        expectation_suite_id: None = ...,
+        checkpoint: Checkpoint = ...,
+    ) -> Checkpoint:
+        """
+        A `checkpoint` is provided.
+        Individual constructor arguments should not be provided.
+        """
+        ...
+
     @public_api
     @deprecated_argument(argument_name="validation_operator_name", version="0.14.0")
     @deprecated_argument(argument_name="batches", version="0.14.0")
@@ -1477,9 +1549,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48",
         message="To be used in place of `expectation_suite_ge_cloud_id`",
     )
+    @new_argument(
+        argument_name="checkpoint",
+        version="0.15.48",
+        message="Pass in an existing checkpoint instead of individual constructor args",
+    )
     def add_checkpoint(
         self,
-        name: str,
+        name: str | None = None,
         config_version: int | float | None = None,
         template_name: str | None = None,
         module_name: str | None = None,
@@ -1505,6 +1582,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a Checkpoint to the DataContext.
 
@@ -1536,6 +1614,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             default_validation_id: The default validation ID to use in generating this checkpoint.
             id: The ID to use in generating this checkpoint (preferred over `ge_cloud_id`).
             expectation_suite_id: The expectation suite ID to use in generating this checkpoint (preferred over `expectation_suite_ge_cloud_id`).
+            checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
             The Checkpoint object created.
@@ -1548,12 +1627,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         del ge_cloud_id
         del expectation_suite_ge_cloud_id
 
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
-            data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
+        checkpoint = self._resolve_add_checkpoint_args(
             name=name,
+            id=id,
             config_version=config_version,
             template_name=template_name,
             module_name=module_name,
@@ -1566,17 +1642,15 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            # Next two fields are for LegacyCheckpoint configuration
             validation_operator_name=validation_operator_name,
             batches=batches,
-            # the following four arguments are used by SimpleCheckpoint
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=id,
-            expectation_suite_ge_cloud_id=expectation_suite_id,
+            expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            checkpoint=checkpoint,
         )
 
         return self.checkpoint_store.add_checkpoint(checkpoint)
@@ -1597,11 +1671,83 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return self.checkpoint_store.update_checkpoint(checkpoint)
 
+    @overload
+    def add_or_update_checkpoint(
+        self,
+        name: str = ...,
+        config_version: int | float | None = ...,
+        template_name: str | None = ...,
+        module_name: str | None = ...,
+        class_name: str | None = ...,
+        run_name_template: str | None = ...,
+        expectation_suite_name: str | None = ...,
+        batch_request: dict | None = ...,
+        action_list: list[dict] | None = ...,
+        evaluation_parameters: dict | None = ...,
+        runtime_configuration: dict | None = ...,
+        validations: list[dict] | None = ...,
+        profilers: list[dict] | None = ...,
+        # Next two fields are for LegacyCheckpoint configuration
+        validation_operator_name: str | None = ...,
+        batches: list[dict] | None = ...,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: str | list[str] | None = ...,
+        slack_webhook: str | None = ...,
+        notify_on: str | None = ...,
+        notify_with: str | list[str] | None = ...,
+        ge_cloud_id: str | None = ...,
+        expectation_suite_ge_cloud_id: str | None = ...,
+        default_validation_id: str | None = ...,
+        id: str | None = ...,
+        expectation_suite_id: str | None = ...,
+        checkpoint: None = ...,
+    ) -> Checkpoint:
+        """
+        Individual constructor arguments are provided.
+        `checkpoint` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_or_update_checkpoint(
+        self,
+        name: None = ...,
+        config_version: None = ...,
+        template_name: None = ...,
+        module_name: None = ...,
+        class_name: None = ...,
+        run_name_template: None = ...,
+        expectation_suite_name: None = ...,
+        batch_request: None = ...,
+        action_list: None = ...,
+        evaluation_parameters: None = ...,
+        runtime_configuration: None = ...,
+        validations: None = ...,
+        profilers: None = ...,
+        validation_operator_name: None = ...,
+        batches: None = ...,
+        site_names: None = ...,
+        slack_webhook: None = ...,
+        notify_on: None = ...,
+        notify_with: None = ...,
+        ge_cloud_id: None = ...,
+        expectation_suite_ge_cloud_id: None = ...,
+        default_validation_id: None = ...,
+        id: None = ...,
+        expectation_suite_id: None = ...,
+        checkpoint: Checkpoint = ...,
+    ) -> Checkpoint:
+        """
+        A `checkpoint` is provided.
+        Individual constructor arguments should not be provided.
+        """
+        ...
+
     @public_api
     @new_method_or_class(version="0.15.48")
     def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
         self,
-        name: str,
+        name: str | None = None,
         id: str | None = None,
         config_version: int | float | None = None,
         template_name: str | None = None,
@@ -1622,6 +1768,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         notify_with: str | list[str] | None = None,
         expectation_suite_id: str | None = None,
         default_validation_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a new Checkpoint or update an existing one on the context depending on whether it already exists or not.
 
@@ -1646,16 +1793,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             notify_with: The notify with setting to use in generating this checkpoint. This is only used for SimpleCheckpoint configuration.
             expectation_suite_id: The expectation suite GE Cloud ID to use in generating this checkpoint.
             default_validation_id: The default validation ID to use in generating this checkpoint.
+            checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        checkpoint = Checkpoint.construct_from_config_args(
-            data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
+        checkpoint = self._resolve_add_checkpoint_args(
             name=name,
+            id=id,
             config_version=config_version,
             template_name=template_name,
             module_name=module_name,
@@ -1668,16 +1813,82 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            # the following four arguments are used by SimpleCheckpoint
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=id,
-            expectation_suite_ge_cloud_id=expectation_suite_id,
+            expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            checkpoint=checkpoint,
         )
+
         return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
+
+    def _resolve_add_checkpoint_args(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        validation_operator_name: str | None = None,
+        batches: list[dict] | None = None,
+        site_names: str | list[str] | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | list[str] | None = None,
+        expectation_suite_id: str | None = None,
+        default_validation_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
+    ) -> Checkpoint:
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        if not ((checkpoint is None) ^ (name is None)):
+            raise ValueError(
+                "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
+            )
+
+        if not checkpoint:
+            assert (
+                name
+            ), "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
+            checkpoint = Checkpoint.construct_from_config_args(
+                data_context=self,
+                checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
+                name=name,
+                config_version=config_version,
+                template_name=template_name,
+                module_name=module_name,
+                class_name=class_name,
+                run_name_template=run_name_template,
+                expectation_suite_name=expectation_suite_name,
+                batch_request=batch_request,
+                action_list=action_list,
+                evaluation_parameters=evaluation_parameters,
+                runtime_configuration=runtime_configuration,
+                validations=validations,
+                profilers=profilers,
+                validation_operator_name=validation_operator_name,
+                batches=batches,
+                site_names=site_names,
+                slack_webhook=slack_webhook,
+                notify_on=notify_on,
+                notify_with=notify_with,
+                ge_cloud_id=id,
+                expectation_suite_ge_cloud_id=expectation_suite_id,
+                default_validation_id=default_validation_id,
+            )
+
+        return checkpoint
 
     @public_api
     @new_argument(
@@ -2732,23 +2943,60 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"expectation_suite {expectation_suite_name} not found"
             )
 
-    @public_api
+    @overload
     def add_profiler(
         self,
         name: str,
         config_version: float,
-        rules: Dict[str, dict],
-        variables: Optional[dict] = None,
+        rules: dict[str, dict],
+        variables: dict | None = ...,
+        profiler: None = ...,
+    ) -> RuleBasedProfiler:
+        """
+        Individual constructors args (`name`, `config_version`, and `rules`) are provided.
+        `profiler` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_profiler(
+        self,
+        name: None = ...,
+        config_version: None = ...,
+        rules: None = ...,
+        variables: None = ...,
+        profiler: RuleBasedProfiler = ...,
+    ) -> RuleBasedProfiler:
+        """
+        `profiler` is provided.
+        Individual constructors args (`name`, `config_version`, and `rules`) should not be provided.
+        """
+        ...
+
+    @public_api
+    @new_argument(
+        argument_name="profiler",
+        version="0.15.48",
+        message="Pass in an existing profiler instead of individual constructor args",
+    )
+    def add_profiler(
+        self,
+        name: str | None = None,
+        config_version: float | None = None,
+        rules: dict[str, dict] | None = None,
+        variables: dict | None = None,
+        profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfiler:
         """
         Constructs a Profiler, persists it utilizing the context's underlying ProfilerStore,
         and returns it to the user for subsequent usage.
 
         Args:
-            name: The name of the RBP instance
-            config_version: The version of the RBP (currently only 1.0 is supported)
-            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and
-            variables: Any variables to be substituted within the rules
+            name: The name of the RBP instance.
+            config_version: The version of the RBP (currently only 1.0 is supported).
+            rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and expectation_configuration_builders.
+            variables: Any variables to be substituted within the rules.
+            profiler: An existing RuleBasedProfiler to persist.
 
         Returns:
             The persisted Profiler constructed by the input arguments.
@@ -2759,31 +3007,44 @@ class AbstractDataContext(ConfigPeer, ABC):
             config_version=config_version,
             rules=rules,
             variables=variables,
+            profiler=profiler,
         )
 
     def _add_profiler(
         self,
-        name: str,
+        name: str | None,
         id: str | None,
-        config_version: float,
-        rules: dict[str, dict],
+        config_version: float | None,
+        rules: dict[str, dict] | None,
         variables: dict | None,
+        profiler: RuleBasedProfiler | None,
     ) -> RuleBasedProfiler:
-        config_data = {
-            "name": name,
-            "id": id,
-            "config_version": config_version,
-            "rules": rules,
-            "variables": variables,
-        }
+        if not (
+            (profiler is None)
+            ^ all(arg is None for arg in (name, config_version, rules))
+        ):
+            raise ValueError(
+                "Must either pass in an existing profiler or individual constructor arguments (but not both)"
+            )
 
-        # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-        validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
-        profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
-        profiler_config.pop("class_name")
-        profiler_config.pop("module_name")
+        if profiler:
+            config = profiler.config
+        else:
+            config_data = {
+                "name": name,
+                "id": id,
+                "config_version": config_version,
+                "rules": rules,
+                "variables": variables,
+            }
 
-        config = RuleBasedProfilerConfig(**profiler_config)
+            # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
+            validated_config: dict = ruleBasedProfilerConfigSchema.load(config_data)
+            profiler_config: dict = ruleBasedProfilerConfigSchema.dump(validated_config)
+            profiler_config.pop("class_name")
+            profiler_config.pop("module_name")
+
+            config = RuleBasedProfilerConfig(**profiler_config)
 
         profiler = RuleBasedProfiler.add_profiler(
             config=config,
@@ -2877,15 +3138,46 @@ class AbstractDataContext(ConfigPeer, ABC):
             data_context=self,
         )
 
+    @overload
+    def add_or_update_profiler(
+        self,
+        name: str,
+        config_version: float,
+        rules: dict[str, dict],
+        variables: dict | None = ...,
+        profiler: None = ...,
+    ) -> RuleBasedProfiler:
+        """
+        Individual constructors args (`name`, `config_version`, and `rules`) are provided.
+        `profiler` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_or_update_profiler(
+        self,
+        name: None = ...,
+        config_version: None = ...,
+        rules: None = ...,
+        variables: None = ...,
+        profiler: RuleBasedProfiler = ...,
+    ) -> RuleBasedProfiler:
+        """
+        `profiler` is provided.
+        Individual constructors args (`name`, `config_version`, and `rules`) should not be provided.
+        """
+        ...
+
     @public_api
     @new_method_or_class(version="0.15.48")
     def add_or_update_profiler(
         self,
-        name: str,
+        name: str | None = None,
         id: str | None = None,
         config_version: float | None = None,
         rules: dict[str, dict] | None = None,
         variables: dict | None = None,
+        profiler: RuleBasedProfiler | None = None,
     ) -> RuleBasedProfiler:
         """Add a new Profiler or update an existing one on the context depending on whether it already exists or not.
 
@@ -2895,18 +3187,18 @@ class AbstractDataContext(ConfigPeer, ABC):
             rules: A set of dictionaries, each of which contains its own domain_builder, parameter_builders, and expectation_configuration_builders.
             variables: Any variables to be substituted within the rules.
             id: The id associated with the RBP instance (if applicable).
+            profiler: An existing RuleBasedProfiler to persist.
 
         Returns:
             A new Profiler or an updated one (depending on whether or not it existed before this method call).
         """
-        config_version = config_version or 1.0
-        rules = rules or {}
         return self._add_profiler(
             name=name,
             id=id,
             config_version=config_version,
             rules=rules,
             variables=variables,
+            profiler=profiler,
         )
 
     @usage_statistics_enabled_method(
