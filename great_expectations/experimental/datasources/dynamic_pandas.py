@@ -384,7 +384,7 @@ def _generate_pandas_data_asset_models(
             logger.info(f"{model_name} - {type(err).__name__}:{err}")
             continue
         except TypeError as err:
-            logger.warning(
+            logger.info(
                 f"pandas {pd.__version__}  {model_name} could not be created normally - {type(err).__name__}:{err} , skipping"
             )
             logger.info(f"{model_name} fields\n{pf(fields)}")
