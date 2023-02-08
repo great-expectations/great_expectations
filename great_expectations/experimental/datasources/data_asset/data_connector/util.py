@@ -65,7 +65,7 @@ except ImportError:
 
 def batch_definition_matches_batch_request(
     batch_definition: "BatchDefinition",  # noqa: E731
-    batch_request: BatchRequest,
+    batch_request: "BatchRequest",  # noqa: E731
 ) -> bool:
     # TODO: <Alex>ALEX</Alex>
     # assert isinstance(batch_definition, BatchDefinition)

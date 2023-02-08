@@ -211,7 +211,7 @@ class DataConnector:
     # TODO: <Alex>ALEX</Alex>
     # TODO: <Alex>ALEX-REPLACE_BY_REAL_ZEP_BATCH_REQUEST</Alex>
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: BatchRequest
+        self, batch_request: "BatchRequest"  # noqa: E731
     ) -> List["BatchDefinition"]:  # noqa: E731
         raise NotImplementedError
 
