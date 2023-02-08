@@ -41,11 +41,11 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestCase,
-    ExpectationTestDataCases,
+    ExpectationTestCase,  # noqa: TCH001
+    ExpectationTestDataCases,  # noqa: TCH001
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
-    ExpectationExecutionEngineDiagnostics,
+    ExpectationExecutionEngineDiagnostics,  # noqa: TCH001
 )
 from great_expectations.core.util import (
     get_or_create_spark_application,

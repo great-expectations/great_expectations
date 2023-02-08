@@ -56,7 +56,9 @@ from great_expectations.core.config_provider import (
     _EnvironmentConfigurationProvider,
     _RuntimeEnvironmentConfigurationProvider,
 )
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.expectation_configuration import (
+    ExpectationConfiguration,  # noqa: TCH001
+)
 from great_expectations.core.expectation_validation_result import get_metric_kwargs_id
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.core.run_identifier import RunIdentifier
@@ -71,11 +73,19 @@ from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     _YamlConfigValidator,
 )
-from great_expectations.data_context.data_context_variables import DataContextVariables
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariables,  # noqa: TCH001
+)
 from great_expectations.data_context.store import Store, TupleStoreBackend
-from great_expectations.data_context.store.expectations_store import ExpectationsStore
-from great_expectations.data_context.store.profiler_store import ProfilerStore
-from great_expectations.data_context.store.validations_store import ValidationsStore
+from great_expectations.data_context.store.expectations_store import (
+    ExpectationsStore,  # noqa: TCH001
+)
+from great_expectations.data_context.store.profiler_store import (
+    ProfilerStore,  # noqa: TCH001
+)
+from great_expectations.data_context.store.validations_store import (
+    ValidationsStore,  # noqa: TCH001
+)
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
@@ -113,8 +123,9 @@ from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.interfaces import Batch as XBatch
 from great_expectations.experimental.datasources.interfaces import (
     Datasource as XDatasource,
 )
@@ -158,7 +169,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
-    from great_expectations.experimental.datasources.interfaces import Batch as XBatch
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.validation_operators.validation_operators import (
@@ -852,7 +862,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The Datasource added or updated by the input `kwargs`.
         """
-        existing_datasource = None
+        existing_datasource: LegacyDatasource | BaseDatasource | XDatasource | None = (
+            None
+        )
         try:
             existing_datasource = self.get_datasource(name)
         except ValueError:
@@ -860,7 +872,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"Could not find an existing datasource named '{name}'; creating a new one."
             )
 
-        if existing_datasource:
+        if existing_datasource and isinstance(
+            existing_datasource, (LegacyDatasource, BaseDatasource)
+        ):
             result_datasource = self._update_datasource(
                 datasource=existing_datasource, **kwargs
             )
@@ -992,8 +1006,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             datasource_name = arg1
         try:
-            datasource: Union[LegacyDatasource, BaseDatasource] = self.get_datasource(
-                datasource_name=datasource_name
+            datasource: LegacyDatasource | BaseDatasource | XDatasource = (
+                self.get_datasource(datasource_name=datasource_name)
             )
             if issubclass(type(datasource), BaseDatasource):
                 api_version = "v3"
@@ -1059,8 +1073,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
-        datasource = self.get_datasource(batch_kwargs.get("datasource"))
-        batch = datasource.get_batch(
+        datasource_name: Optional[Any] = batch_kwargs.get("datasource")
+        datasource: LegacyDatasource | BaseDatasource | XDatasource
+        if isinstance(datasource_name, str):
+            datasource = self.get_datasource(datasource_name)
+        else:
+            datasource = self.get_datasource(None)  #  type: ignore[arg-type]
+        assert not isinstance(
+            datasource, XDatasource
+        ), "Experimental Datasource cannot be built from batch_kwargs"
+        batch = datasource.get_batch(  #  type: ignore[union-attr]
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
         if data_asset_type is None:
@@ -1436,7 +1458,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if datasource is None:
             raise ValueError(f"Datasource {datasource_name} not found")
 
-        if save_changes:
+        if save_changes and isinstance(datasource, (LegacyDatasource, BaseDatasource)):
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)  # type: ignore[attr-defined]
         self._cached_datasources.pop(datasource_name, None)
@@ -2128,9 +2150,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
         )
 
-        # We get a single BatchData so we can get the execution_engine here. All batches will share the same one
+        # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
-        execution_engine: ExecutionEngine = batch_list[-1].data.execution_engine
+        datasource_name: str = batch_list[-1].batch_definition.datasource_name
+        datasource: LegacyDatasource | BaseDatasource | XDatasource = self.datasources[
+            datasource_name
+        ]
+        execution_engine: ExecutionEngine
+        if isinstance(datasource, XDatasource):
+            batch = batch_list[-1]
+            assert isinstance(batch, XBatch)
+            execution_engine = batch.data.execution_engine
+        elif isinstance(datasource, BaseDatasource):
+            execution_engine = datasource.execution_engine
+        else:
+            raise gx_exceptions.DatasourceError(
+                message="LegacyDatasource cannot be used to create a Validator",
+                datasource_name=datasource_name,
+            )
 
         validator = Validator(
             execution_engine=execution_engine,
@@ -3475,6 +3512,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
+                    assert not isinstance(
+                        datasource, XDatasource
+                    ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
                     data_asset_names[
                         datasource_name
                     ] = datasource.get_available_data_asset_names(
@@ -3483,6 +3523,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
             elif len(batch_kwargs_generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
+                assert not isinstance(
+                    datasource, XDatasource
+                ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
                 # 20230120 - Chetan - I believe this is a latent bug - we should not be doing string-based indexing
                 #                     within a list. This will result in a runtime error.
                 datasource_names[  # type:ignore[call-overload]
@@ -3500,6 +3543,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             for datasource_name in datasource_names:
                 try:
                     datasource = self.get_datasource(datasource_name)
+                    assert not isinstance(
+                        datasource, XDatasource
+                    ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
                     data_asset_names[
                         datasource_name
                     ] = datasource.get_available_data_asset_names()

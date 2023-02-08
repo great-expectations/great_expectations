@@ -40,7 +40,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions.exceptions import DataContextError
-from great_expectations.render.renderer.site_builder import SiteBuilder
+from great_expectations.render.renderer.site_builder import SiteBuilder  # noqa: TCH001
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
