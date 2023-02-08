@@ -5,7 +5,17 @@ import pickle
 import warnings
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchMarkers
@@ -17,7 +27,6 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compression
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.polars_batch_data import PolarsBatchData
@@ -70,6 +79,10 @@ try:
 except ImportError:
     pl_DataFrame = None
     pl = None
+
+if TYPE_CHECKING:
+    from great_expectations.core.metric_domain_types import MetricDomainTypes
+
 
 HASH_THRESHOLD = 1e9
 

@@ -109,7 +109,6 @@ def column_aggregate_value(
         def wrapper(metric_fn: Callable):
             @metric_value(
                 engine=PolarsExecutionEngine,
-                metric_fn_type=metric_fn_type,
                 domain_type=domain_type,
             )
             @wraps(metric_fn)

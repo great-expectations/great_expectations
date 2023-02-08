@@ -21,7 +21,13 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_manager import BatchManager
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.util import (
+    AzureUrl,
+    DBFSPath,
+    GCSUrl,
+    S3Url,
+    convert_to_json_serializable,
+)
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.expectations.row_conditions import (
     RowCondition,

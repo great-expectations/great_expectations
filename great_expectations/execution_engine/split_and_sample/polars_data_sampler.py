@@ -1,5 +1,6 @@
 import hashlib
 import random  # noqa: F401
+from typing import TYPE_CHECKING
 
 try:
     from polars import DataFrame as pl_DataFrame
@@ -8,10 +9,12 @@ except ImportError:
     pl_DataFrame = None
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.id_dict import BatchSpec
 
 
 class PolarsDataSampler(DataSampler):
