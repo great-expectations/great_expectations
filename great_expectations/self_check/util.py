@@ -67,7 +67,6 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.polars_execution_engine import (
     PolarsExecutionEngine,
 )
-from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )

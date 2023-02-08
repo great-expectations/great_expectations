@@ -617,7 +617,7 @@ class Validator:
         expectation_type: str,
         expectation_kwargs: dict,
         meta: dict,
-        expectation_impl: "Expectation",  # noqa: F821
+        expectation_impl: Expectation,  # noqa: F821
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
         auto: bool = expectation_kwargs.get("auto", False)
