@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Union
 
-from great_expectations.data_context.types.base import BaseYamlConfig
+from great_expectations.data_context.types.base import BaseYamlConfig  # noqa: TCH001
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
