@@ -16,9 +16,9 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
+    FilesystemDataAsset,
     JSONAsset,
     PandasDatasource,
-    FilesystemDataAsset,
 )
 
 if TYPE_CHECKING:
