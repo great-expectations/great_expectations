@@ -22,15 +22,15 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "base_directory": {
-            "title": "Base Directory",
-            "type": "string",
-            "format": "path"
-        },
         "regex": {
             "title": "Regex",
             "type": "string",
             "format": "regex"
+        },
+        "base_directory": {
+            "title": "Base Directory",
+            "type": "string",
+            "format": "path"
         },
         "io": {
             "title": "Io"
@@ -149,8 +149,8 @@
     },
     "required": [
         "name",
-        "base_directory",
         "regex",
+        "base_directory",
         "io"
     ],
     "additionalProperties": false,
