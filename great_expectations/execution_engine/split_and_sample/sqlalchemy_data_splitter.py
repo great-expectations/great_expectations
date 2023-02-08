@@ -45,7 +45,7 @@ except ImportError:
     concat = None
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TCH004
     from sqlalchemy.sql.expression import Cast, ColumnOperators
 
     from great_expectations.execution_engine.sqlalchemy_execution_engine import (

@@ -5,13 +5,13 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
-    BatchDefinition,
-    BatchMarkers,
-    BatchRequestBase,
+    BatchDefinition,  # noqa: TCH001
+    BatchMarkers,  # noqa: TCH001
+    BatchRequestBase,  # noqa: TCH001
 )
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
