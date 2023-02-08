@@ -558,7 +558,7 @@ class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
         return psycopg2_success and postgresql_psycopg2_success
 
 
-class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
+class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
     def __init__(self, datasource_name: Optional[str]) -> None:
         # We are insisting on psycopg2 driver when adding a Redshift datasource
         # through the CLI to avoid over-complication of this flow. If user wants
@@ -813,11 +813,12 @@ table_name = "YOUR_TABLE_NAME"'''
 SQLYAMLHelpers: TypeAlias = Union[
     MySQLCredentialYamlHelper,
     PostgresCredentialYamlHelper,
-    AthenaCredentialYamlHelper,
+    RedshiftCredentialYamlHelper,
     SnowflakeCredentialYamlHelper,
     BigqueryCredentialYamlHelper,
     ConnectionStringCredentialYamlHelper,
     TrinoCredentialYamlHelper,
+    AthenaCredentialYamlHelper,
 ]
 
 
@@ -827,10 +828,11 @@ def _get_sql_yaml_helper_class(
     helper_class_by_backend: Dict[SupportedDatabaseBackends, Type[SQLYAMLHelpers]] = {
         SupportedDatabaseBackends.POSTGRES: PostgresCredentialYamlHelper,
         SupportedDatabaseBackends.MYSQL: MySQLCredentialYamlHelper,
-        SupportedDatabaseBackends.REDSHIFT: AthenaCredentialYamlHelper,
+        SupportedDatabaseBackends.REDSHIFT: RedshiftCredentialYamlHelper,
         SupportedDatabaseBackends.SNOWFLAKE: SnowflakeCredentialYamlHelper,
         SupportedDatabaseBackends.BIGQUERY: BigqueryCredentialYamlHelper,
         SupportedDatabaseBackends.TRINO: TrinoCredentialYamlHelper,
+        SupportedDatabaseBackends.ATHENA: AthenaCredentialYamlHelper,
         SupportedDatabaseBackends.OTHER: ConnectionStringCredentialYamlHelper,
     }
     helper_class = helper_class_by_backend[selected_database]
