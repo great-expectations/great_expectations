@@ -14,13 +14,8 @@ echo "Building sphinx API docs."
 (cd docs/sphinx_api_docs_source; invoke docs)
 
 echo "Copying previous versions"
-echo "Installing aws cli"
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-
-echo "Downloading previous versions"
-aws s3 cp s3://superconductive-public/oss_prior_documentation_versions/ .
+curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_prior_documentation_versions/oss_prior_documentation_versions.zip" -o "oss_prior_documentation_versions.zip"
+unzip oss_prior_documentation_versions.zip
 
 echo "Building docusaurus docs."
 yarn build
