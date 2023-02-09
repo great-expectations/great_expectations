@@ -789,7 +789,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             initialize=initialize,
             save_changes=save_changes,
             datasource=datasource,
-            overwrite_existing=False,
             **kwargs,
         )
 
@@ -808,7 +807,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         initialize: bool = True,
         save_changes: bool | None = None,
         datasource: LegacyDatasource | BaseDatasource | None = None,
-        overwrite_existing: bool = False,
         **kwargs,
     ) -> LegacyDatasource | BaseDatasource | None:
         save_changes = self._determine_save_changes_flag(save_changes)
@@ -822,7 +820,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "module_name", "great_expectations.datasource"
             )
             verify_dynamic_loading_support(module_name=module_name)
-            class_name: Optional[str] = kwargs.get("class_name")  # type: ignore[assignment]
+            class_name = kwargs.get("class_name", "Datasource")
             datasource_class = load_class(
                 module_name=module_name, class_name=class_name
             )
@@ -947,7 +945,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource = self._add_datasource(
             name=name,
             datasource=datasource,
-            overwrite_existing=True,
             **kwargs,
         )
         assert datasource is not None
