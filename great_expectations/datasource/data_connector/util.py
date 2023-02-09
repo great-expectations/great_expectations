@@ -1,4 +1,4 @@
-# Utility methods for dealing with DataConnector objects
+from __future__ import annotations
 
 import copy
 import logging
@@ -402,6 +402,7 @@ def list_azure_keys(
             if isinstance(item, BlobPrefix):
                 if recursive:
                     _walk_blob_hierarchy(name_starts_with=item.name)
+
             else:
                 path_list.append(item.name)
 
@@ -571,11 +572,9 @@ def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
     return sorter
 
 
-def _build_asset_from_config(
-    runtime_environment: "DataConnector", config: dict
-) -> Asset:
+def _build_asset_from_config(runtime_environment: DataConnector, config: dict) -> Asset:
     """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""
-    runtime_environment_dict: Dict[str, "DataConnector"] = {
+    runtime_environment_dict: Dict[str, DataConnector] = {
         "data_connector": runtime_environment
     }
     config = assetConfigSchema.load(config)
