@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import copy
-from typing import List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import (
     DataContextKey,
     DataContextVariableKey,
 )
-from great_expectations.core.serializer import AbstractConfigSerializer  # noqa: TCH001
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
@@ -15,10 +15,13 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import (
-    GXCloudIdentifier,  # noqa: TCH001
-)
 from great_expectations.util import filter_properties_dict
+
+if TYPE_CHECKING:
+    from great_expectations.core.serializer import AbstractConfigSerializer
+    from great_expectations.data_context.types.resource_identifiers import (
+        GXCloudIdentifier,
+    )
 
 
 class DatasourceStore(Store):
@@ -144,20 +147,6 @@ class DatasourceStore(Store):
             id=datasource_config.id,
         )
 
-    def set_by_name(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> None:
-        """Persists a DatasourceConfig in the store by a given name.
-
-        Args:
-            datasource_name: The name of the Datasource to update.
-            datasource_config: The config object to persist using the StoreBackend.
-        """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
-        self.set(datasource_key, datasource_config)
-
     def set(  # type: ignore[override]
         self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
     ) -> DatasourceConfig:
@@ -186,6 +175,29 @@ class DatasourceStore(Store):
 
         return return_value
 
+    def add_by_name(
+        self, datasource_name: str, datasource_config: DatasourceConfig
+    ) -> None:
+        """Persists a DatasourceConfig in the store by a given name.
+
+        Args:
+            datasource_name: The name of the Datasource to update.
+            datasource_config: The config object to persist using the StoreBackend.
+
+        Raises:
+            DatasourceError: A DatasourceConfig with the given key already exists in the store.
+        """
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(
+            datasource_name=datasource_name
+        )
+        try:
+            self.add(key=datasource_key, value=datasource_config)
+        except gx_exceptions.StoreBackendError:
+            raise gx_exceptions.DatasourceError(
+                datasource_name=datasource_name,
+                message="A Datasource with the given name already exists",
+            )
+
     def update_by_name(
         self, datasource_name: str, datasource_config: DatasourceConfig
     ) -> None:
@@ -196,19 +208,28 @@ class DatasourceStore(Store):
             datasource_config: The config object to persist using the StoreBackend.
 
         Raises:
-            ValueError if a DatasourceConfig is not found.
+            DatasourceNotFoundError: If a DatasourceConfig is not found.
         """
         datasource_key: DataContextVariableKey = self._determine_datasource_key(
             datasource_name=datasource_name
         )
-        if not self.has_key(datasource_key):  # noqa: W601
-            raise ValueError(
-                f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
+        try:
+            self.update(key=datasource_key, value=datasource_config)
+        except gx_exceptions.StoreBackendError:
+            raise gx_exceptions.DatasourceNotFoundError(
+                f"Could not find an existing Datasource named {datasource_name}."
             )
 
-        self.set_by_name(
-            datasource_name=datasource_name, datasource_config=datasource_config
+    def add_or_update_by_name(
+        self, datasource_name: str, datasource_config: DatasourceConfig
+    ) -> None:
+        """
+        TODO
+        """
+        datasource_key: DataContextVariableKey = self._determine_datasource_key(
+            datasource_name=datasource_name
         )
+        self.add_or_update(key=datasource_key, value=datasource_config)
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
         datasource_key = DataContextVariableKey(

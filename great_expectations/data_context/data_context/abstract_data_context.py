@@ -864,7 +864,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _update_datasource(
         self,
         datasource: LegacyDatasource | BaseDatasource,
-        save_changes: bool | None = None,
+        save_changes: bool,
     ) -> Datasource:
         name = datasource.name
         config = datasource.config
@@ -890,31 +890,31 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         return updated_datasource
 
-    # @overload
-    # def add_or_update_datasource(
-    #     self,
-    #     name: str = ...,
-    #     datasource: None = ...,
-    #     **kwargs,
-    # ) -> LegacyDatasource | BaseDatasource | None:
-    #     """
-    #     A `name` is provided.
-    #     `datasource` should not be provided.
-    #     """
-    #     ...
+    @overload
+    def add_or_update_datasource(
+        self,
+        name: str = ...,
+        datasource: None = ...,
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource | None:
+        """
+        A `name` is provided.
+        `datasource` should not be provided.
+        """
+        ...
 
-    # @overload
-    # def add_or_update_datasource(
-    #     self,
-    #     name: None = ...,
-    #     datasource: LegacyDatasource | BaseDatasource = ...,
-    #     **kwargs,
-    # ) -> LegacyDatasource | BaseDatasource | None:
-    #     """
-    #     A `datasource` is provided.
-    #     `name` should not be provided.
-    #     """
-    #     ...
+    @overload
+    def add_or_update_datasource(
+        self,
+        name: None = ...,
+        datasource: LegacyDatasource | BaseDatasource = ...,
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource | None:
+        """
+        A `datasource` is provided.
+        `name` should not be provided.
+        """
+        ...
 
     @public_api
     @new_method_or_class(version="0.15.48")
