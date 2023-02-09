@@ -1945,7 +1945,9 @@ def get_context(
 
     if not project_config:
         project_config = DataContextConfig(
-            store_backend_defaults=InMemoryStoreBackendDefaults()
+            store_backend_defaults=InMemoryStoreBackendDefaults(
+                init_temp_docs_sites=True
+            )
         )
 
     return EphemeralDataContext(

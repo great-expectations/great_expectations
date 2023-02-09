@@ -5110,7 +5110,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         index_page_locator_infos = {}
 
-        sites = self.variables.data_docs_sites
+        sites = self._get_data_doc_sites()
         if sites:
             logger.debug("Found data_docs_sites. Building sites...")
 
@@ -5152,6 +5152,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             logger.debug("No data_docs_config found. No site(s) built.")
 
         return index_page_locator_infos
+
+    def _get_data_doc_sites(self):
+        return self.variables.data_docs_sites
 
     def _init_site_builder_for_data_docs_site_creation(
         self,

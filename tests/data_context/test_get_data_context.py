@@ -9,7 +9,10 @@ from great_expectations.data_context.cloud_constants import GXCloudEnvironmentVa
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
-from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.base import (
+    DataContextConfig,
+    InMemoryStoreBackendDefaults,
+)
 from great_expectations.exceptions import ConfigNotFoundError
 from tests.test_utils import working_directory
 
@@ -233,3 +236,11 @@ def test_cloud_context_with_in_memory_config_overrides(
 def test_invalid_root_dir_gives_error(clear_env_vars):
     with pytest.raises(ConfigNotFoundError):
         gx.get_context(context_root_dir="i/dont/exist")
+
+
+@pytest.mark.unit
+def test_get_context_with_no_arguments_returns_ephemeral():
+    context = gx.get_context()
+    assert isinstance(context, EphemeralDataContext)
+    defaults = InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
+    assert context.config.stores == defaults.stores
