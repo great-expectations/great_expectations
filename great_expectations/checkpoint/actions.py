@@ -34,7 +34,9 @@ from great_expectations.checkpoint.util import (
     send_sns_notification,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_validation_result import ExpectationSuiteValidationResult  # noqa: TCH001
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,  # noqa: TCH001
+)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
