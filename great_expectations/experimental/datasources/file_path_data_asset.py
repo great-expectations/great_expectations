@@ -12,7 +12,6 @@ from typing import (
     Optional,
     Pattern,
     Set,
-    cast,
 )
 
 import pydantic
@@ -30,7 +29,8 @@ from great_expectations.experimental.datasources.interfaces import (
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition
-    from great_expectations.core.batch_spec import BatchMarkers, PathBatchSpec
+    from great_expectations.core.batch_spec import BatchMarkers
+    from great_expectations.core.id_dict import BatchSpec
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -129,16 +129,15 @@ class _FilePathDataAsset(DataAsset):
 
         batch_list: List[Batch] = []
 
-        batch_spec: PathBatchSpec
+        batch_spec: BatchSpec
         batch_spec_options: dict
         batch_data: Any
         batch_markers: BatchMarkers
         batch_metadata: BatchRequestOptions
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = cast(
-                PathBatchSpec,
-                data_connector.build_batch_spec(batch_definition=batch_definition),
+            batch_spec = data_connector.build_batch_spec(
+                batch_definition=batch_definition
             )
             batch_spec_options = {
                 "reader_method": self._get_reader_method(),
