@@ -152,7 +152,7 @@ class TestExcludeUnsetAssetFields:
     """
 
     def test_from_datasource(self, asset_dict: dict):
-        ds_mapping = {"csv": "pandas", "json": "pandas"}
+        ds_mapping = {"csv": "pandas_filesystem", "json": "pandas_filesystem"}
 
         ds_type_: str = ds_mapping[asset_dict["type"]]
         ds_class = _SourceFactories.type_lookup[ds_type_]
@@ -161,12 +161,15 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "base_directory": pathlib.Path(__file__),
                 "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
         asset_name = asset_dict["name"]
-        ds_dict = {"name": "my_ds", "assets": {asset_name: asset_dict}}
+        ds_dict = {
+            "name": "my_ds",
+            "base_directory": pathlib.Path(__file__),
+            "assets": {asset_name: asset_dict},
+        }
         datasource: Datasource = ds_class.parse_obj(ds_dict)
         assert asset_dict == datasource.dict()["assets"][asset_name]
 
@@ -178,14 +181,14 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "base_directory": pathlib.Path(__file__),
                 "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
         asset_name = asset_dict["name"]
         ds_dict = {
             "name": "my_ds",
-            "type": "pandas",
+            "type": "pandas_filesystem",
+            "base_directory": pathlib.Path(__file__),
             "assets": {asset_name: asset_dict},
         }
         gx_config = GxConfig.parse_obj({"xdatasources": {"my_ds": ds_dict}})
