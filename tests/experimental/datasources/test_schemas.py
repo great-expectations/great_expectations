@@ -40,7 +40,7 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     """
 
     def _sort_required_lists(schema_as_dict: dict) -> None:
-        """Someties "required" lists come unsorted, causing misleading assertion failures; this corrects the issue.
+        """Sometimes "required" lists come unsorted, causing misleading assertion failures; this corrects the issue.
 
         Args:
             schema_as_dict: source dictionary (will be modified "in-situ")
