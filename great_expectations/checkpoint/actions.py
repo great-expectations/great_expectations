@@ -10,8 +10,10 @@ import logging
 import warnings
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 from urllib.parse import urljoin
+
 import requests
 from typing_extensions import Final
+
 from great_expectations.core import ExpectationSuiteValidationResult  # noqa: TCH001
 from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
@@ -33,11 +35,11 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -1273,7 +1275,9 @@ class APINotificationAction(ValidationAction):
         elif "active_batch_definition" in validation_result_suite.meta:
             data_asset_name = (
                 validation_result_suite.meta["active_batch_definition"].data_asset_name
-                if validation_result_suite.meta["active_batch_definition"].data_asset_name
+                if validation_result_suite.meta[
+                    "active_batch_definition"
+                ].data_asset_name
                 else "__no_data_asset_name__"
             )
         else:
@@ -1289,7 +1293,9 @@ class APINotificationAction(ValidationAction):
         )
 
         response = self.send_results(payload)
-        return f"Successfully Posted results to API, status code - {response.status_code} "
+        return (
+            f"Successfully Posted results to API, status code - {response.status_code} "
+        )
 
     def send_results(self, payload) -> None:
         try:
