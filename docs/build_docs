@@ -6,11 +6,15 @@
 echo "checking git log before doing anything"
 git --no-pager log -n 5 --format=oneline
 
+git pull
+
 # Get latest version, check out and build API docs using the latest
 git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V
 GX_LATEST=$(git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V | tail -1)
 echo "Using latest version ${GX_LATEST} to build docs."
 git checkout $GX_LATEST
+
+git pull
 
 echo "checking git log after checkout latest"
 git --no-pager log -n 5 --format=oneline
@@ -29,8 +33,11 @@ echo "Copying previous versions"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"
 unzip -o oss_docs_versions.zip -d .
 
+# TODO: Should this instead check out the branch that we were on before checking out the new version? I think so
 echo "Checking out develop to build the rest of the docs."
 git checkout develop
+
+git pull
 
 echo "checking git log after checking out develop"
 git --no-pager log -n 5 --format=oneline
