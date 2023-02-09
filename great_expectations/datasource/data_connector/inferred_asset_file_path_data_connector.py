@@ -65,7 +65,7 @@ class InferredAssetFilePathDataConnector(FilePathDataConnector):
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
-    def get_data_reference_list_count(self) -> int:
+    def get_data_reference_count(self) -> int:
         """
         Returns the list of data_references known by this DataConnector by looping over all data_asset_names in
         _data_references_cache

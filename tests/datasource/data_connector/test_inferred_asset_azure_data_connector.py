@@ -257,7 +257,7 @@ def test_instantiation_with_account_url_and_credential(
     assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
 
@@ -290,7 +290,7 @@ def test_instantiation_with_conn_str_and_credential(
     assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
 
