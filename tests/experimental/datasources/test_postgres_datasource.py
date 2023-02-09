@@ -191,7 +191,6 @@ def create_and_add_table_asset_without_testing_connection(
         table_name=table_name,
         column_splitter=column_splitter,
     )
-    # TODO: asset custom init
     table_asset._datasource = source
     source.assets[table_asset.name] = table_asset
     return source, table_asset

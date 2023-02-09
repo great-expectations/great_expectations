@@ -24,7 +24,6 @@ from pydantic import Field, StrictBool, StrictInt, root_validator, validate_argu
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.experimental.datasources.constants import _FIELDS_ALWAYS_SET
 from great_expectations.experimental.datasources.experimental_base_model import (
@@ -134,7 +133,11 @@ def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
         return BatchSorter(key=sort_key, reverse=False)
 
 
-class DataAsset(ExperimentalBaseModel):
+# It would be best to bind this to Datasource, but we can't now due to circular dependencies
+_DatasourceT = TypeVar("_DatasourceT")
+
+
+class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -143,12 +146,13 @@ class DataAsset(ExperimentalBaseModel):
     # * type: Literal["csv"] = "csv"
     name: str
     type: str
+
     order_by_setter: BatchSortersDefinition = Field(
         default_factory=list, alias="order_by", exclude=True
     )
 
     # non-field private attributes
-    _datasource: Datasource = pydantic.PrivateAttr()
+    _datasource: _DatasourceT = pydantic.PrivateAttr()
 
     @property
     def order_by(self) -> List[BatchSorter]:
@@ -156,20 +160,12 @@ class DataAsset(ExperimentalBaseModel):
             _batch_sorter_from_str(sort_key=batch_sorter)
             if isinstance(batch_sorter, str)
             else batch_sorter
-            for batch_sorter in self._order_by
+            for batch_sorter in self.order_by_setter
         ]
 
     @property
-    def datasource(self) -> Datasource:
+    def datasource(self) -> _DatasourceT:
         return self._datasource
-
-    @datasource.setter
-    # TODO (kilo): remove setter and add custom init for DataAsset to inject datasource in constructor??
-    # This setter is non-functional: https://github.com/pydantic/pydantic/issues/3395
-    # There is some related discussion linked from that ticket which may be a workaround.
-    def datasource(self, ds: Datasource):
-        assert isinstance(ds, Datasource)
-        self._datasource = ds
 
     def test_connection(self) -> None:
         """Test the connection for the DataAsset.
@@ -214,18 +210,8 @@ class DataAsset(ExperimentalBaseModel):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        if options is not None and not self._valid_batch_request_options(options):
-            allowed_keys = set(self.batch_request_options_template().keys())
-            actual_keys = set(options.keys())
-            raise ge_exceptions.InvalidBatchRequestError(
-                "Batch request options should only contain keys from the following set:\n"
-                f"{allowed_keys}\nbut your specified keys contain\n"
-                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
-            )
-        return BatchRequest(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
-            options=options or {},
+        raise NotImplementedError(
+            """One must implement "get_batch_request" on a DataAsset subclass."""
         )
 
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
@@ -239,21 +225,9 @@ class DataAsset(ExperimentalBaseModel):
         Args:
             batch_request: A batch request object to be validated.
         """
-        if not (
-            batch_request.datasource_name == self.datasource.name
-            and batch_request.data_asset_name == self.name
-            and self._valid_batch_request_options(batch_request.options)
-        ):
-            expect_batch_request_form = BatchRequest(
-                datasource_name=self.datasource.name,
-                data_asset_name=self.name,
-                options=self.batch_request_options_template(),
-            )
-            raise ge_exceptions.InvalidBatchRequestError(
-                "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
-            )
+        raise NotImplementedError(
+            """One must implement "_validate_batch_request" on a DataAsset subclass."""
+        )
 
     # Sorter methods
     @pydantic.validator("order_by_setter", pre=True, each_item=True)
@@ -297,7 +271,7 @@ class DataAsset(ExperimentalBaseModel):
         """
         # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
         # https://docs.pydantic.dev/usage/model_config/#options
-        self.order_by = _batch_sorter_from_list(sorters)
+        self.order_by_setter = sorters
         return self
 
     def sort_batches(self, batch_list: List[Batch]) -> None:

@@ -22,6 +22,10 @@ if TYPE_CHECKING:
         PandasExecutionEngine,
         SparkDFExecutionEngine,
     )
+    from great_expectations.experimental.datasources import (
+        PandasFilesystemDatasource,
+        SparkDatasource,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -45,24 +49,17 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        from great_expectations.experimental.datasources import (
-            PandasFilesystemDatasource,
-            SparkDatasource,
-        )
-
-        assert isinstance(
-            self.datasource, (PandasFilesystemDatasource, SparkDatasource)
-        )
+        datasource: PandasFilesystemDatasource | SparkDatasource = self.datasource
 
         success = False
-        for filepath in self.datasource.base_directory.iterdir():
+        for filepath in datasource.base_directory.iterdir():
             if self.regex.match(filepath.name):
                 # if one file in the path matches the regex, we consider this asset valid
                 success = True
                 break
         if not success:
             raise TestConnectionError(
-                f"No file at path: {self.datasource.base_directory.resolve()} matched the regex: {self.regex.pattern}"
+                f"No file at path: {datasource.base_directory.resolve()} matched the regex: {self.regex.pattern}"
             )
 
     def _fully_specified_batch_requests_with_path(
@@ -79,16 +76,9 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
             This list will be empty if no files exist on disk that correspond to the input
             batch request.
         """
-        from great_expectations.experimental.datasources import (
-            PandasFilesystemDatasource,
-            SparkDatasource,
-        )
+        datasource: PandasFilesystemDatasource | SparkDatasource = self.datasource
 
-        assert isinstance(
-            self.datasource, (PandasFilesystemDatasource, SparkDatasource)
-        )
-
-        base_directory: pathlib.Path = self.datasource.base_directory
+        base_directory: pathlib.Path = datasource.base_directory
         all_files: List[pathlib.Path] = list(pathlib.Path(base_directory).iterdir())
 
         batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
@@ -115,7 +105,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                     batch_requests_with_path.append(
                         (
                             BatchRequest(
-                                datasource_name=self.datasource.name,
+                                datasource_name=datasource.name,
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),

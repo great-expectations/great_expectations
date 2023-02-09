@@ -186,7 +186,7 @@ class SqliteDatasource(SQLDatasource):
             name=name,
             table_name=table_name,
             schema_name=schema_name,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=order_by or [],
             # see TableAsset._parse_order_by_sorter()
         )
         asset._datasource = self
@@ -212,7 +212,7 @@ class SqliteDatasource(SQLDatasource):
         asset = SqliteQueryAsset(
             name=name,
             query=query,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=order_by or [],
             # see TableAsset._parse_order_by_sorter()
         )
         asset._datasource = self
