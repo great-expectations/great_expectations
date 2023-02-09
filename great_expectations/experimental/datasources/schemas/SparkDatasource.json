@@ -71,6 +71,11 @@
                         "$ref": "#/definitions/BatchSorter"
                     }
                 },
+                "glob_directive": {
+                    "title": "Glob Directive",
+                    "default": "**/*",
+                    "type": "string"
+                },
                 "base_directory": {
                     "title": "Base Directory",
                     "type": "string",
