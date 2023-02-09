@@ -41,6 +41,17 @@ def spark_datasource(test_backends) -> SparkDatasource:
     )
 
 
+@pytest.fixture
+def csv_path() -> pathlib.Path:
+    relative_path = pathlib.Path(
+        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+    )
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path
+
+
 @pytest.mark.unit
 def test_construct_spark_datasource(spark_datasource: SparkDatasource):
     assert spark_datasource.name == "spark_datasource"
@@ -291,25 +302,19 @@ def test_spark_sorter(
             assert metadata[key2] == range2
 
 
-def bad_regex_config() -> tuple[re.Pattern, TestConnectionError]:
-    relative_path = pathlib.Path(
-        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    base_directory = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
+def bad_regex_config(csv_path: pathlib.Path) -> tuple[re.Pattern, TestConnectionError]:
     regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     test_connection_error = TestConnectionError(
-        f"No file at path: {base_directory.resolve()} matched the regex: {regex.pattern}",
+        f"No file at path: {csv_path.resolve()} matched the regex: {regex.pattern}",
     )
     return regex, test_connection_error
 
 
 @pytest.fixture(params=[bad_regex_config])
 def datasource_test_connection_error_messages(
-    spark_datasource: SparkDatasource, request
+    csv_path: pathlib.Path, spark_datasource: SparkDatasource, request
 ) -> tuple[SparkDatasource, TestConnectionError]:
-    base_directory, regex, test_connection_error = request.param()
+    regex, test_connection_error = request.param(csv_path=csv_path)
     csv_spark_asset = CSVSparkAsset(
         name="csv_spark_asset",
         regex=regex,
