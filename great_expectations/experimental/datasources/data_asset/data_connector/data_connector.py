@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations.core._docs_decorators import public_api
@@ -60,7 +61,7 @@ class DataConnector:
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict = {}
 
-        self._data_context_root_directory: Optional[str] = None
+        self._data_context_root_directory: Optional[pathlib.Path] = None
 
     @property
     def name(self) -> str:
@@ -75,11 +76,13 @@ class DataConnector:
         return self._datasource_name
 
     @property
-    def data_context_root_directory(self) -> str:
+    def data_context_root_directory(self) -> pathlib.Path:
         return self._data_context_root_directory
 
     @data_context_root_directory.setter
-    def data_context_root_directory(self, data_context_root_directory: str) -> None:
+    def data_context_root_directory(
+        self, data_context_root_directory: pathlib.Path
+    ) -> None:
         self._data_context_root_directory = data_context_root_directory
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:

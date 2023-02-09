@@ -65,18 +65,18 @@ class FilesystemDataConnector(FilePathDataConnector):
         self._glob_directive: str = glob_directive
 
     @property
-    def base_directory(self) -> str:
+    def base_directory(self) -> pathlib.Path:
         """
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
         root directory. If it is absolute, then keep as-is.
         """
         return normalize_directory_path(
-            dir_path=str(self._base_directory),
+            dir_path=self._base_directory,
             root_directory_path=self.data_context_root_directory,
         )
 
     def _get_data_reference_list(self) -> List[str]:
-        base_directory: str = self.base_directory
+        base_directory: pathlib.Path = self.base_directory
         glob_directive: str = self._glob_directive
         path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(
             base_directory_path=base_directory, glob_directive=glob_directive
@@ -84,5 +84,4 @@ class FilesystemDataConnector(FilePathDataConnector):
         return sorted(path_list)
 
     def _get_full_file_path(self, path: str) -> str:
-        base_directory: str = self.base_directory
-        return str(pathlib.Path(base_directory).joinpath(path))
+        return str(self.base_directory.joinpath(path))

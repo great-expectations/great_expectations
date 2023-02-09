@@ -3,11 +3,11 @@ from __future__ import annotations
 import copy
 import logging
 import os
+import pathlib
 import re
 import sre_constants
 import sre_parse
 import warnings
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Set, Union
 
 from great_expectations.core.id_dict import IDDict
@@ -294,17 +294,17 @@ def sanitize_prefix_for_s3(text: str) -> str:
 
 
 def normalize_directory_path(
-    dir_path: str, root_directory_path: Optional[str] = None
-) -> str:
+    dir_path: pathlib.Path, root_directory_path: Optional[pathlib.Path] = None
+) -> pathlib.Path:
     # If directory is a relative path, interpret it as relative to the root directory.
-    if Path(dir_path).is_absolute() or root_directory_path is None:
+    if dir_path.is_absolute() or root_directory_path is None:
         return dir_path
 
-    return str(Path(root_directory_path).joinpath(dir_path))
+    return root_directory_path.joinpath(dir_path)
 
 
 def get_filesystem_one_level_directory_glob_path_list(
-    base_directory_path: str, glob_directive: str
+    base_directory_path: pathlib.Path, glob_directive: str
 ) -> List[str]:
     """
     List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
@@ -312,7 +312,7 @@ def get_filesystem_one_level_directory_glob_path_list(
     :param glob_directive -- glob expansion directive
     :returns -- list of relative file paths
     """
-    globbed_paths = Path(base_directory_path).glob(glob_directive)
+    globbed_paths = base_directory_path.glob(glob_directive)
     path_list: List[str] = [
         os.path.relpath(str(posix_path), base_directory_path)
         for posix_path in globbed_paths
