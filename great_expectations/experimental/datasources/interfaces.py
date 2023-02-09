@@ -148,7 +148,8 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
     type: str
 
     order_by_setter: BatchSortersDefinition = Field(
-        default_factory=list, alias="order_by", exclude=True
+        default_factory=list,
+        alias="order_by",
     )
 
     # non-field private attributes
