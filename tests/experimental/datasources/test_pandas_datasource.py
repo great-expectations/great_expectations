@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Type
 
-import pandas as pd
 import pydantic
 import pytest
 from pytest import MonkeyPatch, param
