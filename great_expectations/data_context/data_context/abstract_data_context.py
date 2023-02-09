@@ -818,10 +818,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         if datasource:
             config = datasource.config
         else:
-            module_name: str = kwargs.get("module_name", "great_expectations.datasource")  # type: ignore[assignment]
+            module_name: str = kwargs.get(
+                "module_name", "great_expectations.datasource"
+            )
             verify_dynamic_loading_support(module_name=module_name)
             class_name: Optional[str] = kwargs.get("class_name")  # type: ignore[assignment]
-            datasource_class = load_class(module_name=module_name, class_name=class_name)  # type: ignore[arg-type]
+            datasource_class = load_class(
+                module_name=module_name, class_name=class_name
+            )
 
             # For any class that should be loaded, it may control its configuration construction
             # by implementing a classmethod called build_configuration
