@@ -69,6 +69,7 @@ def test_basic_instantiation():
 
     # Missing "data_asset_name" argument.
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="something",
@@ -489,7 +490,7 @@ def test_return_only_unique_batch_definitions():
         data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
-        regex=re.compile(r"(?P<name>.+)\/.+\.csv"),
+        regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         prefix="A",
     )
     assert my_data_connector.self_check() == {
@@ -522,7 +523,7 @@ def test_return_only_unique_batch_definitions():
         data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
-        regex=re.compile(r"(?P<directory>.+)\/(?P<filename>.+\.csv)"),
+        regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         prefix="B",
     )
 
