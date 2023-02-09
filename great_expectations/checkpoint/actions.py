@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING, Dict, List, Union
 import requests
 from typing_extensions import Final
 
-from great_expectations.core import ExpectationSuiteValidationResult  # noqa: TCH001
 from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import (
