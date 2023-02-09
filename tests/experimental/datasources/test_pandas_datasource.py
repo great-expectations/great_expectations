@@ -478,7 +478,7 @@ def test_pandas_sorter(
             assert metadata[key2] == range2
 
 
-def bad_regex_config(csv_path: pathlib) -> tuple[re.Pattern, TestConnectionError]:
+def bad_regex_config(csv_path: pathlib.Path) -> tuple[re.Pattern, TestConnectionError]:
     regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     test_connection_error = TestConnectionError(
         f"No file at path: {csv_path.resolve()} matched the regex: {regex.pattern}"
@@ -488,9 +488,11 @@ def bad_regex_config(csv_path: pathlib) -> tuple[re.Pattern, TestConnectionError
 
 @pytest.fixture(params=[bad_regex_config])
 def datasource_test_connection_error_messages(
-    pandas_filesystem_datasource: PandasFilesystemDatasource, request
+    csv_path: pathlib.Path,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+    request,
 ) -> tuple[PandasFilesystemDatasource, TestConnectionError]:
-    regex, test_connection_error = request.param()
+    regex, test_connection_error = request.param(csv_path=csv_path)
     csv_asset = CSVAsset(
         name="csv_asset",
         regex=regex,
