@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import inspect
 import logging
 import re
 from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Type, Union
@@ -19,6 +18,7 @@ from great_expectations.experimental.datasources.interfaces import (
     DataAsset,
     Datasource,
 )
+from great_expectations.experimental.datasources.signatures import _merge_signatures
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
@@ -197,32 +197,6 @@ class PandasDatasource(Datasource):
         )
         return self.add_asset(asset)
 
-
-# https://github.com/pydantic/pydantic/blob/v1.10.4/pydantic/main.py#L285
-add_fn: inspect.Signature = inspect.signature(PandasDatasource.add_csv_asset)
-print(f"\tadd_csv_asset initial ->\n{add_fn}\n")
-
-csv_init = inspect.signature(CSVAsset)
-print(f"\tCSVAsset ->\n{csv_init}\n")
-
-_EXCLUDE_FROM_SIGNATURE: set[str] = {"type", "*"}
-
-merged_params: List[inspect.Parameter] = [*add_fn.parameters.values()]
-# TODO only kickout kwargs
-merged_params.pop(-1)
-# print(merged_params)
-
-for name, param in csv_init.parameters.items():
-    if param.kind == inspect.Parameter.VAR_POSITIONAL:
-        # print(f"Skip VAR_POSITIONAL {name}")
-        continue
-    if name in add_fn.parameters or name in _EXCLUDE_FROM_SIGNATURE:
-        # print(f"Skip {name}")
-        continue
-    # print(name, param)
-    merged_params.append(param)
-
-PandasDatasource.add_csv_asset.__signature__ = inspect.Signature(
-    parameters=merged_params, return_annotation=add_fn.return_annotation
-)
-print(f"\tadd_csv_asset final -> \n{inspect.signature(PandasDatasource.add_csv_asset)}")
+    add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset)
+    add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset)
+    add_parquet_asset.__signature__ = _merge_signatures(add_parquet_asset, ParquetAsset)
