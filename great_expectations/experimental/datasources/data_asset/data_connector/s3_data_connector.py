@@ -43,6 +43,7 @@ class S3DataConnector(FilePathDataConnector):
         delimiter (str): S3 delimiter
         max_keys (int): S3 max_keys (default is 1000)
         boto3_options (dict): optional boto3 options
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
         # TODO: <Alex>ALEX</Alex>
@@ -60,6 +61,7 @@ class S3DataConnector(FilePathDataConnector):
         delimiter: str = "/",
         max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
@@ -70,6 +72,7 @@ class S3DataConnector(FilePathDataConnector):
             data_asset_name=data_asset_name,
             execution_engine_name=execution_engine_name,
             regex=regex,
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>

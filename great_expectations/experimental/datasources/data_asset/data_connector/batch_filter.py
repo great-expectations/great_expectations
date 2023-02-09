@@ -1,12 +1,10 @@
+from __future__ import annotations
+
 import itertools
 import logging
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.core.batch import BatchDefinition
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.id_dict import IDDict
 from great_expectations.util import is_int
 
@@ -205,8 +203,8 @@ class BatchFilter:
 
     def select_from_data_connector_query(
         self,
-        batch_definition_list: Optional[List["BatchDefinition"]] = None,  # noqa: E731
-    ) -> List["BatchDefinition"]:  # noqa: E731
+        batch_definition_list: Optional[List[BatchDefinition]] = None,
+    ) -> List[BatchDefinition]:
         if batch_definition_list is None:
             return []
 

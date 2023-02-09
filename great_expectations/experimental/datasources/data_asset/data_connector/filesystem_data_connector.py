@@ -29,6 +29,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         name (str): name of ConfiguredAssetFilesystemDataConnector
         regex (pattern): Optional regex pattern for filtering data references
         glob_directive (str): glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): Optional list if you want to sort the data_references
         # TODO: <Alex>ALEX</Alex>
@@ -43,6 +44,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         base_directory: pathlib.Path,
         regex: Optional[re.Pattern] = None,
         glob_directive: str = "**/*",
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
@@ -53,6 +55,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             data_asset_name=data_asset_name,
             execution_engine_name=execution_engine_name,
             regex=regex,
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>

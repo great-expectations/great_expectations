@@ -1,5 +1,4 @@
 import os
-import pathlib
 import re
 from typing import List
 
@@ -166,7 +165,7 @@ def test_return_all_batch_definitions_unsorted():
     # with empty options
     unsorted_batch_definition_list: List[
         BatchDefinition
-    ] = my_data_connector._get_batch_definition_list_from_batch_request(
+    ] = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
             datasource_name="my_dataframe_datasource",
             data_asset_name="my_s3_data_asset",

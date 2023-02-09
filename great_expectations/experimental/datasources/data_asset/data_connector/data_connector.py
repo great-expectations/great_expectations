@@ -1,13 +1,10 @@
+from __future__ import annotations
+
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from great_expectations.core._docs_decorators import public_api
-
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.core.batch import BatchDefinition, BatchRequestBase
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.id_dict import BatchSpec
-from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition
@@ -15,87 +12,6 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
-
-
-class DataConnectorStorageDataReferenceResolver:
-    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
-        "InferredAssetS3DataConnector": "S3",
-        "ConfiguredAssetS3DataConnector": "S3",
-        "InferredAssetGCSDataConnector": "GCS",
-        "ConfiguredAssetGCSDataConnector": "GCS",
-        "InferredAssetAzureDataConnector": "ABS",
-        "ConfiguredAssetAzureDataConnector": "ABS",
-        "InferredAssetDBFSDataConnector": "DBFS",
-        "ConfiguredAssetDBFSDataConnector": "DBFS",
-    }
-    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
-        tuple[str, str], Callable
-    ] = {
-        (
-            "S3",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "S3",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "GCS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "GCS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "ABS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "ABS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "DBFS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
-            **template_arguments
-        ),
-        (
-            "DBFS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
-            **template_arguments
-        ),
-    }
-
-    @staticmethod
-    def resolve_data_reference(
-        data_connector_name: str,
-        execution_engine_name: str,
-        template_arguments: dict,
-    ):
-        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
-            data_connector_name
-        ]
-        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
-            (storage_name, execution_engine_name)
-        ](
-            template_arguments
-        )
 
 
 # noinspection SpellCheckingInspection
@@ -121,7 +37,10 @@ class DataConnector:
     snapshots of batches or store metadata from an external data version control system.
 
     Args:
-        name: The name of the Data Connector.
+        name: The name of the DataConnector instance
+        datasource_name: The name of the Datasource associated with this DataConnector instance
+        data_asset_name: The name of the DataAsset using this DataConnector instance
+        execution_engine_name: The name of the ExecutionEngine associated with this DataConnector instance
     """
 
     def __init__(
@@ -163,29 +82,7 @@ class DataConnector:
     def data_context_root_directory(self, data_context_root_directory: str) -> None:
         self._data_context_root_directory = data_context_root_directory
 
-    # TODO: <Alex>ALEX</Alex>
-    # def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
-    #     """
-    #     Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
-    #
-    #     Args:
-    #         batch_definition (BatchDefinition): required batch_definition parameter for retrieval
-    #     Returns:
-    #         BatchSpec object built from BatchDefinition
-    #
-    #     """
-    #     batch_spec_params: dict = (
-    #         self._generate_batch_spec_parameters_from_batch_definition(
-    #             batch_definition=batch_definition
-    #         )
-    #     )
-    #     batch_spec = BatchSpec(**batch_spec_params)
-    #     return batch_spec
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    def build_batch_spec(
-        self, batch_definition: "BatchDefinition"
-    ) -> BatchSpec:  # noqa: E731
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> BatchSpec:
         """
         Builds batch_spec from batch_definition by generating batch_spec params and adding any pass_through params
 
@@ -203,22 +100,10 @@ class DataConnector:
         batch_spec = BatchSpec(**batch_spec_params)
         return batch_spec
 
-    # TODO: <Alex>ALEX</Alex>
-
-    # TODO: <Alex>ALEX</Alex>
-    # def get_batch_definition_list_from_batch_request(
-    #     self, batch_request: BatchRequestBase
-    # ) -> List[BatchDefinition]:
-    #     raise NotImplementedError
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX-REPLACE_BY_REAL_ZEP_BATCH_REQUEST</Alex>
     def get_batch_definition_list_from_batch_request(
-        self, batch_request: "BatchRequest"  # noqa: E731
-    ) -> List["BatchDefinition"]:  # noqa: E731
+        self, batch_request: BatchRequest
+    ) -> List[BatchDefinition]:
         raise NotImplementedError
-
-    # TODO: <Alex>ALEX</Alex>
 
     def get_data_reference_count(self) -> int:
         raise NotImplementedError
@@ -226,52 +111,25 @@ class DataConnector:
     def get_unmatched_data_references(self) -> List[Any]:
         raise NotImplementedError
 
-    # TODO: <Alex>ALEX</Alex>
-    # def _generate_batch_spec_parameters_from_batch_definition(
-    #     self, batch_definition: BatchDefinition
-    # ) -> dict:
-    #     raise NotImplementedError
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     def _generate_batch_spec_parameters_from_batch_definition(
-        self, batch_definition: "BatchDefinition"  # noqa: E731
+        self, batch_definition: BatchDefinition
     ) -> dict:
         raise NotImplementedError
-
-    # TODO: <Alex>ALEX</Alex>
 
     def _refresh_data_references_cache(
         self,
     ) -> None:
         raise NotImplementedError
 
-    # TODO: <Alex>ALEX</Alex>
-    # def _map_data_reference_to_batch_definition_list(
-    #     self, data_reference: Any
-    # ) -> Optional[List[BatchDefinition]]:
-    #     raise NotImplementedError
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: Any
-    ) -> Optional[List["BatchDefinition"]]:  # noqa: E731
+    ) -> Optional[List[BatchDefinition]]:
         raise NotImplementedError
 
-    # TODO: <Alex>ALEX</Alex>
-
-    # TODO: <Alex>ALEX</Alex>
-    # def _map_batch_definition_to_data_reference(
-    #     self, batch_definition: BatchDefinition
-    # ) -> Any:
-    #     raise NotImplementedError
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     def _map_batch_definition_to_data_reference(
-        self, batch_definition: "BatchDefinition"  # noqa: E731
+        self, batch_definition: BatchDefinition
     ) -> Any:
         raise NotImplementedError
-
-    # TODO: <Alex>ALEX</Alex>
 
     def _get_data_reference_list(self) -> List[str]:
         """
@@ -280,23 +138,12 @@ class DataConnector:
         """
         raise NotImplementedError
 
-    def resolve_data_reference(self, template_arguments: dict):
-        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            execution_engine_name=self._execution_engine_name,
-            template_arguments=template_arguments,
-        )
-
     def self_check(self, pretty_print=True, max_examples=3):
         """
         Checks the configuration of the current DataConnector by doing the following :
 
         1. refresh or create data_reference_cache
         2. print unmatched data_references, and allow the user to modify the regex or glob configuration if necessary
-        3. select a random data_reference and attempt to retrieve and print the first few rows to user
-
-        When used as part of the test_yaml_config() workflow, the user will be able to know if the data_connector is properly configured.
 
         Args:
             pretty_print (bool): should the output be printed?
