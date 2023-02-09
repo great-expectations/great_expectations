@@ -11,7 +11,7 @@ from moto import mock_s3
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.experimental.datasources.data_asset.data_connector.configured_asset_s3_data_connector import (
+from great_expectations.experimental.datasources.data_asset.data_connector.s3_data_connector import (
     S3DataConnector,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
