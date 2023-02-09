@@ -162,7 +162,7 @@ class RuntimeDataConnector(DataConnector):
             ]
             return data_reference_list  # type: ignore[return-value] # could be list of lists
 
-    def get_data_reference_list_count(self) -> int:
+    def get_data_reference_count(self) -> int:
         """
         Get number of data_references corresponding to all data_asset_names in cache. In cases where the
         RuntimeDataConnector has been passed a BatchRequest with the same data_asset_name but different
