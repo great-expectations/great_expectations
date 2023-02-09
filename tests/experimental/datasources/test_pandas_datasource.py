@@ -49,6 +49,17 @@ def pandas_filesystem_datasource() -> PandasFilesystemDatasource:
     )
 
 
+@pytest.fixture
+def csv_path() -> pathlib.Path:
+    relative_path = pathlib.Path(
+        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+    )
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path
+
+
 class SpyInterrupt(RuntimeError):
     """
     Exception that may be raised to interrupt the control flow of the program
@@ -202,11 +213,15 @@ class TestDynamicPandasAssets:
     def test_data_asset_reader_options_passthrough(
         self,
         empty_data_context: AbstractDataContext,
+        csv_path: pathlib.Path,
         capture_reader_fn_params: tuple[list[list], list[dict]],
         extra_kwargs: dict,
     ):
         batch_request = (
-            empty_data_context.sources.add_pandas("my_pandas")
+            empty_data_context.sources.add_pandas_filesystem(
+                "my_pandas",
+                base_directory=csv_path,
+            )
             .add_csv_asset(
                 "my_csv",
                 regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
@@ -463,16 +478,10 @@ def test_pandas_sorter(
             assert metadata[key2] == range2
 
 
-def bad_regex_config() -> tuple[re.Pattern, TestConnectionError]:
-    relative_path = pathlib.Path(
-        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
-    )
-    base_directory = (
-        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
-    )
+def bad_regex_config(csv_path: pathlib) -> tuple[re.Pattern, TestConnectionError]:
     regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     test_connection_error = TestConnectionError(
-        f"No file at path: {base_directory.resolve()} matched the regex: {regex.pattern}"
+        f"No file at path: {csv_path.resolve()} matched the regex: {regex.pattern}"
     )
     return regex, test_connection_error
 
