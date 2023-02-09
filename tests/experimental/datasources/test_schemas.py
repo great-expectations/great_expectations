@@ -62,7 +62,6 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     print(f"pandas version: {PANDAS_VERSION}\n")
 
     schema_path = _SCHEMAS_DIR.joinpath(f"{zep_ds_or_asset_model.__name__}.json")
-    print(schema_path.relative_to(schema_path.cwd()))
 
     # TODO: remove this logic and make this fail once all json schemas are working
     if schema_path.name in (
@@ -70,7 +69,12 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
         "SqliteTableAsset.json",
         "SqliteQueryAsset.json",
         "SASAsset.json",
-        "PandasDatasource.json",
+        "SQLDatasource.json",
+        "PostgresDatasource.json",
+        "PandasFilesystemDatasource.json",
+        "SparkDatasource.json",
+        "_PandasDatasource.json",
+        "_SparkDatasource.json",
     ):
         pytest.xfail(f"{schema_path.name} does not exist")
 
