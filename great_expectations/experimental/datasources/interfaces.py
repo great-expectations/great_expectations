@@ -81,7 +81,7 @@ class BatchSorter:
     reverse: bool = False
 
 
-BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str]]
+BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str], list]
 
 
 def _is_batch_sorter_list(
@@ -143,10 +143,21 @@ class DataAsset(ExperimentalBaseModel):
     # * type: Literal["csv"] = "csv"
     name: str
     type: str
-    order_by: List[BatchSorter] = Field(default_factory=list)
+    order_by_setter: BatchSortersDefinition = Field(
+        default_factory=list, alias="order_by", exclude=True
+    )
 
     # non-field private attributes
     _datasource: Datasource = pydantic.PrivateAttr()
+
+    @property
+    def order_by(self) -> List[BatchSorter]:
+        return [
+            _batch_sorter_from_str(sort_key=batch_sorter)
+            if isinstance(batch_sorter, str)
+            else batch_sorter
+            for batch_sorter in self._order_by
+        ]
 
     @property
     def datasource(self) -> Datasource:
@@ -245,7 +256,7 @@ class DataAsset(ExperimentalBaseModel):
             )
 
     # Sorter methods
-    @pydantic.validator("order_by", pre=True, each_item=True)
+    @pydantic.validator("order_by_setter", pre=True, each_item=True)
     def _parse_order_by_sorter(
         cls, v: Union[str, BatchSorter]
     ) -> Union[BatchSorter, dict]:
