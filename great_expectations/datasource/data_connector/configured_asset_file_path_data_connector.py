@@ -123,7 +123,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         path_list: List[str] = self._get_data_reference_list_for_asset(asset=asset)
         return path_list
 
-    def get_data_reference_list_count(self) -> int:
+    def get_data_reference_count(self) -> int:
         """
         Returns the list of data_references known by this DataConnector by looping over all data_asset_names in
         _data_references_cache
