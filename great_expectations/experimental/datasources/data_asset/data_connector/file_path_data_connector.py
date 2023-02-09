@@ -29,10 +29,8 @@ from great_expectations.experimental.datasources.data_asset.data_connector.util 
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import (
-        BatchDefinition,
-        BatchRequest,
-    )
+    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.experimental.datasources.interfaces import BatchRequest
 
 
 logger = logging.getLogger(__name__)
@@ -162,7 +160,7 @@ class FilePathDataConnector(DataConnector):
             execution_engine_name=execution_engine_name,
         )
 
-        self._regex: Optional[re.Pattern] = regex
+        self._regex: re.Pattern = regex
         self._regex_parser: RegExParser = RegExParser(
             regex_pattern=regex, unnamed_regex_group_prefix=unnamed_regex_group_prefix
         )
@@ -312,8 +310,8 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
-            mapped_batch_definition_list: List[
-                BatchDefinition
+            mapped_batch_definition_list: Optional[
+                List[BatchDefinition]
             ] = self._map_data_reference_to_batch_definition_list(
                 data_reference=data_reference
             )

@@ -54,7 +54,7 @@ class S3DataConnector(FilePathDataConnector):
         data_asset_name: str,
         execution_engine_name: str,
         bucket: str,
-        regex: Optional[re.Pattern] = None,
+        regex: re.Pattern,
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
