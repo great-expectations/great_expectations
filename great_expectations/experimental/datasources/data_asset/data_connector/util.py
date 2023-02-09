@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import logging
 import os
@@ -64,7 +66,7 @@ except ImportError:
 
 
 def batch_definition_matches_batch_request(
-    batch_definition: "BatchDefinition",  # noqa: E731
+    batch_definition: BatchDefinition,
     batch_request: "BatchRequest",  # noqa: E731
 ) -> bool:
     # TODO: <Alex>ALEX</Alex>
@@ -144,7 +146,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     data_reference: str,
     regex_pattern: re.Pattern,
     data_asset_name: Optional[str] = None,
-) -> Optional[List["BatchDefinition"]]:  # noqa: E731
+) -> Optional[List[BatchDefinition]]:
     batch_identifiers: Optional[
         IDDict
     ] = convert_data_reference_string_to_batch_identifiers_using_regex(
@@ -212,7 +214,7 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
-    batch_definition: "BatchDefinition",  # noqa: E731
+    batch_definition: BatchDefinition,
     regex_pattern: re.Pattern,
     group_names: List[str],
 ) -> str:
