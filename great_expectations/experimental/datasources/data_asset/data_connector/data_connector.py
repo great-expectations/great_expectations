@@ -76,12 +76,12 @@ class DataConnector:
         return self._datasource_name
 
     @property
-    def data_context_root_directory(self) -> pathlib.Path:
+    def data_context_root_directory(self) -> Optional[pathlib.Path]:
         return self._data_context_root_directory
 
     @data_context_root_directory.setter
     def data_context_root_directory(
-        self, data_context_root_directory: pathlib.Path
+        self, data_context_root_directory: Optional[pathlib.Path]
     ) -> None:
         self._data_context_root_directory = data_context_root_directory
 

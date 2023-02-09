@@ -148,7 +148,7 @@ class FilePathDataConnector(DataConnector):
         datasource_name: str,
         data_asset_name: str,
         execution_engine_name: str,
-        regex: Optional[re.Pattern] = None,
+        regex: re.Pattern,
         unnamed_regex_group_prefix: str = "batch_request_param_",
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>

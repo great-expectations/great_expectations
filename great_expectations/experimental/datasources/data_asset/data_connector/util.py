@@ -77,7 +77,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     data_connector_name: str,
     data_reference: str,
     regex_pattern: re.Pattern,
-    data_asset_name: Optional[str] = None,
+    data_asset_name: str,
 ) -> Optional[List[BatchDefinition]]:
     batch_identifiers: Optional[
         IDDict
@@ -222,7 +222,7 @@ def _invert_regex_to_data_reference_template(
         regex_pattern = regex_pattern.pattern
 
     # print("-"*80)
-    parsed_sre = sre_parse.parse(regex_pattern)
+    parsed_sre = sre_parse.parse(str(regex_pattern))
     for token, value in parsed_sre:  # type: ignore[attr-defined]
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template

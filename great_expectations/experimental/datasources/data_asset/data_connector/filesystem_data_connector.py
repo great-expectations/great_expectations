@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import List, Optional
+from typing import List
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.experimental.datasources.data_asset.data_connector.file_path_data_connector import (
@@ -42,7 +42,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         data_asset_name: str,
         execution_engine_name: str,
         base_directory: pathlib.Path,
-        regex: Optional[re.Pattern] = None,
+        regex: re.Pattern,
         glob_directive: str = "**/*",
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
