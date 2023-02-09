@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import logging
-from typing import ClassVar, Dict, List, Optional, Pattern, Set
+import re
+from typing import ClassVar, Dict, List, Optional, Pattern, Set, Union
 
 import pydantic
 
@@ -28,7 +29,7 @@ class _FilePathDataAsset(DataAsset):
     }
 
     # General file-path DataAsset pertaining attributes.
-    regex: Pattern
+    _regex: Union[str, Pattern] = pydantic.Field(alias="regex")
 
     # Internal attributes
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
@@ -64,6 +65,12 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
+
+    @property
+    def regex(self) -> Pattern:
+        if isinstance(self._regex, str):
+            return re.compile(self._regex)
+        return self._regex
 
     def batch_request_options_template(
         self,
