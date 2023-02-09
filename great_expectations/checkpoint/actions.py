@@ -1293,7 +1293,7 @@ class APINotificationAction(ValidationAction):
 
         response = self.send_results(payload)
         return (
-            f"Successfully Posted results to API, status code - {response.status_code} "
+            f"Successfully Posted results to API, status code - {response.status_code}"
         )
 
     def send_results(self, payload) -> None:

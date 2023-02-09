@@ -602,7 +602,6 @@ def test_api_action_run(
     validation_result_suite,
     validation_result_suite_id,
     data_context_simple_expectation_suite,
-    file_data_asset,
 ):
     mock_response = mock.MagicMock()
     mock_response.status_code = 200
