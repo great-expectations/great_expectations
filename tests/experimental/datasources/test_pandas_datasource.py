@@ -463,16 +463,7 @@ def test_pandas_sorter(
             assert metadata[key2] == range2
 
 
-def bad_base_directory_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
-    base_directory = pathlib.Path("/this/path/is/not/here")
-    regex = re.compile(r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
-    test_connection_error = TestConnectionError(
-        f"Path: {base_directory.resolve()} does not exist."
-    )
-    return base_directory, regex, test_connection_error
-
-
-def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
+def bad_regex_config() -> tuple[re.Pattern, TestConnectionError]:
     relative_path = pathlib.Path(
         "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
@@ -483,19 +474,19 @@ def bad_regex_config() -> tuple[pathlib.Path, re.Pattern, TestConnectionError]:
     test_connection_error = TestConnectionError(
         f"No file at path: {base_directory.resolve()} matched the regex: {regex.pattern}"
     )
-    return base_directory, regex, test_connection_error
+    return regex, test_connection_error
 
 
-@pytest.fixture(params=[bad_base_directory_config, bad_regex_config])
+@pytest.fixture(params=[bad_regex_config])
 def datasource_test_connection_error_messages(
     pandas_filesystem_datasource: PandasFilesystemDatasource, request
 ) -> tuple[PandasFilesystemDatasource, TestConnectionError]:
-    base_directory, regex, test_connection_error = request.param()
+    regex, test_connection_error = request.param()
     csv_asset = CSVAsset(
         name="csv_asset",
-        base_directory=base_directory,
         regex=regex,
     )
+    csv_asset._datasource = pandas_filesystem_datasource
     pandas_filesystem_datasource.assets = {"csv_asset": csv_asset}
     return pandas_filesystem_datasource, test_connection_error
 
