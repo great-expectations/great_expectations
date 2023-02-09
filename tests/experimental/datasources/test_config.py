@@ -72,13 +72,13 @@ PG_COMPLEX_CONFIG_DICT = {
             },
         },
         "my_pandas_ds": {
-            "type": "pandas",
+            "type": "pandas_filesystem",
             "name": "my_pandas_ds",
+            "base_directory": __file__,
             "assets": {
                 "my_csv_asset": {
                     "name": "my_csv_asset",
                     "type": "csv",
-                    "base_directory": __file__,
                     "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
@@ -86,7 +86,6 @@ PG_COMPLEX_CONFIG_DICT = {
                 "my_json_asset": {
                     "name": "my_json_asset",
                     "type": "json",
-                    "base_directory": __file__,
                     "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
                     "orient": "records",
                 },
