@@ -260,15 +260,14 @@ def _invert_regex_to_data_reference_template(
 
 def sanitize_prefix(text: str) -> str:
     """
-    Takes in a given user-prefix and cleans it to work with file-system traversal methods
-    (i.e. add '/' to the end of a string meant to represent a directory)
+    Takes in a given user-prefix and cleans it to work with file-system traversal methods (i.e. add '/' to the end of a string meant to represent a directory).
     """
     _, ext = os.path.splitext(text)
     if ext:
         # Provided prefix is a filename so no adjustment is necessary
         return text
 
-    # Provided prefix is a directory (so we want to ensure we append it with '/')
+    # Provided prefix is a directory (so we want to ensure we append it with '/').
     return os.path.join(text, "")
 
 
@@ -308,9 +307,10 @@ def get_filesystem_one_level_directory_glob_path_list(
 ) -> List[str]:
     """
     List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
-    :param base_directory_path -- base directory path, relative to which file paths will be collected
-    :param glob_directive -- glob expansion directive
-    :returns -- list of relative file paths
+    param base_directory_path: -- base directory path, relative to which file paths will be collected
+    param glob_directive: -- glob expansion directive
+
+    Returns: list of relative file paths
     """
     globbed_paths = base_directory_path.glob(glob_directive)
     path_list: List[str] = [
@@ -397,7 +397,7 @@ def list_gcs_keys(
     Returns:
         List of keys representing GCS file paths (as filtered by the `query_options` dict)
     """
-    # Delimiter determines whether or not traversal of bucket is recursive
+    # Delimiter determines wheather or not traversal of bucket is recursive
     # Manually set to appropriate default if not already set by user
     delimiter = query_options["delimiter"]
     if delimiter is None and not recursive:
@@ -436,11 +436,12 @@ def list_s3_keys(
     ConfiguredAssetS3DataConnector is needed, because paths on S3 are comprised not only the leaf file name but the
     full path that includes both the prefix and the file name.  Otherwise, in the situations where multiple data assets
     share levels of a directory tree, matching files to data assets will not be possible, due to the path ambiguity.
-    :param s3: s3 client connection
-    :param query_options: s3 query attributes ("Bucket", "Prefix", "Delimiter", "MaxKeys")
-    :param iterator_dict: dictionary to manage "NextContinuationToken" (if "IsTruncated" is returned from S3)
-    :param recursive: True for InferredAssetS3DataConnector and False for ConfiguredAssetS3DataConnector (see above)
-    :return: string valued key representing file path on S3 (full prefix and leaf file name)
+    param s3: s3 client connection
+    param query_options: s3 query attributes ("Bucket", "Prefix", "Delimiter", "MaxKeys")
+    param iterator_dict: dictionary to manage "NextContinuationToken" (if "IsTruncated" is returned from S3)
+    param recursive: True for InferredAssetS3DataConnector and False for ConfiguredAssetS3DataConnector (see above)
+
+    Returns: string-valued key representing file path on S3 (full prefix and leaf file name)
     """
     if iterator_dict is None:
         iterator_dict = {}
