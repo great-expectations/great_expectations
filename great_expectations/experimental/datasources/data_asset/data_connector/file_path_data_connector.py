@@ -89,6 +89,7 @@ class FilePathDataConnector(DataConnector):
         name: str,
         datasource_name: str,
         data_asset_name: str,
+        execution_engine_name: str,
         regex: Optional[re.Pattern] = None,
         unnamed_regex_group_prefix: str = "batch_request_param_",
         # TODO: <Alex>ALEX</Alex>
@@ -96,7 +97,10 @@ class FilePathDataConnector(DataConnector):
         # TODO: <Alex>ALEX</Alex>
     ) -> None:
         super().__init__(
-            name=name, datasource_name=datasource_name, data_asset_name=data_asset_name
+            name=name,
+            datasource_name=datasource_name,
+            data_asset_name=data_asset_name,
+            execution_engine_name=execution_engine_name,
         )
 
         # TODO: <Alex>ALEX</Alex>

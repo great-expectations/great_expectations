@@ -1,44 +1,61 @@
+import os
 import pathlib
 import re
 from typing import List
 
+import boto3
+import pandas as pd
+
 import pytest
+from moto import mock_s3
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
+from great_expectations.experimental.datasources.data_asset.data_connector.configured_asset_s3_data_connector import (
+    S3DataConnector,
+)
 from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
     DataConnector,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector.filesystem_data_connector import (
-    FilesystemDataConnector,
+from great_expectations.experimental.datasources.data_asset.data_connector.util import (
+    sanitize_prefix_for_s3,
+    sanitize_prefix,
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest
-from tests.test_utils import create_files_in_directory
 
 
-def test_basic_instantiation(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-    )
+@mock_s3
+def test_basic_instantiation():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client = boto3.client("s3", region_name=region_name)
 
-    my_data_connector: DataConnector = FilesystemDataConnector(
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    keys: List[str] = [
+        "alpha-1.csv",
+        "alpha-2.csv",
+        "alpha-3.csv",
+    ]
+    for key in keys:
+        client.put_object(
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+        )
+
+    my_data_connector: DataConnector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory),
+        bucket=bucket,
         regex=re.compile(r"alpha-(.*)\.csv"),
-        glob_directive="*.csv",
+        prefix="",
     )
 
     assert my_data_connector.self_check() == {
-        "class_name": "FilesystemDataConnector",
+        "class_name": "S3DataConnector",
         "batch_definition_count": 3,
         "data_reference_count": 3,
         "example_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
@@ -61,32 +78,37 @@ def test_basic_instantiation(tmp_path_factory):
         )
 
 
-def test_instantiation_regex_does_not_match_paths(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp(
-            "test_instantiation_from_a_config_regex_does_not_match_paths"
-        )
-    )
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-    )
+@mock_s3
+def test_instantiation_regex_does_not_match_paths():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client = boto3.client("s3", region_name=region_name)
 
-    my_data_connector: DataConnector = FilesystemDataConnector(
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    keys: List[str] = [
+        "alpha-1.csv",
+        "alpha-2.csv",
+        "alpha-3.csv",
+    ]
+    for key in keys:
+        client.put_object(
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+        )
+
+    my_data_connector: DataConnector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory),
+        bucket=bucket,
         regex=re.compile(r"beta-(.*)\.csv"),
-        glob_directive="*.csv",
+        prefix="",
     )
     assert my_data_connector.self_check() == {
-        "class_name": "FilesystemDataConnector",
+        "class_name": "S3DataConnector",
         "batch_definition_count": 3,
         "example_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
         "data_reference_count": 3,
@@ -99,34 +121,41 @@ def test_instantiation_regex_does_not_match_paths(tmp_path_factory):
     }
 
 
-def test_return_all_batch_definitions_unsorted(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_all_batch_definitions_unsorted")
-    )
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "alex_20200809_1000.csv",
-            "eugene_20200809_1500.csv",
-            "james_20200811_1009.csv",
-            "abe_20200809_1040.csv",
-            "will_20200809_1002.csv",
-            "james_20200713_1567.csv",
-            "eugene_20201129_1900.csv",
-            "will_20200810_1001.csv",
-            "james_20200810_1003.csv",
-            "alex_20200819_1300.csv",
-        ],
-    )
+@mock_s3
+def test_return_all_batch_definitions_unsorted():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client = boto3.client("s3", region_name=region_name)
 
-    my_data_connector: DataConnector = FilesystemDataConnector(
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    keys: List[str] = [
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ]
+    for key in keys:
+        client.put_object(
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+        )
+
+    my_data_connector: DataConnector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory),
+        bucket=bucket,
         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
-        glob_directive="*.csv",
+        prefix="",
     )
 
     # with missing BatchRequest arguments
@@ -243,37 +272,44 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
-# def test_return_all_batch_definitions_sorted(tmp_path_factory):
-#     base_directory = str(
-#         tmp_path_factory.mktemp("test_return_all_batch_definitions_sorted")
-#     )
-#     create_files_in_directory(
-#         directory=base_directory,
-#         file_name_list=[
-#             "alex_20200809_1000.csv",
-#             "eugene_20200809_1500.csv",
-#             "james_20200811_1009.csv",
-#             "abe_20200809_1040.csv",
-#             "will_20200809_1002.csv",
-#             "james_20200713_1567.csv",
-#             "eugene_20201129_1900.csv",
-#             "will_20200810_1001.csv",
-#             "james_20200810_1003.csv",
-#             "alex_20200819_1300.csv",
-#         ],
-#     )
+# @mock_s3
+# def test_return_all_batch_definitions_sorted():
+#     region_name: str = "us-east-1"
+#     bucket: str = "test_bucket"
+#     conn = boto3.resource("s3", region_name=region_name)
+#     conn.create_bucket(Bucket=bucket)
+#     client = boto3.client("s3", region_name=region_name)
 #
-#     my_data_connector: DataConnector = FilesystemDataConnector(
+#     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+#
+#     keys: List[str] = [
+#         "alex_20200809_1000.csv",
+#         "eugene_20200809_1500.csv",
+#         "james_20200811_1009.csv",
+#         "abe_20200809_1040.csv",
+#         "will_20200809_1002.csv",
+#         "james_20200713_1567.csv",
+#         "eugene_20201129_1900.csv",
+#         "will_20200810_1001.csv",
+#         "james_20200810_1003.csv",
+#         "alex_20200819_1300.csv",
+#     ]
+#     for key in keys:
+#         client.put_object(
+#             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+#         )
+#
+#     my_data_connector: DataConnector = S3DataConnector(
 #         name="my_experimental_data_connector",
 #         datasource_name="my_dataframe_datasource",
 #         data_asset_name="my_filesystem_data_asset",
-#         execution_engine_name = "PandasExecutionEngine",
-#         base_directory=pathlib.Path(base_directory),
+#         execution_engine_name="PandasExecutionEngine",
+#         bucket=bucket,
 #         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
-#         glob_directive="*.csv",
+#         prefix="",
 #     )
 #     assert my_data_connector.self_check() == {
-#         "class_name": "FilesystemDataConnector",
+#         "class_name": "S3DataConnector",
 #         "data_reference_count": 10,
 #         "example_unmatched_data_references": [],
 #         "unmatched_data_reference_count": 0,
@@ -424,60 +460,49 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 # TODO: <Alex>ALEX</Alex>
 
 
-def test_return_only_unique_batch_definitions(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_return_only_unique_batch_definitions")
-    )
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "A/file_1.csv",
-            "A/file_2.csv",
-            "A/file_3.csv",
-            "B/file_1.csv",
-            "B/file_2.csv",
-        ],
-    )
+@mock_s3
+def test_return_only_unique_batch_definitions():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client = boto3.client("s3", region_name=region_name)
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    keys: List[str] = [
+        "A/file_1.csv",
+        "A/file_2.csv",
+        "A/file_3.csv",
+        "B/file_1.csv",
+        "B/file_2.csv",
+    ]
+    for key in keys:
+        client.put_object(
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+        )
 
     my_data_connector: DataConnector
 
-    my_data_connector = FilesystemDataConnector(
+    my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory),
+        bucket=bucket,
         regex=re.compile(r"(?P<name>.+)\/.+\.csv"),
-        # glob_directive="*.csv",  # omitting for purposes of this test
+        prefix="A",
     )
     assert my_data_connector.self_check() == {
-        "class_name": "FilesystemDataConnector",
-        "batch_definition_count": 7,
-        "example_data_references": ["A", "A/file_1.csv", "A/file_2.csv"],
-        "data_reference_count": 7,
-        "example_unmatched_data_references": ["A", "B"],
-        "unmatched_data_reference_count": 2,
+        "class_name": "S3DataConnector",
+        "batch_definition_count": 3,
+        "example_data_references": ["A/file_1.csv", "A/file_2.csv", "A/file_3.csv"],
+        "data_reference_count": 3,
+        "example_unmatched_data_references": [],
+        "unmatched_data_reference_count": 0,
     }
 
     expected: List[BatchDefinition] = [
-        BatchDefinition(
-            datasource_name="my_dataframe_datasource",
-            data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
-            batch_identifiers=IDDict({"directory": "A", "filename": "file_1.csv"}),
-        ),
-        BatchDefinition(
-            datasource_name="my_dataframe_datasource",
-            data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
-            batch_identifiers=IDDict({"directory": "A", "filename": "file_2.csv"}),
-        ),
-        BatchDefinition(
-            datasource_name="my_dataframe_datasource",
-            data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
-            batch_identifiers=IDDict({"directory": "A", "filename": "file_3.csv"}),
-        ),
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
@@ -492,14 +517,14 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         ),
     ]
 
-    my_data_connector = FilesystemDataConnector(
+    my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory),
+        bucket=bucket,
         regex=re.compile(r"(?P<directory>.+)\/(?P<filename>.+\.csv)"),
-        # glob_directive="*.csv",  # omitting for purposes of this test
+        prefix="B",
     )
 
     unsorted_batch_definition_list: List[
@@ -514,31 +539,44 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     assert expected == unsorted_batch_definition_list
 
 
-def test_alpha(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("test_alpha"))
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "test_dir_alpha/A.csv",
-            "test_dir_alpha/B.csv",
-            "test_dir_alpha/C.csv",
-            "test_dir_alpha/D.csv",
-        ],
-    )
+@mock_s3
+def test_alpha():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client = boto3.client("s3", region_name=region_name)
 
-    my_data_connector: DataConnector = FilesystemDataConnector(
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    keys: List[str] = [
+        "test_dir_alpha/A.csv",
+        "test_dir_alpha/B.csv",
+        "test_dir_alpha/C.csv",
+        "test_dir_alpha/D.csv",
+    ]
+    for key in keys:
+        client.put_object(
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+        )
+
+    my_data_connector: DataConnector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory) / "test_dir_alpha",
+        bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)\.csv"),
-        glob_directive="*.csv",
+        prefix="test_dir_alpha",
     )
     assert my_data_connector.self_check() == {
-        "class_name": "FilesystemDataConnector",
+        "class_name": "S3DataConnector",
         "batch_definition_count": 4,
-        "example_data_references": ["A.csv", "B.csv", "C.csv"],
+        "example_data_references": [
+            "test_dir_alpha/A.csv",
+            "test_dir_alpha/B.csv",
+            "test_dir_alpha/C.csv",
+        ],
         "data_reference_count": 4,
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
@@ -563,7 +601,7 @@ def test_alpha(tmp_path_factory):
     my_batch_request = BatchRequest(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        options={"part_1": "B"},
+        options={"part_1": "test_dir_alpha/B"},
     )
     my_batch_definition_list = (
         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -573,41 +611,50 @@ def test_alpha(tmp_path_factory):
     assert len(my_batch_definition_list) == 1
 
 
-def test_foxtrot(tmp_path_factory):
-    base_directory = str(tmp_path_factory.mktemp("test_foxtrot"))
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "test_dir_foxtrot/A/A-1.csv",
-            "test_dir_foxtrot/A/A-2.csv",
-            "test_dir_foxtrot/A/A-3.csv",
-            "test_dir_foxtrot/B/B-1.txt",
-            "test_dir_foxtrot/B/B-2.txt",
-            "test_dir_foxtrot/B/B-3.txt",
-            "test_dir_foxtrot/C/C-2017.csv",
-            "test_dir_foxtrot/C/C-2018.csv",
-            "test_dir_foxtrot/C/C-2019.csv",
-            "test_dir_foxtrot/D/D-aaa.csv",
-            "test_dir_foxtrot/D/D-bbb.csv",
-            "test_dir_foxtrot/D/D-ccc.csv",
-            "test_dir_foxtrot/D/D-ddd.csv",
-            "test_dir_foxtrot/D/D-eee.csv",
-        ],
-    )
+@mock_s3
+def test_foxtrot():
+    region_name: str = "us-east-1"
+    bucket: str = "test_bucket"
+    conn = boto3.resource("s3", region_name=region_name)
+    conn.create_bucket(Bucket=bucket)
+    client = boto3.client("s3", region_name=region_name)
+
+    test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+
+    keys: List[str] = [
+        "test_dir_foxtrot/A/A-1.csv",
+        "test_dir_foxtrot/A/A-2.csv",
+        "test_dir_foxtrot/A/A-3.csv",
+        "test_dir_foxtrot/B/B-1.txt",
+        "test_dir_foxtrot/B/B-2.txt",
+        "test_dir_foxtrot/B/B-3.txt",
+        "test_dir_foxtrot/C/C-2017.csv",
+        "test_dir_foxtrot/C/C-2018.csv",
+        "test_dir_foxtrot/C/C-2019.csv",
+        "test_dir_foxtrot/D/D-aaa.csv",
+        "test_dir_foxtrot/D/D-bbb.csv",
+        "test_dir_foxtrot/D/D-ccc.csv",
+        "test_dir_foxtrot/D/D-ddd.csv",
+        "test_dir_foxtrot/D/D-eee.csv",
+    ]
+    for key in keys:
+        client.put_object(
+            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+        )
 
     my_data_connector: DataConnector
 
-    my_data_connector = FilesystemDataConnector(
+    my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot",
+        bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
-        glob_directive="*.csv",
+        prefix="",
     )
     assert my_data_connector.self_check() == {
-        "class_name": "FilesystemDataConnector",
+        "class_name": "S3DataConnector",
         "batch_definition_count": 0,
         "data_reference_count": 0,
         "example_data_references": [],
@@ -615,67 +662,67 @@ def test_foxtrot(tmp_path_factory):
         "unmatched_data_reference_count": 0,
     }
 
-    my_data_connector = FilesystemDataConnector(
+    my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "A",
+        bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
-        glob_directive="*.csv",
+        prefix="test_dir_foxtrot/A",
     )
     assert my_data_connector.self_check() == {
-        "class_name": "FilesystemDataConnector",
+        "class_name": "S3DataConnector",
         "batch_definition_count": 3,
         "data_reference_count": 3,
         "example_data_references": [
-            "A-1.csv",
-            "A-2.csv",
-            "A-3.csv",
+            "test_dir_foxtrot/A/A-1.csv",
+            "test_dir_foxtrot/A/A-2.csv",
+            "test_dir_foxtrot/A/A-3.csv",
         ],
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
     }
 
-    my_data_connector = FilesystemDataConnector(
+    my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "B",
+        bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
-        glob_directive="*.*",
+        prefix="test_dir_foxtrot/B",
     )
     assert my_data_connector.self_check() == {
-        "class_name": "FilesystemDataConnector",
+        "class_name": "S3DataConnector",
         "batch_definition_count": 3,
         "data_reference_count": 3,
         "example_data_references": [
-            "B-1.txt",
-            "B-2.txt",
-            "B-3.txt",
+            "test_dir_foxtrot/B/B-1.txt",
+            "test_dir_foxtrot/B/B-2.txt",
+            "test_dir_foxtrot/B/B-3.txt",
         ],
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
     }
 
-    my_data_connector = FilesystemDataConnector(
+    my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "C",
+        bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
-        glob_directive="*",
+        prefix="test_dir_foxtrot/C",
     )
     assert my_data_connector.self_check() == {
-        "class_name": "FilesystemDataConnector",
+        "class_name": "S3DataConnector",
         "batch_definition_count": 3,
         "data_reference_count": 3,
         "example_data_references": [
-            "C-2017.csv",
-            "C-2018.csv",
-            "C-2019.csv",
+            "test_dir_foxtrot/C/C-2017.csv",
+            "test_dir_foxtrot/C/C-2018.csv",
+            "test_dir_foxtrot/C/C-2019.csv",
         ],
         "example_unmatched_data_references": [],
         "unmatched_data_reference_count": 0,
@@ -694,105 +741,40 @@ def test_foxtrot(tmp_path_factory):
     assert len(my_batch_definition_list) == 3
 
 
-def test_relative_base_directory_path(tmp_path_factory):
-    base_directory = str(
-        tmp_path_factory.mktemp("test_relative_asset_base_directory_path")
-    )
-    create_files_in_directory(
-        directory=base_directory,
-        file_name_list=[
-            "test_dir_0/A/B/C/logfile_0.csv",
-            "test_dir_0/A/B/C/bigfile_1.csv",
-            "test_dir_0/A/filename2.csv",
-            "test_dir_0/A/filename3.csv",
-        ],
-    )
-
-    my_data_connector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
-        datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
-        execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A",
-        regex=re.compile(r"(?P<part_1>.+)\.csv"),
-        glob_directive="*",
-    )
-    assert my_data_connector.self_check() == {
-        "class_name": "FilesystemDataConnector",
-        "batch_definition_count": 3,
-        "data_reference_count": 3,
-        "example_data_references": [
-            "B",
-            "filename2.csv",
-            "filename3.csv",
-        ],
-        "example_unmatched_data_references": ["B"],
-        "unmatched_data_reference_count": 1,
-    }
-
-    my_data_connector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
-        datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
-        execution_engine_name="PandasExecutionEngine",
-        base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A" / "B" / "C",
-        regex=re.compile(r"(?P<name>.+)_(?P<number>.+)\.csv"),
-        glob_directive="log*.csv",
-    )
-    assert my_data_connector.self_check() == {
-        "class_name": "FilesystemDataConnector",
-        "batch_definition_count": 1,
-        "data_reference_count": 1,
-        "example_data_references": ["logfile_0.csv"],
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
-    assert (
-        my_data_connector._get_full_file_path(path="bigfile_1.csv")
-        == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"
-    )
-
-    my_batch_request: BatchRequest = BatchRequest(
-        datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
-        options={},
-    )
-    my_batch_definition_list: List[
-        BatchDefinition
-    ] = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=my_batch_request
-    )
-    assert len(my_batch_definition_list) == 1
-
-
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
+# @mock_s3
 # def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
 #     tmp_path_factory,
 # ):
-#     base_directory = str(
-#         tmp_path_factory.mktemp(
-#             "test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group"
+#     region_name: str = "us-east-1"
+#     bucket: str = "test_bucket"
+#     conn = boto3.resource("s3", region_name=region_name)
+#     conn.create_bucket(Bucket=bucket)
+#     client = boto3.client("s3", region_name=region_name)
+#
+#     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
+#
+#     keys: List[str] = [
+#         "alex_20200809_1000.csv",
+#         "eugene_20200809_1500.csv",
+#         "james_20200811_1009.csv",
+#         "abe_20200809_1040.csv",
+#         "will_20200809_1002.csv",
+#         "james_20200713_1567.csv",
+#         "eugene_20201129_1900.csv",
+#         "will_20200810_1001.csv",
+#         "james_20200810_1003.csv",
+#         "alex_20200819_1300.csv",
+#     ]
+#     for key in keys:
+#         client.put_object(
+#             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
 #         )
-#     )
-#     create_files_in_directory(
-#         directory=base_directory,
-#         file_name_list=[
-#             "alex_20200809_1000.csv",
-#             "eugene_20200809_1500.csv",
-#             "james_20200811_1009.csv",
-#             "abe_20200809_1040.csv",
-#             "will_20200809_1002.csv",
-#             "james_20200713_1567.csv",
-#             "eugene_20201129_1900.csv",
-#             "will_20200810_1001.csv",
-#             "james_20200810_1003.csv",
-#             "alex_20200819_1300.csv",
-#         ],
-#     )
+#
 #     my_data_connector_yaml = yaml.load(
 #         f"""
-#         class_name: FilesystemDataConnector
+#         class_name: S3DataConnector
 #         datasource_name: test_environment
 #         base_directory: {base_directory}
 #         glob_directive: "*.csv"
@@ -822,7 +804,7 @@ def test_relative_base_directory_path(tmp_path_factory):
 #     )
 #     with pytest.raises(gx_exceptions.DataConnectorError):
 #         # noinspection PyUnusedLocal
-#         my_data_connector: FilesystemDataConnector = (
+#         my_data_connector: S3DataConnector = (
 #             instantiate_class_from_config(
 #                 config=my_data_connector_yaml,
 #                 runtime_environment={
@@ -835,3 +817,31 @@ def test_relative_base_directory_path(tmp_path_factory):
 #             )
 #         )
 # TODO: <Alex>ALEX</Alex>
+
+
+def test_sanitize_prefix_behaves_the_same_as_local_files():
+    def check_sameness(prefix, expected_output):
+        s3_sanitized = sanitize_prefix_for_s3(prefix)
+        file_system_sanitized = sanitize_prefix(prefix)
+        if os.sep == "\\":  # Fix to ensure tests work on Windows
+            file_system_sanitized = file_system_sanitized.replace("\\", "/")
+
+        assert file_system_sanitized == expected_output, (
+            f"Expected output does not match original sanitization behavior, got "
+            f"{file_system_sanitized} instead of {expected_output}"
+        )
+        assert (
+            s3_sanitized == expected_output == file_system_sanitized
+        ), f'S3 sanitized result is incorrect, "{s3_sanitized} instead of {expected_output}'
+
+    # Copy of all samples from tests/datasource/data_connector/test_file_path_data_connector.py
+    check_sameness("foo/", "foo/")
+    check_sameness("bar", "bar/")
+    check_sameness("baz.txt", "baz.txt")
+    check_sameness("a/b/c/baz.txt", "a/b/c/baz.txt")
+
+    # A couple additional checks
+    check_sameness("a/b/c", "a/b/c/")
+    check_sameness("a.x/b/c", "a.x/b/c/")
+    check_sameness("path/to/folder.something/", "path/to/folder.something/")
+    check_sameness("path/to/folder.something", "path/to/folder.something")

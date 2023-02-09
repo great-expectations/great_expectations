@@ -1,5 +1,13 @@
 import logging
-from typing import List, Optional
+import re
+from typing import TYPE_CHECKING, List, Optional
+
+from great_expectations.experimental.datasources.data_asset.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+)
+from great_expectations.experimental.datasources.data_asset.data_connector.util import (
+    sanitize_prefix_for_s3,
+)
 
 try:
     import boto3
@@ -7,72 +15,66 @@ except ImportError:
     boto3 = None
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.datasource.data_connector.asset import Asset
-from great_expectations.datasource.data_connector.configured_asset_file_path_data_connector import (
-    ConfiguredAssetFilePathDataConnector,
+from great_expectations.experimental.datasources.data_asset.data_connector.util import (
+    list_s3_keys,
 )
-from great_expectations.datasource.data_connector.util import list_s3_keys
-from great_expectations.execution_engine import ExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDefinition
+
 
 logger = logging.getLogger(__name__)
 
 
 @public_api
-class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
-    """Extension of ConfiguredAssetFilePathDataConnector used to connect to S3.
+class S3DataConnector(FilePathDataConnector):
+    """Extension of FilePathDataConnector used to connect to S3.
 
-    Being a Configured Asset Data Connector, it requires an explicit list of each Data Asset it can
-    connect to. While this allows for fine-grained control over which Data Assets may be accessed,
-    it requires more setup.
 
     Args:
         name (str): required name for DataConnector
         datasource_name (str): required name for datasource
         bucket (str): bucket for S3
-        assets (dict): dict of asset configuration (required for ConfiguredAssetDataConnector)
-        execution_engine (ExecutionEngine): optional reference to ExecutionEngine
-        default_regex (dict): optional regex configuration for filtering data_references
-        sorters (list): optional list of sorters for sorting data_references
+        regex (dict): regex configuration for filtering data_references
         prefix (str): S3 prefix
         delimiter (str): S3 delimiter
         max_keys (int): S3 max_keys (default is 1000)
         boto3_options (dict): optional boto3 options
-        batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
+        # TODO: <Alex>ALEX</Alex>
+        # sorters (list): optional list of sorters for sorting data_references
+        # TODO: <Alex>ALEX</Alex>
     """
 
     def __init__(
         self,
         name: str,
         datasource_name: str,
+        data_asset_name: str,
+        execution_engine_name: str,
         bucket: str,
-        assets: dict,
-        execution_engine: Optional[ExecutionEngine] = None,
-        default_regex: Optional[dict] = None,
-        sorters: Optional[list] = None,
+        regex: Optional[re.Pattern] = None,
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
         boto3_options: Optional[dict] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        id: Optional[str] = None,
+        # TODO: <Alex>ALEX</Alex>
+        # sorters: Optional[list] = None,
+        # TODO: <Alex>ALEX</Alex>
     ) -> None:
-
-        logger.debug(f'Constructing ConfiguredAssetS3DataConnector "{name}".')
-
         super().__init__(
             name=name,
-            id=id,
             datasource_name=datasource_name,
-            execution_engine=execution_engine,
-            assets=assets,
-            default_regex=default_regex,
-            sorters=sorters,
-            batch_spec_passthrough=batch_spec_passthrough,
+            data_asset_name=data_asset_name,
+            execution_engine_name=execution_engine_name,
+            regex=regex,
+            # TODO: <Alex>ALEX</Alex>
+            # sorters=sorters,
+            # TODO: <Alex>ALEX</Alex>
         )
+
         self._bucket = bucket
-        self._prefix = self.sanitize_prefix_for_s3(prefix)
+        self._prefix = sanitize_prefix_for_s3(prefix)
         self._delimiter = delimiter
         self._max_keys = max_keys
 
@@ -85,26 +87,6 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
             raise ImportError(
                 "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
             )
-
-    @staticmethod
-    def sanitize_prefix_for_s3(text: str) -> str:
-        """
-        Takes in a given user-prefix and cleans it to work with file-system traversal methods
-        (i.e. add '/' to the end of a string meant to represent a directory)
-
-        Customized for S3 paths, ignoring the path separator used by the host OS
-        """
-        text = text.strip()
-        if not text:
-            return text
-
-        path_parts = text.split("/")
-        if not path_parts:  # Empty prefix
-            return text
-        elif "." in path_parts[-1]:  # File, not folder
-            return text
-        else:  # Folder, should have trailing /
-            return f"{text.rstrip('/')}/"
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
         """
@@ -121,23 +103,13 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         )
         return S3BatchSpec(batch_spec)
 
-    def _get_data_reference_list_for_asset(self, asset: Optional[Asset]) -> List[str]:
+    def _get_data_reference_list(self) -> List[str]:
         query_options: dict = {
             "Bucket": self._bucket,
             "Prefix": self._prefix,
             "Delimiter": self._delimiter,
             "MaxKeys": self._max_keys,
         }
-        if asset is not None:
-            if asset.bucket:
-                query_options["Bucket"] = asset.bucket
-            if asset.prefix:
-                query_options["Prefix"] = asset.prefix
-            if asset.delimiter:
-                query_options["Delimiter"] = asset.delimiter
-            if asset.max_keys:
-                query_options["MaxKeys"] = asset.max_keys
-
         path_list: List[str] = [
             key
             for key in list_s3_keys(
@@ -149,16 +121,9 @@ class ConfiguredAssetS3DataConnector(ConfiguredAssetFilePathDataConnector):
         ]
         return path_list
 
-    def _get_full_file_path_for_asset(
-        self, path: str, asset: Optional[Asset] = None
-    ) -> str:
-        # asset isn't used in this method.
-        # It's only kept for compatibility with parent methods.
+    def _get_full_file_path(self, path: str) -> str:
         template_arguments: dict = {
             "bucket": self._bucket,
             "path": path,
         }
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)

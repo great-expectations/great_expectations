@@ -129,11 +129,14 @@ class DataConnector:
         name: str,
         datasource_name: str,
         data_asset_name: str,
+        execution_engine_name: str,
     ) -> None:
         self._name: str = name
 
         self._datasource_name: str = datasource_name
         self._data_asset_name: str = data_asset_name
+
+        self._execution_engine_name: str = execution_engine_name
 
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict = {}
@@ -281,7 +284,7 @@ class DataConnector:
         """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
         return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
             data_connector_name=self.__class__.__name__,
-            execution_engine_name=self._execution_engine.__class__.__name__,
+            execution_engine_name=self._execution_engine_name,
             template_arguments=template_arguments,
         )
 

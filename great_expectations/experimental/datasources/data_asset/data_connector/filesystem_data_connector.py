@@ -39,6 +39,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         name: str,
         datasource_name: str,
         data_asset_name: str,
+        execution_engine_name: str,
         base_directory: pathlib.Path,
         regex: Optional[re.Pattern] = None,
         glob_directive: str = "**/*",
@@ -50,6 +51,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             name=name,
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
+            execution_engine_name=execution_engine_name,
             regex=regex,
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
