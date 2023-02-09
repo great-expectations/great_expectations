@@ -47,7 +47,7 @@ def test_basic_instantiation(tmp_path_factory):
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
     # Illegal execution environment name
