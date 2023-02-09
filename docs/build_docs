@@ -3,11 +3,18 @@
 # Build API docs then build docusaurus docs.
 # Currently used in our netlify pipeline.
 
+echo "checking git log before doing anything"
+git --no-pager log -n 5 --format=oneline
+
 # Get latest version, check out and build API docs using the latest
 git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V
 GX_LATEST=$(git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V | tail -1)
 echo "Using latest version ${GX_LATEST} to build docs."
 git checkout $GX_LATEST
+
+echo "checking git log after checkout latest"
+git --no-pager log -n 5 --format=oneline
+
 
 echo "Installing dev dependencies"
 pip install -c constraints-dev.txt -e ".[test]"
@@ -24,6 +31,10 @@ unzip -o oss_docs_versions.zip -d .
 
 echo "Checking out develop to build the rest of the docs."
 git checkout develop
+
+echo "checking git log after checking out develop"
+git --no-pager log -n 5 --format=oneline
+
 
 echo "Building docusaurus docs."
 yarn build
