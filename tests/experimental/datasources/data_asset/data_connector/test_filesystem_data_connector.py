@@ -4,11 +4,8 @@ from typing import List
 
 import pytest
 
-import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
     DataConnector,
 )
