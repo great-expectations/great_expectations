@@ -132,7 +132,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
         idx: int
         return {idx: None for idx in self._all_group_names}
 
-    def get_batch_request(
+    def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
         if options:
@@ -145,7 +145,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                         f"All regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )
-        return super().get_batch_request(options)
+        return super().build_batch_request(options)
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
