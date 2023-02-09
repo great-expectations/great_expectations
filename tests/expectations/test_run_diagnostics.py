@@ -43,6 +43,7 @@ def test_expectation_self_check():
         },
         "execution_engines": {
             "PandasExecutionEngine": False,
+            "PolarsExecutionEngine": False,
             "SqlAlchemyExecutionEngine": False,
             "SparkDFExecutionEngine": False,
         },
