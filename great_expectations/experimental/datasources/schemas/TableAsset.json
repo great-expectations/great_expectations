@@ -17,10 +17,24 @@
         },
         "order_by": {
             "title": "Order By",
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/BatchSorter"
-            }
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/BatchSorter"
+                    }
+                },
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                {
+                    "type": "array",
+                    "items": {}
+                }
+            ]
         },
         "column_splitter": {
             "$ref": "#/definitions/SqlYearMonthSplitter"
