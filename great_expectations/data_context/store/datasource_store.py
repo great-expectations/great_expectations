@@ -160,10 +160,16 @@ class DatasourceStore(Store):
         """
         if not key:
             key = self._build_key_from_config(value)
+        return self._persist_datasource(key=key, config=value)
 
+    def _persist_datasource(
+        self, key: DataContextKey, config: DatasourceConfig
+    ) -> DatasourceConfig:
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(key, value)
+        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(
+            key=key, value=config
+        )
         if ref and isinstance(ref, GXCloudResourceRef):
             key.cloud_id = ref.cloud_id  # type: ignore[attr-defined]
 
@@ -219,17 +225,6 @@ class DatasourceStore(Store):
             raise gx_exceptions.DatasourceNotFoundError(
                 f"Could not find an existing Datasource named {datasource_name}."
             )
-
-    def add_or_update_by_name(
-        self, datasource_name: str, datasource_config: DatasourceConfig
-    ) -> None:
-        """
-        TODO
-        """
-        datasource_key: DataContextVariableKey = self._determine_datasource_key(
-            datasource_name=datasource_name
-        )
-        self.add_or_update(key=datasource_key, value=datasource_config)
 
     def _determine_datasource_key(self, datasource_name: str) -> DataContextVariableKey:
         datasource_key = DataContextVariableKey(

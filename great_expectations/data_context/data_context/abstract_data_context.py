@@ -841,7 +841,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 config=datasource_config,
                 initialize=initialize,
                 save_changes=save_changes,
-                overwrite_existing=overwrite_existing,
             )
         )
         return return_datasource
@@ -887,7 +886,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 config=datasource_config,
                 initialize=True,
                 save_changes=False,
-                overwrite_existing=False,
             )
         )
 
@@ -4552,7 +4550,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config: DatasourceConfig,
         initialize: bool,
         save_changes: bool,
-        overwrite_existing: bool,
     ) -> Optional[Datasource]:
         """Perform substitutions and optionally initialize the Datasource and/or store the config.
 
@@ -4570,13 +4567,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
         if save_changes:
-            if overwrite_existing:
-                breakpoint()
-                self._datasource_store.add_or_update_by_name(  # type: ignore[attr-defined]
-                    datasource_name=config.name, datasource_config=config
-                )
-            else:
-                config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
+            config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
 
         datasource: Optional[Datasource] = None
         if initialize:
