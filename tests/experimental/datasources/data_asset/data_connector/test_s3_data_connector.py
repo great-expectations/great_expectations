@@ -47,7 +47,7 @@ def test_basic_instantiation():
     my_data_connector: DataConnector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
         regex=re.compile(r"alpha-(.*)\.csv"),
@@ -101,7 +101,7 @@ def test_instantiation_regex_does_not_match_paths():
     my_data_connector: DataConnector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
         regex=re.compile(r"beta-(.*)\.csv"),
@@ -151,7 +151,7 @@ def test_return_all_batch_definitions_unsorted():
     my_data_connector: DataConnector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
@@ -169,7 +169,7 @@ def test_return_all_batch_definitions_unsorted():
     ] = my_data_connector._get_batch_definition_list_from_batch_request(
         BatchRequest(
             datasource_name="my_dataframe_datasource",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             options={},
         )
     )
@@ -177,7 +177,7 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
             ),
@@ -185,7 +185,7 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
             ),
@@ -193,7 +193,7 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
             ),
@@ -201,7 +201,7 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
             ),
@@ -209,7 +209,7 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
             ),
@@ -217,7 +217,7 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200713", "price": "1567"}
             ),
@@ -225,7 +225,7 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200810", "price": "1003"}
             ),
@@ -233,7 +233,7 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {"name": "james", "timestamp": "20200811", "price": "1009"}
             ),
@@ -241,7 +241,7 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200809", "price": "1002"}
             ),
@@ -249,7 +249,7 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
                 {"name": "will", "timestamp": "20200810", "price": "1001"}
             ),
@@ -262,7 +262,7 @@ def test_return_all_batch_definitions_unsorted():
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="my_dataframe_datasource",
-                data_asset_name="my_filesystem_data_asset",
+                data_asset_name="my_s3_data_asset",
                 options={"name": "alex", "timestamp": "20200819", "price": "1300"},
             )
         )
@@ -302,7 +302,7 @@ def test_return_all_batch_definitions_unsorted():
 #     my_data_connector: DataConnector = S3DataConnector(
 #         name="my_experimental_data_connector",
 #         datasource_name="my_dataframe_datasource",
-#         data_asset_name="my_filesystem_data_asset",
+#         data_asset_name="my_s3_data_asset",
 #         execution_engine_name="PandasExecutionEngine",
 #         bucket=bucket,
 #         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
@@ -319,7 +319,7 @@ def test_return_all_batch_definitions_unsorted():
 #         my_data_connector.get_batch_definition_list_from_batch_request(
 #             BatchRequest(
 #                 datasource_name="my_dataframe_datasource",
-#                 data_asset_name="my_filesystem_data_asset",
+#                 data_asset_name="my_s3_data_asset",
 #                 options={},
 #             )
 #         )
@@ -329,7 +329,7 @@ def test_return_all_batch_definitions_unsorted():
 #         BatchDefinition(
 #             datasource_name="my_dataframe_datasource",
 #             data_connector_name="my_experimental_data_connector",
-#             data_asset_name="my_filesystem_data_asset",
+#             data_asset_name="my_s3_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
 #             ),
@@ -337,7 +337,7 @@ def test_return_all_batch_definitions_unsorted():
 #         BatchDefinition(
 #             datasource_name="my_dataframe_datasource",
 #             data_connector_name="my_experimental_data_connector",
-#             data_asset_name="my_filesystem_data_asset",
+#             data_asset_name="my_s3_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
 #             ),
@@ -345,7 +345,7 @@ def test_return_all_batch_definitions_unsorted():
 #         BatchDefinition(
 #             datasource_name="my_dataframe_datasource",
 #             data_connector_name="my_experimental_data_connector",
-#             data_asset_name="my_filesystem_data_asset",
+#             data_asset_name="my_s3_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
 #             ),
@@ -353,7 +353,7 @@ def test_return_all_batch_definitions_unsorted():
 #         BatchDefinition(
 #             datasource_name="my_dataframe_datasource",
 #             data_connector_name="my_experimental_data_connector",
-#             data_asset_name="my_filesystem_data_asset",
+#             data_asset_name="my_s3_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
 #             ),
@@ -361,7 +361,7 @@ def test_return_all_batch_definitions_unsorted():
 #         BatchDefinition(
 #             datasource_name="my_dataframe_datasource",
 #             data_connector_name="my_experimental_data_connector",
-#             data_asset_name="my_filesystem_data_asset",
+#             data_asset_name="my_s3_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
 #             ),
@@ -369,7 +369,7 @@ def test_return_all_batch_definitions_unsorted():
 #         BatchDefinition(
 #             datasource_name="my_dataframe_datasource",
 #             data_connector_name="my_experimental_data_connector",
-#             data_asset_name="my_filesystem_data_asset",
+#             data_asset_name="my_s3_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "james", "timestamp": "20200811", "price": "1009"}
 #             ),
@@ -377,7 +377,7 @@ def test_return_all_batch_definitions_unsorted():
 #         BatchDefinition(
 #             datasource_name="my_dataframe_datasource",
 #             data_connector_name="my_experimental_data_connector",
-#             data_asset_name="my_filesystem_data_asset",
+#             data_asset_name="my_s3_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "james", "timestamp": "20200810", "price": "1003"}
 #             ),
@@ -385,7 +385,7 @@ def test_return_all_batch_definitions_unsorted():
 #         BatchDefinition(
 #             datasource_name="my_dataframe_datasource",
 #             data_connector_name="my_experimental_data_connector",
-#             data_asset_name="my_filesystem_data_asset",
+#             data_asset_name="my_s3_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "james", "timestamp": "20200713", "price": "1567"}
 #             ),
@@ -393,7 +393,7 @@ def test_return_all_batch_definitions_unsorted():
 #         BatchDefinition(
 #             datasource_name="my_dataframe_datasource",
 #             data_connector_name="my_experimental_data_connector",
-#             data_asset_name="my_filesystem_data_asset",
+#             data_asset_name="my_s3_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "will", "timestamp": "20200810", "price": "1001"}
 #             ),
@@ -401,7 +401,7 @@ def test_return_all_batch_definitions_unsorted():
 #         BatchDefinition(
 #             datasource_name="my_dataframe_datasource",
 #             data_connector_name="my_experimental_data_connector",
-#             data_asset_name="my_filesystem_data_asset",
+#             data_asset_name="my_s3_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "will", "timestamp": "20200809", "price": "1002"}
 #             ),
@@ -413,7 +413,7 @@ def test_return_all_batch_definitions_unsorted():
 #
 #     my_batch_request: BatchRequest = BatchRequest(
 #         datasource_name="my_dataframe_datasource",
-#         data_asset_name="my_filesystem_data_asset",
+#         data_asset_name="my_s3_data_asset",
 #         options={
 #             "name": "james",
 #             "timestamp": "20200713",
@@ -435,7 +435,7 @@ def test_return_all_batch_definitions_unsorted():
 #
 #     expected_batch_definition = BatchDefinition(
 #         datasource_name="my_dataframe_datasource",
-#         data_asset_name="my_filesystem_data_asset",
+#         data_asset_name="my_s3_data_asset",
 #         batch_identifiers={
 #             "name": "james",
 #             "timestamp": "20200713",
@@ -447,7 +447,7 @@ def test_return_all_batch_definitions_unsorted():
 #     # TEST 3: Without BatchRequest (query) options, should return all 10
 #     my_batch_request: BatchRequest = BatchRequest(
 #         datasource_name="my_dataframe_datasource",
-#         data_asset_name="my_filesystem_data_asset",
+#         data_asset_name="my_s3_data_asset",
 #         options={},
 #     )
 #     # should return 10
@@ -487,7 +487,7 @@ def test_return_only_unique_batch_definitions():
     my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
         regex=re.compile(r"(?P<name>.+)\/.+\.csv"),
@@ -506,13 +506,13 @@ def test_return_only_unique_batch_definitions():
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict({"directory": "B", "filename": "file_1.csv"}),
         ),
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="my_experimental_data_connector",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict({"directory": "B", "filename": "file_2.csv"}),
         ),
     ]
@@ -520,7 +520,7 @@ def test_return_only_unique_batch_definitions():
     my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
         regex=re.compile(r"(?P<directory>.+)\/(?P<filename>.+\.csv)"),
@@ -532,7 +532,7 @@ def test_return_only_unique_batch_definitions():
     ] = my_data_connector.get_batch_definition_list_from_batch_request(
         BatchRequest(
             datasource_name="my_dataframe_datasource",
-            data_asset_name="my_filesystem_data_asset",
+            data_asset_name="my_s3_data_asset",
             options={},
         )
     )
@@ -563,7 +563,7 @@ def test_alpha():
     my_data_connector: DataConnector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)\.csv"),
@@ -600,7 +600,7 @@ def test_alpha():
 
     my_batch_request = BatchRequest(
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         options={"part_1": "test_dir_alpha/B"},
     )
     my_batch_definition_list = (
@@ -647,7 +647,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
@@ -665,7 +665,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
@@ -687,7 +687,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
@@ -709,7 +709,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         execution_engine_name="PandasExecutionEngine",
         bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
@@ -730,7 +730,7 @@ def test_foxtrot():
 
     my_batch_request = BatchRequest(
         datasource_name="my_dataframe_datasource",
-        data_asset_name="my_filesystem_data_asset",
+        data_asset_name="my_s3_data_asset",
         options={},
     )
     my_batch_definition_list: List[
@@ -779,7 +779,7 @@ def test_foxtrot():
 #         base_directory: {base_directory}
 #         glob_directive: "*.csv"
 #         assets:
-#             my_filesystem_data_asset:
+#             my_s3_data_asset:
 #                 pattern: (.+)_(.+)_(.+)\\.csv
 #                 group_names:
 #                     - name

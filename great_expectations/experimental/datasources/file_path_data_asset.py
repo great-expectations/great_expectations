@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import copy
 import logging
-from typing import ClassVar, Dict, List, Optional, Pattern, Set
+import pathlib
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Pattern, Set
 
 import pydantic
 
@@ -15,6 +17,17 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequestOptions,
     DataAsset,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.core.batch_spec import BatchMarkers, PathBatchSpec
+    from great_expectations.execution_engine import (
+        PandasExecutionEngine,
+        SparkDFExecutionEngine,
+    )
+    from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
+        DataConnector,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -87,6 +100,82 @@ class _FilePathDataAsset(DataAsset):
 
         return super().get_batch_request(options)
 
+    def get_batch_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> List[Batch]:
+        self._validate_batch_request(batch_request)
+
+        execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (
+            self.datasource.get_execution_engine()
+        )
+
+        data_connector: DataConnector = self._get_data_connector()
+
+        batch_definition_list: List[
+            BatchDefinition
+        ] = data_connector.get_batch_definition_list_from_batch_request(
+            batch_request=batch_request
+        )
+
+        batch_list: List[Batch] = []
+
+        batch_spec: PathBatchSpec
+        batch_spec_options: dict
+        batch_data: Any
+        batch_markers: BatchMarkers
+        batch_metadata: BatchRequestOptions
+        batch: Batch
+        for batch_definition in batch_definition_list:
+            batch_spec = self._build_path_batch_spec_from_batch_definition(
+                batch_definition=batch_definition
+            )
+            batch_spec_options = {
+                "reader_method": self._get_reader_method(),
+                "reader_options": self.dict(
+                    include=self._get_reader_options_include(),
+                    exclude=self._EXCLUDE_FROM_READER_OPTIONS,
+                    exclude_unset=True,
+                    by_alias=True,
+                ),
+            }
+            batch_spec.update(batch_spec_options)
+
+            batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+                batch_spec=batch_spec
+            )
+
+            batch_metadata = copy.deepcopy(batch_request.options)
+            # TODO: <Alex>ALEX-FIX_TO_INSURE_BASE_DIRECTORY_TYPE_IS_PATHLIB.PATH-CONSISTENTLY</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX-FIX_TO_INSURE_PROPERTY_NAME_CORRESPONDDS_TO_ITS_MEANING</Alex>
+            batch_metadata["base_directory"] = pathlib.Path(batch_spec["path"])
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            batch_metadata.update(batch_definition.batch_identifiers)
+            batch_request.options.update(batch_definition.batch_identifiers)
+            # TODO: <Alex>ALEX</Alex>
+
+            # Some pydantic annotations are postponed due to circular imports.
+            # Batch.update_forward_refs() will set the annotations before we
+            # instantiate the Batch class since we can import them in this scope.
+            Batch.update_forward_refs()
+
+            batch = Batch(
+                datasource=self.datasource,
+                data_asset=self,
+                batch_request=batch_request,
+                data=batch_data,
+                metadata=batch_metadata,
+                legacy_batch_markers=batch_markers,
+                legacy_batch_spec=batch_spec,
+                legacy_batch_definition=batch_definition,
+            )
+            batch_list.append(batch)
+
+        self.sort_batches(batch_list)
+
+        return batch_list
+
     def test_connection(self) -> None:
         """Test the connection for the DataAsset.
 
@@ -97,9 +186,12 @@ class _FilePathDataAsset(DataAsset):
             """One needs to implement "test_connection" on a _FilePathDataAsset subclass."""
         )
 
-    def get_batch_list_from_batch_request(
-        self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    def _get_data_connector(self) -> DataConnector:
+        raise NotImplementedError
+
+    def _build_path_batch_spec_from_batch_definition(
+        self, batch_definition: BatchDefinition
+    ) -> PathBatchSpec:
         raise NotImplementedError
 
     def _get_reader_method(self) -> str:
