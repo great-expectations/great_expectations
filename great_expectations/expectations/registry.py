@@ -18,11 +18,11 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.id_dict import IDDict
 from great_expectations.render import (
-    AtomicDiagnosticRendererType,
-    AtomicPrescriptiveRendererType,
-    AtomicRendererType,
+    AtomicDiagnosticRendererType,  # noqa: TCH001
+    AtomicPrescriptiveRendererType,  # noqa: TCH001
+    AtomicRendererType,  # noqa: TCH001
 )
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationConfiguration

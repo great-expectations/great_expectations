@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from ruamel.yaml.comments import CommentedMap
 
-from great_expectations.core import RunIdentifier
+from great_expectations.core import RunIdentifier  # noqa: TCH001
 from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,

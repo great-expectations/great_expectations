@@ -13,6 +13,7 @@ from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
@@ -29,6 +30,13 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__file__)
+
+# apply markers to entire test module
+pytestmark = [
+    pytest.mark.skipif(
+        PANDAS_VERSION < 1.2, reason=f"ZEP pandas not supported on {PANDAS_VERSION}"
+    )
+]
 
 
 @pytest.fixture
@@ -119,7 +127,13 @@ class TestDynamicPandasAssets:
                 "read_table",
                 marks=pytest.mark.xfail(reason="conflict with 'table' type name"),
             ),
-            param("read_xml"),
+            param(
+                "read_xml",
+                marks=pytest.mark.skipif(
+                    PANDAS_VERSION < 1.2,
+                    reason=f"read_xml does not exist on {PANDAS_VERSION} ",
+                ),
+            ),
         ],
     )
     def test_data_asset_defined_for_io_read_method(self, method_name: str):
@@ -141,7 +155,7 @@ class TestDynamicPandasAssets:
         This is also a proxy for testing that the dynamic pydantic model creation was successful.
         """
         with pytest.raises(pydantic.ValidationError) as exc_info:
-            asset_class(  # type: ignore[call-arg] # type has a default
+            asset_class(  # type: ignore[call-arg]
                 name="test",
                 base_directory=pathlib.Path(__file__),
                 regex=re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
@@ -243,7 +257,7 @@ def test_add_csv_asset_to_datasource(
 @pytest.mark.unit
 def test_construct_csv_asset_directly(csv_path: pathlib.Path):
     # noinspection PyTypeChecker
-    asset = CSVAsset(  # type: ignore[call-arg] # no type
+    asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",  # type: ignore[arg-type]
