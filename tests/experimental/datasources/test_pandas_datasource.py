@@ -270,7 +270,7 @@ def test_add_csv_asset_to_datasource(
 @pytest.mark.unit
 def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
-    asset = CSVAsset(  # type: ignore[call-arg]
+    asset = CSVAsset(
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
@@ -348,7 +348,8 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert batch.metadata == {
         "year": "2018",
         "month": "04",
-        "base_directory": pandas_filesystem_datasource.base_directory / "yellow_tripdata_sample_2018-04.csv",  # type: ignore[attr-defined]
+        "base_directory": pandas_filesystem_datasource.base_directory
+        / "yellow_tripdata_sample_2018-04.csv",
     }
     assert batch.id == "pandas_filesystem_datasource-csv_asset-year_2018-month_04"
 
