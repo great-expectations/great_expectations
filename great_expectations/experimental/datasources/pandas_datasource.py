@@ -3,7 +3,7 @@ from __future__ import annotations
 import inspect
 import logging
 import re
-from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Type, Union
 
 from typing_extensions import ClassVar, Literal
 
@@ -203,4 +203,17 @@ add_fn: inspect.Signature = inspect.signature(PandasDatasource.add_csv_asset)
 print(f"\tadd_csv_asset ->\n{add_fn}\n")
 
 csv_init = inspect.signature(CSVAsset)
-print(f"\tCSVAsset ->\n{csv_init}")
+print(f"\tCSVAsset ->\n{csv_init}\n")
+
+_EXCLUDE_FROM_SIGNATURE: set[str] = {"type", "*"}
+
+replacement: List[inspect.Parameter] = []
+for name, param in csv_init.parameters.items():
+    if name in add_fn.parameters or name in _EXCLUDE_FROM_SIGNATURE:
+        print(f"Skip {name}")
+        continue
+    print(name, param)
+    replacement.append(param)
+
+PandasDatasource.add_csv_asset.__signature__ = add_fn.replace(parameters=replacement)
+print(f"\n{inspect.signature(PandasDatasource.add_csv_asset)}")
