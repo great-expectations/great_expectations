@@ -1266,7 +1266,19 @@ class APINotificationAction(ValidationAction):
         **kwargs,
     ):
         suite_name: str = validation_result_suite.meta["expectation_suite_name"]
-        data_asset_name: str = data_asset.active_batch_definition.data_asset_name
+        if "batch_kwargs" in validation_result_suite.meta:
+            data_asset_name = validation_result_suite.meta["batch_kwargs"].get(
+                "data_asset_name", "__no_data_asset_name__"
+            )
+        elif "active_batch_definition" in validation_result_suite.meta:
+            data_asset_name = (
+                validation_result_suite.meta["active_batch_definition"].data_asset_name
+                if validation_result_suite.meta["active_batch_definition"].data_asset_name
+                else "__no_data_asset_name__"
+            )
+        else:
+            data_asset_name = "__no_data_asset_name__"
+
         validation_results: list = validation_result_suite.get("results")
         validation_results_serializable: list = convert_to_json_serializable(
             validation_results
@@ -1276,12 +1288,13 @@ class APINotificationAction(ValidationAction):
             data_asset_name, suite_name, validation_results_serializable
         )
 
-        self.send_results(payload)
+        response = self.send_results(payload)
+        return f"Successfully Posted results to API, status code - {response.status_code} "
 
     def send_results(self, payload) -> None:
         try:
             headers = {"Content-Type": "application/json"}
-            requests.post(self.url, headers=headers, data=payload)
+            return requests.post(self.url, headers=headers, data=payload)
         except Exception as e:
             print(f"Exception when sending data to API - {e}")
             raise e
