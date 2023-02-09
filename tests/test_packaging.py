@@ -84,6 +84,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-excel.txt"]
         | req_set_dict["requirements-dev-pagerduty.txt"]
         | req_set_dict["requirements-dev-spark.txt"]
+        | req_set_dict["requirements-dev-polars.txt"]
     ) == req_set_dict["requirements-dev.txt"]
 
     assert req_set_dict["requirements-dev.txt"] - (
@@ -102,6 +103,7 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-mssql.txt"]
         | req_set_dict["requirements-dev-mysql.txt"]
         | req_set_dict["requirements-dev-pagerduty.txt"]
+        | req_set_dict["requirements-dev-polars.txt"]
         | req_set_dict["requirements-dev-postgresql.txt"]
         | req_set_dict["requirements-dev-redshift.txt"]
         | req_set_dict["requirements-dev-snowflake.txt"]
