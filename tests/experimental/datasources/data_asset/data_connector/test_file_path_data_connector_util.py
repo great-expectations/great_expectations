@@ -1,4 +1,4 @@
-from great_expectations.experimental.datasources.data_asset.data_connector.util import (
+from great_expectations.experimental.datasources.data_asset.data_connector.file_path_data_connector_util import (
     sanitize_prefix,
 )
 

@@ -4,10 +4,13 @@ import logging
 import re
 from typing import TYPE_CHECKING, List, Optional
 
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.experimental.datasources.data_asset.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector.util import (
+from great_expectations.experimental.datasources.data_asset.data_connector.file_path_data_connector_util import (
+    list_s3_keys,
     sanitize_prefix_for_s3,
 )
 
@@ -16,11 +19,6 @@ try:
 except ImportError:
     boto3 = None
 
-from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
-from great_expectations.experimental.datasources.data_asset.data_connector.util import (
-    list_s3_keys,
-)
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition

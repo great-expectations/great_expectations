@@ -16,7 +16,7 @@ from great_expectations.experimental.datasources.data_asset.data_connector.s3_da
 from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
     DataConnector,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector.util import (
+from great_expectations.experimental.datasources.data_asset.data_connector.file_path_data_connector_util import (
     sanitize_prefix_for_s3,
     sanitize_prefix,
 )
