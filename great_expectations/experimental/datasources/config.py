@@ -38,7 +38,7 @@ _MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 class GxConfig(ExperimentalBaseModel):
     """Represents the full new-style/experimental configuration file."""
 
-    xdatasources: Dict[str, Datasource] = Field({}, description=_ZEP_STYLE_DESCRIPTION)
+    xdatasources: Dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
 
     @property
     def datasources(self) -> Dict[str, Datasource]:
