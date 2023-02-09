@@ -256,7 +256,7 @@ class DataConnector:
         """
         raise NotImplementedError
 
-    def get_data_reference_list_count(self) -> int:
+    def get_data_reference_count(self) -> int:
         raise NotImplementedError
 
     def get_unmatched_data_references(self) -> List[Any]:
