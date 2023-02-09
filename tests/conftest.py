@@ -788,7 +788,7 @@ def empty_data_context(
 
 
 @pytest.fixture(scope="function")
-def data_context_with_connection_to_animal_names_db(
+def data_context_with_connection_to_metrics_db(
     tmp_path,
 ) -> FileDataContext:
     """
@@ -830,8 +830,14 @@ def data_context_with_connection_to_animal_names_db(
                 module_name: great_expectations.datasource.data_connector
                 class_name: ConfiguredAssetSqlDataConnector
                 assets:
-                    my_asset:
+                    animals_names_asset:
                         table_name: animal_names
+                        class_name: Asset
+                    column_pair_asset:
+                        table_name: column_pairs
+                        class_name: Asset
+                    multi_column_sum_asset:
+                        table_name: multi_column_sums
                         class_name: Asset
     """
     # noinspection PyUnusedLocal
@@ -2617,7 +2623,7 @@ def empty_base_data_context_in_cloud_mode(
     ge_cloud_config: GXCloudConfig,
 ) -> BaseDataContext:
     project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
+    project_path.mkdir(exist_ok=True)
     project_path = str(project_path)
 
     context = gx.data_context.BaseDataContext(
@@ -2638,7 +2644,7 @@ def empty_data_context_in_cloud_mode(
 ):
     """This fixture is a DataContext in cloud mode that mocks calls to the cloud backend during setup so that it can be instantiated in tests."""
     project_path = tmp_path / "empty_data_context"
-    project_path.mkdir()
+    project_path.mkdir(exist_ok=True)
     project_path_name: str = str(project_path)
 
     def mocked_config(*args, **kwargs) -> DataContextConfig:
@@ -7253,6 +7259,92 @@ def pandas_animals_dataframe_for_unexpected_rows_and_index():
             ],
         }
     )
+
+
+@pytest.fixture
+def pandas_column_pairs_dataframe_for_unexpected_rows_and_index():
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "ordered_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "eraser",
+                "eraser",
+                "eraser",
+            ],
+            "received_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "desk",
+                "desk",
+                "desk",
+            ],
+        }
+    )
+
+
+@pytest.fixture
+def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index():
+    return pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "a": [10, 20, 30, 40, 50, 60],
+            "b": [10, 20, 30, 40, 50, 60],
+            "c": [10, 20, 30, 40, 50, 60],
+        }
+    )
+
+
+@pytest.fixture
+def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
+    spark_session,
+) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "ordered_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "eraser",
+                "eraser",
+                "eraser",
+            ],
+            "received_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "desk",
+                "desk",
+                "desk",
+            ],
+        }
+    )
+    test_df = spark_session.createDataFrame(data=df)
+    return test_df
+
+
+@pytest.fixture
+def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
+    spark_session,
+) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "a": [10, 20, 30, 40, 50, 60],
+            "b": [10, 20, 30, 40, 50, 60],
+            "c": [10, 20, 30, 40, 50, 60],
+        }
+    )
+    test_df = spark_session.createDataFrame(data=df)
+    return test_df
 
 
 @pytest.fixture

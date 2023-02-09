@@ -4,11 +4,12 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 import numpy as np
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     render_evaluation_parameter_string,
@@ -48,7 +49,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
     VARIABLES_KEY,
 )
 from great_expectations.util import isclose
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.validator import (
+    ValidationDependencies,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
@@ -243,10 +246,28 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnExpectation):
         "allow_relative_error",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Ensures quantile_ranges has been provided with value_ranges."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_quantile_values_to_be_between` it is required that the `configuration.kwargs` contain a
+        `quantile_ranges` key that is a `dict`. Also, `quantile_ranges` must contain a `value_ranges` key that is a
+        list of ordered pairs, as well as a `quantiles` key that is a list of the same length as `values_ranges`.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+            ValueError: `value_ranges` and `quantiles` are not the same length.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:

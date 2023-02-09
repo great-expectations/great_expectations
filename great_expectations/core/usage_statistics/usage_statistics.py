@@ -23,9 +23,11 @@ from great_expectations import __version__ as ge_version
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
-    CLISuiteInteractiveFlagCombinations,
+    CLISuiteInteractiveFlagCombinations,  # noqa: TCH001
 )
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.usage_statistics.events import (
+    UsageStatsEvents,  # noqa: TCH001
+)
 from great_expectations.core.usage_statistics.execution_environment import (
     GXExecutionEnvironment,
     PackageInfo,
@@ -276,6 +278,11 @@ def get_usage_statistics_handler(args_array: list) -> Optional[UsageStatisticsHa
     return handler
 
 
+# Mapping between method's qualified name and the event name it emits
+# Used to esnure proper usage stats coverage in tests
+ENABLED_METHODS: dict[str, UsageStatsEvents] = {}
+
+
 def usage_statistics_enabled_method(
     func: Optional[Callable] = None,
     event_name: Optional[UsageStatsEvents] = None,
@@ -285,6 +292,8 @@ def usage_statistics_enabled_method(
     """
     A decorator for usage statistics which defaults to the less detailed payload schema.
     """
+    if func and event_name:
+        ENABLED_METHODS[func.__qualname__] = event_name
     if callable(func):
         if event_name is None:
             event_name = func.__name__

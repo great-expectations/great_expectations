@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -210,7 +210,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
     ):
         renderer_configuration = RendererConfiguration(
-            configuraiton=configuration,
+            configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )

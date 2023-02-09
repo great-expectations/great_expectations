@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, List, Type, Union
-
-from typing_extensions import ClassVar
+from typing import TYPE_CHECKING, Callable, ClassVar, Dict, List, Type, Union
 
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
@@ -17,7 +15,7 @@ if TYPE_CHECKING:
 
 SourceFactoryFn = Callable[..., "Datasource"]
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class TypeRegistrationError(TypeError):
@@ -61,7 +59,7 @@ class _SourceFactories:
         An `.add_pandas()` pandas factory method will be added to `context.sources`.
 
         >>> class PandasDatasource(Datasource):
-        >>>     type: str = 'pandas'`
+        >>>     type: str = 'pandas'
         >>>     asset_types = [FileAsset]
         >>>     execution_engine: PandasExecutionEngine
         """
@@ -99,7 +97,7 @@ class _SourceFactories:
         The method name is pulled from the `Datasource.type` attribute.
         """
         method_name = f"add_{ds_type_name}"
-        LOGGER.debug(
+        logger.debug(
             f"2a. Registering {ds_type.__name__} as {ds_type_name} with {method_name}() factory"
         )
 
@@ -110,7 +108,7 @@ class _SourceFactories:
             )
 
         datasource_type_lookup[ds_type] = ds_type_name
-        LOGGER.debug(f"'{ds_type_name}' added to `type_lookup`")
+        logger.debug(f"'{ds_type_name}' added to `type_lookup`")
         cls.__source_factories[method_name] = factory_fn
         return ds_type_name
 
@@ -120,18 +118,23 @@ class _SourceFactories:
         asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
         if not asset_types:
-            LOGGER.warning(
+            logger.warning(
                 f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
             )
 
         for t in asset_types:
+            if t.__name__.startswith("_"):
+                logger.debug(
+                    f"{t} is private, assuming not intended as a public concrete type. Skipping registration"
+                )
+                continue
             try:
                 asset_type_name = t.__fields__["type"].default
                 if asset_type_name is None:
                     raise TypeError(
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
-                LOGGER.debug(
+                logger.debug(
                     f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
                 )
                 asset_type_lookup[t] = asset_type_name

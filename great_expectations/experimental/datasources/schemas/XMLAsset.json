@@ -1,0 +1,123 @@
+{
+    "title": "XMLAsset",
+    "description": "Read XML document into a ``DataFrame`` object.\n\n.. versionadded:: 1.3.0",
+    "type": "object",
+    "properties": {
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "type": {
+            "title": "Type",
+            "default": "xml",
+            "enum": [
+                "xml"
+            ],
+            "type": "string"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/BatchSorter"
+            }
+        },
+        "regex": {
+            "title": "Regex",
+            "type": "string",
+            "format": "regex"
+        },
+        "base_directory": {
+            "title": "Base Directory",
+            "type": "string",
+            "format": "path"
+        },
+        "xpath": {
+            "title": "Xpath",
+            "default": "./*",
+            "type": "string"
+        },
+        "namespaces": {
+            "title": "Namespaces",
+            "type": "object"
+        },
+        "elems_only": {
+            "title": "Elems Only",
+            "default": false,
+            "type": "boolean"
+        },
+        "attrs_only": {
+            "title": "Attrs Only",
+            "default": false,
+            "type": "boolean"
+        },
+        "names": {
+            "title": "Names",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "encoding": {
+            "title": "Encoding",
+            "default": "utf-8",
+            "type": "string"
+        },
+        "parser": {
+            "title": "Parser",
+            "default": "lxml",
+            "type": "string"
+        },
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
+            "anyOf": [
+                {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
+                    "type": "string"
+                },
+                {
+                    "type": "object"
+                }
+            ]
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
+        }
+    },
+    "required": [
+        "name",
+        "regex",
+        "base_directory"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "BatchSorter": {
+            "title": "BatchSorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        }
+    }
+}

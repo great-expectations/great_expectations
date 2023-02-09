@@ -7,7 +7,7 @@ from great_expectations.core.data_context_key import (
     DataContextKey,
     DataContextVariableKey,
 )
-from great_expectations.core.serializer import AbstractConfigSerializer
+from great_expectations.core.serializer import AbstractConfigSerializer  # noqa: TCH001
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
@@ -15,7 +15,9 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
+from great_expectations.data_context.types.resource_identifiers import (
+    GXCloudIdentifier,  # noqa: TCH001
+)
 from great_expectations.util import filter_properties_dict
 
 

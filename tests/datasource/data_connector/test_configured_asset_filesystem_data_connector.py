@@ -72,7 +72,7 @@ def test_basic_instantiation(tmp_path_factory):
 
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
     # Illegal execution environment name
@@ -909,18 +909,16 @@ def test_foxtrot(tmp_path_factory):
         # FIXME: (Sam) example_data_reference removed temporarily in PR #2590:
         # "example_data_reference": {},
     }
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="general_filesystem_data_connector",
         data_asset_name="A",
         data_connector_query=None,
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list: List[
+        BatchDefinition
+    ] = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 3
 
@@ -999,18 +997,16 @@ def test_relative_asset_base_directory_path(tmp_path_factory):
         # "example_data_reference": {},
     }
 
-    my_batch_definition_list: List[BatchDefinition]
-    my_batch_definition: BatchDefinition
     my_batch_request = BatchRequest(
         datasource_name="BASE",
         data_connector_name="my_configured_asset_filesystem_data_connector",
         data_asset_name="A",
         data_connector_query=None,
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list: List[
+        BatchDefinition
+    ] = my_data_connector.get_batch_definition_list_from_batch_request(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 1
 

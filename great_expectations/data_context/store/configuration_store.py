@@ -151,7 +151,7 @@ class ConfigurationStore(Store):
         raise NotImplementedError
 
     def determine_key(
-        self, name: Optional[str], ge_cloud_id: Optional[str]
+        self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
     ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
         assert bool(name) ^ bool(
             ge_cloud_id

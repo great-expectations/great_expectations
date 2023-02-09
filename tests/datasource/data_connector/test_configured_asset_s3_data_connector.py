@@ -18,9 +18,10 @@ from great_expectations.core.batch import (
     IDDict,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import (
-    ConfiguredAssetS3DataConnector,
-    FilePathDataConnector,
+from great_expectations.datasource.data_connector import ConfiguredAssetS3DataConnector
+from great_expectations.datasource.data_connector.util import (
+    sanitize_prefix,
+    sanitize_prefix_for_s3,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 
@@ -84,7 +85,7 @@ def test_basic_instantiation():
 
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 3
+    assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_unmatched_data_references() == []
 
     # Illegal execution environment name
@@ -1125,8 +1126,8 @@ assets:
 
 def test_sanitize_prefix_behaves_the_same_as_local_files():
     def check_sameness(prefix, expected_output):
-        s3_sanitized = ConfiguredAssetS3DataConnector.sanitize_prefix_for_s3(prefix)
-        file_system_sanitized = FilePathDataConnector.sanitize_prefix(prefix)
+        s3_sanitized = sanitize_prefix_for_s3(prefix)
+        file_system_sanitized = sanitize_prefix(prefix)
         if os.sep == "\\":  # Fix to ensure tests work on Windows
             file_system_sanitized = file_system_sanitized.replace("\\", "/")
 

@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 import numpy as np
 import pandas as pd
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -32,7 +32,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         column_nonnull_elements: pd.Series = column[~column_null_elements_cond]
         return column_nonnull_elements.median()
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -59,7 +59,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         element_values = sqlalchemy_engine.execute(
             sa.select([column])
             .order_by(column)
-            .where(column != None)
+            .where(column != None)  # noqa: E711
             .offset(max(nonnull_count // 2 - 1, 0))
             .limit(2)
             .select_from(selectable)
@@ -87,7 +87,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
 
         return column_median
 
-    @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
