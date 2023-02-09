@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, Mapping, Optional, Union, cast
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.serializer import DictConfigSerializer
@@ -14,10 +16,12 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
 )
-from great_expectations.data_context.types.resource_identifiers import (
-    ExpectationSuiteIdentifier,
-    ValidationResultIdentifier,
-)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.types.resource_identifiers import (
+        ExpectationSuiteIdentifier,
+        ValidationResultIdentifier,
+    )
 
 logger = logging.getLogger(__name__)
 
