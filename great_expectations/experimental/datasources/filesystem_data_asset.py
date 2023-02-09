@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, Set, cast
+from typing import TYPE_CHECKING, ClassVar, Set
 
 from great_expectations.experimental.datasources.data_asset.data_connector.filesystem_data_connector import (
     FilesystemDataConnector,
@@ -13,8 +13,6 @@ from great_expectations.experimental.datasources.file_path_data_asset import (
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
-    from great_expectations.core.batch_spec import PathBatchSpec
     from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
         DataConnector,
     )
@@ -68,17 +66,6 @@ class _FilesystemDataAsset(_FilePathDataAsset):
             glob_directive=self.glob_directive,
         )
         return data_connector
-
-    def _build_path_batch_spec_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> PathBatchSpec:
-        batch_spec: PathBatchSpec = cast(
-            PathBatchSpec,
-            self._get_data_connector().build_batch_spec(
-                batch_definition=batch_definition
-            ),
-        )
-        return batch_spec
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(

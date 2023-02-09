@@ -3,7 +3,17 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Pattern, Set
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Pattern,
+    Set,
+    cast,
+)
 
 import pydantic
 
@@ -126,8 +136,9 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchRequestOptions
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = self._build_path_batch_spec_from_batch_definition(
-                batch_definition=batch_definition
+            batch_spec = cast(
+                PathBatchSpec,
+                data_connector.build_batch_spec(batch_definition=batch_definition),
             )
             batch_spec_options = {
                 "reader_method": self._get_reader_method(),
@@ -187,11 +198,6 @@ class _FilePathDataAsset(DataAsset):
         )
 
     def _get_data_connector(self) -> DataConnector:
-        raise NotImplementedError
-
-    def _build_path_batch_spec_from_batch_definition(
-        self, batch_definition: BatchDefinition
-    ) -> PathBatchSpec:
         raise NotImplementedError
 
     def _get_reader_method(self) -> str:
