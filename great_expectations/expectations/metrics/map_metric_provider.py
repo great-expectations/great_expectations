@@ -156,6 +156,66 @@ def column_function_partial(  # noqa: C901 - 19
 
         return wrapper
 
+    elif issubclass(engine, PolarsExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
+
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
+            raise ValueError(
+                f"""{engine.__name__} (as a subclass of PolarsExecutionEngine) only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
+"column_function_partial" "partial_fn_type" property."""
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PolarsExecutionEngine,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+
+                column_name = get_dbms_compatible_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
+                filter_column_isnull = kwargs.get(
+                    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+                )
+                if filter_column_isnull:
+                    df = df.drop_nulls(subset=[column_name])
+
+                values = metric_fn(
+                    cls,
+                    df.get_column(column_name),
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return values, compute_domain_kwargs, accessor_domain_kwargs
+
+            return inner_func
+
+        return wrapper
+
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
