@@ -14,6 +14,7 @@ from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
@@ -30,7 +31,13 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__file__)
-PANDAS_VERSION: str = pd.__version__
+
+# apply markers to entire test module
+pytestmark = [
+    pytest.mark.skipif(
+        PANDAS_VERSION < 1.2, reason=f"ZEP pandas not supported on {PANDAS_VERSION}"
+    )
+]
 
 
 @pytest.fixture
@@ -124,7 +131,7 @@ class TestDynamicPandasAssets:
             param(
                 "read_xml",
                 marks=pytest.mark.skipif(
-                    PANDAS_VERSION.startswith("1.1"),
+                    PANDAS_VERSION < 1.2,
                     reason=f"read_xml does not exist on {PANDAS_VERSION} ",
                 ),
             ),
