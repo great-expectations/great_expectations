@@ -239,8 +239,9 @@ def test_invalid_root_dir_gives_error(clear_env_vars):
 
 
 @pytest.mark.unit
-def test_get_context_with_no_arguments_returns_ephemeral():
+def test_get_context_with_no_arguments_returns_ephemeral_with_sensible_defaults():
     context = gx.get_context()
     assert isinstance(context, EphemeralDataContext)
+
     defaults = InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
     assert context.config.stores == defaults.stores

@@ -74,6 +74,3 @@ class EphemeralDataContext(AbstractDataContext):
             datasource_store.set_by_name(datasource_name=name, datasource_config=config)
 
         self._datasource_store = datasource_store
-
-    def _get_data_doc_sites(self):
-        return self.variables.data_docs_sites
