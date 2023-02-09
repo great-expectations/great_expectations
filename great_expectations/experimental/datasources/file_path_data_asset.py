@@ -28,8 +28,7 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
-    from great_expectations.core.batch_spec import BatchMarkers
+    from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
