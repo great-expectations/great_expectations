@@ -44,7 +44,12 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
 from great_expectations.expectations.metrics import MetaMetricProvider  # noqa: TCH001
-from great_expectations.expectations.metrics.import_manager import F, quoted_name, sa
+from great_expectations.expectations.metrics.import_manager import (
+    F,
+    pl,
+    quoted_name,
+    sa,
+)
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
@@ -490,11 +495,11 @@ def column_condition_partial(  # noqa: C901 - 23
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
                 )
                 if filter_column_isnull:
-                    df = df[df[column_name].is_not_null()]
+                    df = df.drop_nulls(subset=[column_name])
 
                 meets_expectation_series = metric_fn(
                     cls,
-                    df[column_name],
+                    df.get_column(column_name),
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )
@@ -1695,7 +1700,6 @@ def _polars_column_map_condition_values(
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
-
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
     # currently handle filter_column_isnull differently than other map_fn / map_condition
@@ -1705,18 +1709,27 @@ def _polars_column_map_condition_values(
         "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
     )
     if filter_column_isnull:
-        df = df[df[column_name].is_not_null()]
+        df = df.drop_nulls(subset=[column_name])
 
-    domain_values = df[column_name]
-
-    domain_values = domain_values[boolean_mapped_unexpected_values is True]
+    df = (
+        df.with_columns(
+            pl.Series(
+                name="__unexpected",
+                values=boolean_mapped_unexpected_values,
+                dtype=pl.Boolean,
+            )
+        )
+        .filter(pl.col("__unexpected"))
+        .drop("__unexpected")
+    )
+    domain_values = df.get_column(column_name)
 
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return list(domain_values)
+        return domain_values.to_list()
     else:
-        return list(domain_values[: result_format["partial_unexpected_count"]])
+        return domain_values.head(result_format["partial_unexpected_count"]).to_list()
 
 
 def _pandas_column_pair_map_condition_values(
