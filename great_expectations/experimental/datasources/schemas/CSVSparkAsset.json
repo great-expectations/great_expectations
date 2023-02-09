@@ -27,6 +27,11 @@
             "type": "string",
             "format": "regex"
         },
+        "base_directory": {
+            "title": "Base Directory",
+            "type": "string",
+            "format": "path"
+        },
         "header": {
             "title": "Header",
             "default": false,

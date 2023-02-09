@@ -407,6 +407,7 @@ PYTHON_VERSION_DEFAULT: float = 3.8
         "detach": "Run container in background and print container ID. Defaults to False.",
         "py": f"version of python to use. Default is {PYTHON_VERSION_DEFAULT}",
         "cmd": "Command for docker image. Default is bash.",
+        "target": "Set the target build stage to build.",
     }
 )
 def docker(
@@ -417,6 +418,7 @@ def docker(
     detach: bool = False,
     cmd: str = "bash",
     py: float = PYTHON_VERSION_DEFAULT,
+    target: str | None = None,
 ):
     """
     Build or run gx docker image.
@@ -443,6 +445,8 @@ def docker(
                 ".",
             ]
         )
+        if target:
+            cmds.extend(["--target", target])
 
     else:
         cmds.append("run")

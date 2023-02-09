@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Type
 
+import pandas as pd
 import pydantic
 import pytest
 from pytest import MonkeyPatch, param
@@ -29,6 +30,7 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__file__)
+PANDAS_VERSION: str = pd.__version__
 
 
 @pytest.fixture
@@ -119,7 +121,13 @@ class TestDynamicPandasAssets:
                 "read_table",
                 marks=pytest.mark.xfail(reason="conflict with 'table' type name"),
             ),
-            param("read_xml"),
+            param(
+                "read_xml",
+                marks=pytest.mark.skipif(
+                    PANDAS_VERSION.startswith("1.1"),
+                    reason=f"read_xml does not exist on {PANDAS_VERSION} ",
+                ),
+            ),
         ],
     )
     def test_data_asset_defined_for_io_read_method(self, method_name: str):
@@ -142,7 +150,7 @@ class TestDynamicPandasAssets:
         This is also a proxy for testing that the dynamic pydantic model creation was successful.
         """
         with pytest.raises(pydantic.ValidationError) as exc_info:
-            asset_class(
+            asset_class(  # type: ignore[call-arg]
                 name="test",
                 base_directory=pathlib.Path(__file__),
                 regex=re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
@@ -242,7 +250,7 @@ def test_add_csv_asset_to_datasource(
 @pytest.mark.unit
 def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
-    asset = CSVAsset(
+    asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
@@ -484,7 +492,7 @@ def datasource_test_connection_error_messages(
     pandas_filesystem_datasource: PandasFilesystemDatasource, request
 ) -> tuple[PandasFilesystemDatasource, TestConnectionError]:
     base_directory, regex, test_connection_error = request.param()
-    csv_asset = CSVAsset(
+    csv_asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
         base_directory=base_directory,
         regex=regex,
