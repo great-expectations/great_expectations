@@ -1,10 +1,8 @@
-import dataclasses
 import json
 import logging
 from unittest import mock
 
 import pytest
-import requests
 from freezegun import freeze_time
 from requests import Session
 

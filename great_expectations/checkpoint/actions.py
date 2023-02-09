@@ -8,8 +8,7 @@ from __future__ import annotations
 import json
 import logging
 import warnings
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
-from urllib.parse import urljoin
+from typing import TYPE_CHECKING, Dict, List, Union
 
 import requests
 from typing_extensions import Final
