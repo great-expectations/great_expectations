@@ -109,7 +109,19 @@ class _FilePathDataAsset(DataAsset):
                         f"not a string: {value}"
                     )
 
-        return super().get_batch_request(options)
+        if options is not None and not self._valid_batch_request_options(options):
+            allowed_keys = set(self.batch_request_options_template().keys())
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(
+                "Batch request options should only contain keys from the following set:\n"
+                f"{allowed_keys}\nbut your specified keys contain\n"
+                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
+            )
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options=options or {},
+        )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
