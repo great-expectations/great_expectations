@@ -354,6 +354,7 @@ def list_azure_keys(
             if isinstance(item, BlobPrefix):
                 if recursive:
                     _walk_blob_hierarchy(name_starts_with=item.name)
+
             else:
                 path_list.append(item.name)
 
@@ -419,6 +420,7 @@ def list_gcs_keys(
         name: str = blob.name
         if name.endswith("/"):  # GCS includes directories in blob output
             continue
+
         keys.append(name)
 
     return keys
