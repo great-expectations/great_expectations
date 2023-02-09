@@ -125,9 +125,9 @@ class SparkDatasource(_SparkDatasource):
         """
         asset = CSVSparkAsset(
             name=name,
-            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            regex=regex,
             header=header,
             inferSchema=infer_schema,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=order_by or [],
         )
         return self.add_asset(asset)

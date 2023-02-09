@@ -645,7 +645,7 @@ class SQLDatasource(Datasource):
             name=name,
             table_name=table_name,
             schema_name=schema_name,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=order_by or [],
             # see DataAsset._parse_order_by_sorter()
         )
         return self.add_asset(asset)
@@ -669,6 +669,6 @@ class SQLDatasource(Datasource):
         asset = QueryAsset(
             name=name,
             query=query,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=order_by or [],
         )
         return self.add_asset(asset)
