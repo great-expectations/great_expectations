@@ -412,6 +412,7 @@ class _YamlConfigValidator:
                 config=datasource_config,
                 initialize=True,
                 save_changes=False,
+                overwrite_existing=False,
             ),
         )
 
