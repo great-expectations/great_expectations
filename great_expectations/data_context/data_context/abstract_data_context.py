@@ -187,25 +187,37 @@ class AbstractDataContext(ConfigPeer, ABC):
        :widths: 25 15 15 15 15 15
        :header-rows: 1
 
-       * - Foo
+       * -
          - Stores
          - Datasources
          - ExpectationSuites
          - Checkpoints
          - Profilers
-       * - Albatross
+       * - `get`
          - 2.99
          - On a stick!
          - On a stick!
          - On a stick!
          - On a stick!
-       * - Crunchy Frog
+       * - `add`
          - 1.49
          - 1.49
          - 1.49
          - 1.49
          - 1.49
-       * - Gannet Ripple
+       * - `update`
+         - 1.99
+         - On a stick!
+         - On a stick!
+         - On a stick!
+         - On a stick!
+       * - `add_or_update`
+         - 1.99
+         - On a stick!
+         - On a stick!
+         - On a stick!
+         - On a stick!
+       * - `delete`
          - 1.99
          - On a stick!
          - On a stick!
