@@ -12,6 +12,7 @@ from great_expectations.experimental.datasources.interfaces import (
     DataAsset,
     Datasource,
 )
+from great_expectations.util import is_library_loadable
 
 logger = logging.getLogger(__name__)
 
@@ -154,23 +155,39 @@ def multibatch_spark_data(
     return context, spark_ds, asset, batch_request
 
 
-@pytest.fixture(params=[pandas_data, sql_data, spark_data])
+@pytest.fixture(
+    params=[
+        pandas_data,
+        sql_data,
+        pytest.param(
+            spark_data,
+            marks=pytest.mark.skipIf(
+                # lambda: not is_library_loadable(library_name="pyspark"),
+                reason="pyspark must be installed",
+            ),
+        ),
+    ]
+)
 def datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
     return request.param(empty_data_context)
 
 
 @pytest.fixture(
-    params=[multibatch_pandas_data, multibatch_sql_data, multibatch_spark_data]
+    params=[
+        multibatch_pandas_data,
+        multibatch_sql_data,
+        pytest.param(
+            multibatch_spark_data,
+            marks=pytest.mark.skipIf(
+                not is_library_loadable(library_name="pyspark"),
+                reason="pyspark must be installed",
+            ),
+        ),
+    ]
 )
 def multibatch_datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
     return request.param(empty_data_context)
