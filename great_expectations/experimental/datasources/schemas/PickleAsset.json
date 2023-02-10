@@ -17,36 +17,22 @@
         },
         "order_by": {
             "title": "Order By",
-            "anyOf": [
-                {
-                    "type": "array",
-                    "items": {
+            "type": "array",
+            "items": {
+                "anyOf": [
+                    {
                         "$ref": "#/definitions/BatchSorter"
-                    }
-                },
-                {
-                    "type": "array",
-                    "items": {
+                    },
+                    {
                         "type": "string"
                     }
-                },
-                {
-                    "type": "array",
-                    "items": {}
-                }
-            ]
+                ]
+            }
         },
         "regex": {
             "title": "Regex",
-            "anyOf": [
-                {
-                    "type": "string"
-                },
-                {
-                    "type": "string",
-                    "format": "regex"
-                }
-            ]
+            "type": "string",
+            "format": "regex"
         },
         "compression": {
             "title": "Compression",
