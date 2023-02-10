@@ -155,6 +155,8 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
+        if isinstance(regex, str):
+            regex = re.compile(regex)
         asset = CSVAsset(
             name=name,
             regex=regex,
@@ -178,6 +180,8 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
+        if isinstance(regex, str):
+            regex = re.compile(regex)
         asset = ExcelAsset(
             name=name,
             regex=regex,
@@ -201,6 +205,8 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
+        if isinstance(regex, str):
+            regex = re.compile(regex)
         asset = JSONAsset(
             name=name,
             regex=regex,
@@ -224,6 +230,8 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
+        if isinstance(regex, str):
+            regex = re.compile(regex)
         asset = ParquetAsset(
             name=name,
             regex=regex,

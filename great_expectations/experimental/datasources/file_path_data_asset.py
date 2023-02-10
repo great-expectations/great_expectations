@@ -3,7 +3,6 @@ from __future__ import annotations
 import dataclasses
 import logging
 import pathlib
-import re
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Pattern, Set, Union
 
@@ -38,7 +37,7 @@ class _FilePathDataAsset(DataAsset):
     }
 
     # General file-path DataAsset pertaining attributes.
-    regex_setter: Union[Pattern, str] = pydantic.Field(alias="regex")
+    regex: Pattern
 
     # Internal attributes
     _datasource: Union[
@@ -82,12 +81,6 @@ class _FilePathDataAsset(DataAsset):
     @property
     def _base_directory(self) -> pathlib.Path:
         return self._datasource.base_directory
-
-    @property
-    def regex(self) -> Pattern:
-        if isinstance(self.regex_setter, str):
-            return re.compile(self.regex_setter)
-        return self.regex_setter
 
     def batch_request_options_template(
         self,

@@ -123,6 +123,8 @@ class SparkDatasource(_SparkDatasource):
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
         """
+        if isinstance(regex, str):
+            regex = re.compile(regex)
         asset = CSVSparkAsset(
             name=name,
             regex=regex,
