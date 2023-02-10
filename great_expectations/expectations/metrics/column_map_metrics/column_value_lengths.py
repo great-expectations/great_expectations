@@ -1,10 +1,5 @@
 from typing import Optional
 
-try:
-    import polars as pl
-except ImportError:
-    pl = None
-
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
@@ -16,7 +11,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import F, pl, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,

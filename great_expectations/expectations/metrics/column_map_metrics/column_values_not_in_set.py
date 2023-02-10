@@ -9,19 +9,12 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.metrics.import_manager import pl
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.util import parse_value_set
-
-try:
-    import polars as pl
-    from polars import DataFrame as pl_DataFrame
-
-except ImportError:
-    pl_DataFrame = None
-    pl = None
 
 
 class ColumnValuesNotInSet(ColumnMapMetricProvider):
