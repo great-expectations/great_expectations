@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import hashlib
 import logging
@@ -6,6 +8,7 @@ import warnings
 from functools import partial
 from io import BytesIO
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -35,6 +38,9 @@ from great_expectations.execution_engine.split_and_sample.polars_data_sampler im
 from great_expectations.execution_engine.split_and_sample.polars_data_splitter import (
     PolarsDataSplitter,
 )
+
+if TYPE_CHECKING:
+    import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -638,3 +644,44 @@ def hash_polars_dataframe(df):
         obj = pickle.dumps(df, pickle.HIGHEST_PROTOCOL)
 
     return hashlib.md5(obj).hexdigest()
+
+
+def filter_by_boolean_map(
+    df: pl.DataFrame, boolean_map: np.ndarray, column_names: list[str]
+) -> pl.Series | pl.DataFrame:
+    """Filter a polars dataframe by a boolean map.
+
+    For example, only rows where the boolean map is true are included in
+    the output.
+
+    Args:
+        df: Dataframe to filter.
+        boolean_map: Array of booleans matching the length of df, where True
+            means the row should be included in the output and False
+            where it shouldn't.
+        column_names:
+            Names of columns that should be included in the output.
+
+    Returns:
+        Series if column_names is only one item, Dataframe if column_names is
+        more than one item.
+    """
+    df = (
+        df.with_columns(
+            pl.Series(
+                name="__unexpected",
+                values=boolean_map,
+                dtype=pl.Boolean,
+            )
+        )
+        .filter(pl.col("__unexpected"))
+        .drop("__unexpected")
+    )
+
+    domain_values: pl.Series | pl.DataFrame
+    if len(column_names) == 1:
+        domain_values = df.get_column(column_names[0])
+    else:
+        domain_values = df.select(column_names)
+
+    return domain_values

@@ -7,10 +7,11 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
+    PolarsExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.expectations.metrics.import_manager import F, pl, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -26,6 +27,13 @@ class ColumnValuesValueLengthEquals(ColumnMapMetricProvider):
 
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, value, _metrics, **kwargs):
+        column_lengths, _, _ = _metrics.get(
+            f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        )
+        return column_lengths == value
+
+    @column_condition_partial(engine=PolarsExecutionEngine)
+    def _polars(cls, column, value, _metrics, **kwargs):
         column_lengths, _, _ = _metrics.get(
             f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
         )
@@ -89,6 +97,10 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
     def _pandas_function(cls, column, **kwargs):
         return column.astype(str).str.len()
 
+    @column_function_partial(engine=PolarsExecutionEngine)
+    def _polars_function(cls, column, **kwargs):
+        return column.cast(pl.Utf8, strict=False).str.lengths()
+
     @column_function_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy_function(cls, column, **kwargs):
         return sa.func.length(column)
@@ -129,6 +141,55 @@ class ColumnValuesValueLength(ColumnMapMetricProvider):
             elif not strict_min and not strict_max:
                 metric_series = pandas_series_between_inclusive(
                     series=column_lengths, min_value=min_value, max_value=max_value
+                )
+        elif min_value is None and max_value is not None:
+            if strict_max:
+                metric_series = column_lengths < max_value
+            else:
+                metric_series = column_lengths <= max_value
+        elif min_value is not None and max_value is None:
+            if strict_min:
+                metric_series = column_lengths > min_value
+            else:
+                metric_series = column_lengths >= min_value
+
+        else:
+            raise ValueError("Invalid configuration")
+
+        return metric_series
+
+    @column_condition_partial(engine=PolarsExecutionEngine)
+    def _polars(
+        cls,
+        column,
+        _metrics,
+        min_value=None,
+        max_value=None,
+        strict_min=None,
+        strict_max=None,
+        **kwargs,
+    ):
+        column_lengths, _, _ = _metrics.get(
+            f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        )
+
+        metric_series = None
+        if min_value is not None and max_value is not None:
+            if strict_min and strict_max:
+                metric_series = (column_lengths > min_value) & (
+                    column_lengths < max_value
+                )
+            elif strict_min and not strict_max:
+                metric_series = (column_lengths > min_value) & (
+                    column_lengths <= max_value
+                )
+            elif not strict_min and strict_max:
+                metric_series = (column_lengths >= min_value) & (
+                    column_lengths < max_value
+                )
+            elif not strict_min and not strict_max:
+                metric_series = (column_lengths >= min_value) & (
+                    column_lengths <= max_value
                 )
         elif min_value is None and max_value is not None:
             if strict_max:

@@ -33,18 +33,23 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
+    PolarsExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.polars_execution_engine import (
-    PolarsExecutionEngine,
+    filter_by_boolean_map,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
 from great_expectations.expectations.metrics import MetaMetricProvider  # noqa: TCH001
-from great_expectations.expectations.metrics.import_manager import F, quoted_name, sa
+from great_expectations.expectations.metrics.import_manager import (
+    F,
+    quoted_name,
+    sa,
+)
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_partial,
@@ -147,6 +152,66 @@ def column_function_partial(  # noqa: C901 - 19
                 values = metric_fn(
                     cls,
                     df[column_name],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return values, compute_domain_kwargs, accessor_domain_kwargs
+
+            return inner_func
+
+        return wrapper
+
+    elif issubclass(engine, PolarsExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
+
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
+            raise ValueError(
+                f"""{engine.__name__} (as a subclass of PolarsExecutionEngine) only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
+"column_function_partial" "partial_fn_type" property."""
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PolarsExecutionEngine,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+
+                column_name = get_dbms_compatible_column_names(
+                    column_names=column_name,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
+                filter_column_isnull = kwargs.get(
+                    "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
+                )
+                if filter_column_isnull:
+                    df = df.drop_nulls(subset=[column_name])
+
+                values = metric_fn(
+                    cls,
+                    df.get_column(column_name),
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )
@@ -430,11 +495,11 @@ def column_condition_partial(  # noqa: C901 - 23
                     "filter_column_isnull", getattr(cls, "filter_column_isnull", True)
                 )
                 if filter_column_isnull:
-                    df = df[df[column_name].is_not_null()]
+                    df = df.drop_nulls(subset=[column_name])
 
                 meets_expectation_series = metric_fn(
                     cls,
-                    df[column_name],
+                    df.get_column(column_name),
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )
@@ -1635,7 +1700,6 @@ def _polars_column_map_condition_values(
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=f'Error: The column "{column_name}" in BatchData does not exist.'
         )
-
     ###
     # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
     # currently handle filter_column_isnull differently than other map_fn / map_condition
@@ -1645,18 +1709,18 @@ def _polars_column_map_condition_values(
         "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
     )
     if filter_column_isnull:
-        df = df[df[column_name].is_not_null()]
+        df = df.drop_nulls(subset=[column_name])
 
-    domain_values = df[column_name]
-
-    domain_values = domain_values[boolean_mapped_unexpected_values is True]
+    domain_values = filter_by_boolean_map(
+        df=df, boolean_map=boolean_mapped_unexpected_values, column_names=[column_name]
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return list(domain_values)
+        return domain_values.to_list()
     else:
-        return list(domain_values[: result_format["partial_unexpected_count"]])
+        return domain_values.head(result_format["partial_unexpected_count"]).to_list()
 
 
 def _pandas_column_pair_map_condition_values(
@@ -1765,16 +1829,17 @@ def _polars_column_pair_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    domain_values = df[column_list]
-
-    domain_values = domain_values[boolean_mapped_unexpected_values is True]
+    domain_values = filter_by_boolean_map(
+        df=df, boolean_map=boolean_mapped_unexpected_values, column_names=column_list
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
     unexpected_list = [
         value_pair
         for value_pair in zip(
-            domain_values[column_A_name].values, domain_values[column_B_name].values
+            domain_values.get_column(column_A_name).to_list(),
+            domain_values.get_column(column_B_name).to_list(),
         )
     ]
     if result_format["result_format"] == "COMPLETE":

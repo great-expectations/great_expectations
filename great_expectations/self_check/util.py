@@ -85,6 +85,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
 try:
+    import polars as pl
     from polars import DataFrame as pl_DataFrame
     from polars import Date as pl_Date
     from polars import Datetime as pl_Datetime
@@ -94,6 +95,7 @@ try:
     from polars import lit as pl_lit
 
 except ImportError:
+    pl = None
     pl_DataFrame = None
     pl_from_numpy = None
     pl_Datetime = None
@@ -1212,7 +1214,7 @@ def get_dataset(  # noqa: C901 - 110
 
 
 def get_test_validator_with_data(  # noqa: C901 - 31
-    execution_engine,
+    execution_engine: str,
     data,
     schemas=None,
     caching=True,
@@ -1223,7 +1225,11 @@ def get_test_validator_with_data(  # noqa: C901 - 31
     context: Optional[AbstractDataContext] = None,
     pk_column: bool = False,
 ):
-    """Utility to create datasets for json-formatted tests."""
+    """Utility to create datasets for json-formatted tests.
+
+    Args:
+        execution_engine: Name of the backend e.g. `pandas` or `spark`
+    """
 
     # if pk_column is defined in our test, then we add a index column to our test set
     if pk_column:
@@ -1237,33 +1243,29 @@ def get_test_validator_with_data(  # noqa: C901 - 31
             if pk_column:
                 schema["pk_index"] = "int"
             pandas_schema = {}
-            for (key, value) in schema.items():
+            for (col_name, col_type) in schema.items():
                 # Note, these are just names used in our internal schemas to build datasets *for internal tests*
                 # Further, some changes in pandas internal about how datetimes are created means to support pandas
                 # pre- 0.25, we need to explicitly specify when we want timezone.
 
                 # We will use timestamp for timezone-aware (UTC only) dates in our tests
-                if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
-                    df[key] = pd.to_datetime(df[key], utc=True)
+                if col_type.lower() in ["timestamp", "datetime64[ns, tz]"]:
+                    df[col_name] = pd.to_datetime(df[col_name], utc=True)
                     continue
-                elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
-                    df[key] = pd.to_datetime(df[key])
+                elif col_type.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
+                    df[col_name] = pd.to_datetime(df[col_name])
                     continue
-                elif value.lower() in ["date"]:
-                    df[key] = pd.to_datetime(df[key]).dt.date
-                    value = "object"
+                elif col_type.lower() in ["date"]:
+                    df[col_name] = pd.to_datetime(df[col_name]).dt.date
+                    col_type = "object"
                 try:
-                    type_ = np.dtype(value)
+                    type_ = np.dtype(col_type)
                 except TypeError:
                     # noinspection PyUnresolvedReferences
-                    type_ = getattr(pd, value)()
-                pandas_schema[key] = type_
+                    type_ = getattr(pd, col_type)()
+                pandas_schema[col_name] = type_
             # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
-
-        if table_name is None:
-            # noinspection PyUnusedLocal
-            table_name = generate_test_table_name()
 
         batch_definition = BatchDefinition(
             datasource_name="pandas_datasource",
@@ -1278,47 +1280,39 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         )
 
     elif execution_engine == "polars":
-        df = pl_from_numpy(df.to_numpy(), list(df.columns))
+        pl_df = pl_DataFrame(data)
         if schemas and "polars" in schemas:
             schema = schemas["polars"]
-            polars_schema = {}
-            for (key, value) in schema.items():
-                # Note, these are just names used in our internal schemas to build datasets *for internal tests*
-                # Further, some changes in pandas internal about how datetimes are created means to support pandas
-                # pre- 0.25, we need to explicitly specify when we want timezone.
+            for (col_name, col_type) in schema.items():
+                # These names correspond to polars data types
+                if col_type == "Date":
+                    pl_df.replace(
+                        col_name,
+                        pl_df.get_column(col_name).str.strptime(
+                            pl.Date, fmt="%Y-%m-%d"
+                        ),
+                    )
+                elif col_type == "Datetime":
+                    pl_df.replace(
+                        col_name,
+                        pl_df.get_column(col_name).str.strptime(
+                            pl.Datetime, fmt="%Y-%m-%d %H:%M:%S"
+                        ),
+                    )
+                else:
+                    try:
+                        dtype = getattr(pl_datatypes, col_type)
+                    except AttributeError as e:
+                        raise AttributeError(
+                            f"{col_type} for column {col_name} is not a valid polars data type."
+                        ) from e
 
-                # We will use timestamp for timezone-aware (UTC only) dates in our tests
-                if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
-                    df[key] = df[key].str.strptime(pl_Datetime)
-                    continue
-                elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
-                    df[key] = df[key].str.strptime(pl_Datetime)
-                    continue
-                elif value.lower() in ["date"]:
-                    df[key] = df[key].str.strptime(pl_Date)
-                    value = "object"
-                try:
-                    type_ = np.dtype(value)
-                except TypeError:
-                    # noinspection PyUnresolvedReferences
-                    type_ = getattr(pl_datatypes, value)
-                    # If this raises AttributeError it's okay: it means someone built a bad test
-                polars_schema[key] = type_
-            # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
-            typed_df = pl_DataFrame()
-            for x in df.columns:
-                typed_df = typed_df.with_column(
-                    pl_lit(pl_Series(df[x].name, df[x].to_list()))
-                )
-                typed_df[x] = typed_df[x].cast(polars_schema[x], strict=False)
+                    pl_df.replace(
+                        col_name,
+                        pl_df.get_column(col_name).cast(dtype=dtype, strict=False),
+                    )
 
-            return build_polars_validator_with_data(df=typed_df)
-
-        if table_name is None:
-            # noinspection PyUnusedLocal
-            table_name = generate_test_table_name()
-
-        return build_polars_validator_with_data(df=df)
+        return build_polars_validator_with_data(df=pl_df)
 
     elif execution_engine in SQL_DIALECT_NAMES:
         if not create_engine:

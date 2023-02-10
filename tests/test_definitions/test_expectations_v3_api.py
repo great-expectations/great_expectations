@@ -1,3 +1,11 @@
+"""Run expectation tests for expectations implemented in the v3 API.
+
+For example:
+pytest -vv -rxAP --pandas -k "[pandas/column_map_expectations/expect_column_value_lengths_to_equal:positive_test_string_one_character_length]" tests/test_definitions/test_expectations_v3_api.py
+
+will run the positive_test_string_one_character_length test for the
+expect_column_value_lengths_to_equal expectation on pandas.
+"""
 import glob
 import json
 import os
