@@ -374,7 +374,7 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
         .add_sorters(["year", "month"])
     )
 
-    batch_request = asset.get_batch_request({"year": 2019, "month": 1})
+    batch_request = asset.build_batch_request({"year": 2019, "month": 1})
 
     result = context.assistants.onboarding.run(
         batch_request=batch_request,
