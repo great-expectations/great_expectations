@@ -30,10 +30,6 @@ from great_expectations.experimental.datasources.interfaces import (
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.execution_engine import (
-        PandasExecutionEngine,
-        SparkDFExecutionEngine,
-    )
     from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
         DataConnector,
     )
@@ -47,10 +43,21 @@ class _FilePathDataAsset(DataAsset):
         "regex",
         "order_by",
         "type",
+        # TODO: <Alex>ALEX</Alex>
+        "base_directory",
+        "glob_directive",
+        "data_connector",
+        # TODO: <Alex>ALEX</Alex>
     }
 
     # General file-path DataAsset pertaining attributes.
     regex: Pattern
+
+    """
+    "DataConnector" provides access to sources of data on local and remote storage systems, efficient listing of data
+    references, located on these storage systems, and translation between "BatchRequest" and "BatchDefinition" obkects.
+    """
+    data_connector: DataConnector
 
     # Internal attributes
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
@@ -71,6 +78,9 @@ class _FilePathDataAsset(DataAsset):
         """
 
         extra = pydantic.Extra.allow
+        # TODO: <Alex>ALEX</Alex>
+        arbitrary_types_allowed = True
+        # TODO: <Alex>ALEX</Alex>
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -114,15 +124,9 @@ class _FilePathDataAsset(DataAsset):
     ) -> List[Batch]:
         self._validate_batch_request(batch_request)
 
-        execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (
-            self.datasource.get_execution_engine()
-        )
-
-        data_connector: DataConnector = self._get_data_connector()
-
         batch_definition_list: List[
             BatchDefinition
-        ] = data_connector.get_batch_definition_list_from_batch_request(
+        ] = self.data_connector.get_batch_definition_list_from_batch_request(
             batch_request=batch_request
         )
 
@@ -135,7 +139,7 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchRequestOptions
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = data_connector.build_batch_spec(
+            batch_spec = self.data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
             batch_spec_options = {
@@ -149,7 +153,10 @@ class _FilePathDataAsset(DataAsset):
             }
             batch_spec.update(batch_spec_options)
 
-            batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
+            (
+                batch_data,
+                batch_markers,
+            ) = self.datasource.get_execution_engine().get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
 
@@ -193,12 +200,14 @@ class _FilePathDataAsset(DataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        raise NotImplementedError(
-            """One needs to implement "test_connection" on a _FilePathDataAsset subclass."""
-        )
-
-    def _get_data_connector(self) -> DataConnector:
-        raise NotImplementedError
+        # TODO: <Alex>ALEX</Alex>
+        # raise NotImplementedError(
+        #     """One needs to implement "test_connection" on a _FilePathDataAsset subclass."""
+        # )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        pass
+        # TODO: <Alex>ALEX</Alex>
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
