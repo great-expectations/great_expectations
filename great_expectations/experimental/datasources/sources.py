@@ -143,6 +143,32 @@ class _SourceFactories:
                     f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",
                 ) from bad_field_exc
 
+            cls._bind_asset_factory_method_if_not_present(ds_type, t, asset_type_name)
+
+    @classmethod
+    def _bind_asset_factory_method_if_not_present(
+        cls,
+        ds_type: Type[Datasource],
+        asset_type: Type[DataAsset],
+        asset_type_name: str,
+    ):
+        # TODO: let asset/ds define how the type_name should look.
+        asset_factory_method_name = f"add_{asset_type_name}_asset"
+        # TODO: check if the class already has a add_asset method defined
+        asset_factory_defined: bool = False
+        if not asset_factory_defined:
+            logger.debug(
+                f"No `{asset_factory_method_name}()` method found for {ds_type} generating the method..."
+            )
+
+            def _add_asset_factory(self: Datasource, name: str, **kwargs):
+                asset = asset_type(name=name, **kwargs)
+                return self.add_asset(asset)
+
+            setattr(asset_type, asset_factory_method_name, _add_asset_factory)
+        else:
+            logger.debug(f"`{asset_factory_method_name}()` already defined {ds_type}")
+
     @property
     def factories(self) -> List[str]:
         return list(self.__source_factories.keys())
