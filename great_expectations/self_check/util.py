@@ -86,13 +86,13 @@ if TYPE_CHECKING:
 
 try:
     import polars as pl
+    from polars import DataFrame as pl_DataFrame
+    from polars import datatypes as pl_datatypes
 except ImportError:
     pl = None
+    pl_DataFrame = None
+    pl_datatypes = None
 
-from great_expectations.expectations.metrics.import_manager import (
-    pl_DataFrame,
-    pl_datatypes,
-)
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
 expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema()
