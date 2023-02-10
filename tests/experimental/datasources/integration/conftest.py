@@ -34,7 +34,7 @@ def pandas_data(
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
-    batch_request = asset.get_batch_request({"year": "2019", "month": "01"})
+    batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
     return context, pandas_ds, asset, batch_request
 
 
@@ -70,7 +70,7 @@ def sql_data(
         .add_year_and_month_splitter(column_name="pickup_datetime")
         .add_sorters(["year", "month"])
     )
-    batch_request = asset.get_batch_request({"year": 2019, "month": 1})
+    batch_request = asset.build_batch_request({"year": 2019, "month": 1})
     return context, datasource, asset, batch_request
 
 
@@ -94,7 +94,7 @@ def spark_data(
         header=True,
         infer_schema=True,
     )
-    batch_request = asset.get_batch_request({"year": "2019", "month": "01"})
+    batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
     return context, spark_ds, asset, batch_request
 
 
@@ -116,7 +116,7 @@ def multibatch_pandas_data(
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
-    batch_request = asset.get_batch_request({"year": "2020"})
+    batch_request = asset.build_batch_request({"year": "2020"})
     return context, pandas_ds, asset, batch_request
 
 
@@ -134,7 +134,7 @@ def multibatch_sql_data(
         .add_year_and_month_splitter(column_name="pickup_datetime")
         .add_sorters(["year", "month"])
     )
-    batch_request = asset.get_batch_request({"year": 2020})
+    batch_request = asset.build_batch_request({"year": 2020})
     return context, datasource, asset, batch_request
 
 
@@ -158,7 +158,7 @@ def multibatch_spark_data(
         header=True,
         infer_schema=True,
     )
-    batch_request = asset.get_batch_request({"year": "2020"})
+    batch_request = asset.build_batch_request({"year": "2020"})
     return context, spark_ds, asset, batch_request
 
 

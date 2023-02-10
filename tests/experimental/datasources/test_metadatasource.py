@@ -22,7 +22,9 @@ from great_expectations.experimental.datasources.sources import (
 class DummyDataAsset(DataAsset):
     """Minimal Concrete DataAsset Implementation"""
 
-    def get_batch_request(self, options: Optional[BatchRequestOptions]) -> BatchRequest:
+    def build_batch_request(
+        self, options: Optional[BatchRequestOptions]
+    ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 
 
