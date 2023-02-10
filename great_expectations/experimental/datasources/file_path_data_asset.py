@@ -103,7 +103,7 @@ class _FilePathDataAsset(DataAsset):
         idx: int
         return {idx: None for idx in self._all_group_names}
 
-    def get_batch_request(
+    def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
         if options:
@@ -117,7 +117,7 @@ class _FilePathDataAsset(DataAsset):
                         f"not a string: {value}"
                     )
 
-        return super().get_batch_request(options)
+        return super().build_batch_request(options)
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest

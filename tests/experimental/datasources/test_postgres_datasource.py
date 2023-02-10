@@ -130,7 +130,7 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
             batch_request_template={"year": None, "month": None},
         )
         assert_batch_request(
-            batch_request=asset.get_batch_request({"year": 2021, "month": 10}),
+            batch_request=asset.build_batch_request({"year": 2021, "month": 10}),
             source_name="my_datasource",
             asset_name="my_asset",
             options={"year": 2021, "month": 10},
@@ -157,13 +157,13 @@ def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFix
             batch_request_template={},
         )
         assert_batch_request(
-            batch_request=asset.get_batch_request(),
+            batch_request=asset.build_batch_request(),
             source_name="my_datasource",
             asset_name="my_asset",
             options={},
         )
         assert_batch_request(
-            batch_request=asset.get_batch_request({}),
+            batch_request=asset.build_batch_request({}),
             source_name="my_datasource",
             asset_name="my_asset",
             options={},
@@ -177,7 +177,9 @@ def test_construct_table_asset_directly_with_no_splitter(create_source):
     ) as source:
         asset = TableAsset(name="my_asset", table_name="my_table")
         asset._datasource = source
-        assert_batch_request(asset.get_batch_request(), "my_datasource", "my_asset", {})
+        assert_batch_request(
+            asset.build_batch_request(), "my_datasource", "my_asset", {}
+        )
 
 
 def create_and_add_table_asset_without_testing_connection(
@@ -217,7 +219,7 @@ def test_construct_table_asset_directly_with_splitter(create_source):
         )
         batch_request_options = {"year": 2022, "month": 10}
         assert_batch_request(
-            asset.get_batch_request(batch_request_options),
+            asset.build_batch_request(batch_request_options),
             "my_datasource",
             "my_asset",
             batch_request_options,
@@ -241,7 +243,7 @@ def test_datasource_gets_batch_list_no_splitter(create_source):
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        source.get_batch_list_from_batch_request(asset.get_batch_request())
+        source.get_batch_list_from_batch_request(asset.build_batch_request())
 
 
 def assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs):
@@ -288,7 +290,7 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
             source=source, name="my_asset", table_name="my_table"
         )
         asset.column_splitter = SqlYearMonthSplitter(column_name="my_col")
-        empty_batch_request = asset.get_batch_request()
+        empty_batch_request = asset.build_batch_request()
         assert empty_batch_request.options == {}
         batches = source.get_batch_list_from_batch_request(empty_batch_request)
         assert_batch_specs_correct_with_year_month_splitter_defaults(batch_specs)
@@ -311,7 +313,7 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
             source=source, name="my_asset", table_name="my_table"
         )
         asset.column_splitter = SqlYearMonthSplitter(column_name="my_col")
-        batch_request_with_none = asset.get_batch_request(
+        batch_request_with_none = asset.build_batch_request(
             asset.batch_request_options_template()
         )
         assert batch_request_with_none.options == {"year": None, "month": None}
@@ -338,7 +340,7 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
         )
         asset.column_splitter = SqlYearMonthSplitter(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
-            asset.get_batch_request({"year": 2022})
+            asset.build_batch_request({"year": 2022})
         )
         assert len(batch_specs) == len(_DEFAULT_TEST_MONTHS)
         for month in _DEFAULT_TEST_MONTHS:
@@ -383,7 +385,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
         )
         asset.column_splitter = SqlYearMonthSplitter(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
-            asset.get_batch_request({"month": 1, "year": 2022})
+            asset.build_batch_request({"month": 1, "year": 2022})
         )
         assert 1 == len(batches)
         assert batches[0].metadata == {"month": 1, "year": 2022}
@@ -498,7 +500,7 @@ def test_get_bad_batch_request(create_source: CreateSourceFixture):
         )
         asset.column_splitter = SqlYearMonthSplitter(column_name="my_col")
         with pytest.raises(ge_exceptions.InvalidBatchRequestError):
-            asset.get_batch_request({"invalid_key": None})
+            asset.build_batch_request({"invalid_key": None})
 
 
 @pytest.mark.unit
@@ -831,7 +833,7 @@ def test_query_data_asset(create_source):
         )
         assert asset.name == "query_asset"
         assert asset.query.lower() == query.lower()
-        source.get_batch_list_from_batch_request(asset.get_batch_request())
+        source.get_batch_list_from_batch_request(asset.build_batch_request())
 
 
 @pytest.mark.unit

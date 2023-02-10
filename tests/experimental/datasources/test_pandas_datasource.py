@@ -251,7 +251,7 @@ class TestDynamicPandasAssets:
                 regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
                 **extra_kwargs,
             )
-            .get_batch_request({"year": "2018"})
+            .build_batch_request({"year": "2018"})
         )
         # TODO: <Alex>ALEX</Alex>
         with pytest.raises(SpyInterrupt):
@@ -367,7 +367,7 @@ def test_csv_asset_with_non_string_regex_named_parameters(
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # year is an int which will raise an error
-        asset.get_batch_request({"year": 2018, "month": "04"})  # type: ignore[attr-defined]
+        asset.build_batch_request({"year": 2018, "month": "04"})  # type: ignore[attr-defined]
 
 
 @pytest.mark.unit
@@ -379,7 +379,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
-    request = asset.get_batch_request({"year": "2018", "month": "04"})  # type: ignore[attr-defined]
+    request = asset.build_batch_request({"year": "2018", "month": "04"})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert len(batches) == 1
     batch = batches[0]
@@ -416,7 +416,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
-    request = asset.get_batch_request({"year": "2018"})  # type: ignore[attr-defined]
+    request = asset.build_batch_request({"year": "2018"})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert (len(batches)) == 12
     batch_filenames = [
@@ -490,7 +490,7 @@ def test_pandas_sorter(
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=order_by,
     )
-    batches = asset.get_batch_list_from_batch_request(asset.get_batch_request())  # type: ignore[attr-defined]
+    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())  # type: ignore[attr-defined]
     assert (len(batches)) == 36
 
     @dataclass(frozen=True)
