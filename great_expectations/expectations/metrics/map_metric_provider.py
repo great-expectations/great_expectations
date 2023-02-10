@@ -39,6 +39,7 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.polars_execution_engine import (
     filter_by_boolean_map,
+    filter_series_by_boolean_map,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
@@ -2011,18 +2012,16 @@ def _polars_multicolumn_map_condition_values(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
 
-    domain_values = df[column_list]
-
-    domain_values = domain_values[boolean_mapped_unexpected_values is True]
+    domain_values = filter_by_boolean_map(
+        df=df, boolean_map=boolean_mapped_unexpected_values, column_names=column_list
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return domain_values.to_dict("records")
+        return domain_values.to_dicts()
     else:
-        return domain_values[: result_format["partial_unexpected_count"]].to_dict(
-            "records"
-        )
+        return domain_values.head(result_format["partial_unexpected_count"]).to_dicts()
 
 
 def _pandas_multicolumn_map_condition_filtered_row_count(
@@ -2255,24 +2254,25 @@ def _polars_column_map_series_and_domain_values(
         "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
     )
     if filter_column_isnull:
-        df = df[df[column_name].is_not_null()]
+        df = df.drop_nulls(subset=[column_name])
 
-    domain_values = df[column_name]
+    domain_values = filter_by_boolean_map(
+        df=df, boolean_map=boolean_mapped_unexpected_values, column_names=[column_name]
+    )
 
-    domain_values = domain_values[boolean_mapped_unexpected_values is True]
-    map_series = map_series[boolean_mapped_unexpected_values is True]
+    map_series = filter_series_by_boolean_map(
+        series=map_series,
+        boolean_map=boolean_mapped_unexpected_values,
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return (
-            list(domain_values),
-            list(map_series),
-        )
+        return (domain_values.to_list(), map_series.to_list())
     else:
         return (
-            list(domain_values[: result_format["partial_unexpected_count"]]),
-            list(map_series[: result_format["partial_unexpected_count"]]),
+            domain_values.head(result_format["partial_unexpected_count"]).to_list(),
+            map_series.head(result_format["partial_unexpected_count"]).to_list(),
         )
 
 
