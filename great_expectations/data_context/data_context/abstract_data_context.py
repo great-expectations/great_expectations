@@ -752,7 +752,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @deprecated_argument(argument_name="save_changes", version="0.15.32")
     @new_argument(
         argument_name="datasource",
-        version="0.15.48",
+        version="0.15.49",
         message="Pass in an existing Datasource instead of individual constructor arguments",
     )
     @usage_statistics_enabled_method(
