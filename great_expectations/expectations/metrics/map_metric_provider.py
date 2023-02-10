@@ -3021,7 +3021,7 @@ def _polars_map_condition_rows(
             "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
         )
         if filter_column_isnull:
-            df = df[df[column_name].is_not_null()]
+            df = df.drop_nulls(subset=[column_name])
 
     elif "column_list" in accessor_domain_kwargs:
         column_list = accessor_domain_kwargs["column_list"]
@@ -3034,12 +3034,16 @@ def _polars_map_condition_rows(
 
     result_format = metric_value_kwargs["result_format"]
 
-    df = df[boolean_mapped_unexpected_values]
+    df = filter_by_boolean_map(
+        df=df,
+        boolean_map=boolean_mapped_unexpected_values,
+        column_names=df.columns,
+    )
 
     if result_format["result_format"] == "COMPLETE":
         return df
 
-    return df[: result_format["partial_unexpected_count"]]
+    return df.head(result_format["partial_unexpected_count"])
 
 
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
