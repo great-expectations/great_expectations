@@ -360,10 +360,9 @@ class BatchSpecError(DataContextError):
 
 
 class DatasourceError(DataContextError):
-    def __init__(self, datasource_name, message) -> None:
-        self.message = "Cannot initialize datasource {}, error: {}".format(
-            datasource_name,
-            message,
+    def __init__(self, datasource_name: str, message: str) -> None:
+        self.message = (
+            f"Cannot initialize datasource {datasource_name}, error: {message}"
         )
         super().__init__(self.message)
 
@@ -377,6 +376,10 @@ class DatasourceInitializationError(DatasourceError):
 
 
 class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
+    pass
+
+
+class DatasourceNotFoundError(DataContextError):
     pass
 
 
