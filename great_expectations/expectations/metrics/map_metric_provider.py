@@ -2011,18 +2011,16 @@ def _polars_multicolumn_map_condition_values(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
 
-    domain_values = df[column_list]
-
-    domain_values = domain_values[boolean_mapped_unexpected_values is True]
+    domain_values = filter_by_boolean_map(
+        df=df, boolean_map=boolean_mapped_unexpected_values, column_names=column_list
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return domain_values.to_dict("records")
+        return domain_values.to_dicts()
     else:
-        return domain_values[: result_format["partial_unexpected_count"]].to_dict(
-            "records"
-        )
+        return domain_values.head(result_format["partial_unexpected_count"]).to_dicts()
 
 
 def _pandas_multicolumn_map_condition_filtered_row_count(
