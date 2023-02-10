@@ -2119,7 +2119,7 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
             temp_dir = tempfile.TemporaryDirectory()
             path = temp_dir.name
             logger.info(f"Created temporary directory '{path}' for ephemeral docs site")
-            self.data_docs_sites[
+            self.data_docs_sites[  # type: ignore[index]
                 DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value
             ]["store_backend"]["base_directory"] = path
         else:
