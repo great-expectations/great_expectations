@@ -58,7 +58,6 @@ class _FilesystemDataAsset(_FilePathDataAsset):
             name="experimental",
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
-            execution_engine_name=self.datasource.get_execution_engine().__class__.__name__,
             base_directory=self.datasource.base_directory,
             regex=self.regex,
             glob_directive=self.glob_directive,

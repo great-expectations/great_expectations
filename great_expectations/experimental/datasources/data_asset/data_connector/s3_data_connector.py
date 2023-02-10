@@ -50,7 +50,6 @@ class S3DataConnector(FilePathDataConnector):
         name: str,
         datasource_name: str,
         data_asset_name: str,
-        execution_engine_name: str,
         bucket: str,
         regex: re.Pattern,
         prefix: str = "",
@@ -66,7 +65,6 @@ class S3DataConnector(FilePathDataConnector):
             name=name,
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            execution_engine_name=execution_engine_name,
             regex=regex,
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>

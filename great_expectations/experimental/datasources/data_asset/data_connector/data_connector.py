@@ -39,7 +39,6 @@ class DataConnector:
         name: The name of the DataConnector instance
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        execution_engine_name: The name of the ExecutionEngine associated with this DataConnector instance
     """
 
     def __init__(
@@ -47,14 +46,11 @@ class DataConnector:
         name: str,
         datasource_name: str,
         data_asset_name: str,
-        execution_engine_name: str,
     ) -> None:
         self._name: str = name
 
         self._datasource_name: str = datasource_name
         self._data_asset_name: str = data_asset_name
-
-        self._execution_engine_name: str = execution_engine_name
 
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict = {}
