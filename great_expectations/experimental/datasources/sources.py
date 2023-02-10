@@ -165,7 +165,7 @@ class _SourceFactories:
                 asset = asset_type(name=name, **kwargs)
                 return self.add_asset(asset)
 
-            setattr(asset_type, asset_factory_method_name, _add_asset_factory)
+            setattr(ds_type, asset_factory_method_name, _add_asset_factory)
         else:
             logger.debug(f"`{asset_factory_method_name}()` already defined {ds_type}")
 
