@@ -1,6 +1,9 @@
 from typing import Optional
 
-import polars as pl
+try:
+    import polars as pl
+except ImportError:
+    pl = None
 
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_function_types import (
