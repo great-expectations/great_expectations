@@ -180,6 +180,49 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     The class encapsulates most store / core components and convenience methods used to access them, meaning the
     majority of Data Context functionality lives here.
+
+    One of the primary responsibilities of the DataContext is managing CRUD operations for core GX objects:
+
+    .. list-table:: Supported CRUD Methods
+       :widths: 10 18 18 18 18 18
+       :header-rows: 1
+
+       * -
+         - Stores
+         - Datasources
+         - ExpectationSuites
+         - Checkpoints
+         - Profilers
+       * - `get`
+         - ❌
+         - ✅
+         - ✅
+         - ✅
+         - ✅
+       * - `add`
+         - ✅
+         - ✅
+         - ✅
+         - ✅
+         - ✅
+       * - `update`
+         - ❌
+         - ✅
+         - ✅
+         - ✅
+         - ✅
+       * - `add_or_update`
+         - ❌
+         - ✅
+         - ✅
+         - ✅
+         - ✅
+       * - `delete`
+         - ✅
+         - ✅
+         - ✅
+         - ✅
+         - ✅
     """
 
     # NOTE: <DataContextRefactor> These can become a property like ExpectationsStore.__name__ or placed in a separate
