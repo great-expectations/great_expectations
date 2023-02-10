@@ -187,6 +187,9 @@
         },
         "trino": {
           "empty_column": "VARCHAR"
+        },
+        "polars": {
+          "empty_column": "Utf8"
         }
       },
       "tests": [{
@@ -232,7 +235,10 @@
     "tests" : [
       {
         "title": "basic_positive_test_case_datetime_set",
-        "suppress_test_for": ["sqlite"],
+        "suppress_test_for": [
+          "sqlite",
+          "polars"
+        ],
         "exact_match_out": false,
         "in": {
           "column": "dates",
@@ -245,7 +251,13 @@
     },
     {
       "title": "basic_negative_test_case_datetime_set",
-      "suppress_test_for": ["sqlite", "bigquery", "spark", "trino"],
+      "suppress_test_for": [
+        "sqlite",
+        "bigquery",
+        "spark",
+        "trino",
+        "polars"
+      ],
       "exact_match_out": false,
       "in": {
         "column": "dates",

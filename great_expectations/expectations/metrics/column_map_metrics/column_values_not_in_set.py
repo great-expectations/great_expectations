@@ -5,9 +5,11 @@ import pandas as pd
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
+    PolarsExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.metrics.import_manager import pl
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -52,6 +54,18 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             parsed_value_set = value_set
 
         return ~column.isin(parsed_value_set)
+
+    @column_condition_partial(engine=PolarsExecutionEngine)
+    def _polars(cls, column, value_set, **kwargs):
+
+        if len(column) == 0:
+            return pl.Series([True])
+
+        if value_set is None:
+            # Vacuously True
+            return pl.Series([True] * len(column))
+
+        return column.apply(lambda x: x not in value_set)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
