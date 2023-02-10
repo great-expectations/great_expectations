@@ -28,10 +28,7 @@ logger = logging.getLogger(__name__)
     reason="pyspark must be installed",
 )
 @pytest.fixture
-def spark_datasource(test_backends) -> SparkDatasource:
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
+def spark_datasource() -> SparkDatasource:
     return SparkDatasource(name="spark_datasource")
 
 
