@@ -33,11 +33,12 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
+    PolarsExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.polars_execution_engine import (
-    PolarsExecutionEngine,
+    filter_by_boolean_map,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
@@ -46,7 +47,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.expectations.metrics import MetaMetricProvider  # noqa: TCH001
 from great_expectations.expectations.metrics.import_manager import (
     F,
-    pl,
     quoted_name,
     sa,
 )
@@ -1711,18 +1711,9 @@ def _polars_column_map_condition_values(
     if filter_column_isnull:
         df = df.drop_nulls(subset=[column_name])
 
-    df = (
-        df.with_columns(
-            pl.Series(
-                name="__unexpected",
-                values=boolean_mapped_unexpected_values,
-                dtype=pl.Boolean,
-            )
-        )
-        .filter(pl.col("__unexpected"))
-        .drop("__unexpected")
+    domain_values = filter_by_boolean_map(
+        df=df, boolean_map=boolean_mapped_unexpected_values, column_names=[column_name]
     )
-    domain_values = df.get_column(column_name)
 
     result_format = metric_value_kwargs["result_format"]
 
@@ -1838,16 +1829,17 @@ def _polars_column_pair_map_condition_values(
                 message=f'Error: The column "{column_name}" in BatchData does not exist.'
             )
 
-    domain_values = df[column_list]
-
-    domain_values = domain_values[boolean_mapped_unexpected_values is True]
+    domain_values = filter_by_boolean_map(
+        df=df, boolean_map=boolean_mapped_unexpected_values, column_names=column_list
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
     unexpected_list = [
         value_pair
         for value_pair in zip(
-            domain_values[column_A_name].values, domain_values[column_B_name].values
+            domain_values.get_column(column_A_name).to_list(),
+            domain_values.get_column(column_B_name).to_list(),
         )
     ]
     if result_format["result_format"] == "COMPLETE":
@@ -2019,18 +2011,16 @@ def _polars_multicolumn_map_condition_values(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
 
-    domain_values = df[column_list]
-
-    domain_values = domain_values[boolean_mapped_unexpected_values is True]
+    domain_values = filter_by_boolean_map(
+        df=df, boolean_map=boolean_mapped_unexpected_values, column_names=column_list
+    )
 
     result_format = metric_value_kwargs["result_format"]
 
     if result_format["result_format"] == "COMPLETE":
-        return domain_values.to_dict("records")
+        return domain_values.to_dicts()
     else:
-        return domain_values[: result_format["partial_unexpected_count"]].to_dict(
-            "records"
-        )
+        return domain_values.head(result_format["partial_unexpected_count"]).to_dicts()
 
 
 def _pandas_multicolumn_map_condition_filtered_row_count(
