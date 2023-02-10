@@ -11,6 +11,10 @@ pytestmark = [pytest.mark.integration]
 
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
+from great_expectations.experimental.datasources import (
+    PandasDatasource,
+    PostgresDatasource,
+)
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
 
@@ -167,11 +171,35 @@ def test_serialize_zep_config(zep_file_context: FileDataContext):
             assert asset_name in dumped_yaml
 
 
+def test_zep_simple_pandas_validate_workflow(
+    zep_file_context: FileDataContext, csv_path: pathlib.Path
+):
+    datasource: PandasDatasource = zep_file_context.sources.add_pandas(
+        name="test_pandas_validate"
+    )
+
+    asset = datasource.add_csv_asset(
+        "yellow_tripdata",
+        csv_path,
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        order_by=["-year", "month"],
+    )
+
+    batch_request = asset.build_batch_request({"year": "2019", "month": "1"})  # type: ignore[attr-defined]
+
+    validator = zep_file_context.get_validator(batch_request=batch_request)
+    result = validator.expect_column_max_to_be_between(
+        column="passenger_count", min_value=1, max_value=12
+    )
+    print(f"  results ->\n{pf(result)}")
+    assert result["success"] is True
+
+
 @pytest.mark.parametrize(
     ["ds_name", "asset_name"],
     [("my_sql_ds", "my_asset"), ("my_pandas_ds", "my_csv_asset")],
 )
-def test_zep_simple_validate_workflow(
+def test_zep_simple_validate_workflow_from_config(
     zep_file_context: FileDataContext, ds_name: str, asset_name: str
 ):
     datasource = zep_file_context.get_datasource(ds_name)
