@@ -155,7 +155,7 @@ def test_all_relevant_context_methods_emit_usage_stats(
 
         # Generate a set of dummy values to trigger the target method
         # and invoke the usage stats decorator without causing side-effects
-        kwargs = {param: mock.MagicMock for param in required_args}
+        kwargs = {param: mock.MagicMock() for param in required_args}
         method(**kwargs)
 
         mock_fn.assert_called_once()

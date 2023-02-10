@@ -4587,7 +4587,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 raise e
 
         self.config.datasources[config.name] = config  # type: ignore[index,assignment]
-        # self._save_project_config()
 
         return datasource
 
