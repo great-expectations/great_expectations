@@ -161,7 +161,7 @@ def multibatch_spark_data(
         sql_data,
         pytest.param(
             spark_data,
-            marks=pytest.mark.skipIf(
+            marks=pytest.mark.skipif(
                 not is_library_loadable(library_name="pyspark"),
                 reason="pyspark must be installed",
             ),
@@ -169,7 +169,7 @@ def multibatch_spark_data(
     ]
 )
 def datasource_test_data(
-    test_backends, empty_data_context, request
+    empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     return request.param(empty_data_context)
 
@@ -180,7 +180,7 @@ def datasource_test_data(
         multibatch_sql_data,
         pytest.param(
             multibatch_spark_data,
-            marks=pytest.mark.skipIf(
+            marks=pytest.mark.skipif(
                 not is_library_loadable(library_name="pyspark"),
                 reason="pyspark must be installed",
             ),
@@ -188,6 +188,6 @@ def datasource_test_data(
     ]
 )
 def multibatch_datasource_test_data(
-    test_backends, empty_data_context, request
+    empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     return request.param(empty_data_context)

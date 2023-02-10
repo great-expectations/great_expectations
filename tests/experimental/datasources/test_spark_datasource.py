@@ -23,7 +23,7 @@ from great_expectations.util import is_library_loadable
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.skipIf(
+@pytest.mark.skipif(
     not is_library_loadable(library_name="pyspark"),
     reason="pyspark must be installed",
 )
