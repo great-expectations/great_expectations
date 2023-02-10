@@ -55,6 +55,7 @@ from packaging import version
 from pkg_resources import Distribution
 from typing_extensions import Literal, TypeGuard
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
@@ -1873,7 +1874,10 @@ def get_context(
         EphemeralDataContext,
         FileDataContext,
     )
-    from great_expectations.data_context.types.base import DataContextConfig
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        InMemoryStoreBackendDefaults,
+    )
 
     # If available and applicable, convert project_config mapping into a rich config type
     if project_config:
@@ -1926,12 +1930,26 @@ def get_context(
 
     # Second, check for which type of local
     # Prioritize FileDataContext but default to EphemeralDataContext if no context_root_dir
-    if context_root_dir or not project_config:
+    if not context_root_dir:
+        try:
+            context_root_dir = FileDataContext.find_context_root_dir()
+        except gx_exceptions.ConfigNotFoundError:
+            logger.info("Could not find local context root directory")
+
+    if context_root_dir:
         return FileDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
+
+    if not project_config:
+        project_config = DataContextConfig(
+            store_backend_defaults=InMemoryStoreBackendDefaults(
+                init_temp_docs_sites=True
+            )
+        )
+
     return EphemeralDataContext(
         project_config=project_config,
         runtime_environment=runtime_environment,
