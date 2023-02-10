@@ -27,11 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "base_directory": {
-            "title": "Base Directory",
-            "type": "string",
-            "format": "path"
-        },
         "sep": {
             "title": "Sep",
             "default": "NO_DEFAULT"
@@ -245,8 +240,7 @@
     },
     "required": [
         "name",
-        "regex",
-        "base_directory"
+        "regex"
     ],
     "additionalProperties": false,
     "definitions": {

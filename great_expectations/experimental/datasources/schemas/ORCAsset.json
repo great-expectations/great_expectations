@@ -27,11 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "base_directory": {
-            "title": "Base Directory",
-            "type": "string",
-            "format": "path"
-        },
         "columns": {
             "title": "Columns",
             "type": "array",
@@ -46,7 +41,6 @@
     "required": [
         "name",
         "regex",
-        "base_directory",
         "kwargs"
     ],
     "additionalProperties": false,
