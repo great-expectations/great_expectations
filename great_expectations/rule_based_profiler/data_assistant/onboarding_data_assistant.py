@@ -905,6 +905,7 @@ class OnboardingDataAssistant(DataAssistant):
                 "upper_bound": None,
             },
             "round_decimals": 0,
+            "candidate_regexes": None,
             "success_ratio": 7.5e-1,
         }
         parameter_builders: List[ParameterBuilder] = [

@@ -88,7 +88,7 @@ class _FilePathDataAsset(DataAsset):
         idx: int
         return {idx: None for idx in self._all_group_names}
 
-    def get_batch_request(
+    def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
         if options:

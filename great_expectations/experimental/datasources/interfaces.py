@@ -182,10 +182,10 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        """A BatchRequestOptions template for get_batch_request.
+        """A BatchRequestOptions template for build_batch_request.
 
         Returns:
-            A BatchRequestOptions dictionary with the correct shape that get_batch_request
+            A BatchRequestOptions dictionary with the correct shape that build_batch_request
             will understand. All the option values are defaulted to None.
         """
         raise NotImplementedError
@@ -197,7 +197,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
 
     # End Abstract Methods
 
-    def get_batch_request(
+    def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
@@ -392,7 +392,7 @@ class Datasource(
 
         Args:
             batch_request: A batch request for this asset. Usually obtained by calling
-                get_batch_request on the asset.
+                build_batch_request on the asset.
 
         Returns:
             A list of batches that match the options specified in the batch request.
