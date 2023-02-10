@@ -272,7 +272,7 @@ def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
     asset = CSVAsset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",  # type: ignore[arg-type]
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
     )
     assert asset.name == "csv_asset"
     assert asset.regex.match("random string") is None
