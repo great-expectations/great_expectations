@@ -57,6 +57,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn=None,
         )
 
         self._base_directory = base_directory

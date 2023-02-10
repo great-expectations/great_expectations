@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
-from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.experimental.datasources.data_asset.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
@@ -33,87 +32,6 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
-
-
-class DataConnectorStorageDataReferenceResolver:
-    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
-        "InferredAssetS3DataConnector": "S3",
-        "ConfiguredAssetS3DataConnector": "S3",
-        "InferredAssetGCSDataConnector": "GCS",
-        "ConfiguredAssetGCSDataConnector": "GCS",
-        "InferredAssetAzureDataConnector": "ABS",
-        "ConfiguredAssetAzureDataConnector": "ABS",
-        "InferredAssetDBFSDataConnector": "DBFS",
-        "ConfiguredAssetDBFSDataConnector": "DBFS",
-    }
-    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
-        tuple[str, str], Callable
-    ] = {
-        (
-            "S3",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "S3",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "GCS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "GCS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "ABS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "ABS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
-            **template_arguments
-        ),
-        (
-            "DBFS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
-            **template_arguments
-        ),
-        (
-            "DBFS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
-            **template_arguments
-        ),
-    }
-
-    @staticmethod
-    def resolve_data_reference(
-        data_connector_name: str,
-        execution_engine_name: str,
-        template_arguments: dict,
-    ):
-        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
-            data_connector_name
-        ]
-        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
-            (storage_name, execution_engine_name)
-        ](
-            template_arguments
-        )
 
 
 class FilePathDataConnector(DataConnector):
@@ -150,6 +68,7 @@ class FilePathDataConnector(DataConnector):
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
         super().__init__(
             name=name,
@@ -162,6 +81,8 @@ class FilePathDataConnector(DataConnector):
         self._regex_parser: RegExParser = RegExParser(
             regex_pattern=regex, unnamed_regex_group_prefix=unnamed_regex_group_prefix
         )
+
+        self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
     # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
     # TODO: <Alex>ALEX</Alex>
@@ -369,14 +290,6 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             if batch_definitions is not None
         ]
         return batch_definition_list
-
-    def resolve_data_reference(self, template_arguments: dict):
-        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
-        return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            execution_engine_name=self._execution_engine_name,
-            template_arguments=template_arguments,
-        )
 
     # Interface Method
     def _get_data_reference_list(self) -> List[str]:

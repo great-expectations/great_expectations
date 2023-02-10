@@ -127,4 +127,4 @@ class S3DataConnector(FilePathDataConnector):
             "bucket": self._bucket,
             "path": path,
         }
-        return self.resolve_data_reference(template_arguments=template_arguments)
+        return self._file_path_template_map_fn(template_arguments=template_arguments)
