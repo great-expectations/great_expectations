@@ -127,4 +127,11 @@ class S3DataConnector(FilePathDataConnector):
             "bucket": self._bucket,
             "path": path,
         }
+        if self._file_path_template_map_fn is None:
+            raise ValueError(
+                f"""Converting file paths to fully-qualified object references for "{self.__class__.__name__}" \
+requires "file_path_template_map_fn: Callable" to be set.
+"""
+            )
+
         return self._file_path_template_map_fn(template_arguments=template_arguments)
