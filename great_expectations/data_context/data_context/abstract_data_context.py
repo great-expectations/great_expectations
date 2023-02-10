@@ -187,18 +187,29 @@ class AbstractDataContext(ConfigPeer, ABC):
        :widths: 25 25 50
        :header-rows: 1
 
-       * - Treat
-         - Quantity
-         - Description
+       * - Foo
+         - Stores
+         - Datasources
+         - ExpectationSuites
+         - Checkpoints
+         - Profilers
        * - Albatross
          - 2.99
          - On a stick!
+         - On a stick!
+         - On a stick!
+         - On a stick!
        * - Crunchy Frog
          - 1.49
-         - If we took the bones out, it wouldn't be
-           crunchy, now would it?
+         - 1.49
+         - 1.49
+         - 1.49
+         - 1.49
        * - Gannet Ripple
          - 1.99
+         - On a stick!
+         - On a stick!
+         - On a stick!
          - On a stick!
     """
 
