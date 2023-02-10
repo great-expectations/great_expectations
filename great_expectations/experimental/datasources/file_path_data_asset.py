@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 import logging
 import pathlib
+from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -12,11 +14,12 @@ from typing import (
     Optional,
     Pattern,
     Set,
+    Union,
 )
 
 import pydantic
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.experimental.datasources.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
@@ -33,6 +36,10 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
+    )
+    from great_expectations.experimental.datasources import (
+        PandasFilesystemDatasource,
+        SparkDatasource,
     )
     from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
         DataConnector,
@@ -53,6 +60,10 @@ class _FilePathDataAsset(DataAsset):
     regex: Pattern
 
     # Internal attributes
+    _datasource: Union[
+        "PandasFilesystemDatasource", "SparkDatasource"
+    ] = pydantic.PrivateAttr()
+
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
@@ -87,6 +98,10 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
+    @property
+    def _base_directory(self) -> pathlib.Path:
+        return self._datasource.base_directory
+
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
@@ -102,12 +117,46 @@ class _FilePathDataAsset(DataAsset):
                     option in self._all_group_name_to_group_index_mapping
                     and not isinstance(value, str)
                 ):
-                    raise ge_exceptions.InvalidBatchRequestError(
+                    raise gx_exceptions.InvalidBatchRequestError(
                         f"All regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )
 
-        return super().build_batch_request(options)
+        if options is not None and not self._valid_batch_request_options(options):
+            allowed_keys = set(self.batch_request_options_template().keys())
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(
+                "Batch request options should only contain keys from the following set:\n"
+                f"{allowed_keys}\nbut your specified keys contain\n"
+                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
+            )
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options=options or {},
+        )
+
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
+        if not (
+            batch_request.datasource_name == self.datasource.name
+            and batch_request.data_asset_name == self.name
+            and self._valid_batch_request_options(batch_request.options)
+        ):
+            expect_batch_request_form = BatchRequest(
+                datasource_name=self.datasource.name,
+                data_asset_name=self.name,
+                options=self.batch_request_options_template(),
+            )
+            raise gx_exceptions.InvalidBatchRequestError(
+                "BatchRequest should have form:\n"
+                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
+                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+            )
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest

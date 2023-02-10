@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import pathlib
 from typing import TYPE_CHECKING, ClassVar, Set
 
 from great_expectations.experimental.datasources.data_asset.data_connector.filesystem_data_connector import (
@@ -13,6 +12,10 @@ from great_expectations.experimental.datasources.file_path_data_asset import (
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
+    from great_expectations.experimental.datasources import (
+        PandasFilesystemDatasource,
+        SparkDatasource,
+    )
     from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
         DataConnector,
     )
@@ -24,12 +27,10 @@ class _FilesystemDataAsset(_FilePathDataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[
         Set[str]
     ] = _FilePathDataAsset._EXCLUDE_FROM_READER_OPTIONS | {
-        "base_directory",
         "glob_directive",
     }
 
     # Filesystem specific attributes
-    base_directory: pathlib.Path
     glob_directive: str = "**/*"
 
     def test_connection(self) -> None:
@@ -38,13 +39,10 @@ class _FilesystemDataAsset(_FilePathDataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if not self.base_directory.exists():
-            raise TestConnectionError(
-                f"Path: {self.base_directory.resolve()} does not exist."
-            )
+        datasource: PandasFilesystemDatasource | SparkDatasource = self.datasource
 
         success = False
-        for filepath in self.base_directory.iterdir():
+        for filepath in datasource.base_directory.iterdir():
             if self.regex.match(filepath.name):
                 # if one file in the path matches the regex, we consider this asset valid
                 success = True
@@ -52,7 +50,7 @@ class _FilesystemDataAsset(_FilePathDataAsset):
 
         if not success:
             raise TestConnectionError(
-                f"No file at path: {self.base_directory} matched the regex: {self.regex.pattern}"
+                f"No file at path: {datasource.base_directory.resolve()} matched the regex: {self.regex.pattern}"
             )
 
     def _get_data_connector(self) -> DataConnector:
@@ -61,7 +59,7 @@ class _FilesystemDataAsset(_FilePathDataAsset):
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             execution_engine_name=self.datasource.get_execution_engine().__class__.__name__,
-            base_directory=self.base_directory,
+            base_directory=self.datasource.base_directory,
             regex=self.regex,
             glob_directive=self.glob_directive,
         )

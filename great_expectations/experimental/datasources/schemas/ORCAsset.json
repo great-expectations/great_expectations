@@ -27,11 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "base_directory": {
-            "title": "Base Directory",
-            "type": "string",
-            "format": "path"
-        },
         "glob_directive": {
             "title": "Glob Directive",
             "default": "**/*",
@@ -51,7 +46,6 @@
     "required": [
         "name",
         "regex",
-        "base_directory",
         "kwargs"
     ],
     "additionalProperties": false,
