@@ -19,14 +19,7 @@
             "title": "Order By",
             "type": "array",
             "items": {
-                "anyOf": [
-                    {
-                        "$ref": "#/definitions/BatchSorter"
-                    },
-                    {
-                        "type": "string"
-                    }
-                ]
+                "$ref": "#/definitions/BatchSorter"
             }
         },
         "column_splitter": {
