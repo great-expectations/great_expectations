@@ -466,7 +466,7 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
         .add_sorters(["year", "-month"])
     )
 
-    batch_request = data_asset.get_batch_request(batch_options)
+    batch_request = data_asset.build_batch_request(batch_options)
 
     result = context.assistants.onboarding.run(
         batch_request=batch_request,
