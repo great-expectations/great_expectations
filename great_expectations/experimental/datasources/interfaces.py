@@ -200,7 +200,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
             get_batch_list_from_batch_request method.
         """
         raise NotImplementedError(
-            """One must implement "get_batch_request" on a DataAsset subclass."""
+            """One must implement "build_batch_request" on a DataAsset subclass."""
         )
 
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:

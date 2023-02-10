@@ -348,7 +348,7 @@ class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
         self.sort_batches(batch_list)
         return batch_list
 
-    def get_batch_request(
+    def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
