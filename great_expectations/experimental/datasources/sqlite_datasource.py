@@ -6,12 +6,10 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, TypeVar,
 import pydantic
 from pydantic import dataclasses as pydantic_dc
 
-from great_expectations.experimental.datasources.interfaces import (
-    DataAsset,  # noqa: TCH001
-)
-
 if TYPE_CHECKING:
     import sqlalchemy
+
+    from great_expectations.experimental.datasources.interfaces import DataAsset
 
 from typing_extensions import Literal
 
@@ -23,6 +21,7 @@ from great_expectations.experimental.datasources.sql_datasource import (
     SQLDatasourceError,
     SqlYearMonthSplitter,
     TableAsset,
+    _batch_sorter_from_list,
     _query_for_year_and_month,
     _SQLAsset,
 )
@@ -188,7 +187,7 @@ class SqliteDatasource(SQLDatasource):
             name=name,
             table_name=table_name,
             schema_name=schema_name,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=_batch_sorter_from_list(order_by or []),
             # see TableAsset._parse_order_by_sorter()
         )
         asset._datasource = self
@@ -214,7 +213,7 @@ class SqliteDatasource(SQLDatasource):
         asset = SqliteQueryAsset(
             name=name,
             query=query,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=_batch_sorter_from_list(order_by or []),
             # see TableAsset._parse_order_by_sorter()
         )
         asset._datasource = self
