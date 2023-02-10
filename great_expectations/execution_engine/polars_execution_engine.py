@@ -634,6 +634,10 @@ Please use "neither" instead.
 
         return data, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
+    def head(self, n=5):
+        """Returns dataframe head. Default is 5"""
+        return self.dataframe.head(n=n)
+
 
 def hash_polars_dataframe(df):
     """Converts df to an md5-hashed object"""

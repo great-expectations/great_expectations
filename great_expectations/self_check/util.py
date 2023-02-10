@@ -87,22 +87,11 @@ if TYPE_CHECKING:
 try:
     import polars as pl
     from polars import DataFrame as pl_DataFrame
-    from polars import Date as pl_Date
-    from polars import Datetime as pl_Datetime
-    from polars import Series as pl_Series
     from polars import datatypes as pl_datatypes
-    from polars import from_numpy as pl_from_numpy
-    from polars import lit as pl_lit
-
 except ImportError:
     pl = None
     pl_DataFrame = None
-    pl_from_numpy = None
-    pl_Datetime = None
-    pl_Date = None
     pl_datatypes = None
-    pl_lit = None
-    pl_Series = None
 
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
