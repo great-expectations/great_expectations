@@ -1631,6 +1631,66 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
 
         return wrapper
 
+    elif issubclass(engine, PolarsExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
+            raise ValueError(
+                f"""{engine.__name__} only supports "{MetricPartialFunctionTypes.MAP_CONDITION_SERIES.value}" for \
+"multicolumn_condition_partial" "partial_fn_type" property."""
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PolarsExecutionEngine,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
+
+                column_list = get_dbms_compatible_column_names(
+                    column_names=column_list,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
+                meets_expectation_series = metric_fn(
+                    cls,
+                    df.select(column_list),
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return (
+                    ~meets_expectation_series,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
