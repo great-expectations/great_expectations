@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 import itertools
 from datetime import datetime
+from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -24,6 +26,7 @@ import pydantic
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import Literal
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
@@ -33,6 +36,7 @@ from great_expectations.experimental.datasources.interfaces import (
     DataAsset,
     Datasource,
     TestConnectionError,
+    _batch_sorter_from_list,
 )
 
 SQLALCHEMY_IMPORTED = False
@@ -92,10 +96,8 @@ class ColumnSplitter:
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        # A TypeVar for Datasource would get rid of this assertion,
-        # but circularity between Datasource <-> DataAsset is an issue.
-        assert isinstance(table_asset.datasource, SQLDatasource)
-        engine: sqlalchemy.engine.Engine = table_asset.datasource.get_engine()
+        datasource: SQLDatasource = table_asset.datasource
+        engine: sqlalchemy.engine.Engine = datasource.get_engine()
         inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
 
         columns: list[dict[str, Any]] = inspector.get_columns(
@@ -184,17 +186,20 @@ def _get_sql_datetime_range(
 
 class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
     # Instance fields
-    type: Literal["_sqlasset"] = "_sqlasset"
+    type: str = pydantic.Field("_sql_asset")
     column_splitter: Optional[_ColumnSplitterT] = None
     name: str
+
+    # Internal attributes
+    _datasource: "SQLDatasource" = pydantic.PrivateAttr()
 
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        """A BatchRequestOptions template for get_batch_request.
+        """A BatchRequestOptions template for build_batch_request.
 
         Returns:
-            A BatchRequestOptions dictionary with the correct shape that get_batch_request
+            A BatchRequestOptions dictionary with the correct shape that build_batch_request
             will understand. All the option values are defaulted to None.
         """
         template: BatchRequestOptions = {}
@@ -278,7 +283,7 @@ class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
 
         Args:
             batch_request: A batch request for this asset. Usually obtained by calling
-                get_batch_request on the asset.
+                build_batch_request on the asset.
 
         Returns:
             A list of batches that match the options specified in the batch request.
@@ -344,6 +349,56 @@ class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
         self.sort_batches(batch_list)
         return batch_list
 
+    def build_batch_request(
+        self, options: Optional[BatchRequestOptions] = None
+    ) -> BatchRequest:
+        """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            options: A dict that can be used to limit the number of batches returned from the asset.
+                The dict structure depends on the asset type. A template of the dict can be obtained by
+                calling batch_request_options_template.
+
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
+        if options is not None and not self._valid_batch_request_options(options):
+            allowed_keys = set(self.batch_request_options_template().keys())
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(
+                "Batch request options should only contain keys from the following set:\n"
+                f"{allowed_keys}\nbut your specified keys contain\n"
+                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
+            )
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options=options or {},
+        )
+
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
+        if not (
+            batch_request.datasource_name == self.datasource.name
+            and batch_request.data_asset_name == self.name
+            and self._valid_batch_request_options(batch_request.options)
+        ):
+            expect_batch_request_form = BatchRequest(
+                datasource_name=self.datasource.name,
+                data_asset_name=self.name,
+                options=self.batch_request_options_template(),
+            )
+            raise gx_exceptions.InvalidBatchRequestError(
+                "BatchRequest should have form:\n"
+                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
+                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+            )
+
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec
 
@@ -365,7 +420,7 @@ class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
 
 class QueryAsset(_SQLAsset):
     # Instance fields
-    type: Literal["query"] = "query"  # type: ignore[assignment]
+    type: Literal["query"] = "query"
     query: str
     column_splitter: Optional[SqlYearMonthSplitter] = None
 
@@ -416,7 +471,7 @@ class QueryAsset(_SQLAsset):
 
 class TableAsset(_SQLAsset):
     # Instance fields
-    type: Literal["table"] = "table"  # type: ignore[assignment]
+    type: Literal["table"] = "table"
     table_name: str
     schema_name: Optional[str] = None
     column_splitter: Optional[SqlYearMonthSplitter] = None
@@ -435,10 +490,8 @@ class TableAsset(_SQLAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        # A TypeVar for Datasource would get rid of this assertion,
-        # but circularity between Datasource <-> DataAsset is an issue.
-        assert isinstance(self.datasource, SQLDatasource)
-        engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
+        datasource: SQLDatasource = self.datasource
+        engine: sqlalchemy.engine.Engine = datasource.get_engine()
         inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
 
         if self.schema_name and self.schema_name not in inspector.get_schema_names():
@@ -593,7 +646,7 @@ class SQLDatasource(Datasource):
             name=name,
             table_name=table_name,
             schema_name=schema_name,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=_batch_sorter_from_list(order_by or []),
             # see DataAsset._parse_order_by_sorter()
         )
         return self.add_asset(asset)
@@ -617,6 +670,6 @@ class SQLDatasource(Datasource):
         asset = QueryAsset(
             name=name,
             query=query,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=_batch_sorter_from_list(order_by or []),
         )
         return self.add_asset(asset)

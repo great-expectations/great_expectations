@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, List, Optional, Set, Tuple
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec
@@ -22,20 +22,15 @@ if TYPE_CHECKING:
         PandasExecutionEngine,
         SparkDFExecutionEngine,
     )
+    from great_expectations.experimental.datasources import (
+        PandasFilesystemDatasource,
+        SparkDatasource,
+    )
 
 logger = logging.getLogger(__name__)
 
 
 class _FilesystemDataAsset(_FilePathDataAsset):
-    _EXCLUDE_FROM_READER_OPTIONS: ClassVar[
-        Set[str]
-    ] = _FilePathDataAsset._EXCLUDE_FROM_READER_OPTIONS | {
-        "base_directory",
-    }
-
-    # Filesystem specific attributes
-    base_directory: pathlib.Path
-
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "reader_method" for Filesystem DataAsset extensions as temporary \
@@ -54,20 +49,17 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if not self.base_directory.exists():
-            raise TestConnectionError(
-                f"Path: {self.base_directory.resolve()} does not exist."
-            )
+        datasource: PandasFilesystemDatasource | SparkDatasource = self.datasource
 
         success = False
-        for filepath in self.base_directory.iterdir():
+        for filepath in datasource.base_directory.iterdir():
             if self.regex.match(filepath.name):
                 # if one file in the path matches the regex, we consider this asset valid
                 success = True
                 break
         if not success:
             raise TestConnectionError(
-                f"No file at path: {self.base_directory} matched the regex: {self.regex.pattern}"
+                f"No file at path: {datasource.base_directory.resolve()} matched the regex: {self.regex.pattern}"
             )
 
     def _fully_specified_batch_requests_with_path(
@@ -84,11 +76,12 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
             This list will be empty if no files exist on disk that correspond to the input
             batch request.
         """
-        batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
+        datasource: PandasFilesystemDatasource | SparkDatasource = self.datasource
 
-        all_files: List[pathlib.Path] = list(
-            pathlib.Path(self.base_directory).iterdir()
-        )
+        base_directory: pathlib.Path = datasource.base_directory
+        all_files: List[pathlib.Path] = list(pathlib.Path(base_directory).iterdir())
+
+        batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
 
         file_name: pathlib.Path
         for file_name in all_files:
@@ -112,14 +105,14 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                     batch_requests_with_path.append(
                         (
                             BatchRequest(
-                                datasource_name=self.datasource.name,
+                                datasource_name=datasource.name,
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),
-                            self.base_directory / file_name,
+                            base_directory / file_name,
                         )
                     )
-                    logger.debug(f"Matching path: {self.base_directory / file_name}")
+                    logger.debug(f"Matching path: {base_directory / file_name}")
         if not batch_requests_with_path:
             logger.warning(
                 f"Batch request {batch_request} corresponds to no data files."
@@ -132,7 +125,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
         idx: int
         return {idx: None for idx in self._all_group_names}
 
-    def get_batch_request(
+    def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
         if options:
@@ -145,7 +138,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                         f"All regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )
-        return super().get_batch_request(options)
+        return super().build_batch_request(options)
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest

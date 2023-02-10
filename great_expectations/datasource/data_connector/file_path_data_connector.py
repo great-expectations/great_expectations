@@ -1,5 +1,5 @@
 import logging
-from typing import Iterator, List, Optional, cast
+from typing import Callable, Dict, Iterator, List, Optional, Tuple, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
@@ -10,6 +10,7 @@ from great_expectations.core.batch import (
     BatchSpec,
 )
 from great_expectations.core.batch_spec import PathBatchSpec
+from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
@@ -25,6 +26,87 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
+
+
+class DataConnectorStorageDataReferenceResolver:
+    DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP: Dict[str, str] = {
+        "InferredAssetS3DataConnector": "S3",
+        "ConfiguredAssetS3DataConnector": "S3",
+        "InferredAssetGCSDataConnector": "GCS",
+        "ConfiguredAssetGCSDataConnector": "GCS",
+        "InferredAssetAzureDataConnector": "ABS",
+        "ConfiguredAssetAzureDataConnector": "ABS",
+        "InferredAssetDBFSDataConnector": "DBFS",
+        "ConfiguredAssetDBFSDataConnector": "DBFS",
+    }
+    STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS: Dict[
+        Tuple[str, str], Callable
+    ] = {
+        (
+            "S3",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "S3",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: S3Url.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "GCS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "GCS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: GCSUrl.OBJECT_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "ABS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "ABS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format(
+            **template_arguments
+        ),
+        (
+            "DBFS",
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
+            **template_arguments
+        ),
+        (
+            "DBFS",
+            "PandasExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
+            **template_arguments
+        ),
+    }
+
+    @staticmethod
+    def resolve_data_reference(
+        data_connector_name: str,
+        execution_engine_name: str,
+        template_arguments: dict,
+    ):
+        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
+        storage_name: str = DataConnectorStorageDataReferenceResolver.DATA_CONNECTOR_NAME_TO_STORAGE_NAME_MAP[
+            data_connector_name
+        ]
+        return DataConnectorStorageDataReferenceResolver.STORAGE_NAME_EXECUTION_ENGINE_NAME_PATH_RESOLVERS[
+            (storage_name, execution_engine_name)
+        ](
+            template_arguments
+        )
 
 
 @public_api
@@ -260,6 +342,14 @@ class FilePathDataConnector(DataConnector):
             batch_definition=batch_definition
         )
         return PathBatchSpec(batch_spec)
+
+    def resolve_data_reference(self, template_arguments: dict):
+        """Resolve file path for a (data_connector_name, execution_engine_name) combination."""
+        return DataConnectorStorageDataReferenceResolver.resolve_data_reference(
+            data_connector_name=self.__class__.__name__,
+            execution_engine_name=self._execution_engine.__class__.__name__,
+            template_arguments=template_arguments,
+        )
 
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
