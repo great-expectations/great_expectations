@@ -33,7 +33,18 @@ def db_file() -> pathlib.Path:
 
 
 @pytest.fixture
-def zep_config_dict(db_file) -> dict:
+def csv_path() -> pathlib.Path:
+    relative_path = pathlib.Path(
+        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+    )
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path
+
+
+@pytest.fixture
+def zep_config_dict(db_file, csv_path) -> dict:
     return {
         "xdatasources": {
             "my_sql_ds": {
@@ -57,7 +68,21 @@ def zep_config_dict(db_file) -> dict:
                         ],
                     },
                 },
-            }
+            },
+            "my_pandas_ds": {
+                "type": "pandas",
+                "name": "my_pandas_ds",
+                "assets": {
+                    "my_csv_asset": {
+                        "name": "my_csv_asset",
+                        "type": "csv",
+                        "base_directory": csv_path,
+                        "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+                        "sep": "|",
+                        "names": ["col1", "col2"],
+                    },
+                },
+            },
         }
     }
 
