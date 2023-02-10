@@ -139,7 +139,7 @@ def test_csv_asset_with_non_string_regex_named_parameters(
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # year is an int which will raise an error
-        asset.get_batch_request({"year": 2018, "month": "04"})
+        asset.build_batch_request({"year": 2018, "month": "04"})
 
 
 @pytest.mark.unit
@@ -154,7 +154,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         header=True,
         infer_schema=True,
     )
-    request = asset.get_batch_request({"year": "2018", "month": "04"})
+    request = asset.build_batch_request({"year": "2018", "month": "04"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
@@ -194,7 +194,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
         header=True,
         infer_schema=True,
     )
-    request = asset.get_batch_request({"year": "2018"})
+    request = asset.build_batch_request({"year": "2018"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert (len(batches)) == 12
     batch_filenames = [
@@ -268,7 +268,7 @@ def test_spark_sorter(
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=order_by,
     )
-    batches = asset.get_batch_list_from_batch_request(asset.get_batch_request())
+    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
     assert (len(batches)) == 36
 
     @dataclass(frozen=True)
