@@ -162,7 +162,7 @@ def multibatch_spark_data(
         pytest.param(
             spark_data,
             marks=pytest.mark.skipIf(
-                # lambda: not is_library_loadable(library_name="pyspark"),
+                not is_library_loadable(library_name="pyspark"),
                 reason="pyspark must be installed",
             ),
         ),
