@@ -103,7 +103,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
@@ -143,7 +143,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         # deprecated - use exclude_unset instead
         skip_defaults: bool | None = None,
         # Default to True to prevent serializing long configs full of unset default values
@@ -183,7 +183,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         *,
         include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
         exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
@@ -214,7 +214,7 @@ class ExperimentalBaseModel(pydantic.BaseModel):
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         # Default to True to prevent serializing long configs full of unset default values
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
