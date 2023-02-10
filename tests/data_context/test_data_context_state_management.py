@@ -9,21 +9,35 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.checkpoint import Checkpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.serializer import DictConfigSerializer
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
 )
 from great_expectations.data_context.store import ExpectationsStore, ProfilerStore
 from great_expectations.data_context.store.checkpoint_store import CheckpointStore
+from great_expectations.data_context.store.datasource_store import DatasourceStore
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     DataContextConfig,
     DatasourceConfig,
     InMemoryStoreBackendDefaults,
     ProgressBarsConfig,
+    datasourceConfigSchema,
 )
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+
+
+class DatasourceStoreSpy(DatasourceStore):
+    def __init__(self) -> None:
+        self.save_count = 0
+        super().__init__(serializer=DictConfigSerializer(schema=datasourceConfigSchema))
+
+    def set(self, key, value, **kwargs):
+        ret = super().set(key=key, value=value, **kwargs)
+        self.save_count += 1
+        return ret
 
 
 class ExpectationsStoreSpy(ExpectationsStore):
@@ -106,9 +120,14 @@ class EphemeralDataContextSpy(EphemeralDataContext):
     ) -> None:
         super().__init__(project_config)
         self.save_count = 0
+        self._datasource_store = DatasourceStoreSpy()
         self._expectations_store = ExpectationsStoreSpy()
         self._profiler_store = ProfilerStoreSpy()
         self._checkpoint_store = CheckpointStoreSpy()
+
+    @property
+    def datasource_store(self):
+        return self._datasource_store
 
     @property
     def expectations_store(self):
@@ -257,7 +276,7 @@ def test_add_datasource_with_existing_datasource(
     data_connectors[data_connector_name].pop("name")
 
     assert actual_config == expected_config
-    assert context.save_count == 1
+    assert context.datasource_store.save_count == 1
 
 
 @pytest.mark.unit
@@ -286,7 +305,7 @@ def test_add_datasource_conflicting_args_failure(
         "an existing datasource or individual constructor arguments (but not both)"
         in str(e.value)
     )
-    assert context.save_count == 0
+    assert context.datasource_store.save_count == 0
 
 
 @pytest.mark.unit
@@ -319,7 +338,7 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
 
     assert num_datasource_after == num_datasource_before
     assert num_datasource_configs_after == num_datasource_configs_before
-    assert context.save_count == 1
+    assert context.datasource_store.save_count == 1
 
 
 @pytest.mark.unit
@@ -350,7 +369,7 @@ def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
 
     assert num_datasource_after == num_datasource_before
     assert num_datasource_configs_after == num_datasource_configs_before
-    assert context.save_count == 1
+    assert context.datasource_store.save_count == 1
 
     expected_config = datasource.config
     actual_config = persisted_datasource.config
@@ -397,7 +416,7 @@ def test_add_or_update_datasource_adds_successfully(
     assert datasource_name in context.datasources
     assert num_datasource_after == num_datasource_before + 1
     assert num_datasource_configs_after == num_datasource_configs_before + 1
-    assert context.save_count == 1
+    assert context.datasource_store.save_count == 1
 
 
 @pytest.mark.unit

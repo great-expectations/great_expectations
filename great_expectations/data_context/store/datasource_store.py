@@ -148,7 +148,7 @@ class DatasourceStore(Store):
         )
 
     def set(  # type: ignore[override]
-        self, key: Union[DataContextKey, None], value: DatasourceConfig, **_: dict
+        self, key: Union[DataContextKey, None], value: DatasourceConfig, **kwargs
     ) -> DatasourceConfig:
         """Create a datasource config in the store using a store_backend-specific key.
         Args:
