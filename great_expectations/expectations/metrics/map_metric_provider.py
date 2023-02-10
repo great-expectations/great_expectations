@@ -169,7 +169,7 @@ def column_function_partial(  # noqa: C901 - 19
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
             raise ValueError(
-                f"""{engine.__name__} (as a subclass of PolarsExecutionEngine) only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
+                f"""{engine.__name__} only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
 "column_function_partial" "partial_fn_type" property."""
             )
 
@@ -767,6 +767,69 @@ def column_pair_function_partial(  # noqa: C901 - 16
 
         return wrapper
 
+    elif issubclass(engine, PolarsExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
+
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
+            raise ValueError(
+                f"""{engine.__name__} only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
+"column_pair_function_partial" "partial_fn_type" property."""
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PolarsExecutionEngine,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                column_names: List[Union[str, quoted_name]] = [
+                    column_A_name,
+                    column_B_name,
+                ]
+                # noinspection PyPep8Naming
+                column_A_name, column_B_name = get_dbms_compatible_column_names(
+                    column_names=column_names,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
+                values = metric_fn(
+                    cls,
+                    df.get_column(column_A_name),
+                    df.get_column(column_B_name),
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return values, compute_domain_kwargs, accessor_domain_kwargs
+
+            return inner_func
+
+        return wrapper
+
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
@@ -984,6 +1047,72 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                     df[column_A_name],
                     df[column_B_name],
                     **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return (
+                    ~meets_expectation_series,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
+    elif issubclass(engine, PolarsExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
+            raise ValueError(
+                f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_SERIES.value}" for \
+"column_pair_function_partial" "partial_fn_type" property."""
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PolarsExecutionEngine,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                # noinspection PyPep8Naming
+                column_A_name = accessor_domain_kwargs["column_A"]
+                # noinspection PyPep8Naming
+                column_B_name = accessor_domain_kwargs["column_B"]
+
+                column_names: List[Union[str, quoted_name]] = [
+                    column_A_name,
+                    column_B_name,
+                ]
+                # noinspection PyPep8Naming
+                column_A_name, column_B_name = get_dbms_compatible_column_names(
+                    column_names=column_names,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
+                meets_expectation_series = metric_fn(
+                    cls,
+                    df.get_column(column_A_name),
+                    df.get_column(column_B_name) ** metric_value_kwargs,
                     _metrics=metrics,
                 )
                 return (
@@ -1225,6 +1354,62 @@ def multicolumn_function_partial(  # noqa: C901 - 16
 
         return wrapper
 
+    elif issubclass(engine, PolarsExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
+
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
+            raise ValueError(
+                f"""{engine.__name__} only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
+"multicolumn_function_partial" "partial_fn_type" property."""
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PolarsExecutionEngine,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
+
+                column_list = get_dbms_compatible_column_names(
+                    column_names=column_list,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
+                values = metric_fn(
+                    cls,
+                    df.select(column_list),
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return values, compute_domain_kwargs, accessor_domain_kwargs
+
+            return inner_func
+
+        return wrapper
+
     elif issubclass(engine, SqlAlchemyExecutionEngine):
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_FN
@@ -1433,6 +1618,66 @@ def multicolumn_condition_partial(  # noqa: C901 - 16
                 meets_expectation_series = metric_fn(
                     cls,
                     df[column_list],
+                    **metric_value_kwargs,
+                    _metrics=metrics,
+                )
+                return (
+                    ~meets_expectation_series,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                )
+
+            return inner_func
+
+        return wrapper
+
+    elif issubclass(engine, PolarsExecutionEngine):
+        if partial_fn_type is None:
+            partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_SERIES
+
+        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        if partial_fn_type not in [MetricPartialFunctionTypes.MAP_CONDITION_SERIES]:
+            raise ValueError(
+                f"""{engine.__name__} only supports "{MetricPartialFunctionTypes.MAP_CONDITION_SERIES.value}" for \
+"multicolumn_condition_partial" "partial_fn_type" property."""
+            )
+
+        def wrapper(metric_fn: Callable):
+            @metric_partial(
+                engine=engine,
+                partial_fn_type=partial_fn_type,
+                domain_type=domain_type,
+                **kwargs,
+            )
+            @wraps(metric_fn)
+            def inner_func(
+                cls,
+                execution_engine: PolarsExecutionEngine,
+                metric_domain_kwargs: dict,
+                metric_value_kwargs: dict,
+                metrics: Dict[str, Any],
+                runtime_configuration: dict,
+            ):
+                (
+                    df,
+                    compute_domain_kwargs,
+                    accessor_domain_kwargs,
+                ) = execution_engine.get_compute_domain(
+                    domain_kwargs=metric_domain_kwargs, domain_type=domain_type
+                )
+
+                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                    "column_list"
+                ]
+
+                column_list = get_dbms_compatible_column_names(
+                    column_names=column_list,
+                    batch_columns_list=metrics["table.columns"],
+                )
+
+                meets_expectation_series = metric_fn(
+                    cls,
+                    df.select(column_list),
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )
