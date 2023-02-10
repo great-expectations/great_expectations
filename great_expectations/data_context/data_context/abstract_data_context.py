@@ -194,35 +194,35 @@ class AbstractDataContext(ConfigPeer, ABC):
          - Checkpoints
          - Profilers
        * - `get`
-         - 2.99
-         - On a stick!
-         - On a stick!
-         - On a stick!
-         - On a stick!
+         - Not Supported
+         - Supported
+         - Supported
+         - Supported
+         - Supported
        * - `add`
-         - 1.49
-         - 1.49
-         - 1.49
-         - 1.49
-         - 1.49
+         - Supported
+         - Supported
+         - Supported
+         - Supported
+         - Supported
        * - `update`
-         - 1.99
-         - On a stick!
-         - On a stick!
-         - On a stick!
-         - On a stick!
+         - Not Supported
+         - Supported
+         - Supported
+         - Supported
+         - Supported
        * - `add_or_update`
-         - 1.99
-         - On a stick!
-         - On a stick!
-         - On a stick!
-         - On a stick!
+         - Not Supported
+         - Supported
+         - Supported
+         - Supported
+         - Supported
        * - `delete`
-         - 1.99
-         - On a stick!
-         - On a stick!
-         - On a stick!
-         - On a stick!
+         - Supported
+         - Supported
+         - Supported
+         - Supported
+         - Supported
     """
 
     # NOTE: <DataContextRefactor> These can become a property like ExpectationsStore.__name__ or placed in a separate
