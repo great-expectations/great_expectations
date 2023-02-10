@@ -3,28 +3,16 @@
 # Build API docs then build docusaurus docs.
 # Currently used in our netlify pipeline.
 
-echo "checking git log before doing anything"
-git --no-pager log -n 5 --format=oneline
-
-git rev-parse HEAD
-
 CURRENT_COMMIT=$(git rev-parse HEAD)
-echo "current commit:"
-echo $CURRENT_COMMIT
-
+# Pull to get the latest tags
 git pull
 
-# Get latest version, check out and build API docs using the latest
-git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V
+# Get latest released version from tag,
+# check out to build API docs
 GX_LATEST=$(git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V | tail -1)
-echo "Using latest version ${GX_LATEST} to build docs."
+echo "Using latest released version ${GX_LATEST} at $(git rev-parse HEAD) to build API docs."
 git checkout $GX_LATEST
-
 git pull
-
-echo "checking git log after checkout latest"
-git --no-pager log -n 5 --format=oneline
-
 
 echo "Installing dev dependencies"
 pip install -c constraints-dev.txt -e ".[test]"
@@ -39,14 +27,9 @@ echo "Copying previous versions"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"
 unzip -o oss_docs_versions.zip -d .
 
-echo "Checking out develop to build the rest of the docs."
+echo "Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs."
 git checkout $CURRENT_COMMIT
-
 git pull
-
-echo "checking git log after checking out develop"
-git --no-pager log -n 5 --format=oneline
-
 
 echo "Building docusaurus docs."
 yarn build
