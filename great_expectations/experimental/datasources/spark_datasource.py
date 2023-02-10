@@ -16,6 +16,7 @@ from great_expectations.experimental.datasources.interfaces import (
     DataAsset,
     Datasource,
     TestConnectionError,
+    _batch_sorter_from_list,
 )
 
 if TYPE_CHECKING:
@@ -121,7 +122,7 @@ class SparkDatasource(_SparkDatasource):
             regex: regex pattern that matches csv filenames that is used to label the batches
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
-            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
         """
         if isinstance(regex, str):
             regex = re.compile(regex)
@@ -130,6 +131,6 @@ class SparkDatasource(_SparkDatasource):
             regex=regex,
             header=header,
             inferSchema=infer_schema,
-            order_by=order_by or [],
+            order_by=_batch_sorter_from_list(order_by or []),
         )
         return self.add_asset(asset)

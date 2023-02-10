@@ -19,6 +19,7 @@ from great_expectations.experimental.datasources.interfaces import (
     DataAsset,
     Datasource,
     TestConnectionError,
+    _batch_sorter_from_list,
 )
 
 if TYPE_CHECKING:
@@ -152,7 +153,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         if isinstance(regex, str):
@@ -160,7 +161,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         asset = CSVAsset(
             name=name,
             regex=regex,
-            order_by=order_by or [],
+            order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
         return self.add_asset(asset)
@@ -177,7 +178,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
         if isinstance(regex, str):
@@ -185,7 +186,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         asset = ExcelAsset(
             name=name,
             regex=regex,
-            order_by=order_by or [],
+            order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
         return self.add_asset(asset)
@@ -202,7 +203,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
         if isinstance(regex, str):
@@ -210,7 +211,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         asset = JSONAsset(
             name=name,
             regex=regex,
-            order_by=order_by or [],
+            order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
         return self.add_asset(asset)
@@ -227,7 +228,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
         if isinstance(regex, str):
@@ -235,7 +236,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         asset = ParquetAsset(
             name=name,
             regex=regex,
-            order_by=order_by or [],
+            order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
         return self.add_asset(asset)

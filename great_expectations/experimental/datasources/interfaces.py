@@ -97,11 +97,11 @@ def _is_str_sorter_list(sorters: BatchSortersDefinition) -> TypeGuard[list[str]]
     return False
 
 
-def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
+def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> list[BatchSorter]:
     if _is_batch_sorter_list(sorters):
         return sorters
 
-    # mypy doesn't successfully type-narrow sorters to a List[str] here, so we use
+    # mypy doesn't successfully type-narrow sorters to a list[str] here, so we use
     # another TypeGuard. We could cast instead which may be slightly faster.
     sring_valued_sorter: str
     if _is_str_sorter_list(sorters):
@@ -147,7 +147,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
     name: str
     type: str
 
-    order_by: BatchSortersDefinition = Field(default_factory=list)
+    order_by: List[BatchSorter] = Field(default_factory=list)
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
