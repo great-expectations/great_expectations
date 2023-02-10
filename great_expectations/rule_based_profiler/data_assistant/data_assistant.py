@@ -444,7 +444,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
                 metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
                 metric_value_kwargs=None,
                 threshold=1.0,
-                candidate_regexes=None,
+                candidate_regexes=f"{VARIABLES_KEY}candidate_regexes",
                 evaluation_parameter_builder_configs=None,
                 data_context=None,
             )
