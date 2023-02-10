@@ -84,9 +84,12 @@ from great_expectations.validator.validator import Validator
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
+try:
+    import polars as pl
+except ImportError:
+    pl = None
 
 from great_expectations.expectations.metrics.import_manager import (
-    pl,
     pl_DataFrame,
     pl_datatypes,
 )
