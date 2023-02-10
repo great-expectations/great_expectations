@@ -649,7 +649,7 @@ def hash_polars_dataframe(df):
 def filter_by_boolean_map(
     df: pl.DataFrame, boolean_map: np.ndarray, column_names: list[str]
 ) -> pl.Series | pl.DataFrame:
-    """Filter a polars dataframe by a boolean map.
+    """Filter a polars DataFrame by a boolean map.
 
     For example, only rows where the boolean map is true are included in
     the output.
@@ -683,5 +683,41 @@ def filter_by_boolean_map(
         domain_values = df.get_column(column_names[0])
     else:
         domain_values = df.select(column_names)
+
+    return domain_values
+
+
+def filter_series_by_boolean_map(
+    series: pl.Series, boolean_map: np.ndarray
+) -> pl.Series:
+    """Filter a polars Series by a boolean map.
+
+    For example, only rows where the boolean map is true are included in
+    the output.
+
+    Args:
+        series: Series to filter.
+        boolean_map: Array of booleans matching the length of df, where True
+            means the row should be included in the output and False
+            where it shouldn't.
+
+    Returns:
+        Series filtered by boolean map
+    """
+    df = (
+        pl.DataFrame(
+            [
+                series,
+                pl.Series(
+                    name="__unexpected",
+                    values=boolean_map,
+                    dtype=pl.Boolean,
+                ),
+            ]
+        )
+        .filter(pl.col("__unexpected"))
+        .drop("__unexpected")
+    )
+    domain_values = df.get_columns()[0]
 
     return domain_values
