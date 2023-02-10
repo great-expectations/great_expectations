@@ -4100,6 +4100,15 @@ class MapMetricProvider(MetricProvider):
                         )
                 elif issubclass(engine, PolarsExecutionEngine):
                     register_metric(
+                        metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
+                        metric_domain_keys=metric_domain_keys,
+                        metric_value_keys=metric_value_keys,
+                        execution_engine=engine,
+                        metric_class=cls,
+                        metric_provider=condition_provider,
+                        metric_fn_type=metric_fn_type,
+                    )
+                    register_metric(
                         metric_name=f"{metric_name}.condition",
                         metric_domain_keys=metric_domain_keys,
                         metric_value_keys=metric_value_keys,

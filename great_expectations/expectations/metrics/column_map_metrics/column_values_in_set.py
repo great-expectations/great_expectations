@@ -5,6 +5,7 @@ import numpy as np
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
+    PolarsExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
@@ -18,6 +19,14 @@ try:
     import sqlalchemy as sa
 except ImportError:
     sa = None
+
+try:
+    import polars as pl
+    from polars import DataFrame as pl_DataFrame
+
+except ImportError:
+    pl_DataFrame = None
+    pl = None
 
 
 class ColumnValuesInSet(ColumnMapMetricProvider):
@@ -50,6 +59,17 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             return np.ones(len(column), dtype=np.bool_)
 
         return column.isin(value_set)
+
+    @column_condition_partial(engine=PolarsExecutionEngine)
+    def _polars(cls, column, value_set, **kwargs):
+        if len(column) == 0:
+            return pl.Series([True])
+
+        if value_set is None:
+            # Vacuously true
+            return pl.Series([True] * len(column))
+
+        return column.apply(lambda x: x in value_set)
 
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, value_set, **kwargs):
