@@ -4,7 +4,6 @@ import logging
 import re
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional
 
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.core.util import AzureUrl, DBFSPath, GCSUrl, S3Url
 from great_expectations.experimental.datasources.data_asset.data_connector.batch_filter import (
@@ -117,7 +116,6 @@ class DataConnectorStorageDataReferenceResolver:
         )
 
 
-@public_api
 class FilePathDataConnector(DataConnector):
     """The base class for Data Connectors designed to access filesystem-like data.
 

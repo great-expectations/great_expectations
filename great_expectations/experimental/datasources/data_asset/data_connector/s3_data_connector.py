@@ -4,7 +4,6 @@ import logging
 import re
 from typing import TYPE_CHECKING, List, Optional
 
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.experimental.datasources.data_asset.data_connector.file_path_data_connector import (
     FilePathDataConnector,
@@ -27,7 +26,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class S3DataConnector(FilePathDataConnector):
     """Extension of FilePathDataConnector used to connect to S3.
 

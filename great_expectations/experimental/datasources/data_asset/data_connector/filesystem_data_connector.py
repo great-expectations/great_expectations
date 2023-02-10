@@ -5,7 +5,6 @@ import pathlib
 import re
 from typing import List
 
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.experimental.datasources.data_asset.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
@@ -17,7 +16,6 @@ from great_expectations.experimental.datasources.data_asset.data_connector.util 
 logger = logging.getLogger(__name__)
 
 
-@public_api
 class FilesystemDataConnector(FilePathDataConnector):
     """Extension of ConfiguredAssetFilePathDataConnector used to connect to Filesystem.
 

@@ -4,7 +4,6 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.id_dict import BatchSpec
 
 if TYPE_CHECKING:
@@ -16,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 
 # noinspection SpellCheckingInspection
-@public_api
 class DataConnector:
     """The base class for all Data Connectors.
 
