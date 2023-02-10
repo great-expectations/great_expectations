@@ -78,8 +78,7 @@ def zep_config_dict(db_file, csv_path) -> dict:
                         "type": "csv",
                         "base_directory": csv_path,
                         "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-                        "sep": "|",
-                        "names": ["col1", "col2"],
+                        "sep": ",",
                     },
                 },
             },
@@ -168,11 +167,17 @@ def test_serialize_zep_config(zep_file_context: FileDataContext):
             assert asset_name in dumped_yaml
 
 
-def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
-    datasource = zep_file_context.get_datasource("my_sql_ds")
+@pytest.mark.parametrize(
+    ["ds_name", "asset_name"],
+    [("my_sql_ds", "my_asset"), ("my_pandas_ds", "my_csv_asset")],
+)
+def test_zep_simple_validate_workflow(
+    zep_file_context: FileDataContext, ds_name: str, asset_name: str
+):
+    datasource = zep_file_context.get_datasource(ds_name)
     assert isinstance(datasource, Datasource)
-    batch_request = datasource.get_asset("my_asset").build_batch_request(
-        {"year": 2019, "month": 1}
+    batch_request = datasource.get_asset(asset_name).build_batch_request(
+        {"year": "2019", "month": "1"}
     )
 
     validator = zep_file_context.get_validator(batch_request=batch_request)
