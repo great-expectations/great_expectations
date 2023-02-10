@@ -19,6 +19,7 @@ from great_expectations.experimental.datasources.sql_datasource import (
     BatchSortersDefinition,
     DatetimeRange,
     QueryAsset,
+    SplitterMapping,
     SQLDatasource,
     SQLDatasourceError,
     SqlYearMonthSplitter,
@@ -26,54 +27,6 @@ from great_expectations.experimental.datasources.sql_datasource import (
     _query_for_year_and_month,
     _SQLAsset,
 )
-
-
-class SqliteTableAsset(TableAsset):
-    # Subclass overrides
-    type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]
-    column_splitter: Optional[SqliteYearMonthSplitter] = None
-
-    def add_year_and_month_splitter(
-        self,
-        column_name: str,
-    ) -> SqliteTableAsset:
-        """Associates a year month splitter with this SqliteTableAsset
-
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-
-        Returns:
-            This SqliteTableAsset so we can use this method fluently.
-        """
-        column_splitter = SqliteYearMonthSplitter(
-            column_name=column_name,
-        )
-        column_splitter.test_connection(table_asset=self)
-        self.column_splitter = column_splitter
-        return self
-
-
-class SqliteQueryAsset(QueryAsset):
-    # Subclass overrides
-    type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]
-    column_splitter: Optional[SqliteYearMonthSplitter] = None
-
-    def add_year_and_month_splitter(
-        self,
-        column_name: str,
-    ) -> SqliteQueryAsset:
-        """Associates a year month splitter with this SqliteQueryAsset
-
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-
-        Returns:
-            This SqliteQueryAsset so we can use this method fluently.
-        """
-        self.column_splitter = SqliteYearMonthSplitter(
-            column_name=column_name,
-        )
-        return self
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -126,6 +79,26 @@ def _get_sqlite_datetime_range(
             f"Data date range can not be determined for the query: {query}. The returned range was {min_max_dt}."
         )
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
+
+
+class SqliteTableAsset(TableAsset):
+    # Subclass overrides
+    type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]
+    column_splitter: Optional[SqliteYearMonthSplitter] = None
+
+    _DEFAULT_SPLITTERS: ClassVar[SplitterMapping] = SplitterMapping(
+        year_and_month=SqliteYearMonthSplitter
+    )
+
+
+class SqliteQueryAsset(QueryAsset):
+    # Subclass overrides
+    type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]
+    column_splitter: Optional[SqliteYearMonthSplitter] = None
+
+    _DEFAULT_SPLITTERS: ClassVar[SplitterMapping] = SplitterMapping(
+        year_and_month=SqliteYearMonthSplitter
+    )
 
 
 _SqliteAssets: List[Type[DataAsset]] = [SqliteTableAsset, SqliteQueryAsset]
@@ -191,9 +164,7 @@ class SqliteDatasource(SQLDatasource):
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             # see TableAsset._parse_order_by_sorter()
         )
-        asset._datasource = self
-        self.assets[name] = asset
-        return asset
+        return self.add_asset(asset)
 
     def add_query_asset(
         self,
@@ -217,6 +188,4 @@ class SqliteDatasource(SQLDatasource):
             order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
             # see TableAsset._parse_order_by_sorter()
         )
-        asset._datasource = self
-        self.assets[name] = asset
-        return asset
+        return self.add_asset(asset)

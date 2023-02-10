@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 from datetime import datetime
 from typing import (
     TYPE_CHECKING,
@@ -82,6 +83,30 @@ class ColumnSplitter:
             permitted_values_str = "', '".join([m.value for m in method_members])
             raise ValueError(f"unexpected value; permitted: '{permitted_values_str}'")
         return v
+
+    def test_connection(self, *, table_asset: TableAsset) -> None:
+        """Test the connection for the ColumnSplitter.
+
+        Args:
+            table_asset: The TableAsset to which the ColumnSplitter will be applied.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        # A TypeVar for Datasource would get rid of this assertion,
+        # but circularity between Datasource <-> DataAsset is an issue.
+        assert isinstance(table_asset.datasource, SQLDatasource)
+        engine: sqlalchemy.engine.Engine = table_asset.datasource.get_engine()
+        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+
+        columns: list[dict[str, Any]] = inspector.get_columns(
+            table_name=table_asset.table_name, schema=table_asset.schema_name
+        )
+        column_names: list[str] = [column["name"] for column in columns]
+        if self.column_name not in column_names:
+            raise TestConnectionError(
+                f'The column "{self.column_name}" was not found in table "{table_asset.qualified_name}"'
+            )
 
 
 _ColumnSplitterT = TypeVar("_ColumnSplitterT", bound=ColumnSplitter)
@@ -171,11 +196,18 @@ def _get_sql_datetime_range(
     return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
 
 
+@dataclasses.dataclass
+class SplitterMapping:
+    year_and_month: Type[ColumnSplitter] = SqlYearMonthSplitter
+
+
 class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
     # Instance fields
     type: Literal["_sqlasset"] = "_sqlasset"
     column_splitter: Optional[_ColumnSplitterT] = None
     name: str
+
+    _DEFAULT_SPLITTERS: ClassVar[SplitterMapping] = SplitterMapping()
 
     def batch_request_options_template(
         self,
@@ -196,13 +228,13 @@ class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
         self,
         column_name: str,
     ) -> _SQLAsset:
-        """Associates a year month splitter with this _SQLAsset
+        """Associates a year month splitter with this SQL data asset
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
         Returns:
-            This _SQLAsset so we can use this method fluently.
+            This SQL data asset so we can use this method fluently.
         """
-        self.column_splitter = SqlYearMonthSplitter(
+        self.column_splitter = self._DEFAULT_SPLITTERS.year_and_month(
             column_name=column_name,
         )
         self.test_column_splitter_connection()
@@ -211,7 +243,7 @@ class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
     def test_connection(self) -> None:
         pass
 
-    def test_column_splitter_connection(self):
+    def test_column_splitter_connection(self) -> None:
         pass
 
     def _fully_specified_batch_requests(self, batch_request) -> List[BatchRequest]:
@@ -418,17 +450,8 @@ class TableAsset(_SQLAsset):
             )
 
     def test_column_splitter_connection(self) -> None:
-        engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
-        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
-
-        columns: list[dict[str, Any]] = inspector.get_columns(
-            table_name=self.table_name, schema=self.schema_name
-        )
-        column_names: list[str] = [column["name"] for column in columns]
-        if self.column_splitter.column_name not in column_names:
-            raise TestConnectionError(
-                f'The column "{self.column_splitter.column_name}" was not found in table "{self.qualified_name}"'
-            )
+        if self.column_splitter:
+            self.column_splitter.test_connection(table_asset=self)
 
     def as_selectable(self) -> sqlalchemy.sql.Selectable:
         """Returns the table as a sqlalchemy Selectable.
