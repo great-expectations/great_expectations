@@ -80,7 +80,7 @@ class BatchSorter:
     reverse: bool = False
 
 
-BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str], list]
+BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str]]
 
 
 def _is_batch_sorter_list(
