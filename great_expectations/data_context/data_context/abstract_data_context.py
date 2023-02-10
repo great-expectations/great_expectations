@@ -184,7 +184,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     One of the primary responsibilities of the DataContext is managing CRUD operations for core GX objects:
 
     .. list-table:: Supported CRUD Methods
-       :widths: 25 15 15 15 15 15
+       :widths: 10 18 18 18 18 18
        :header-rows: 1
 
        * -
