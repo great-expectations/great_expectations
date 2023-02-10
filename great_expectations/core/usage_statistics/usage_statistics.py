@@ -314,7 +314,8 @@ def usage_statistics_enabled_method(
             time_begin: int = int(round(time.time() * 1000))
             try:
                 if args_payload_fn is not None:
-                    nested_update(event_payload, args_payload_fn(*args, **kwargs))
+                    args_payload = args_payload_fn(*args, **kwargs) or {}
+                    nested_update(event_payload, args_payload)
 
                 result = func(*args, **kwargs)
                 message["success"] = True
