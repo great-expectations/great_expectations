@@ -139,9 +139,9 @@ def _replace_builtins(input_: str | type) -> str | type:
 
 FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
     # CSVAsset
-    "filepath_or_buffer": {"base_directory": _FieldSpec(pathlib.Path, ...)},
+    "filepath_or_buffer": {"_base_directory": _FieldSpec(pathlib.Path, ...)},
     # JSONAsset
-    "path_or_buf": {"base_directory": _FieldSpec(pathlib.Path, ...)},
+    "path_or_buf": {"_base_directory": _FieldSpec(pathlib.Path, ...)},
     # SQLTable
     "schema": {
         "schema_name": _FieldSpec(
@@ -155,7 +155,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
         )
     },
     # misc
-    "filepath": {"base_directory": _FieldSpec(pathlib.Path, ...)},
+    "filepath": {"_base_directory": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]

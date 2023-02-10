@@ -499,7 +499,7 @@ def type_schema(
     from great_expectations.experimental.datasources import _PANDAS_SCHEMA_VERSION
     from great_expectations.experimental.datasources.interfaces import Datasource
     from great_expectations.experimental.datasources.pandas_datasource import (
-        PandasDatasource,
+        PandasFilesystemDatasource,
     )
     from great_expectations.experimental.datasources.sources import _SourceFactories
 
@@ -525,7 +525,8 @@ def type_schema(
             model = _SourceFactories.type_lookup[name]
 
             if (
-                model in {*PandasDatasource.asset_types, PandasDatasource}
+                model
+                in {*PandasFilesystemDatasource.asset_types, PandasFilesystemDatasource}
                 and _PANDAS_SCHEMA_VERSION != pandas.__version__
             ):
                 print(
