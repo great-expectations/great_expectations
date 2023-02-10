@@ -260,7 +260,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         """
         # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
         # https://docs.pydantic.dev/usage/model_config/#options
-        self.order_by_setter = sorters
+        self.order_by = _batch_sorter_from_list(sorters)
         return self
 
     def sort_batches(self, batch_list: List[Batch]) -> None:
