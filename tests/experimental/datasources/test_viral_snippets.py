@@ -146,7 +146,7 @@ def test_serialize_zep_config(zep_file_context: FileDataContext):
 def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
     datasource = zep_file_context.get_datasource("my_sql_ds")
     assert isinstance(datasource, Datasource)
-    batch_request = datasource.get_asset("my_asset").get_batch_request(
+    batch_request = datasource.get_asset("my_asset").build_batch_request(
         {"year": 2019, "month": 1}
     )
 

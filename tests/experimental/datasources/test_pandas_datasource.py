@@ -13,6 +13,7 @@ from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
@@ -29,6 +30,13 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__file__)
+
+# apply markers to entire test module
+pytestmark = [
+    pytest.mark.skipif(
+        PANDAS_VERSION < 1.2, reason=f"ZEP pandas not supported on {PANDAS_VERSION}"
+    )
+]
 
 
 @pytest.fixture
@@ -119,7 +127,13 @@ class TestDynamicPandasAssets:
                 "read_table",
                 marks=pytest.mark.xfail(reason="conflict with 'table' type name"),
             ),
-            param("read_xml"),
+            param(
+                "read_xml",
+                marks=pytest.mark.skipif(
+                    PANDAS_VERSION < 1.2,
+                    reason=f"read_xml does not exist on {PANDAS_VERSION} ",
+                ),
+            ),
         ],
     )
     def test_data_asset_defined_for_io_read_method(self, method_name: str):
@@ -141,7 +155,7 @@ class TestDynamicPandasAssets:
         This is also a proxy for testing that the dynamic pydantic model creation was successful.
         """
         with pytest.raises(pydantic.ValidationError) as exc_info:
-            asset_class(
+            asset_class(  # type: ignore[call-arg]
                 name="test",
                 base_directory=pathlib.Path(__file__),
                 regex=re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
@@ -206,7 +220,7 @@ class TestDynamicPandasAssets:
                 regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                 **extra_kwargs,
             )
-            .get_batch_request({"year": "2018"})
+            .build_batch_request({"year": "2018"})
         )
         with pytest.raises(SpyInterrupt):
             empty_data_context.get_validator(batch_request=batch_request)
@@ -243,10 +257,10 @@ def test_add_csv_asset_to_datasource(
 @pytest.mark.unit
 def test_construct_csv_asset_directly(csv_path: pathlib.Path):
     # noinspection PyTypeChecker
-    asset = CSVAsset(
+    asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
         base_directory=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",  # type: ignore[arg-type]
     )
     assert asset.name == "csv_asset"
     assert asset.base_directory == csv_path
@@ -306,7 +320,7 @@ def test_csv_asset_with_non_string_regex_named_parameters(
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # year is an int which will raise an error
-        asset.get_batch_request({"year": 2018, "month": "04"})  # type: ignore[attr-defined]
+        asset.build_batch_request({"year": 2018, "month": "04"})  # type: ignore[attr-defined]
 
 
 @pytest.mark.unit
@@ -318,7 +332,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
-    request = asset.get_batch_request({"year": "2018", "month": "04"})  # type: ignore[attr-defined]
+    request = asset.build_batch_request({"year": "2018", "month": "04"})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert len(batches) == 1
     batch = batches[0]
@@ -355,7 +369,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
         base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
-    request = asset.get_batch_request({"year": "2018"})  # type: ignore[attr-defined]
+    request = asset.build_batch_request({"year": "2018"})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert (len(batches)) == 12
     batch_filenames = [
@@ -429,7 +443,7 @@ def test_pandas_sorter(
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
         order_by=order_by,
     )
-    batches = asset.get_batch_list_from_batch_request(asset.get_batch_request())  # type: ignore[attr-defined]
+    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())  # type: ignore[attr-defined]
     assert (len(batches)) == 36
 
     @dataclass(frozen=True)
@@ -489,7 +503,7 @@ def datasource_test_connection_error_messages(
     pandas_datasource: PandasDatasource, request
 ) -> tuple[PandasDatasource, TestConnectionError]:
     base_directory, regex, test_connection_error = request.param()
-    csv_asset = CSVAsset(
+    csv_asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
         base_directory=base_directory,
         regex=regex,
