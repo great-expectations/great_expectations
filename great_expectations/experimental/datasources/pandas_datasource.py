@@ -143,7 +143,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_csv_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Union[re.Pattern, str],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
     ) -> CSVAsset:  # type: ignore[valid-type]

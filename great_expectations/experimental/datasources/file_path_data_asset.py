@@ -38,7 +38,7 @@ class _FilePathDataAsset(DataAsset):
     }
 
     # General file-path DataAsset pertaining attributes.
-    regex_setter: Union[str, Pattern] = pydantic.Field(alias="regex")
+    regex_setter: Union[Pattern, str] = pydantic.Field(alias="regex")
 
     # Internal attributes
     _datasource: Union[
