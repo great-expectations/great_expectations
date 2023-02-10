@@ -147,22 +147,10 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
     name: str
     type: str
 
-    order_by_setter: BatchSortersDefinition = Field(
-        default_factory=list,
-        alias="order_by",
-    )
+    order_by: BatchSortersDefinition = Field(default_factory=list)
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
-
-    @property
-    def order_by(self) -> List[BatchSorter]:
-        return [
-            _batch_sorter_from_str(sort_key=batch_sorter)
-            if isinstance(batch_sorter, str)
-            else batch_sorter
-            for batch_sorter in self.order_by_setter
-        ]
 
     @property
     def datasource(self) -> _DatasourceT:
@@ -231,7 +219,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         )
 
     # Sorter methods
-    @pydantic.validator("order_by_setter", pre=True, each_item=True)
+    @pydantic.validator("order_by", pre=True, each_item=True)
     def _parse_order_by_sorter(
         cls, v: Union[str, BatchSorter]
     ) -> Union[BatchSorter, dict]:

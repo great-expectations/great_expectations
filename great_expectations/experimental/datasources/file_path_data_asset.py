@@ -31,8 +31,8 @@ logger = logging.getLogger(__name__)
 class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "name",
-        "regex_setter",
-        "order_by_setter",
+        "regex",
+        "order_by",
         "type",
     }
 
