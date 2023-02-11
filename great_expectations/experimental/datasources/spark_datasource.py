@@ -133,4 +133,4 @@ class SparkDatasource(_SparkDatasource):
             inferSchema=infer_schema,
             order_by=_batch_sorter_from_list(order_by or []),
         )
-        return self.add_asset(asset)
+        return self._add_asset(asset)

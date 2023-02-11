@@ -164,7 +164,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
-        return self.add_asset(asset)
+        return self._add_asset(asset)
 
     def add_excel_asset(
         self,
@@ -189,7 +189,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
-        return self.add_asset(asset)
+        return self._add_asset(asset)
 
     def add_json_asset(
         self,
@@ -214,7 +214,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
-        return self.add_asset(asset)
+        return self._add_asset(asset)
 
     def add_parquet_asset(
         self,
@@ -239,4 +239,4 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
-        return self.add_asset(asset)
+        return self._add_asset(asset)

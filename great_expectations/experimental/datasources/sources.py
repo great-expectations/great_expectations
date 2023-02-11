@@ -191,7 +191,7 @@ class _SourceFactories:
                 self: Datasource, name: str, **kwargs
             ) -> pydantic.BaseModel:
                 asset = asset_type(name=name, **kwargs)
-                return self.add_asset(asset)
+                return self._add_asset(asset)
 
             setattr(ds_type, asset_factory_method_name, _add_asset_factory)
         else:
