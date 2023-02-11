@@ -179,12 +179,11 @@ class _SourceFactories:
         asset_type: Type[DataAsset],
         asset_type_name: str,
     ):
-        # TODO: let asset/ds define how the type_name should look.
         asset_factory_method_name = f"add_{asset_type_name}_asset"
         asset_factory_defined: bool = asset_factory_method_name in ds_type.__dict__
 
         if not asset_factory_defined:
-            logger.info(
+            logger.debug(
                 f"No `{asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."
             )
 
@@ -196,7 +195,7 @@ class _SourceFactories:
 
             setattr(ds_type, asset_factory_method_name, _add_asset_factory)
         else:
-            logger.info(
+            logger.debug(
                 f"`{asset_factory_method_name}()` already defined `{ds_type.__name__}`"
             )
 
