@@ -10,8 +10,8 @@ from moto import mock_s3
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.data_connector.util import (
-    sanitize_prefix_for_s3,
     sanitize_prefix,
+    sanitize_prefix_for_s3,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
     DataConnector,
