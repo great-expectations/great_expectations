@@ -2374,7 +2374,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 include_rendered_content=include_rendered_content,
             )
         if create_expectation_suite_with_name is not None:
-            expectation_suite = self.create_expectation_suite(
+            expectation_suite = self.add_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name,
             )
 
@@ -3648,8 +3648,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                     + profiler.__name__
                 )
 
-        self.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name, overwrite_existing=True
+        self.add_or_update_expectation_suite(
+            expectation_suite_name=expectation_suite_name
         )
 
         # TODO: Add batch_parameters
