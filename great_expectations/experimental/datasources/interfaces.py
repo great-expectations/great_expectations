@@ -342,7 +342,7 @@ class Datasource(
         ), f"{asset_type.__name__} is not a valid asset for {self.__class__.__name__}"
 
         asset = asset_type(type=type, name=name, **kwargs)
-        return self._add_asset(asset)
+        return self._add_asset_and_test_connection(asset)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -414,7 +414,7 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def _add_asset(self, asset: _DataAssetT) -> _DataAssetT:
+    def _add_asset_and_test_connection(self, asset: _DataAssetT) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:

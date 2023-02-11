@@ -649,7 +649,7 @@ class SQLDatasource(Datasource):
             order_by=_batch_sorter_from_list(order_by or []),
             # see DataAsset._parse_order_by_sorter()
         )
-        return self._add_asset(asset)
+        return self._add_asset_and_test_connection(asset)
 
     def add_query_asset(
         self,
@@ -672,4 +672,4 @@ class SQLDatasource(Datasource):
             query=query,
             order_by=_batch_sorter_from_list(order_by or []),
         )
-        return self._add_asset(asset)
+        return self._add_asset_and_test_connection(asset)
