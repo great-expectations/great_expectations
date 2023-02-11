@@ -507,7 +507,7 @@ class Batch(ExperimentalBaseModel):
     @validate_arguments
     def head(
         self,
-        n_rows: Optional[StrictInt] = None,
+        n_rows: StrictInt = None,
         fetch_all: StrictBool = False,
     ) -> HeadData:
         """Return the first n rows of this Batch.
