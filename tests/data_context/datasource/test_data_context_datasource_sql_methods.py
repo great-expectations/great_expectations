@@ -333,7 +333,7 @@ def test_get_validator_expectation_suite_options(
             data_asset_name="table_partitioned_by_date_column__A",
             data_connector_query=IDDict(batch_filter_parameters={"date": "2020-01-15"}),
         ),
-        add_expectation_suite_with_name="yet_more_expectations",
+        create_expectation_suite_with_name="yet_more_expectations",
     )
 
     # Failed specification: incorrectly typed expectation suite

@@ -161,7 +161,7 @@ def test_validator_default_expectation_args__sql(
         data_connector_name="daily",
         data_asset_name="table_partitioned_by_date_column__A",
         batch_identifiers={"date": "2020-01-15"},
-        add_expectation_suite_with_name="test_suite",
+        create_expectation_suite_with_name="test_suite",
     )
 
     print(my_validator.get_default_expectation_arguments())
@@ -201,7 +201,7 @@ def test_columns(
     }
     validator: Validator = data_context.get_validator(
         batch_request=BatchRequest(**batch_request),
-        add_expectation_suite_with_name="warning",
+        create_expectation_suite_with_name="warning",
     )
     columns: List[str] = validator.columns()
 
@@ -229,7 +229,7 @@ def test_head(
     }
     validator: Validator = data_context.get_validator(
         batch_request=BatchRequest(**batch_request),
-        add_expectation_suite_with_name="warning",
+        create_expectation_suite_with_name="warning",
     )
     head: pd.DataFrame = validator.head()
 

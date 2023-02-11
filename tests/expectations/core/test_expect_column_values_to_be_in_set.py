@@ -45,7 +45,7 @@ def test_expect_column_values_to_be_in_set_fail(
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        add_expectation_suite_with_name="test",
+        create_expectation_suite_with_name="test",
     )
 
     result = validator.expect_column_values_to_be_in_set(
@@ -82,7 +82,7 @@ def test_expect_column_values_in_set_pass(
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        add_expectation_suite_with_name="test",
+        create_expectation_suite_with_name="test",
     )
 
     result = validator.expect_column_values_to_be_in_set(
@@ -128,7 +128,7 @@ def test_expect_column_values_country_fail(
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        add_expectation_suite_with_name="test",
+        create_expectation_suite_with_name="test",
     )
 
     result = validator.expect_column_values_to_be_two_letter_country_code(column="a")
@@ -152,7 +152,7 @@ def test_expect_column_values_country_pass(
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        add_expectation_suite_with_name="test",
+        create_expectation_suite_with_name="test",
     )
 
     result = validator.expect_column_values_to_be_two_letter_country_code(column="a")
@@ -188,7 +188,7 @@ def test_expect_column_values_to_be_in_set_no_set(
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        add_expectation_suite_with_name="test",
+        create_expectation_suite_with_name="test",
     )
     with pytest.raises(
         great_expectations.exceptions.exceptions.InvalidExpectationConfigurationError

@@ -265,7 +265,7 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_expectation_suite">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py create_expectation_suite">
 context.add_expectation_suite(
     expectation_suite_name="test_gcs_suite", overwrite_existing=True
 )

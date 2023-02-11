@@ -126,16 +126,16 @@ def data_context_with_bad_datasource(tmp_path_factory):
 def test_create_duplicate_expectation_suite(titanic_data_context):
     # create new expectation suite
     assert titanic_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test_add_expectation_suite"
+        expectation_suite_name="titanic.test_create_expectation_suite"
     )
     # attempt to create expectation suite with name that already exists on data asset
     with pytest.raises(gx_exceptions.DataContextError):
         titanic_data_context.add_expectation_suite(
-            expectation_suite_name="titanic.test_add_expectation_suite"
+            expectation_suite_name="titanic.test_create_expectation_suite"
         )
     # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True
     assert titanic_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test_add_expectation_suite",
+        expectation_suite_name="titanic.test_create_expectation_suite",
         overwrite_existing=True,
     )
 
@@ -577,7 +577,7 @@ def test_data_context_get_datasource(titanic_data_context):
 
 def test_data_context_expectation_suite_delete(empty_data_context):
     assert empty_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test_add_expectation_suite"
+        expectation_suite_name="titanic.test_create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert len(expectation_suites) == 1
@@ -590,11 +590,11 @@ def test_data_context_expectation_suite_delete(empty_data_context):
 
 def test_data_context_expectation_nested_suite_delete(empty_data_context):
     assert empty_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test.add_expectation_suite"
+        expectation_suite_name="titanic.test.create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert empty_data_context.add_expectation_suite(
-        expectation_suite_name="titanic.test.a.add_expectation_suite"
+        expectation_suite_name="titanic.test.a.create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
     assert len(expectation_suites) == 2
@@ -1875,7 +1875,7 @@ data_connectors:
         batch_identifiers={
             "alphanumeric": "some_file",
         },
-        add_expectation_suite_with_name="A_expectation_suite",
+        create_expectation_suite_with_name="A_expectation_suite",
     )
     assert my_validator.expectation_suite_name == "A_expectation_suite"
 
@@ -1921,7 +1921,7 @@ def test_get_validator_with_batch(in_memory_runtime_context):
 
     my_validator = context.get_validator(
         batch=my_batch,
-        add_expectation_suite_with_name="A_expectation_suite",
+        create_expectation_suite_with_name="A_expectation_suite",
     )
 
 
@@ -1957,7 +1957,7 @@ def test_get_validator_with_batch_list(in_memory_runtime_context):
 
     my_validator = context.get_validator(
         batch_list=my_batch_list,
-        add_expectation_suite_with_name="A_expectation_suite",
+        create_expectation_suite_with_name="A_expectation_suite",
     )
     assert len(my_validator.batches) == 2
 

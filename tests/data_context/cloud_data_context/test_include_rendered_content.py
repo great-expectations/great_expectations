@@ -164,7 +164,7 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
     ):
         validator: Validator = context.get_validator(
             batch_request=batch_request,
-            add_expectation_suite_with_name="test_suite",
+            create_expectation_suite_with_name="test_suite",
         )
 
         expectation_validation_result: ExpectationValidationResult = (

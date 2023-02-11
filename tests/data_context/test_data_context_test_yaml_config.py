@@ -1158,7 +1158,7 @@ def test_golden_path_configured_asset_pandas_datasource_configuration(
             data_connector_name="my_filesystem_data_connector",
             data_asset_name="C",
             data_connector_query={"batch_filter_parameters": {"year": "2019"}},
-            add_expectation_suite_with_name="my_expectations",
+            create_expectation_suite_with_name="my_expectations",
             batch_spec_passthrough={
                 "sampling_method": "_sample_using_hash",
                 "sampling_kwargs": {

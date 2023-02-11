@@ -545,7 +545,7 @@ def test_in_memory_data_context_configuration(
         datasource_name="my_datasource",
         data_connector_name="my_basic_data_connector",
         data_asset_name="Titanic_1912",
-        add_expectation_suite_with_name="my_test_titanic_expectation_suite",
+        create_expectation_suite_with_name="my_test_titanic_expectation_suite",
     )
 
     assert my_validator.expect_table_row_count_to_equal(1313)["success"]

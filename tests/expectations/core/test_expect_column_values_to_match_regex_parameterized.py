@@ -36,7 +36,7 @@ def test_expect_column_values_as_string_to_be_positive_integers_pass(
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        add_expectation_suite_with_name="test",
+        create_expectation_suite_with_name="test",
     )
 
     assert validator.expect_column_values_as_string_to_be_positive_integer(
@@ -60,7 +60,7 @@ def test_expect_column_values_as_string_to_be_positive_integers_fail(
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        add_expectation_suite_with_name="test",
+        create_expectation_suite_with_name="test",
     )
 
     assert not validator.expect_column_values_as_string_to_be_positive_integer(

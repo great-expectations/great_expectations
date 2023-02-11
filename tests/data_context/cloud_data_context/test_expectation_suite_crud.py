@@ -288,7 +288,7 @@ def test_list_expectation_suites(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_add_expectation_suite_saves_suite_to_cloud(
+def test_create_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],
     mock_list_expectation_suite_names: mock.MagicMock,
@@ -309,7 +309,7 @@ def test_add_expectation_suite_saves_suite_to_cloud(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_add_expectation_suite_overwrites_existing_suite(
+def test_create_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mock_list_expectation_suite_names: mock.MagicMock,
     mock_list_expectation_suites: mock.MagicMock,
@@ -341,7 +341,7 @@ def test_add_expectation_suite_overwrites_existing_suite(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_add_expectation_suite_namespace_collision_raises_error(
+def test_create_expectation_suite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mock_list_expectation_suite_names: mock.MagicMock,
 ) -> None:
