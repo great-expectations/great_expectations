@@ -16,6 +16,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    get_args,
 )
 
 import pandas as pd
@@ -280,6 +281,16 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
                     f"Trying to sort {self.name} table asset batches on key {sorter.key} "
                     "which isn't available on all batches."
                 ) from e
+
+    @classmethod
+    def _get_type_field_value(cls) -> str:
+        """Get the default value of the `type` field."""
+        default = cls.__fields__["type"].default
+        literal_values = get_args(cls.__fields__["type"].type_)
+        assert (
+            default in literal_values
+        ), f"{cls.__name__}'s `type` field's default value '{default}' is not a member of {literal_values}"
+        return default
 
 
 # If a Datasource can have more than 1 _DataAssetT, this will need to change.
