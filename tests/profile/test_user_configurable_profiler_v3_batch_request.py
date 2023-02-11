@@ -66,7 +66,7 @@ def get_pandas_runtime_validator(context, df):
         },
     )
 
-    expectation_suite = context.create_expectation_suite(
+    expectation_suite = context.add_expectation_suite(
         "my_suite", overwrite_existing=True
     )
 
@@ -97,7 +97,7 @@ def get_spark_runtime_validator(context, df):
         },
     )
 
-    expectation_suite = context.create_expectation_suite(
+    expectation_suite = context.add_expectation_suite(
         "my_suite", overwrite_existing=True
     )
 

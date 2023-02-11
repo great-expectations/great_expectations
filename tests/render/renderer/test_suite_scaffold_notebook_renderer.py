@@ -35,7 +35,7 @@ def test_notebook_execution_with_pandas_backend(
     root_dir = context.root_directory
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     suite_name = "my_suite"
-    suite = context.create_expectation_suite(suite_name)
+    suite = context.add_expectation_suite(suite_name)
 
     csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
     batch_kwargs = {"datasource": "mydatasource", "path": csv_path}

@@ -43,7 +43,7 @@ config = DataContextConfig(
 context_gx = get_context(project_config=config)
 
 expectation_suite_name = "suite_name"
-suite = context_gx.create_expectation_suite(expectation_suite_name)
+suite = context_gx.add_expectation_suite(expectation_suite_name)
 batch_request = RuntimeBatchRequest(
     datasource_name="spark_s3",
     data_asset_name="datafile_name",

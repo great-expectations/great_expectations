@@ -74,9 +74,7 @@ try:
         f'Loaded ExpectationSuite "{suite.expectation_suite_name}" containing {len(suite.expectations)} expectations.'
     )
 except DataContextError:
-    suite = context.create_expectation_suite(
-        expectation_suite_name=expectation_suite_name
-    )
+    suite = context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     print(f'Created ExpectationSuite "{suite.expectation_suite_name}".')
 # </snippet>
 

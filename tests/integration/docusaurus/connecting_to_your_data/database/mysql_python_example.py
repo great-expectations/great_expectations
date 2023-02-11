@@ -56,7 +56,7 @@ batch_request = RuntimeBatchRequest(
         }  # NOTE: create_engine arguments may be passed here
     },
 )
-context.create_expectation_suite(
+context.add_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
 validator = context.get_validator(
@@ -73,7 +73,7 @@ batch_request = BatchRequest(
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="test_ci.taxi_data",  # this is the name of the table you want to retrieve
 )
-context.create_expectation_suite(
+context.add_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
 validator = context.get_validator(

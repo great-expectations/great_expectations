@@ -33,7 +33,7 @@ def test_expect_column_values_to_be_decreasing_warn_parse_strings_as_datetimes(
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="test",
+        add_expectation_suite_with_name="test",
     )
 
     with pytest.warns(DeprecationWarning) as record:

@@ -37,7 +37,7 @@ def test_save_expectation_suite_with_datetime_objects(
             "ge_batch_id": "test_id",
         }
 
-        empty_suite = context.create_expectation_suite("test_suite")
+        empty_suite = context.add_expectation_suite("test_suite")
 
         batch = context.get_batch(
             batch_kwargs=batch_kwargs, expectation_suite_name=empty_suite

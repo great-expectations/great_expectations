@@ -55,7 +55,7 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._set",
         return_value=cloud_ref,
     ):
-        expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite: ExpectationSuite = context.add_expectation_suite(
             "test_suite"
         )
     expectation_suite.expectations.append(
@@ -164,7 +164,7 @@ def test_cloud_backed_data_context_expectation_validation_result_include_rendere
     ):
         validator: Validator = context.get_validator(
             batch_request=batch_request,
-            create_expectation_suite_with_name="test_suite",
+            add_expectation_suite_with_name="test_suite",
         )
 
         expectation_validation_result: ExpectationValidationResult = (

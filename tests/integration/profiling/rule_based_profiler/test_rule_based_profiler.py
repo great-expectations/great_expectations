@@ -60,7 +60,7 @@ def test_batches_are_accessible(
     # Should give most recent batch
     validator_1 = context.get_validator(
         batch_request=batch_request_1,
-        create_expectation_suite_with_name="my_expectation_suite_name_1",
+        add_expectation_suite_with_name="my_expectation_suite_name_1",
     )
     metric_max = validator_1.get_metric(
         MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
@@ -84,7 +84,7 @@ def test_batches_are_accessible(
     )
     validator_2 = context.get_validator(
         batch_request=batch_request_2,
-        create_expectation_suite_with_name="my_expectation_suite_name_2",
+        add_expectation_suite_with_name="my_expectation_suite_name_2",
     )
     metric_max = validator_2.get_metric(
         MetricConfiguration("column.max", metric_domain_kwargs={"column": "batch_num"})
@@ -109,7 +109,7 @@ def test_batches_are_accessible(
         )
         validator = context.get_validator(
             batch_request=batch_request,
-            create_expectation_suite_with_name=f"my_expectation_suite_name__{batch_num}",
+            add_expectation_suite_with_name=f"my_expectation_suite_name__{batch_num}",
         )
         metric_max = validator.get_metric(
             MetricConfiguration(

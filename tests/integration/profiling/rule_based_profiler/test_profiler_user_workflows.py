@@ -213,7 +213,7 @@ def test_alice_columnar_table_single_batch_batches_are_accessible(
     # Should give most recent batch
     validator_1: Validator = context.get_validator(
         batch_request=batch_request_1,
-        create_expectation_suite_with_name="my_expectation_suite_name_1",
+        add_expectation_suite_with_name="my_expectation_suite_name_1",
     )
     metric_max: int = validator_1.get_metric(
         MetricConfiguration("column.max", metric_domain_kwargs={"column": "event_type"})
@@ -603,7 +603,7 @@ def test_bobby_columnar_table_multi_batch_batches_are_accessible(
     )
     validator_latest: Validator = context.get_validator(
         batch_request=batch_request_latest,
-        create_expectation_suite_with_name="my_expectation_suite_name_1",
+        add_expectation_suite_with_name="my_expectation_suite_name_1",
     )
 
     metric_configuration_arguments: Dict[str, Any] = {

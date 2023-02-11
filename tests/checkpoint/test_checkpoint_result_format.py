@@ -314,7 +314,7 @@ def _add_expectations_and_checkpoint(
         checkpoint_config["runtime_configuration"] = dict_to_update_checkpoint
 
     context: DataContext = data_context
-    context.create_expectation_suite(expectation_suite_name="metrics_exp")
+    context.add_expectation_suite(expectation_suite_name="metrics_exp")
     animals_suite = context.get_expectation_suite(expectation_suite_name="metrics_exp")
     for expectation in expectations_list:
         animals_suite.add_expectation(expectation_configuration=expectation)

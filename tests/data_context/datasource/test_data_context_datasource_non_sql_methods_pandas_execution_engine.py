@@ -79,7 +79,7 @@ def test_get_validator(context_with_single_titanic_csv):
         "data_asset_name": "Titanic",
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
-    context.create_expectation_suite(expectation_suite_name="temp_suite")
+    context.add_expectation_suite(expectation_suite_name="temp_suite")
     my_validator: Validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="temp_suite"
     )
@@ -96,7 +96,7 @@ def test_get_validator_bad_batch_request(context_with_single_titanic_csv):
         "data_asset_name": "I_DONT_EXIST",
     }
     batch_request: BatchRequest = BatchRequest(**batch_request_dict)
-    context.create_expectation_suite(expectation_suite_name="temp_suite")
+    context.add_expectation_suite(expectation_suite_name="temp_suite")
     with pytest.raises(InvalidBatchRequestError):
         context.get_validator(
             batch_request=batch_request, expectation_suite_name="temp_suite"

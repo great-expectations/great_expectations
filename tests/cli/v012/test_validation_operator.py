@@ -274,7 +274,7 @@ def test_validation_operator_run_noninteractive_validation_config_file_does_is_m
 def test_validation_operator_list_with_one_operator(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
-    context.create_expectation_suite("a.warning")
+    context.add_expectation_suite("a.warning")
 
 
 def test_validation_operator_list_with_zero_validation_operators(

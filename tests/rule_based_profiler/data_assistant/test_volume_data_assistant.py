@@ -1577,7 +1577,7 @@ def run_volume_data_assistant_result_jupyter_notebook_with_new_cell(
     root_dir: str = context.root_directory
 
     expectation_suite_name: str = "test_suite"
-    context.create_expectation_suite(
+    context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name, overwrite_existing=True
     )
 

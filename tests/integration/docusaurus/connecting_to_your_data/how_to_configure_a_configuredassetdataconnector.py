@@ -75,7 +75,7 @@ batch_request = BatchRequest(
     data_asset_name="yellow_tripdata",
 )
 
-context.create_expectation_suite(
+context.add_expectation_suite(
     expectation_suite_name="<MY EXPECTATION SUITE NAME>", overwrite_existing=True
 )
 

@@ -300,7 +300,7 @@ batch_request = BatchRequest(
 
 validator = context.get_validator(
     batch_request=batch_request,
-    create_expectation_suite_with_name="<MY EXPECTATION SUITE NAME>",
+    add_expectation_suite_with_name="<MY EXPECTATION SUITE NAME>",
 )
 
 # NOTE: The following code is only for testing and can be ignored by users.

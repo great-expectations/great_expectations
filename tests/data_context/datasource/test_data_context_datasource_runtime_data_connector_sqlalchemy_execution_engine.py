@@ -253,7 +253,7 @@ def test_get_validator_successful_specification_sqlalchemy_engine(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context = data_context_with_datasource_sqlalchemy_engine
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
     my_validator: Validator = context.get_validator(
         batch_request=RuntimeBatchRequest(
@@ -280,7 +280,7 @@ def test_get_validator_ambiguous_parameter_sqlalchemy_engine(
     as an unnamed parameter, which will raise a GreatExpectationsTypeError
     """
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # raised by get_batch_list() in DataContext
     with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
         batch_list: List[Batch] = context.get_validator(
@@ -301,7 +301,7 @@ def test_get_validator_wrong_type_sqlalchemy_engine(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     # data_connector_name should be a dict not an int
@@ -324,7 +324,7 @@ def test_get_validator_failed_specification_no_batch_identifier_sqlalchemy_engin
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     # batch_identifiers should not be None
@@ -361,7 +361,7 @@ def test_get_validator_failed_specification_incorrect_batch_spec_passthrough_sql
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # incorrect batch_spec_passthrough, which should be a dict
@@ -384,7 +384,7 @@ def test_get_validator_failed_specification_no_runtime_parameters_sqlalchemy_eng
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     with pytest.raises(TypeError):
         # runtime_parameters should not be None
         batch_list: List[Batch] = context.get_validator(
@@ -415,7 +415,7 @@ def test_get_validator_wrong_runtime_parameters_sqlalchemy_engine(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(
         great_expectations.exceptions.exceptions.InvalidBatchRequestError
@@ -438,7 +438,7 @@ def test_get_validator_successful_specification_sqlalchemy_engine_named_asset(
 ):
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
     my_validator: Validator = context.get_validator(
         batch_request=RuntimeBatchRequest(

@@ -64,7 +64,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data"
 
-context.create_expectation_suite(
+context.add_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
 validator = context.get_validator(

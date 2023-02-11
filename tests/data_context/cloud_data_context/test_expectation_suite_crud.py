@@ -288,7 +288,7 @@ def test_list_expectation_suites(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_create_expectation_suite_saves_suite_to_cloud(
+def test_add_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],
     mock_list_expectation_suite_names: mock.MagicMock,
@@ -302,14 +302,14 @@ def test_create_expectation_suite_saves_suite_to_cloud(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
     ):
         mock_list_expectation_suite_names.return_value = existing_suite_names
-        suite = context.create_expectation_suite(suite_name)
+        suite = context.add_expectation_suite(suite_name)
 
     assert suite.ge_cloud_id is not None
 
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_create_expectation_suite_overwrites_existing_suite(
+def test_add_expectation_suite_overwrites_existing_suite(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mock_list_expectation_suite_names: mock.MagicMock,
     mock_list_expectation_suites: mock.MagicMock,
@@ -332,7 +332,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
                 resource_name=suite_name,
             )
         ]
-        suite = context.create_expectation_suite(
+        suite = context.add_expectation_suite(
             expectation_suite_name=suite_name, overwrite_existing=True
         )
 
@@ -341,7 +341,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_create_expectation_suite_namespace_collision_raises_error(
+def test_add_expectation_suite_namespace_collision_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mock_list_expectation_suite_names: mock.MagicMock,
 ) -> None:
@@ -352,7 +352,7 @@ def test_create_expectation_suite_namespace_collision_raises_error(
 
     with pytest.raises(DataContextError) as e:
         mock_list_expectation_suite_names.return_value = existing_suite_names
-        context.create_expectation_suite(suite_name)
+        context.add_expectation_suite(suite_name)
 
     assert f"expectation_suite '{suite_name}' already exists" in str(e.value)
 

@@ -64,7 +64,7 @@ batch_request.runtime_parameters[
 
 validator = context.get_validator(
     batch_request=batch_request,
-    create_expectation_suite_with_name="<MY EXPECTATION SUITE NAME>",
+    add_expectation_suite_with_name="<MY EXPECTATION SUITE NAME>",
 )
 print(validator.head())
 

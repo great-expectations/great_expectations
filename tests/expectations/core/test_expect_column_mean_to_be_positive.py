@@ -46,7 +46,7 @@ def test_expect_column_mean_to_be_positive(data_context_with_datasource_pandas_e
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="test",
+        add_expectation_suite_with_name="test",
     )
 
     result = validator.expect_column_mean_to_be_positive(column="a")

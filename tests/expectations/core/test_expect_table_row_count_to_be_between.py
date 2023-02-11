@@ -19,7 +19,7 @@ def test_expect_table_row_count_to_be_between_runtime_custom_query_no_temp_table
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="test",
+        add_expectation_suite_with_name="test",
     )
     results = validator.expect_table_row_count_to_be_between(
         min_value=100, max_value=2000
@@ -60,7 +60,7 @@ def test_expect_table_row_count_to_be_between_runtime_custom_query_with_where_no
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="test",
+        add_expectation_suite_with_name="test",
     )
     results = validator.expect_table_row_count_to_be_between(
         min_value=100, max_value=2000
@@ -99,7 +99,7 @@ def test_expect_table_row_count_to_be_between_no_temp_table_sa(
     )
     validator = context.get_validator(
         batch_request=batch_request,
-        create_expectation_suite_with_name="test",
+        add_expectation_suite_with_name="test",
     )
     results = validator.expect_table_row_count_to_be_between(
         min_value=100, max_value=2000

@@ -248,7 +248,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
     expectation_suite_name: str = "warning"
 
-    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -462,7 +462,7 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
     uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
     expectation_suite_name: str = "warning"
 
-    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",

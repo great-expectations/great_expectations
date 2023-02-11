@@ -61,7 +61,7 @@ def test_sqlalchemy_datasource_custom_data_asset(
     )
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context_parameterized_expectation_suite.create_expectation_suite("table_1.boo")
+    data_context_parameterized_expectation_suite.add_expectation_suite("table_1.boo")
     batch = data_context_parameterized_expectation_suite.get_batch(
         data_context_parameterized_expectation_suite.build_batch_kwargs(
             "test_sqlalchemy_datasource", "default", "table_1"

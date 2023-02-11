@@ -1436,7 +1436,7 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_doc
     uncommitted_dir = os.path.join(root_dir, "uncommitted")
     suite_name = "warning"
 
-    context.create_expectation_suite(suite_name)
+    context.add_expectation_suite(suite_name)
     csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
     batch_kwargs = {"datasource": "mydatasource", "path": csv_path}
     batch = context.get_batch(batch_kwargs, suite_name)

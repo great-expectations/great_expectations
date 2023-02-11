@@ -398,7 +398,7 @@ def test_basic_checkpoint_config_validation(
     context.add_checkpoint(**yaml.load(yaml_config))
     assert len(context.list_checkpoints()) == 2
 
-    context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
     with pytest.raises(
         gx_exceptions.DataContextError,
         match=r'Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
@@ -549,7 +549,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
-    data_context.create_expectation_suite(expectation_suite_name="users.delivery")
+    data_context.add_expectation_suite(expectation_suite_name="users.delivery")
     result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.name,
     )
@@ -680,7 +680,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
-    data_context.create_expectation_suite(expectation_suite_name="users.delivery")
+    data_context.add_expectation_suite(expectation_suite_name="users.delivery")
     result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.name,
     )
@@ -778,7 +778,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
-    data_context.create_expectation_suite(expectation_suite_name="users.delivery")
+    data_context.add_expectation_suite(expectation_suite_name="users.delivery")
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.name,
@@ -1048,8 +1048,8 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
-    data_context.create_expectation_suite(expectation_suite_name="users.warning")
-    data_context.create_expectation_suite(expectation_suite_name="users.error")
+    data_context.add_expectation_suite(expectation_suite_name="users.warning")
+    data_context.add_expectation_suite(expectation_suite_name="users.error")
     result: CheckpointResult = data_context.run_checkpoint(
         checkpoint_name=checkpoint.name,
     )
@@ -1157,7 +1157,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
             checkpoint_name=checkpoint.name,
         )
 
-    data_context.create_expectation_suite(expectation_suite_name="users.delivery")
+    data_context.add_expectation_suite(expectation_suite_name="users.delivery")
 
     result = data_context.run_checkpoint(
         checkpoint_name="my_base_checkpoint",
@@ -1320,7 +1320,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         == 0
     )
 
-    filesystem_csv_data_context_with_validation_operators.create_expectation_suite(
+    filesystem_csv_data_context_with_validation_operators.add_expectation_suite(
         "my_suite"
     )
     # noinspection PyUnusedLocal
@@ -1388,7 +1388,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
     result = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1433,7 +1433,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
     result: CheckpointResult = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1496,7 +1496,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
     result = checkpoint.run()
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1553,7 +1553,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1612,7 +1612,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
 
     assert len(context.validations_store.list_keys()) == 1
@@ -1779,7 +1779,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
     # noinspection PyUnusedLocal
     result = checkpoint.run(
         validations=[
@@ -2109,7 +2109,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
     # noinspection PyUnusedLocal
     result = checkpoint.run(
         validations=[
@@ -2129,7 +2129,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -2186,7 +2186,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query 1
     batch_request_1 = RuntimeBatchRequest(
@@ -2259,7 +2259,7 @@ def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
@@ -2303,7 +2303,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -2361,7 +2361,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -2418,7 +2418,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     test_df = spark_session.createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -2479,7 +2479,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -2544,7 +2544,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3176,7 +3176,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3233,7 +3233,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3289,7 +3289,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     test_df = get_or_create_spark_application().createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3343,7 +3343,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3400,7 +3400,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3456,7 +3456,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     test_df = get_or_create_spark_application().createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3517,7 +3517,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3581,7 +3581,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3644,7 +3644,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3708,7 +3708,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3765,7 +3765,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3826,7 +3826,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3886,7 +3886,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     test_df = get_or_create_spark_application().createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -3944,7 +3944,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -4006,7 +4006,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -4067,7 +4067,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     test_df = get_or_create_spark_application().createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -4133,7 +4133,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -4201,7 +4201,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -4268,7 +4268,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -4337,7 +4337,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -4400,7 +4400,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -4459,7 +4459,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a path
     # Using typed object instead of dictionary, expected by "add_checkpoint()", on purpose to insure that checks work.
@@ -4939,7 +4939,7 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_batch_request_into_che
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
@@ -4996,7 +4996,7 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_validations_into_check
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a DataFrame
     runtime_batch_request: RuntimeBatchRequest = RuntimeBatchRequest(

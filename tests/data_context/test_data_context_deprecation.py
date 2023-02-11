@@ -289,9 +289,9 @@ def test_data_context__resolve_id_and_ge_cloud_id_failure():
         pytest.param("save_datasource", ["datasource"], id="save_datasource"),
         pytest.param("save_profiler", ["profiler"], id="save_profiler"),
         pytest.param(
-            "create_expectation_suite",
+            "add_expectation_suite",
             ["expectation_suite_name"],
-            id="create_expectation_suite",
+            id="add_expectation_suite",
         ),
     ],
 )
