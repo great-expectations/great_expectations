@@ -68,7 +68,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     data_reference: str,
     regex_pattern: re.Pattern,
     data_asset_name: str,
-) -> Optional[List[BatchDefinition]]:
+) -> List[BatchDefinition]:
     batch_identifiers: Optional[
         IDDict
     ] = convert_data_reference_string_to_batch_identifiers_using_regex(
@@ -76,7 +76,7 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
         regex_pattern=regex_pattern,
     )
     if batch_identifiers is None:
-        return None
+        return []
 
     # Importing at module level causes circular dependencies.
     from great_expectations.core.batch import BatchDefinition

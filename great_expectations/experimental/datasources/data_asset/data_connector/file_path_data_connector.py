@@ -229,8 +229,8 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self._data_references_cache = {}
 
         for data_reference in self._get_data_reference_list():
-            mapped_batch_definition_list: Optional[
-                List[BatchDefinition]
+            mapped_batch_definition_list: List[
+                BatchDefinition
             ] = self._map_data_reference_to_batch_definition_list(
                 data_reference=data_reference
             )
@@ -239,7 +239,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     # Interface Method
     def _map_data_reference_to_batch_definition_list(
         self, data_reference: str
-    ) -> Optional[List[BatchDefinition]]:
+    ) -> List[BatchDefinition]:
         return map_data_reference_string_to_batch_definition_list_using_regex(
             datasource_name=self.datasource_name,
             data_connector_name=self.name,
