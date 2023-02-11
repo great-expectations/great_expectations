@@ -154,11 +154,11 @@ class _SourceFactories:
     ):
         # TODO: let asset/ds define how the type_name should look.
         asset_factory_method_name = f"add_{asset_type_name}_asset"
-        # TODO: check if the class already has a add_asset method defined
-        asset_factory_defined: bool = False
+        asset_factory_defined: bool = asset_factory_method_name in ds_type.__dict__
+
         if not asset_factory_defined:
-            logger.debug(
-                f"No `{asset_factory_method_name}()` method found for {ds_type} generating the method..."
+            logger.info(
+                f"No `{asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."
             )
 
             def _add_asset_factory(self: Datasource, name: str, **kwargs):
@@ -167,7 +167,9 @@ class _SourceFactories:
 
             setattr(ds_type, asset_factory_method_name, _add_asset_factory)
         else:
-            logger.debug(f"`{asset_factory_method_name}()` already defined {ds_type}")
+            logger.info(
+                f"`{asset_factory_method_name}()` already defined `{ds_type.__name__}`"
+            )
 
     @property
     def factories(self) -> List[str]:
