@@ -73,7 +73,7 @@ def get_validator_class() -> Type[Validator]:
     """Using this function helps work around circular import dependncies."""
     import great_expectations.validator.validator as validator
 
-    return validator.ExecutionEngine
+    return validator.Validator
 
 
 class BaseCheckpoint(ConfigPeer):
