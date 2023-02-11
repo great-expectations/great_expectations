@@ -85,7 +85,9 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
         root directory. If it is absolute, then keep as-is.
         """
-        return normalize_directory_path(
-            dir_path=self._base_directory,
-            root_directory_path=self.data_context_root_directory,
+        return str(
+            normalize_directory_path(
+                dir_path=self._base_directory,
+                root_directory_path=self.data_context_root_directory,
+            )
         )

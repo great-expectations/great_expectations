@@ -1,17 +1,21 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import (
+        ExecutionEngine,
+        PandasExecutionEngine,
+        SparkDFExecutionEngine,
+        SqlAlchemyExecutionEngine,
+    )
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -24,6 +28,34 @@ except ImportError:
     logger.debug(
         "Unable to load pandas; install optional pandas dependency for support."
     )
+
+
+def get_execution_engine_class() -> Type[ExecutionEngine]:
+    """Using this function helps work around circular import dependncies."""
+    import great_expectations.execution_engine.execution_engine as execution_engine
+
+    return execution_engine.ExecutionEngine
+
+
+def get_pandas_execution_engine_class() -> Type[PandasExecutionEngine]:
+    """Using this function helps work around circular import dependncies."""
+    import great_expectations.execution_engine.pandas_execution_engine as pandas_execution_engine
+
+    return pandas_execution_engine.PandasExecutionEngine
+
+
+def get_sqlalchemy_execution_engine_class() -> Type[SqlAlchemyExecutionEngine]:
+    """Using this function helps work around circular import dependncies."""
+    import great_expectations.execution_engine.sqlalchemy_execution_engine as sqlalchemy_execution_engine
+
+    return sqlalchemy_execution_engine.SqlAlchemyExecutionEngine
+
+
+def get_sparkdf_execution_engine_class() -> Type[SparkDFExecutionEngine]:
+    """Using this function helps work around circular import dependncies."""
+    import great_expectations.execution_engine.sparkdf_execution_engine as sparkdf_execution_engine
+
+    return sparkdf_execution_engine.SparkDFExecutionEngine
 
 
 class MetricsCalculator:
@@ -97,10 +129,14 @@ class MetricsCalculator:
         )
 
         if isinstance(
-            self._execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
+            self._execution_engine,
+            (
+                get_pandas_execution_engine_class(),
+                get_sqlalchemy_execution_engine_class(),
+            ),
         ):
             df = pd.DataFrame(data=data)
-        elif isinstance(self._execution_engine, SparkDFExecutionEngine):
+        elif isinstance(self._execution_engine, get_sparkdf_execution_engine_class()):
             rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
             df = pd.DataFrame(data=rows)
         else:

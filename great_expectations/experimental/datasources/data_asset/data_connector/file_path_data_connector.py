@@ -5,9 +5,12 @@ import re
 from typing import TYPE_CHECKING, Callable, List, Optional
 
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
-from great_expectations.experimental.datasources.data_asset.data_connector.batch_filter import (
+from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
     build_batch_filter,
+)
+from great_expectations.datasource.data_connector.util import (
+    map_batch_definition_to_data_reference_string_using_regex,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
     DataConnector,
@@ -22,7 +25,6 @@ from great_expectations.experimental.datasources.data_asset.data_connector.regex
 # TODO: <Alex>ALEX</Alex>
 from great_expectations.experimental.datasources.data_asset.data_connector.util import (
     batch_definition_matches_batch_request,
-    map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
 
