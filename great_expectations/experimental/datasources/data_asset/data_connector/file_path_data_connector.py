@@ -287,7 +287,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         batch_definition_list: List[BatchDefinition] = [
             batch_definitions[0]
             for batch_definitions in self._data_references_cache.values()
-            if batch_definitions is not None
+            if batch_definitions
         ]
         return batch_definition_list
 
