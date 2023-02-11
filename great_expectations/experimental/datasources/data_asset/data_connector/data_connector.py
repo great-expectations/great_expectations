@@ -53,7 +53,7 @@ class DataConnector:
         self._data_asset_name: str = data_asset_name
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache: Dict[str, BatchDefinition] = {}
+        self._data_references_cache: Dict[str, Optional[BatchDefinition]] = {}
 
         self._data_context_root_directory: Optional[pathlib.Path] = None
 
