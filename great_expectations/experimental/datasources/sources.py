@@ -188,7 +188,9 @@ class _SourceFactories:
                 f"No `{asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."
             )
 
-            def _add_asset_factory(self: Datasource, name: str, **kwargs):
+            def _add_asset_factory(
+                self: Datasource, name: str, **kwargs
+            ) -> pydantic.BaseModel:
                 asset = asset_type(name=name, **kwargs)
                 return self.add_asset(asset)
 
