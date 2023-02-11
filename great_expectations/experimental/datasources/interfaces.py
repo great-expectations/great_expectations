@@ -328,6 +328,14 @@ class Datasource(
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
 
+    def add_asset(self, *, type: str, name: str, **kwargs) -> _DataAssetT:
+        asset_type: Type[_DataAssetT] = _SourceFactories.type_lookup[type]
+        assert issubclass(
+            asset_type, DataAsset
+        ), f"{type} maps to {asset_type.__name__} which is not a {DataAsset.__name__}"
+        asset = asset_type(type=type, name=name, **kwargs)
+        return self._add_asset(asset)
+
     @pydantic.validator("assets", each_item=True)
     @classmethod
     def _load_asset_subtype(

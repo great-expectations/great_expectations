@@ -170,35 +170,6 @@ class _SourceFactories:
                     f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",
                 ) from bad_field_exc
 
-            cls._bind_asset_factory_method_if_not_present(ds_type, t, asset_type_name)
-
-    @classmethod
-    def _bind_asset_factory_method_if_not_present(
-        cls,
-        ds_type: Type[Datasource],
-        asset_type: Type[DataAsset],
-        asset_type_name: str,
-    ):
-        asset_factory_method_name = f"add_{asset_type_name}_asset"
-        asset_factory_defined: bool = asset_factory_method_name in ds_type.__dict__
-
-        if not asset_factory_defined:
-            logger.debug(
-                f"No `{asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."
-            )
-
-            def _add_asset_factory(
-                self: Datasource, name: str, **kwargs
-            ) -> pydantic.BaseModel:
-                asset = asset_type(name=name, **kwargs)
-                return self._add_asset(asset)
-
-            setattr(ds_type, asset_factory_method_name, _add_asset_factory)
-        else:
-            logger.debug(
-                f"`{asset_factory_method_name}()` already defined `{ds_type.__name__}`"
-            )
-
     @property
     def factories(self) -> List[str]:
         return list(self.__source_factories.keys())

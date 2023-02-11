@@ -164,25 +164,31 @@ class TestDynamicPandasAssets:
     def test_add_asset_method_exists_and_is_functional(
         self, asset_class: Type[_FilesystemDataAsset]
     ):
+        ds = PandasFilesystemDatasource(
+            name="ds_for_testing_add_asset_methods",
+            base_directory=pathlib.Path.cwd(),
+        )
+
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
         print(f"{method_name}() -> {asset_class.__name__}")
 
-        assert method_name in PandasFilesystemDatasource.__dict__
-
-        ds = PandasFilesystemDatasource(
-            name="ds_for_testing_add_asset_methods",
-            base_directory=pathlib.Path.cwd(),
-        )
-        method = getattr(ds, method_name)
+        defined_add_asset_method = getattr(ds, method_name, None)
 
         with pytest.raises(pydantic.ValidationError) as exc_info:
-            method(
-                f"{asset_class.__name__}_add_asset_test",
-                regex="great_expectations",
-                _invalid_key="foobar",
-            )
+            kwargs = {
+                "name": f"{asset_class.__name__}_add_asset_test",
+                "regex": "great_expectations",
+                "_invalid_key": "foobar",
+            }
+
+            # if a specific add_asset method has been defined for the asset type, use it
+            if defined_add_asset_method:
+                defined_add_asset_method(**kwargs)
+            # otherwise use the general `add_asset()`
+            else:
+                ds.add_asset(type=type_name, **kwargs)
         # importantly check that the method creates (or attempts to create) the intended asset
         assert exc_info.value.model == asset_class
 
