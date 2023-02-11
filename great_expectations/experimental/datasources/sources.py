@@ -1,11 +1,23 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable, ClassVar, Dict, List, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    List,
+    NamedTuple,
+    Type,
+    Union,
+)
 
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
+    import pydantic
+
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.experimental.context import DataContext
     from great_expectations.experimental.datasources.interfaces import (
@@ -20,6 +32,21 @@ logger = logging.getLogger(__name__)
 
 class TypeRegistrationError(TypeError):
     pass
+
+
+class _FieldDetails(NamedTuple):
+    default_value: Any
+    type_annotation: Type
+
+
+def _get_field_details(
+    model: Type[pydantic.BaseModel], field_name: str
+) -> _FieldDetails:
+    """Get the default value of the requested field and its type annotation."""
+    return _FieldDetails(
+        default_value=model.__fields__[field_name].default,
+        type_annotation=model.__fields__[field_name].type_,
+    )
 
 
 class _SourceFactories:
@@ -65,7 +92,7 @@ class _SourceFactories:
         """
 
         # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
-        ds_type_name = ds_type.__fields__["type"].default
+        ds_type_name = _get_field_details(ds_type, "type").default_value
         if not ds_type_name:
             raise TypeRegistrationError(
                 f"`{ds_type.__name__}` is missing a `type` attribute with an assigned string value"
@@ -129,7 +156,7 @@ class _SourceFactories:
                 )
                 continue
             try:
-                asset_type_name = t.__fields__["type"].default
+                asset_type_name = _get_field_details(t, "type").default_value
                 if asset_type_name is None:
                     raise TypeError(
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"

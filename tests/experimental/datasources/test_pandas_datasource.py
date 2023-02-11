@@ -21,6 +21,7 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     PandasFilesystemDatasource,
     _FilesystemDataAsset,
 )
+from great_expectations.experimental.datasources.sources import _get_field_details
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -163,7 +164,8 @@ class TestDynamicPandasAssets:
     def test_add_asset_method_exists_and_is_functional(
         self, asset_class: Type[_FilesystemDataAsset]
     ):
-        method_name: str = f"add_{asset_class._get_type_field_value()}_asset"
+        type_name: str = _get_field_details(asset_class, "type").default_value
+        method_name: str = f"add_{type_name}_asset"
 
         print(f"{method_name}() -> {asset_class.__name__}")
 
