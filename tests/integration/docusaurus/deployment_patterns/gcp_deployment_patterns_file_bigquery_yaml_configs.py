@@ -266,10 +266,8 @@ batch_request = RuntimeBatchRequest(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py create_expectation_suite">
-context.add_expectation_suite(
-    expectation_suite_name="test_bigquery_suite", overwrite_existing=True
-)
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_or_update_expectation_suite">
+context.add_or_update_expectation_suite(expectation_suite_name="test_bigquery_suite")
 
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_bigquery_suite"

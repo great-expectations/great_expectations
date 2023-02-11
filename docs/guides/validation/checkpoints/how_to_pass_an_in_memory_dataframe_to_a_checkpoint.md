@@ -76,7 +76,7 @@ You will need an <TechnicalTag tag="expectation_suite" text="Expectation Suite" 
 
 For the purposes of this guide, we have created an empty suite named `my_expectation_suite` by running:
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py create_expectation_suite"
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py add_expectation_suite"
 ```
 
 We will now walk through two examples for configuring a `Checkpoint` and passing it an in-memory DataFrame at runtime.
