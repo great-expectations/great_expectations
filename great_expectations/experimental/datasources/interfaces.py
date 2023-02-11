@@ -329,10 +329,18 @@ class Datasource(
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
 
     def add_asset(self, *, type: str, name: str, **kwargs) -> _DataAssetT:
+        """Generic method for adding any asset type to the current Datasource.
+
+        Only accepts keyword arguments.
+        """
         asset_type: Type[_DataAssetT] = _SourceFactories.type_lookup[type]
         assert issubclass(
             asset_type, DataAsset
         ), f"{type} maps to {asset_type.__name__} which is not a {DataAsset.__name__}"
+        assert (
+            asset_type in self.asset_types
+        ), f"{asset_type.__name__} is not a valid asset for {self.__class__.__name__}"
+
         asset = asset_type(type=type, name=name, **kwargs)
         return self._add_asset(asset)
 
