@@ -369,14 +369,14 @@ def _generate_pandas_data_asset_models(
     data_asset_models: Dict[str, M] = {}
     for signature_tuple in io_method_sigs:
 
+        # skip the first parameter as this corresponds to the path/buffer/io field
+        # paths to specific files are provided by the batch building logic
+        fields = _to_pydantic_fields(signature_tuple, skip_first_param=True)
+
         type_name = signature_tuple.name.split("read_")[1]
         model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
             type_name, f"{type_name.capitalize()}Asset"
         )
-
-        # skip the first parameter as this corresponds to the path/buffer/io field
-        # paths to specific files are provided by the batch building logic
-        fields = _to_pydantic_fields(signature_tuple, skip_first_param=True)
 
         try:
             asset_model = _create_pandas_asset_model(
