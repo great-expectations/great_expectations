@@ -27,9 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "sql": {
-            "title": "Sql"
-        },
         "con": {
             "title": "Con"
         },
@@ -59,7 +56,6 @@
     "required": [
         "name",
         "regex",
-        "sql",
         "con"
     ],
     "additionalProperties": false,

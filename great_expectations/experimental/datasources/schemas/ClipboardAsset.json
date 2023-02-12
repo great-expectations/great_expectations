@@ -27,18 +27,15 @@
             "type": "string",
             "format": "regex"
         },
-        "sep": {
-            "title": "Sep",
-            "default": "\\s+"
-        },
         "kwargs": {
-            "title": "Kwargs"
+            "title": "Kwargs",
+            "description": "Extra keyword arguments that will be passed to the reader method",
+            "type": "object"
         }
     },
     "required": [
         "name",
-        "regex",
-        "kwargs"
+        "regex"
     ],
     "additionalProperties": false,
     "definitions": {
