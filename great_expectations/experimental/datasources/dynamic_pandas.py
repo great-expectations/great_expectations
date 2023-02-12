@@ -285,7 +285,7 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
 
 
 def _to_pydantic_fields(
-    sig_tuple: _SignatureTuple,
+    sig_tuple: _SignatureTuple, skip_first_param: bool
 ) -> Dict[str, _FieldSpec]:
     """
     Extract the parameter details in a structure that can be easily unpacked to
@@ -295,8 +295,9 @@ def _to_pydantic_fields(
     all_parameters: Iterator[tuple[str, inspect.Parameter]] = iter(
         sig_tuple.signature.parameters.items()
     )
-    # skip the first parameter as this corresponds to the path/buffer/io field
-    next(all_parameters)
+    if skip_first_param:
+        # skip the first parameter as this corresponds to the path/buffer/io field
+        next(all_parameters)
 
     for param_name, param in all_parameters:
         no_annotation: bool = param.annotation is inspect._empty
@@ -368,7 +369,9 @@ def _generate_pandas_data_asset_models(
     data_asset_models: Dict[str, M] = {}
     for signature_tuple in io_method_sigs:
 
-        fields = _to_pydantic_fields(signature_tuple)
+        # TODO: when/if we want to support non filebased dataframes like clipboard, sql_table
+        # etc. we may need to add a different conditional here.
+        fields = _to_pydantic_fields(signature_tuple, skip_first_param=True)
 
         type_name = signature_tuple.name.split("read_")[1]
         model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
