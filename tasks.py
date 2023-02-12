@@ -497,8 +497,8 @@ def type_schema(
     import pandas
 
     from great_expectations.experimental.datasources import _PANDAS_SCHEMA_VERSION
-    from great_expectations.experimental.datasources.interfaces import Datasource
     from great_expectations.experimental.datasources.pandas_datasource import (
+        _PandasDatasource,
         PandasFilesystemDatasource,
     )
     from great_expectations.experimental.datasources.sources import _SourceFactories
@@ -524,10 +524,14 @@ def type_schema(
         for name in _SourceFactories.type_lookup.type_names():
             model = _SourceFactories.type_lookup[name]
 
-            # TODO: use more robust subclass checks
             if (
-                model
-                in {*PandasFilesystemDatasource.asset_types, PandasFilesystemDatasource}
+                issubclass(
+                    model,
+                    (
+                        _PandasDatasource,
+                        *PandasFilesystemDatasource.asset_types,
+                    ),
+                )
                 and _PANDAS_SCHEMA_VERSION != pandas.__version__
             ):
                 print(
