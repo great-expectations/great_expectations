@@ -548,7 +548,7 @@ def type_schema(
                         continue
 
                 schema_path.write_text(json_str)
-                print(f"✅  {name} - {schema_path.name} schema updated")
+                print(f"🔃  {name} - {schema_path.name} schema updated")
             except TypeError as err:
                 print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
 
