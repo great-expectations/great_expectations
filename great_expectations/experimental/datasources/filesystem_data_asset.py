@@ -63,15 +63,3 @@ class _FilesystemDataAsset(_FilePathDataAsset):
             glob_directive=self.glob_directive,
         )
         return data_connector
-
-    def _get_reader_method(self) -> str:
-        raise NotImplementedError(
-            """One needs to explicitly provide "reader_method" for Filesystem DataAsset extensions as temporary \
-work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
-        )
-
-    def _get_reader_options_include(self) -> Set[str] | None:
-        raise NotImplementedError(
-            """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
-to use as its "include" directive for Filesystem style DataAsset processing."""
-        )
