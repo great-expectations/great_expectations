@@ -362,7 +362,6 @@ def _generate_pandas_data_asset_models(
     base_model_class: M,
     blacklist: Optional[Sequence[str]] = None,
     use_docstring_from_method: bool = False,
-    non_filebased_asset_types: Sequence[str] = tuple(),
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(blacklist)
     io_method_sigs = _extract_io_signatures(io_methods)
@@ -375,12 +374,9 @@ def _generate_pandas_data_asset_models(
             type_name, f"{type_name.capitalize()}Asset"
         )
 
-        if type_name in non_filebased_asset_types:
-            fields = _to_pydantic_fields(signature_tuple, skip_first_param=False)
-        else:
-            # skip the first parameter as this corresponds to the path/buffer/io field
-            # paths to specific files are provided by the batch building logic
-            fields = _to_pydantic_fields(signature_tuple, skip_first_param=True)
+        # skip the first parameter as this corresponds to the path/buffer/io field
+        # paths to specific files are provided by the batch building logic
+        fields = _to_pydantic_fields(signature_tuple, skip_first_param=True)
 
         try:
             asset_model = _create_pandas_asset_model(
