@@ -553,6 +553,7 @@ def type_schema(
                 print(f"🔃  {name} - {schema_path.name} schema updated")
             except TypeError as err:
                 print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
+        raise invoke.Exit(code=0)
 
     text: str = buffer.getvalue()
     if save_path:
