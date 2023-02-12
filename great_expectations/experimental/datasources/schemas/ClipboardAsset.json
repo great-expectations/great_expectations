@@ -27,6 +27,10 @@
             "type": "string",
             "format": "regex"
         },
+        "sep": {
+            "title": "Sep",
+            "default": "\\s+"
+        },
         "kwargs": {
             "title": "Kwargs",
             "description": "Extra keyword arguments that will be passed to the reader method",

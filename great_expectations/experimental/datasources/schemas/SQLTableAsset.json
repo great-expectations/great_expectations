@@ -27,6 +27,10 @@
             "type": "string",
             "format": "regex"
         },
+        "table_name": {
+            "title": "Table Name",
+            "type": "string"
+        },
         "con": {
             "title": "Con"
         },
@@ -68,6 +72,7 @@
     "required": [
         "name",
         "regex",
+        "table_name",
         "con"
     ],
     "additionalProperties": false,

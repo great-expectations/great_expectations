@@ -57,6 +57,7 @@ _ASSET_MODELS = _generate_pandas_data_asset_models(
     _FilesystemDataAsset,
     blacklist=_BLACK_LIST,
     use_docstring_from_method=True,
+    non_filebased_asset_types=("clipboard", "gbq", "sql_query", "sql_table"),
 )
 try:
     # variables only needed for type-hinting

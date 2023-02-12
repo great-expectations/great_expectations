@@ -27,6 +27,10 @@
             "type": "string",
             "format": "regex"
         },
+        "query": {
+            "title": "Query",
+            "type": "string"
+        },
         "project_id": {
             "title": "Project Id",
             "type": "string"
@@ -82,7 +86,8 @@
     },
     "required": [
         "name",
-        "regex"
+        "regex",
+        "query"
     ],
     "additionalProperties": false,
     "definitions": {
