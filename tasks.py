@@ -524,6 +524,7 @@ def type_schema(
         for name in _SourceFactories.type_lookup.type_names():
             model = _SourceFactories.type_lookup[name]
 
+            # TODO: use more robust subclass checks
             if (
                 model
                 in {*PandasFilesystemDatasource.asset_types, PandasFilesystemDatasource}
