@@ -37,13 +37,13 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Generic,
     List,
     Mapping,
     Optional,
     Set,
     SupportsFloat,
     Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -406,7 +406,7 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name: str, module_name: str) -> Type[T]:
+def load_class(class_name: str, module_name: str) -> Generic[T]:
     if class_name is None:
         raise TypeError("class_name must not be None")
 
