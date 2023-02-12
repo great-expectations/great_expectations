@@ -5,6 +5,7 @@ import pathlib
 import re
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
+import pydantic
 from typing_extensions import Literal
 
 from great_expectations.experimental.datasources.dynamic_pandas import (
@@ -79,6 +80,7 @@ class _PandasDatasource(Datasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_ASSET_MODELS.values())
 
     # instance attributes
+    type: str = pydantic.Field("_pandas")
     assets: Dict[
         str,
         _FilesystemDataAsset,

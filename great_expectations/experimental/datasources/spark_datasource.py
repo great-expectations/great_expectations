@@ -5,6 +5,7 @@ import pathlib
 import re
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
+import pydantic
 from typing_extensions import Literal
 
 from great_expectations.experimental.datasources.filesystem_data_asset import (
@@ -48,6 +49,7 @@ class _SparkDatasource(Datasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVSparkAsset]
 
     # instance attributes
+    type: str = pydantic.Field("_spark")
     assets: Dict[
         str,
         CSVSparkAsset,
