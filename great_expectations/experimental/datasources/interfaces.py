@@ -328,6 +328,7 @@ class Datasource(
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
 
+    # keyword only arguments to prevent passing wrong positional arguments
     def add_asset(self, *, type: str, name: str, **kwargs) -> _DataAssetT:
         """Generic method for adding any asset type to the current Datasource.
 
