@@ -4,7 +4,6 @@ import enum
 import functools
 import inspect
 import logging
-import pathlib
 import re
 import warnings
 from collections import defaultdict
@@ -138,10 +137,6 @@ def _replace_builtins(input_: str | type) -> str | type:
 
 
 FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
-    # CSVAsset
-    "filepath_or_buffer": {"_base_directory": _FieldSpec(pathlib.Path, ...)},
-    # JSONAsset
-    "path_or_buf": {"_base_directory": _FieldSpec(pathlib.Path, ...)},
     # SQLTable
     "schema": {
         "schema_name": _FieldSpec(
@@ -155,11 +150,19 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
         )
     },
     # misc
-    "filepath": {"_base_directory": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
     "skiprows": {"skiprows": _FieldSpec(Union[Sequence[int], int, None], None)},  # type: ignore[arg-type]
+    "kwargs": {
+        "kwargs": _FieldSpec(
+            Optional[dict],  # type: ignore[arg-type]
+            Field(
+                None,
+                description="Extra keyword arguments that will be passed to the reader method",
+            ),
+        )
+    },
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
@@ -288,7 +291,10 @@ def _to_pydantic_fields(
     `pydantic.create_model()` as field arguments
     """
     fields_dict: Dict[str, _FieldSpec] = {}
-    for param_name, param in sig_tuple.signature.parameters.items():
+    for i, (param_name, param) in enumerate(sig_tuple.signature.parameters.items()):
+        # skip the first parameter as this corresponds to the path/buffer/io field
+        if i < 1:
+            continue
 
         no_annotation: bool = param.annotation is inspect._empty
         if no_annotation:
