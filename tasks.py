@@ -535,7 +535,8 @@ def type_schema(
                 and _PANDAS_SCHEMA_VERSION != pandas.__version__
             ):
                 print(
-                    f"🙈  {name} - was generated with pandas {_PANDAS_SCHEMA_VERSION}; skipping"
+                    f"🙈  {name} - was generated with pandas"
+                    f" {_PANDAS_SCHEMA_VERSION} but you have {pandas.__version__}; skipping"
                 )
                 continue
 
