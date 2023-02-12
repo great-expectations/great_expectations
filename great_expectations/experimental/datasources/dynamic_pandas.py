@@ -14,6 +14,7 @@ from typing import (
     Dict,
     Hashable,
     Iterable,
+    Iterator,
     List,
     NamedTuple,
     Optional,
@@ -291,11 +292,13 @@ def _to_pydantic_fields(
     `pydantic.create_model()` as field arguments
     """
     fields_dict: Dict[str, _FieldSpec] = {}
-    for i, (param_name, param) in enumerate(sig_tuple.signature.parameters.items()):
-        # skip the first parameter as this corresponds to the path/buffer/io field
-        if i < 1:
-            continue
+    all_parameters: Iterator[tuple[str, inspect.Parameter]] = iter(
+        sig_tuple.signature.parameters.items()
+    )
+    # skip the first parameter as this corresponds to the path/buffer/io field
+    next(all_parameters)
 
+    for param_name, param in all_parameters:
         no_annotation: bool = param.annotation is inspect._empty
         if no_annotation:
             logger.debug(f"`{param_name}` has no type annotation")
