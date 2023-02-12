@@ -13,7 +13,7 @@ from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
-from great_expectations.util import deep_filter_properties_iterable
+from great_expectations.util import deep_filter_properties_iterable, load_class
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -43,11 +43,11 @@ except ImportError:
     )
 
 
-def get_x_batch_request_class() -> Type[XBatchRequest]:
+def _get_x_batch_request_class() -> Type[XBatchRequest]:
     """Using this function helps work around circular import dependncies."""
-    import great_expectations.experimental.datasources.interfaces as experimental_interfaces
-
-    return experimental_interfaces.BatchRequest
+    module_name = "great_expectations.experimental.datasources.interfaces"
+    class_name = "BatchRequest"
+    return load_class(class_name=class_name, module_name=module_name)
 
 
 @public_api
@@ -868,7 +868,7 @@ def materialize_batch_request(
 
     batch_request_class: type
     if "options" in effective_batch_request:
-        batch_request_class = get_x_batch_request_class()
+        batch_request_class = _get_x_batch_request_class()
     elif batch_request_contains_runtime_parameters(
         batch_request=effective_batch_request
     ):
@@ -907,7 +907,7 @@ def get_batch_request_as_dict(
     if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
         batch_request = batch_request.to_dict()
 
-    if isinstance(batch_request, get_x_batch_request_class()):
+    if isinstance(batch_request, _get_x_batch_request_class()):
         batch_request = dataclasses.asdict(batch_request)
 
     return batch_request
@@ -974,7 +974,7 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     if batch_request:
         if not isinstance(
             batch_request,
-            (BatchRequest, RuntimeBatchRequest, get_x_batch_request_class()),
+            (BatchRequest, RuntimeBatchRequest, _get_x_batch_request_class()),
         ):
             raise TypeError(
                 "batch_request must be a BatchRequest, RuntimeBatchRequest, or a "

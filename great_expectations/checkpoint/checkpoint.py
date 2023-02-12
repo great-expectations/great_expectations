@@ -55,6 +55,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
+    load_class,
 )
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
@@ -69,11 +70,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def get_validator_class() -> Type[Validator]:
+def _get_validator_class() -> Type[Validator]:
     """Using this function helps work around circular import dependncies."""
-    import great_expectations.validator.validator as validator
-
-    return validator.Validator
+    module_name = "great_expectations.validator.validator"
+    class_name = "Validator"
+    return load_class(class_name=class_name, module_name=module_name)
 
 
 class BaseCheckpoint(ConfigPeer):
@@ -1081,7 +1082,7 @@ class LegacyCheckpoint(Checkpoint):
             )
 
         for batch in assets_to_validate:
-            if not isinstance(batch, (tuple, DataAsset, get_validator_class())):
+            if not isinstance(batch, (tuple, DataAsset, _get_validator_class())):
                 raise gx_exceptions.DataContextError(
                     "Batches are required to be of type DataAsset or Validator"
                 )

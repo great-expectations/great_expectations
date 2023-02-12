@@ -43,6 +43,8 @@ from typing import (
     Set,
     SupportsFloat,
     Tuple,
+    Type,
+    TypeVar,
     Union,
     cast,
     overload,
@@ -102,6 +104,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.types.base import DataContextConfig
 
+
+T = TypeVar("T")
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
 p2 = re.compile(r"([a-z0-9])([A-Z])")
@@ -402,15 +406,19 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name: str, module_name: str):
+def load_class(class_name: str, module_name: str) -> Type[T]:
     if class_name is None:
         raise TypeError("class_name must not be None")
+
     if not isinstance(class_name, str):
         raise TypeError("class_name must be a string")
+
     if module_name is None:
         raise TypeError("module_name must not be None")
+
     if not isinstance(module_name, str):
         raise TypeError("module_name must be a string")
+
     try:
         verify_dynamic_loading_support(module_name=module_name)
     except FileNotFoundError:
@@ -420,6 +428,7 @@ def load_class(class_name: str, module_name: str):
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
+
     try:
         klass_ = getattr(module_obj, class_name)
     except AttributeError:
