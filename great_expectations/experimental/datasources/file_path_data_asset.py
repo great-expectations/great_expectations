@@ -34,6 +34,7 @@ class _FilePathDataAsset(DataAsset):
         "regex",
         "order_by",
         "type",
+        "kwargs",  # kwargs need to be unpacked and passed separately
     }
 
     # General file-path DataAsset pertaining attributes.
