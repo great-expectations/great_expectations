@@ -538,10 +538,6 @@ def type_schema(
                 schema_path = schema_dir.joinpath(f"{model.__name__}.json")
                 json_str: str = model.schema_json(indent=indent) + "\n"
 
-                if issubclass(model, Datasource):
-                    print(f"🙈  {name} - is a Datasource; skipping")
-                    continue
-
                 if schema_path.exists():
                     if json_str == schema_path.read_text():
                         print(f"✅  {name} - {schema_path.name} unchanged")
