@@ -101,57 +101,57 @@ def test_cli_athena_datasource_new_connection_string(
     for credential in credentials:
         assert credential in credentials_cell
 
-    # region_test = "sa-east-1"
-    # connection_string = f"awsathena+rest://@athena.{region_test}.amazonaws.com/bi?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
+    region_test = "sa-east-1"
+    connection_string = f"awsathena+rest://@athena.{region_test}.amazonaws.com/bi?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
 
-    # nb["cells"][5]["source"] = credentials_cell.replace("YOUR_REGION", region_test)
+    nb["cells"][5]["source"] = credentials_cell.replace("YOUR_REGION", region_test)
 
-    # credentials_cell = nb["cells"][5]["source"]
-    # nb["cells"][5]["source"] = credentials_cell.replace("YOUR_SCHEMA", "bi")
+    credentials_cell = nb["cells"][5]["source"]
+    nb["cells"][5]["source"] = credentials_cell.replace("YOUR_SCHEMA", "bi")
 
-    # ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
-    # ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
+    ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
+    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
 
-    # del context
-    # context = get_context(context_root_dir=root_dir)
+    del context
+    context = get_context(context_root_dir=root_dir)
 
-    # assert context.list_datasources() == [
-    #     {
-    #         "module_name": "great_expectations.datasource",
-    #         "execution_engine": {
-    #             "module_name": "great_expectations.execution_engine",
-    #             "connection_string": connection_string,
-    #             "class_name": "SqlAlchemyExecutionEngine",
-    #         },
-    #         "class_name": "Datasource",
-    #         "data_connectors": {
-    #             "default_runtime_data_connector_name": {
-    #                 "batch_identifiers": ["default_identifier_name"],
-    #                 "class_name": "RuntimeDataConnector",
-    #                 "module_name": "great_expectations.datasource.data_connector",
-    #             },
-    #             "default_inferred_data_connector_name": {
-    #                 "class_name": "InferredAssetSqlDataConnector",
-    #                 "module_name": "great_expectations.datasource.data_connector",
-    #                 "include_schema_name": True,
-    #                 "introspection_directives": {
-    #                     "schema_name": "YOUR_SCHEMA",
-    #                 },
-    #             },
-    #             "default_configured_data_connector_name": {
-    #                 "assets": {
-    #                     "YOUR_TABLE_NAME": {
-    #                         "class_name": "Asset",
-    #                         "module_name": "great_expectations.datasource.data_connector.asset",
-    #                         "schema_name": "YOUR_SCHEMA",
-    #                     },
-    #                 },
-    #                 "class_name": "ConfiguredAssetSqlDataConnector",
-    #                 "module_name": "great_expectations.datasource.data_connector",
-    #             },
-    #         },
-    #         "name": "my_datasource",
-    #     }
-    # ]
+    assert context.list_datasources() == [
+        {
+            "module_name": "great_expectations.datasource",
+            "execution_engine": {
+                "module_name": "great_expectations.execution_engine",
+                "connection_string": connection_string,
+                "class_name": "SqlAlchemyExecutionEngine",
+            },
+            "class_name": "Datasource",
+            "data_connectors": {
+                "default_runtime_data_connector_name": {
+                    "batch_identifiers": ["default_identifier_name"],
+                    "class_name": "RuntimeDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                },
+                "default_inferred_data_connector_name": {
+                    "class_name": "InferredAssetSqlDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                    "include_schema_name": True,
+                    "introspection_directives": {
+                        "schema_name": "YOUR_SCHEMA",
+                    },
+                },
+                "default_configured_data_connector_name": {
+                    "assets": {
+                        "YOUR_TABLE_NAME": {
+                            "class_name": "Asset",
+                            "module_name": "great_expectations.datasource.data_connector.asset",
+                            "schema_name": "YOUR_SCHEMA",
+                        },
+                    },
+                    "class_name": "ConfiguredAssetSqlDataConnector",
+                    "module_name": "great_expectations.datasource.data_connector",
+                },
+            },
+            "name": "my_datasource",
+        }
+    ]
 
-    # assert_no_logging_messages_or_tracebacks(caplog, result)
+    assert_no_logging_messages_or_tracebacks(caplog, result)
