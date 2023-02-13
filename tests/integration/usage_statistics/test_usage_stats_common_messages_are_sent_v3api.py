@@ -136,7 +136,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     expected_events.append("data_context.get_batch_list")
     validator.expect_table_row_count_to_equal(value=2)
     validator.save_expectation_suite()
-    expected_events.append("data_context.save_expectation_suite")
+    expected_events.append("data_context.save_or_update_expectation_suite")
 
     checkpoint_yaml = """
     name: my_checkpoint
