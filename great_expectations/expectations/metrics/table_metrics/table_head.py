@@ -189,6 +189,7 @@ class TableHead(TableMetricProvider):
                 # if n_rows is zero, the last chunk is the entire dataframe,
                 # so we truncate it to preserve the header
                 df = df_last_chunk.head(0)
+
         return df
 
     @metric_value(engine=SparkDFExecutionEngine)
@@ -199,11 +200,11 @@ class TableHead(TableMetricProvider):
         metric_value_kwargs: dict,
         metrics: dict[str, Any],
         runtime_configuration: dict,
-    ) -> list[pyspark_sql_Row] | pyspark_sql_Row:
+    ) -> pd.DataFrame:
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        rows: list[pyspark_sql_Row] | pyspark_sql_Row
+        rows: list[pyspark_sql_Row] | pyspark_sql_Row | list[dict]
         if metric_value_kwargs["fetch_all"]:
             rows = df.collect()
         else:
@@ -216,4 +217,8 @@ class TableHead(TableMetricProvider):
                 rows = df.head(n=n_rows)
             else:
                 rows = df.head(n=df.count() + n_rows)
-        return rows
+
+        rows = [element.asDict() for element in rows]
+        df = pd.DataFrame(data=rows)
+
+        return df

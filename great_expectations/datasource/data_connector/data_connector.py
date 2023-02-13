@@ -2,6 +2,8 @@ import logging
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple
 
+import pandas as pd
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
@@ -381,7 +383,7 @@ class DataConnector:
         # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
         # resolve metrics.
         validator = Validator(execution_engine=batch_data.execution_engine)
-        data: Any = validator.get_metric(
+        df: pd.DataFrame = validator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.head",
                 metric_domain_kwargs={
@@ -401,9 +403,9 @@ class DataConnector:
             )
         )
 
-        if pretty_print and data is not None:
+        if pretty_print and df is not None:
             print("\n\t\tShowing 5 rows")
-            print(data)
+            print(df)
 
         return {
             "batch_spec": batch_spec,

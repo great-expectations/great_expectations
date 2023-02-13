@@ -529,24 +529,7 @@ class Batch(ExperimentalBaseModel):
             metric_domain_kwargs={"batch_id": self.id},
             metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
         )
-        table_head_metric_value: pd.DataFrame | list[
-            pyspark_sql_Row
-        ] | pyspark_sql_Row = self.data.execution_engine.resolve_metrics(
+        table_head_df: pd.DataFrame = self.data.execution_engine.resolve_metrics(
             metrics_to_resolve=(metric,)
-        )[
-            metric.id
-        ]
-        table_head_df: pd.DataFrame
-        if isinstance(table_head_metric_value, pd.DataFrame):
-            # table_head_metric_value is a pd.DataFrame already
-            table_head_df = table_head_metric_value
-        elif isinstance(table_head_metric_value, list):
-            # convert list of pyspark.sql.Row to pd.DataFrame
-            table_head_df = pd.DataFrame(
-                [row.asDict() for row in table_head_metric_value]
-            )
-        else:
-            # otherwise convert pyspark.sql.Row to pd.DataFrame
-            table_head_df = pd.DataFrame(table_head_metric_value.asDict())
-
+        )[metric.id]
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))
