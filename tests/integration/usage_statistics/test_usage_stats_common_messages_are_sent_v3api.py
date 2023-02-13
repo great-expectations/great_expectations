@@ -129,9 +129,7 @@ def test_common_usage_stats_are_sent_no_mocking(
         batch_identifiers={"default_identifier_name": "default_identifier"},
     )
 
-    context.add_expectation_suite(
-        expectation_suite_name="test_suite", overwrite_existing=True
-    )
+    context.add_expectation_suite(expectation_suite_name="test_suite")
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )
