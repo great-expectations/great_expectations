@@ -222,7 +222,8 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
     @pydantic.validator("order_by", pre=True)
     def parse_order_by_sorters(
         cls, order_by: Optional[List[Union[BatchSorter, str]]]
-    ) -> List[Union[BatchSorter, dict]]:
+    ) -> List[BatchSorter]:
+        order_by_sorters: list[BatchSorter] = []
         if order_by:
             for idx, sorter in enumerate(order_by):
                 if isinstance(sorter, str):
@@ -230,8 +231,10 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
                         raise ValueError(
                             '"order_by" list cannot contain an empty string'
                         )
-                    order_by[idx] = _batch_sorter_from_str(sorter)
-        return order_by
+                    order_by_sorters.append(_batch_sorter_from_str(sorter))
+                else:
+                    order_by_sorters.append(sorter)
+        return order_by_sorters
 
     def add_sorters(self: _DataAssetT, sorters: BatchSortersDefinition) -> _DataAssetT:
         """Associates a sorter to this DataAsset
