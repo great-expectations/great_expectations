@@ -82,6 +82,11 @@
                     "type": "string",
                     "format": "regex"
                 },
+                "glob_directive": {
+                    "title": "Glob Directive",
+                    "default": "**/*",
+                    "type": "string"
+                },
                 "header": {
                     "title": "Header",
                     "default": false,

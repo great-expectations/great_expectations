@@ -77,6 +77,11 @@
                     "title": "Regex",
                     "type": "string",
                     "format": "regex"
+                },
+                "glob_directive": {
+                    "title": "Glob Directive",
+                    "default": "**/*",
+                    "type": "string"
                 }
             },
             "required": [
