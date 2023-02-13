@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import warnings
 from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 import requests
@@ -466,6 +467,12 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             A new (empty) expectation suite.
         """
+        # deprecated-v0.15.48
+        warnings.warn(
+            "create_expectation_suite is deprecated as of v0.15.49 and will be removed in v0.18. "
+            "Please use add_expectation_suite or add_or_update_expectation_suite instead.",
+            DeprecationWarning,
+        )
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
