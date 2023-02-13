@@ -13,37 +13,7 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
 )
 
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.util import is_library_loadable
-# TODO: <Alex>ALEX</Alex>
-from tests.conftest import build_test_backends_list_v2_api
-
 logger = logging.getLogger(__name__)
-
-
-# TODO: <Alex>ALEX</Alex>
-def pytest_generate_tests(metafunc):
-    test_backends = build_test_backends_list_v2_api(metafunc)
-    if "test_backend" in metafunc.fixturenames:
-        metafunc.parametrize("test_backend", test_backends, scope="module")
-    if "test_backends" in metafunc.fixturenames:
-        metafunc.parametrize("test_backends", [test_backends], scope="module")
-
-
-# TODO: <Alex>ALEX</Alex>
-# TODO: <Alex>ALEX</Alex>
-# def get_test_backends(metafunc):
-#     return build_test_backends_list_v2_api(metafunc)
-# TODO: <Alex>ALEX</Alex>
-
-
-# TODO: <Alex>ALEX</Alex>
-# @pytest.fixture
-def test_backends_provider(test_backends):
-    return test_backends
-
-
-# TODO: <Alex>ALEX</Alex>
 
 
 def pandas_data(
@@ -196,44 +166,15 @@ def multibatch_spark_data(
     params=[
         pandas_data,
         sql_data,
-        # TODO: <Alex>ALEX</Alex>
-        # pytest.param(
-        #     spark_data,
-        #     # TODO: <Alex>ALEX</Alex>
-        #     # marks=pytest.mark.skipif(
-        #     #     not is_library_loadable(library_name="pyspark"),
-        #     #     reason="pyspark must be installed",
-        #     # ),
-        #     # TODO: <Alex>ALEX</Alex>
-        #     # TODO: <Alex>ALEX</Alex>
-        #     marks=pytest.mark.skipif(
-        #         "SparkDFDataset" not in get_test_backends(metafunc),
-        #         reason="pyspark must be installed",
-        #     ),
-        #     # TODO: <Alex>ALEX</Alex>
-        # ),
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         spark_data,
-        # TODO: <Alex>ALEX</Alex>
     ]
 )
 def datasource_test_data(
-    empty_data_context, request
+    test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    # print(f'\n[ALEX_TEST] [INTEGREATION_TESTS::CONFTEST.PY::DATASOURCE_TEST_DATA()] EMPTY_DATA_CONTEXT:\n{empty_data_context} ; TYPE: {str(type(empty_data_context))}')
-    print(
-        f"\n[ALEX_TEST] [INTEGREATION_TESTS::CONFTEST.PY::DATASOURCE_TEST_DATA()] REQUEST:\n{request} ; TYPE: {str(type(request))}"
-    )
-    print(
-        f"\n[ALEX_TEST] [INTEGREATION_TESTS::CONFTEST.PY::DATASOURCE_TEST_DATA()] REQUEST.PARAM:\n{request.param} ; TYPE: {str(type(request.param))}"
-    )
-    print(
-        f"\n[ALEX_TEST] [INTEGREATION_TESTS::CONFTEST.PY::DATASOURCE_TEST_DATA()] REQUEST.PARAM.__CLASS__.__NAME__:\n{request.param.__class__.__name__} ; TYPE: {str(type(request.param.__class__.__name__))}"
-    )
-    print(
-        f"\n[ALEX_TEST] [INTEGREATION_TESTS::CONFTEST.PY::DATASOURCE_TEST_DATA()] REQUEST.PARAM.__NAME__:\n{request.param.__name__} ; TYPE: {str(type(request.param.__name__))}"
-    )
+    if request.param.__name__ == "spark_data" and "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
     return request.param(empty_data_context)
 
 
@@ -241,29 +182,16 @@ def datasource_test_data(
     params=[
         multibatch_pandas_data,
         multibatch_sql_data,
-        # TODO: <Alex>ALEX</Alex>
-        # pytest.param(
-        #     multibatch_spark_data,
-        #     # TODO: <Alex>ALEX</Alex>
-        #     # marks=pytest.mark.skipif(
-        #     #     not is_library_loadable(library_name="pyspark"),
-        #     #     reason="pyspark must be installed",
-        #     # ),
-        #     # TODO: <Alex>ALEX</Alex>
-        #     # TODO: <Alex>ALEX</Alex>
-        #     marks=pytest.mark.skipif(
-        #         "SparkDFDataset" not in test_backends_provider(),
-        #         reason="pyspark must be installed",
-        #     ),
-        #     # TODO: <Alex>ALEX</Alex>
-        # ),
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         multibatch_spark_data,
-        # TODO: <Alex>ALEX</Alex>
     ]
 )
 def multibatch_datasource_test_data(
     empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
+    if (
+        request.param.__name__ == "multibatch_spark_data"
+        and "SparkDFDataset" not in test_backends
+    ):
+        pytest.skip("No spark backend selected.")
+
     return request.param(empty_data_context)

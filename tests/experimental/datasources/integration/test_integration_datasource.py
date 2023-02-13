@@ -54,28 +54,24 @@ def test_run_multibatch_data_assistant_and_checkpoint(multibatch_datasource_test
 @pytest.mark.parametrize(
     ["n_rows", "fetch_all", "success"],
     [
-        # TODO: <Alex>ALEX</Alex>
         (None, False, True),
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # (3, False, True),
-        # (7, False, True),
-        # (-100, False, True),
-        # ("invalid_value", False, False),
-        # (1.5, False, False),
-        # (True, False, False),
-        # (0, False, True),
-        # (200000, False, True),
-        # (1, False, True),
-        # (-50000, False, True),
-        # (-5, True, True),
-        # (0, True, True),
-        # (3, True, True),
-        # (50000, True, True),
-        # (-20000, True, True),
-        # (None, True, True),
-        # (15, "invalid_value", False),
-        # TODO: <Alex>ALEX</Alex>
+        (3, False, True),
+        (7, False, True),
+        (-100, False, True),
+        ("invalid_value", False, False),
+        (1.5, False, False),
+        (True, False, False),
+        (0, False, True),
+        (200000, False, True),
+        (1, False, True),
+        (-50000, False, True),
+        (-5, True, True),
+        (0, True, True),
+        (3, True, True),
+        (50000, True, True),
+        (-20000, True, True),
+        (None, True, True),
+        (15, "invalid_value", False),
     ],
 )
 def test_batch_head(
