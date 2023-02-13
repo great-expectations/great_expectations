@@ -3066,9 +3066,10 @@ def check_json_test_result(  # noqa: C901 - 52
             elif key == "unexpected_index_list":
                 unexpected_list = result["result"].get("unexpected_index_list")
                 if pk_column and unexpected_list:
+                    # Note that consistent ordering of unexpected_list is not a guarantee by ID/PK
                     assert (
                         sorted(unexpected_list, key=lambda d: d["pk_index"]) == value
-                    ), f"{result['result'].get('unexpected_index_list')} != {value}"
+                    ), f"{unexpected_list} != {value}"
 
             elif key == "unexpected_list":
                 try:
