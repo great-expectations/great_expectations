@@ -608,7 +608,7 @@ this is fewer than number of sorters specified, which is {len(sorters)}.
             splitter_kwargs: Optional[dict] = data_asset_config.get("splitter_kwargs")
             batch_identifiers_list = (
                 self.execution_engine.get_data_for_batch_identifiers(
-                    table_name=table_name,
+                    selectable=sa.text(table_name),
                     splitter_method_name=splitter_method_name,
                     splitter_kwargs=splitter_kwargs,
                 )
