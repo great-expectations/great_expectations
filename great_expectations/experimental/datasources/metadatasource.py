@@ -55,6 +55,8 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
 
         _datasource_factory.__doc__ = cls.__doc__
 
+        # TODO: generate schemas from `cls` if needed
+
         if cls.__module__ == "__main__":
             logger.warning(
                 f"Datasource `{cls_name}` should not be defined as part of __main__ this may cause typing lookup collisions"
