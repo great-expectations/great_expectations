@@ -725,7 +725,7 @@ class ExpectationSuite(SerializableDictDot):
         """Upsert specified ExpectationConfiguration into this ExpectationSuite.
 
         Args:
-            expectation_configuration: The ExpectationConfiguration to add or update
+            expectation_configuration: The ExpectationConfiguration to add or update.
             send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
                 public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
