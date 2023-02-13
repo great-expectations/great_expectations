@@ -240,7 +240,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     ) -> List[BatchDefinition] | None:
         return map_data_reference_string_to_batch_definition_list_using_regex(
             datasource_name=self.datasource_name,
-            data_connector_name=self.name,
+            data_connector_name="experimental",
             data_asset_name=self.data_asset_name,
             data_reference=data_reference,
             regex_pattern=self._regex,
