@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar, Set
+from typing import TYPE_CHECKING, ClassVar, Optional, Set
 
+import great_expectations.exceptions as ge_exceptions
 from great_expectations.experimental.datasources.data_asset.data_connector.filesystem_data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.experimental.datasources.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.experimental.datasources.interfaces import TestConnectionError
+from great_expectations.experimental.datasources.interfaces import (
+    BatchRequest,
+    BatchRequestOptions,
+    TestConnectionError,
+)
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources import (
@@ -52,6 +57,28 @@ class _FilesystemDataAsset(_FilePathDataAsset):
             raise TestConnectionError(
                 f"No file at path: {datasource.base_directory.resolve()} matched the regex: {self.regex.pattern}"
             )
+
+    def batch_request_options_template(
+        self,
+    ) -> BatchRequestOptions:
+        idx: int
+        return {idx: None for idx in self._all_group_names}
+
+    def build_batch_request(
+        self, options: Optional[BatchRequestOptions] = None
+    ) -> BatchRequest:
+        if options:
+            for option, value in options.items():
+                if (
+                    option in self._all_group_name_to_group_index_mapping
+                    and not isinstance(value, str)
+                ):
+                    raise ge_exceptions.InvalidBatchRequestError(
+                        f"All regex matching options must be strings. The value of '{option}' is "
+                        f"not a string: {value}"
+                    )
+
+        return super().build_batch_request(options)
 
     def _get_data_connector(self) -> DataConnector:
         data_connector: DataConnector = FilesystemDataConnector(

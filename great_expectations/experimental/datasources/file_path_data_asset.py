@@ -54,6 +54,7 @@ class _FilePathDataAsset(DataAsset):
         "regex",
         "order_by",
         "type",
+        "kwargs",  # kwargs need to be unpacked and passed separately
     }
 
     # General file-path DataAsset pertaining attributes.
@@ -97,10 +98,6 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
-
-    @property
-    def _base_directory(self) -> pathlib.Path:
-        return self._datasource.base_directory
 
     def batch_request_options_template(
         self,

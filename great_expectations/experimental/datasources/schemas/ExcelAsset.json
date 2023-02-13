@@ -32,9 +32,6 @@
             "default": "**/*",
             "type": "string"
         },
-        "io": {
-            "title": "Io"
-        },
         "sheet_name": {
             "title": "Sheet Name",
             "default": 0
@@ -149,8 +146,7 @@
     },
     "required": [
         "name",
-        "regex",
-        "io"
+        "regex"
     ],
     "additionalProperties": false,
     "definitions": {

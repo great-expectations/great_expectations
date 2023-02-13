@@ -32,9 +32,6 @@
             "default": "**/*",
             "type": "string"
         },
-        "path": {
-            "title": "Path"
-        },
         "columns": {
             "title": "Columns"
         },
@@ -50,8 +47,7 @@
     },
     "required": [
         "name",
-        "regex",
-        "path"
+        "regex"
     ],
     "additionalProperties": false,
     "definitions": {
