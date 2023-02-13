@@ -23,11 +23,12 @@ from great_expectations.util import is_library_loadable
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="pyspark"),
+    reason="pyspark must be installed",
+)
 @pytest.fixture
-def spark_datasource(test_backends) -> SparkDatasource:
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("No spark backend selected.")
-
+def spark_datasource() -> SparkDatasource:
     base_directory_rel_path = pathlib.Path(
         "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
