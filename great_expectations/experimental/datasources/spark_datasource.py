@@ -110,7 +110,7 @@ class SparkDatasource(_SparkDatasource):
     def add_csv_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[re.Pattern, str]] = None,
         header: bool = False,
         infer_schema: bool = False,
         order_by: Optional[BatchSortersDefinition] = None,
@@ -124,11 +124,10 @@ class SparkDatasource(_SparkDatasource):
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = CSVSparkAsset._regex_str_to_pattern(regex=regex)
         asset = CSVSparkAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
             header=header,
             inferSchema=infer_schema,
             order_by=_batch_sorter_from_list(order_by or []),

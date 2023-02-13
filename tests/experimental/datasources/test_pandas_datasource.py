@@ -258,6 +258,18 @@ def test_add_csv_asset_to_datasource(
 ):
     asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
+    )
+    assert asset.name == "csv_asset"  # type: ignore[attr-defined]
+    m1 = asset.regex.match("yellow_tripdata_sample_1111-22.csv")  # type: ignore[attr-defined]
+    assert m1 is not None
+
+
+@pytest.mark.unit
+def test_add_csv_asset_with_regex_to_datasource(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+):
+    asset = pandas_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
     )
     assert asset.name == "csv_asset"  # type: ignore[attr-defined]
