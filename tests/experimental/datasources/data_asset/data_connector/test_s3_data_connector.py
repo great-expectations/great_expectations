@@ -20,6 +20,7 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
 from great_expectations.experimental.datasources.interfaces import BatchRequest
 
 
+@pytest.mark.integration
 @mock_s3
 def test_basic_instantiation():
     region_name: str = "us-east-1"
@@ -70,6 +71,7 @@ def test_basic_instantiation():
         )
 
 
+@pytest.mark.integration
 @mock_s3
 def test_instantiation_regex_does_not_match_paths():
     region_name: str = "us-east-1"
@@ -114,6 +116,7 @@ def test_instantiation_regex_does_not_match_paths():
     assert len(my_data_connector.get_unmatched_data_references()) == 3
 
 
+@pytest.mark.integration
 @mock_s3
 def test_return_all_batch_definitions_unsorted():
     region_name: str = "us-east-1"
@@ -265,6 +268,7 @@ def test_return_all_batch_definitions_unsorted():
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
+# @pytest.mark.integration
 # @mock_s3
 # def test_return_all_batch_definitions_sorted():
 #     region_name: str = "us-east-1"
@@ -460,6 +464,7 @@ def test_return_all_batch_definitions_unsorted():
 # TODO: <Alex>ALEX</Alex>
 
 
+@pytest.mark.integration
 @mock_s3
 def test_return_only_unique_batch_definitions():
     region_name: str = "us-east-1"
@@ -538,6 +543,7 @@ def test_return_only_unique_batch_definitions():
     assert expected == unsorted_batch_definition_list
 
 
+@pytest.mark.integration
 @mock_s3
 def test_alpha():
     region_name: str = "us-east-1"
@@ -607,6 +613,7 @@ def test_alpha():
     assert len(my_batch_definition_list) == 1
 
 
+@pytest.mark.integration
 @mock_s3
 def test_foxtrot():
     region_name: str = "us-east-1"
@@ -727,6 +734,7 @@ def test_foxtrot():
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
+# @pytest.mark.integration
 # @mock_s3
 # def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_group(
 #     tmp_path_factory,

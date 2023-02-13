@@ -14,6 +14,7 @@ from great_expectations.experimental.datasources.interfaces import BatchRequest
 from tests.test_utils import create_files_in_directory
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_basic_instantiation(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_basic_instantiation"))
@@ -55,6 +56,7 @@ def test_basic_instantiation(tmp_path_factory):
         )
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_instantiation_regex_does_not_match_paths(tmp_path_factory):
     base_directory = str(
@@ -95,6 +97,7 @@ def test_instantiation_regex_does_not_match_paths(tmp_path_factory):
     assert len(my_data_connector.get_unmatched_data_references()) == 3
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     base_directory = str(
@@ -240,6 +243,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # TODO: <Alex>ALEX</Alex>
+# @pytest.mark.integration
 # @pytest.mark.slow  # creating small number of`file handles in temporary file system
 # def test_return_all_batch_definitions_sorted(tmp_path_factory):
 #     base_directory = str(
@@ -429,6 +433,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 # TODO: <Alex>ALEX</Alex>
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_return_only_unique_batch_definitions(tmp_path_factory):
     base_directory = str(
@@ -524,6 +529,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     assert expected == unsorted_batch_definition_list
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_alpha(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_alpha"))
@@ -585,6 +591,7 @@ def test_alpha(tmp_path_factory):
     assert len(my_batch_definition_list) == 1
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_foxtrot(tmp_path_factory):
     base_directory = str(tmp_path_factory.mktemp("test_foxtrot"))
@@ -695,6 +702,7 @@ def test_foxtrot(tmp_path_factory):
     assert len(my_batch_definition_list) == 3
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
 def test_relative_base_directory_path(tmp_path_factory):
     base_directory = str(
