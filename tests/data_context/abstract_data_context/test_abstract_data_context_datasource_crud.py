@@ -120,7 +120,7 @@ def test_save_datasource_overwrites_on_name_collision(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names,
-    ) as mock_set:
+    ) as mock_set, pytest.deprecated_call():
 
         context.save_datasource(datasource_to_save)
 

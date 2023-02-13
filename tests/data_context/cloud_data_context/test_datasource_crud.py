@@ -386,7 +386,7 @@ def test_cloud_context_datasource_crud_e2e() -> None:
         },
     )
 
-    context.save_datasource(datasource)
+    context.add_or_update_datasource(datasource=datasource)
 
     saved_datasource = context.get_datasource(datasource_name)
     assert saved_datasource is not None and saved_datasource.name == datasource_name

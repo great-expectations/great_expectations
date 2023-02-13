@@ -382,7 +382,7 @@ def test_cloud_data_context_run_checkpoint_e2e():
     '''
 
     datasource = context.test_yaml_config(datasource_yaml)
-    datasource = context.save_datasource(datasource)
+    datasource = context.add_or_update_datasource(datasource=datasource)
     ```
 
     === Set up the prerequisite Checkpoint ===
