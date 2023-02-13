@@ -47,7 +47,6 @@ class S3DataConnector(FilePathDataConnector):
 
     def __init__(
         self,
-        name: str,
         datasource_name: str,
         data_asset_name: str,
         bucket: str,
@@ -62,7 +61,6 @@ class S3DataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
     ) -> None:
         super().__init__(
-            name=name,
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
             regex=regex,
