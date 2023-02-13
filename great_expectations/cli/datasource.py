@@ -749,9 +749,6 @@ table_name = "{self.table_name}"'''
 
 class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
     def __init__(self, datasource_name: Optional[str]) -> None:
-        # We are insisting on psycopg2 driver when adding a Redshift datasource
-        # through the CLI to avoid over-complication of this flow. If user wants
-        # to use another driver, they must use a sqlalchemy connection string.
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -772,15 +769,15 @@ class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
 
     def credentials_snippet(self) -> str:
         return '''\
-            # The SQLAlchemy url/connection string for the Athena connection
-            # (reference: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena or https://github.com/laughingman7743/PyAthena/#sqlalchemy)"""
+# The SQLAlchemy url/connection string for the Athena connection
+# (reference: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena or https://github.com/laughingman7743/PyAthena/#sqlalchemy)"""
 
-            schema_name = ""  # or database name. It is optional
-            table_name = ""
-            region = ""
-            s3_path = "s3://YOUR_S3_BUCKET/path/to/"  # ignore partitioning
-            
-            connection_string = "awsathena+rest://@athena.{region}.amazonaws.com/{schema_name}?s3_staging_dir={s3_path}"
+schema_name = "YOUR_SCHEMA"  # or database name. It is optional
+table_name = "YOUR_TABLE_NAME"
+region = "YOUR_REGION"
+s3_path = "s3://YOUR_S3_BUCKET/path/to/"  # ignore partitioning
+
+connection_string = f"awsathena+rest://@athena.{region}.amazonaws.com/{schema_name}?s3_staging_dir={s3_path}"
             '''
 
     def _yaml_innards(self) -> str:
