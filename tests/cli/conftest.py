@@ -2,7 +2,7 @@ import os
 import shutil
 
 import pytest
-
+from moto import mock_athena
 from great_expectations.data_context.util import file_relative_path
 
 
@@ -62,3 +62,18 @@ def misc_directory(tmp_path):
     misc_dir.mkdir()
     assert os.path.isabs(misc_dir)
     return misc_dir
+
+
+@pytest.fixture()
+def empty_athena_db():
+    try:
+        import sqlalchemy as sa  # noqa: F401
+        from sqlalchemy import create_engine
+        region_test = "sa-east-1"
+        connection_string = f"awsathena+rest://@athena.{region_test}.amazonaws.com/test?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
+
+        engine = create_engine(connection_string)
+        return engine
+    except ImportError:
+        raise ValueError("sqlite tests require sqlalchemy to be installed")
+

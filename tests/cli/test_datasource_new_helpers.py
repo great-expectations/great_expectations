@@ -810,7 +810,7 @@ table_name = "YOUR_TABLE_NAME"
 region = "YOUR_REGION"
 s3_path = "s3://YOUR_S3_BUCKET/path/to/"  # ignore partitioning
 
-connection_string = "awsathena+rest://@athena.{region}.amazonaws.com/{schema_name}?s3_staging_dir={s3_path}"
+connection_string = f"awsathena+rest://@athena.{region}.amazonaws.com/{schema_name}?s3_staging_dir={s3_path}"
             '''
     )
 
