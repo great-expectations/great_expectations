@@ -43,7 +43,6 @@ def test_basic_instantiation():
         )
 
     my_data_connector: DataConnector = S3DataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
@@ -97,7 +96,6 @@ def test_instantiation_regex_does_not_match_paths():
         )
 
     my_data_connector: DataConnector = S3DataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
@@ -146,7 +144,6 @@ def test_return_all_batch_definitions_unsorted():
         )
 
     my_data_connector: DataConnector = S3DataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
@@ -296,7 +293,6 @@ def test_return_all_batch_definitions_unsorted():
 #         )
 #
 #     my_data_connector: DataConnector = S3DataConnector(
-#         name="my_experimental_data_connector",
 #         datasource_name="my_dataframe_datasource",
 #         data_asset_name="my_s3_data_asset",
 #         bucket=bucket,
@@ -480,7 +476,6 @@ def test_return_only_unique_batch_definitions():
     my_data_connector: DataConnector
 
     my_data_connector = S3DataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
@@ -512,7 +507,6 @@ def test_return_only_unique_batch_definitions():
     ]
 
     my_data_connector = S3DataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
@@ -554,7 +548,6 @@ def test_alpha():
         )
 
     my_data_connector: DataConnector = S3DataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
@@ -637,7 +630,6 @@ def test_foxtrot():
     my_data_connector: DataConnector
 
     my_data_connector = S3DataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
@@ -654,7 +646,6 @@ def test_foxtrot():
     }
 
     my_data_connector = S3DataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
@@ -675,7 +666,6 @@ def test_foxtrot():
     }
 
     my_data_connector = S3DataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
@@ -696,7 +686,6 @@ def test_foxtrot():
     }
 
     my_data_connector = S3DataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,

@@ -29,7 +29,6 @@ def test_basic_instantiation(tmp_path_factory):
     )
 
     my_data_connector: DataConnector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory),
@@ -265,7 +264,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #     )
 #
 #     my_data_connector: DataConnector = FilesystemDataConnector(
-#         name="my_experimental_data_connector",
 #         datasource_name="my_dataframe_datasource",
 #         data_asset_name="my_filesystem_data_asset",
 #         base_directory=pathlib.Path(base_directory),
@@ -443,7 +441,6 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     my_data_connector: DataConnector
 
     my_data_connector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory),
@@ -493,7 +490,6 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     ]
 
     my_data_connector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory),
@@ -527,7 +523,6 @@ def test_alpha(tmp_path_factory):
     )
 
     my_data_connector: DataConnector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory) / "test_dir_alpha",
@@ -598,7 +593,6 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector: DataConnector
 
     my_data_connector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot",
@@ -615,7 +609,6 @@ def test_foxtrot(tmp_path_factory):
     }
 
     my_data_connector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "A",
@@ -636,7 +629,6 @@ def test_foxtrot(tmp_path_factory):
     }
 
     my_data_connector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "B",
@@ -657,7 +649,6 @@ def test_foxtrot(tmp_path_factory):
     }
 
     my_data_connector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "C",
@@ -706,7 +697,6 @@ def test_relative_base_directory_path(tmp_path_factory):
     )
 
     my_data_connector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A",
@@ -727,7 +717,6 @@ def test_relative_base_directory_path(tmp_path_factory):
     }
 
     my_data_connector = FilesystemDataConnector(
-        name="my_experimental_data_connector",
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A" / "B" / "C",
