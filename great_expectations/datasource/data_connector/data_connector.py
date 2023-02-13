@@ -4,6 +4,8 @@ import logging
 from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple
 
+import pandas as pd
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
@@ -14,7 +16,7 @@ from great_expectations.core.batch import (
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -382,24 +384,31 @@ class DataConnector:
         # Note: get_batch_data_and_metadata will have loaded the data into the currently-defined execution engine.
         # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
         # resolve metrics.
-        validator = Validator(execution_engine=batch_data.execution_engine)
-        data: Any = validator.get_metric(
-            metric=MetricConfiguration(
-                metric_name="table.head",
-                metric_domain_kwargs={
+        batch_data.data.execution_engine.batch_manager.load_batch_list(
+            batch_list=[
+                {
                     "batch_id": batch_definition.id,
-                },
-                metric_value_kwargs={
-                    "n_rows": 5,
-                },
-            )
+                }
+            ]
         )
-        n_rows: int = validator.get_metric(
+        metrics_calculator = MetricsCalculator(
+            execution_engine=batch_data.data.execution_engine,
+            show_progress_bars=True,
+        )
+
+        metric_domain_kwargs = {
+            "batch_id": batch_definition.id,
+        }
+
+        data: pd.DataFrame = metrics_calculator.head(
+            n_rows=5,
+            domain_kwargs=metric_domain_kwargs,
+            fetch_all=False,
+        )
+        n_rows: int = metrics_calculator.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.row_count",
-                metric_domain_kwargs={
-                    "batch_id": batch_definition.id,
-                },
+                metric_domain_kwargs=metric_domain_kwargs,
             )
         )
 

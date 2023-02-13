@@ -12,7 +12,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
+from great_expectations.experimental.datasources.data_asset.data_connector import (
     DataConnector,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector.regex_parser import (

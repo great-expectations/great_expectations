@@ -9,7 +9,7 @@ from great_expectations.datasource.data_connector.util import (
     list_s3_keys,
     sanitize_prefix_for_s3,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector.file_path_data_connector import (
+from great_expectations.experimental.datasources.data_asset.data_connector import (
     FilePathDataConnector,
 )
 
