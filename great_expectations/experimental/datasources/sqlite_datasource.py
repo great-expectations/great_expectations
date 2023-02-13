@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 from typing_extensions import Literal
 
 from great_expectations.experimental.datasources.sql_datasource import (
+    BatchSorter,
     BatchSortersDefinition,
     DatetimeRange,
     QueryAsset,
@@ -21,7 +22,6 @@ from great_expectations.experimental.datasources.sql_datasource import (
     SQLDatasourceError,
     SqlYearMonthSplitter,
     TableAsset,
-    _batch_sorter_from_list,
     _query_for_year_and_month,
     _SQLAsset,
 )
@@ -183,12 +183,14 @@ class SqliteDatasource(SQLDatasource):
         Returns:
             The SqliteTableAsset that is added to the datasource.
         """
+        order_by_sorters: list[BatchSorter] = SqliteTableAsset.parse_order_by_sorters(
+            order_by=order_by
+        )
         asset = SqliteTableAsset(
             name=name,
             table_name=table_name,
             schema_name=schema_name,
-            order_by=_batch_sorter_from_list(order_by or []),
-            # see TableAsset._parse_order_by_sorter()
+            order_by=order_by_sorters,
         )
         asset._datasource = self
         self.assets[name] = asset
@@ -210,11 +212,13 @@ class SqliteDatasource(SQLDatasource):
         Returns:
             The SqliteTableAsset that is added to the datasource.
         """
+        order_by_sorters: list[BatchSorter] = SqliteQueryAsset.parse_order_by_sorters(
+            order_by=order_by
+        )
         asset = SqliteQueryAsset(
             name=name,
             query=query,
-            order_by=_batch_sorter_from_list(order_by or []),
-            # see TableAsset._parse_order_by_sorter()
+            order_by=order_by_sorters,
         )
         asset._datasource = self
         self.assets[name] = asset

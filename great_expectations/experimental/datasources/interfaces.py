@@ -220,7 +220,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
-    def parse_order_by_sorter(
+    def parse_order_by_sorters(
         cls, order_by: Optional[List[Union[BatchSorter, str]]]
     ) -> List[Union[BatchSorter, dict]]:
         if order_by:

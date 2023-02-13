@@ -32,11 +32,11 @@ from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
     BatchRequestOptions,
+    BatchSorter,
     BatchSortersDefinition,
     DataAsset,
     Datasource,
     TestConnectionError,
-    _batch_sorter_from_list,
 )
 
 SQLALCHEMY_IMPORTED = False
@@ -642,12 +642,14 @@ class SQLDatasource(Datasource):
         Returns:
             The TableAsset that is added to the datasource.
         """
+        order_by_sorters: list[BatchSorter] = TableAsset.parse_order_by_sorters(
+            order_by=order_by
+        )
         asset = TableAsset(
             name=name,
             table_name=table_name,
             schema_name=schema_name,
-            order_by=_batch_sorter_from_list(order_by or []),
-            # see DataAsset._parse_order_by_sorter()
+            order_by=order_by_sorters,
         )
         return self.add_asset(asset)
 
@@ -667,9 +669,12 @@ class SQLDatasource(Datasource):
         Returns:
             The QueryAsset that is added to the datasource.
         """
+        order_by_sorters: list[BatchSorter] = QueryAsset.parse_order_by_sorters(
+            order_by=order_by
+        )
         asset = QueryAsset(
             name=name,
             query=query,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
         )
         return self.add_asset(asset)
