@@ -162,13 +162,7 @@ def multibatch_spark_data(
     return context, spark_ds, asset, batch_request
 
 
-@pytest.fixture(
-    params=[
-        pandas_data,
-        sql_data,
-        spark_data,
-    ]
-)
+@pytest.fixture(params=[pandas_data, sql_data, spark_data])
 def datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
@@ -179,11 +173,7 @@ def datasource_test_data(
 
 
 @pytest.fixture(
-    params=[
-        multibatch_pandas_data,
-        multibatch_sql_data,
-        multibatch_spark_data,
-    ]
+    params=[multibatch_pandas_data, multibatch_sql_data, multibatch_spark_data]
 )
 def multibatch_datasource_test_data(
     test_backends, empty_data_context, request
