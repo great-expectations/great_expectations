@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-import pathlib
 import re
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Pattern, Set, Union
@@ -35,6 +34,7 @@ class _FilePathDataAsset(DataAsset):
         "regex",
         "order_by",
         "type",
+        "kwargs",  # kwargs need to be unpacked and passed separately
     }
 
     # General file-path DataAsset pertaining attributes.
@@ -79,6 +79,7 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
+
     @pydantic.validator("regex", pre=True)
     def parse_regex_string(cls, regex: Optional[Union[Pattern, str]]) -> Pattern:
         pattern: Pattern
@@ -91,10 +92,6 @@ class _FilePathDataAsset(DataAsset):
         else:
             raise ValueError('"regex" must be either re.Pattern, str, or None')
         return pattern
-
-    @property
-    def _base_directory(self) -> pathlib.Path:
-        return self._datasource.base_directory
 
     def batch_request_options_template(
         self,

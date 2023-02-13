@@ -4,7 +4,6 @@ import enum
 import functools
 import inspect
 import logging
-import pathlib
 import re
 import warnings
 from collections import defaultdict
@@ -15,6 +14,7 @@ from typing import (
     Dict,
     Hashable,
     Iterable,
+    Iterator,
     List,
     NamedTuple,
     Optional,
@@ -138,10 +138,6 @@ def _replace_builtins(input_: str | type) -> str | type:
 
 
 FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
-    # CSVAsset
-    "filepath_or_buffer": {"_base_directory": _FieldSpec(pathlib.Path, ...)},
-    # JSONAsset
-    "path_or_buf": {"_base_directory": _FieldSpec(pathlib.Path, ...)},
     # SQLTable
     "schema": {
         "schema_name": _FieldSpec(
@@ -155,11 +151,19 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
         )
     },
     # misc
-    "filepath": {"_base_directory": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
     "skiprows": {"skiprows": _FieldSpec(Union[Sequence[int], int, None], None)},  # type: ignore[arg-type]
+    "kwargs": {
+        "kwargs": _FieldSpec(
+            Optional[dict],  # type: ignore[arg-type]
+            Field(
+                None,
+                description="Extra keyword arguments that will be passed to the reader method",
+            ),
+        )
+    },
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
@@ -281,15 +285,21 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
 
 
 def _to_pydantic_fields(
-    sig_tuple: _SignatureTuple,
+    sig_tuple: _SignatureTuple, skip_first_param: bool
 ) -> Dict[str, _FieldSpec]:
     """
     Extract the parameter details in a structure that can be easily unpacked to
     `pydantic.create_model()` as field arguments
     """
     fields_dict: Dict[str, _FieldSpec] = {}
-    for param_name, param in sig_tuple.signature.parameters.items():
+    all_parameters: Iterator[tuple[str, inspect.Parameter]] = iter(
+        sig_tuple.signature.parameters.items()
+    )
+    if skip_first_param:
+        # skip the first parameter as this corresponds to the path/buffer/io field
+        next(all_parameters)
 
+    for param_name, param in all_parameters:
         no_annotation: bool = param.annotation is inspect._empty
         if no_annotation:
             logger.debug(f"`{param_name}` has no type annotation")
@@ -359,7 +369,9 @@ def _generate_pandas_data_asset_models(
     data_asset_models: Dict[str, M] = {}
     for signature_tuple in io_method_sigs:
 
-        fields = _to_pydantic_fields(signature_tuple)
+        # skip the first parameter as this corresponds to the path/buffer/io field
+        # paths to specific files are provided by the batch building logic
+        fields = _to_pydantic_fields(signature_tuple, skip_first_param=True)
 
         type_name = signature_tuple.name.split("read_")[1]
         model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
