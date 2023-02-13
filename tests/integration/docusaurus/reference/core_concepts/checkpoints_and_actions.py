@@ -356,8 +356,8 @@ yellow_tripdata_sample_2019-02
 """
 # </snippet>
 
-context.add_expectation_suite("my_expectation_suite", overwrite_existing=True)
-context.add_expectation_suite("my_other_expectation_suite", overwrite_existing=True)
+context.add_expectation_suite("my_expectation_suite")
+context.add_expectation_suite("my_other_expectation_suite")
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template">
 using_template = """

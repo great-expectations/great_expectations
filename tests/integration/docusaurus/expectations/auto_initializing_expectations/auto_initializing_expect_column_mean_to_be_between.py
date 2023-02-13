@@ -66,7 +66,7 @@ batch_request_2018_data: BatchRequest = BatchRequest(
 )
 
 suite = data_context.add_expectation_suite(
-    expectation_suite_name="new_expectation_suite", overwrite_existing=True
+    expectation_suite_name="new_expectation_suite"
 )
 validator = data_context.get_validator(
     expectation_suite=suite, batch_request=batch_request_2018_data

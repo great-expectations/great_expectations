@@ -118,9 +118,7 @@ assert sorted(
 # 5. Create expectations
 # CODE vvvvv vvvvv
 expectation_suite_name = "insert_your_expectation_suite_name_here"
-context.add_expectation_suite(
-    expectation_suite_name=expectation_suite_name, overwrite_existing=True
-)
+context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
 validator = context.get_validator(
     batch_request=batch_request,
     expectation_suite_name=expectation_suite_name,

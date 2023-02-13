@@ -191,7 +191,6 @@ def prepare_validator_for_cloud_e2e() -> Callable[
         suite = context.add_expectation_suite(
             suite_name,
             ge_cloud_id=expectation_suite_ge_cloud_id,
-            overwrite_existing=True,
         )
 
         # Set up a number of Expectations and confirm proper assignment

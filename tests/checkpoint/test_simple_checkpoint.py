@@ -78,7 +78,7 @@ def context_with_data_source_and_empty_suite(
     datasources = context.list_datasources()
     assert datasources[0]["class_name"] == "Datasource"
     assert "my_special_data_connector" in datasources[0]["data_connectors"].keys()
-    context.add_expectation_suite("one", overwrite_existing=True)
+    context.add_expectation_suite("one")
     assert context.list_expectation_suite_names() == ["one"]
     return context
 

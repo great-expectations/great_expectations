@@ -75,9 +75,7 @@ batch_request = BatchRequest(
     data_asset_name="yellow_tripdata",
 )
 
-context.add_expectation_suite(
-    expectation_suite_name="<MY EXPECTATION SUITE NAME>", overwrite_existing=True
-)
+context.add_expectation_suite(expectation_suite_name="<MY EXPECTATION SUITE NAME>")
 
 validator = context.get_validator(
     batch_request=batch_request,

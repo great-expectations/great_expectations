@@ -134,9 +134,8 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
             expectation_suite_name="titanic.test_create_expectation_suite"
         )
     # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True
-    assert titanic_data_context.add_expectation_suite(
+    assert titanic_data_context.add_or_update_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite",
-        overwrite_existing=True,
     )
 
 

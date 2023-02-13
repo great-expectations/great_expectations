@@ -43,9 +43,7 @@ batch_request = RuntimeBatchRequest(
     },
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
-context.add_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -60,9 +58,7 @@ batch_request = BatchRequest(
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="main.yellow_tripdata_sample_2019_01",  # this is the name of the table you want to retrieve
 )
-context.add_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
