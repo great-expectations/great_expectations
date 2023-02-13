@@ -27,11 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "base_directory": {
-            "title": "Base Directory",
-            "type": "string",
-            "format": "path"
-        },
         "sql": {
             "title": "Sql"
         },
@@ -64,7 +59,6 @@
     "required": [
         "name",
         "regex",
-        "base_directory",
         "sql",
         "con"
     ],

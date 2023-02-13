@@ -5,6 +5,7 @@ from unittest import mock
 
 import pytest
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
@@ -279,14 +280,14 @@ def test_datasource_store_with_inline_store_backend(
 
 
 @pytest.mark.unit
-def test_datasource_store_set_by_name(
+def test_datasource_store_add_by_name(
     empty_datasource_store: DatasourceStore,
     datasource_config: DatasourceConfig,
     fake_datasource_name,
 ) -> None:
     assert len(empty_datasource_store.list_keys()) == 0
 
-    empty_datasource_store.set_by_name(
+    empty_datasource_store.add_by_name(
         datasource_name=fake_datasource_name, datasource_config=datasource_config
     )
 
@@ -395,13 +396,16 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
     empty_datasource_store: DatasourceStore,
 ) -> None:
     updated_datasource_config = DatasourceConfig()
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(gx_exceptions.DatasourceNotFoundError) as e:
         empty_datasource_store.update_by_name(
             datasource_name=fake_datasource_name,
             datasource_config=updated_datasource_config,
         )
 
-    assert f"Unable to load datasource `{fake_datasource_name}`" in str(e.value)
+    assert (
+        f"Could not find an existing Datasource named {fake_datasource_name}."
+        in str(e.value)
+    )
 
 
 @pytest.mark.integration
