@@ -307,7 +307,7 @@ validations:
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_checkpoint">
-context.add_checkpoint(**yaml.load(checkpoint_config))
+context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py run_checkpoint">

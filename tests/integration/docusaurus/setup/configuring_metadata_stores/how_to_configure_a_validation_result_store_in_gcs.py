@@ -51,7 +51,7 @@ validations:
       data_asset_name: yellow_tripdata_sample_2019-01
     expectation_suite_name: {expectation_suite_name}
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_config))
+context.add_or_update_checkpoint(**yaml.safe_load(checkpoint_config))
 
 # run the checkpoint twice to create two validations
 context.run_checkpoint(checkpoint_name=checkpoint_name)

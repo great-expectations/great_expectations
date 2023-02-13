@@ -80,7 +80,7 @@ validations:
       data_asset_name: taxi_data
     expectation_suite_name: my_expectation_suite
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_or_update_checkpoint(**yaml.safe_load(checkpoint_yaml))
 # </snippet>
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
@@ -101,7 +101,7 @@ checkpoint_config = {
         }
     ],
 }
-context.add_checkpoint(**checkpoint_config)
+context.add_or_update_checkpoint(**checkpoint_config)
 # </snippet>
 
 test_python = context.test_yaml_config(
@@ -136,7 +136,7 @@ config_version: 1
 class_name: SimpleCheckpoint
 expectation_suite_name: my_expectation_suite
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_or_update_checkpoint(**yaml.safe_load(checkpoint_yaml))
 # </snippet>
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
@@ -148,7 +148,7 @@ checkpoint_config = {
     "class_name": "SimpleCheckpoint",
     "expectation_suite_name": "my_expectation_suite",
 }
-context.add_checkpoint(**checkpoint_config)
+context.add_or_update_checkpoint(**checkpoint_config)
 # </snippet>
 
 test_python = context.test_yaml_config(

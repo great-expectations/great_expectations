@@ -204,7 +204,7 @@ checkpoint_config = checkpoint_config.replace(
 
 my_checkpoint = context.test_yaml_config(checkpoint_config)
 
-context.add_checkpoint(**yaml.load(checkpoint_config))
+context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
 
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,

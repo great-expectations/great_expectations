@@ -309,7 +309,7 @@ batch_request = {
 }
 
 checkpoint_config = CheckpointConfig(**checkpoint_dict)
-context.add_checkpoint(
+context.add_or_update_checkpoint(
     **filter_properties_dict(
         properties=checkpoint_config.to_json_dict(),
         clean_falsy=True,

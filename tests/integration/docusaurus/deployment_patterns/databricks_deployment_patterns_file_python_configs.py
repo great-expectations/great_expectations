@@ -217,7 +217,7 @@ checkpoint_config["validations"][0]["batch_request"][
 
 my_checkpoint = context.test_yaml_config(yaml.dump(checkpoint_config))
 
-context.add_checkpoint(**checkpoint_config)
+context.add_or_update_checkpoint(**checkpoint_config)
 
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
