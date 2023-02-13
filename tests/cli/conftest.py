@@ -67,7 +67,7 @@ def misc_directory(tmp_path):
 @pytest.fixture()
 def empty_athena_db():
     try:
-        import sqlalchemy as sa  # noqa: F401
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
         region_test = "sa-east-1"
         connection_string = f"awsathena+rest://@athena.{region_test}.amazonaws.com/test?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
@@ -75,5 +75,5 @@ def empty_athena_db():
         engine = create_engine(connection_string)
         return engine
     except ImportError:
-        raise ValueError("sqlite tests require sqlalchemy to be installed")
+        raise ValueError("athena tests require sqlalchemy to be installed")
 
