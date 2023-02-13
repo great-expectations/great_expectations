@@ -117,7 +117,7 @@ def test_save_profiler(
     with mock.patch(
         "great_expectations.data_context.store.profiler_store.ProfilerStore.set",
         return_value=profiler_config_with_placeholder_args,
-    ):
+    ), pytest.deprecated_call():
         mock_data_context.save_profiler(
             profiler=profiler_config_with_placeholder_args,
             profiler_store=populated_profiler_store,

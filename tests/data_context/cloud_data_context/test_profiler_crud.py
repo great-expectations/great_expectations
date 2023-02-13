@@ -116,7 +116,7 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     with mock.patch("requests.Session.put", autospec=True) as mock_put, mock.patch(
         "requests.Session.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
-        return_profiler = context.save_profiler(profiler=profiler_with_id)
+        return_profiler = context.add_or_update_profiler(profiler=profiler_with_id)
 
     profiler_id = profiler_with_id.ge_cloud_id
     expected_profiler_config = ruleBasedProfilerConfigSchema.dump(
@@ -171,7 +171,7 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     ) as mock_post, mock.patch(
         "requests.Session.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
-        return_profiler = context.save_profiler(profiler=profiler_without_id)
+        return_profiler = context.add_or_update_profiler(profiler=profiler_without_id)
 
     expected_profiler_config = ruleBasedProfilerConfigSchema.dump(
         profiler_without_id.config
