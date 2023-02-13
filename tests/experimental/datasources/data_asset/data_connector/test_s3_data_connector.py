@@ -49,20 +49,17 @@ def test_basic_instantiation():
         regex=re.compile(r"alpha-(.*)\.csv"),
         prefix="",
     )
-
-    assert my_data_connector.self_check() == {
-        "class_name": "S3DataConnector",
-        "batch_definition_count": 3,
-        "data_reference_count": 3,
-        "example_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
-
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
+
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector.get_unmatched_data_references() == []
+    assert my_data_connector._get_data_reference_list()[:3] == [
+        "alpha-1.csv",
+        "alpha-2.csv",
+        "alpha-3.csv",
+    ]
+    assert my_data_connector.get_unmatched_data_references()[:3] == []
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     # Missing "data_asset_name" argument.
     with pytest.raises(TypeError):
@@ -102,18 +99,21 @@ def test_instantiation_regex_does_not_match_paths():
         regex=re.compile(r"beta-(.*)\.csv"),
         prefix="",
     )
-    assert my_data_connector.self_check() == {
-        "class_name": "S3DataConnector",
-        "batch_definition_count": 3,
-        "example_data_references": ["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
-        "data_reference_count": 3,
-        "example_unmatched_data_references": [
-            "alpha-1.csv",
-            "alpha-2.csv",
-            "alpha-3.csv",
-        ],
-        "unmatched_data_reference_count": 3,
-    }
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    assert my_data_connector.get_data_reference_count() == 3
+    assert my_data_connector._get_data_reference_list()[:3] == [
+        "alpha-1.csv",
+        "alpha-2.csv",
+        "alpha-3.csv",
+    ]
+    assert my_data_connector.get_unmatched_data_references()[:3] == [
+        "alpha-1.csv",
+        "alpha-2.csv",
+        "alpha-3.csv",
+    ]
+    assert len(my_data_connector.get_unmatched_data_references()) == 3
 
 
 @mock_s3
@@ -150,6 +150,8 @@ def test_return_all_batch_definitions_unsorted():
         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         prefix="",
     )
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
 
     # with missing BatchRequest arguments
     with pytest.raises(TypeError):
@@ -299,12 +301,21 @@ def test_return_all_batch_definitions_unsorted():
 #         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
 #         prefix="",
 #     )
-#     assert my_data_connector.self_check() == {
-#         "class_name": "S3DataConnector",
-#         "data_reference_count": 10,
-#         "example_unmatched_data_references": [],
-#         "unmatched_data_reference_count": 0,
-#     }
+#     # noinspection PyProtectedMember
+#     my_data_connector._refresh_data_references_cache()
+#
+#     assert my_data_connector.get_data_reference_count() == 3
+#     assert my_data_connector._get_data_reference_list()[:3] == [
+#         "alpha-1.csv",
+#         "alpha-2.csv",
+#         "alpha-3.csv",
+#     ]
+#     assert my_data_connector.get_unmatched_data_references()[:3] == [
+#         "alpha-1.csv",
+#         "alpha-2.csv",
+#         "alpha-3.csv",
+#     ]
+#     assert len(my_data_connector.get_unmatched_data_references()) == 3
 #
 #     sorted_batch_definition_list: List[BatchDefinition] = (
 #         my_data_connector.get_batch_definition_list_from_batch_request(
@@ -482,14 +493,17 @@ def test_return_only_unique_batch_definitions():
         regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         prefix="A",
     )
-    assert my_data_connector.self_check() == {
-        "class_name": "S3DataConnector",
-        "batch_definition_count": 3,
-        "example_data_references": ["A/file_1.csv", "A/file_2.csv", "A/file_3.csv"],
-        "data_reference_count": 3,
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    assert my_data_connector.get_data_reference_count() == 3
+    assert my_data_connector._get_data_reference_list()[:3] == [
+        "A/file_1.csv",
+        "A/file_2.csv",
+        "A/file_3.csv",
+    ]
+    assert my_data_connector.get_unmatched_data_references()[:3] == []
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     expected: List[BatchDefinition] = [
         BatchDefinition(
@@ -554,18 +568,17 @@ def test_alpha():
         regex=re.compile(r"(?P<part_1>.+)\.csv"),
         prefix="test_dir_alpha",
     )
-    assert my_data_connector.self_check() == {
-        "class_name": "S3DataConnector",
-        "batch_definition_count": 4,
-        "example_data_references": [
-            "test_dir_alpha/A.csv",
-            "test_dir_alpha/B.csv",
-            "test_dir_alpha/C.csv",
-        ],
-        "data_reference_count": 4,
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    assert my_data_connector.get_data_reference_count() == 4
+    assert my_data_connector._get_data_reference_list()[:3] == [
+        "test_dir_alpha/A.csv",
+        "test_dir_alpha/B.csv",
+        "test_dir_alpha/C.csv",
+    ]
+    assert my_data_connector.get_unmatched_data_references()[:3] == []
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
@@ -636,14 +649,13 @@ def test_foxtrot():
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="",
     )
-    assert my_data_connector.self_check() == {
-        "class_name": "S3DataConnector",
-        "batch_definition_count": 0,
-        "data_reference_count": 0,
-        "example_data_references": [],
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    assert my_data_connector.get_data_reference_count() == 0
+    assert my_data_connector._get_data_reference_list()[:3] == []
+    assert my_data_connector.get_unmatched_data_references()[:3] == []
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
@@ -652,18 +664,17 @@ def test_foxtrot():
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="test_dir_foxtrot/A",
     )
-    assert my_data_connector.self_check() == {
-        "class_name": "S3DataConnector",
-        "batch_definition_count": 3,
-        "data_reference_count": 3,
-        "example_data_references": [
-            "test_dir_foxtrot/A/A-1.csv",
-            "test_dir_foxtrot/A/A-2.csv",
-            "test_dir_foxtrot/A/A-3.csv",
-        ],
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    assert my_data_connector.get_data_reference_count() == 3
+    assert my_data_connector._get_data_reference_list()[:3] == [
+        "test_dir_foxtrot/A/A-1.csv",
+        "test_dir_foxtrot/A/A-2.csv",
+        "test_dir_foxtrot/A/A-3.csv",
+    ]
+    assert my_data_connector.get_unmatched_data_references()[:3] == []
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
@@ -672,18 +683,17 @@ def test_foxtrot():
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         prefix="test_dir_foxtrot/B",
     )
-    assert my_data_connector.self_check() == {
-        "class_name": "S3DataConnector",
-        "batch_definition_count": 3,
-        "data_reference_count": 3,
-        "example_data_references": [
-            "test_dir_foxtrot/B/B-1.txt",
-            "test_dir_foxtrot/B/B-2.txt",
-            "test_dir_foxtrot/B/B-3.txt",
-        ],
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    assert my_data_connector.get_data_reference_count() == 3
+    assert my_data_connector._get_data_reference_list()[:3] == [
+        "test_dir_foxtrot/B/B-1.txt",
+        "test_dir_foxtrot/B/B-2.txt",
+        "test_dir_foxtrot/B/B-3.txt",
+    ]
+    assert my_data_connector.get_unmatched_data_references()[:3] == []
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
@@ -692,18 +702,17 @@ def test_foxtrot():
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="test_dir_foxtrot/C",
     )
-    assert my_data_connector.self_check() == {
-        "class_name": "S3DataConnector",
-        "batch_definition_count": 3,
-        "data_reference_count": 3,
-        "example_data_references": [
-            "test_dir_foxtrot/C/C-2017.csv",
-            "test_dir_foxtrot/C/C-2018.csv",
-            "test_dir_foxtrot/C/C-2019.csv",
-        ],
-        "example_unmatched_data_references": [],
-        "unmatched_data_reference_count": 0,
-    }
+    # noinspection PyProtectedMember
+    my_data_connector._refresh_data_references_cache()
+
+    assert my_data_connector.get_data_reference_count() == 3
+    assert my_data_connector._get_data_reference_list()[:3] == [
+        "test_dir_foxtrot/C/C-2017.csv",
+        "test_dir_foxtrot/C/C-2018.csv",
+        "test_dir_foxtrot/C/C-2019.csv",
+    ]
+    assert my_data_connector.get_unmatched_data_references()[:3] == []
+    assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_batch_request = BatchRequest(
         datasource_name="my_dataframe_datasource",
