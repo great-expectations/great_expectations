@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+from abc import abstractmethod
 from typing import TYPE_CHECKING, Callable, List, Optional
 
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
@@ -289,5 +290,6 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         ]
         return batch_definition_list
 
+    @abstractmethod
     def _get_full_file_path(self, path: str) -> str:
-        raise NotImplementedError
+        pass
