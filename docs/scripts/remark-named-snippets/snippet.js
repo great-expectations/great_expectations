@@ -35,7 +35,10 @@ function constructSnippetMap (dirs) {
 function parseSourceDirectories (dirs) {
   const files = []
   for (const dir of dirs) {
-    for (const file of glob.sync(dir + '/**/*.py')) {
+    const allFiles = glob.sync(dir + '/**/*.py')
+    allFiles.concat(glob.sync(dir + '/**/*.yml'))
+    allFiles.concat(glob.sync(dir + '/**/*.yaml'))
+    for (const file of allFiles) {
       files.push(file)
     }
   }
