@@ -28,7 +28,10 @@ logger = logging.getLogger(__name__)
     reason="pyspark must be installed",
 )
 @pytest.fixture
-def spark_datasource() -> SparkDatasource:
+def spark_datasource(test_backends) -> SparkDatasource:
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
     base_directory_rel_path = pathlib.Path(
         "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
