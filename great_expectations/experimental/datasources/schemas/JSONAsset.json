@@ -27,11 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "base_directory": {
-            "title": "Base Directory",
-            "type": "string",
-            "format": "path"
-        },
         "orient": {
             "title": "Orient"
         },
@@ -117,8 +112,7 @@
     },
     "required": [
         "name",
-        "regex",
-        "base_directory"
+        "regex"
     ],
     "additionalProperties": false,
     "definitions": {

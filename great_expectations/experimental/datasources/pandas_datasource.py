@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 import re
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 from typing_extensions import Literal
 
-from great_expectations.alias_types import PathStr  # noqa: TCH001
 from great_expectations.experimental.datasources.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
@@ -17,6 +17,8 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     Datasource,
+    TestConnectionError,
+    _batch_sorter_from_list,
 )
 
 if TYPE_CHECKING:
@@ -72,18 +74,17 @@ except KeyError as key_err:
     ParquetAsset = _FilesystemDataAsset
 
 
-class PandasDatasource(Datasource):
+class _PandasDatasource(Datasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_ASSET_MODELS.values())
 
     # instance attributes
-    type: Literal["pandas"] = "pandas"
-    name: str
     assets: Dict[
         str,
         _FilesystemDataAsset,
     ] = {}
 
+    # Abstract Methods
     @property
     def execution_engine_type(self) -> Type[PandasExecutionEngine]:
         """Return the PandasExecutionEngine unless the override is set"""
@@ -94,15 +95,46 @@ class PandasDatasource(Datasource):
         return PandasExecutionEngine
 
     def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the _PandasDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the _PandasDatasource,
+                         an attempt can be made to test them as well.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        raise NotImplementedError(
+            """One needs to implement "test_connection" on a _PandasDatasource subclass."""
+        )
+
+    # End Abstract Methods
+
+
+class PandasFilesystemDatasource(_PandasDatasource):
+    # instance attributes
+    type: Literal["pandas_filesystem"] = "pandas_filesystem"
+    name: str
+    base_directory: pathlib.Path
+    assets: Dict[
+        str,
+        _FilesystemDataAsset,
+    ] = {}
+
+    def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the PandasDatasource.
 
         Args:
             test_assets: If assets have been passed to the PandasDatasource, whether to test them as well.
 
         Raises:
-            TestConnectionError
+            TestConnectionError: If the connection test fails.
         """
-        # Only self.assets can be tested for PandasDatasource
+        if not self.base_directory.exists():
+            raise TestConnectionError(
+                f"Path: {self.base_directory.resolve()} does not exist."
+            )
+
         if self.assets and test_assets:
             for asset in self.assets.values():
                 asset.test_connection()
@@ -110,8 +142,7 @@ class PandasDatasource(Datasource):
     def add_csv_asset(
         self,
         name: str,
-        base_directory: PathStr,
-        regex: Union[str, re.Pattern],
+        regex: Union[re.Pattern, str],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
     ) -> CSVAsset:  # type: ignore[valid-type]
@@ -119,16 +150,16 @@ class PandasDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
+        if isinstance(regex, str):
+            regex = re.compile(regex)
         asset = CSVAsset(
             name=name,
-            base_directory=base_directory,  # type: ignore[arg-type]
-            regex=regex,  # type: ignore[arg-type]  # type: ignore[arg-type]
-            order_by=order_by or [],  # type: ignore[arg-type]
+            regex=regex,
+            order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
         return self.add_asset(asset)
@@ -136,7 +167,6 @@ class PandasDatasource(Datasource):
     def add_excel_asset(
         self,
         name: str,
-        base_directory: PathStr,
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -145,16 +175,16 @@ class PandasDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
+        if isinstance(regex, str):
+            regex = re.compile(regex)
         asset = ExcelAsset(
             name=name,
-            base_directory=base_directory,  # type: ignore[arg-type]
-            regex=regex,  # type: ignore[arg-type]
-            order_by=order_by or [],  # type: ignore[arg-type]
+            regex=regex,
+            order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
         return self.add_asset(asset)
@@ -162,7 +192,6 @@ class PandasDatasource(Datasource):
     def add_json_asset(
         self,
         name: str,
-        base_directory: PathStr,
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -171,16 +200,16 @@ class PandasDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
+        if isinstance(regex, str):
+            regex = re.compile(regex)
         asset = JSONAsset(
             name=name,
-            base_directory=base_directory,  # type: ignore[arg-type]
-            regex=regex,  # type: ignore[arg-type]
-            order_by=order_by or [],  # type: ignore[arg-type]
+            regex=regex,
+            order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
         return self.add_asset(asset)
@@ -188,7 +217,6 @@ class PandasDatasource(Datasource):
     def add_parquet_asset(
         self,
         name: str,
-        base_directory: PathStr,
         regex: Union[str, re.Pattern],
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -197,16 +225,16 @@ class PandasDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
-            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
+        if isinstance(regex, str):
+            regex = re.compile(regex)
         asset = ParquetAsset(
             name=name,
-            base_directory=base_directory,  # type: ignore[arg-type]
-            regex=regex,  # type: ignore[arg-type]
-            order_by=order_by or [],  # type: ignore[arg-type]
+            regex=regex,
+            order_by=_batch_sorter_from_list(order_by or []),
             **kwargs,
         )
         return self.add_asset(asset)

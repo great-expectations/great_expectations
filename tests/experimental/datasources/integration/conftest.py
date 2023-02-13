@@ -26,10 +26,12 @@ def pandas_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    pandas_ds = context.sources.add_pandas(name="my_pandas")
+    pandas_ds = context.sources.add_pandas_filesystem(
+        name="my_pandas",
+        base_directory=csv_path,
+    )
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
@@ -82,10 +84,12 @@ def spark_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    spark_ds = context.sources.add_spark(name="my_spark")
+    spark_ds = context.sources.add_spark(
+        name="my_spark",
+        base_directory=csv_path,
+    )
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
-        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
         header=True,
@@ -104,10 +108,12 @@ def multibatch_pandas_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    pandas_ds = context.sources.add_pandas(name="my_pandas")
+    pandas_ds = context.sources.add_pandas_filesystem(
+        name="my_pandas",
+        base_directory=csv_path,
+    )
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
@@ -142,10 +148,12 @@ def multibatch_spark_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    spark_ds = context.sources.add_spark(name="my_spark")
+    spark_ds = context.sources.add_spark(
+        name="my_spark",
+        base_directory=csv_path,
+    )
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
-        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
         header=True,

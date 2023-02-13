@@ -40,7 +40,7 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     """
 
     def _sort_required_lists(schema_as_dict: dict) -> None:
-        """Someties "required" lists come unsorted, causing misleading assertion failures; this corrects the issue.
+        """Sometimes "required" lists come unsorted, causing misleading assertion failures; this corrects the issue.
 
         Args:
             schema_as_dict: source dictionary (will be modified "in-situ")
@@ -62,7 +62,6 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     print(f"pandas version: {PANDAS_VERSION}\n")
 
     schema_path = _SCHEMAS_DIR.joinpath(f"{zep_ds_or_asset_model.__name__}.json")
-    print(schema_path.relative_to(schema_path.cwd()))
 
     # TODO: remove this logic and make this fail once all json schemas are working
     if schema_path.name in (
@@ -70,7 +69,6 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
         "SqliteTableAsset.json",
         "SqliteQueryAsset.json",
         "SASAsset.json",
-        "PandasDatasource.json",
     ):
         pytest.xfail(f"{schema_path.name} does not exist")
 
