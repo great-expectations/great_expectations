@@ -55,7 +55,6 @@ class _FilesystemDataAsset(_FilePathDataAsset):
 
     def _get_data_connector(self) -> DataConnector:
         data_connector: DataConnector = FilesystemDataConnector(
-            name="experimental",
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             base_directory=self.datasource.base_directory,

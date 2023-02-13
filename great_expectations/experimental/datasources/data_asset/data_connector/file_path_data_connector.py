@@ -60,7 +60,6 @@ class FilePathDataConnector(DataConnector):
 
     def __init__(
         self,
-        name: str,
         datasource_name: str,
         data_asset_name: str,
         regex: re.Pattern,
@@ -72,7 +71,6 @@ class FilePathDataConnector(DataConnector):
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
         super().__init__(
-            name=name,
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
         )
@@ -290,14 +288,6 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             if batch_definitions is not None
         ]
         return batch_definition_list
-
-    # Interface Method
-    def _get_data_reference_list(self) -> List[str]:
-        """
-        List objects in the underlying data store to create a list of data_references.
-        This method is used to refresh the cache by classes that extend this base DataConnector class
-        """
-        raise NotImplementedError
 
     def _get_full_file_path(self, path: str) -> str:
         raise NotImplementedError

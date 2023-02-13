@@ -36,19 +36,15 @@ class DataConnector:
     snapshots of batches or store metadata from an external data version control system.
 
     Args:
-        name: The name of the DataConnector instance
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
     """
 
     def __init__(
         self,
-        name: str,
         datasource_name: str,
         data_asset_name: str,
     ) -> None:
-        self._name: str = name
-
         self._datasource_name: str = datasource_name
         self._data_asset_name: str = data_asset_name
 
@@ -56,10 +52,6 @@ class DataConnector:
         self._data_references_cache: Dict[str, List[BatchDefinition] | None] = {}
 
         self._data_context_root_directory: Optional[pathlib.Path] = None
-
-    @property
-    def name(self) -> str:
-        return self._name
 
     @property
     def data_asset_name(self) -> str:
@@ -152,10 +144,6 @@ class DataConnector:
         """
         if len(self._data_references_cache) == 0:
             self._refresh_data_references_cache()
-
-        if pretty_print:
-            print(f"	{self.name}", ":", self.__class__.__name__)
-            print()
 
         report_obj = {
             "class_name": self.__class__.__name__,
