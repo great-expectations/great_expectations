@@ -186,7 +186,7 @@ def datasource_test_data(
     ]
 )
 def multibatch_datasource_test_data(
-    empty_data_context, request
+    test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     if (
         request.param.__name__ == "multibatch_spark_data"
