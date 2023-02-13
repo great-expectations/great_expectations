@@ -66,14 +66,52 @@ def misc_directory(tmp_path):
 
 @pytest.fixture()
 def empty_athena_db():
+    # try:
+    #     import sqlalchemy as sa
+    #     from sqlalchemy import create_engine
+    #     os.environ["AWS_ACCESS_KEY_ID"] = "test"
+    #     os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
+    #     region_test = "sa-east-1"
+    #     connection_string = f"awsathena+rest://@athena.{region_test}.amazonaws.com/test?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
+
+    #     engine = create_engine(connection_string)
+    #     return engine
+    # except ImportError:
+    #     raise ValueError("athena tests require sqlalchemy to be installed")
     try:
-        import sqlalchemy as sa
-        from sqlalchemy import create_engine
-        region_test = "sa-east-1"
-        connection_string = f"awsathena+rest://@athena.{region_test}.amazonaws.com/test?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
-
-        engine = create_engine(connection_string)
-        return engine
+        import boto3
     except ImportError:
-        raise ValueError("athena tests require sqlalchemy to be installed")
+        raise ValueError(
+            "AWS Athena Data Connector tests are requested, but boto3 is not installed"
+        )
 
+    with mock_athena():
+        os.environ["AWS_ACCESS_KEY_ID"] = "test"
+        os.environ["AWS_SECRET_ACCESS_KEY"] = "test"
+        region_name: str = "sa-east-1"
+        client = boto3.client("athena", region_name=region_name)
+        database_name = "bi"
+
+
+        client.start_query_execution(
+        QueryString=f'create database {database_name}',)
+
+        create_table_string = f"""CREATE EXTERNAL TABLE IF NOT EXISTS
+{database_name}.test_table (
+  Id string,
+  Name string,
+  
+) ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+  'separatorChar' = ',',
+  'quoteChar' = '\"',
+  'escapeChar' = '\\'
+)
+STORED AS TEXTFILE
+LOCATION 's3://YOUR_S3_BUCKET/path/to/';"""
+
+        client.start_query_execution(
+        QueryString=create_table_string,
+        )
+        
+        return client
