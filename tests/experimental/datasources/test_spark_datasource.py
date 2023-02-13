@@ -220,7 +220,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     assert expected_year_month == batch_year_month
 
 
-@pytest.mark.integration
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "order_by",
     [
