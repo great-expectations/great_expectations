@@ -14,11 +14,11 @@ from great_expectations.experimental.datasources.filesystem_data_asset import (
     _FilesystemDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
+    BatchSorter,
     BatchSortersDefinition,
     DataAsset,
     Datasource,
     TestConnectionError,
-    _batch_sorter_from_list,
 )
 
 if TYPE_CHECKING:
@@ -154,11 +154,14 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
-        regex_pattern: re.Pattern = CSVAsset._regex_str_to_pattern(regex=regex)
+        regex_pattern: re.Pattern = CSVAsset.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = CSVAsset.parse_order_by_sorters(
+            order_by=order_by
+        )
         asset = CSVAsset(
             name=name,
             regex=regex_pattern,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
         return self.add_asset(asset)
@@ -178,11 +181,14 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
-        regex_pattern: re.Pattern = CSVAsset._regex_str_to_pattern(regex=regex)
+        regex_pattern: re.Pattern = CSVAsset.regex_str_to_pattern(regex=regex)
+        order_by_sorters: list[BatchSorter] = CSVAsset.parse_order_by_sorters(
+            order_by=order_by
+        )
         asset = ExcelAsset(
             name=name,
             regex=regex_pattern,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
         return self.add_asset(asset)
@@ -202,11 +208,14 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
-        regex_pattern: re.Pattern = JSONAsset._regex_str_to_pattern(regex=regex)
+        regex_pattern: re.Pattern = JSONAsset.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = CSVAsset.parse_order_by_sorters(
+            order_by=order_by
+        )
         asset = JSONAsset(
             name=name,
             regex=regex_pattern,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
         return self.add_asset(asset)
@@ -226,11 +235,14 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
-        regex_pattern: re.Pattern = ParquetAsset._regex_str_to_pattern(regex=regex)
+        regex_pattern: re.Pattern = ParquetAsset.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = CSVAsset.parse_order_by_sorters(
+            order_by=order_by
+        )
         asset = ParquetAsset(
             name=name,
             regex=regex_pattern,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
         return self.add_asset(asset)

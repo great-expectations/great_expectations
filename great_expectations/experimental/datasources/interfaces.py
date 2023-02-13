@@ -219,15 +219,19 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         )
 
     # Sorter methods
-    @pydantic.validator("order_by", pre=True, each_item=True)
-    def _parse_order_by_sorter(
-        cls, v: Union[str, BatchSorter]
-    ) -> Union[BatchSorter, dict]:
-        if isinstance(v, str):
-            if not v:
-                raise ValueError("empty string")
-            return _batch_sorter_from_str(v)
-        return v
+    @pydantic.validator("order_by", pre=True)
+    def parse_order_by_sorter(
+        cls, order_by: Optional[List[Union[BatchSorter, str]]]
+    ) -> List[Union[BatchSorter, dict]]:
+        if order_by:
+            for idx, sorter in enumerate(order_by):
+                if isinstance(sorter, str):
+                    if not sorter:
+                        raise ValueError(
+                            '"order_by" list cannot contain an empty string'
+                        )
+                    order_by[idx] = _batch_sorter_from_str(sorter)
+        return order_by
 
     def add_sorters(self: _DataAssetT, sorters: BatchSortersDefinition) -> _DataAssetT:
         """Associates a sorter to this DataAsset

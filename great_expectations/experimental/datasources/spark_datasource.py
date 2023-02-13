@@ -11,11 +11,11 @@ from great_expectations.experimental.datasources.filesystem_data_asset import (
     _FilesystemDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
+    BatchSorter,
     BatchSortersDefinition,
     DataAsset,
     Datasource,
     TestConnectionError,
-    _batch_sorter_from_list,
 )
 
 if TYPE_CHECKING:
@@ -122,12 +122,15 @@ class SparkDatasource(_SparkDatasource):
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
         """
-        regex_pattern: re.Pattern = CSVSparkAsset._regex_str_to_pattern(regex=regex)
+        regex_pattern: re.Pattern = CSVSparkAsset.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = CSVSparkAsset.parse_order_by_sorters(
+            order_by=order_by
+        )
         asset = CSVSparkAsset(
             name=name,
             regex=regex_pattern,
             header=header,
             inferSchema=infer_schema,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
         )
         return self.add_asset(asset)
