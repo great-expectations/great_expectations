@@ -243,7 +243,7 @@ assert validation_result.result == {"observed_value": 2.75}
 
 # Checkpoint
 # NOTE: The following code is only for testing and can be ignored by users.
-context.add_expectation_suite(expectation_suite_name="test_suite")
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 test_suite = context.get_expectation_suite(expectation_suite_name="test_suite")
 
 expectation_config = ExpectationConfiguration(

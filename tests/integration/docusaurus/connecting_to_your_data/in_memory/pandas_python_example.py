@@ -39,7 +39,7 @@ batch_request = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
-context.add_expectation_suite(expectation_suite_name="test_suite")
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )

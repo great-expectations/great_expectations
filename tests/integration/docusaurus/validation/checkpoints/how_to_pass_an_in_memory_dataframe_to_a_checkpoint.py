@@ -65,7 +65,7 @@ assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py add_expectation_suite">
-context.add_expectation_suite("my_expectation_suite")
+context.add_or_update_expectation_suite("my_expectation_suite")
 # </snippet>
 
 # YAML <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_yaml_missing_keys">

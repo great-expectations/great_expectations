@@ -37,7 +37,7 @@ data_connectors:
 datasource = context.add_datasource(**yaml.safe_load(datasource_config))
 
 expectation_suite_name = "my_expectation_suite"
-context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 checkpoint_name = "my_checkpoint"
 checkpoint_config = f"""
