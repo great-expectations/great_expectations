@@ -555,6 +555,15 @@ Run the following [Databricks CLI](https://docs.databricks.com/dev-tools/cli/ind
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
 ```
 
+Using the `displayHTML` command is another option for displaying Data Docs on a Databricks notebook. There is a restriction, though, in that clicking on a link in the display data documents will result in an empty page. If you wish to see some validation results, use this approach.
+
+```python 
+html = '/dbfs/great_expectations/uncommitted/data_docs/local_site/index.html'
+with open(html, "r") as f:
+    data = "".join([l for l in f])
+displayHTML(data)
+```
+
 ### 8. Congratulations!
 You've successfully validated your data with Great Expectations using Databricks and viewed the resulting human-readable Data Docs. Check out our other guides for more customization options and happy validating!
 
