@@ -80,7 +80,7 @@ class InferredAssetFilesystemDataConnector(InferredAssetFilePathDataConnector):
         return str(Path(self.base_directory).joinpath(path))
 
     @property
-    def base_directory(self):
+    def base_directory(self) -> str:
         """
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
         root directory. If it is absolute, then keep as-is.
