@@ -15,8 +15,6 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     DataConnector,
-)
-from great_expectations.experimental.datasources.data_asset.data_connector import (
     S3DataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest

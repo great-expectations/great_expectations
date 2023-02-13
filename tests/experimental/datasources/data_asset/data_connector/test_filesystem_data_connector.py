@@ -8,8 +8,6 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     DataConnector,
-)
-from great_expectations.experimental.datasources.data_asset.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest
