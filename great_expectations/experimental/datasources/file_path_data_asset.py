@@ -79,7 +79,7 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
-    @pydantic.validator("regex")
+    @pydantic.validator("regex", pre=True)
     def parse_regex_string(cls, regex: Optional[Union[Pattern, str]]) -> Pattern:
         pattern: Pattern
         if not regex:

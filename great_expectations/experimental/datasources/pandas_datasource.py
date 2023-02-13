@@ -181,7 +181,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
-        regex_pattern: re.Pattern = ExcelAsset.regex_str_to_pattern(regex=regex)
+        regex_pattern: re.Pattern = ExcelAsset.parse_regex_string(regex=regex)
         order_by_sorters: list[BatchSorter] = ExcelAsset.parse_order_by_sorters(
             order_by=order_by
         )
