@@ -10,7 +10,7 @@ We will cover case with RuntimeDataConnector and use S3 as metadata store.
 ### 0. Pre-requirements
 
 - Configure great_expectations.yaml and upload to your S3 bucket or generate it dynamically from code
-```yaml file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns_great_expectations.yaml#L1-L70
+```yaml name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns_great_expectations.yaml"
 ```
 
 
@@ -20,24 +20,24 @@ You need to add to your AWS Glue Spark Job Parameters to install great expectati
   — additional-python-modules great_expectations
 ```
 Then import necessary libs:
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L1-L13
+```python name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py imports"
 ```
 
 ### 2. Set up Great Expectations
 Here we initialize a Spark and Glue, and read great_expectations.yaml
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L15-L22
+```python name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py set up gx"
 ```
 
 ### 3. Connect to your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L24-L43
+```python name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py connect to data"
 ```
 
 ### 4. Create Expectations
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L45-L62
+```python name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py create expectations"
 ```
 
 ### 5. Validate your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py#L64-L78
+```python name="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py validate your data"
 ```
 
 ### 6. Congratulations!
