@@ -99,6 +99,7 @@ class S3DataConnector(FilePathDataConnector):
         )
         return S3BatchSpec(batch_spec)
 
+    # Interface Method
     def get_data_references(self) -> List[str]:
         query_options: dict = {
             "Bucket": self._bucket,
@@ -117,6 +118,7 @@ class S3DataConnector(FilePathDataConnector):
         ]
         return path_list
 
+    # Interface Method
     def _get_full_file_path(self, path: str) -> str:
         template_arguments: dict = {
             "bucket": self._bucket,

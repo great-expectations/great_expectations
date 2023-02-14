@@ -81,6 +81,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             root_directory_path=self.data_context_root_directory,
         )
 
+    # Interface Method
     def get_data_references(self) -> List[str]:
         base_directory: pathlib.Path = self.base_directory
         glob_directive: str = self._glob_directive
@@ -89,5 +90,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         )
         return sorted(path_list)
 
+    # Interface Method
     def _get_full_file_path(self, path: str) -> str:
         return str(self.base_directory.joinpath(path))
