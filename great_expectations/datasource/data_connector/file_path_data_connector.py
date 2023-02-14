@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Callable, Dict, Iterator, List, Optional, Tuple, cast
 
 import great_expectations.exceptions as gx_exceptions
@@ -190,7 +191,7 @@ class FilePathDataConnector(DataConnector):
         path_list: List[str] = [
             map_batch_definition_to_data_reference_string_using_regex(
                 batch_definition=batch_definition,
-                regex_pattern=pattern,
+                regex_pattern=re.compile(pattern),
                 group_names=group_names,
             )
             for batch_definition in batch_definition_list
@@ -324,7 +325,7 @@ class FilePathDataConnector(DataConnector):
         group_names: List[str] = regex_config["group_names"]
         return map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
-            regex_pattern=pattern,
+            regex_pattern=re.compile(pattern),
             group_names=group_names,
         )
 
