@@ -1,7 +1,7 @@
 import abc
 import enum
 from dataclasses import dataclass
-from typing import Optional, Tuple, Union, cast
+from typing import Optional, Union, cast
 
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import ProfilerConfigurationError
@@ -100,16 +100,14 @@ class CardinalityChecker:
             custom cardinality limit.
     """
 
-    SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES: Tuple[
-        Union[AbsoluteCardinalityLimit, RelativeCardinalityLimit]
-    ] = (
+    SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES = (
         AbsoluteCardinalityLimit,
         RelativeCardinalityLimit,
     )
-    SUPPORTED_LIMIT_MODE_CLASS_NAMES: Tuple[str] = (
+    SUPPORTED_LIMIT_MODE_CLASS_NAMES = (
         mode.__name__ for mode in SUPPORTED_CARDINALITY_LIMIT_MODE_CLASSES
     )
-    SUPPORTED_CARDINALITY_LIMIT_MODE_STRINGS: Tuple[str] = (
+    SUPPORTED_CARDINALITY_LIMIT_MODE_STRINGS = (
         mode.name for mode in CardinalityLimitMode
     )
 
@@ -168,6 +166,52 @@ class CardinalityChecker:
             )
 
     @staticmethod
+    def _to_cardinality_limit_mode(
+        cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None
+    ):
+        if isinstance(cardinality_limit_mode, str):
+            try:
+                return CardinalityLimitMode[cardinality_limit_mode.upper()].value
+            except KeyError:
+                raise ProfilerConfigurationError(
+                    f"Please specify a supported cardinality mode. Supported cardinality modes are {[member.name for member in CardinalityLimitMode]}"
+                )
+        elif isinstance(cardinality_limit_mode, dict):
+            validate_input_parameters(
+                cardinality_limit_mode=cardinality_limit_mode.get("name"),
+                max_unique_values=cardinality_limit_mode.get("max_unique_values"),
+                max_proportion_unique=cardinality_limit_mode.get(
+                    "max_proportion_unique"
+                ),
+                required_num_supplied_params=2,
+            )
+            try:
+                return AbsoluteCardinalityLimit(
+                    name=cardinality_limit_mode["name"],
+                    max_unique_values=cardinality_limit_mode["max_unique_values"],
+                    metric_name_defining_limit=cardinality_limit_mode[
+                        "metric_name_defining_limit"
+                    ],
+                )
+            except (KeyError, ValueError):
+                try:
+                    return RelativeCardinalityLimit(
+                        name=cardinality_limit_mode["name"],
+                        max_proportion_unique=cardinality_limit_mode[
+                            "max_proportion_unique"
+                        ],
+                        metric_name_defining_limit=cardinality_limit_mode[
+                            "metric_name_defining_limit"
+                        ],
+                    )
+                except (KeyError, ValueError):
+                    raise ProfilerConfigurationError(
+                        f"Please specify a supported cardinality mode.  Supported cardinality modes are {[member.name for member in CardinalityLimitMode]}"
+                    )
+        else:
+            return cast(CardinalityLimitMode, cardinality_limit_mode).value
+
+    @staticmethod
     def _convert_to_cardinality_limit_mode(
         cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
         max_unique_values: Optional[int] = None,
@@ -180,55 +224,16 @@ class CardinalityChecker:
         )
 
         if cardinality_limit_mode is not None:
-            if isinstance(cardinality_limit_mode, str):
-                try:
-                    return CardinalityLimitMode[cardinality_limit_mode.upper()].value
-                except KeyError:
-                    raise ProfilerConfigurationError(
-                        f"Please specify a supported cardinality mode. Supported cardinality modes are {[member.name for member in CardinalityLimitMode]}"
-                    )
-            elif isinstance(cardinality_limit_mode, dict):
-                validate_input_parameters(
-                    cardinality_limit_mode=cardinality_limit_mode.get("name"),
-                    max_unique_values=cardinality_limit_mode.get("max_unique_values"),
-                    max_proportion_unique=cardinality_limit_mode.get(
-                        "max_proportion_unique"
-                    ),
-                    required_num_supplied_params=2,
-                )
-                try:
-                    return AbsoluteCardinalityLimit(
-                        name=cardinality_limit_mode["name"],
-                        max_unique_values=cardinality_limit_mode["max_unique_values"],
-                        metric_name_defining_limit=cardinality_limit_mode[
-                            "metric_name_defining_limit"
-                        ],
-                    )
-                except (KeyError, ValueError):
-                    try:
-                        return RelativeCardinalityLimit(
-                            name=cardinality_limit_mode["name"],
-                            max_proportion_unique=cardinality_limit_mode[
-                                "max_proportion_unique"
-                            ],
-                            metric_name_defining_limit=cardinality_limit_mode[
-                                "metric_name_defining_limit"
-                            ],
-                        )
-                    except (KeyError, ValueError):
-                        raise ProfilerConfigurationError(
-                            f"Please specify a supported cardinality mode.  Supported cardinality modes are {[member.name for member in CardinalityLimitMode]}"
-                        )
-            else:
-                return cast(CardinalityLimitMode, cardinality_limit_mode).value
-
-        if max_unique_values is not None:
+            return CardinalityChecker._to_cardinality_limit_mode(cardinality_limit_mode)
+        elif max_unique_values is not None:
             return AbsoluteCardinalityLimit(
                 name=f"CUSTOM_ABS_{max_unique_values}",
                 max_unique_values=max_unique_values,
             )
-
-        if max_proportion_unique is not None:
+        else:
+            assert (
+                max_proportion_unique is not None
+            ), "Guaranteed to have `max_proportion_unique` due to prior call to `validate_input_parameters`"
             return RelativeCardinalityLimit(
                 name=f"CUSTOM_REL_{max_proportion_unique}",
                 max_proportion_unique=max_proportion_unique,
@@ -238,18 +243,16 @@ class CardinalityChecker:
 def validate_input_parameters(
     cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
     max_unique_values: Optional[int] = None,
-    max_proportion_unique: Optional[int] = None,
+    max_proportion_unique: Optional[float] = None,
     required_num_supplied_params: int = 1,
 ) -> None:
     num_supplied_params: int = sum(
-        [
-            0 if param is None else 1
-            for param in (
-                cardinality_limit_mode,
-                max_unique_values,
-                max_proportion_unique,
-            )
-        ]
+        0 if param is None else 1
+        for param in (
+            cardinality_limit_mode,
+            max_unique_values,
+            max_proportion_unique,
+        )
     )
     if num_supplied_params != required_num_supplied_params:
         raise ProfilerConfigurationError(
@@ -264,6 +267,7 @@ def validate_input_parameters(
 
         if required_num_supplied_params == 2:
             try:
+                assert isinstance(cardinality_limit_mode, str)
                 return CardinalityLimitMode[cardinality_limit_mode.upper()].value
             except KeyError:
                 raise ProfilerConfigurationError(
