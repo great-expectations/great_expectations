@@ -7,6 +7,7 @@ from great_expectations.data_context.util import (
     PasswordMasker,
     parse_substitution_variable,
 )
+from great_expectations.exceptions.exceptions import StoreConfigurationError
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class
 
@@ -283,7 +284,7 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     assert PasswordMasker.mask_db_url("sqlite://", use_urlparse=True) == "sqlite://"
 
 
-def test_sanitize_config_azure_blob_store(caplog):
+def test_sanitize_config_azure_blob_store():
     azure_url: str = "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
     assert (
         PasswordMasker.mask_db_url(azure_url)
@@ -291,11 +292,8 @@ def test_sanitize_config_azure_blob_store(caplog):
     )
 
     azure_wrong_url: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
-    assert PasswordMasker.mask_db_url(azure_wrong_url) is None
-    assert (
-        "Something went wrong when trying to obfuscate URL for Azure: 'NoneType' object has no attribute 'group'"
-        in caplog.text
-    )
+    with pytest.raises(StoreConfigurationError):
+        PasswordMasker.mask_db_url(azure_wrong_url)
 
 
 def test_sanitize_config_raises_exception_with_bad_input(

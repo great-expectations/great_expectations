@@ -12,6 +12,7 @@ from urllib.parse import urlparse
 import pyparsing as pp
 
 from great_expectations.alias_types import PathStr  # noqa: TCH001
+from great_expectations.exceptions import StoreConfigurationError
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
@@ -204,19 +205,21 @@ class PasswordMasker:
         return cls._mask_db_url_no_sa(url=url)
 
     @classmethod
-    def _obfuscate_azure_blobstore_connection_string(cls, url: str) -> str | None:
+    def _obfuscate_azure_blobstore_connection_string(cls, url: str) -> str:
         # Parse Azure Connection Strings
         azure_conn_str_re = re.compile(
             "(DefaultEndpointsProtocol=(http|https));(AccountName=([a-zA-Z0-9]+));(AccountKey=)(.+);(EndpointSuffix=([a-zA-Z\\.]+))"
         )
         matched: re.Match[str] | None = azure_conn_str_re.match(url)
-        try:
-            res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"
-            return res
-        except Exception as e:
-            logger.warning(
-                f"Something went wrong when trying to obfuscate URL for Azure: {e}"
-            )
+        if matched:
+            try:
+                res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"
+                return res
+            except Exception as e:
+                raise StoreConfigurationError(
+                    f"Something went wrong when trying to obfuscate URL for Azure connection-string. Please check your configuration: {e}"
+                )
+        return cls._mask_db_url_no_sa(url=url)
 
     @classmethod
     def _mask_db_url_no_sa(cls, url: str) -> str:
