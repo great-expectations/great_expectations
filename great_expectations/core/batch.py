@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import dataclasses
 import datetime
 import json
 import logging
-from typing import Any, Callable, Dict, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Type, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
@@ -10,12 +12,14 @@ from great_expectations.core._docs_decorators import deprecated_argument, public
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
-from great_expectations.experimental.datasources.interfaces import (
-    BatchRequest as XBatchRequest,
-)
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
-from great_expectations.util import deep_filter_properties_iterable
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.util import deep_filter_properties_iterable, load_class
+
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.interfaces import (
+        BatchRequest as XBatchRequest,
+    )
+    from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +41,20 @@ except ImportError:
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
+
+
+def _get_x_batch_request_class() -> Type[XBatchRequest]:
+    """Using this function helps work around circular import dependncies."""
+    module_name = "great_expectations.experimental.datasources.interfaces"
+    class_name = "BatchRequest"
+    return load_class(class_name=class_name, module_name=module_name)
+
+
+def _get_metrics_calculator_class() -> Type[MetricsCalculator]:
+    """Using this function helps work around circular import dependncies."""
+    module_name = "great_expectations.validator.metrics_calculator"
+    class_name = "MetricsCalculator"
+    return load_class(class_name=class_name, module_name=module_name)
 
 
 @public_api
@@ -835,14 +853,17 @@ class Batch(SerializableDictDot):
         Returns:
             A Pandas DataFrame
         """
-        # FIXME - we should use a Validator after resolving circularity
-        # Validator(self._data.execution_engine, batches=(self,)).get_metric(MetricConfiguration("table.head", {"batch_id": self.id}, {"n_rows": n_rows, "fetch_all": fetch_all}))
-        metric = MetricConfiguration(
-            "table.head",
-            {"batch_id": self.id},
-            {"n_rows": n_rows, "fetch_all": fetch_all},
+        self._data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+        metrics_calculator = _get_metrics_calculator_class()(
+            execution_engine=self._data.execution_engine,
+            show_progress_bars=True,
         )
-        return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
+        table_head_df: pd.DataFrame = metrics_calculator.head(
+            n_rows=n_rows,
+            domain_kwargs={"batch_id": self.id},
+            fetch_all=fetch_all,
+        )
+        return table_head_df
 
 
 def materialize_batch_request(
@@ -857,7 +878,7 @@ def materialize_batch_request(
 
     batch_request_class: type
     if "options" in effective_batch_request:
-        batch_request_class = XBatchRequest
+        batch_request_class = _get_x_batch_request_class()
     elif batch_request_contains_runtime_parameters(
         batch_request=effective_batch_request
     ):
@@ -896,7 +917,7 @@ def get_batch_request_as_dict(
     if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
         batch_request = batch_request.to_dict()
 
-    if isinstance(batch_request, XBatchRequest):
+    if isinstance(batch_request, _get_x_batch_request_class()):
         batch_request = dataclasses.asdict(batch_request)
 
     return batch_request
@@ -962,12 +983,14 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
 
     if batch_request:
         if not isinstance(
-            batch_request, (BatchRequest, RuntimeBatchRequest, XBatchRequest)
+            batch_request,
+            (BatchRequest, RuntimeBatchRequest, _get_x_batch_request_class()),
         ):
             raise TypeError(
                 "batch_request must be a BatchRequest, RuntimeBatchRequest, or a "
                 f"experimental.datasources.interfaces.BatchRequest object, not {type(batch_request)}"
             )
+
         datasource_name = batch_request.datasource_name
 
     # ensure that the first parameter is datasource_name, which should be a str. This check prevents users

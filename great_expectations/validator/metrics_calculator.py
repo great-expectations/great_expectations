@@ -1,13 +1,7 @@
 import logging
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -85,7 +79,7 @@ class MetricsCalculator:
                 "batch_id"
             ] = self._execution_engine.batch_manager.active_batch_id
 
-        data: Any = self.get_metric(
+        df: pd.DataFrame = self.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.head",
                 metric_domain_kwargs=domain_kwargs,
@@ -95,18 +89,6 @@ class MetricsCalculator:
                 },
             )
         )
-
-        if isinstance(
-            self._execution_engine, (PandasExecutionEngine, SqlAlchemyExecutionEngine)
-        ):
-            df = pd.DataFrame(data=data)
-        elif isinstance(self._execution_engine, SparkDFExecutionEngine):
-            rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
-            df = pd.DataFrame(data=rows)
-        else:
-            raise gx_exceptions.GreatExpectationsError(
-                "Unsupported or unknown ExecutionEngine type encountered in Validator class."
-            )
 
         return df.reset_index(drop=True, inplace=False)
 
