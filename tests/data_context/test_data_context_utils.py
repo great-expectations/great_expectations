@@ -283,6 +283,21 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     assert PasswordMasker.mask_db_url("sqlite://", use_urlparse=True) == "sqlite://"
 
 
+def test_sanitize_config_azure_blob_store(caplog):
+    azure_url: str = "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    assert (
+        PasswordMasker.mask_db_url(azure_url)
+        == "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=***;EndpointSuffix=core.windows.net"
+    )
+
+    azure_wrong_url: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    assert PasswordMasker.mask_db_url(azure_wrong_url) is None
+    assert (
+        "Something went wrong when trying to obfuscate URL for Azure: 'NoneType' object has no attribute 'group'"
+        in caplog.text
+    )
+
+
 def test_sanitize_config_raises_exception_with_bad_input(
     basic_data_context_config,
 ):
