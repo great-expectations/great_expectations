@@ -1,24 +1,30 @@
+from __future__ import annotations
+
 import logging
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
 
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
-    NumericRangeEstimationResult,
+    NumericRangeEstimationResult,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
 )
 from great_expectations.rule_based_profiler.helpers.util import (
     build_numeric_range_estimation_result,
-    convert_metric_values_to_float_dtype_best_effort,
+    datetime_semantic_domain_type,
 )
-from great_expectations.rule_based_profiler.metric_computation_result import MetricValue
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
-from great_expectations.util import convert_ndarray_float_to_datetime_tuple
+from great_expectations.util import convert_ndarray_to_datetime_dtype_best_effort
+
+if TYPE_CHECKING:
+    from numbers import Number
+
+    import numpy.typing as npt
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -39,30 +45,27 @@ class ExactNumericRangeEstimator(NumericRangeEstimator):
 
     def _get_numeric_range_estimate(
         self,
-        metric_values: np.ndarray,
+        metric_values: npt.NDArray,
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
     ) -> NumericRangeEstimationResult:
-        ndarray_is_datetime_type: bool
-        metric_values_converted: np.ndarray
+        datetime_detected: bool = datetime_semantic_domain_type(domain=domain)
+        metric_values_converted: npt.NDArray
         (
-            ndarray_is_datetime_type,
+            _,
+            _,
             metric_values_converted,
-        ) = convert_metric_values_to_float_dtype_best_effort(
-            metric_values=metric_values
+        ) = convert_ndarray_to_datetime_dtype_best_effort(
+            data=metric_values,
+            datetime_detected=datetime_detected,
+            parse_strings_as_datetimes=True,
+            fuzzy=False,
         )
-
-        min_value: MetricValue = np.amin(a=metric_values_converted)
-        max_value: MetricValue = np.amax(a=metric_values_converted)
-
-        if ndarray_is_datetime_type:
-            min_value, max_value = convert_ndarray_float_to_datetime_tuple(
-                data=[min_value, max_value]
-            )
-
+        min_value: Number = np.amin(a=metric_values_converted)
+        max_value: Number = np.amax(a=metric_values_converted)
         return build_numeric_range_estimation_result(
-            metric_values=metric_values,
+            metric_values=metric_values_converted,
             min_value=min_value,
             max_value=max_value,
         )

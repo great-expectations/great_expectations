@@ -64,7 +64,7 @@ Datasource configurations can be written as YAML files or Python dictionaries.  
 <TabItem value="yaml">
 
 ```python
-datasource_yaml = fr"""
+datasource_yaml = f"""
 name: <name_of_your_datasource>
 class_name: Datasource
 execution_engine:
@@ -144,11 +144,11 @@ You can call `test_yaml_config()` from your Data Context, like so:
 <TabItem value="yaml">
 
 ```python
-import great_expectations as ge
+import great_expectations as gx
 
 datasource_yaml = ""  # Replace this with the yaml string you want to check for errors.
 
-context = ge.get_context()
+context = gx.get_context()
 context.test_yaml_config(datasource_yaml)
 ```
 
@@ -157,12 +157,12 @@ context.test_yaml_config(datasource_yaml)
 <TabItem value="python">
 
 ```python
-import great_expectations as ge
+import great_expectations as gx
 from ruamel import yaml
 
 datasource_config = {}  # Replace this with the Python dictionary you want to check for errors.
 
-context = ge.get_context()
+context = gx.get_context()
 context.test_yaml_config(yaml.dump(datasource_config))
 ```
 

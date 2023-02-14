@@ -8,8 +8,8 @@ import uuid
 
 import pandas as pd
 
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.util import get_context
 
 logging.basicConfig(level=logging.INFO)
 
@@ -65,7 +65,7 @@ def main(
         },
         commented_map=None,
     )
-    context = BaseDataContext(config)
+    context = get_context(config)
     print("Done constructing a DataContext.")
     print("Building a suite and validating.")
     df = pd.DataFrame({"a": [1, 2, 3]})

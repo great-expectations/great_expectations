@@ -1,4 +1,3 @@
-import json
 import logging
 from typing import Callable, Dict, Optional
 
@@ -8,25 +7,27 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.exceptions.exceptions import InvalidExpectationKwargsError
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
-)
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_function_partial,
-    metric_partial,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
+from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.validator import ValidationDependencies
 
 logger = logging.getLogger(__name__)
 
@@ -143,13 +144,12 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
 class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
     """Expect a column to contain string-typed integers to be increasing.
 
-    expect_column_values_to_be_string_integers_increasing is a :func:`column_map_expectation \
-    <great_expectations.dataset.dataset.MetaDataset.column_map_expectation>`.
+    expect_column_values_to_be_string_integers_increasing is a \
+    [Column Map Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations).
 
     Args:
         column (str): \
             The column name.
-
 
     Keyword Args:
         strictly (Boolean or None): \
@@ -157,27 +157,24 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
 
     Other Parameters:
         result_format (str or None): \
-            Which output mode to use: `BOOLEAN_ONLY`, `BASIC`, `COMPLETE`, or `SUMMARY`.
-            For more detail, see :ref:`result_format <result_format>`.
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
         include_config (boolean): \
-            If True, then include the expectation config as part of the result object. \
-            For more detail, see :ref:`include_config`.
+            If True, then include the expectation config as part of the result object.
         catch_exceptions (boolean or None): \
             If True, then catch exceptions and include them as part of the result object. \
-            For more detail, see :ref:`catch_exceptions`.
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
         meta (dict or None): \
-            A JSON-serializable dictionary (nesting allowed) that will be included in the output without
-            modification. For more detail, see :ref:`meta`.
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
 
     Returns:
-        An ExpectationSuiteValidationResult
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
 
-        Exact fields vary depending on the values passed to :ref:`result_format <result_format>` and
-        :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+
     See Also:
-        :func:`expect_column_values_to_be_decreasing \
-        <great_expectations.execution_engine.execution_engine.ExecutionEngine
-        .expect_column_values_to_be_decreasing>`
+        [expect_column_values_to_be_decreasing](https://greatexpectations.io/expectations/expect_column_values_to_be_decreasing)
     """
 
     # This dictionary contains metadata for display in the public gallery
@@ -229,25 +226,26 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
         configuration: Optional[ExpectationConfiguration] = None,
         execution_engine: Optional[ExecutionEngine] = None,
         runtime_configuration: Optional[dict] = None,
-    ) -> dict:
+    ) -> ValidationDependencies:
 
-        dependencies = super().get_validation_dependencies(
+        dependencies: ValidationDependencies = super().get_validation_dependencies(
             configuration=configuration,
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
         metric_kwargs = get_metric_kwargs(
-            metric_name="column_values.string_integers.increasing.map",
+            metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
             configuration=configuration,
             runtime_configuration=runtime_configuration,
         )
 
-        dependencies["metrics"][
-            "column_values.string_integers.increasing.map"
-        ] = MetricConfiguration(
-            metric_name="column_values.string_integers.increasing.map",
-            metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-            metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+        dependencies.set_metric_configuration(
+            metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
+            metric_configuration=MetricConfiguration(
+                metric_name=f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}",
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
         )
 
         return dependencies
@@ -258,10 +256,10 @@ class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
         metrics: Dict,
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
-    ) -> Dict:
+    ) -> ExpectationValidationResult:
 
         string_integers_increasing = metrics.get(
-            "column_values.string_integers.increasing.map"
+            f"column_values.string_integers.increasing.{MetricPartialFunctionTypeSuffixes.MAP.value}"
         )
 
         success = all(string_integers_increasing[0])

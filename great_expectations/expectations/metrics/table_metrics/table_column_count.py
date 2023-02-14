@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -21,37 +21,37 @@ class TableColumnCount(TableMetricProvider):
     def _pandas(
         cls,
         execution_engine: "ExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         columns = metrics.get("table.columns")
-        return len(columns)
+        return len(columns)  # type: ignore[arg-type]
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: "ExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         columns = metrics.get("table.columns")
-        return len(columns)
+        return len(columns)  # type: ignore[arg-type]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: "ExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         columns = metrics.get("table.columns")
-        return len(columns)
+        return len(columns)  # type: ignore[arg-type]
 
     @classmethod
     def _get_evaluation_dependencies(
@@ -74,6 +74,5 @@ class TableColumnCount(TableMetricProvider):
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies

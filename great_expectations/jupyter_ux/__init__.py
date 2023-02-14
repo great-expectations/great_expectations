@@ -137,7 +137,7 @@ Uncomment the next cell and set data_source_name to one of these names.
 
 
 def setup_notebook_logging(logger=None, log_level=logging.INFO):
-    """Set up the provided logger for the GE default logging configuration.
+    """Set up the provided logger for the GX default logging configuration.
 
     Args:
         logger - the logger to configure

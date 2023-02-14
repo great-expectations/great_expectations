@@ -2,6 +2,9 @@
 from ._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
+
+from great_expectations.data_context.migrator.cloud_migrator import CloudMigrator
+
 del get_versions  # isort:skip
 
 from great_expectations.data_context import DataContext

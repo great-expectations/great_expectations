@@ -1,0 +1,56 @@
+<!-- props.inferred: Boolean, should this list include the inferred-specific optional keys? -->
+<!-- props.splitting: Boolean, should this list include the splitting-specific optional keys? -->
+<!-- props.sampling: Boolean, should this list include the sampling-specific optional keys? -->
+<!-- props.introspection: Boolean, should this list include the intorspection-specific optional keys? -->
+
+<ul>
+{ props.inferred &&
+    <span>
+        <li>
+            <strong><code>data_asset_name_prefix</code>:</strong> A string describing an optional prefix to prepend to the names of inferred Data Assets.
+        </li>
+        <li>
+            <strong><code>data_asset_name_suffix</code>:</strong> A string describing an optional suffix to append to the names of inferred Data Assets.
+        </li>
+        <li>
+            <strong><code>include_schema_name</code>:</strong> A boolean value which answers the question : "Should the <code>data_asset_name</code> include the schema as a prefix?"
+        </li>
+        <li>
+            <strong><code>excluded_tables</code>:</strong> A list of tables to ignore when inferring Data Assets.
+        </li>
+        <li>
+            <strong><code>included_tables</code>:</strong> A list that, if defined, will limit the inferred Data Assets to those tables that are included in the list.
+        </li>
+        <li>
+            <strong><code>skip_inapplicable_tables</code>:</strong>  A boolean value.  If <code>True</code>, tables that can't be successfully queried using sampling and splitter methods are excluded from inferred Data Assets. If <code>False</code>, the class will throw an error during initialization if any such tables are encountered.
+        </li>
+    </span>
+}
+{ props.splitting &&
+    <span>
+        <li>
+            <strong><code>splitter_method</code>:</strong> A string that names the method that will be used to split the target table into multiple Batches.
+        </li>
+        <li>
+            <strong><code>splitter_kwargs</code>:</strong> A dictionary containing keyword arguments to pass to <code>splitter_method</code> if <code>splitter_method</code> has been defined.
+        </li>
+    </span>
+}
+{props.sampling &&
+    <span>
+        <li>
+            <strong><code>sampling_method</code>:</strong> A string that names the method that will be used to sample data from returned Batches.
+        </li>
+        <li>
+            <strong><code>sampling_kwargs</code>:</strong> A dictionary containing keyword arguments to pass to <code>sampling_method</code> if <code>sampling_method</code> has been defined.
+        </li>
+    </span>
+}
+{ props.introspection &&
+    <span>
+        <li>
+            <strong><code>introspection_directives</code>:</strong> A dictionary of arguments passed to the introspection method of auto-initializing Expectations and Data Assistants to guide the introspection process.
+        </li>
+    </span>
+}
+</ul>

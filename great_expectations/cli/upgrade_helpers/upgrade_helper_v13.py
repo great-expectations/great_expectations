@@ -5,9 +5,9 @@ from typing import List, Optional, Tuple, Union
 
 from ruamel.yaml.comments import CommentedMap
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint  # noqa: TCH001
 from great_expectations.cli.upgrade_helpers.base_upgrade_helper import BaseUpgradeHelper
 from great_expectations.data_context.store.checkpoint_store import CheckpointStore
 from great_expectations.data_context.types.base import (
@@ -115,7 +115,7 @@ class UpgradeHelperV13(BaseUpgradeHelper):
 
             if len(self.upgrade_checklist["manual"]["checkpoints"]) == 0:
                 self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
-        except ge_exceptions.InvalidTopLevelConfigKeyError:
+        except gx_exceptions.InvalidTopLevelConfigKeyError:
             self.upgrade_log["skipped_checkpoint_config_upgrade"] = True
 
     # noinspection SpellCheckingInspection

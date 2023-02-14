@@ -1,8 +1,9 @@
-from typing import Any, Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.core.batch import (
     BatchRequest,
     standardize_batch_request_display_ordering,
@@ -12,11 +13,16 @@ from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
 )
 from great_expectations.util import deep_filter_properties_iterable
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
     def __init__(
         self,
-        context: DataContext,
+        context: AbstractDataContext,
         expectation_suite_name: str,
         profiler_name: str,
         batch_request: Optional[Union[str, Dict[str, Any]]] = None,
@@ -50,12 +56,9 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
 
         # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
         if self._profiler_name:
-            if self._profiler_name == "onboarding-data-assistant":
-                self._add_onboarding_data_assistant_cells()
-            else:
-                self._add_rule_based_profiler_cells()
+            self._add_rule_based_profiler_cells()
         else:
-            self._add_user_configurable_profiler_cells()
+            self._add_onboarding_data_assistant_cells()
 
         self.add_footer()
 
@@ -131,7 +134,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -140,7 +143,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = ge.data_context.DataContext()
+context = gx.get_context()
 
 batch_request = {self._batch_request}
 
@@ -196,13 +199,13 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = ge.data_context.DataContext()
+context = gx.get_context()
 
 batch_request = {self._batch_request}
 
@@ -237,13 +240,13 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = ge.data_context.DataContext()
+context = gx.get_context()
 
 batch_request = {self._batch_request}
 
@@ -320,6 +323,9 @@ This is highly configurable depending on your goals.
 You can ignore columns, specify cardinality of categorical columns, configure semantic types for columns, even adjust thresholds and/or different estimator parameters, etc.
 You can find more information about OnboardingDataAssistant and other DataAssistant components (please see documentation for the complete set of DataAssistant controls) [how to choose and control the behavior of the DataAssistant tailored to your goals](https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant).
 
+Performance considerations:
+- Latency: We optimized for an explicit "question/answer" design, which means we issue **lots** of queries. Connection latency will impact performance.
+- Data Volume: Small samples of data will often give you a great starting point for understanding the dataset. Consider configuring a sampled asset and profiling a small number of batches.
     """
         )
 

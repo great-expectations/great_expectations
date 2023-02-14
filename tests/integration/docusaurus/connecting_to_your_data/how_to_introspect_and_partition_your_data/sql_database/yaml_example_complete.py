@@ -1,10 +1,10 @@
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.expectations.metrics.import_manager import sa
 
-context = ge.get_context()
+context = gx.get_context()
 
 datasource_yaml = f"""
 name: taxi_datasource
@@ -89,7 +89,7 @@ context.add_datasource(**yaml.load(datasource_yaml))
 available_data_asset_names = context.datasources[
     "taxi_datasource"
 ].get_available_data_asset_names(data_connector_names="whole_table")["whole_table"]
-assert len(available_data_asset_names) == 2
+assert len(available_data_asset_names) == 3
 # Here is a BatchRequest referring to an un-partitioned inferred data_asset.
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
@@ -185,7 +185,7 @@ num_rows = batch_data.execution_engine.engine.execute(
 assert num_rows < 200
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert "taxi_datasource" in [ds["name"] for ds in context.list_datasources()]
 assert "main.yellow_tripdata_sample_2019_01" in set(
     context.get_available_data_asset_names()["taxi_datasource"]["whole_table"]

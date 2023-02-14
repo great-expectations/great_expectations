@@ -3,19 +3,18 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.data_context.base_data_context import (
-    BaseDataContext,
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.data_context.cloud_data_context import (
+    CloudDataContext,
 )
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
-from great_expectations.data_context.types.base import DataContextConfig, GeCloudConfig
-from great_expectations.data_context.types.resource_identifiers import GeCloudIdentifier
+from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
 
@@ -100,12 +99,11 @@ def mocked_post_response(
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
-    empty_base_data_context_in_cloud_mode: BaseDataContext,
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
     profiler_with_id: RuleBasedProfiler,
     mocked_get_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     """
     What does this test do and why?
@@ -115,8 +113,8 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     """
     context = empty_base_data_context_in_cloud_mode
 
-    with mock.patch("requests.put", autospec=True) as mock_put, mock.patch(
-        "requests.get", autospec=True, side_effect=mocked_get_response
+    with mock.patch("requests.Session.put", autospec=True) as mock_put, mock.patch(
+        "requests.Session.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
         return_profiler = context.save_profiler(profiler=profiler_with_id)
 
@@ -126,6 +124,7 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
     )
 
     mock_put.assert_called_once_with(
+        mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
         json={
             "data": {
@@ -137,13 +136,12 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
                 "type": "profiler",
             },
         },
-        **shared_called_with_request_kwargs,
     )
 
     mock_get.assert_called_once_with(
+        mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
         params=None,
-        **shared_called_with_request_kwargs,
     )
 
     assert return_profiler.ge_cloud_id == profiler_with_id.ge_cloud_id
@@ -152,14 +150,13 @@ def test_profiler_save_with_existing_profiler_retrieves_obj_with_id_from_store(
 @pytest.mark.cloud
 @pytest.mark.integration
 def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
-    empty_base_data_context_in_cloud_mode: BaseDataContext,
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
     profiler_without_id: RuleBasedProfiler,
     profiler_id: str,
     mocked_get_response: Callable[[], MockResponse],
     mocked_post_response: Callable[[], MockResponse],
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    shared_called_with_request_kwargs: dict,
 ) -> None:
     """
     What does this test do and why?
@@ -170,9 +167,9 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     context = empty_base_data_context_in_cloud_mode
 
     with mock.patch(
-        "requests.post", autospec=True, side_effect=mocked_post_response
+        "requests.Session.post", autospec=True, side_effect=mocked_post_response
     ) as mock_post, mock.patch(
-        "requests.get", autospec=True, side_effect=mocked_get_response
+        "requests.Session.get", autospec=True, side_effect=mocked_get_response
     ) as mock_get:
         return_profiler = context.save_profiler(profiler=profiler_without_id)
 
@@ -181,6 +178,7 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
     )
 
     mock_post.assert_called_once_with(
+        mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers",
         json={
             "data": {
@@ -191,13 +189,12 @@ def test_profiler_save_with_new_profiler_retrieves_obj_with_id_from_store(
                 },
             },
         },
-        **shared_called_with_request_kwargs,
     )
 
     mock_get.assert_called_once_with(
+        mock.ANY,  # requests.Session object
         f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/profilers/{profiler_id}",
         params=None,
-        **shared_called_with_request_kwargs,
     )
 
     assert return_profiler.ge_cloud_id == profiler_id
@@ -214,7 +211,7 @@ def test_cloud_backed_data_context_add_profiler_e2e(
     mock_save_project_config: mock.MagicMock,
     profiler_rules: dict,
 ) -> None:
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     name = "oss_test_profiler"
     config_version = 1.0
@@ -342,38 +339,40 @@ def mock_get_all_profilers_json(
 @pytest.mark.cloud
 def test_list_profilers(
     empty_ge_cloud_data_context_config: DataContextConfig,
-    ge_cloud_config: GeCloudConfig,
+    ge_cloud_config: GXCloudConfig,
     profiler_names_and_ids: Tuple[Tuple[str, str], Tuple[str, str]],
     mock_get_all_profilers_json: dict,
 ) -> None:
     project_path_name = "foo/bar/baz"
 
-    context = BaseDataContext(
+    context = get_context(
         project_config=empty_ge_cloud_data_context_config,
         context_root_dir=project_path_name,
-        ge_cloud_config=ge_cloud_config,
-        ge_cloud_mode=True,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_mode=True,
     )
 
     profiler_1, profiler_2 = profiler_names_and_ids
     profiler_name_1, profiler_id_1 = profiler_1
     profiler_name_2, profiler_id_2 = profiler_2
 
-    with mock.patch("requests.get", autospec=True) as mock_get:
+    with mock.patch("requests.Session.get", autospec=True) as mock_get:
         mock_get.return_value = mock.Mock(
             status_code=200, json=lambda: mock_get_all_profilers_json
         )
         profilers = context.list_profilers()
 
     assert profilers == [
-        GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.PROFILER,
-            ge_cloud_id=profiler_id_1,
+        GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.PROFILER,
+            cloud_id=profiler_id_1,
             resource_name=profiler_name_1,
         ),
-        GeCloudIdentifier(
-            resource_type=GeCloudRESTResource.PROFILER,
-            ge_cloud_id=profiler_id_2,
+        GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.PROFILER,
+            cloud_id=profiler_id_2,
             resource_name=profiler_name_2,
         ),
     ]

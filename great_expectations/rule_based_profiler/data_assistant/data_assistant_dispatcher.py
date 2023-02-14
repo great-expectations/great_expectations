@@ -1,10 +1,19 @@
-import logging
-from typing import Dict, List, Optional, Set, Type
+from __future__ import annotations
 
-from great_expectations.rule_based_profiler.data_assistant import DataAssistant
+import logging
+from typing import TYPE_CHECKING, Dict, List, Optional, Set, Type
+
+from great_expectations.rule_based_profiler.data_assistant import (
+    DataAssistant,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_runner import (
     DataAssistantRunner,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -17,14 +26,14 @@ class DataAssistantDispatcher:
 
     _registered_data_assistants: Dict[str, Type[DataAssistant]] = {}
 
-    def __init__(self, data_context: "BaseDataContext") -> None:  # noqa: F821
+    def __init__(self, data_context: AbstractDataContext) -> None:
         """
         Args:
-            data_context: BaseDataContext associated with DataAssistantDispatcher
+            data_context: AbstractDataContext associated with DataAssistantDispatcher
         """
         self._data_context = data_context
 
-        self._data_assistant_runner_cache = {}
+        self._data_assistant_runner_cache: dict = {}
 
     def __getattr__(self, name: str) -> DataAssistantRunner:
         # Both, registered data_assistant_type and alias name are supported for invocation.
@@ -58,7 +67,7 @@ class DataAssistantDispatcher:
     @classmethod
     def _register_data_assistant(
         cls,
-        data_assistant: Type[DataAssistant],  # noqa: F821
+        data_assistant: Type[DataAssistant],
     ) -> None:
         """
         This method registers "DataAssistant" subclass for future instantiation and execution of its "run()" method.

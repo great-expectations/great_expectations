@@ -1,8 +1,7 @@
 import datetime
 import json
 import os
-from collections import OrderedDict
-from unittest.mock import patch
+from unittest import mock
 
 import boto3
 import pyparsing as pp
@@ -15,12 +14,10 @@ from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
-from great_expectations.data_context.data_context import BaseDataContext
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store import (
-    GeCloudStoreBackend,
     InMemoryStoreBackend,
     StoreBackend,
     TupleAzureBlobStoreBackend,
@@ -28,16 +25,10 @@ from great_expectations.data_context.store import (
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
 )
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
-)
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
 )
-from great_expectations.data_context.types.base import (
-    CheckpointConfig,
-    DataContextConfig,
-)
+from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     ValidationResultIdentifier,
@@ -45,7 +36,11 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidKeyError, StoreBackendError, StoreError
 from great_expectations.self_check.util import expectationSuiteSchema
-from great_expectations.util import gen_directory_tree_str, is_library_loadable
+from great_expectations.util import (
+    gen_directory_tree_str,
+    get_context,
+    is_library_loadable,
+)
 
 yaml = YAMLHandler()
 
@@ -113,7 +108,7 @@ def basic_data_context_config_for_validation_operator():
 def validation_operators_data_context(
     basic_data_context_config_for_validation_operator, filesystem_csv_4
 ):
-    data_context = BaseDataContext(basic_data_context_config_for_validation_operator)
+    data_context = get_context(basic_data_context_config_for_validation_operator)
 
     data_context.add_datasource(
         "my_datasource",
@@ -1057,7 +1052,7 @@ def test_TupleGCSStoreBackend_base_public_path():
     project = "dummy-project"
     base_public_path = "http://www.test.com/"
 
-    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+    with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.get_bucket.return_value
         mock_blob = mock_bucket.blob.return_value
@@ -1112,7 +1107,7 @@ def test_TupleGCSStoreBackend():
     project = "dummy-project"
     base_public_path = "http://www.test.com/"
 
-    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+    with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
 
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.bucket.return_value
@@ -1135,7 +1130,7 @@ def test_TupleGCSStoreBackend():
             b"aaa", content_type="text/html"
         )
 
-    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+    with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.bucket.return_value
         mock_blob = mock_bucket.blob.return_value
@@ -1156,7 +1151,7 @@ def test_TupleGCSStoreBackend():
             b"aaa", content_type="image/png"
         )
 
-    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+    with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
 
         mock_client = mock_gcs_client.return_value
         mock_bucket = mock_client.bucket.return_value
@@ -1173,7 +1168,7 @@ def test_TupleGCSStoreBackend():
         mock_blob.download_as_string.assert_called_once()
         mock_str.decode.assert_called_once_with("utf-8")
 
-    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+    with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
 
         mock_client = mock_gcs_client.return_value
 
@@ -1192,7 +1187,7 @@ def test_TupleGCSStoreBackend():
         except NotFound:
             pass
 
-    with patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
+    with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
         mock_gcs_client.side_effect = InvalidKeyError("Hi I am an InvalidKeyError")
         with pytest.raises(InvalidKeyError):
             my_store.get(("non_existent_key",))
@@ -1230,7 +1225,7 @@ def test_TupleAzureBlobStoreBackend_connection_string():
         connection_string=connection_string, prefix=prefix, container=container
     )
 
-    with patch(
+    with mock.patch(
         "azure.storage.blob.BlobServiceClient", autospec=True
     ) as mock_azure_blob_client:
 
@@ -1273,10 +1268,10 @@ def test_TupleAzureBlobStoreBackend_account_url():
         account_url=account_url, prefix=prefix, container=container
     )
 
-    with patch(
+    with mock.patch(
         "azure.storage.blob.BlobServiceClient", autospec=True
     ) as mock_azure_blob_client:
-        with patch(
+        with mock.patch(
             "azure.identity.DefaultAzureCredential", autospec=True
         ) as mock_azure_credential:
             mock_container_client = my_store._container_client
@@ -1356,247 +1351,6 @@ def test_TupleS3StoreBackend_list_over_1000_keys():
     assert len(keys) == num_keys_to_add + 1
 
 
-@pytest.mark.cloud
-@pytest.mark.unit
-def test_GeCloudStoreBackend(
-    shared_called_with_request_kwargs: dict, ge_cloud_access_token: str
-):
-    """
-    What does this test test and why?
-
-    Since GeCloudStoreBackend relies on GE Cloud, we mock requests.post, requests.get, and
-    requests.patch and assert that the right calls are made for set, get, list, and remove_key.
-
-    Note that although ge_cloud_access_token is provided (and is a valid UUID), no external
-    requests are actually made as part of this test. The actual value of the token does not
-    matter here but we leverage an existing fixture to mimic the contents of requests made
-    in production. The same logic applies to all UUIDs in this test.
-    """
-    ge_cloud_base_url = "https://app.greatexpectations.io/"
-    ge_cloud_credentials = {
-        "access_token": ge_cloud_access_token,
-        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-    }
-    ge_cloud_resource_type = GeCloudRESTResource.CHECKPOINT
-    my_simple_checkpoint_config: CheckpointConfig = CheckpointConfig(
-        name="my_minimal_simple_checkpoint",
-        class_name="SimpleCheckpoint",
-        config_version=1,
-    )
-    my_simple_checkpoint_config_serialized = (
-        my_simple_checkpoint_config.get_schema_class()().dump(
-            my_simple_checkpoint_config
-        )
-    )
-
-    # test .set
-    with patch("requests.post", autospec=True) as mock_post:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=ge_cloud_resource_type,
-        )
-        my_store_backend.set(("checkpoint", ""), my_simple_checkpoint_config_serialized)
-        mock_post.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "attributes": {
-                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-                        "checkpoint_config": OrderedDict(
-                            [
-                                ("name", "my_minimal_simple_checkpoint"),
-                                ("config_version", 1.0),
-                                ("template_name", None),
-                                ("module_name", "great_expectations.checkpoint"),
-                                ("class_name", "SimpleCheckpoint"),
-                                ("run_name_template", None),
-                                ("expectation_suite_name", None),
-                                ("batch_request", {}),
-                                ("action_list", []),
-                                ("evaluation_parameters", {}),
-                                ("runtime_configuration", {}),
-                                ("validations", []),
-                                ("profilers", []),
-                                ("ge_cloud_id", None),
-                                ("expectation_suite_ge_cloud_id", None),
-                            ]
-                        ),
-                    },
-                }
-            },
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .get
-    with patch("requests.get", autospec=True) as mock_get:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=ge_cloud_resource_type,
-        )
-        my_store_backend.get(
-            (
-                "checkpoint",
-                "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            )
-        )
-        mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
-            "-4bdd-8a42-3c35cce574c6",
-            params=None,
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .list_keys
-    with patch("requests.get", autospec=True) as mock_get:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=ge_cloud_resource_type,
-        )
-        my_store_backend.list_keys()
-        mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .remove_key
-    with patch("requests.delete", autospec=True) as mock_delete:
-        mock_response = mock_delete.return_value
-        mock_response.status_code = 200
-
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=ge_cloud_resource_type,
-        )
-        my_store_backend.remove_key(
-            (
-                "checkpoint",
-                "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            )
-        )
-        mock_delete.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
-            "-4bdd"
-            "-8a42-3c35cce574c6",
-            json={
-                "data": {
-                    "type": "checkpoint",
-                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                    "attributes": {"deleted": True},
-                }
-            },
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .set
-    with patch("requests.post", autospec=True) as mock_post:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
-        )
-        my_store_backend.set(("rendered_data_doc", ""), OrderedDict())
-        mock_post.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
-            json={
-                "data": {
-                    "type": "rendered_data_doc",
-                    "attributes": {
-                        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-                        "rendered_data_doc": OrderedDict(),
-                    },
-                }
-            },
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .get
-    with patch("requests.get", autospec=True) as mock_get:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
-        )
-        my_store_backend.get(
-            (
-                "rendered_data_doc",
-                "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            )
-        )
-        mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
-            "-4bdd-8a42-3c35cce574c6",
-            params=None,
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .list_keys
-    with patch("requests.get", autospec=True) as mock_get:
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
-        )
-        my_store_backend.list_keys()
-        mock_get.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs",
-            **shared_called_with_request_kwargs,
-        )
-
-    # test .remove_key
-    with patch("requests.delete", autospec=True) as mock_delete:
-        mock_response = mock_delete.return_value
-        mock_response.status_code = 200
-
-        my_store_backend = GeCloudStoreBackend(
-            ge_cloud_base_url=ge_cloud_base_url,
-            ge_cloud_credentials=ge_cloud_credentials,
-            ge_cloud_resource_type=GeCloudRESTResource.RENDERED_DATA_DOC,
-        )
-        my_store_backend.remove_key(
-            (
-                "rendered_data_doc",
-                "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
-            )
-        )
-        mock_delete.assert_called_with(
-            "https://app.greatexpectations.io/organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/rendered-data-docs/1ccac18e-7631"
-            "-4bdd"
-            "-8a42-3c35cce574c6",
-            json={
-                "data": {
-                    "type": "rendered_data_doc",
-                    "id": "1ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                    "attributes": {"deleted": True},
-                }
-            },
-            **shared_called_with_request_kwargs,
-        )
-
-
-@pytest.mark.unit
-@pytest.mark.cloud
-def test_GeCloudStoreBackend_casts_str_resource_type_to_GeCloudRESTResource() -> None:
-    ge_cloud_base_url = "https://app.greatexpectations.io/"
-    ge_cloud_credentials = {
-        "access_token": "1234",
-        "organization_id": "51379b8b-86d3-4fe7-84e9-e1a52f4a414c",
-    }
-    ge_cloud_resource_type = "checkpoint"  # Instead of using enum
-
-    my_store_backend = GeCloudStoreBackend(
-        ge_cloud_base_url=ge_cloud_base_url,
-        ge_cloud_credentials=ge_cloud_credentials,
-        ge_cloud_resource_type=ge_cloud_resource_type,
-    )
-
-    assert my_store_backend.ge_cloud_resource_type is GeCloudRESTResource.CHECKPOINT
-
-
 @pytest.mark.integration
 def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
@@ -1616,7 +1370,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     # test valid .set
     key = DataContextVariableKey()
     tuple_ = key.to_tuple()
-    with patch(
+    with mock.patch(
         "great_expectations.data_context.store.InlineStoreBackend._save_changes"
     ) as mock_save:
         inline_store_backend.set(tuple_, new_config_version)
@@ -1704,10 +1458,10 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
 @pytest.mark.integration
 def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
     path_to_great_expectations_yml: str = os.path.join(
-        empty_data_context.root_directory, empty_data_context.GE_YML
+        empty_data_context.root_directory, empty_data_context.GX_YML
     )
 
-    # 1. Set simple string config value and confirm it persists in the GE.yml
+    # 1. Set simple string config value and confirm it persists in the GX.yml
 
     inline_store_backend: InlineStoreBackend = InlineStoreBackend(
         data_context=empty_data_context,
@@ -1730,7 +1484,7 @@ def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> N
 
     assert config_commented_map_from_yaml["config_version"] == new_config_version
 
-    # 2. Set nested dictionary config value and confirm it persists in the GE.yml
+    # 2. Set nested dictionary config value and confirm it persists in the GX.yml
 
     inline_store_backend = InlineStoreBackend(
         data_context=empty_data_context,
@@ -1818,3 +1572,65 @@ def test_InMemoryStoreBackend_build_Key() -> None:
     assert store_backend.build_key(name=name) == DataContextVariableKey(
         resource_name=name
     )
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_add_success():
+    store_backend = InMemoryStoreBackend()
+    key = ("foo",)
+    value = "bar"
+
+    store_backend.add(key=key, value=value)
+    assert key in store_backend.list_keys()
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_add_failure():
+    store_backend = InMemoryStoreBackend()
+    key = ("foo",)
+    value = "bar"
+
+    store_backend.add(key=key, value=value)
+    with pytest.raises(StoreBackendError) as e:
+        store_backend.add(key=key, value=value)
+
+    assert "Store already has the following key" in str(e.value)
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_update_success():
+    store_backend = InMemoryStoreBackend()
+    key = ("foo",)
+    value = "bar"
+    updated_value = "baz"
+
+    store_backend.add(key=key, value=value)
+    store_backend.update(key=key, value=updated_value)
+
+    assert store_backend.get(key) == updated_value
+
+
+@pytest.mark.unit
+def test_InMemoryStoreBackend_update_failure():
+    store_backend = InMemoryStoreBackend()
+    key = ("foo",)
+    value = "bar"
+
+    with pytest.raises(StoreBackendError) as e:
+        store_backend.update(key=key, value=value)
+
+    assert "Store does not have a value associated the following key" in str(e.value)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("previous_key_exists", [True, False])
+def test_InMemoryStoreBackend_add_or_update(previous_key_exists: bool):
+    store_backend = InMemoryStoreBackend()
+    key = ("foo",)
+    value = "bar"
+
+    if previous_key_exists:
+        store_backend.add(key=key, value=None)
+
+    store_backend.add_or_update(key=key, value=value)
+    assert store_backend.get(key) == value

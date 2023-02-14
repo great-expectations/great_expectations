@@ -150,7 +150,7 @@ def test_spark_kwargs_are_passed_through(
 ):
     """
     Ensure that an external SparkSession is not stopped when the spark_config matches
-    the one specified in the GE Context.
+    the one specified in the GX Context.
     """
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")

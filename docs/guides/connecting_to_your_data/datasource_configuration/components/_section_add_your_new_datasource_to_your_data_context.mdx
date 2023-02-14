@@ -1,7 +1,6 @@
 Now that you have verified that you have a valid configuration you can add your new Datasource to your Data Context with the command:
 
-```python
-data_context.add_datasource(**datasource_config)
+```python name="add your datasource to your data_context"
 ```
 
 :::caution
@@ -14,14 +13,7 @@ If the value of `datasource_config["name"]` corresponds to a Datasource that is 
 
 If you want to ensure that you only add a Datasource when it won't overwrite an existing one, you can use the following code instead:
 
-```python
-# add_datasource only if it doesn't already exist in your Data Context
-try:
-    data_context.get_datasource(datasource_config["name"])
-except ValueError:
-    data_context.add_datasource(**datasource_config)
-else:
-    print(f"The datasource {datasource_config["name"]} already exists in your Data Context!")
+```python name="add your datasource to your data_context only if it does not already exit"
 ```
 
 :::

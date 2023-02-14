@@ -1,13 +1,13 @@
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py imports">
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
 
-context = ge.get_context()
+context = gx.get_context()
 # </snippet>
 
 # This utility is not for general use. It is only to support testing.
@@ -77,7 +77,7 @@ context.test_yaml_config(yaml.dump(mysql_datasource_config))
 context.add_datasource(**mysql_datasource_config)
 
 # Tutorial content resumes here.
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py mysql_runtime_batch_request">
 mysql_runtime_batch_request = RuntimeBatchRequest(
     datasource_name="my_mysql_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -86,7 +86,7 @@ mysql_runtime_batch_request = RuntimeBatchRequest(
     batch_identifiers={"batch_id": "default_identifier"},
 )
 # </snippet>
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py pg_runtime_batch_request">
 pg_runtime_batch_request = RuntimeBatchRequest(
     datasource_name="my_postgresql_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -95,12 +95,12 @@ pg_runtime_batch_request = RuntimeBatchRequest(
     batch_identifiers={"batch_id": "default_identifier"},
 )
 # </snippet>
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py get_validator">
 validator = context.get_validator(
     batch_request=mysql_runtime_batch_request,
 )
 # </snippet>
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py profiler">
 profiler = UserConfigurableProfiler(
     profile_dataset=validator,
     excluded_expectations=[
@@ -109,14 +109,14 @@ profiler = UserConfigurableProfiler(
     ],
 )
 # </snippet>
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py build_suite">
 expectation_suite_name = "compare_two_tables"
 suite = profiler.build_suite()
 context.save_expectation_suite(
     expectation_suite=suite, expectation_suite_name=expectation_suite_name
 )
 # </snippet>
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py checkpoint_config">
 my_checkpoint_name = "comparison_checkpoint"
 
 yaml_config = f"""
@@ -129,7 +129,7 @@ expectation_suite_name: {expectation_suite_name}
 
 context.add_checkpoint(**yaml.load(yaml_config))
 # </snippet>
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py run_checkpoint">
 results = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name, batch_request=pg_runtime_batch_request
 )

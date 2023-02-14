@@ -128,3 +128,7 @@ class ProfilerTypeMapping:
         "JSON",
         "json",
     ]
+    OBJECT_TYPE_NAMES = [
+        "OBJECT",
+        "object",
+    ]

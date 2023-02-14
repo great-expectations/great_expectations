@@ -3,7 +3,7 @@ from typing import Dict, List
 import pytest
 
 import great_expectations
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -108,7 +108,7 @@ def test_get_batch_ambiguous_parameter_sqlalchemy_engine(
     """
     context = data_context_with_datasource_sqlalchemy_engine
     # raised by get_batch_list()
-    with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
+    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
         batch_list: List[Batch] = context.get_batch_list(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -282,7 +282,7 @@ def test_get_validator_ambiguous_parameter_sqlalchemy_engine(
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
     context.create_expectation_suite("my_expectations")
     # raised by get_batch_list() in DataContext
-    with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
+    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
         batch_list: List[Batch] = context.get_validator(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",

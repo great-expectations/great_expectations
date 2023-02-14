@@ -11,7 +11,7 @@ title: "Connect to Data: Index"
 - [How to configure a DataConnector to introspect and partition a file system or blob store](../../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store.md)
 - [How to configure a DataConnector to introspect and partition tables in SQL](../../guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md)
 - [How to create a Batch of data from an in-memory Spark or Pandas dataframe or path](../../guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe.md)
-- [How to get a Batch of data from a configured Datasource](../../guides/connecting_to_your_data/how_to_get_a_batch_of_data_from_a_configured_datasource.md)
+- [How to get one or more Batches of data from a configured Datasource](../../guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 
 ## In memory
 - [How to connect to in-memory data in a Pandas dataframe](../../guides/connecting_to_your_data/in_memory/pandas.md)

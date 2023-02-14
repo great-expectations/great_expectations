@@ -4,7 +4,7 @@ from typing import Union
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.checkpoint import (
@@ -20,7 +20,7 @@ from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
-from great_expectations.render.types import RenderedAtomicContent
+from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import deep_filter_properties_iterable
 
 
@@ -450,7 +450,7 @@ def test_simple_checkpoint_persisted_to_store(
 def test_simple_checkpoint_defaults_run_and_no_run_params_raises_checkpoint_error(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults
 ):
-    with pytest.raises(ge_exceptions.CheckpointError) as cpe:
+    with pytest.raises(gx_exceptions.CheckpointError) as cpe:
         # noinspection PyUnusedLocal
         result: CheckpointResult = simple_checkpoint_defaults.run()
     assert (
@@ -1291,7 +1291,7 @@ def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_v
     )
 
     with pytest.raises(
-        ge_exceptions.CheckpointError,
+        gx_exceptions.CheckpointError,
         match='Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
     ):
         checkpoint.run()
@@ -2951,7 +2951,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
     )
 
     with pytest.raises(
-        ge_exceptions.exceptions.InvalidBatchRequestError,
+        gx_exceptions.exceptions.InvalidBatchRequestError,
         match=r"The runtime_parameters dict must have one \(and only one\) of the following keys: 'batch_data', 'query', 'path'.",
     ):
         checkpoint.run(batch_request=runtime_batch_request)
@@ -3411,7 +3411,7 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_batch_request_into_check
     }
 
     with pytest.raises(
-        ge_exceptions.InvalidConfigError,
+        gx_exceptions.InvalidConfigError,
         match='batch_data found in batch_request cannot be saved to CheckpointStore "checkpoint_store"',
     ):
         context.add_checkpoint(**checkpoint_config)
@@ -3468,7 +3468,7 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_validations_into_checkpo
     }
 
     with pytest.raises(
-        ge_exceptions.InvalidConfigError,
+        gx_exceptions.InvalidConfigError,
         match='batch_data found in validations cannot be saved to CheckpointStore "checkpoint_store"',
     ):
         context.add_checkpoint(**checkpoint_config)
@@ -3551,7 +3551,7 @@ def test_running_spark_simplecheckpoint(
 
 
 @pytest.mark.integration
-def run_spark_checkpoint_with_schema(
+def test_run_spark_checkpoint_with_schema(
     context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
 ):
     context = context_with_single_csv_spark_and_suite

@@ -1,24 +1,56 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import deep_filter_properties_iterable
 
 try:
     import sqlalchemy as sa
     from sqlalchemy.engine import Engine
+    from sqlalchemy.engine.reflection import Inspector
     from sqlalchemy.exc import OperationalError
 except ImportError:
     sa = None
     Engine = None
+    Inspector = None
     OperationalError = None
 
 
+@public_api
 class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
-    """
-    A DataConnector that infers data_asset names by introspecting a SQL database
+    """An Inferred Asset Data Connector used to connect to an SQL database.
+
+    This Data Connector determines Data Asset names by introspecting the database schema.
+
+    Args:
+        name: The name of the Data Connector.
+        datasource_name: The name of this Data Connector's Datasource.
+        execution_engine: The Execution Engine object to used by this Data Connector to read the data.
+        data_asset_name_prefix: A prefix to prepend to all names of Data Assets inferred by this Data Connector.
+        data_asset_name_suffix: A suffix to append to all names of Data Asset inferred by this Data Connector.
+        include_schema_name: If True the Data Asset name  will include the schema as a prefix.
+        splitter_method: A method to use to split the target table into multiple Batches.
+        splitter_kwargs: Keyword arguments to pass to the splitter method.
+        sampling_method: A method to use to downsample within a target Batch.
+        sampling_kwargs: Keyword arguments to pass to sampling method.
+        excluded_tables: A list of tables to ignore when inferring Data Asset names.
+        included_tables: A list of tables to include when inferring Data Asset names. When provided, only Data Assets
+            matching this list will be inferred.
+        skip_inapplicable_tables: If True, tables that can't be successfully queried using sampling and splitter methods
+            are excluded from inferred data_asset_names. If False, the class will throw an error during initialization
+            if any such tables are encountered.
+        introspection_directives: Arguments passed to the introspection method to guide introspection. These may be,
+            `schema_name`, which filters to a specific schema,
+            `ignore_information_schemas_and_system_tables`, which defaults to True,
+            `information_schemas`, a list of schemas to consider as informational,
+            `system_tables`, a list of tables to consider system tables,
+            and `include_views` which defaults to True.
+        batch_spec_passthrough: Dictionary with keys that will be added directly to the batch spec.
+        id: The unique identifier for this Data Connector used when running in cloud mode.
     """
 
     def __init__(
@@ -40,29 +72,6 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         batch_spec_passthrough: Optional[dict] = None,
         id: Optional[str] = None,
     ) -> None:
-        """
-        InferredAssetDataConnector for connecting to data on a SQL database
-
-        Args:
-            name (str): The name of this DataConnector
-            datasource_name (str): The name of the Datasource that contains it
-            execution_engine (ExecutionEngine): An ExecutionEngine
-            data_asset_name_prefix (str): An optional prefix to prepend to inferred data_asset_names
-            data_asset_name_suffix (str): An optional suffix to append to inferred data_asset_names
-            include_schema_name (bool): Should the data_asset_name include the schema as a prefix?
-            splitter_method (str): A method to split the target table into multiple Batches
-            splitter_kwargs (dict): Keyword arguments to pass to splitter_method
-            sampling_method (str): A method to downsample within a target Batch
-            sampling_kwargs (dict): Keyword arguments to pass to sampling_method
-            excluded_tables (List): A list of tables to ignore when inferring data asset_names
-            included_tables (List): If not None, only include tables in this list when inferring data asset_names
-            skip_inapplicable_tables (bool):
-                If True, tables that can't be successfully queried using sampling and splitter methods are excluded from inferred data_asset_names.
-                If False, the class will throw an error during initialization if any such tables are encountered.
-            introspection_directives (Dict): Arguments passed to the introspection method to guide introspection
-            batch_spec_passthrough (dict): dictionary with keys that will be added directly to batch_spec
-        """
-
         super().__init__(
             name=name,
             datasource_name=datasource_name,
@@ -126,6 +135,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             ):
                 continue
 
+            schema_name: str = metadata["schema_name"]
             table_name: str = metadata["table_name"]
 
             data_asset_config: dict = deep_filter_properties_iterable(
@@ -135,7 +145,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     "data_asset_name_prefix": self.data_asset_name_prefix,
                     "data_asset_name_suffix": self.data_asset_name_suffix,
                     "include_schema_name": self.include_schema_name,
-                    "schema_name": metadata["schema_name"],
+                    "schema_name": schema_name,
                     "splitter_method": self.splitter_method,
                     "splitter_kwargs": self.splitter_kwargs,
                     "sampling_method": self.sampling_method,
@@ -165,13 +175,12 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     ) from e
 
             # Store an asset config for each introspected data asset.
-            introspected_assets[table_name] = data_asset_config
-
-        self._refresh_data_assets_cache(assets=introspected_assets)
+            introspected_assets[data_asset_name] = data_asset_config
+            self.add_data_asset(name=table_name, config=data_asset_config)
 
     def _introspect_db(  # noqa: C901 - 16
         self,
-        schema_name: str = None,
+        schema_name: Union[str, None] = None,
         ignore_information_schemas_and_system_tables: bool = True,
         information_schemas: Optional[List[str]] = None,
         system_tables: Optional[List[str]] = None,
@@ -190,12 +199,13 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             system_tables = ["sqlite_master"]  # sqlite
 
         engine: Engine = self.execution_engine.engine
-        inspector = sa.inspect(engine)
+        inspector: Inspector = sa.inspect(engine)
 
         selected_schema_name = schema_name
 
         tables: List[Dict[str, str]] = []
-        for schema_name in inspector.get_schema_names():
+        schema_names: List[str] = inspector.get_schema_names()
+        for schema_name in schema_names:
             if (
                 ignore_information_schemas_and_system_tables
                 and schema_name in information_schemas
@@ -205,7 +215,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
             if selected_schema_name is not None and schema_name != selected_schema_name:
                 continue
 
-            for table_name in inspector.get_table_names(schema=schema_name):
+            table_names: List[str] = inspector.get_table_names(schema=schema_name)
+            for table_name in table_names:
                 if ignore_information_schemas_and_system_tables and (
                     table_name in system_tables
                 ):
@@ -246,7 +257,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         # The following code fetches the names of external schemas and tables from a special table
         # 'svv_external_tables'.
         try:
-            if "redshift" == engine.dialect.name.lower():
+            if engine.dialect.name.lower() == GXSqlDialect.REDSHIFT:
                 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
                 result = engine.execute(
                     "select schemaname, tablename from svv_external_tables"

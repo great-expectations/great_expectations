@@ -1,7 +1,9 @@
-import json
-from typing import Any, List, Optional, Set, Union
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
+import json
+from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
+
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
     BatchRequestBase,
@@ -12,13 +14,18 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class Builder(SerializableDictDot):
     """
     A Builder provides methods to serialize any builder object of a rule generically.
     """
 
-    exclude_field_names: Set[str] = {
+    exclude_field_names: ClassVar[Set[str]] = {
         "batch_list",
         "batch_request",
         "data_context",
@@ -26,15 +33,15 @@ class Builder(SerializableDictDot):
 
     def __init__(
         self,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
-            data_context: BaseDataContext associated with this Builder
+            data_context: AbstractDataContext associated with this Builder
         """
-        self._batch_list = None
-        self._batch_request = None
-        self._data_context = data_context
+        self._batch_list: Optional[List[Batch]] = None
+        self._batch_request: Union[BatchRequestBase, dict, None] = None
+        self._data_context: Optional[AbstractDataContext] = data_context
 
     """
     Full getter/setter accessors for "batch_request" and "batch_list" are for configuring Builder dynamically.
@@ -49,7 +56,7 @@ class Builder(SerializableDictDot):
         self._batch_list = value
 
     @property
-    def batch_request(self) -> Optional[Union[BatchRequestBase, dict]]:
+    def batch_request(self) -> Union[BatchRequestBase, dict, None]:
         return self._batch_request
 
     @batch_request.setter
@@ -60,7 +67,7 @@ class Builder(SerializableDictDot):
         self._batch_request = value
 
     @property
-    def data_context(self) -> Optional["BaseDataContext"]:  # noqa: F821
+    def data_context(self) -> Optional[AbstractDataContext]:
         return self._data_context
 
     def set_batch_list_if_null_batch_request(
@@ -94,7 +101,7 @@ class Builder(SerializableDictDot):
             ]
         )
         if num_supplied_batch_specification_args > 1:
-            raise ge_exceptions.ProfilerConfigurationError(
+            raise gx_exceptions.ProfilerConfigurationError(
                 f'Please pass at most one of "batch_list" and "batch_request" arguments (you passed {num_supplied_batch_specification_args} arguments).'
             )
 

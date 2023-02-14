@@ -14,12 +14,12 @@ File-based introspection and partitioning are useful for:
 - Exploring the types, subdirectory location, and filepath naming structures of the files in your dataset, and
 - Organizing the discovered files into <TechnicalTag tag="data_asset" text="Data Assets" /> according to the identified structures.
 
-`Partitioning` enables you to select the desired subsets of your dataset for [Validation](../../reference/validation.md).
+`Partitioning` enables you to select the desired subsets of your dataset for <TechnicalTag tag="validation" text="Validation"/>>.
 
 <Prerequisites>
 
 - [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
-- [Configured a Datasource and Data Connector](../../reference/datasources.md)
+- [Configured a Datasource and Data Connector](../../terms/datasource.md)
   
 </Prerequisites>
 
@@ -27,7 +27,7 @@ We will use the "Yellow Taxi" dataset to walk you through the configuration of `
 bare-bones version of either an `Inferred Asset Data Connector` or a `Configured Asset Data Connector`, we gradually
 build out the configuration to achieve the introspection of your files with the semantics consistent with your goals.
 
-To learn more about <TechnicalTag tag="datasource" text="Datasources" />, <TechnicalTag tag="datasource" text="Data Connectors" />, and <TechnicalTag tag="batch" text="Batch(es)" />, please see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md).
+To learn more about <TechnicalTag tag="datasource" text="Datasources" />, <TechnicalTag tag="datasource" text="Data Connectors" />, and <TechnicalTag tag="batch" text="Batch(es)" />, please see our [Datasources Guide](../../terms/datasource.md).
 
 ## Preliminary Steps
 
@@ -225,7 +225,7 @@ Finally, once your `Data Connector` configuration satisfies your requirements, s
 ```
 
 Consult the
-[How to get a Batch of data from a configured Datasource](./how_to_get_a_batch_of_data_from_a_configured_datasource.md)
+[How to get one or more Batches of data from a configured Datasource](./how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 guide for examples of considerable flexibility in querying `Batch` objects along the different dimensions materialized
 as a result of partitioning the dataset as specified by the `taxi_data_flat` and `taxi_data_year_month` `Data Assets`.
 

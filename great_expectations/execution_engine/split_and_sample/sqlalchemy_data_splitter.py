@@ -14,13 +14,17 @@ not by itself.
             split_query_or_clause = splitter()
 """
 
-from typing import List, Union
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
+from typing import TYPE_CHECKING, List, Union
+
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
+    SplitterMethod,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 try:
     import sqlalchemy as sa
@@ -40,6 +44,14 @@ except ImportError:
     Label = None
     concat = None
 
+if TYPE_CHECKING:
+    import sqlalchemy as sa  # noqa: TCH004
+    from sqlalchemy.sql.expression import Cast, ColumnOperators
+
+    from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+        SqlAlchemyExecutionEngine,
+    )
+
 
 class SqlAlchemyDataSplitter(DataSplitter):
     """Methods for splitting data accessible via SqlAlchemyExecutionEngine.
@@ -52,20 +64,20 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self._dialect = dialect
 
     DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
-        "split_on_year": "get_data_for_batch_identifiers_year",
-        "split_on_year_and_month": "get_data_for_batch_identifiers_year_and_month",
-        "split_on_year_and_month_and_day": "get_data_for_batch_identifiers_year_and_month_and_day",
-        "split_on_date_parts": "get_data_for_batch_identifiers_for_split_on_date_parts",
+        SplitterMethod.SPLIT_ON_YEAR: "get_data_for_batch_identifiers_year",
+        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH: "get_data_for_batch_identifiers_year_and_month",
+        SplitterMethod.SPLIT_ON_YEAR_AND_MONTH_AND_DAY: "get_data_for_batch_identifiers_year_and_month_and_day",
+        SplitterMethod.SPLIT_ON_DATE_PARTS: "get_data_for_batch_identifiers_for_split_on_date_parts",
     }
 
     SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING: dict = {
-        "split_on_whole_table": "get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table",
-        "split_on_column_value": "get_split_query_for_data_for_batch_identifiers_for_split_on_column_value",
-        "split_on_converted_datetime": "get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime",
-        "split_on_divided_integer": "get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer",
-        "split_on_mod_integer": "get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer",
-        "split_on_multi_column_values": "get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values",
-        "split_on_hashed_column": "get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column",
+        SplitterMethod.SPLIT_ON_WHOLE_TABLE: "get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table",
+        SplitterMethod.SPLIT_ON_COLUMN_VALUE: "get_split_query_for_data_for_batch_identifiers_for_split_on_column_value",
+        SplitterMethod.SPLIT_ON_CONVERTED_DATETIME: "get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime",
+        SplitterMethod.SPLIT_ON_DIVIDED_INTEGER: "get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer",
+        SplitterMethod.SPLIT_ON_MOD_INTEGER: "get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer",
+        SplitterMethod.SPLIT_ON_MULTI_COLUMN_VALUES: "get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values",
+        SplitterMethod.SPLIT_ON_HASHED_COLUMN: "get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column",
     }
 
     def split_on_year(
@@ -164,7 +176,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """
         self._validate_date_parts(date_parts)
 
-        date_parts: List[DatePart] = self._convert_date_parts(date_parts)
+        date_parts = self._convert_date_parts(date_parts)
 
         column_batch_identifiers: dict = batch_identifiers[column_name]
 
@@ -203,7 +215,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         date_format_string: str = "%Y-%m-%d",
     ) -> bool:
         """Convert the values in the named column to the given date_format, and split on that"""
-        if self._dialect == "sqlite":
+        if self._dialect == GXSqlDialect.SQLITE:
             return (
                 sa.func.strftime(
                     date_format_string,
@@ -223,7 +235,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         batch_identifiers: dict,
     ) -> bool:
         """Divide the values in the named column by `divisor`, and split on that"""
-        if self._dialect == "sqlite":
+        if self._dialect == GXSqlDialect.SQLITE:
             return (
                 sa.cast(
                     (sa.cast(sa.column(column_name), sa.Integer) / divisor), sa.Integer
@@ -231,7 +243,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 == batch_identifiers[column_name]
             )
 
-        if self._dialect == "mysql":
+        if self._dialect == GXSqlDialect.MYSQL:
             return (
                 sa.cast(
                     sa.func.truncate(
@@ -242,7 +254,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 == batch_identifiers[column_name]
             )
 
-        if self._dialect == "mssql":
+        if self._dialect == GXSqlDialect.MSSQL:
             return (
                 sa.cast(
                     sa.func.round(
@@ -253,7 +265,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 == batch_identifiers[column_name]
             )
 
-        if self._dialect == "awsathena":
+        if self._dialect == GXSqlDialect.AWSATHENA:
             return (
                 sa.cast(
                     sa.func.truncate(
@@ -282,8 +294,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
     ) -> bool:
         """Divide the values in the named column by `mod`, and split on that"""
         if self._dialect in [
-            "sqlite",
-            "mssql",
+            GXSqlDialect.SQLITE,
+            GXSqlDialect.MSSQL,
         ]:
             return (
                 sa.cast(sa.column(column_name), sa.Integer) % mod
@@ -316,7 +328,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         batch_identifiers: dict,
     ) -> bool:
         """Split on the hashed value of the named column"""
-        if self._dialect == "sqlite":
+        if self._dialect == GXSqlDialect.SQLITE:
             return (
                 sa.func.md5(sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits)
                 == batch_identifiers[column_name]
@@ -328,7 +340,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         splitter_method_name: str,
         splitter_kwargs: dict,
@@ -349,21 +361,22 @@ class SqlAlchemyDataSplitter(DataSplitter):
         processed_splitter_method_name: str = self._get_splitter_method_name(
             splitter_method_name
         )
+        batch_identifiers_list: List[dict]
         if self._is_datetime_splitter(processed_splitter_method_name):
             splitter_fn_name: str = self.DATETIME_SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
                 processed_splitter_method_name
             ]
-            batch_identifiers_list: List[dict] = getattr(self, splitter_fn_name)(
+            batch_identifiers_list = getattr(self, splitter_fn_name)(
                 execution_engine, table_name, **splitter_kwargs
             )
         else:
-            batch_identifiers_list: List[
-                dict
-            ] = self.get_data_for_batch_identifiers_for_non_date_part_splitters(
-                execution_engine,
-                table_name,
-                processed_splitter_method_name,
-                splitter_kwargs,
+            batch_identifiers_list = (
+                self.get_data_for_batch_identifiers_for_non_date_part_splitters(
+                    execution_engine,
+                    table_name,
+                    processed_splitter_method_name,
+                    splitter_kwargs,
+                )
             )
 
         return batch_identifiers_list
@@ -383,7 +396,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers_year(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
     ) -> List[dict]:
@@ -409,7 +422,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers_year_and_month(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
     ) -> List[dict]:
@@ -435,7 +448,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers_year_and_month_and_day(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
     ) -> List[dict]:
@@ -481,16 +494,18 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """
         self._validate_date_parts(date_parts)
 
-        date_parts: List[DatePart] = self._convert_date_parts(date_parts)
+        date_parts = self._convert_date_parts(date_parts)
 
         # NOTE: AJB 20220414 concatenating to find distinct values to support all dialects.
         # There are more performant dialect-specific methods that can be implemented in
         # future improvements.
         # NOTE: AJB 20220511 for awsathena we need to cast extracted date parts
         # to string first before concatenating them.
+        concat_clause: list[Label]
+        concat_date_parts: Cast | ColumnOperators
         if len(date_parts) == 1:
             # MSSql does not accept single item concatenation
-            concat_clause: List[Label] = [
+            concat_clause = [
                 sa.func.distinct(
                     sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
                         date_parts[0].value
@@ -502,7 +517,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
             # NOTE: <Alex>6/29/2022</Alex>
             Certain SQLAlchemy-compliant backends (e.g., Amazon Redshift, SQLite) allow only binary operators for "CONCAT".
             """
-            if self._dialect == "sqlite":
+            if self._dialect == GXSqlDialect.SQLITE:
                 concat_date_parts = sa.cast(
                     sa.func.extract(date_parts[0].value, sa.column(column_name)),
                     sa.String,
@@ -517,11 +532,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
                         )
                     )
 
-                concat_clause: List[Label] = [
+                concat_clause = [
                     sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
                 ]
             else:
-                concat_date_parts: concat = sa.func.concat(
+                concat_date_parts = sa.func.concat(
                     "",
                     sa.cast(
                         sa.func.extract(date_parts[0].value, sa.column(column_name)),
@@ -529,7 +544,6 @@ class SqlAlchemyDataSplitter(DataSplitter):
                     ),
                 )
 
-                date_part: DatePart
                 for date_part in date_parts[1:]:
                     concat_date_parts = sa.func.concat(
                         concat_date_parts,
@@ -539,7 +553,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                         ),
                     )
 
-                concat_clause: List[Label] = [
+                concat_clause = [
                     sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
                 ]
 
@@ -557,7 +571,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers_for_split_on_date_parts(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         column_name: str,
         date_parts: Union[List[DatePart], List[str]],
@@ -594,8 +608,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     @staticmethod
     def _execute_split_query(
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
-        split_query: Selectable,  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
+        split_query: Selectable,
     ) -> List[LegacyRow]:
         """Use the provided execution engine to run the split query and fetch all of the results.
 
@@ -609,7 +623,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
         return execution_engine.execute_split_query(split_query)
 
     def _get_params_for_batch_identifiers_from_date_part_splitter(
-        self, column_name: str, result: List[LegacyRow], date_parts: List[DatePart]
+        self,
+        column_name: str,
+        result: List[LegacyRow],
+        date_parts: List[DatePart] | List[str],
     ) -> List[dict]:
         """Get parameters used to build BatchIdentifiers from the results of a get_data_for_batch_identifiers_for_split_on_date_parts
 
@@ -622,7 +639,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         Returns:
             List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
         """
-        date_parts: List[DatePart] = self._convert_date_parts(date_parts)
+        date_parts = self._convert_date_parts(date_parts)
 
         data_for_batch_identifiers: List[dict] = [
             {
@@ -648,7 +665,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_data_for_batch_identifiers_for_non_date_part_splitters(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         table_name: str,
         splitter_method_name: str,
         splitter_kwargs: dict,
@@ -701,8 +718,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
             return self.SPLITTER_METHOD_TO_GET_UNIQUE_BATCH_IDENTIFIERS_METHOD_MAPPING[
                 processed_splitter_method_name
             ]
-        except ValueError as e:
-            raise ge_exceptions.InvalidConfigError(
+        except ValueError:
+            raise gx_exceptions.InvalidConfigError(
                 f"Please provide a supported splitter method name, you provided: {splitter_method_name}"
             )
 
@@ -775,7 +792,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         divisor: int,
     ) -> Selectable:
         """Divide the values in the named column by `divisor`, and split on that"""
-        if self._dialect == "sqlite":
+        if self._dialect == GXSqlDialect.SQLITE:
             return sa.select(
                 [
                     sa.func.distinct(
@@ -787,7 +804,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 ]
             ).select_from(sa.text(table_name))
 
-        if self._dialect == "mysql":
+        if self._dialect == GXSqlDialect.MYSQL:
             return sa.select(
                 [
                     sa.func.distinct(
@@ -802,7 +819,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 ]
             ).select_from(sa.text(table_name))
 
-        if self._dialect == "mssql":
+        if self._dialect == GXSqlDialect.MSSQL:
             return sa.select(
                 [
                     sa.func.distinct(
@@ -818,7 +835,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                 ]
             ).select_from(sa.text(table_name))
 
-        if self._dialect == "awsathena":
+        if self._dialect == GXSqlDialect.AWSATHENA:
             return sa.select(
                 [
                     sa.func.distinct(
@@ -853,8 +870,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
     ) -> Selectable:
         """Divide the values in the named column by `mod`, and split on that"""
         if self._dialect in [
-            "sqlite",
-            "mssql",
+            GXSqlDialect.SQLITE,
+            GXSqlDialect.MSSQL,
         ]:
             return sa.select(
                 [sa.func.distinct(sa.cast(sa.column(column_name), sa.Integer) % mod)]
@@ -887,7 +904,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         hash_digits: int,
     ) -> Selectable:
         """Note: this method is experimental. It does not work with all SQL dialects."""
-        if self._dialect == "sqlite":
+        if self._dialect == GXSqlDialect.SQLITE:
             return sa.select(
                 [
                     sa.func.distinct(

@@ -5,11 +5,11 @@ import numpy as np
 import pytest
 import scipy.stats as stats
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import NP_EPSILON
 from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
@@ -61,7 +61,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         rule_name="my_rule",
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -72,6 +72,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -80,14 +81,13 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {},
                 "metric_name": "table.row_count",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -108,7 +108,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     expected_value: np.ndarray = np.asarray([7510, 8806])
 
@@ -193,7 +193,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         rule_name="my_rule",
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -204,6 +204,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -211,14 +212,13 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {"column": "fare_amount"},
                 "metric_name": "column.min",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -239,7 +239,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -292,8 +292,10 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         domain=domain,
         variables=variables,
         parameters=parameters,
-        recompute_existing_parameter_values=True,
         batch_request=batch_request,
+        runtime_configuration={
+            "recompute_existing_parameter_values": True,
+        },
     )
 
     parameter_node: ParameterNode = (
@@ -311,7 +313,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
@@ -391,7 +393,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         rule_name="my_rule",
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -402,6 +404,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -409,14 +412,13 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {"column": "fare_amount"},
                 "metric_name": "column.min",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -437,7 +439,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -528,7 +530,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         rule_name="my_rule",
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -539,6 +541,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -546,14 +549,13 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {"column": "fare_amount"},
                 "metric_name": "column.min",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -574,7 +576,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -627,8 +629,10 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         domain=domain,
         variables=variables,
         parameters=parameters,
-        recompute_existing_parameter_values=True,
         batch_request=batch_request,
+        runtime_configuration={
+            "recompute_existing_parameter_values": True,
+        },
     )
 
     parameter_node: ParameterNode = (
@@ -646,7 +650,7 @@ def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evalu
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
@@ -739,6 +743,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
 
@@ -791,12 +796,13 @@ provided.
 """
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError, match=error_message):
+    with pytest.raises(gx_exceptions.ProfilerExecutionError, match=error_message):
         numeric_metric_range_parameter_builder.build_parameters(
             domain=domain,
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
 
@@ -856,6 +862,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
 
@@ -921,6 +928,7 @@ to 0.  A false_positive_rate of {NP_EPSILON} has been selected instead.
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
 
@@ -962,7 +970,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         domain_type=MetricDomainTypes.TABLE,
     )
     parameter_container = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -973,6 +981,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -981,14 +990,13 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {},
                 "metric_name": "table.row_count",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -1009,7 +1017,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     expected_value: np.ndarray = np.asarray([6180, 10277])
 
@@ -1107,6 +1115,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -1153,6 +1162,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -1231,6 +1241,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -1278,6 +1289,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (

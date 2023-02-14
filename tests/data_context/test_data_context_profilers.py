@@ -3,23 +3,11 @@ from unittest import mock
 import pytest
 from marshmallow import ValidationError
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch import BatchRequest
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-
-
-def test_list_profilers_raises_configuration_error(empty_data_context: DataContext):
-    with mock.patch(
-        "great_expectations.data_context.DataContext.profiler_store",
-    ) as mock_profiler_store:
-        mock_profiler_store.__get__ = mock.Mock(return_value=None)
-        with pytest.raises(ge_exceptions.StoreConfigurationError) as e:
-            empty_data_context.list_profilers()
-
-    assert "not a configured store" in str(e.value)
 
 
 def test_add_profiler(
@@ -63,7 +51,7 @@ def test_run_profiler_with_dynamic_arguments_emits_proper_usage_stats(
     profiler_name: str,
 ):
     with mock.patch(
-        "great_expectations.data_context.DataContext.profiler_store"
+        "great_expectations.data_context.AbstractDataContext.profiler_store"
     ) as mock_profiler_store:
         mock_profiler_store.__get__ = mock.Mock(return_value=populated_profiler_store)
         empty_data_context_stats_enabled.run_profiler_with_dynamic_arguments(
@@ -94,7 +82,7 @@ def test_run_profiler_on_data_emits_proper_usage_stats(
     profiler_name: str,
 ):
     with mock.patch(
-        "great_expectations.data_context.DataContext.profiler_store"
+        "great_expectations.data_context.AbstractDataContext.profiler_store"
     ) as mock_profiler_store:
         mock_profiler_store.__get__ = mock.Mock(return_value=populated_profiler_store)
         empty_data_context_stats_enabled.run_profiler_on_data(
@@ -134,7 +122,7 @@ def test_save_profiler(
             profiler=profiler_config_with_placeholder_args,
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
 
     with mock.patch(
@@ -145,6 +133,6 @@ def test_save_profiler(
             data_context=mock_data_context,
             profiler_store=populated_profiler_store,
             name="my_profiler",
-            ge_cloud_id=None,
+            id=None,
         )
     assert isinstance(profiler, RuleBasedProfiler)

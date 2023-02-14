@@ -4,9 +4,9 @@ import subprocess
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 
-context = ge.get_context()
+context = gx.get_context()
 
 # NOTE: The following code is only for testing and depends on an environment
 # variable to set the gcp_project. You can replace the value with your own
@@ -256,7 +256,7 @@ assert (
 )
 
 # get the updated context and run a checkpoint to ensure validation store is updated
-context = ge.get_context()
+context = gx.get_context()
 validation_result = context.run_checkpoint(checkpoint_name=checkpoint_name)
 assert validation_result["success"] == True
 list_validation_store_files = (

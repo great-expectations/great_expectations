@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")
@@ -14,7 +14,7 @@ sfWarehouse = os.environ.get("SNOWFLAKE_WAREHOUSE")
 
 CONNECTION_STRING = f"snowflake://{sfUser}:{sfPswd}@{sfAccount}/{sfDatabase}/{sfSchema}?warehouse={sfWarehouse}&application=great_expectations_oss"
 
-context = ge.get_context()
+context = gx.get_context()
 
 datasource_yaml = f"""
 name: my_snowflake_datasource
@@ -63,7 +63,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 # Second test for BatchRequest naming a table
 batch_request = BatchRequest(
@@ -80,7 +80,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_snowflake_datasource"]
 assert f"{sfSchema.lower()}.taxi_data" in set(
     context.get_available_data_asset_names()["my_snowflake_datasource"][

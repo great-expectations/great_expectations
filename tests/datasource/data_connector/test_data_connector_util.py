@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 
 # noinspection PyProtectedMember
@@ -497,7 +497,7 @@ def test_build_sorters_from_config_bad_config():
             "name": "price",
         }
     ]
-    with pytest.raises(ge_exceptions.PluginClassNotFoundError):
+    with pytest.raises(gx_exceptions.PluginClassNotFoundError):
         build_sorters_from_config(sorters_config)
 
     # 2. orderby : not a real order
@@ -508,7 +508,7 @@ def test_build_sorters_from_config_bad_config():
             "name": "price",
         }
     ]
-    with pytest.raises(ge_exceptions.SorterError):
+    with pytest.raises(gx_exceptions.SorterError):
         build_sorters_from_config(sorters_config)
 
 

@@ -1,16 +1,18 @@
 from typing import Dict, List, Optional
 
-from great_expectations.core import ExpectationConfiguration
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-    ExpectationConfigurationBuilder,
+    ExpectationConfigurationBuilder,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
     get_fully_qualified_parameter_names,
     get_parameter_values_for_fully_qualified_parameter_names,
 )
-from great_expectations.rule_based_profiler.rule_state import RuleState
+from great_expectations.rule_based_profiler.rule.rule_state import (
+    RuleState,  # noqa: TCH001
+)
 
 
 class RuleOutput:
@@ -40,9 +42,18 @@ class RuleOutput:
         domain: Domain
         expectation_configuration_builder: ExpectationConfigurationBuilder
         for domain in domains:
-            for (
-                expectation_configuration_builder
-            ) in self.rule_state.rule.expectation_configuration_builders:
+            expectation_configuration_builders: List[ExpectationConfigurationBuilder]
+            if (
+                self.rule_state.rule
+                and self.rule_state.rule.expectation_configuration_builders
+            ):
+                expectation_configuration_builders = (
+                    self.rule_state.rule.expectation_configuration_builders
+                )
+            else:
+                expectation_configuration_builders = []
+
+            for expectation_configuration_builder in expectation_configuration_builders:
                 expectation_configurations.append(
                     expectation_configuration_builder.build_expectation_configuration(
                         domain=domain,

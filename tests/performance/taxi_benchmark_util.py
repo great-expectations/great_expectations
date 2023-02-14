@@ -9,12 +9,13 @@ from typing import List, Optional
 from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.data_context import BaseDataContext
+from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.types.base import (
     ConcurrencyConfig,
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+from great_expectations.util import get_context
 
 
 def create_checkpoint(
@@ -268,7 +269,7 @@ def _create_context(
         concurrency=concurrency_config(),
     )
 
-    context = BaseDataContext(project_config=data_context_config)
+    context = get_context(project_config=data_context_config)
 
     if backend_api == "V3":
         datasource_config = {
@@ -308,7 +309,7 @@ def _create_context(
 
 
 def _add_checkpoint(
-    context: BaseDataContext,
+    context: AbstractDataContext,
     backend_api: str,
     datasource_name: str,
     data_connector_name: str,
@@ -356,7 +357,7 @@ def _add_checkpoint(
         raise ValueError(f"Unsupported backend_api {backend_api}")
 
 
-def _add_expectation_configuration(context: BaseDataContext, suite_name: str):
+def _add_expectation_configuration(context: AbstractDataContext, suite_name: str):
     suite = context.create_expectation_suite(expectation_suite_name=suite_name)
     suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(

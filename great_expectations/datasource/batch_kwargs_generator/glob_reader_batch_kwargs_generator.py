@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import warnings
+from typing import Iterable
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
@@ -219,7 +220,7 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         reader_method=None,
         reader_options=None,
         limit=None,
-    ) -> None:
+    ) -> Iterable[PathBatchKwargs]:
         for path in path_list:
             yield self._build_batch_kwargs_from_path(
                 path,

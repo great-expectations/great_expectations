@@ -1,7 +1,7 @@
 import os
 
-# <snippet>
-import great_expectations as ge
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py imports">
+import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 
 # </snippet>
@@ -9,8 +9,8 @@ from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
 
-# <snippet>
-context = ge.get_context()
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py get_context">
+context = gx.get_context()
 # </snippet>
 
 # NOTE: The following code is only for testing and depends on an environment
@@ -224,7 +224,7 @@ bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py datasource_yaml">
 datasource_yaml = rf"""
 name: my_bigquery_datasource
 class_name: Datasource
@@ -250,13 +250,13 @@ datasource_yaml = datasource_yaml.replace(
 )
 
 context.test_yaml_config(datasource_yaml)
-# <snippet>
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # Test for RuntimeBatchRequest using a query.
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py batch_request">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_bigquery_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -266,7 +266,7 @@ batch_request = RuntimeBatchRequest(
 )
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py create_expectation_suite">
 context.create_expectation_suite(
     expectation_suite_name="test_bigquery_suite", overwrite_existing=True
 )
@@ -276,7 +276,7 @@ validator = context.get_validator(
 )
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py validator_calls">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
@@ -284,11 +284,11 @@ validator.expect_column_values_to_be_between(
 )
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py save_expectation_suite">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py checkpoint_config">
 my_checkpoint_name = "bigquery_checkpoint"
 checkpoint_config = f"""
 name: {my_checkpoint_name}
@@ -308,11 +308,11 @@ validations:
 """
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_checkpoint">
 context.add_checkpoint(**yaml.load(checkpoint_config))
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py run_checkpoint">
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )

@@ -1,11 +1,11 @@
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 CONNECTION_STRING = "sqlite:///data/yellow_tripdata.db"
 
-context = ge.get_context()
+context = gx.get_context()
 
 datasource_config = {
     "name": "my_sqlite_datasource",
@@ -53,7 +53,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 # Here is a BatchRequest naming a table
 batch_request = BatchRequest(
@@ -70,7 +70,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_sqlite_datasource"]
 assert "main.yellow_tripdata_sample_2019_01" in set(
     context.get_available_data_asset_names()["my_sqlite_datasource"][

@@ -3,7 +3,7 @@ from typing import Dict
 
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.util import load_class
-from great_expectations.render.types import RenderedDocumentContent
+from great_expectations.render import RenderedDocumentContent
 from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
@@ -12,7 +12,7 @@ from great_expectations.util import (
 
 class JsonSiteStore(Store):
     """
-    A JsonSiteStore manages the JSON artifacts of our renderers, which allows us to render them into final views in HTML by GE Cloud.
+    A JsonSiteStore manages the JSON artifacts of our renderers, which allows us to render them into final views in HTML by GX Cloud.
 
     """
 
@@ -50,8 +50,8 @@ class JsonSiteStore(Store):
 
     def ge_cloud_response_json_to_object_dict(self, response_json: Dict) -> Dict:
         """
-        This method takes full json response from GE cloud and outputs a dict appropriate for
-        deserialization into a GE object
+        This method takes full json response from GX cloud and outputs a dict appropriate for
+        deserialization into a GX object
         """
         ge_cloud_json_site_id = response_json["data"]["id"]
         json_site_dict = response_json["data"]["attributes"]["rendered_data_doc"]

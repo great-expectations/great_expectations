@@ -39,6 +39,11 @@
     "definition": "A collection of records within a Datasource which is usually named based on the underlying data system and sliced to correspond to a desired specification.",
     "url": "terms/data_asset"
   },
+  "data_assistant": {
+    "term": "Data Assistant",
+    "definition": "A utility that asks questions about your data, gathering information to describe what is observed, and then presents Metrics and proposes Expectations based on the answers.",
+    "url": "terms/data_assistant"
+  },
   "data_connector": {
     "term": "Data Connector",
     "definition": "Provides the configuration details based on the source data system which are needed by a Datasource to define Data Assets.",

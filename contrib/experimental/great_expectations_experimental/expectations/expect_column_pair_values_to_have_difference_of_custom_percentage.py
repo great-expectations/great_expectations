@@ -103,7 +103,7 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
     }
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -119,8 +119,7 @@ class ExpectColumnPairValuesToHaveDifferenceOfCustomPercentage(
         mostly = configuration.kwargs["mostly"]
         percentage = configuration.kwargs["percentage"]
 
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # Check if both columns are provided and values of mostly and percentage are correct
         try:

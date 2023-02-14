@@ -1,6 +1,6 @@
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 
 
 def read_config_from_file(config_filename):
@@ -30,7 +30,7 @@ def test_add_datasource(empty_data_context):
     config_filename = context.root_directory + "/great_expectations.yml"
 
     # Config can't be instantiated
-    with pytest.raises(TypeError):
+    with pytest.raises(gx_exceptions.DatasourceInitializationError):
         context.add_datasource(
             "my_new_datasource",
             **{
@@ -42,7 +42,7 @@ def test_add_datasource(empty_data_context):
     assert "my_new_datasource" not in read_config_from_file(config_filename)
 
     # Config doesn't instantiate an Datasource
-    with pytest.raises(ge_exceptions.DatasourceInitializationError):
+    with pytest.raises(gx_exceptions.DatasourceInitializationError):
         context.add_datasource(
             "my_new_datasource",
             **{

@@ -16,7 +16,7 @@ your data at various levels of granularity:
 <Prerequisites>
 
 - [Configured and loaded a Data Context](../../../tutorials/getting_started/tutorial_setup.md)
-- [Configured a Datasource and Data Connector](../../../reference/datasources.md)
+- [Configured a Datasource and Data Connector](../../../terms/datasource.md)
 - Reviewed [How to configure a DataConnector to introspect and partition a file system or blob store](../how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store.md)
 
 </Prerequisites>

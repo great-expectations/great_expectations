@@ -1,5 +1,10 @@
 import pytest
 
+from great_expectations.data_context.data_context.file_data_context import (
+    FileDataContext,
+)
+from great_expectations.util import get_context
+
 """
 This module specifically tests for combinations of paths for datasource new.
 
@@ -24,12 +29,11 @@ import nbformat
 from click.testing import CliRunner
 from nbconvert.preprocessors import ExecutePreprocessor
 
-from great_expectations import DataContext
 from great_expectations.cli import cli
 
 
-def _run_notebook(context: DataContext) -> None:
-    uncommitted_dir = os.path.join(context.root_directory, context.GE_UNCOMMITTED_DIR)
+def _run_notebook(context: FileDataContext) -> None:
+    uncommitted_dir = os.path.join(context.root_directory, context.GX_UNCOMMITTED_DIR)
     expected_notebook = os.path.join(uncommitted_dir, "datasource_new.ipynb")
     with open(expected_notebook) as f:
         nb = nbformat.read(f, as_version=4)
@@ -38,7 +42,7 @@ def _run_notebook(context: DataContext) -> None:
 
 
 def _run_cli_datasource_new_path_test(
-    context: DataContext, args: str, invocation_input: str, base_path: str
+    context: FileDataContext, args: str, invocation_input: str, base_path: str
 ) -> None:
     root_dir = context.root_directory
     runner = CliRunner(mix_stderr=True)
@@ -53,7 +57,7 @@ def _run_cli_datasource_new_path_test(
 
     # Renew a context since we executed a notebook in a different process
     del context
-    context = DataContext(root_dir)
+    context = get_context(context_root_dir=root_dir)
     assert context.list_datasources() == [
         {
             "name": "my_datasource",

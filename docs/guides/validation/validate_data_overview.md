@@ -54,7 +54,7 @@ Running your Checkpoint once it is fully set up is very straight forward.  You c
 
 When a Checkpoint finishes Validation, its Validation Results are automatically compiled as Data Docs.  You can find these results in the Validation Results tab of your Data Docs, and clicking in to an individual Validation Result in the Data Docs will bring up a detailed list of all the Expectations that ran, as well as which (if any) Expectations passed and which (if any) failed.
 
-For more information, see our [documentation for Data Docs](../../reference/data_docs.md). 
+For more information, see our documentation for <TechnicalTag tag="data_docs" text="Data Docs"/>. 
 
 ## Wrapping up
 

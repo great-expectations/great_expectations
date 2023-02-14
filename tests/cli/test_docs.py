@@ -4,9 +4,8 @@ from unittest import mock
 import pytest
 from click.testing import CliRunner
 
-from great_expectations import DataContext
 from great_expectations.cli import cli
-from great_expectations.data_context import BaseDataContext
+from great_expectations.util import get_context
 from tests.cli.utils import (
     VALIDATION_OPERATORS_DEPRECATION_MESSAGE,
     assert_no_logging_messages_or_tracebacks,
@@ -185,7 +184,7 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
     )
     assert mock_emit.call_args_list == expected_usage_stats_messages
 
-    context = DataContext(root_dir)
+    context = get_context(context_root_dir=root_dir)
     obs_urls = context.get_docs_sites_urls()
 
     assert len(obs_urls) == 1
@@ -195,7 +194,7 @@ def test_docs_build_happy_paths_build_site_on_single_site_context(
             in obs_urls[0]["site_url"]
         )
         site_dir = os.path.join(
-            root_dir, context.GE_UNCOMMITTED_DIR, "data_docs", "local_site"
+            root_dir, context.GX_UNCOMMITTED_DIR, "data_docs", "local_site"
         )
         assert os.path.isdir(site_dir)
         # Note the fixture has no expectations or validations - only check the index
@@ -219,8 +218,8 @@ def context_with_two_sites(titanic_data_context_stats_enabled_config_version_3):
         },
         "site_index_builder": {"class_name": "DefaultSiteIndexBuilder"},
     }
-    temp_context = BaseDataContext(config, context_root_dir=context.root_directory)
-    new_context = DataContext(context.root_directory)
+    temp_context = get_context(config, context_root_dir=context.root_directory)
+    new_context = get_context(context_root_dir=context.root_directory)
     new_context.set_config(temp_context.get_config_with_variables_substituted())
     new_context._save_project_config()
     assert new_context.get_site_names() == ["local_site", "team_site"]
@@ -414,11 +413,11 @@ def test_docs_build_happy_paths_build_site_on_multiple_site_context(
     )
     assert mock_emit.call_args_list == expected_usage_stats_messages
 
-    context = DataContext(root_dir)
+    context = get_context(context_root_dir=root_dir)
     for expected_site_name in expected_built_site_names:
         assert expected_site_name in stdout
         site_dir = os.path.join(
-            root_dir, context.GE_UNCOMMITTED_DIR, "data_docs", expected_site_name
+            root_dir, context.GX_UNCOMMITTED_DIR, "data_docs", expected_site_name
         )
         assert os.path.isdir(site_dir)
         # Note the fixture has no expectations or validations - only check the index
@@ -507,7 +506,7 @@ def context_with_site_built(titanic_data_context_stats_enabled_config_version_3)
     assert len(obs_urls) == 1
     expected_index_path = os.path.join(
         context.root_directory,
-        context.GE_UNCOMMITTED_DIR,
+        context.GX_UNCOMMITTED_DIR,
         "data_docs",
         "local_site",
         "index.html",
@@ -656,7 +655,7 @@ def test_docs_clean_happy_paths_clean_expected_sites(
     ]
     expected_index_path = os.path.join(
         context.root_directory,
-        context.GE_UNCOMMITTED_DIR,
+        context.GX_UNCOMMITTED_DIR,
         "data_docs",
         "local_site",
         "index.html",

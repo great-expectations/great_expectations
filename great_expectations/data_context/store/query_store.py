@@ -1,7 +1,7 @@
 import logging
 from string import Template
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
 from great_expectations.util import filter_properties_dict
@@ -34,7 +34,7 @@ class SqlAlchemyQueryStore(Store):
         store_name=None,
     ) -> None:
         if not sqlalchemy:
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "sqlalchemy module not found, but is required for "
                 "SqlAlchemyQueryStore"
             )
@@ -60,7 +60,7 @@ class SqlAlchemyQueryStore(Store):
                     self._store_backend.set(tuple([k]), v)
 
             except (AssertionError, KeyError) as e:
-                raise ge_exceptions.InvalidConfigError(str(e))
+                raise gx_exceptions.InvalidConfigError(str(e))
 
         if "engine" in credentials:
             self.engine = credentials["engine"]

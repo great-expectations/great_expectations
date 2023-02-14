@@ -43,7 +43,7 @@ We recommend placing it in your project directory, for example ``great_expectati
 
 **main.py:**
 
-```python file=../../../../tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py#L89-L118
+```python name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py imports"
 ```
 
 ### 3. If you haven't done so already, authenticate the gcloud CLI and set the project
@@ -107,6 +107,6 @@ Issue the following CLI command: ``gcloud app browse``. If successful, the gclou
 
 - [Google App Engine](https://cloud.google.com/appengine/docs/standard/python3)
 - [Controlling App Access with Firewalls](https://cloud.google.com/appengine/docs/standard/python3/creating-firewalls)
-- [Core concepts: Data Docs](../../../reference/data_docs.md)
+- <TechnicalTag tag="data_docs" text="Data Docs"/>
 - To view the full script used in this page, see it on GitHub: [how_to_host_and_share_data_docs_on_gcs.py](https://github.com/great-expectations/great_expectations/tree/develop/tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py)
 

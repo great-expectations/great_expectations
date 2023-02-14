@@ -1,7 +1,6 @@
 Now that you have a full Datasource configuration, you can confirm that it is valid by testing it with the `.test_yaml_config(...)` method.  To do this, execute the Python code:
 
-```python
-data_context.test_yaml_config(yaml.dump(datasource_config))
+```python name="test your config with test_yaml_config"
 ```
 
 When executed, `test_yaml_config` will instantiate the component described by the yaml configuration that is passed in and then run a self check procedure to verify that the component works as expected.

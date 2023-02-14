@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
@@ -15,7 +15,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 
 yaml = yaml.YAML(typ="safe")
 
-context = ge.get_context()
+context = gx.get_context()
 
 # Add datasource for all tests
 datasource_yaml = """
@@ -100,7 +100,7 @@ typed_results = {
     "success": True,
 }
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py results">
 results = {
     "run_id": RunIdentifier,
     "run_results": {
@@ -145,7 +145,7 @@ validator.expect_table_row_count_to_be_between(
 )
 validator.save_expectation_suite(discard_failed_expectations=False)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting">
 no_nesting = f"""
 name: my_checkpoint
 config_version: 1
@@ -177,7 +177,7 @@ runtime_configuration:
 """
 # </snippet>
 context.add_checkpoint(**yaml.load(no_nesting))
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
 assert results.success is True
@@ -194,7 +194,7 @@ assert (
     == 1000
 )
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults">
 nesting_with_defaults = """
 name: my_checkpoint
 config_version: 1
@@ -230,12 +230,12 @@ runtime_configuration:
 """
 # </snippet>
 context.add_checkpoint(**yaml.load(nesting_with_defaults))
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
 assert results.success is True
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets">
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
@@ -253,7 +253,7 @@ assert second_expectation_suite == "my_expectation_suite"
 assert second_data_asset == "yellow_tripdata_sample_2019-02"
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results">
 documentation_results = """
 print(first_expectation_suite)
 my_expectation_suite
@@ -270,7 +270,7 @@ yellow_tripdata_sample_2019-02
 # </snippet>
 
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime">
 keys_passed_at_runtime = """
 name: my_base_checkpoint
 config_version: 1
@@ -297,7 +297,7 @@ runtime_configuration:
 # </snippet>
 context.add_checkpoint(**yaml.load(keys_passed_at_runtime))
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_3">
 results = context.run_checkpoint(
     checkpoint_name="my_base_checkpoint",
     validations=[
@@ -321,7 +321,7 @@ results = context.run_checkpoint(
 )
 # </snippet>
 assert results.success is True
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_2">
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
@@ -340,7 +340,7 @@ assert second_expectation_suite == "my_other_expectation_suite"
 assert second_data_asset == "yellow_tripdata_sample_2019-02"
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_2">
 documentation_results = """
 print(first_expectation_suite)
 my_expectation_suite
@@ -359,7 +359,7 @@ yellow_tripdata_sample_2019-02
 context.create_expectation_suite("my_expectation_suite", overwrite_existing=True)
 context.create_expectation_suite("my_other_expectation_suite", overwrite_existing=True)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template">
 using_template = """
 name: my_checkpoint
 config_version: 1
@@ -379,11 +379,11 @@ validations:
 """
 # </snippet>
 context.add_checkpoint(**yaml.load(using_template))
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_4">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
 assert results.success is True
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_3">
 first_validation_result = list(results.run_results.items())[0][1]["validation_result"]
 second_validation_result = list(results.run_results.items())[1][1]["validation_result"]
 
@@ -402,7 +402,7 @@ assert second_expectation_suite == "my_other_expectation_suite"
 assert second_data_asset == "yellow_tripdata_sample_2019-02"
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_3">
 documentation_results = """
 print(first_expectation_suite)
 my_expectation_suite
@@ -419,7 +419,7 @@ yellow_tripdata_sample_2019-02
 # </snippet>
 
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint">
 using_simple_checkpoint = """
 name: my_checkpoint
 config_version: 1
@@ -440,13 +440,13 @@ using_simple_checkpoint = using_simple_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
 context.add_checkpoint(**yaml.load(using_simple_checkpoint))
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_5">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
 assert results.success is True
 validation_result = list(results.run_results.items())[0][1]["validation_result"]
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite">
 expectation_suite = validation_result["meta"]["expectation_suite_name"]
 data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
 
@@ -454,14 +454,14 @@ assert expectation_suite == "my_expectation_suite"
 assert data_asset == "yellow_tripdata_sample_2019-01"
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_4">
 documentation_results: str = """
 print(expectation_suite)
 my_expectation_suite
 """
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint">
 equivalent_using_checkpoint = """
 name: my_checkpoint
 config_version: 1
@@ -497,13 +497,13 @@ equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
 context.add_checkpoint(**yaml.load(equivalent_using_checkpoint))
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_6">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
 assert results.success is True
 validation_result = list(results.run_results.items())[0][1]["validation_result"]
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite_2">
 expectation_suite = validation_result["meta"]["expectation_suite_name"]
 data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
 
@@ -511,7 +511,7 @@ assert expectation_suite == "my_expectation_suite"
 assert data_asset == "yellow_tripdata_sample_2019-01"
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_5">
 documentation_results: str = """
 print(expectation_suite)
 my_expectation_suite

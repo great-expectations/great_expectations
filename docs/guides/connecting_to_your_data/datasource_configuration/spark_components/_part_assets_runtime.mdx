@@ -5,28 +5,7 @@ import CautionRuntimeBatchIdentifierValues from '../components/_caution_runtime_
 
 The full configuration for your Datasource should now look like:
 
-```python
-datasource_config: dict = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_runtime_data_connector": {
-            "class_name": "RuntimeDataConnector",
-            "batch_spec_passthrough": {
-                "reader_method": "csv",
-                "reader_options": {
-                    "header": True,
-                    "inferSchema": True,
-            },
-            "batch_identifiers": ["batch_timestamp"],
-        }
-    }
-}
+```python name="full datasource_config for runtime spark datasource"
 ```
 
 <CautionRuntimeBatchIdentifierValues />

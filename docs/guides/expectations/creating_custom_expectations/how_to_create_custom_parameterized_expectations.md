@@ -18,7 +18,7 @@ A Parameterized <TechnicalTag tag="expectation" text="Expectation"/> is a capabi
 
 ### 1. Select an Expectation to inherit from
 
-For the purpose of this exercise, we will implement the Expectations `expect_column_mean_to_be_positive` and `expect_column_values_to_be_two_letter_country_code` - realistic Expectations 
+For the purpose of this exercise, we will implement the Expectations `expect_column_mean_to_be_positive` and `expect_column_values_to_be_two_letter_country_code` - realistic Expectations
 of the data that can easily inherit from `expect_column_mean_to_be_between` and `expect_column_values_to_be_in_set` respectively.
 
 ### 2. Select default values for your class
@@ -29,19 +29,36 @@ As can be seen in the implementation below, we have chosen to keep our default m
 
 Notice that we do not need to set `default_kwarg_values` for all kwargs: it is sufficient to set them only for ones for which we would like to set a default value. To keep our implementation simple, we do not override the `metric_dependencies` or `success_keys`.
 
-````python
-class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
-   default_kwarg_values = {
-       "min_value": 0,
-       "strict_min": True,
-   }
+````python name="tests/expectations/core/test_expect_column_mean_to_be_positive.py ExpectColumnMeanToBePositive_class_def"
 ````
+
+:::info
+We could also explicitly override our parent methods to modify the behavior of our new Expectation, for example by updating the configuration validation to require the values we set as defaults not be altered.
+
+```python name="tests/expectations/core/test_expect_column_mean_to_be_positive.py validate_config"
+```
+:::
+
+For another example, let's take a look at `expect_column_values_to_be_in_set`.
+
+In this case, we will only be changing our `value_set`:
+
+```python name="tests/expectations/core/test_expect_column_values_to_be_in_set.py ExpectColumnValuesToBeTwoLetterCountryCode_class_def"
+```
+
+That's all there is to it - really!
+
+<div style={{"text-align":"center"}}>
+<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
+Congratulations!<br/>&#127881; You've just built your first Parameterized Custom Expectation! &#127881;
+</b></p>
+</div>
 
 ### 3. Contribution (Optional)
 
 If you plan to contribute your Expectation to the public open source project, you should include a `library_metadata` object. For example:
 
-```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L28
+```python name="tests/expectations/core/test_expect_column_mean_to_be_positive.py library_metadata"
 ```
 
 This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
@@ -51,29 +68,3 @@ Additionally, you will need to implement some basic examples and test cases befo
 :::note
 For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
 :::
-
-## Additional Notes
-
-```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L13-L19
-```
-
-We could also explicitly override our parent methods to modify the behavior of our new Expectation, for example by updating the configuration validation to require the values we set as defaults not be altered.
-
-```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L21-L26
-```
-
-Now for `expect_column_values_to_be_in_set`.
-
-In this case, we will only be changing our `value_set`:
-
-```python file=../../../../tests/expectations/core/test_expect_column_values_to_be_in_set.py#L15-L18
-```
-
-That's all there is to it - really!
-
-<div style={{"text-align":"center"}}>  
-<p style={{"color":"#8784FF","font-size":"1.4em"}}><b>  
-Congratulations!<br/>&#127881; You've just built your first Parameterized Custom Expectation! &#127881;  
-</b></p>  
-</div>
-

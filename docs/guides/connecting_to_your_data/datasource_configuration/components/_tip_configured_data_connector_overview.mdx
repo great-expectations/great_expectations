@@ -1,11 +1,5 @@
 :::tip
 
-A `ConfiguredAssetDataConnector` allows you to have the most fine-tuning, and requires an explicit listing of each Data Asset you want to connect to.
-
-However, a `ConfiguredAssetDataConnector` can be used to functionally duplicate the ability of an `InferredAssetDataConnector` to grant access to all files in a folder based on a regex match by defining a Data Asset that uses the same `pattern` as you would use in an `InferredAssetDataConnector`'s `default_regex`.  This will cause the Data Asset in question to have one Batch for each matched file, just as the `InferredAssetDataConnector` would have one Data Asset for each file.  Therefore, the only difference would be in how you accessed the data in question.
-
-With an `InferredAssetDataConnector`, you would need to provide your Batch Request the name of the Data Asset in question in order to retrieve it as a Batch from a Batch Request.
-
-With a `ConfiguredAssetDataConnector`, you would provide your Batch Request with the name of the Data Asset that was configured with an `InferredAssetDataConnector` style pattern, and then provide the same name as you would have used for an `InferredAssetDataConnector`'s Data Asset as a `batch_identifier` in your Batch Request.  This will result in the `ConfiguredAssetDataConnector` providing the same data in response to the Batch Request as an `InferredAssetDataConnector` requesting the data as a Data Asset would.
+A `ConfiguredAssetDataConnector` enables the most fine-tuning, allowing you to easily work with multiple Batches.  It also requires an explicit listing of each Data Asset you connect to and how Batches or defined within that Data Asset, which makes it very clear what Data Assets are being provided when you reference it in Profilers, Batch Requests, or Checkpoints..
 
 :::

@@ -4,8 +4,10 @@ from typing import List
 
 import click
 
-from great_expectations import DataContext
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations import DataContext  # noqa: TCH001
+from great_expectations.checkpoint.types.checkpoint_result import (
+    CheckpointResult,  # noqa: TCH001
+)
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -165,7 +167,7 @@ def _verify_checkpoint_does_not_exist(
 def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
     return os.path.abspath(
         os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+            context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )
 
@@ -326,7 +328,7 @@ def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
 
     script_name: str = f"run_{checkpoint}.py"
     script_path: str = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, script_name
+        context.root_directory, context.GX_UNCOMMITTED_DIR, script_name
     )
 
     if os.path.isfile(script_path):

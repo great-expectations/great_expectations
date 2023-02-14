@@ -1,7 +1,7 @@
 import abc
 import enum
 from dataclasses import dataclass
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, cast
 
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import ProfilerConfigurationError
@@ -147,8 +147,13 @@ class CardinalityChecker:
         self._validate_metric_value(metric_value=metric_value)
         if isinstance(self._cardinality_limit_mode, AbsoluteCardinalityLimit):
             return metric_value <= self._cardinality_limit_mode.max_unique_values
-        elif isinstance(self._cardinality_limit_mode, RelativeCardinalityLimit):
+
+        if isinstance(self._cardinality_limit_mode, RelativeCardinalityLimit):
             return metric_value <= self._cardinality_limit_mode.max_proportion_unique
+
+        raise ValueError(
+            f'Unknown "cardinality_limit_mode" mode "{self._cardinality_limit_mode}" encountered.'
+        )
 
     @staticmethod
     def _validate_metric_value(metric_value: float) -> None:
@@ -215,7 +220,7 @@ class CardinalityChecker:
                             f"Please specify a supported cardinality mode.  Supported cardinality modes are {[member.name for member in CardinalityLimitMode]}"
                         )
             else:
-                return cardinality_limit_mode.value
+                return cast(CardinalityLimitMode, cardinality_limit_mode).value
 
         if max_unique_values is not None:
             return AbsoluteCardinalityLimit(

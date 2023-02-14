@@ -43,27 +43,10 @@ Let's follow the outline in this diagram to follow the journey from BatchRequest
       communicate parameters to a specific Execution Engine.
     * When resolved, the BatchRequest may point to many BatchDefinitions and Batches.
     * BatchRequests can be defined as dictionaries, or by instantiating a BatchRequest object.
-    
-    ```python
-    batch_request = {
-        "datasource": "myds",
-        "data_connector": "pipeline",
-        "in_memory_dataset": df,
-        "data_connector_query" : {
-          "batch_filter_parameters" : {
-              "airflow_run_id": my_run_id,
-              "other_key": my_other_key
-          }
-          "custom_filter_function": my_filter_fn,
-          "limit": 10,
-          "index": Optional[Union[int, list, tuple, slice, str]],  # examples: 0; "-1"; [3:7]; "[2:4]"
-        },
-        "sampling": {
-            "limit": 1000,
-            "sample": 0.1
-        }
-    }
-    ```
+
+
+```python file=../../tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py#L76-L89
+```
     
 2. The Datasource finds the Data Connector indicated by the BatchRequest, and uses it to obtain a BatchDefinition list.
 

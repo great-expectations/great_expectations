@@ -26,16 +26,22 @@ def get_extras_require():
         "snowflake",
         "teradata",
         "trino",
+        "vertica",
     )
     ignore_keys = (
         "sqlalchemy",
         "test",
-        "dev-tools",
+        "tools",
         "all-contrib-expectations",
     )
-    rx_fname_part = re.compile(r"requirements-dev-(.*).txt")
-    for fname in sorted(glob("requirements-dev-*.txt")):
-        key = rx_fname_part.match(fname).group(1)
+    requirements_dir = "reqs"
+    rx_fname_part = re.compile(rf"{requirements_dir}/requirements-dev-(.*).txt")
+    for fname in glob(f"{requirements_dir}/*.txt"):
+        match = rx_fname_part.match(fname)
+        assert (
+            match is not None
+        ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
+        key = match.group(1)
         if key in ignore_keys:
             continue
         with open(fname) as f:
@@ -44,9 +50,10 @@ def get_extras_require():
 
     lite = results.pop("lite")
     contrib = results.pop("contrib")
+    docs_test = results.pop("api-docs-test")
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["test"] = lite + contrib
+    results["test"] = lite + contrib + docs_test
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]
@@ -75,7 +82,9 @@ config = {
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
     "extras_require": get_extras_require(),
-    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
+    "packages": find_packages(
+        exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
+    ),
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
@@ -97,6 +106,7 @@ config = {
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
 }
 

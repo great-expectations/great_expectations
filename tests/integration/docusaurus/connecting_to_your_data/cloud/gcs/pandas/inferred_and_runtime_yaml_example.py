@@ -1,18 +1,18 @@
 from typing import List
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py imports">
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
 
 # </snippet>
 
-# <snippet>
-context = ge.get_context()
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py get_context">
+context = gx.get_context()
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py datasource_yaml">
 datasource_yaml = rf"""
 name: my_gcs_datasource
 class_name: Datasource
@@ -43,12 +43,12 @@ datasource_yaml = datasource_yaml.replace(
 
 context.test_yaml_config(datasource_yaml)
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py rumtime_batch_request">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -64,7 +64,7 @@ batch_request.runtime_parameters[
     "path"
 ] = f"gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py validator_creation">
 context.create_expectation_suite(
     expectation_suite_name="test_suite", overwrite_existing=True
 )
@@ -75,7 +75,7 @@ print(validator.head())
 # </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 batch_list: List[Batch] = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
@@ -84,7 +84,7 @@ batch: Batch = batch_list[0]
 assert batch.data.dataframe.shape[0] == 10000
 
 # Here is a BatchRequest naming a data_asset
-# <snippet>
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py batch_request">
 batch_request = BatchRequest(
     datasource_name="my_gcs_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -107,7 +107,7 @@ validator = context.get_validator(
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_gcs_datasource"][

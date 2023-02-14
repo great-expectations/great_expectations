@@ -14,7 +14,7 @@ As stated in the Getting Started Tutorial [Step 4: Validate data](../../tutorial
 - <TechnicalTag tag="data_connector" text="Data Connectors" />
 - <TechnicalTag tag="batch_request" text="Batch Requests" />
 - <TechnicalTag tag="action" text="Actions" />
- 
+
 Otherwise, configuring these validation parameters would have to be done via the API.  A Checkpoint encapsulates this "boilerplate" and ensures that all components work in harmony together.  Finally, running a configured Checkpoint is a one-liner, as described below.
 
 <Prerequisites>
@@ -110,10 +110,11 @@ Usage:
 """
 import sys
 
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.data_context import DataContext
+import great_expectations as gx
 
-data_context: DataContext = DataContext(
+from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+
+data_context = gx.get_context(
     context_root_dir="/path/to/great_expectations"
 )
 

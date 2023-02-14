@@ -126,13 +126,14 @@
       },
       "out": {
         "unexpected_list": [{"a": 1.0, "b": 1.0}, {"a": 1.0, "b": 1.0}, {"a": 1.0, "b": 1.0}, {"a": 2.0, "b": 2.0}, {"a": 2.0, "b": 2.0}],
-        "unexpected_index_list": [0,2,4,5,7],
+        "unexpected_index_list": [{"a": 1.0, "pk_index": 0, "b": 1.0}, {"a": 1.0, "pk_index": 2, "b": 1.0}, {"a": 1.0, "pk_index": 4, "b": 1.0}, {"a": 2.0, "pk_index": 5, "b": 2.0}, {"a": 2.0, "pk_index": 7, "b": 2.0}],
         "success": false
       }
-    },{
+    },
+      {
       "title": "unexpected_values_exact_match_out_with_index_list",
       "exact_match_out" : true,
-      "only_for": ["pandas"],
+      "only_for": ["pandas_v2_api"],
       "in": {
         "column_list": ["a", "b"]
       },
@@ -209,6 +210,90 @@
           ]
         }
       }
+    },{
+      "title": "unexpected_values_exact_match_out_with_index_list_pandas_v3_api",
+      "exact_match_out" : true,
+      "only_for": ["pandas_v3_api"],
+      "in": {
+        "column_list": ["a", "b"]
+      },
+      "out": {
+        "success": false,
+        "result":{
+          "unexpected_count": 5,
+          "partial_unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ],
+          "unexpected_list": [
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "b": 2.0
+            }
+          ],
+          "unexpected_index_list":
+          [
+            {
+              "a": 1.0,
+              "pk_index": 0,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "pk_index": 2,
+              "b": 1.0
+            },
+            {
+              "a": 1.0,
+              "pk_index": 4,
+              "b": 1.0
+            },
+            {
+              "a": 2.0,
+              "pk_index": 5,
+              "b": 2.0
+            },
+            {
+              "a": 2.0,
+              "pk_index": 7,
+              "b": 2.0
+            }
+          ]
+      }}
     },{
       "title": "unexpected_values_exact_match_out_no_index_list",
       "exact_match_out" : true,

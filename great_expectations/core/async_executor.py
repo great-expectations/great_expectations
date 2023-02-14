@@ -7,14 +7,16 @@ WARNING: This module is experimental.
 
 from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import AbstractContextManager
-from typing import Any, Optional
+from typing import Generic, Optional, TypeVar
 
 from urllib3 import connectionpool, poolmanager
 
 from great_expectations.data_context.types.base import ConcurrencyConfig
 
+T = TypeVar("T")
 
-class AsyncResult:
+
+class AsyncResult(Generic[T]):
     """Wrapper around Future to facilitate single code path
     for both when concurrency is enabled and disabled.
 
@@ -22,13 +24,13 @@ class AsyncResult:
     """
 
     def __init__(
-        self, future: Optional[Future] = None, value: Optional[Any] = None
+        self, future: Optional[Future] = None, value: Optional[T] = None
     ) -> None:
         """AsyncResult instances are created by AsyncExecutor.submit() and should not otherwise be created directly."""
         self._future = future
         self._value = value
 
-    def result(self):
+    def result(self) -> T:
         """Return the value corresponding to the AsyncExecutor.submit() call, blocking if necessary until the execution
         finishes.
         """

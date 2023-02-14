@@ -18,33 +18,7 @@ import ConfigForAssetsInferredMulti from '../filesystem_components/_config_for_a
 
 And the full configuration for your Datasource should look like:
 
-```python
-datasource_config = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_inferred_data_connector": {
-            "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "../data",
-            "default_regex": {
-                "pattern": "(.*)\\.csv",
-                "group_names": ["data_asset_name"],
-            },
-            "batch_spec_passthrough": {
-                "reader_method": "csv",
-                "reader_options": {
-                    "header": True,
-                    "inferSchema": True,
-                },
-            },
-        }
-    }
-}
+```python name="full datasource_config for inferred spark single batch datasource"
 ```
 
   </TabItem>
@@ -54,33 +28,7 @@ datasource_config = {
 
 And the full configuration for your Datasource should look like:
 
-```python
-datasource_config = {
-    "name": "my_datasource_name",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "class_name": "SparkDFExecutionEngine",
-        "module_name": "great_expectations.execution_engine",
-    },
-    "data_connectors": {
-        "name_of_my_inferred_data_connector": {
-            "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "../data",
-            "default_regex": {
-                "default_regex": "(yellow_tripdata_sample_2020)-(\\d.*)\\.csv"
-                "group_names": ["data_asset_name", "month"],
-            },
-            "batch_spec_passthrough": {
-                "reader_method": "csv",
-                "reader_options": {
-                    "header": True,
-                    "inferSchema": True,
-                },
-            },
-        }
-    }
-}
+```python name="full datasource_config for inferred spark multi batch datasource"
 ```
 
   </TabItem>

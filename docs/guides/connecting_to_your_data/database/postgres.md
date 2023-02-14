@@ -83,12 +83,12 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L21-L38
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py datasource_config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L46
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py test_yaml_config"
 ```
 
 </TabItem>
@@ -120,7 +120,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py#L50
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/postgres_python_example.py add_datasource"
 ```
 
 </TabItem>

@@ -41,3 +41,12 @@ def test_parse_condition_to_sqlalchemy(sa):
 
     res = parse_condition_to_sqlalchemy('col("foo").notNull()')
     assert str(res) == "foo IS NOT NULL"
+
+    res = parse_condition_to_sqlalchemy('col("foo") == "a-b"')
+    assert str(res) == "foo = :foo_1"
+
+    res = parse_condition_to_sqlalchemy('col("foo") != "a-b"')
+    assert str(res) == "foo != :foo_1"
+
+    res = parse_condition_to_sqlalchemy('col("foo") <= 1.34')
+    assert str(res) == "foo <= :foo_1"

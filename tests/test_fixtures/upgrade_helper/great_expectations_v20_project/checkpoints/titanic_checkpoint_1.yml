@@ -17,13 +17,13 @@ validation_operator_name: action_list_operator
 # Great Expectations in your pipelines easy!
 batches:
   - batch_kwargs:
-      path: GE_PROJECT_DIR/data/Titanic.csv
+      path: GX_PROJECT_DIR/data/Titanic.csv
       datasource: Downloads__dir
       data_asset_name: Titanic
     expectation_suite_names: # one or more suites may validate against a single batch
       - Titanic.warning
   - batch_kwargs:
-      path: GE_PROJECT_DIR/data/Titanic_copy_0.csv
+      path: GX_PROJECT_DIR/data/Titanic_copy_0.csv
       datasource: Downloads__dir
       data_asset_name: Titanic_copy_0
     expectation_suite_names: # one or more suites may validate against a single batch

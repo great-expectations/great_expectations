@@ -20,7 +20,7 @@ jobs:
         - script: |
             great_expectations --version
             great_expectations -y init --no-usage-stats
-            python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
+            python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
           displayName: 'Confirm installation'
 
     - job:
@@ -47,5 +47,5 @@ jobs:
             source activate ge_dev
             great_expectations --version
             great_expectations -y init --no-usage-stats
-            python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
+            python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
           displayName: 'Confirm installation'

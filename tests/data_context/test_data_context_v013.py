@@ -9,7 +9,6 @@ from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
@@ -20,6 +19,7 @@ from great_expectations.execution_engine.pandas_batch_data import PandasBatchDat
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.util import get_context
 from great_expectations.validator.validator import Validator
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
@@ -114,7 +114,7 @@ def test_ConfigOnlyDataContext_v013__initialization(
     config_path = str(
         tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
     )
-    context = BaseDataContext(
+    context = get_context(
         basic_data_context_v013_config,
         config_path,
     )
@@ -148,7 +148,7 @@ def test__normalize_absolute_or_relative_path(
     )
     test_dir = full_test_path.parts[-1]
     config_path = str(full_test_path)
-    context = BaseDataContext(
+    context = get_context(
         basic_data_context_v013_config,
         config_path,
     )
@@ -184,13 +184,13 @@ def test_load_config_variables_file(
     try:
         # We should be able to load different files based on an environment variable
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
-        context = BaseDataContext(
+        context = get_context(
             basic_data_context_v013_config, context_root_dir=base_path
         )
         config_vars = context.config_variables
         assert config_vars["env"] == "dev"
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
-        context = BaseDataContext(
+        context = get_context(
             basic_data_context_v013_config, context_root_dir=base_path
         )
         config_vars = context.config_variables
@@ -536,7 +536,7 @@ def test_in_memory_data_context_configuration(
     project_config_dict = dataContextConfigSchema.load(project_config_dict)
 
     project_config: DataContextConfig = DataContextConfig(**project_config_dict)
-    data_context = BaseDataContext(
+    data_context = get_context(
         project_config=project_config,
         context_root_dir=titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.root_directory,
     )

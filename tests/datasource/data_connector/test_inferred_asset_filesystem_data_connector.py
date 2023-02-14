@@ -4,7 +4,7 @@ from unittest import mock
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -47,7 +47,7 @@ def test_basic_instantiation(tmp_path_factory):
     # noinspection PyProtectedMember
     my_data_connector._refresh_data_references_cache()
 
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
     # Illegal execution environment name
@@ -900,7 +900,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
           """,
     )
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         my_data_connector: InferredAssetFilesystemDataConnector = (
             instantiate_class_from_config(
@@ -961,7 +961,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
           """,
     )
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
         my_data_connector: InferredAssetFilesystemDataConnector = (
             instantiate_class_from_config(

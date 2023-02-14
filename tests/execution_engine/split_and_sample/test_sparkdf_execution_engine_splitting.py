@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     GCSBatchSpec,
@@ -601,7 +601,7 @@ def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
     test_sparkdf,
     basic_spark_df_execution_engine,
 ):
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
         split_df = basic_spark_df_execution_engine.get_batch_data(
             RuntimeDataBatchSpec(

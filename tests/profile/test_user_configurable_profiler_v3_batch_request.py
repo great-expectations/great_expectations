@@ -2,12 +2,13 @@ import logging
 import os
 import random
 import string
+from typing import List
 from unittest import mock
 
 import pandas as pd
 import pytest
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
@@ -183,7 +184,7 @@ def titanic_validator(titanic_data_context_modular_api):
     What does this test do and why?
     Ensures that all available expectation types work as expected
     """
-    df = ge.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
+    df = gx.read_csv(file_relative_path(__file__, "../test_sets/Titanic.csv"))
 
     return get_pandas_runtime_validator(titanic_data_context_modular_api, df)
 
@@ -195,7 +196,7 @@ def taxi_validator_pandas(titanic_data_context_modular_api):
     Ensures that all available expectation types work as expected
     """
 
-    df = ge.read_csv(
+    df = gx.read_csv(
         file_relative_path(
             __file__,
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
@@ -212,7 +213,7 @@ def taxi_validator_spark(spark_session, titanic_data_context_modular_api):
     What does this test do and why?
     Ensures that all available expectation types work as expected
     """
-    df = ge.read_csv(
+    df = gx.read_csv(
         file_relative_path(
             __file__,
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
@@ -228,7 +229,7 @@ def taxi_validator_sqlalchemy(sa, titanic_data_context_modular_api):
     What does this test do and why?
     Ensures that all available expectation types work as expected
     """
-    df = ge.read_csv(
+    df = gx.read_csv(
         file_relative_path(
             __file__,
             "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
@@ -454,7 +455,7 @@ def test__validate_semantic_types_dict(cardinality_validator):
         )
     assert e.value.args[0] == (
         "Column col_few is specified in both the semantic_types_dict and the list of ignored columns. Please remove "
-        f"one of these entries to proceed."
+        "one of these entries to proceed."
     )
 
 
@@ -486,9 +487,9 @@ def test_build_suite_no_config(
     ]
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -595,9 +596,9 @@ def test_build_suite_with_config_and_no_semantic_types_dict(
     ]
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -676,9 +677,9 @@ def test_build_suite_with_semantic_types_dict(
     assert mock_emit.call_count == 1
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -734,9 +735,9 @@ def test_build_suite_when_suite_already_exists(
     assert mock_emit.call_count == 2
 
     # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call]
+    expected_events: List[mock._Call]
     # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call]
+    actual_events: List[mock._Call]
 
     expected_events = [
         mock.call(
@@ -793,7 +794,7 @@ def test_primary_or_compound_key_not_found_in_columns(cardinality_validator):
     # key includes a non-existent column, should fail
     with pytest.raises(ValueError) as e:
         # noinspection PyUnusedLocal
-        bad_key_profiler = UserConfigurableProfiler(
+        bad_key_profiler = UserConfigurableProfiler(  # noqa: F841
             cardinality_validator,
             primary_or_compound_key=["col_unique", "col_that_does_not_exist"],
         )
