@@ -136,11 +136,11 @@ def column_aggregate_value(
                     )
 
                 if filter_column_isnull:
-                    df = df[df[column_name].is_not_null()]
+                    df = df.drop_nulls(subset=[column_name])
 
                 return metric_fn(
                     cls,
-                    column=df[column_name],
+                    column=df.get_column(column_name),
                     **metric_value_kwargs,
                     _metrics=metrics,
                 )

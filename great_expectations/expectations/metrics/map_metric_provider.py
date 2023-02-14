@@ -48,6 +48,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 from great_expectations.expectations.metrics import MetaMetricProvider  # noqa: TCH001
 from great_expectations.expectations.metrics.import_manager import (
     F,
+    pl,
     quoted_name,
     sa,
 )
@@ -2895,21 +2896,21 @@ def _polars_column_map_condition_value_counts(
         "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
     )
     if filter_column_isnull:
-        df = df[df[column_name].is_not_null()]
+        df = df.drop_nulls(subset=[column_name])
 
-    domain_values = df[column_name]
+    domain_values = filter_by_boolean_map(
+        df=df, boolean_map=boolean_mapped_unexpected_values, column_names=[column_name]
+    )
 
     result_format = metric_value_kwargs["result_format"]
     value_counts = None
     try:
-        value_counts = domain_values[boolean_mapped_unexpected_values].value_counts()
+        value_counts = domain_values.value_counts()
     except ValueError:
         try:
-            value_counts = (
-                domain_values[boolean_mapped_unexpected_values]
-                .apply(tuple)
-                .value_counts()
-            )
+            value_counts = domain_values.apply(
+                list, return_dtype=pl.List
+            ).value_counts()
         except ValueError:
             pass
 
@@ -3020,7 +3021,7 @@ def _polars_map_condition_rows(
             "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
         )
         if filter_column_isnull:
-            df = df[df[column_name].is_not_null()]
+            df = df.drop_nulls(subset=[column_name])
 
     elif "column_list" in accessor_domain_kwargs:
         column_list = accessor_domain_kwargs["column_list"]
@@ -3033,12 +3034,16 @@ def _polars_map_condition_rows(
 
     result_format = metric_value_kwargs["result_format"]
 
-    df = df[boolean_mapped_unexpected_values]
+    df = filter_by_boolean_map(
+        df=df,
+        boolean_map=boolean_mapped_unexpected_values,
+        column_names=df.columns,
+    )
 
     if result_format["result_format"] == "COMPLETE":
         return df
 
-    return df[: result_format["partial_unexpected_count"]]
+    return df.head(result_format["partial_unexpected_count"])
 
 
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
