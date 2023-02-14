@@ -81,7 +81,7 @@ class BatchSorter:
     reverse: bool = False
 
 
-BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str]]
+BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str, dict]]
 
 
 def _is_batch_sorter_list(
@@ -413,7 +413,7 @@ class Datasource(
 
     @staticmethod
     def parse_order_by_sorters(
-        order_by: Optional[List[Union[BatchSorter, str]]] = None
+        order_by: Optional[List[Union[BatchSorter, str, dict]]] = None
     ) -> List[BatchSorter]:
         order_by_sorters: list[BatchSorter] = []
         if order_by:
