@@ -2,7 +2,7 @@ from typing import Optional
 
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.data_context.data_context_variables import (
-    DataContextVariableSchema,
+    DataContextVariableSchema,  # noqa: TCH001
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.resource_identifiers import DataContextKey

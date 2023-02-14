@@ -14,10 +14,10 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.datasource.data_connector.asset import Asset
+from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
 from great_expectations.datasource.data_connector.data_connector import DataConnector
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +162,7 @@ class RuntimeDataConnector(DataConnector):
             ]
             return data_reference_list  # type: ignore[return-value] # could be list of lists
 
-    def get_data_reference_list_count(self) -> int:
+    def get_data_reference_count(self) -> int:
         """
         Get number of data_references corresponding to all data_asset_names in cache. In cases where the
         RuntimeDataConnector has been passed a BatchRequest with the same data_asset_name but different

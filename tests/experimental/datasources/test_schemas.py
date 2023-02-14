@@ -1,15 +1,17 @@
 import json
 import sys
-from typing import Type
+from typing import Any, Type
 
 import pandas
 import pydantic
 import pytest
 
-from great_expectations.experimental.datasources import _SCHEMAS_DIR
+from great_expectations.experimental.datasources import (
+    _PANDAS_SCHEMA_VERSION,  # this is the version we run in the standard test pipeline. Update as needed
+    _SCHEMAS_DIR,
+)
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
-PANDAS_STANDARD_TEST_VERSION: str = "1.3.5"  # this is the version we run in the standard test pipeline. Update as needed
 PANDAS_VERSION: str = pandas.__version__
 
 
@@ -36,27 +38,47 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     Note: if the installed version of pandas doesn't match the one used in the standard
     test pipeline, the test will be marked a `xfail` because the schemas will not match.
     """
-    if PANDAS_STANDARD_TEST_VERSION != PANDAS_VERSION:
-        pytest.xfail(
-            reason=f"schema generated with pandas {PANDAS_STANDARD_TEST_VERSION}"
-        )
+
+    def _sort_required_lists(schema_as_dict: dict) -> None:
+        """Sometimes "required" lists come unsorted, causing misleading assertion failures; this corrects the issue.
+
+        Args:
+            schema_as_dict: source dictionary (will be modified "in-situ")
+
+        """
+        key: str
+        value: Any
+        for key, value in schema_as_dict.items():
+            if key == "required":
+                schema_as_dict[key] = sorted(value)
+
+            if isinstance(value, dict):
+                _sort_required_lists(schema_as_dict=value)
+
+    if _PANDAS_SCHEMA_VERSION != PANDAS_VERSION:
+        pytest.xfail(reason=f"schema generated with pandas {_PANDAS_SCHEMA_VERSION}")
 
     print(f"python version: {sys.version.split()[0]}")
     print(f"pandas version: {PANDAS_VERSION}\n")
 
     schema_path = _SCHEMAS_DIR.joinpath(f"{zep_ds_or_asset_model.__name__}.json")
-    print(schema_path.relative_to(schema_path.cwd()))
 
     # TODO: remove this logic and make this fail once all json schemas are working
     if schema_path.name in (
         "SqliteDatasource.json",
         "SqliteTableAsset.json",
         "SqliteQueryAsset.json",
+        "SASAsset.json",
     ):
         pytest.xfail(f"{schema_path.name} does not exist")
 
     json_str = schema_path.read_text().rstrip()
 
+    schema_as_dict = json.loads(json_str)
+    _sort_required_lists(schema_as_dict=schema_as_dict)
+    zep_ds_or_asset_model_as_dict = zep_ds_or_asset_model.schema()
+    _sort_required_lists(schema_as_dict=zep_ds_or_asset_model_as_dict)
+
     assert (
-        json.loads(json_str) == zep_ds_or_asset_model.schema()
+        schema_as_dict == zep_ds_or_asset_model_as_dict
     ), "Schemas are out of sync. Run `invoke schema --sync`. Also check your pandas version."

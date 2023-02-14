@@ -22,11 +22,6 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "base_directory": {
-            "title": "Base Directory",
-            "type": "string",
-            "format": "path"
-        },
         "regex": {
             "title": "Regex",
             "type": "string",
@@ -45,7 +40,6 @@
     },
     "required": [
         "name",
-        "base_directory",
         "regex"
     ],
     "definitions": {

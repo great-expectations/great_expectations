@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 import re
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 from typing_extensions import Literal
 
-from great_expectations.alias_types import PathStr
 from great_expectations.experimental.datasources.filesystem_data_asset import (
     _FilesystemDataAsset,
 )
@@ -14,10 +14,12 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     Datasource,
+    TestConnectionError,
+    _batch_sorter_from_list,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import SparkDFExecutionEngine
 
 logger = logging.getLogger(__name__)
 
@@ -41,23 +43,49 @@ class CSVSparkAsset(_FilesystemDataAsset):
         return {"header", "inferSchema"}
 
 
-class SparkDatasource(Datasource):
+class _SparkDatasource(Datasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVSparkAsset]
 
     # instance attributes
-    type: Literal["spark"] = "spark"
-    name: str
-    assets: Dict[str, CSVSparkAsset] = {}
+    assets: Dict[
+        str,
+        CSVSparkAsset,
+    ] = {}
 
+    # Abstract Methods
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
+    def execution_engine_type(self) -> Type[SparkDFExecutionEngine]:
         """Return the SparkDFExecutionEngine unless the override is set"""
         from great_expectations.execution_engine.sparkdf_execution_engine import (
             SparkDFExecutionEngine,
         )
 
         return SparkDFExecutionEngine
+
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the _SparkDatasource.
+
+        Args:
+            test_assets: If assets have been passed to the _SparkDatasource,
+                         an attempt can be made to test them as well.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        raise NotImplementedError(
+            """One needs to implement "test_connection" on a _SparkDatasource subclass."""
+        )
+
+    # End Abstract Methods
+
+
+class SparkDatasource(_SparkDatasource):
+    # instance attributes
+    type: Literal["spark"] = "spark"
+    name: str
+    base_directory: pathlib.Path
+    assets: Dict[str, CSVSparkAsset] = {}
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SparkDatasource.
@@ -68,7 +96,11 @@ class SparkDatasource(Datasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        # Only self.assets can be tested for PandasDatasource
+        if not self.base_directory.exists():
+            raise TestConnectionError(
+                f"Path: {self.base_directory.resolve()} does not exist."
+            )
+
         if self.assets and test_assets:
             for asset in self.assets.values():
                 asset.test_connection()
@@ -76,7 +108,6 @@ class SparkDatasource(Datasource):
     def add_csv_asset(
         self,
         name: str,
-        base_directory: PathStr,
         regex: Union[str, re.Pattern],
         header: bool = False,
         infer_schema: bool = False,
@@ -86,18 +117,18 @@ class SparkDatasource(Datasource):
 
         Args:
             name: The name of the csv asset
-            base_directory: base directory path, relative to which CSV file paths will be collected
             regex: regex pattern that matches csv filenames that is used to label the batches
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
-            order_by: sorting directive via either List[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
         """
+        if isinstance(regex, str):
+            regex = re.compile(regex)
         asset = CSVSparkAsset(
             name=name,
-            base_directory=base_directory,  # type: ignore[arg-type]  # str will be coerced to Path
-            regex=regex,  # type: ignore[arg-type]  # str with will coerced to Pattern
+            regex=regex,
             header=header,
             inferSchema=infer_schema,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=_batch_sorter_from_list(order_by or []),
         )
         return self.add_asset(asset)

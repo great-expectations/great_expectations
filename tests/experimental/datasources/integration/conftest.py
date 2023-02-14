@@ -25,14 +25,16 @@ def pandas_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    pandas_ds = context.sources.add_pandas(name="my_pandas")
+    pandas_ds = context.sources.add_pandas_filesystem(
+        name="my_pandas",
+        base_directory=csv_path,
+    )
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
-    batch_request = asset.get_batch_request({"year": "2019", "month": "01"})
+    batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
     return context, pandas_ds, asset, batch_request
 
 
@@ -68,7 +70,7 @@ def sql_data(
         .add_year_and_month_splitter(column_name="pickup_datetime")
         .add_sorters(["year", "month"])
     )
-    batch_request = asset.get_batch_request({"year": 2019, "month": 1})
+    batch_request = asset.build_batch_request({"year": 2019, "month": 1})
     return context, datasource, asset, batch_request
 
 
@@ -81,16 +83,18 @@ def spark_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    spark_ds = context.sources.add_spark(name="my_spark")
+    spark_ds = context.sources.add_spark(
+        name="my_spark",
+        base_directory=csv_path,
+    )
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
-        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
         header=True,
         infer_schema=True,
     )
-    batch_request = asset.get_batch_request({"year": "2019", "month": "01"})
+    batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
     return context, spark_ds, asset, batch_request
 
 
@@ -103,14 +107,16 @@ def multibatch_pandas_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    pandas_ds = context.sources.add_pandas(name="my_pandas")
+    pandas_ds = context.sources.add_pandas_filesystem(
+        name="my_pandas",
+        base_directory=csv_path,
+    )
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
-    batch_request = asset.get_batch_request({"year": "2020"})
+    batch_request = asset.build_batch_request({"year": "2020"})
     return context, pandas_ds, asset, batch_request
 
 
@@ -128,7 +134,7 @@ def multibatch_sql_data(
         .add_year_and_month_splitter(column_name="pickup_datetime")
         .add_sorters(["year", "month"])
     )
-    batch_request = asset.get_batch_request({"year": 2020})
+    batch_request = asset.build_batch_request({"year": 2020})
     return context, datasource, asset, batch_request
 
 
@@ -141,16 +147,18 @@ def multibatch_spark_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    spark_ds = context.sources.add_spark(name="my_spark")
+    spark_ds = context.sources.add_spark(
+        name="my_spark",
+        base_directory=csv_path,
+    )
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
-        base_directory=csv_path,
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
         header=True,
         infer_schema=True,
     )
-    batch_request = asset.get_batch_request({"year": "2020"})
+    batch_request = asset.build_batch_request({"year": "2020"})
     return context, spark_ds, asset, batch_request
 
 
@@ -158,7 +166,7 @@ def multibatch_spark_data(
 def datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if "SparkDFDataset" not in test_backends:
+    if request.param.__name__ == "spark_data" and "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
     return request.param(empty_data_context)
@@ -170,7 +178,10 @@ def datasource_test_data(
 def multibatch_datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if "SparkDFDataset" not in test_backends:
+    if (
+        request.param.__name__ == "multibatch_spark_data"
+        and "SparkDFDataset" not in test_backends
+    ):
         pytest.skip("No spark backend selected.")
 
     return request.param(empty_data_context)

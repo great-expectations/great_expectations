@@ -3,7 +3,7 @@ import warnings
 from great_expectations.render.renderer import ValidationResultsPageRenderer
 from great_expectations.render.view import DefaultMarkdownPageView
 from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
+    ValidationOperatorResult,  # noqa: TCH001
 )
 
 

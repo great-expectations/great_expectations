@@ -23,7 +23,7 @@ from marshmallow import Schema, ValidationError, fields, pre_dump
 
 import great_expectations as gx
 from great_expectations import __version__ as ge_version
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,
@@ -70,7 +70,9 @@ logger = logging.getLogger(__name__)
 @public_api
 @deprecated_argument(argument_name="data_asset_type", version="0.14.0")
 @new_argument(
-    argument_name="ge_cloud_id", version="0.13.33", message="Used in cloud deployments."
+    argument_name="ge_cloud_id",
+    version="0.13.33",
+    message="Used in GX Cloud deployments.",
 )
 class ExpectationSuite(SerializableDictDot):
     """Suite of expectations plus create, read, update, and delete functionality.
@@ -723,7 +725,7 @@ class ExpectationSuite(SerializableDictDot):
         """Upsert specified ExpectationConfiguration into this ExpectationSuite.
 
         Args:
-            expectation_configuration: The ExpectationConfiguration to add or update
+            expectation_configuration: The ExpectationConfiguration to add or update.
             send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
                 public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration

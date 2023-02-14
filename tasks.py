@@ -407,6 +407,7 @@ PYTHON_VERSION_DEFAULT: float = 3.8
         "detach": "Run container in background and print container ID. Defaults to False.",
         "py": f"version of python to use. Default is {PYTHON_VERSION_DEFAULT}",
         "cmd": "Command for docker image. Default is bash.",
+        "target": "Set the target build stage to build.",
     }
 )
 def docker(
@@ -417,6 +418,7 @@ def docker(
     detach: bool = False,
     cmd: str = "bash",
     py: float = PYTHON_VERSION_DEFAULT,
+    target: str | None = None,
 ):
     """
     Build or run gx docker image.
@@ -443,6 +445,8 @@ def docker(
                 ".",
             ]
         )
+        if target:
+            cmds.extend(["--target", target])
 
     else:
         cmds.append("run")
@@ -490,6 +494,13 @@ def type_schema(
 
     --list to show all available types
     """
+    import pandas
+
+    from great_expectations.experimental.datasources import _PANDAS_SCHEMA_VERSION
+    from great_expectations.experimental.datasources.pandas_datasource import (
+        PandasFilesystemDatasource,
+        _PandasDatasource,
+    )
     from great_expectations.experimental.datasources.sources import _SourceFactories
 
     buffer = io.StringIO()
@@ -512,19 +523,37 @@ def type_schema(
         schema_dir = GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
         for name in _SourceFactories.type_lookup.type_names():
             model = _SourceFactories.type_lookup[name]
+
+            if (
+                issubclass(
+                    model,
+                    (
+                        _PandasDatasource,
+                        *PandasFilesystemDatasource.asset_types,
+                    ),
+                )
+                and _PANDAS_SCHEMA_VERSION != pandas.__version__
+            ):
+                print(
+                    f"🙈  {name} - was generated with pandas"
+                    f" {_PANDAS_SCHEMA_VERSION} but you have {pandas.__version__}; skipping"
+                )
+                continue
+
             try:
                 schema_path = schema_dir.joinpath(f"{model.__name__}.json")
                 json_str: str = model.schema_json(indent=indent) + "\n"
 
                 if schema_path.exists():
                     if json_str == schema_path.read_text():
-                        print(f"  {name} - {schema_path.name} unchanged")
+                        print(f"✅  {name} - {schema_path.name} unchanged")
                         continue
 
                 schema_path.write_text(json_str)
-                print(f"  {name} - {schema_path.name} schema updated")
+                print(f"🔃  {name} - {schema_path.name} schema updated")
             except TypeError as err:
-                print(f"  Could not sync {name} schema - {type(err).__name__}:{err}")
+                print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
+        raise invoke.Exit(code=0)
 
     text: str = buffer.getvalue()
     if save_path:

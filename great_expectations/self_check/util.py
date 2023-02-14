@@ -41,11 +41,11 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestCase,
-    ExpectationTestDataCases,
+    ExpectationTestCase,  # noqa: TCH001
+    ExpectationTestDataCases,  # noqa: TCH001
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
-    ExpectationExecutionEngineDiagnostics,
+    ExpectationExecutionEngineDiagnostics,  # noqa: TCH001
 )
 from great_expectations.core.util import (
     get_or_create_spark_application,
@@ -64,7 +64,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
@@ -3065,15 +3064,10 @@ def check_json_test_result(  # noqa: C901 - 52
                 assert result["result"]["observed_value"] in value
 
             elif key == "unexpected_index_list":
-                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
-                    pass
-                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
-                    pass
-                else:
-                    if pk_column:
-                        assert (
-                            result["result"]["unexpected_index_list"] == value
-                        ), f"{result['result']['unexpected_index_list']} != {value}"
+                if pk_column and result["result"].get("unexpected_index_list"):
+                    assert (
+                        result["result"].get("unexpected_index_list") == value
+                    ), f"{result['result'].get('unexpected_index_list')} != {value}"
 
             elif key == "unexpected_list":
                 try:

@@ -3,14 +3,16 @@ from copy import deepcopy
 from typing import Dict, List, Optional, Union
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.datasource.data_connector.asset.asset import Asset
+from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
+from great_expectations.core.batch_spec import PathBatchSpec  # noqa: TCH001
+from great_expectations.datasource.data_connector.asset.asset import (
+    Asset,  # noqa: TCH001
+)
 from great_expectations.datasource.data_connector.file_path_data_connector import (
     FilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import _build_asset_from_config
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +123,7 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
         path_list: List[str] = self._get_data_reference_list_for_asset(asset=asset)
         return path_list
 
-    def get_data_reference_list_count(self) -> int:
+    def get_data_reference_count(self) -> int:
         """
         Returns the list of data_references known by this DataConnector by looping over all data_asset_names in
         _data_references_cache

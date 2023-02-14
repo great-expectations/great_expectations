@@ -4,8 +4,8 @@ import enum
 import functools
 import inspect
 import logging
-import pathlib
 import re
+import warnings
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import (
@@ -14,6 +14,7 @@ from typing import (
     Dict,
     Hashable,
     Iterable,
+    Iterator,
     List,
     NamedTuple,
     Optional,
@@ -27,12 +28,14 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import FilePath
+from pydantic import Field, FilePath
 
 # from pydantic.typing import resolve_annotations
 from typing_extensions import Final, Literal, TypeAlias
 
-from great_expectations.experimental.datasources.interfaces import DataAsset
+from great_expectations.experimental.datasources.interfaces import (
+    DataAsset,  # noqa: TCH001
+)
 
 try:
     # https://github.com/pandas-dev/pandas/blob/main/pandas/_typing.py
@@ -59,6 +62,8 @@ except ImportError:
 
 
 logger = logging.getLogger(__file__)
+
+PANDAS_VERSION: float = float(pd.__version__.rsplit(".", maxsplit=1)[0])
 
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 
@@ -116,9 +121,11 @@ FIELD_SKIPPED_NO_ANNOTATION: Set[str] = set()
 class _SignatureTuple(NamedTuple):
     name: str
     signature: inspect.Signature
+    docstring: str = ""
 
 
 class _FieldSpec(NamedTuple):
+    # mypy doesn't consider Optional[SOMETHING] or Union[SOMETHING] a type. So what is it?
     type: Type
     default_value: object  # ... for required value
 
@@ -131,22 +138,47 @@ def _replace_builtins(input_: str | type) -> str | type:
 
 
 FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
-    # CSVAsset
-    "filepath_or_buffer": {"base_directory": _FieldSpec(pathlib.Path, ...)},
-    # JSONAsset
-    "path_or_buf": {"base_directory": _FieldSpec(pathlib.Path, ...)},
+    # SQLTable
+    "schema": {
+        "schema_name": _FieldSpec(
+            Optional[str],  # type: ignore[arg-type]
+            Field(
+                None,
+                description="'schema_name' on the instance model."
+                " Will be passed to pandas reader method as 'schema'",
+                alias="schema",
+            ),
+        )
+    },
     # misc
-    "filepath": {"base_directory": _FieldSpec(pathlib.Path, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
     "skiprows": {"skiprows": _FieldSpec(Union[Sequence[int], int, None], None)},  # type: ignore[arg-type]
+    "kwargs": {
+        "kwargs": _FieldSpec(
+            Optional[dict],  # type: ignore[arg-type]
+            Field(
+                None,
+                description="Extra keyword arguments that will be passed to the reader method",
+            ),
+        )
+    },
 }
 
 _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
     "csv": "CSVAsset",
-    "json": "JSONAsset",
+    "gbq": "GBQAsset",
+    "hdf": "HDFAsset",
     "html": "HTMLAsset",
+    "json": "JSONAsset",
+    "orc": "ORCAsset",
+    "sas": "SASAsset",
+    "spss": "SPSSAsset",
+    "sql_query": "SQLQueryAsset",
+    "sql_table": "SQLTableAsset",
+    "stata": "STATAAsset",
+    "xml": "XMLAsset",
 }
 
 _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
@@ -166,11 +198,24 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
 
 
 def _extract_io_methods(
-    whitelist: Optional[Sequence[str]] = None,
+    blacklist: Optional[Sequence[str]] = None,
 ) -> List[Tuple[str, DataFrameFactoryFn]]:
-    member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
-    if whitelist:
-        return [t for t in member_functions if t[0] in whitelist]
+    # suppress pandas future warnings that may be emitted by collecting
+    # pandas io methods
+    # Once the context manager exits, the warning filter is removed.
+    # Do not remove this context-manager.
+    # https://docs.python.org/3/library/warnings.html#temporarily-suppressing-warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter(action="ignore", category=FutureWarning)
+
+        member_functions = inspect.getmembers(pd, predicate=inspect.isfunction)
+    # filter removed
+    if blacklist:
+        return [
+            t
+            for t in member_functions
+            if t[0] not in blacklist and t[0].startswith("read_")
+        ]
     return [t for t in member_functions if t[0].startswith("read_")]
 
 
@@ -180,7 +225,7 @@ def _extract_io_signatures(
     signatures = []
     for name, method in io_methods:
         sig = inspect.signature(method)
-        signatures.append(_SignatureTuple(name, sig))
+        signatures.append(_SignatureTuple(name, sig, method.__doc__ or ""))
     return signatures
 
 
@@ -203,10 +248,18 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
     """
     https://docs.python.org/3/howto/annotations.html#manually-un-stringizing-stringized-annotations
     """
-    # TODO: parse the annotation string
     annotation = param.annotation
+    # this section is only needed for when user is running our min supported pandas (1.1)
+    # pandas now exclusively uses postponed/str annotations
     if not isinstance(annotation, str):
-        logger.debug(type(annotation), annotation)
+        logger.debug(f"{param.name} has non-string annotations")
+        # `__args__` contains the actual members of a `Union[TYPE_1, TYPE_2]` object
+        union_types = getattr(annotation, "__args__", None)
+        if union_types and PANDAS_VERSION < 1.2:
+            # we could examine these types and only kick out certain blacklisted types
+            # but once we drop python 3.7 support our min pandas version will make this
+            # unneeded
+            return UNSUPPORTED_TYPE
         return annotation
 
     types: list = []
@@ -220,6 +273,8 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
             types.append(type_str)
         else:
             NEED_SPECIAL_HANDLING[param.name].add(type_str)
+            logger.debug(f"skipping {param.name} type - {type_str}")
+            continue
     if not types:
         return UNSUPPORTED_TYPE
     if len(types) > 1:
@@ -230,15 +285,21 @@ def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
 
 
 def _to_pydantic_fields(
-    sig_tuple: _SignatureTuple,
+    sig_tuple: _SignatureTuple, skip_first_param: bool
 ) -> Dict[str, _FieldSpec]:
     """
     Extract the parameter details in a structure that can be easily unpacked to
     `pydantic.create_model()` as field arguments
     """
     fields_dict: Dict[str, _FieldSpec] = {}
-    for param_name, param in sig_tuple.signature.parameters.items():
+    all_parameters: Iterator[tuple[str, inspect.Parameter]] = iter(
+        sig_tuple.signature.parameters.items()
+    )
+    if skip_first_param:
+        # skip the first parameter as this corresponds to the path/buffer/io field
+        next(all_parameters)
 
+    for param_name, param in all_parameters:
         no_annotation: bool = param.annotation is inspect._empty
         if no_annotation:
             logger.debug(f"`{param_name}` has no type annotation")
@@ -271,11 +332,19 @@ def _create_pandas_asset_model(
     type_field: Tuple[Union[Type, str], str],
     fields_dict: Dict[str, _FieldSpec],
     extra: pydantic.Extra,
+    model_docstring: str = "",
 ) -> M:
     """https://docs.pydantic.dev/usage/models/#dynamic-model-creation"""
-    model = pydantic.create_model(model_name, __base__=model_base, type=type_field, **fields_dict)  # type: ignore[call-overload] # FieldSpec is a tuple
+    model = pydantic.create_model(  # type: ignore[call-overload] # FieldSpec is a tuple
+        model_name,
+        __base__=model_base,
+        type=type_field,
+        **fields_dict,
+    )
     # can't set both __base__ & __config__ when dynamically creating model
     model.__config__.extra = extra
+    if model_docstring:
+        model.__doc__ = model_docstring
 
     def _get_reader_method(self) -> str:
         return f"read_{self.type}"
@@ -290,15 +359,19 @@ def _create_pandas_asset_model(
 
 
 def _generate_pandas_data_asset_models(
-    base_model_class: M, whitelist: Optional[Sequence[str]] = None
+    base_model_class: M,
+    blacklist: Optional[Sequence[str]] = None,
+    use_docstring_from_method: bool = False,
 ) -> Dict[str, M]:
-    io_methods = _extract_io_methods(whitelist)
+    io_methods = _extract_io_methods(blacklist)
     io_method_sigs = _extract_io_signatures(io_methods)
 
     data_asset_models: Dict[str, M] = {}
     for signature_tuple in io_method_sigs:
 
-        fields = _to_pydantic_fields(signature_tuple)
+        # skip the first parameter as this corresponds to the path/buffer/io field
+        # paths to specific files are provided by the batch building logic
+        fields = _to_pydantic_fields(signature_tuple, skip_first_param=True)
 
         type_name = signature_tuple.name.split("read_")[1]
         model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
@@ -312,20 +385,22 @@ def _generate_pandas_data_asset_models(
                 type_field=(f"Literal['{type_name}']", type_name),
                 fields_dict=fields,
                 extra=pydantic.Extra.forbid,
+                model_docstring=signature_tuple.docstring.partition("\n\nParameters")[0]
+                if use_docstring_from_method
+                else "",
             )
             logger.debug(f"{model_name}\n{pf(fields)}")
         except NameError as err:
             # TODO: sql_table has a `schema` param that is a pydantic reserved attribute.
             # Solution is to use an alias field.
-            logger.debug(f"{model_name} - {type(err).__name__}:{err}")
+            logger.info(f"{model_name} - {type(err).__name__}:{err}")
             continue
         except TypeError as err:
-            # may fail on python <3.10 due to use of builtin as generic
-            logger.warning(
-                f"{model_name} could not be created normally - {type(err).__name__}:{err}"
+            logger.info(
+                f"pandas {pd.__version__}  {model_name} could not be created normally - {type(err).__name__}:{err} , skipping"
             )
-            logger.warning(f"{model_name} fields\n{pf(fields)}")
-            raise
+            logger.info(f"{model_name} fields\n{pf(fields)}")
+            continue
 
         data_asset_models[type_name] = asset_model
         asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
