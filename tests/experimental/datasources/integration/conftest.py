@@ -7,9 +7,9 @@ import pytest
 
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.experimental.datasources import (
-    SqliteDatasource,
     PandasFilesystemDatasource,
     SparkDatasource,
+    SqliteDatasource,
 )
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
