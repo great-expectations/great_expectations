@@ -94,6 +94,7 @@ if TYPE_CHECKING:
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.data_context.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation import Expectation
     from great_expectations.experimental.datasources.interfaces import Batch as XBatch
     from great_expectations.rule_based_profiler import (
         RuleBasedProfilerResult,
@@ -615,7 +616,7 @@ class Validator:
         expectation_type: str,
         expectation_kwargs: dict,
         meta: dict,
-        expectation_impl: "Expectation",  # noqa: F821
+        expectation_impl: Expectation,
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
         auto: bool = expectation_kwargs.get("auto", False)

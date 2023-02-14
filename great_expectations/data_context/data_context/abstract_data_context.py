@@ -155,7 +155,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
-    from great_expectations.data_context.store.profiler_store import ProfilerStore
+    from great_expectations.data_context.store.profiler_store import (
+        ProfilerStore,  # noqa: TCH004
+    )
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
