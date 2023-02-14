@@ -346,7 +346,7 @@ def sanitize_prefix_for_s3(text: str) -> str:
 
 def normalize_directory_path(
     dir_path: Union[pathlib.Path, str],
-    root_directory_path: Optional[Union[pathlib.Path, str]] = None,
+    root_directory_path: Optional[pathlib.Path | str] = None,
 ) -> pathlib.Path:
     if isinstance(dir_path, str):
         dir_path = pathlib.Path(dir_path)
