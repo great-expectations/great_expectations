@@ -3049,7 +3049,7 @@ def check_json_test_result(  # noqa: C901 - 52
                     elif try_allclose:
                         assert np.allclose(
                             result["result"]["observed_value"],
-                            value,
+                            value,  # type: ignore[arg-type]
                             rtol=RTOL,
                             atol=ATOL,
                         ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {value}"
