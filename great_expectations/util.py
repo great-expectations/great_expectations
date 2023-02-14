@@ -73,7 +73,7 @@ try:
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
     # Fallback for python < 3.8
-    import importlib_metadata  # type: ignore[no-redef]
+    import importlib_metadata
 
 logger = logging.getLogger(__name__)
 
