@@ -166,7 +166,7 @@ def multibatch_spark_data(
 def datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if "SparkDFDataset" not in test_backends:
+    if request.param.__name__ == "spark_data" and "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
     return request.param(empty_data_context)
@@ -178,7 +178,10 @@ def datasource_test_data(
 def multibatch_datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
-    if "SparkDFDataset" not in test_backends:
+    if (
+        request.param.__name__ == "multibatch_spark_data"
+        and "SparkDFDataset" not in test_backends
+    ):
         pytest.skip("No spark backend selected.")
 
     return request.param(empty_data_context)
