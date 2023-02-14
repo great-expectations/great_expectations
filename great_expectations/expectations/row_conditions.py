@@ -33,6 +33,7 @@ except ImportError:
     sa = None
 
 if TYPE_CHECKING:
+    import pyspark.sql
     import sqlalchemy as sa  # noqa: TCH004
     from sqlalchemy.sql.expression import ColumnElement
 
@@ -128,7 +129,7 @@ def _parse_great_expectations_condition(row_condition: str):
 # noinspection PyUnresolvedReferences
 def parse_condition_to_spark(
     row_condition: str,
-) -> "pyspark.sql.Column":  # noqa: F821 # TODO: pyspark typing
+) -> pyspark.sql.Column:  # TODO: pyspark typing
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
