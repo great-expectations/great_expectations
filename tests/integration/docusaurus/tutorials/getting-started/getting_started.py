@@ -86,6 +86,7 @@ assert isinstance(validator, Validator)
 
 # <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py exclude_column_names">
 # Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
+# <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py exclude_column_names no comment">
 exclude_column_names = [
     "vendor_id",
     "pickup_datetime",
@@ -106,6 +107,7 @@ exclude_column_names = [
     "total_amount",
     "congestion_surcharge",
 ]
+# </snippet>
 # </snippet>
 
 profiler = UserConfigurableProfiler(
