@@ -479,7 +479,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self.engine.dialect.name.lower()
 
-    def _build_engine(self, credentials: dict, **kwargs) -> "sa.engine.Engine":
+    def _build_engine(self, credentials: dict, **kwargs) -> sa.engine.Engine:
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -513,7 +513,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str,
         credentials: dict,
-    ) -> Tuple["sa.engine.url.URL", dict]:
+    ) -> Tuple[sa.engine.url.URL, dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
