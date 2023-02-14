@@ -1125,14 +1125,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return self.engine.execute(split_query).fetchall()
 
     def get_data_for_batch_identifiers(
-        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
+        self, selectable: Selectable, splitter_method_name: str, splitter_kwargs: dict
     ) -> List[dict]:
         """Build data used to construct batch identifiers for the input table using the provided splitter config.
 
         Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
 
         Args:
-            table_name: Table to split.
+            selectable: Selectable to split.
             splitter_method_name: Desired splitter method to use.
             splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
 
@@ -1141,7 +1141,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self._data_splitter.get_data_for_batch_identifiers(
             execution_engine=self,
-            table_name=table_name,
+            selectable=selectable,
             splitter_method_name=splitter_method_name,
             splitter_kwargs=splitter_kwargs,
         )
