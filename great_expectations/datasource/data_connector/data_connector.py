@@ -14,7 +14,6 @@ from great_expectations.core.batch import (
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
@@ -384,11 +383,7 @@ class DataConnector:
         # Consequently, when we build a Validator, we do not need to specifically load the batch into it to
         # resolve metrics.
         validator = Validator(execution_engine=batch_data.execution_engine)
-        metrics_calculator = MetricsCalculator(
-            execution_engine=batch_data.execution_engine,
-            show_progress_bars=True,
-        )
-        table_head_df: pd.DataFrame = metrics_calculator.head(
+        table_head_df: pd.DataFrame = validator.head(
             n_rows=5,
             domain_kwargs={"batch_id": batch_definition.id},
             fetch_all=False,
