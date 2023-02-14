@@ -28,6 +28,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
+from packaging.version import Version
 from pydantic import Field, FilePath
 
 # from pydantic.typing import resolve_annotations
@@ -63,7 +64,9 @@ except ImportError:
 
 logger = logging.getLogger(__file__)
 
-PANDAS_VERSION: float = float(pd.__version__.rsplit(".", maxsplit=1)[0])
+PANDAS_VERSION: float = float(
+    f"{Version(pd.__version__).major}.{Version(pd.__version__).minor}"
+)
 
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 
