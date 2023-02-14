@@ -52,7 +52,7 @@ def _get_x_batch_request_class() -> Type[XBatchRequest]:
 
 def _get_metrics_calculator_class() -> Type[MetricsCalculator]:
     """Using this function helps work around circular import dependncies."""
-    module_name = "great_expectations.validator"
+    module_name = "great_expectations.validator.validator"
     class_name = "MetricsCalculator"
     return load_class(class_name=class_name, module_name=module_name)
 
