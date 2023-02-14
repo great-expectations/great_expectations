@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import abc
 import enum
 from dataclasses import dataclass
-from typing import Optional, Union, cast
+from typing import cast
 
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import ProfilerConfigurationError
@@ -113,9 +115,9 @@ class CardinalityChecker:
 
     def __init__(
         self,
-        cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
-        max_unique_values: Optional[int] = None,
-        max_proportion_unique: Optional[float] = None,
+        cardinality_limit_mode: str | CardinalityLimitMode | dict | None = None,
+        max_unique_values: int | None = None,
+        max_proportion_unique: float | None = None,
     ) -> None:
         self._cardinality_limit_mode = self._convert_to_cardinality_limit_mode(
             cardinality_limit_mode=cardinality_limit_mode,
@@ -126,7 +128,7 @@ class CardinalityChecker:
     @property
     def cardinality_limit_mode(
         self,
-    ) -> Union[AbsoluteCardinalityLimit, RelativeCardinalityLimit]:
+    ) -> AbsoluteCardinalityLimit | RelativeCardinalityLimit:
         return self._cardinality_limit_mode
 
     def cardinality_within_limit(self, metric_value: float) -> bool:
@@ -167,7 +169,7 @@ class CardinalityChecker:
 
     @staticmethod
     def _to_cardinality_limit_mode(
-        cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None
+        cardinality_limit_mode: str | CardinalityLimitMode | dict | None = None,
     ):
         if isinstance(cardinality_limit_mode, str):
             try:
@@ -213,10 +215,10 @@ class CardinalityChecker:
 
     @staticmethod
     def _convert_to_cardinality_limit_mode(
-        cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
-        max_unique_values: Optional[int] = None,
-        max_proportion_unique: Optional[float] = None,
-    ) -> Union[AbsoluteCardinalityLimit, RelativeCardinalityLimit]:
+        cardinality_limit_mode: str | CardinalityLimitMode | dict | None = None,
+        max_unique_values: int | None = None,
+        max_proportion_unique: float | None = None,
+    ) -> AbsoluteCardinalityLimit | RelativeCardinalityLimit:
         validate_input_parameters(
             cardinality_limit_mode=cardinality_limit_mode,
             max_unique_values=max_unique_values,
@@ -241,9 +243,9 @@ class CardinalityChecker:
 
 
 def validate_input_parameters(
-    cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
-    max_unique_values: Optional[int] = None,
-    max_proportion_unique: Optional[float] = None,
+    cardinality_limit_mode: str | CardinalityLimitMode | dict | None = None,
+    max_unique_values: int | None = None,
+    max_proportion_unique: float | None = None,
     required_num_supplied_params: int = 1,
 ) -> None:
     num_supplied_params: int = sum(
