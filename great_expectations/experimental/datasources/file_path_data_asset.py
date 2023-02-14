@@ -41,7 +41,7 @@ class _FilePathDataAsset(DataAsset):
 
     # Internal attributes
     _datasource: Union[
-        "PandasFilesystemDatasource", "SparkDatasource"
+        PandasFilesystemDatasource, SparkDatasource
     ] = pydantic.PrivateAttr()
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
