@@ -237,7 +237,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
 
 # noinspection PyUnresolvedReferences
 def _invert_regex_to_data_reference_template(
-    regex_pattern: Union[re.Pattern, str],
+    regex_pattern: re.Pattern | str,
     group_names: List[str],
 ) -> str:
     r"""Create a string template based on a regex and corresponding list of group names.
