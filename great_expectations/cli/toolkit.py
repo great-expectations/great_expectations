@@ -12,8 +12,10 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 import click
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint  # noqa: TCH001
+from great_expectations.checkpoint.types.checkpoint_result import (
+    CheckpointResult,  # noqa: TCH001
+)
 from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
@@ -29,11 +31,12 @@ from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
-from great_expectations.datasource import BaseDatasource
+from great_expectations.datasource import BaseDatasource  # noqa: TCH001
 from great_expectations.util import get_context
-from great_expectations.validator.validator import Validator
+from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 if TYPE_CHECKING:
+    from great_expectations.core.batch import JSONValues
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.experimental.datasources.interfaces import (
         Datasource as XDatasource,
@@ -1046,16 +1049,23 @@ def get_batch_request_from_json_file(
     data_context: FileDataContext,
     usage_event: Optional[str] = None,
     suppress_usage_message: bool = False,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
-    batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
+) -> dict[str, JSONValues]:
+    batch_request_or_error_message: Optional[
+        str | dict[str, str | int | dict[str, Any]]
     ] = load_json_file_into_dict(
         filepath=batch_request_json_file_path,
         data_context=data_context,
         usage_event=usage_event,
     )
     try:
-        batch_request = BatchRequest(**batch_request).to_json_dict()  # type: ignore[arg-type] # values union
+        if not batch_request_or_error_message or isinstance(
+            batch_request_or_error_message, str
+        ):
+            raise TypeError(batch_request_or_error_message)
+        else:
+            batch_request_json_dict: dict[str, JSONValues] = BatchRequest(
+                **batch_request_or_error_message  # type: ignore[arg-type]
+            ).to_json_dict()
     except TypeError as e:
         cli_message(
             string="<red>Please check that your batch_request is valid and is able to load a batch.</red>"
@@ -1069,7 +1079,7 @@ def get_batch_request_from_json_file(
             )
         sys.exit(1)
 
-    return batch_request
+    return batch_request_json_dict
 
 
 def get_batch_request_using_datasource_name(

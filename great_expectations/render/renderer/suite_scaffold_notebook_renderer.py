@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import nbformat
 
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite  # noqa: TCH001
 from great_expectations.dataset import Dataset
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,

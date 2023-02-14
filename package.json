@@ -34,6 +34,7 @@
     "react-select": "^4.3.0",
     "remark-code-import": "^0.3.0",
     "sass": "^1.56.1",
+    "search-insights": "^2.2.3",
     "standard": "^16.0.3"
   },
   "devDependencies": {

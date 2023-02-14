@@ -6,6 +6,7 @@ import enum
 import itertools
 import json
 import logging
+import tempfile
 import uuid
 import warnings
 from typing import (
@@ -41,7 +42,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
@@ -150,7 +151,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile: Union[str, "TextIOWrapper"]) -> None:
+    def to_yaml(self, outfile: Union[str, TextIOWrapper]) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
@@ -2080,6 +2081,7 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
 
     def __init__(
         self,
+        init_temp_docs_sites: bool = False,
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -2113,7 +2115,15 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
         }
-        self.data_docs_sites = {}
+        if init_temp_docs_sites:
+            temp_dir = tempfile.TemporaryDirectory()
+            path = temp_dir.name
+            logger.info(f"Created temporary directory '{path}' for ephemeral docs site")
+            self.data_docs_sites[  # type: ignore[index]
+                DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value
+            ]["store_backend"]["base_directory"] = path
+        else:
+            self.data_docs_sites = {}
 
 
 class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
@@ -3088,7 +3098,7 @@ class CheckpointConfig(BaseYamlConfig):
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     @staticmethod
     def resolve_config_using_acceptable_arguments(
-        checkpoint: "Checkpoint",  # noqa: F821
+        checkpoint: Checkpoint,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,

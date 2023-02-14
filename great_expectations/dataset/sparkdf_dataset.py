@@ -35,9 +35,6 @@ try:
         expr,
         isnan,
         lag,
-    )
-    from pyspark.sql.functions import length as length_
-    from pyspark.sql.functions import (
         lit,
         monotonically_increasing_id,
         stddev_samp,
@@ -45,6 +42,7 @@ try:
         udf,
         when,
     )
+    from pyspark.sql.functions import length as length_
 except ImportError as e:
     logger.debug(str(e))
     logger.debug(

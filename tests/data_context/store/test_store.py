@@ -2,7 +2,9 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
+from great_expectations.exceptions.exceptions import StoreBackendError
 
 
 @pytest.mark.unit
@@ -69,3 +71,65 @@ def test_build_store_from_config_failure(store_config: dict, module_name: str):
             store_config=store_config,
             module_name=module_name,
         )
+
+
+@pytest.mark.unit
+def test_store_add_success():
+    store = Store()
+    key = StringKey("foo")
+    value = "bar"
+
+    store.add(key=key, value=value)
+    assert store.has_key(key)
+
+
+@pytest.mark.unit
+def test_store_add_failure():
+    store = Store()
+    key = StringKey("foo")
+    value = "bar"
+
+    store.add(key=key, value=value)
+    with pytest.raises(StoreBackendError) as e:
+        store.add(key=key, value=value)
+
+    assert "Store already has the following key" in str(e.value)
+
+
+@pytest.mark.unit
+def test_store_update_success():
+    store = Store()
+    key = StringKey("foo")
+    value = "bar"
+    updated_value = "baz"
+
+    store.add(key=key, value=value)
+    store.update(key=key, value=updated_value)
+
+    assert store.get(key) == updated_value
+
+
+@pytest.mark.unit
+def test_store_update_failure():
+    store = Store()
+    key = StringKey("foo")
+    value = "bar"
+
+    with pytest.raises(StoreBackendError) as e:
+        store.update(key=key, value=value)
+
+    assert "Store does not have a value associated the following key" in str(e.value)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("previous_key_exists", [True, False])
+def test_store_add_or_update(previous_key_exists: bool):
+    store = Store()
+    key = StringKey("foo")
+    value = "bar"
+
+    if previous_key_exists:
+        store.add(key=key, value=None)
+
+    store.add_or_update(key=key, value=value)
+    assert store.get(key) == value

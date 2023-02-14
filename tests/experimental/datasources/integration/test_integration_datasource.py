@@ -103,7 +103,7 @@ def test_sql_query_data_asset(empty_data_context):
         .add_sorters(["year"])
     )
     validator = context.get_validator(
-        batch_request=asset.get_batch_request({"year": 2019})
+        batch_request=asset.build_batch_request({"year": 2019})
     )
     result = validator.expect_column_distinct_values_to_equal_set(
         column="passenger_count",

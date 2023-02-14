@@ -69,6 +69,6 @@ class EphemeralDataContext(AbstractDataContext):
         # As the store is in-memory, it needs to be populated immediately
         datasources = cast(Dict[str, DatasourceConfig], self.config.datasources or {})
         for name, config in datasources.items():
-            datasource_store.set_by_name(datasource_name=name, datasource_config=config)
+            datasource_store.add_by_name(datasource_name=name, datasource_config=config)
 
         self._datasource_store = datasource_store

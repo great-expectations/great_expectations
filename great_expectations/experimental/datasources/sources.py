@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, List, Type, Union
-
-from typing_extensions import ClassVar
+from typing import TYPE_CHECKING, Callable, ClassVar, Dict, List, Type, Union
 
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
@@ -58,10 +56,10 @@ class _SourceFactories:
         Example
         -------
 
-        An `.add_pandas()` pandas factory method will be added to `context.sources`.
+        An `.add_pandas_filesystem()` pandas_filesystem factory method will be added to `context.sources`.
 
-        >>> class PandasDatasource(Datasource):
-        >>>     type: str = 'pandas'
+        >>> class PandasFilesystemDatasource(_PandasDatasource):
+        >>>     type: str = 'pandas_filesystem'
         >>>     asset_types = [FileAsset]
         >>>     execution_engine: PandasExecutionEngine
         """

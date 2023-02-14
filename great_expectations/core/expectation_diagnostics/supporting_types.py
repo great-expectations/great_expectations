@@ -9,7 +9,7 @@ from typing import List, Optional, Sequence, Union
 from typing_extensions import TypedDict
 
 from great_expectations.core.expectation_validation_result import (
-    ExpectationValidationResult,
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.types import SerializableDictDot
 

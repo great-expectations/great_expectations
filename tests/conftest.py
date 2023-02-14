@@ -98,6 +98,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
+    import pyspark.sql
     from pyspark.sql import SparkSession
 
 yaml = YAML()
@@ -788,7 +789,7 @@ def empty_data_context(
 
 
 @pytest.fixture(scope="function")
-def data_context_with_connection_to_animal_names_db(
+def data_context_with_connection_to_metrics_db(
     tmp_path,
 ) -> FileDataContext:
     """
@@ -830,8 +831,14 @@ def data_context_with_connection_to_animal_names_db(
                 module_name: great_expectations.datasource.data_connector
                 class_name: ConfiguredAssetSqlDataConnector
                 assets:
-                    my_asset:
+                    animals_names_asset:
                         table_name: animal_names
+                        class_name: Asset
+                    column_pair_asset:
+                        table_name: column_pairs
+                        class_name: Asset
+                    multi_column_sum_asset:
+                        table_name: multi_column_sums
                         class_name: Asset
     """
     # noinspection PyUnusedLocal
@@ -7295,9 +7302,56 @@ def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index():
 
 
 @pytest.fixture
+def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
+    spark_session,
+) -> pyspark.sql.dataframe.DataFrame:
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "ordered_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "eraser",
+                "eraser",
+                "eraser",
+            ],
+            "received_item": [
+                "pencil",
+                "pencil",
+                "pencil",
+                "desk",
+                "desk",
+                "desk",
+            ],
+        }
+    )
+    test_df = spark_session.createDataFrame(data=df)
+    return test_df
+
+
+@pytest.fixture
+def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
+    spark_session,
+) -> pyspark.sql.dataframe.DataFrame:
+    df: pd.DataFrame = pd.DataFrame(
+        {
+            "pk_1": [0, 1, 2, 3, 4, 5],
+            "pk_2": ["zero", "one", "two", "three", "four", "five"],
+            "a": [10, 20, 30, 40, 50, 60],
+            "b": [10, 20, 30, 40, 50, 60],
+            "c": [10, 20, 30, 40, 50, 60],
+        }
+    )
+    test_df = spark_session.createDataFrame(data=df)
+    return test_df
+
+
+@pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+) -> pyspark.sql.dataframe.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],

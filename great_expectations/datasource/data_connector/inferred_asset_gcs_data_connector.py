@@ -2,13 +2,13 @@ import logging
 from typing import List, Optional
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.inferred_asset_file_path_data_connector import (
     InferredAssetFilePathDataConnector,
 )
 from great_expectations.datasource.data_connector.util import list_gcs_keys
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +154,4 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             "bucket_or_name": self._bucket_or_name,
             "path": path,
         }
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)

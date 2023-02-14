@@ -72,7 +72,7 @@ def test_instantiation_without_args(
     assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
 
@@ -115,7 +115,7 @@ def test_instantiation_with_filename_arg(
     assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
 
@@ -158,7 +158,7 @@ def test_instantiation_with_info_arg(
     assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
 
