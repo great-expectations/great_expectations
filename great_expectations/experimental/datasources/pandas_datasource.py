@@ -154,8 +154,8 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
-        regex_pattern: re.Pattern = CSVAsset.parse_regex_string(regex=regex)
-        order_by_sorters: list[BatchSorter] = CSVAsset.parse_order_by_sorters(
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
         asset = CSVAsset(
@@ -181,8 +181,8 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
-        regex_pattern: re.Pattern = ExcelAsset.parse_regex_string(regex=regex)
-        order_by_sorters: list[BatchSorter] = ExcelAsset.parse_order_by_sorters(
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
         asset = ExcelAsset(
@@ -208,8 +208,8 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
-        regex_pattern: re.Pattern = JSONAsset.parse_regex_string(regex=regex)
-        order_by_sorters: list[BatchSorter] = JSONAsset.parse_order_by_sorters(
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
         asset = JSONAsset(
@@ -235,8 +235,8 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
-        regex_pattern: re.Pattern = ParquetAsset.parse_regex_string(regex=regex)
-        order_by_sorters: list[BatchSorter] = ParquetAsset.parse_order_by_sorters(
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
         asset = ParquetAsset(

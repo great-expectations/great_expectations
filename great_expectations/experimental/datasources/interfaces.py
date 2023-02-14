@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
+import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -219,23 +220,6 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         )
 
     # Sorter methods
-    @pydantic.validator("order_by", pre=True)
-    def parse_order_by_sorters(
-        cls, order_by: Optional[List[Union[BatchSorter, str]]]
-    ) -> List[BatchSorter]:
-        order_by_sorters: list[BatchSorter] = []
-        if order_by:
-            for idx, sorter in enumerate(order_by):
-                if isinstance(sorter, str):
-                    if not sorter:
-                        raise ValueError(
-                            '"order_by" list cannot contain an empty string'
-                        )
-                    order_by_sorters.append(_batch_sorter_from_str(sorter))
-                else:
-                    order_by_sorters.append(sorter)
-        return order_by_sorters
-
     def add_sorters(self: _DataAssetT, sorters: BatchSortersDefinition) -> _DataAssetT:
         """Associates a sorter to this DataAsset
 
@@ -420,6 +404,38 @@ class Datasource(
         # when dumping to dict, json, yaml etc.
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
         return asset
+
+    @staticmethod
+    def parse_order_by_sorters(
+        order_by: Optional[List[Union[BatchSorter, str]]] = None
+    ) -> List[BatchSorter]:
+        order_by_sorters: list[BatchSorter] = []
+        if order_by:
+            for idx, sorter in enumerate(order_by):
+                if isinstance(sorter, str):
+                    if not sorter:
+                        raise ValueError(
+                            '"order_by" list cannot contain an empty string'
+                        )
+                    order_by_sorters.append(_batch_sorter_from_str(sorter))
+                else:
+                    order_by_sorters.append(sorter)
+        return order_by_sorters
+
+    @staticmethod
+    def parse_regex_string(
+        regex: Optional[Union[re.Pattern, str]] = None
+    ) -> re.Pattern:
+        pattern: re.Pattern
+        if not regex:
+            pattern = re.compile(".*")
+        elif isinstance(regex, str):
+            pattern = re.compile(regex)
+        elif isinstance(regex, re.Pattern):
+            pattern = regex
+        else:
+            raise ValueError('"regex" must be either re.Pattern, str, or None')
+        return pattern
 
     # Abstract Methods
     @property

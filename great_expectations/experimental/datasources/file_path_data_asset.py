@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 import logging
-import re
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Pattern, Set, Union
 
@@ -78,19 +77,6 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
-
-    @pydantic.validator("regex", pre=True)
-    def parse_regex_string(cls, regex: Optional[Union[Pattern, str]]) -> Pattern:
-        pattern: Pattern
-        if not regex:
-            pattern = re.compile(".*")
-        elif isinstance(regex, str):
-            pattern = re.compile(regex)
-        elif isinstance(regex, Pattern):
-            pattern = regex
-        else:
-            raise ValueError('"regex" must be either re.Pattern, str, or None')
-        return pattern
 
     def batch_request_options_template(
         self,

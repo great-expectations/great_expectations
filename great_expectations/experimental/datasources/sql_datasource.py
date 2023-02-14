@@ -642,7 +642,7 @@ class SQLDatasource(Datasource):
         Returns:
             The TableAsset that is added to the datasource.
         """
-        order_by_sorters: list[BatchSorter] = TableAsset.parse_order_by_sorters(
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
         asset = TableAsset(
@@ -669,7 +669,7 @@ class SQLDatasource(Datasource):
         Returns:
             The QueryAsset that is added to the datasource.
         """
-        order_by_sorters: list[BatchSorter] = QueryAsset.parse_order_by_sorters(
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
         asset = QueryAsset(

@@ -183,7 +183,7 @@ class SqliteDatasource(SQLDatasource):
         Returns:
             The SqliteTableAsset that is added to the datasource.
         """
-        order_by_sorters: list[BatchSorter] = SqliteTableAsset.parse_order_by_sorters(
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
         asset = SqliteTableAsset(
@@ -212,7 +212,7 @@ class SqliteDatasource(SQLDatasource):
         Returns:
             The SqliteTableAsset that is added to the datasource.
         """
-        order_by_sorters: list[BatchSorter] = SqliteQueryAsset.parse_order_by_sorters(
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
         asset = SqliteQueryAsset(
