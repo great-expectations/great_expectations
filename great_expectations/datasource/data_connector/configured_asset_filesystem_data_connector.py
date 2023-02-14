@@ -71,8 +71,11 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
 
         if asset is not None:
             if asset.base_directory:
-                base_directory = normalize_directory_path(
-                    dir_path=asset.base_directory, root_directory_path=base_directory
+                base_directory = str(
+                    normalize_directory_path(
+                        dir_path=asset.base_directory,
+                        root_directory_path=base_directory,
+                    )
                 )
 
             if asset.glob_directive:
@@ -90,9 +93,11 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         base_directory: str = self.base_directory
         if asset is not None:
             if asset.base_directory:
-                base_directory = normalize_directory_path(
-                    dir_path=asset.base_directory,
-                    root_directory_path=base_directory,
+                base_directory = str(
+                    normalize_directory_path(
+                        dir_path=asset.base_directory,
+                        root_directory_path=base_directory,
+                    )
                 )
 
         return str(Path(base_directory).joinpath(path))
@@ -103,7 +108,9 @@ class ConfiguredAssetFilesystemDataConnector(ConfiguredAssetFilePathDataConnecto
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
         root directory. If it is absolute, then keep as-is.
         """
-        return normalize_directory_path(
-            dir_path=self._base_directory,
-            root_directory_path=self.data_context_root_directory,
+        return str(
+            normalize_directory_path(
+                dir_path=self._base_directory,
+                root_directory_path=self.data_context_root_directory,
+            )
         )

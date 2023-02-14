@@ -49,8 +49,12 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
-from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
-from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
+from great_expectations.dataset.pandas_dataset import PandasDataset
+from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
+from great_expectations.dataset.sqlalchemy_dataset import (
+    SqlAlchemyBatchReference,
+    SqlAlchemyDataset,
+)
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -114,6 +118,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context import AbstractDataContext
+    from great_expectations.expectations.expectation import Expectation
 
 
 @dataclass
@@ -617,7 +622,7 @@ class Validator:
         expectation_type: str,
         expectation_kwargs: dict,
         meta: dict,
-        expectation_impl: "Expectation",  # noqa: F821
+        expectation_impl: Expectation,
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
         auto: bool = expectation_kwargs.get("auto", False)

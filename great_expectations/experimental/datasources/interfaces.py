@@ -461,7 +461,7 @@ class Batch(ExperimentalBaseModel):
     datasource: Datasource
     data_asset: DataAsset
     batch_request: BatchRequest
-    data: "BatchData"
+    data: BatchData
     id: str = ""
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
@@ -469,9 +469,9 @@ class Batch(ExperimentalBaseModel):
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    batch_markers: "BatchMarkers" = Field(..., alias="legacy_batch_markers")
+    batch_markers: BatchMarkers = Field(..., alias="legacy_batch_markers")
     batch_spec: BatchSpec = Field(..., alias="legacy_batch_spec")
-    batch_definition: "BatchDefinition" = Field(..., alias="legacy_batch_definition")
+    batch_definition: BatchDefinition = Field(..., alias="legacy_batch_definition")
 
     class Config:
         allow_mutation = False
