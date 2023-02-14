@@ -123,7 +123,9 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
         self,
     ) -> BatchRequestOptions:
         idx: int
-        return {idx: None for idx in self._all_group_names}
+        batch_request_options_template = {idx: None for idx in self._all_group_names}
+        batch_request_options_template["path"] = None
+        return batch_request_options_template
 
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None

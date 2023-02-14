@@ -111,7 +111,11 @@ def test_csv_asset_with_regex_unnamed_parameters(
         infer_schema=True,
     )
     options = asset.batch_request_options_template()
-    assert options == {"batch_request_param_1": None, "batch_request_param_2": None}
+    assert options == {
+        "batch_request_param_1": None,
+        "batch_request_param_2": None,
+        "path": None,
+    }
 
 
 @pytest.mark.unit
@@ -125,7 +129,7 @@ def test_csv_asset_with_regex_named_parameters(
         infer_schema=True,
     )
     options = asset.batch_request_options_template()
-    assert options == {"year": None, "month": None}
+    assert options == {"year": None, "month": None, "path": None}
 
 
 @pytest.mark.unit
@@ -139,7 +143,7 @@ def test_csv_asset_with_some_regex_named_parameters(
         infer_schema=True,
     )
     options = asset.batch_request_options_template()
-    assert options == {"batch_request_param_1": None, "month": None}
+    assert options == {"batch_request_param_1": None, "month": None, "path": None}
 
 
 @pytest.mark.unit
