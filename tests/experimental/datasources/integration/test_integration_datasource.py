@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import pathlib
 import pytest
 
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.experimental.datasources import (
+    PandasFilesystemDatasource,
+    SparkDatasource,
+)
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
@@ -90,6 +95,7 @@ def test_batch_head(
     )
 
 
+@pytest.mark.integration
 def test_sql_query_data_asset(empty_data_context):
     context = empty_data_context
     datasource = sqlite_datasource(context, "yellow_tripdata.db")
@@ -111,3 +117,28 @@ def test_sql_query_data_asset(empty_data_context):
         result_format={"result_format": "BOOLEAN_ONLY"},
     )
     assert result.success
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ["base_directory", "regex", "raises_test_connection_error"],
+    [
+        (
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path(
+                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+                )
+            ),
+            r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            False,
+        )
+    ],
+)
+def test_filesystem_data_asset(
+    filesystem_datasource: PandasFilesystemDatasource | SparkDatasource,
+    base_directory: pathlib.Path,
+    regex: str | None,
+    raises_test_connection_error: bool,
+):
+    filesystem_datasource.base_directory = base_directory
+    filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)
