@@ -191,7 +191,7 @@ class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
     name: str
 
     # Internal attributes
-    _datasource: "SQLDatasource" = pydantic.PrivateAttr()
+    _datasource: SQLDatasource = pydantic.PrivateAttr()
 
     def batch_request_options_template(
         self,
