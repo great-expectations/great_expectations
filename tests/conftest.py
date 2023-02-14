@@ -98,6 +98,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
+    import pyspark.sql
     from pyspark.sql import SparkSession
 
 yaml = YAML()
@@ -7303,7 +7304,7 @@ def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index():
 @pytest.fixture
 def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+) -> pyspark.sql.dataframe.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7333,7 +7334,7 @@ def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+) -> pyspark.sql.dataframe.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7350,7 +7351,7 @@ def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+) -> pyspark.sql.dataframe.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],

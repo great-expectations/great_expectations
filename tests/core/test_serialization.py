@@ -44,10 +44,11 @@ except ImportError:
 
 if TYPE_CHECKING:
     from pyspark.sql import SparkSession
+    from pyspark.sql.types import StructType
 
 
 @pytest.fixture
-def spark_schema(spark_session: SparkSession) -> "StructType":
+def spark_schema(spark_session: SparkSession) -> StructType:
     return StructType(
         [
             StructField("a", IntegerType(), True, None),
@@ -1040,7 +1041,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 def test_checkpoint_config_and_nested_objects_are_serialized_spark(
     checkpoint_config: Union[CheckpointConfig, str],
     expected_serialized_checkpoint_config: dict,
-    spark_session: "SparkSession",
+    spark_session: SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1190,7 +1191,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
 def test_datasource_config_and_nested_objects_are_serialized_spark(
     datasource_config: Union[DatasourceConfig, str],
     expected_serialized_datasource_config: dict,
-    spark_session: "SparkSession",
+    spark_session: SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1259,7 +1260,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
 def test_data_connector_and_nested_objects_are_serialized_spark(
     data_connector_config: DataConnectorConfig,
     expected_serialized_data_connector_config: dict,
-    spark_session: "SparkSession",
+    spark_session: SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1325,7 +1326,7 @@ def test_data_connector_and_nested_objects_are_serialized_spark(
 def test_asset_and_nested_objects_are_serialized_spark(
     asset_config: AssetConfig,
     expected_serialized_asset_config: dict,
-    spark_session: "SparkSession",
+    spark_session: SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
