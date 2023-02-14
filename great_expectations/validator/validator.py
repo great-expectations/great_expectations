@@ -114,6 +114,7 @@ except ImportError:
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context import AbstractDataContext
+    from great_expectations.expectations.expectation import Expectation
 
 
 @dataclass
@@ -617,7 +618,7 @@ class Validator:
         expectation_type: str,
         expectation_kwargs: dict,
         meta: dict,
-        expectation_impl: "Expectation",  # noqa: F821
+        expectation_impl: Expectation,
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
         auto: bool = expectation_kwargs.get("auto", False)
