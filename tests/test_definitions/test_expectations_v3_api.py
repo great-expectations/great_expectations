@@ -125,9 +125,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 validator_with_data.active_batch_data,
                                 SqlAlchemyBatchData,
                             ):
-                                # Call out supported dialects
-                                if "pandas_v3_api" in only_for:
-                                    generate_test = True
                                 if "sqlalchemy" in only_for:
                                     generate_test = True
                                 elif (
@@ -208,6 +205,9 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 validator_with_data.active_batch_data,
                                 PandasBatchData,
                             ):
+                                # Call out supported dialects
+                                if "pandas_v3_api" in only_for:
+                                    generate_test = True
                                 major, minor, *_ = pd.__version__.split(".")
                                 if "pandas" in only_for:
                                     generate_test = True
