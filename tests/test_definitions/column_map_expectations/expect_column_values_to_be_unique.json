@@ -160,7 +160,11 @@
           "unexpected_list": ["None", "None", "None", "None"],
           "unexpected_index_list": [
             {
-              "pk_index": 3,
+              "pk_index": 0,
+              "null": "None"
+            },
+            {
+              "pk_index": 1,
               "null": "None"
             },
             {
@@ -168,11 +172,7 @@
               "null": "None"
             },
             {
-              "pk_index": 0,
-              "null": "None"
-            },
-            {
-              "pk_index": 1,
+              "pk_index": 3,
               "null": "None"
             }
           ]
