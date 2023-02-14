@@ -151,7 +151,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile: Union[str, "TextIOWrapper"]) -> None:
+    def to_yaml(self, outfile: Union[str, TextIOWrapper]) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
@@ -3098,7 +3098,7 @@ class CheckpointConfig(BaseYamlConfig):
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     @staticmethod
     def resolve_config_using_acceptable_arguments(
-        checkpoint: "Checkpoint",  # noqa: F821
+        checkpoint: Checkpoint,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
