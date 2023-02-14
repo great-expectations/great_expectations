@@ -14,12 +14,12 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable, load_class
-from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import (
         BatchRequest as XBatchRequest,
     )
+    from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +47,13 @@ def _get_x_batch_request_class() -> Type[XBatchRequest]:
     """Using this function helps work around circular import dependncies."""
     module_name = "great_expectations.experimental.datasources.interfaces"
     class_name = "BatchRequest"
+    return load_class(class_name=class_name, module_name=module_name)
+
+
+def _get_metrics_calculator_class() -> Type[MetricsCalculator]:
+    """Using this function helps work around circular import dependncies."""
+    module_name = "great_expectations.validator"
+    class_name = "MetricsCalculator"
     return load_class(class_name=class_name, module_name=module_name)
 
 
@@ -846,14 +853,17 @@ class Batch(SerializableDictDot):
         Returns:
             A Pandas DataFrame
         """
-        # FIXME - we should use a Validator after resolving circularity
-        # Validator(self._data.execution_engine, batches=(self,)).get_metric(MetricConfiguration("table.head", {"batch_id": self.id}, {"n_rows": n_rows, "fetch_all": fetch_all}))
-        metric = MetricConfiguration(
-            "table.head",
-            {"batch_id": self.id},
-            {"n_rows": n_rows, "fetch_all": fetch_all},
+        self._data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
+        metrics_calculator = _get_metrics_calculator_class()(
+            execution_engine=self._data.execution_engine,
+            show_progress_bars=True,
         )
-        return self._data.execution_engine.resolve_metrics((metric,))[metric.id]
+        table_head_df: pd.DataFrame = metrics_calculator.head(
+            n_rows=n_rows,
+            domain_kwargs={"batch_id": self.id},
+            fetch_all=fetch_all,
+        )
+        return table_head_df
 
 
 def materialize_batch_request(
