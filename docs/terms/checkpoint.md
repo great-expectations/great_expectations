@@ -145,7 +145,7 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 **YAML**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L150-L176
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting just the yaml"
 ```
 
 **runtime**:
@@ -159,7 +159,7 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 
 **YAML**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L199-L229
+```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults just the yaml"
 ```
 
 **Runtime**:
@@ -172,7 +172,7 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 ```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets"
 ```
 
-```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L258-L268
+```console name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results just the string"
 ```
 
 </TabItem>
