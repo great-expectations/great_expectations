@@ -424,6 +424,17 @@ class Datasource(
                             '"order_by" list cannot contain an empty string'
                         )
                     order_by_sorters.append(_batch_sorter_from_str(sorter))
+                elif isinstance(sorter, dict):
+                    key: Optional[Any] = sorter.get("key")
+                    reverse: Optional[Any] = sorter.get("reverse")
+                    if key and reverse:
+                        order_by_sorters.append(BatchSorter(key=key, reverse=reverse))
+                    elif key:
+                        order_by_sorters.append(BatchSorter(key=key))
+                    else:
+                        raise ValueError(
+                            '"order_by" list dict must have a key named "key"'
+                        )
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters

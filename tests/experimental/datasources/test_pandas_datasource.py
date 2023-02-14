@@ -264,7 +264,7 @@ def test_add_csv_asset_to_datasource(
         name="csv_asset",
     )
     assert asset.name == "csv_asset"  # type: ignore[attr-defined]
-    m1 = asset.regex.match("yellow_tripdata_sample_1111-22.csv")  # type: ignore[attr-defined]
+    m1 = asset.regex.match("this_can_be_named_anything.csv")  # type: ignore[attr-defined]
     assert m1 is not None
 
 
