@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, List, Optional, Set, Tuple
+from typing import TYPE_CHECKING, Optional
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec
@@ -22,10 +22,6 @@ if TYPE_CHECKING:
         PandasExecutionEngine,
         SparkDFExecutionEngine,
     )
-    from great_expectations.experimental.datasources import (
-        PandasFilesystemDatasource,
-        SparkDatasource,
-    )
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +33,7 @@ class _FilesystemDataAsset(_FilePathDataAsset):
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
-    def _get_reader_options_include(self) -> Set[str] | None:
+    def _get_reader_options_include(self) -> set[str] | None:
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for Filesystem style DataAsset processing."""
@@ -64,7 +60,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
-    ) -> List[Tuple[BatchRequest, pathlib.Path]]:
+    ) -> list[tuple[BatchRequest, pathlib.Path]]:
         """Generates a list fully specified batch requests from partial specified batch request
 
         Args:
@@ -76,16 +72,17 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
             This list will be empty if no files exist on disk that correspond to the input
             batch request.
         """
-        datasource: PandasFilesystemDatasource | SparkDatasource = self.datasource
+        base_directory: pathlib.Path = self.datasource.base_directory
+        all_paths_relative_to_base_dir: list[str] = [
+            str(file.relative_to(base_directory))
+            for file in base_directory.glob("**/*.*")
+        ]
 
-        base_directory: pathlib.Path = datasource.base_directory
-        all_files: List[pathlib.Path] = list(pathlib.Path(base_directory).iterdir())
+        batch_requests_with_path: list[tuple[BatchRequest, pathlib.Path]] = []
 
-        batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
-
-        file_name: pathlib.Path
-        for file_name in all_files:
-            match = self._regex_parser.get_matches(target=file_name.name)
+        rel_path: str
+        for rel_path in all_paths_relative_to_base_dir:
+            match = self._regex_parser.get_matches(target=rel_path)
             if match:
                 # Create the batch request that would correlate to this regex match
                 match_options = {}
@@ -105,14 +102,14 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                     batch_requests_with_path.append(
                         (
                             BatchRequest(
-                                datasource_name=datasource.name,
+                                datasource_name=self.datasource.name,
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),
-                            base_directory / file_name,
+                            base_directory / rel_path,
                         )
                     )
-                    logger.debug(f"Matching path: {base_directory / file_name}")
+                    logger.debug(f"Matching path: {base_directory / rel_path}")
         if not batch_requests_with_path:
             logger.warning(
                 f"Batch request {batch_request} corresponds to no data files."
@@ -144,9 +141,9 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
-    ) -> List[Batch]:
+    ) -> list[Batch]:
         self._validate_batch_request(batch_request)
-        batch_list: List[Batch] = []
+        batch_list: list[Batch] = []
 
         kwargs: dict | None = getattr(self, "kwargs", None)
         if not kwargs:
