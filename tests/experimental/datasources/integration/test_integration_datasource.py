@@ -12,6 +12,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,
+    TestConnectionError,
 )
 from tests.experimental.datasources.integration.conftest import sqlite_datasource
 from tests.experimental.datasources.integration.integration_test_utils import (
@@ -123,7 +124,7 @@ def test_sql_query_data_asset(empty_data_context):
 @pytest.mark.parametrize(
     ["base_directory", "regex", "raises_test_connection_error"],
     [
-        (
+        pytest.param(
             pathlib.Path(__file__).parent.joinpath(
                 pathlib.Path(
                     "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
@@ -131,7 +132,34 @@ def test_sql_query_data_asset(empty_data_context):
             ),
             r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
             False,
-        )
+            id="good filename",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path(
+                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+                )
+            ),
+            r"bad_yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            True,
+            id="bad filename",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path("..", "..", "..", "test_sets")
+            ),
+            r"taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            False,
+            id="good path",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path("..", "..", "..", "test_sets")
+            ),
+            r"bad_taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            True,
+            id="bad path",
+        ),
     ],
 )
 def test_filesystem_data_asset(
@@ -141,4 +169,8 @@ def test_filesystem_data_asset(
     raises_test_connection_error: bool,
 ):
     filesystem_datasource.base_directory = base_directory
-    filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)
+    if raises_test_connection_error:
+        with pytest.raises(TestConnectionError):
+            filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)
+    else:
+        filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)

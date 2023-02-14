@@ -49,17 +49,17 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        datasource: PandasFilesystemDatasource | SparkDatasource = self.datasource
-
         success = False
-        for filepath in datasource.base_directory.iterdir():
-            if self.regex.match(filepath.name):
+        for filepath in self.datasource.base_directory.glob("**/*.*"):
+            if self.regex.match(
+                str(filepath.relative_to(self.datasource.base_directory))
+            ):
                 # if one file in the path matches the regex, we consider this asset valid
                 success = True
                 break
         if not success:
             raise TestConnectionError(
-                f"No file at path: {datasource.base_directory.resolve()} matched the regex: {self.regex.pattern}"
+                f"No file at path: {self.datasource.base_directory.resolve()} matched the regex: {self.regex.pattern}"
             )
 
     def _fully_specified_batch_requests_with_path(
