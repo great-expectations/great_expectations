@@ -19,6 +19,7 @@ from great_expectations.datasource.data_connector.asset import Asset  # noqa: TC
 from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.datasource import DataConnector
 
 logger = logging.getLogger(__name__)
@@ -346,7 +347,7 @@ def sanitize_prefix_for_s3(text: str) -> str:
 
 def normalize_directory_path(
     dir_path: Union[pathlib.Path, str],
-    root_directory_path: Optional[pathlib.Path | str] = None,
+    root_directory_path: Optional[PathStr] = None,
 ) -> pathlib.Path:
     if isinstance(dir_path, str):
         dir_path = pathlib.Path(dir_path)
