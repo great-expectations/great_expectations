@@ -1,6 +1,6 @@
 import datetime
 import os
-from typing import List, Optional
+from typing import List
 from unittest import mock
 
 import pandas as pd
@@ -201,18 +201,21 @@ def test_get_data_for_batch_identifiers_year(
 ):
     """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
     data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
-    table_name: str = "table_name"
+    # selectable should be a sa.Selectable object but since we are mocking out
+    # get_data_for_batch_identifiers_for_split_on_date_parts
+    # and just verifying its getting passed through, we ignore the type here.
+    selectable: str = "mock_selectable"
     column_name: str = "column_name"
 
     data_splitter.get_data_for_batch_identifiers_year(
         execution_engine=mock_execution_engine,
-        table_name=table_name,
+        selectable=selectable,
         column_name=column_name,
     )
 
     mock_get_data_for_batch_identifiers_for_split_on_date_parts.assert_called_with(
         execution_engine=mock_execution_engine,
-        table_name=table_name,
+        selectable=selectable,
         column_name=column_name,
         date_parts=[DatePart.YEAR],
     )
@@ -228,18 +231,18 @@ def test_get_data_for_batch_identifiers_year_and_month(
 ):
     """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
     data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
-    table_name: str = "table_name"
+    selectable: str = "mock_selectable"
     column_name: str = "column_name"
 
     data_splitter.get_data_for_batch_identifiers_year_and_month(
         execution_engine=mock_execution_engine,
-        table_name=table_name,
+        selectable=selectable,
         column_name=column_name,
     )
 
     mock_get_data_for_batch_identifiers_for_split_on_date_parts.assert_called_with(
         execution_engine=mock_execution_engine,
-        table_name=table_name,
+        selectable=selectable,
         column_name=column_name,
         date_parts=[DatePart.YEAR, DatePart.MONTH],
     )
@@ -255,18 +258,18 @@ def test_get_data_for_batch_identifiers_year_and_month_and_day(
 ):
     """test that get_data_for_batch_identifiers_for_split_on_date_parts() was called with the appropriate params."""
     data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
-    table_name: str = "table_name"
+    selectable: str = "mock_selectable"
     column_name: str = "column_name"
 
     data_splitter.get_data_for_batch_identifiers_year_and_month_and_day(
         execution_engine=mock_execution_engine,
-        table_name=table_name,
+        selectable=selectable,
         column_name=column_name,
     )
 
     mock_get_data_for_batch_identifiers_for_split_on_date_parts.assert_called_with(
         execution_engine=mock_execution_engine,
-        table_name=table_name,
+        selectable=selectable,
         column_name=column_name,
         date_parts=[DatePart.YEAR, DatePart.MONTH, DatePart.DAY],
     )
@@ -286,11 +289,11 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     """
 
     data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect="sqlite")
-    table_name: str = "table_name"
+    selectable: sa.sql.Selectable = sa.text("table_name")
     column_name: str = "column_name"
 
     result: sa.sql.elements.BooleanClauseList = data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
-        table_name=table_name,
+        selectable=selectable,
         column_name=column_name,
         date_parts=date_parts,
     )
@@ -307,7 +310,7 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
         query_str
         == (
             "SELECT distinct(EXTRACT(month FROM column_name)) AS concat_distinct_values, "
-            "CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM table_name"
+            f"CAST(EXTRACT(month FROM column_name) AS INTEGER) AS month FROM {selectable}"
         )
         .replace("\n", "")
         .replace(" ", "")
@@ -343,11 +346,11 @@ def test_get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts_
     return the correct query when passed any valid set of parameters including multiple date parts.
     """
     data_splitter: SqlAlchemyDataSplitter = SqlAlchemyDataSplitter(dialect=dialect)
-    table_name: str = "table_name"
+    selectable: sa.sql.Selectable = sa.text("table_name")
     column_name: str = "column_name"
 
     result: sa.sql.elements.BooleanClauseList = data_splitter.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
-        table_name=table_name,
+        selectable=selectable,
         column_name=column_name,
         date_parts=date_parts,
     )
@@ -522,6 +525,7 @@ def test_sqlite_split(
             )
         else:
             if taxi_test_cases.test_column_name:
+                assert test_case.expected_column_values is not None
                 batch_spec = SqlAlchemyDatasourceBatchSpec(
                     table_name="test",
                     schema_name="main",
@@ -534,6 +538,7 @@ def test_sqlite_split(
                     },
                 )
             elif taxi_test_cases.test_column_names:
+                assert test_case.expected_column_values is not None
                 column_name: str
                 batch_spec = SqlAlchemyDatasourceBatchSpec(
                     table_name="test",
