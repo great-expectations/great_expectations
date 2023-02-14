@@ -363,7 +363,7 @@ def normalize_directory_path(
 
 
 def get_filesystem_one_level_directory_glob_path_list(
-    base_directory_path: Union[pathlib.Path, str], glob_directive: str
+    base_directory_path: Union[PathStr], glob_directive: str
 ) -> List[str]:
     """
     List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
