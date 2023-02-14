@@ -34,11 +34,8 @@ def test_basic_instantiation(tmp_path_factory):
         regex=re.compile(r"alpha-(.*)\.csv"),
         glob_directive="*.csv",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "alpha-1.csv",
         "alpha-2.csv",
         "alpha-3.csv",
@@ -48,6 +45,7 @@ def test_basic_instantiation(tmp_path_factory):
 
     # Missing "data_asset_name" argument.
     with pytest.raises(TypeError):
+        # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list_from_batch_request(
             BatchRequest(
                 datasource_name="something",
@@ -80,11 +78,8 @@ def test_instantiation_regex_does_not_match_paths(tmp_path_factory):
         regex=re.compile(r"beta-(.*)\.csv"),
         glob_directive="*.csv",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "alpha-1.csv",
         "alpha-2.csv",
         "alpha-3.csv",
@@ -126,9 +121,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         glob_directive="*.csv",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     # with missing BatchRequest arguments
     with pytest.raises(TypeError):
         # noinspection PyArgumentList
@@ -272,9 +264,6 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
 #         glob_directive="*.csv",
 #     )
-#     # noinspection PyProtectedMember
-#     my_data_connector._refresh_data_references_cache()
-#
 #     assert my_data_connector.get_data_reference_count() == 3
 #     assert my_data_connector._get_data_reference_list()[:3] == [
 #         "alpha-1.csv",
@@ -456,14 +445,11 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory),
-        regex=re.compile(r"(?P<name>.+)\/.+\.csv"),
+        regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 7
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "A",
         "A/file_1.csv",
         "A/file_2.csv",
@@ -511,12 +497,9 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
         base_directory=pathlib.Path(base_directory),
-        regex=re.compile(r"(?P<directory>.+)\/(?P<filename>.+\.csv)"),
+        regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     unsorted_batch_definition_list: List[
         BatchDefinition
     ] = my_data_connector.get_batch_definition_list_from_batch_request(
@@ -550,11 +533,8 @@ def test_alpha(tmp_path_factory):
         regex=re.compile(r"(?P<part_1>.+)\.csv"),
         glob_directive="*.csv",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 4
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "A.csv",
         "B.csv",
         "C.csv",
@@ -624,11 +604,8 @@ def test_foxtrot(tmp_path_factory):
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         glob_directive="*.csv",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 0
-    assert my_data_connector._get_data_reference_list()[:3] == []
+    assert my_data_connector.get_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
@@ -639,11 +616,8 @@ def test_foxtrot(tmp_path_factory):
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         glob_directive="*.csv",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "A-1.csv",
         "A-2.csv",
         "A-3.csv",
@@ -658,11 +632,8 @@ def test_foxtrot(tmp_path_factory):
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         glob_directive="*.*",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "B-1.txt",
         "B-2.txt",
         "B-3.txt",
@@ -677,11 +648,8 @@ def test_foxtrot(tmp_path_factory):
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         glob_directive="*",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "C-2017.csv",
         "C-2018.csv",
         "C-2019.csv",
@@ -725,11 +693,8 @@ def test_relative_base_directory_path(tmp_path_factory):
         regex=re.compile(r"(?P<part_1>.+)\.csv"),
         glob_directive="*",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "B",
         "filename2.csv",
         "filename3.csv",
@@ -746,11 +711,8 @@ def test_relative_base_directory_path(tmp_path_factory):
         regex=re.compile(r"(?P<name>.+)_(?P<number>.+)\.csv"),
         glob_directive="log*.csv",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 1
-    assert my_data_connector._get_data_reference_list()[:3] == ["logfile_0.csv"]
+    assert my_data_connector.get_data_references()[:3] == ["logfile_0.csv"]
     assert len(my_data_connector.get_unmatched_data_references()) == 0
     assert (
         my_data_connector._get_full_file_path(path="bigfile_1.csv")

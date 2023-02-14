@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import List
+from typing import List, Optional
 
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
@@ -24,7 +24,6 @@ class FilesystemDataConnector(FilePathDataConnector):
     it requires more setup.
 
     Args:
-        name (str): name of ConfiguredAssetFilesystemDataConnector
         regex (pattern): Optional regex pattern for filtering data references
         glob_directive (str): glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
@@ -45,6 +44,11 @@ class FilesystemDataConnector(FilePathDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
     ) -> None:
+        self._data_context_root_directory: Optional[pathlib.Path] = None
+
+        self._base_directory = base_directory
+        self._glob_directive: str = glob_directive
+
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
@@ -56,8 +60,15 @@ class FilesystemDataConnector(FilePathDataConnector):
             file_path_template_map_fn=None,
         )
 
-        self._base_directory = base_directory
-        self._glob_directive: str = glob_directive
+    @property
+    def data_context_root_directory(self) -> Optional[pathlib.Path]:
+        return self._data_context_root_directory
+
+    @data_context_root_directory.setter
+    def data_context_root_directory(
+        self, data_context_root_directory: Optional[pathlib.Path]
+    ) -> None:
+        self._data_context_root_directory = data_context_root_directory
 
     @property
     def base_directory(self) -> pathlib.Path:
@@ -70,7 +81,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             root_directory_path=self.data_context_root_directory,
         )
 
-    def _get_data_reference_list(self) -> List[str]:
+    def get_data_references(self) -> List[str]:
         base_directory: pathlib.Path = self.base_directory
         glob_directive: str = self._glob_directive
         path_list: List[str] = get_filesystem_one_level_directory_glob_path_list(

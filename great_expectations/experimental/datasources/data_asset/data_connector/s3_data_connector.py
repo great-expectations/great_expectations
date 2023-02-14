@@ -31,7 +31,6 @@ class S3DataConnector(FilePathDataConnector):
 
 
     Args:
-        name (str): required name for DataConnector
         datasource_name (str): required name for datasource
         bucket (str): bucket for S3
         regex (dict): regex configuration for filtering data_references
@@ -60,16 +59,6 @@ class S3DataConnector(FilePathDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
     ) -> None:
-        super().__init__(
-            datasource_name=datasource_name,
-            data_asset_name=data_asset_name,
-            regex=regex,
-            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # sorters=sorters,
-            # TODO: <Alex>ALEX</Alex>
-        )
-
         self._bucket = bucket
         self._prefix = sanitize_prefix_for_s3(prefix)
         self._delimiter = delimiter
@@ -84,6 +73,16 @@ class S3DataConnector(FilePathDataConnector):
             raise ImportError(
                 "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
             )
+
+        super().__init__(
+            datasource_name=datasource_name,
+            data_asset_name=data_asset_name,
+            regex=regex,
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # sorters=sorters,
+            # TODO: <Alex>ALEX</Alex>
+        )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
         """
@@ -100,7 +99,7 @@ class S3DataConnector(FilePathDataConnector):
         )
         return S3BatchSpec(batch_spec)
 
-    def _get_data_reference_list(self) -> List[str]:
+    def get_data_references(self) -> List[str]:
         query_options: dict = {
             "Bucket": self._bucket,
             "Prefix": self._prefix,

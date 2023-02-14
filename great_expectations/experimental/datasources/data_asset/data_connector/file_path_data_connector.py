@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import re
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional
 
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.batch_filter import (
@@ -51,7 +51,6 @@ class FilePathDataConnector(DataConnector):
     Note that `FilePathDataConnector` is not meant to be used on its own, but extended.
 
     Args:
-        name: The name of the Data Connector.
         regex: A regex pattern for filtering data references
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
@@ -83,27 +82,17 @@ class FilePathDataConnector(DataConnector):
 
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
+        # This is a dictionary which maps data_references onto batch_requests.
+        self._data_references_cache: Dict[str, List[BatchDefinition] | None] = {}
+
+        self._refresh_data_references_cache()
+
     # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
     # TODO: <Alex>ALEX</Alex>
     # @property
     # def sorters(self) -> Optional[dict]:
     #     return self._sorters
     # TODO: <Alex>ALEX</Alex>
-
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
-        """
-        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
-
-        Args:
-            batch_definition (BatchDefinition): to be used to build batch_spec
-
-        Returns:
-            BatchSpec built from batch_definition
-        """
-        batch_spec: BatchSpec = super().build_batch_spec(
-            batch_definition=batch_definition
-        )
-        return PathBatchSpec(batch_spec)
 
     # Interface Method
     def get_batch_definition_list_from_batch_request(
@@ -172,6 +161,21 @@ class FilePathDataConnector(DataConnector):
 
         return batch_definition_list
 
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> PathBatchSpec:
+        """
+        Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
+
+        Args:
+            batch_definition (BatchDefinition): to be used to build batch_spec
+
+        Returns:
+            BatchSpec built from batch_definition
+        """
+        batch_spec: BatchSpec = super().build_batch_spec(
+            batch_definition=batch_definition
+        )
+        return PathBatchSpec(batch_spec)
+
     # Interface Method
     def get_data_reference_count(self) -> int:
         """
@@ -208,8 +212,23 @@ class FilePathDataConnector(DataConnector):
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
-        path: str = self._map_batch_definition_to_data_reference(
-            batch_definition=batch_definition
+        """
+        This interface method examines "BatchDefinition" object and converts it to exactly one "data_reference" handle,
+        based on partitioning behavior of given subclass (e.g., Regular Expressions for file path based DataConnector
+        implementations).  Type of "data_reference" is storage dependent.  This method is then used to create storage
+        system specific "BatchSpec" parameters for retrieving "Batch" of data.
+
+        Args:
+            batch_definition: input "BatchDefinition" object
+
+        Returns:
+            dict -- dictionary of "BatchSpec" properties
+        """
+        group_names: List[str] = self._regex_parser.get_all_group_names()
+        path: str = map_batch_definition_to_data_reference_string_using_regex(
+            batch_definition=batch_definition,
+            regex_pattern=self._regex,
+            group_names=group_names,
         )
         if not path:
             raise ValueError(
@@ -222,41 +241,42 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {"path": path}
 
-    # Interface Method
     def _refresh_data_references_cache(self) -> None:
+        """
+        This prototypical method populates cache, whose keys are data references and values are "BatchDefinition"
+        objects.  Subsequently, "BatchDefinition" objects generated are amenable to flexible querying and sorting.
+
+        It examines every "data_reference" handle and converts it to zero or more "BatchDefinition" objects, based on
+        partitioning behavior of given subclass (e.g., Regular Expressions for file path based DataConnector
+        implementations).  Type of each "data_reference" is storage dependent.
+        """
         # Map data_references to batch_definitions
         self._data_references_cache = {}
 
-        for data_reference in self._get_data_reference_list():
+        for data_reference in self.get_data_references():
             mapped_batch_definition_list: List[
                 BatchDefinition
-            ] | None = self._map_data_reference_to_batch_definition_list(
-                data_reference=data_reference
+            ] | None = map_data_reference_string_to_batch_definition_list_using_regex(
+                datasource_name=self.datasource_name,
+                data_connector_name="experimental",
+                data_asset_name=self.data_asset_name,
+                data_reference=data_reference,
+                regex_pattern=self._regex,
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
-    # Interface Method
-    def _map_data_reference_to_batch_definition_list(
-        self, data_reference: str
-    ) -> List[BatchDefinition] | None:
-        return map_data_reference_string_to_batch_definition_list_using_regex(
-            datasource_name=self.datasource_name,
-            data_connector_name="experimental",
-            data_asset_name=self.data_asset_name,
-            data_reference=data_reference,
-            regex_pattern=self._regex,
-        )
+        """
+        This prototypical method examines "BatchDefinition" object and converts it to exactly one "data_reference"
+        handle, based on partitioning behavior of given subclass (e.g., Regular Expressions for file path based
+        DataConnector implementations).  Type of "data_reference" is storage dependent.  This method is then used to
+        create storage system specific "BatchSpec" parameters for retrieving "Batch" of data.
 
-    # Interface Method
-    def _map_batch_definition_to_data_reference(
-        self, batch_definition: BatchDefinition
-    ) -> str:
-        group_names: List[str] = self._regex_parser.get_all_group_names()
-        return map_batch_definition_to_data_reference_string_using_regex(
-            batch_definition=batch_definition,
-            regex_pattern=self._regex,
-            group_names=group_names,
-        )
+        Args:
+            batch_definition: input "BatchDefinition" object
+
+        Returns:
+            handle provided
+        """
 
     # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
     # TODO: <Alex>ALEX</Alex>

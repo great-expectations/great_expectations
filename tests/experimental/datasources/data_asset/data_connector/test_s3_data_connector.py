@@ -48,11 +48,8 @@ def test_basic_instantiation():
         regex=re.compile(r"alpha-(.*)\.csv"),
         prefix="",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "alpha-1.csv",
         "alpha-2.csv",
         "alpha-3.csv",
@@ -99,11 +96,8 @@ def test_instantiation_regex_does_not_match_paths():
         regex=re.compile(r"beta-(.*)\.csv"),
         prefix="",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "alpha-1.csv",
         "alpha-2.csv",
         "alpha-3.csv",
@@ -151,9 +145,6 @@ def test_return_all_batch_definitions_unsorted():
         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         prefix="",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     # with missing BatchRequest arguments
     with pytest.raises(TypeError):
         # noinspection PyArgumentList
@@ -496,11 +487,8 @@ def test_return_only_unique_batch_definitions():
         regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         prefix="A",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "A/file_1.csv",
         "A/file_2.csv",
         "A/file_3.csv",
@@ -572,11 +560,8 @@ def test_alpha():
         regex=re.compile(r"(?P<part_1>.+)\.csv"),
         prefix="test_dir_alpha",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 4
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "test_dir_alpha/A.csv",
         "test_dir_alpha/B.csv",
         "test_dir_alpha/C.csv",
@@ -654,11 +639,8 @@ def test_foxtrot():
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 0
-    assert my_data_connector._get_data_reference_list()[:3] == []
+    assert my_data_connector.get_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
@@ -669,11 +651,8 @@ def test_foxtrot():
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="test_dir_foxtrot/A",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "test_dir_foxtrot/A/A-1.csv",
         "test_dir_foxtrot/A/A-2.csv",
         "test_dir_foxtrot/A/A-3.csv",
@@ -688,11 +667,8 @@ def test_foxtrot():
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         prefix="test_dir_foxtrot/B",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "test_dir_foxtrot/B/B-1.txt",
         "test_dir_foxtrot/B/B-2.txt",
         "test_dir_foxtrot/B/B-3.txt",
@@ -707,11 +683,8 @@ def test_foxtrot():
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="test_dir_foxtrot/C",
     )
-    # noinspection PyProtectedMember
-    my_data_connector._refresh_data_references_cache()
-
     assert my_data_connector.get_data_reference_count() == 3
-    assert my_data_connector._get_data_reference_list()[:3] == [
+    assert my_data_connector.get_data_references()[:3] == [
         "test_dir_foxtrot/C/C-2017.csv",
         "test_dir_foxtrot/C/C-2018.csv",
         "test_dir_foxtrot/C/C-2019.csv",
