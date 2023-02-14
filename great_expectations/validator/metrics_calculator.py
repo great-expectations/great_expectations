@@ -1,22 +1,15 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.util import load_class
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validation_graph import ValidationGraph
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import (
-        ExecutionEngine,
-        PandasExecutionEngine,
-        SparkDFExecutionEngine,
-        SqlAlchemyExecutionEngine,
-    )
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
@@ -29,27 +22,6 @@ except ImportError:
     logger.debug(
         "Unable to load pandas; install optional pandas dependency for support."
     )
-
-
-def _get_pandas_execution_engine_class() -> Type[PandasExecutionEngine]:
-    """Using this function helps work around circular import dependncies."""
-    module_name = "great_expectations.execution_engine.pandas_execution_engine"
-    class_name = "PandasExecutionEngine"
-    return load_class(class_name=class_name, module_name=module_name)
-
-
-def _get_sqlalchemy_execution_engine_class() -> Type[SqlAlchemyExecutionEngine]:
-    """Using this function helps work around circular import dependncies."""
-    module_name = "great_expectations.execution_engine.sqlalchemy_execution_engine"
-    class_name = "SqlAlchemyExecutionEngine"
-    return load_class(class_name=class_name, module_name=module_name)
-
-
-def _get_sparkdf_execution_engine_class() -> Type[SparkDFExecutionEngine]:
-    """Using this function helps work around circular import dependncies."""
-    module_name = "great_expectations.execution_engine.sparkdf_execution_engine"
-    class_name = "SparkDFExecutionEngine"
-    return load_class(class_name=class_name, module_name=module_name)
 
 
 class MetricsCalculator:
@@ -111,7 +83,7 @@ class MetricsCalculator:
                 "batch_id"
             ] = self._execution_engine.batch_manager.active_batch_id
 
-        data: Any = self.get_metric(
+        df: pd.DataFrame = self.get_metric(
             metric=MetricConfiguration(
                 metric_name="table.head",
                 metric_domain_kwargs=domain_kwargs,
@@ -121,22 +93,6 @@ class MetricsCalculator:
                 },
             )
         )
-
-        if isinstance(
-            self._execution_engine,
-            (
-                _get_pandas_execution_engine_class(),
-                _get_sqlalchemy_execution_engine_class(),
-            ),
-        ):
-            df = pd.DataFrame(data=data)
-        elif isinstance(self._execution_engine, _get_sparkdf_execution_engine_class()):
-            rows: List[Dict[str, Any]] = [datum.asDict() for datum in data]
-            df = pd.DataFrame(data=rows)
-        else:
-            raise gx_exceptions.GreatExpectationsError(
-                "Unsupported or unknown ExecutionEngine type encountered in Validator class."
-            )
 
         return df.reset_index(drop=True, inplace=False)
 
