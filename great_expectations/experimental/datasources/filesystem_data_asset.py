@@ -10,19 +10,14 @@ from great_expectations.experimental.datasources.data_asset.data_connector.files
 from great_expectations.experimental.datasources.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.experimental.datasources.interfaces import (
-    BatchRequest,
-    BatchRequestOptions,
-    TestConnectionError,
-)
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources import (
-        PandasFilesystemDatasource,
-        SparkDatasource,
-    )
     from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
         DataConnector,
+    )
+    from great_expectations.experimental.datasources.interfaces import (
+        BatchRequest,
+        BatchRequestOptions,
     )
 
 logger = logging.getLogger(__name__)
@@ -37,26 +32,6 @@ class _FilesystemDataAsset(_FilePathDataAsset):
 
     # Filesystem specific attributes
     glob_directive: str = "**/*"
-
-    def test_connection(self) -> None:
-        """Test the connection for the CSVAsset.
-
-        Raises:
-            TestConnectionError: If the connection test fails.
-        """
-        datasource: PandasFilesystemDatasource | SparkDatasource = self.datasource
-
-        success = False
-        for filepath in datasource.base_directory.iterdir():
-            if self.regex.match(filepath.name):
-                # if one file in the path matches the regex, we consider this asset valid
-                success = True
-                break
-
-        if not success:
-            raise TestConnectionError(
-                f"No file at path: {datasource.base_directory.resolve()} matched the regex: {self.regex.pattern}"
-            )
 
     def batch_request_options_template(
         self,

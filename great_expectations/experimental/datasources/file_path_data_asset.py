@@ -28,6 +28,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
@@ -239,9 +240,14 @@ class _FilePathDataAsset(DataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        raise NotImplementedError(
-            """One needs to implement "test_connection" on a _FilePathDataAsset subclass."""
-        )
+        data_connector: DataConnector = self._get_data_connector()
+        if (
+            data_connector.get_unmatched_data_reference_count()
+            == data_connector.get_data_reference_count()
+        ):
+            raise TestConnectionError(
+                f"""No data references found in DataAsset "{self.name}"."""
+            )
 
     def _get_data_connector(self) -> DataConnector:
         raise NotImplementedError

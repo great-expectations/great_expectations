@@ -101,7 +101,7 @@ class DataConnector(ABC):
     @abstractmethod
     def get_data_reference_count(self) -> int:
         """
-        This interface method returns number of all (e.g., cached) data references (useful for diagnostics purposes).
+        This interface method returns number of all (e.g., cached) data references (useful for diagnostics).
 
         Returns:
             int -- number of data references identified
@@ -116,6 +116,16 @@ class DataConnector(ABC):
 
         Returns:
             List[Any] -- unmatched data references (type depends on cloud storage environment, SQL DBMS, etc.)
+        """
+        pass
+
+    @abstractmethod
+    def get_unmatched_data_reference_count(self) -> int:
+        """
+        This interface method returns number of all (e.g., cached) unmached data references (useful for diagnostics).
+
+        Returns:
+            int -- number of data references identified
         """
         pass
 

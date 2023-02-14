@@ -492,7 +492,7 @@ def test_pandas_sorter(
 def bad_regex_config(csv_path: pathlib.Path) -> tuple[re.Pattern, TestConnectionError]:
     regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
     test_connection_error = TestConnectionError(
-        f"No file at path: {csv_path.resolve()} matched the regex: {regex.pattern}"
+        """No data references found in DataAsset "csv_asset"."""
     )
     return regex, test_connection_error
 
@@ -526,4 +526,5 @@ def test_test_connection_failures(
 
     with pytest.raises(type(test_connection_error)) as e:
         pandas_filesystem_datasource.test_connection()
+
     assert str(e.value) == str(test_connection_error)

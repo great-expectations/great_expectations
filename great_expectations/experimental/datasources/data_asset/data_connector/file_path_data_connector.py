@@ -209,6 +209,17 @@ class FilePathDataConnector(DataConnector):
         return unmatched_data_references
 
     # Interface Method
+    def get_unmatched_data_reference_count(self) -> int:
+        """
+        Returns the list of unmached data_references known by this DataConnector from its _data_references_cache
+
+        Returns:
+            number of unmached data_references known by this DataConnector.
+        """
+        unmached_references: int = len(self.get_unmatched_data_references())
+        return unmached_references
+
+    # Interface Method
     def _generate_batch_spec_parameters_from_batch_definition(
         self, batch_definition: BatchDefinition
     ) -> dict:
