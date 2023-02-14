@@ -19,6 +19,7 @@ from great_expectations.datasource.data_connector.asset import Asset  # noqa: TC
 from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.datasource import DataConnector
 
 logger = logging.getLogger(__name__)
@@ -237,7 +238,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
 
 # noinspection PyUnresolvedReferences
 def _invert_regex_to_data_reference_template(
-    regex_pattern: Union[re.Pattern, str],
+    regex_pattern: re.Pattern | str,
     group_names: List[str],
 ) -> str:
     r"""Create a string template based on a regex and corresponding list of group names.
@@ -346,7 +347,7 @@ def sanitize_prefix_for_s3(text: str) -> str:
 
 def normalize_directory_path(
     dir_path: Union[pathlib.Path, str],
-    root_directory_path: Optional[Union[pathlib.Path, str]] = None,
+    root_directory_path: Optional[PathStr] = None,
 ) -> pathlib.Path:
     if isinstance(dir_path, str):
         dir_path = pathlib.Path(dir_path)
@@ -362,7 +363,7 @@ def normalize_directory_path(
 
 
 def get_filesystem_one_level_directory_glob_path_list(
-    base_directory_path: Union[pathlib.Path, str], glob_directive: str
+    base_directory_path: Union[PathStr], glob_directive: str
 ) -> List[str]:
     """
     List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
