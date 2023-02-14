@@ -295,6 +295,10 @@ def test_sanitize_config_azure_blob_store():
     with pytest.raises(StoreConfigurationError):
         PasswordMasker.mask_db_url(azure_wrong_url)
 
+    azure_missing_fields: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;EndpointSuffix=core.windows.net"
+    with pytest.raises(StoreConfigurationError):
+        PasswordMasker.mask_db_url(azure_missing_fields)
+
 
 def test_sanitize_config_raises_exception_with_bad_input(
     basic_data_context_config,

@@ -210,16 +210,18 @@ class PasswordMasker:
         azure_conn_str_re = re.compile(
             "(DefaultEndpointsProtocol=(http|https));(AccountName=([a-zA-Z0-9]+));(AccountKey=)(.+);(EndpointSuffix=([a-zA-Z\\.]+))"
         )
-        matched: re.Match[str] | None = azure_conn_str_re.match(url)
-        if matched:
-            try:
-                res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"
-                return res
-            except Exception as e:
+        try:
+            matched: re.Match[str] | None = azure_conn_str_re.match(url)
+            if not matched:
                 raise StoreConfigurationError(
-                    f"Something went wrong when trying to obfuscate URL for Azure connection-string. Please check your configuration: {e}"
+                    f"The URL for the Azure connection-string, was not configured properly. Please check and try again: {url} "
                 )
-        return cls._mask_db_url_no_sa(url=url)
+            res = f"DefaultEndpointsProtocol={matched.group(2)};AccountName={matched.group(4)};AccountKey=***;EndpointSuffix={matched.group(8)}"
+            return res
+        except Exception as e:
+            raise StoreConfigurationError(
+                f"Something went wrong when trying to obfuscate URL for Azure connection-string. Please check your configuration: {e}"
+            )
 
     @classmethod
     def _mask_db_url_no_sa(cls, url: str) -> str:
