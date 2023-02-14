@@ -556,7 +556,7 @@ def test_result_format_configured_no_set_default_override(
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.add_expectation_suite("test_suite")
+    suite = in_memory_runtime_context.add_or_update_expectation_suite("test_suite")
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
