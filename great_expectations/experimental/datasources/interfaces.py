@@ -220,6 +220,12 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         )
 
     # Sorter methods
+    @pydantic.validator("order_by", pre=True)
+    def _parse_order_by_sorters(
+        cls, order_by: Optional[List[Union[BatchSorter, str, dict]]] = None
+    ) -> List[BatchSorter]:
+        return Datasource.parse_order_by_sorters(order_by=order_by)
+
     def add_sorters(self: _DataAssetT, sorters: BatchSortersDefinition) -> _DataAssetT:
         """Associates a sorter to this DataAsset
 
