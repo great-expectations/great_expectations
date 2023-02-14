@@ -2,6 +2,7 @@ import copy
 import inspect
 import logging
 import pathlib
+import re
 import warnings
 from typing import Any, Optional
 from urllib.parse import urlparse
@@ -183,7 +184,7 @@ class PasswordMasker:
         Returns:
             url with password masked e.g. "postgresql+psycopg2://username:***@host:65432/database"
         """
-        if sa is not None and use_urlparse is False:
+        if sa is not None and use_urlparse is False and ":/" in url:
             try:
                 engine = sa.create_engine(url, **kwargs)
                 return engine.url.__repr__()
@@ -205,6 +206,20 @@ class PasswordMasker:
         if url.startswith("oracle+cx_oracle"):
             replace_prefix = {"original": "oracle+cx_oracle", "temporary": "oracle"}
             url = url.replace(replace_prefix["original"], replace_prefix["temporary"])
+
+        # Parse Azure Connection Strings
+        azure_conn_str_re = re.compile(
+            "(DefaultEndpointsProtocol=(http|https));(AccountName=([a-zA-Z0-9]+));(AccountKey=)(.+);(EndpointSuffix=([a-zA-Z\\.]+))"
+        )
+        if azure_conn_str_re.match(url):
+            m = azure_conn_str_re.match(url)
+            if m:
+                res = f"DefaultEndpointsProtocol={m.group(2)};AccountName={m.group(4)};AccountKey=***;EndpointSuffix={m.group(7)}"
+                return res
+            else:
+                logger.warning(
+                    "Something went wrong when trying to obfuscate URL for Azure"
+                )
 
         parsed_url = urlparse(url)
 
