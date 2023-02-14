@@ -1074,7 +1074,7 @@ def sql_statement_with_post_compile_to_string(
         String representation of select_statement
 
     """
-    sqlalchemy_connection: "sa.engine.base.Connection" = engine.engine
+    sqlalchemy_connection: sa.engine.base.Connection = engine.engine
     compiled = select_statement.compile(
         sqlalchemy_connection,
         compile_kwargs={"render_postcompile": True},
