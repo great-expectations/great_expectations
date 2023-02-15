@@ -221,6 +221,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         )
 
     def _build_data_connector(self) -> None:
+        """All DataAsset implementations that utilize DataConnector should instantiate appropriate DataConnector class (or simply pass)."""
         raise NotImplementedError
 
     # Sorter methods
