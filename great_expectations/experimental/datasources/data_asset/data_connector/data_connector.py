@@ -57,7 +57,7 @@ class DataConnector(ABC):
         return self._datasource_name
 
     @abstractmethod
-    def get_batch_definition_list_from_batch_request(
+    def get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> List[BatchDefinition]:
         """
@@ -145,3 +145,25 @@ class DataConnector(ABC):
             dict -- dictionary of "BatchSpec" properties
         """
         pass
+
+    @staticmethod
+    def _batch_definition_matches_batch_request(
+        batch_definition: BatchDefinition,
+        batch_request: BatchRequest,
+    ) -> bool:
+        if not (
+            batch_request.datasource_name == batch_definition.datasource_name
+            and batch_request.data_asset_name == batch_definition.data_asset_name
+        ):
+            return False
+
+        if batch_request.options:
+            for key in batch_request.options.keys():
+                if not (
+                    key in batch_definition.batch_identifiers
+                    and batch_definition.batch_identifiers[key]
+                    == batch_request.options[key]
+                ):
+                    return False
+
+        return True

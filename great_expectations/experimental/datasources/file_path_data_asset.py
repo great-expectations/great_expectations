@@ -169,9 +169,7 @@ class _FilePathDataAsset(DataAsset):
 
         batch_definition_list: List[
             BatchDefinition
-        ] = data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=batch_request
-        )
+        ] = data_connector.get_batch_definition_list(batch_request=batch_request)
 
         batch_list: List[Batch] = []
 

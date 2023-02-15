@@ -60,7 +60,7 @@ def test_basic_instantiation():
     # Missing "data_asset_name" argument.
     with pytest.raises(TypeError):
         # noinspection PyArgumentList
-        my_data_connector.get_batch_definition_list_from_batch_request(
+        my_data_connector.get_batch_definition_list(
             BatchRequest(
                 datasource_name="something",
                 options={},
@@ -148,12 +148,12 @@ def test_return_all_batch_definitions_unsorted():
     # with missing BatchRequest arguments
     with pytest.raises(TypeError):
         # noinspection PyArgumentList
-        my_data_connector.get_batch_definition_list_from_batch_request()
+        my_data_connector.get_batch_definition_list()
 
     # with empty options
     unsorted_batch_definition_list: List[
         BatchDefinition
-    ] = my_data_connector.get_batch_definition_list_from_batch_request(
+    ] = my_data_connector.get_batch_definition_list(
         BatchRequest(
             datasource_name="my_dataframe_datasource",
             data_asset_name="my_s3_data_asset",
@@ -245,13 +245,11 @@ def test_return_all_batch_definitions_unsorted():
     assert expected == unsorted_batch_definition_list
 
     # with specified Batch query options
-    unsorted_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            BatchRequest(
-                datasource_name="my_dataframe_datasource",
-                data_asset_name="my_s3_data_asset",
-                options={"name": "alex", "timestamp": "20200819", "price": "1300"},
-            )
+    unsorted_batch_definition_list = my_data_connector.get_batch_definition_list(
+        BatchRequest(
+            datasource_name="my_dataframe_datasource",
+            data_asset_name="my_s3_data_asset",
+            options={"name": "alex", "timestamp": "20200819", "price": "1300"},
         )
     )
     assert expected[2:3] == unsorted_batch_definition_list
@@ -311,7 +309,7 @@ def test_return_all_batch_definitions_unsorted():
 #     assert len(my_data_connector.get_unmatched_data_references()) == 3
 #
 #     sorted_batch_definition_list: List[BatchDefinition] = (
-#         my_data_connector.get_batch_definition_list_from_batch_request(
+#         my_data_connector.get_batch_definition_list(
 #             BatchRequest(
 #                 datasource_name="my_dataframe_datasource",
 #                 data_asset_name="my_s3_data_asset",
@@ -421,7 +419,7 @@ def test_return_all_batch_definitions_unsorted():
 #
 #     # TEST 2: Should only return the specified partition
 #     my_batch_definition_list = (
-#         my_data_connector.get_batch_definition_list_from_batch_request(
+#         my_data_connector.get_batch_definition_list(
 #             batch_request=my_batch_request
 #         )
 #     )
@@ -447,7 +445,7 @@ def test_return_all_batch_definitions_unsorted():
 #     )
 #     # should return 10
 #     my_batch_definition_list = (
-#         my_data_connector.get_batch_definition_list_from_batch_request(
+#         my_data_connector.get_batch_definition_list(
 #             batch_request=my_batch_request
 #         )
 #     )
@@ -521,7 +519,7 @@ def test_return_only_unique_batch_definitions():
 
     unsorted_batch_definition_list: List[
         BatchDefinition
-    ] = my_data_connector.get_batch_definition_list_from_batch_request(
+    ] = my_data_connector.get_batch_definition_list(
         BatchRequest(
             datasource_name="my_dataframe_datasource",
             data_asset_name="my_s3_data_asset",
@@ -578,10 +576,8 @@ def test_alpha():
     my_batch_request = BatchRequest(
         datasource_name="BASE", data_asset_name="A", options={}
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 0
 
@@ -590,10 +586,8 @@ def test_alpha():
         data_asset_name="my_s3_data_asset",
         options={"part_1": "test_dir_alpha/B"},
     )
-    my_batch_definition_list = (
-        my_data_connector.get_batch_definition_list_from_batch_request(
-            batch_request=my_batch_request
-        )
+    my_batch_definition_list = my_data_connector.get_batch_definition_list(
+        batch_request=my_batch_request
     )
     assert len(my_batch_definition_list) == 1
 
@@ -699,9 +693,7 @@ def test_foxtrot():
     )
     my_batch_definition_list: List[
         BatchDefinition
-    ] = my_data_connector.get_batch_definition_list_from_batch_request(
-        batch_request=my_batch_request
-    )
+    ] = my_data_connector.get_batch_definition_list(batch_request=my_batch_request)
     assert len(my_batch_definition_list) == 3
 
 

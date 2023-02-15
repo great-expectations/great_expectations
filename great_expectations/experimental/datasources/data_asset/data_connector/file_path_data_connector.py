@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import copy
 import logging
 import re
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set
 
+from great_expectations.core import IDDict
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
@@ -24,10 +26,6 @@ from great_expectations.experimental.datasources.data_asset.data_connector.regex
 # TODO: <Alex>ALEX</Alex>
 # from great_expectations.experimental.data_asset.data_connector.sorter import Sorter
 # TODO: <Alex>ALEX</Alex>
-from great_expectations.experimental.datasources.data_asset.data_connector.util import (
-    batch_definition_matches_batch_request,
-    map_data_reference_string_to_batch_definition_list_using_regex,
-)
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition
@@ -80,6 +78,8 @@ class FilePathDataConnector(DataConnector):
             regex_pattern=regex, unnamed_regex_group_prefix=unnamed_regex_group_prefix
         )
 
+        self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
+
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
         # This is a dictionary which maps data_references onto batch_requests.
@@ -95,7 +95,7 @@ class FilePathDataConnector(DataConnector):
     # TODO: <Alex>ALEX</Alex>
 
     # Interface Method
-    def get_batch_definition_list_from_batch_request(
+    def get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> List[BatchDefinition]:
         """
@@ -123,7 +123,7 @@ class FilePathDataConnector(DataConnector):
         batch_definition_set = set()
         for batch_definition in self._get_batch_definition_list_from_cache():
             if (
-                batch_definition_matches_batch_request(
+                self._batch_definition_matches_batch_request(
                     batch_definition=batch_definition, batch_request=batch_request
                 )
                 and batch_definition not in batch_definition_set
@@ -267,12 +267,8 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         for data_reference in self.get_data_references():
             mapped_batch_definition_list: List[
                 BatchDefinition
-            ] | None = map_data_reference_string_to_batch_definition_list_using_regex(
-                datasource_name=self.datasource_name,
-                data_connector_name="experimental",
-                data_asset_name=self.data_asset_name,
-                data_reference=data_reference,
-                regex_pattern=self._regex,
+            ] | None = self._map_data_reference_string_to_batch_definition_list_using_regex(
+                data_reference=data_reference
             )
             self._data_references_cache[data_reference] = mapped_batch_definition_list
 
@@ -320,6 +316,69 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
             if batch_definitions is not None
         ]
         return batch_definition_list
+
+    def _map_data_reference_string_to_batch_definition_list_using_regex(
+        self, data_reference: str
+    ) -> List[BatchDefinition] | None:
+        batch_identifiers: Optional[
+            IDDict
+        ] = self._convert_data_reference_string_to_batch_identifiers_using_regex(
+            data_reference=data_reference
+        )
+        if batch_identifiers is None:
+            return None
+
+        # Importing at module level causes circular dependencies.
+        from great_expectations.core.batch import BatchDefinition
+
+        return [
+            BatchDefinition(
+                datasource_name=self._datasource_name,
+                data_connector_name="experimental",
+                data_asset_name=self._data_asset_name,
+                batch_identifiers=IDDict(batch_identifiers),
+            )
+        ]
+
+    def _convert_data_reference_string_to_batch_identifiers_using_regex(
+        self, data_reference: str
+    ) -> Optional[IDDict]:
+        # noinspection PyUnresolvedReferences
+        matches: Optional[re.Match] = self._regex.match(data_reference)
+        if matches is None:
+            return None
+
+        num_all_matched_group_values: int = self._regex.groups
+
+        # Check for `(?P<name>)` named group syntax
+        defined_group_name_to_group_index_mapping: Dict[str, int] = dict(
+            self._regex.groupindex
+        )
+        defined_group_name_indexes: Set[int] = set(
+            defined_group_name_to_group_index_mapping.values()
+        )
+        defined_group_name_to_group_value_mapping: Dict[str, str] = matches.groupdict()
+
+        all_matched_group_values: List[str] = list(matches.groups())
+
+        assert len(all_matched_group_values) == num_all_matched_group_values
+
+        group_name_to_group_value_mapping: Dict[str, str] = copy.deepcopy(
+            defined_group_name_to_group_value_mapping
+        )
+
+        idx: int
+        group_idx: int
+        matched_group_value: str
+        for idx, matched_group_value in enumerate(all_matched_group_values):
+            group_idx = idx + 1
+            if group_idx not in defined_group_name_indexes:
+                group_name: str = f"{self._unnamed_regex_group_prefix}{group_idx}"
+                group_name_to_group_value_mapping[group_name] = matched_group_value
+
+        batch_identifiers = IDDict(group_name_to_group_value_mapping)
+
+        return batch_identifiers
 
     @abstractmethod
     def _get_full_file_path(self, path: str) -> str:
