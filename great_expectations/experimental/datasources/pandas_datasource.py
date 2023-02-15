@@ -23,12 +23,40 @@ from great_expectations.experimental.datasources.interfaces import (
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import PandasExecutionEngine
+    from great_expectations.experimental.datasources.interfaces import (
+        Batch,
+        BatchRequest,
+        BatchRequestOptions,
+    )
 
 logger = logging.getLogger(__name__)
 
 
 class PandasDatasourceError(Exception):
     pass
+
+
+class _PandasDataAsset(DataAsset):
+    def test_connection(self) -> None:
+        ...
+
+    def batch_request_options_template(
+        self,
+    ) -> BatchRequestOptions:
+        ...
+
+    def get_batch_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> list[Batch]:
+        ...
+
+    def build_batch_request(
+        self, options: Optional[BatchRequestOptions] = None
+    ) -> BatchRequest:
+        ...
+
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
+        ...
 
 
 _BLACK_LIST = (
@@ -53,18 +81,26 @@ _BLACK_LIST = (
     # "read_xml",
 )
 
-_ASSET_MODELS = _generate_pandas_data_asset_models(
+_FILESYSTEM_ASSET_MODELS = _generate_pandas_data_asset_models(
     _FilesystemDataAsset,
     blacklist=_BLACK_LIST,
     use_docstring_from_method=True,
+    skip_first_param=True,
 )
+
+_ALL_ASSET_MODELS = _generate_pandas_data_asset_models(
+    _PandasDataAsset,
+    use_docstring_from_method=True,
+    skip_first_param=False,
+)
+
 try:
     # variables only needed for type-hinting
-    CSVAsset = _ASSET_MODELS["csv"]
-    ExcelAsset = _ASSET_MODELS["excel"]
-    JSONAsset = _ASSET_MODELS["json"]
-    ORCAsset = _ASSET_MODELS["orc"]
-    ParquetAsset = _ASSET_MODELS["parquet"]
+    CSVAsset = _FILESYSTEM_ASSET_MODELS["csv"]
+    ExcelAsset = _FILESYSTEM_ASSET_MODELS["excel"]
+    JSONAsset = _FILESYSTEM_ASSET_MODELS["json"]
+    ORCAsset = _FILESYSTEM_ASSET_MODELS["orc"]
+    ParquetAsset = _FILESYSTEM_ASSET_MODELS["parquet"]
 except KeyError as key_err:
     logger.info(f"zep - {key_err} asset model could not be generated")
     CSVAsset = _FilesystemDataAsset
@@ -76,7 +112,7 @@ except KeyError as key_err:
 
 class _PandasDatasource(Datasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = list(_ASSET_MODELS.values())
+    asset_types: ClassVar[List[Type[DataAsset]]] = list(_ALL_ASSET_MODELS.values())
 
     # instance attributes
     assets: Dict[
@@ -111,7 +147,26 @@ class _PandasDatasource(Datasource):
     # End Abstract Methods
 
 
+class PandasDatasource(_PandasDatasource):
+    # class attributes
+    asset_types: ClassVar[List[Type[DataAsset]]] = list(_ALL_ASSET_MODELS.values())
+
+    # instance attributes
+    assets: Dict[
+        str,
+        _PandasDataAsset,
+    ] = {}
+
+    def test_connection(self) -> None:
+        ...
+
+
 class PandasFilesystemDatasource(_PandasDatasource):
+    # class attributes
+    asset_types: ClassVar[List[Type[DataAsset]]] = list(
+        _FILESYSTEM_ASSET_MODELS.values()
+    )
+
     # instance attributes
     type: Literal["pandas_filesystem"] = "pandas_filesystem"
     name: str

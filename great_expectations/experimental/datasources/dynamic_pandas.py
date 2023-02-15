@@ -365,6 +365,7 @@ def _generate_pandas_data_asset_models(
     base_model_class: M,
     blacklist: Optional[Sequence[str]] = None,
     use_docstring_from_method: bool = False,
+    skip_first_param: bool = False,
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(blacklist)
     io_method_sigs = _extract_io_signatures(io_methods)
@@ -374,7 +375,7 @@ def _generate_pandas_data_asset_models(
 
         # skip the first parameter as this corresponds to the path/buffer/io field
         # paths to specific files are provided by the batch building logic
-        fields = _to_pydantic_fields(signature_tuple, skip_first_param=True)
+        fields = _to_pydantic_fields(signature_tuple, skip_first_param=skip_first_param)
 
         type_name = signature_tuple.name.split("read_")[1]
         model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
