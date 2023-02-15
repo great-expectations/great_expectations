@@ -3,7 +3,17 @@ from __future__ import annotations
 import logging
 import os
 import warnings
-from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 import requests
 
@@ -769,3 +779,26 @@ class CloudDataContext(SerializableDataContext):
         assert cloud_config is not None
         config = cls.retrieve_data_context_config_from_cloud(cloud_config=cloud_config)
         return config
+
+    def _persist_suite_with_store(
+        self,
+        expectation_suite: ExpectationSuite,
+        overwrite_existing: bool,
+        **kwargs,
+    ) -> ExpectationSuite:
+        key = GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+            resource_name=expectation_suite.expectation_suite_name,
+        )
+
+        persistence_fn: Callable
+        if overwrite_existing:
+            persistence_fn = self.expectations_store.add_or_update
+        else:
+            persistence_fn = self.expectations_store.add
+
+        response = persistence_fn(key=key, value=expectation_suite, **kwargs)
+        if isinstance(response, GXCloudResourceRef):
+            expectation_suite.ge_cloud_id = response.cloud_id
+
+        return expectation_suite
