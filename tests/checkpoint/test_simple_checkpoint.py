@@ -78,7 +78,7 @@ def context_with_data_source_and_empty_suite(
     datasources = context.list_datasources()
     assert datasources[0]["class_name"] == "Datasource"
     assert "my_special_data_connector" in datasources[0]["data_connectors"].keys()
-    context.create_expectation_suite("one", overwrite_existing=True)
+    context.add_expectation_suite("one")
     assert context.list_expectation_suite_names() == ["one"]
     return context
 
@@ -924,7 +924,7 @@ def test_simple_checkpoint_defaults_run_multiple_validations_without_persistence
     simple_checkpoint_defaults,
     two_validations,
 ):
-    context_with_data_source_and_empty_suite.create_expectation_suite("two")
+    context_with_data_source_and_empty_suite.add_expectation_suite("two")
     assert len(context_with_data_source_and_empty_suite.list_expectation_suites()) == 2
     result = simple_checkpoint_defaults.run(
         run_name="bar",
@@ -944,7 +944,7 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     two_validations,
 ):
     context: DataContext = context_with_data_source_and_empty_suite
-    context.create_expectation_suite("two")
+    context.add_expectation_suite("two")
     assert len(context.list_expectation_suites()) == 2
 
     # persist to store
@@ -1019,7 +1019,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1075,7 +1075,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df = spark_session.createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1129,7 +1129,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1186,7 +1186,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query 1
     batch_request_1 = RuntimeBatchRequest(
@@ -1259,7 +1259,7 @@ def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_v
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # add checkpoint config
     checkpoint: SimpleCheckpoint = SimpleCheckpoint(
@@ -1303,7 +1303,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1361,7 +1361,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1418,7 +1418,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df = spark_session.createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1479,7 +1479,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1544,7 +1544,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1602,7 +1602,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1659,7 +1659,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1715,7 +1715,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df = spark_session.createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1769,7 +1769,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1826,7 +1826,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1882,7 +1882,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df = spark_session.createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -1943,7 +1943,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2007,7 +2007,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2071,7 +2071,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2135,7 +2135,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2192,7 +2192,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2253,7 +2253,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2313,7 +2313,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df = spark_session.createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2371,7 +2371,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     context: DataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2432,7 +2432,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2492,7 +2492,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     test_df = spark_session.createDataFrame(pandas_df)
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2557,7 +2557,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2625,7 +2625,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2693,7 +2693,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2761,7 +2761,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2823,7 +2823,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_printable_validation_resu
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -2882,7 +2882,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
     )
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     runtime_batch_request: RuntimeBatchRequest
 
@@ -3367,7 +3367,7 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_batch_request_into_check
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(
@@ -3424,7 +3424,7 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_validations_into_checkpo
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
-    context.create_expectation_suite("my_expectation_suite")
+    context.add_expectation_suite("my_expectation_suite")
 
     # RuntimeBatchRequest with a query
     batch_request = RuntimeBatchRequest(

@@ -1055,7 +1055,7 @@ def get_or_create_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
             except gx_exceptions.DataContextError:
-                expectation_suite = data_context.create_expectation_suite(
+                expectation_suite = data_context.add_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
                 logger.info(
