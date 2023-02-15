@@ -39,7 +39,7 @@ from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import (
     BaseDataContext,
     CloudDataContext,
-    EphemeralDataContext,
+    AbstractDataContext,
 )
 from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
@@ -7113,7 +7113,7 @@ data_connectors:
 
 
 @pytest.fixture
-def in_memory_runtime_context() -> EphemeralDataContext:
+def in_memory_runtime_context() -> AbstractDataContext:
     return build_in_memory_runtime_context()
 
 
