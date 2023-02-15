@@ -1,14 +1,10 @@
-import json
 from typing import Optional
 
 import indiapins
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
@@ -20,7 +16,7 @@ from great_expectations.expectations.metrics import (
 def is_valid_india_zip(zip: str):
     if len(zip) != 6:
         return False
-    elif zip.isnumeric() == False:
+    elif zip.isnumeric() is False:
         return False
     elif indiapins.isvalid(zip):
         return True
