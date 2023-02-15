@@ -314,14 +314,12 @@ def _add_expectations_and_checkpoint(
         checkpoint_config["runtime_configuration"] = dict_to_update_checkpoint
 
     context: DataContext = data_context
-    context.create_expectation_suite(expectation_suite_name="metrics_exp")
+    context.add_or_update_expectation_suite(expectation_suite_name="metrics_exp")
     animals_suite = context.get_expectation_suite(expectation_suite_name="metrics_exp")
     for expectation in expectations_list:
         animals_suite.add_expectation(expectation_configuration=expectation)
-    context.save_expectation_suite(
+    context.add_or_update_expectation_suite(
         expectation_suite=animals_suite,
-        expectation_suite_name="metrics_exp",
-        overwriting_existing=True,
     )
     checkpoint_config = CheckpointConfig(**checkpoint_config)
     context.add_checkpoint(
@@ -1002,6 +1000,52 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
     assert not first_result_partial_list
 
     assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
+
+
+@pytest.mark.integration
+def test_sql_complete_output_no_id_pk_fallback(
+    data_context_with_connection_to_metrics_db,
+    reference_sql_checkpoint_config_for_animal_names_table,
+    expectation_config_expect_column_values_to_be_in_set,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    index_column_names: List[str] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_column_names"
+    )
+    assert not index_column_names
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list = evrs[0]["results"][0]["result"].get(
+        "partial_unexpected_index_list"
+    )
+    assert not first_result_partial_list
+
+    unexpected_index_query = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_query"
+    )
+    # query does not contain id_pk column
+    assert (
+        unexpected_index_query
+        == "SELECT animals \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"
+    )
 
 
 # pandas
@@ -2384,6 +2428,53 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic
         "unexpected_index_query"
     )
     assert not unexpected_index_query
+
+
+@pytest.mark.integration
+def test_spark_complete_output_no_id_pk_fallback(
+    in_memory_runtime_context,
+    batch_request_for_spark_unexpected_rows_and_index,
+    reference_checkpoint_config_for_unexpected_column_names,
+    expectation_config_expect_column_values_to_be_in_set,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="metrics_exp",
+        batch_request=batch_request_for_spark_unexpected_rows_and_index,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_column_names"
+    )
+    assert not index_column_names
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0][
+        "result"
+    ].get("partial_unexpected_index_list")
+    assert not first_result_partial_list
+    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_query"
+    )
+    assert (
+        unexpected_index_query
+        == "df.filter(F.expr((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog)))))"
+    )
 
 
 @pytest.mark.integration
