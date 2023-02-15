@@ -453,7 +453,7 @@ def test_save_expectation_suite_saves_suite_to_cloud(
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
     ):
-        context.save_expectation_suite(suite)
+        context.add_expectation_suite(expectation_suite=suite)
 
     assert suite.ge_cloud_id is not None
 
@@ -473,7 +473,7 @@ def test_save_expectation_suite_overwrites_existing_suite(
     with mock.patch(
         "requests.Session.put", autospec=True, return_value=mock.Mock(status_code=405)
     ) as mock_put, mock.patch("requests.Session.patch", autospec=True) as mock_patch:
-        context.save_expectation_suite(suite)
+        context.add_expectation_suite(expectation_suite=suite)
 
     expected_suite_json = {
         "data_asset_type": None,
@@ -510,9 +510,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
     with pytest.raises(DataContextError) as e:
         mock_expectations_store_has_key.return_value = False
         mock_list_expectation_suite_names.return_value = existing_suite_names
-        context.save_expectation_suite(
-            expectation_suite=suite, overwrite_existing=False
-        )
+        context.add_expectation_suite(expectation_suite=suite)
 
     assert f"expectation_suite '{suite_name}' already exists" in str(e.value)
 
@@ -532,8 +530,8 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
 
     with pytest.raises(DataContextError) as e:
         mock_expectations_store_has_key.return_value = True
-        context.save_expectation_suite(
-            expectation_suite=suite, overwrite_existing=False
+        context.add_expectation_suite(
+            expectation_suite=suite,
         )
 
     mock_expectations_store_has_key.assert_called_once_with(
