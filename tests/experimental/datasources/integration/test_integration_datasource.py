@@ -161,6 +161,16 @@ def test_sql_query_data_asset(empty_data_context):
             True,
             id="bad path",
         ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path(
+                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+                )
+            ),
+            None,
+            False,
+            id="default regex",
+        ),
     ],
 )
 def test_filesystem_data_asset(
