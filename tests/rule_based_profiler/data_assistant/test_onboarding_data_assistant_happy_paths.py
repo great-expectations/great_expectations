@@ -370,7 +370,7 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
             name="my_asset",
             table_name=table_name,
         )
-        .add_year_and_month_splitter(column_name=split_col)
+        .add_splitter_year_and_month(column_name=split_col)
         .add_sorters(["year", "month"])
     )
 
@@ -462,7 +462,7 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
             name="sampled_yellow_tripdata_test",
             table_name=table_name,
         )
-        .add_year_and_month_splitter(column_name="tpep_pickup_datetime")
+        .add_splitter_year_and_month(column_name="tpep_pickup_datetime")
         .add_sorters(["year", "-month"])
     )
 
