@@ -64,8 +64,8 @@ great_expectations datasource new
 assert test_yaml == test_python
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py create_expectation_suite">
-context.create_expectation_suite("my_expectation_suite")
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py add_expectation_suite">
+context.add_or_update_expectation_suite("my_expectation_suite")
 # </snippet>
 
 # YAML <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py checkpoint_config_yaml_missing_keys">
@@ -80,7 +80,7 @@ validations:
       data_asset_name: taxi_data
     expectation_suite_name: my_expectation_suite
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_or_update_checkpoint(**yaml.safe_load(checkpoint_yaml))
 # </snippet>
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
@@ -101,7 +101,7 @@ checkpoint_config = {
         }
     ],
 }
-context.add_checkpoint(**checkpoint_config)
+context.add_or_update_checkpoint(**checkpoint_config)
 # </snippet>
 
 test_python = context.test_yaml_config(
@@ -136,7 +136,7 @@ config_version: 1
 class_name: SimpleCheckpoint
 expectation_suite_name: my_expectation_suite
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_or_update_checkpoint(**yaml.safe_load(checkpoint_yaml))
 # </snippet>
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
@@ -148,7 +148,7 @@ checkpoint_config = {
     "class_name": "SimpleCheckpoint",
     "expectation_suite_name": "my_expectation_suite",
 }
-context.add_checkpoint(**checkpoint_config)
+context.add_or_update_checkpoint(**checkpoint_config)
 # </snippet>
 
 test_python = context.test_yaml_config(

@@ -346,18 +346,16 @@ def sanitize_prefix_for_s3(text: str) -> str:
 
 
 def normalize_directory_path(
-    dir_path: Union[pathlib.Path, str],
+    dir_path: Union[PathStr],
     root_directory_path: Optional[PathStr] = None,
 ) -> pathlib.Path:
-    if isinstance(dir_path, str):
-        dir_path = pathlib.Path(dir_path)
-
-    if isinstance(root_directory_path, str):
-        root_directory_path = pathlib.Path(root_directory_path)
+    dir_path = pathlib.Path(dir_path)
 
     # If directory is a relative path, interpret it as relative to the root directory.
     if dir_path.is_absolute() or root_directory_path is None:
         return dir_path
+
+    root_directory_path = pathlib.Path(root_directory_path)
 
     return root_directory_path.joinpath(dir_path)
 

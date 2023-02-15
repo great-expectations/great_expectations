@@ -99,7 +99,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f, default_flow_style=False)
 
 expectation_suite_name = "my_expectation_suite"
-context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 # try gsutil cp command
 copy_expectation_command = """
