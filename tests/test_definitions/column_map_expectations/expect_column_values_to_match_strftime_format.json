@@ -1,0 +1,147 @@
+{
+    "expectation_type" : "expect_column_values_to_match_strftime_format",
+    "datasets" : [{
+      "data" : {
+        "a": ["2019-04-01", "2019-04-02", "2019-04-03", "2019-04-13"],
+        "b": ["01/01/2010", "01/01/2011", "01/01/2012", null],
+        "c": ["01-01-2019", "01-10-2019", "01/20/2019", "01-30-2019"],
+        "d": [1, 2, 3, 4],
+        "e": ["2019-04-01", "2019-04-02", "2019-04-03", "2019-04-13"],
+        "f": ["1977-05-55T00:00:00", "1980-05-21T13:47:59", "2017-06-12T23:57:59", null]
+      },
+      "schemas": {
+        "spark": {
+          "a": "StringType",
+          "b": "StringType",
+          "c": "StringType",
+          "d": "IntegerType",
+          "e": "TimestampType",
+          "f": "StringType"
+        }
+      },
+      "tests": [{
+        "title": "simple_positive_test",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in":{
+          "column": "a",
+          "strftime_format": "%Y-%m-%d"
+        },
+        "out":{
+          "success": true,
+          "unexpected_list": []
+        }
+      },
+      {
+        "title": "negative_test_wrong_format",
+        "exact_match_out" : false,
+        "in":{
+          "column": "a",
+          "strftime_format": "%Y%m%d"
+        },
+        "out":{
+          "success": false,
+          "unexpected_list": ["2019-04-01", "2019-04-02", "2019-04-03", "2019-04-13"]
+        }
+      },
+      {
+        "title": "positive_test_w_nulls",
+        "exact_match_out" : false,
+        "in":{
+          "column": "b",
+          "strftime_format": "%d/%m/%Y"
+        },
+        "out":{
+          "success": true,
+          "unexpected_list": []
+        }
+      },
+      {
+        "title": "positive_test_w_mostly",
+        "exact_match_out" : false,
+        "in":{
+          "column": "c",
+          "strftime_format": "%m-%d-%Y",
+          "mostly": 0.75
+        },
+        "out":{
+          "success": true,
+          "unexpected_list": ["01/20/2019"]
+        }
+      },
+      {
+        "title": "simple_negative_test",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in":{
+          "column": "c",
+          "strftime_format": "%m-%d-%Y"
+        },
+        "out":{
+          "success": false,
+          "unexpected_list": ["01/20/2019"]
+        }
+      },
+      {
+        "title": "negative_test_out_of_bounds_value_for_month",
+        "exact_match_out" : false,
+        "in":{
+          "column": "a",
+          "strftime_format": "%Y-%d-%m"
+        },
+        "out":{
+          "success": false,
+          "unexpected_list": ["2019-04-13"]
+        }
+      },
+      {
+        "title": "negative_test_iso8601",
+        "exact_match_out" : false,
+        "in":{
+          "column": "f",
+          "strftime_format": "%Y-%m-%dT%H:%M:%S"
+        },
+        "out":{
+          "success": false,
+          "unexpected_list": ["1977-05-55T00:00:00"]
+        }
+      },
+      {
+        "title": "test_raising_exception_for_wrong_input_data_type",
+        "exact_match_out" : false,
+        "in":{
+          "column": "d",
+          "strftime_format": "%m-%d-%Y",
+          "catch_exceptions": true
+        },
+        "out":{
+          "traceback_substring": "Values passed to expect_column_values_to_match_strftime_format must be of type string"
+        }
+      },
+      {
+        "title": "test_raising_exception_for_wrong_format",
+        "exact_match_out" : false,
+        "in":{
+          "column": "a",
+          "strftime_format": "%D",
+          "catch_exceptions": true
+        },
+        "out":{
+          "traceback_substring": "Unable to use provided strftime_format."
+        }
+      },
+      {
+        "title": "negative_test_input_already_datetimes",
+        "exact_match_out" : false,
+        "suppress_test_for": ["pandas"],
+        "in":{
+          "column": "e",
+          "strftime_format": "%Y-%m-%d",
+          "catch_exceptions": true
+        },
+        "out":{
+            "traceback_substring": "Values passed to expect_column_values_to_match_strftime_format must be of type string"
+        }
+      }]
+    }]
+}

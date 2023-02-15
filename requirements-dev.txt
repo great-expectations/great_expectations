@@ -1,0 +1,9 @@
+--requirement requirements.txt
+--requirement reqs/requirements-dev-test.txt
+--requirement reqs/requirements-dev-sqlalchemy.txt
+
+--requirement reqs/requirements-dev-arrow.txt
+--requirement reqs/requirements-dev-azure.txt
+--requirement reqs/requirements-dev-excel.txt
+--requirement reqs/requirements-dev-pagerduty.txt
+--requirement reqs/requirements-dev-spark.txt

@@ -1,0 +1,799 @@
+{
+  "run_results": {
+    "ValidationResultIdentifier::basic/warning/getest run/20200727T171932.959193Z/4e0d84813237541d5dbb9f8af649a7ef": {
+      "validation_result": {
+        "statistics": {
+          "evaluated_expectations": 11,
+          "successful_expectations": 9,
+          "unsuccessful_expectations": 2,
+          "success_percent": 81.81818181818183
+        },
+        "success": false,
+        "meta": {
+          "great_expectations.__version__": "0.11.8+4.g4ab34df3.dirty",
+          "expectation_suite_name": "basic.warning",
+          "run_id": {
+            "run_name": "getest run",
+            "run_time": "2020-07-27T17:19:32.959193+00:00"
+          },
+          "batch_kwargs": {
+            "datasource": "getest",
+            "PandasInMemoryDF": true,
+            "ge_batch_id": "56615f40-d02d-11ea-b6ea-acde48001122"
+          },
+          "batch_markers": {
+            "ge_load_time": "20200727T171932.954810Z",
+            "pandas_data_fingerprint": "8c46fdaf0bd356fd58b7bcd9b2e6012d"
+          },
+          "batch_parameters": null,
+          "validation_time": "20200727T171932.962507Z"
+        },
+        "evaluation_parameters": {},
+        "results": [
+          {
+            "expectation_config": {
+              "expectation_type": "expect_table_row_count_to_be_between",
+              "kwargs": {
+                "max_value": 33000,
+                "min_value": 27000,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 30
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": false,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_table_column_count_to_equal",
+              "kwargs": {
+                "value": 3,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 3
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_table_columns_to_match_ordered_list",
+              "kwargs": {
+                "column_list": [
+                  "Team",
+                  " \"Payroll (millions)\"",
+                  " \"Wins\""
+                ],
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": [
+                "Team",
+                " \"Payroll (millions)\"",
+                " \"Wins\""
+              ]
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_values_to_not_be_null",
+              "kwargs": {
+                "column": " \"Payroll (millions)\"",
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "element_count": 30,
+              "unexpected_count": 0,
+              "unexpected_percent": 0.0,
+              "partial_unexpected_list": []
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_min_to_be_between",
+              "kwargs": {
+                "column": " \"Payroll (millions)\"",
+                "max_value": 56.24,
+                "min_value": 54.24,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 55.24,
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_max_to_be_between",
+              "kwargs": {
+                "column": " \"Payroll (millions)\"",
+                "max_value": 198.96,
+                "min_value": 196.96,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 197.96,
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_mean_to_be_between",
+              "kwargs": {
+                "column": " \"Payroll (millions)\"",
+                "max_value": 99.01899999999998,
+                "min_value": 97.01899999999998,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 98.01899999999998,
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_median_to_be_between",
+              "kwargs": {
+                "column": " \"Payroll (millions)\"",
+                "max_value": 86000.75,
+                "min_value": 84000.75,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 85.75,
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": false,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_quantile_values_to_be_between",
+              "kwargs": {
+                "allow_relative_error": false,
+                "column": " \"Payroll (millions)\"",
+                "quantile_ranges": {
+                  "quantiles": [
+                    0.05,
+                    0.25,
+                    0.5,
+                    0.75,
+                    0.95
+                  ],
+                  "value_ranges": [
+                    [
+                      54.37,
+                      56.37
+                    ],
+                    [
+                      74.48,
+                      76.48
+                    ],
+                    [
+                      82.31,
+                      84.31
+                    ],
+                    [
+                      116.62,
+                      118.62
+                    ],
+                    [
+                      173.54,
+                      175.54
+                    ]
+                  ]
+                },
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": {
+                "quantiles": [
+                  0.05,
+                  0.25,
+                  0.5,
+                  0.75,
+                  0.95
+                ],
+                "values": [
+                  55.37,
+                  75.48,
+                  83.31,
+                  117.62,
+                  174.54
+                ]
+              },
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0,
+              "details": {
+                "success_details": [
+                  true,
+                  true,
+                  true,
+                  true,
+                  true
+                ]
+              }
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_values_to_not_be_null",
+              "kwargs": {
+                "column": "Team",
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "element_count": 30,
+              "unexpected_count": 0,
+              "unexpected_percent": 0.0,
+              "partial_unexpected_list": []
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_value_lengths_to_be_between",
+              "kwargs": {
+                "column": "Team",
+                "min_value": 1,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0,
+              "unexpected_count": 0,
+              "unexpected_percent": 0.0,
+              "unexpected_percent_nonmissing": 0.0,
+              "partial_unexpected_list": [],
+              "partial_unexpected_index_list": [],
+              "partial_unexpected_counts": []
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          }
+        ]
+      },
+      "actions_results": {
+        "store_validation_result": {},
+        "store_evaluation_params": {}
+      }
+    },
+    "ValidationResultIdentifier::basic/warning/getest run/20200727T171933.959193Z/4e0d84813237541d5dbb9f8af649a7eg": {
+      "validation_result": {
+        "statistics": {
+          "evaluated_expectations": 11,
+          "successful_expectations": 9,
+          "unsuccessful_expectations": 2,
+          "success_percent": 81.81818181818183
+        },
+        "success": false,
+        "meta": {
+          "great_expectations.__version__": "0.11.8+4.g4ab34df3.dirty",
+          "expectation_suite_name": "basic.warning",
+          "run_id": {
+            "run_name": "getest run",
+            "run_time": "2020-07-27T17:19:32.959193+00:00"
+          },
+          "batch_kwargs": {
+            "datasource": "getest",
+            "PandasInMemoryDF": true,
+            "ge_batch_id": "56615f40-d02d-11ea-b6ea-acde48001122"
+          },
+          "batch_markers": {
+            "ge_load_time": "20200727T171932.954810Z",
+            "pandas_data_fingerprint": "8c46fdaf0bd356fd58b7bcd9b2e6012d"
+          },
+          "batch_parameters": null,
+          "validation_time": "20200727T171932.962507Z"
+        },
+        "evaluation_parameters": {},
+        "results": [
+          {
+            "expectation_config": {
+              "expectation_type": "expect_table_row_count_to_be_between",
+              "kwargs": {
+                "max_value": 33000,
+                "min_value": 27000,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 30
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": false,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_table_column_count_to_equal",
+              "kwargs": {
+                "value": 3,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 3
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_table_columns_to_match_ordered_list",
+              "kwargs": {
+                "column_list": [
+                  "Team",
+                  " \"Payroll (millions)\"",
+                  " \"Wins\""
+                ],
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": [
+                "Team",
+                " \"Payroll (millions)\"",
+                " \"Wins\""
+              ]
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_values_to_not_be_null",
+              "kwargs": {
+                "column": " \"Payroll (millions)\"",
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "element_count": 30,
+              "unexpected_count": 0,
+              "unexpected_percent": 0.0,
+              "partial_unexpected_list": []
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_min_to_be_between",
+              "kwargs": {
+                "column": " \"Payroll (millions)\"",
+                "max_value": 56.24,
+                "min_value": 54.24,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 55.24,
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_max_to_be_between",
+              "kwargs": {
+                "column": " \"Payroll (millions)\"",
+                "max_value": 198.96,
+                "min_value": 196.96,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 197.96,
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_mean_to_be_between",
+              "kwargs": {
+                "column": " \"Payroll (millions)\"",
+                "max_value": 99.01899999999998,
+                "min_value": 97.01899999999998,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 98.01899999999998,
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_median_to_be_between",
+              "kwargs": {
+                "column": " \"Payroll (millions)\"",
+                "max_value": 86000.75,
+                "min_value": 84000.75,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": 85.75,
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": false,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_quantile_values_to_be_between",
+              "kwargs": {
+                "allow_relative_error": false,
+                "column": " \"Payroll (millions)\"",
+                "quantile_ranges": {
+                  "quantiles": [
+                    0.05,
+                    0.25,
+                    0.5,
+                    0.75,
+                    0.95
+                  ],
+                  "value_ranges": [
+                    [
+                      54.37,
+                      56.37
+                    ],
+                    [
+                      74.48,
+                      76.48
+                    ],
+                    [
+                      82.31,
+                      84.31
+                    ],
+                    [
+                      116.62,
+                      118.62
+                    ],
+                    [
+                      173.54,
+                      175.54
+                    ]
+                  ]
+                },
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "observed_value": {
+                "quantiles": [
+                  0.05,
+                  0.25,
+                  0.5,
+                  0.75,
+                  0.95
+                ],
+                "values": [
+                  55.37,
+                  75.48,
+                  83.31,
+                  117.62,
+                  174.54
+                ]
+              },
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0,
+              "details": {
+                "success_details": [
+                  true,
+                  true,
+                  true,
+                  true,
+                  true
+                ]
+              }
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_values_to_not_be_null",
+              "kwargs": {
+                "column": "Team",
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "element_count": 30,
+              "unexpected_count": 0,
+              "unexpected_percent": 0.0,
+              "partial_unexpected_list": []
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          },
+          {
+            "expectation_config": {
+              "expectation_type": "expect_column_value_lengths_to_be_between",
+              "kwargs": {
+                "column": "Team",
+                "min_value": 1,
+                "result_format": {
+                  "result_format": "SUMMARY"
+                }
+              },
+              "meta": {}
+            },
+            "result": {
+              "element_count": 30,
+              "missing_count": 0,
+              "missing_percent": 0.0,
+              "unexpected_count": 0,
+              "unexpected_percent": 0.0,
+              "unexpected_percent_nonmissing": 0.0,
+              "partial_unexpected_list": [],
+              "partial_unexpected_index_list": [],
+              "partial_unexpected_counts": []
+            },
+            "exception_info": {
+              "raised_exception": false,
+              "exception_message": null,
+              "exception_traceback": null
+            },
+            "success": true,
+            "meta": {}
+          }
+        ]
+      },
+      "actions_results": {
+        "store_validation_result": {},
+        "store_evaluation_params": {}
+      }
+    }
+  },
+  "run_id": {
+    "run_name": "getest run",
+    "run_time": "2020-07-27T17:19:32.959193+00:00"
+  },
+  "validation_operator_config": {
+    "class_name": "ActionListValidationOperator",
+    "module_name": "great_expectations.validation_operators",
+    "name": "action_list_operator",
+    "kwargs": {
+      "action_list": [
+        {
+          "name": "store_validation_result",
+          "action": {
+            "class_name": "StoreValidationResultAction"
+          }
+        },
+        {
+          "name": "store_evaluation_params",
+          "action": {
+            "class_name": "StoreEvaluationParametersAction"
+          }
+        }
+      ],
+      "result_format": {
+        "result_format": "SUMMARY",
+        "partial_unexpected_count": 20
+      }
+    }
+  },
+  "success": false,
+  "evaluation_parameters": null
+}

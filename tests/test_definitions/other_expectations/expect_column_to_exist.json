@@ -1,0 +1,58 @@
+{
+  "expectation_type": "expect_column_to_exist",
+  "datasets": [{
+    "data": {
+      "c1": [4, 5, 6, 7],
+      "c2": ["a", "b", "c", "d"],
+      "c3": [null, null, null, null]
+    },
+    "schemas": {
+      "spark": {
+        "c1": "IntegerType",
+        "c2": "StringType",
+        "c3": "StringType"
+      }
+    },
+    "tests": [{
+      "title": "basic_positive_test",
+      "include_in_gallery": true,
+      "exact_match_out": false,
+      "in": {
+        "column": "c1"
+      },
+      "out": {
+        "success": true
+      }
+    }, {
+      "title": "basic_negative_test",
+      "include_in_gallery": true,
+      "exact_match_out": false,
+      "in": {
+        "column": "covfefe"
+      },
+      "out": {
+        "success": false
+      }
+    }, {
+      "title": "positive_test_with_column_order",
+      "exact_match_out": false,
+      "in": {
+        "column": "c2",
+        "column_index": 1
+      },
+      "out": {
+        "success": true
+      }
+    }, {
+      "title": "column_exists_but_wrong_index",
+      "exact_match_out": false,
+      "in": {
+        "column": "c3",
+        "column_index": 4
+      },
+      "out": {
+        "success": false
+      }
+    }]
+  }]
+}

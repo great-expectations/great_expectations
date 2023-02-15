@@ -1,0 +1,25 @@
+{
+    "expectation_suite_name": "my_dag_node.default",
+    "data_asset_type": "Dataset",
+    "meta": {
+        "great_expectations_version": "0.9.4"
+    },
+    "expectations": [
+        {
+            "expectation_type": "expect_table_row_count_to_equal",
+            "kwargs": {
+                "value": {
+                    "$PARAMETER": "urn:great_expectations:validations:source_diabetes_data.default:expect_column_unique_value_count_to_be_between.result.observed_value:column=patient_nbr"
+                }
+            }
+        },
+        {
+            "expectation_type": "expect_column_unique_value_count_to_be_between",
+            "kwargs": {
+                "min_value": {
+                    "$PARAMETER": "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result.observed_value"
+                }
+            }
+        }
+    ]
+}

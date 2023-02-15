@@ -1,0 +1,95 @@
+{
+  "expectation_type": "expect_table_row_count_to_equal",
+  "datasets": [
+    {
+      "data": {
+        "c1": [
+          4,
+          5,
+          null,
+          7
+        ],
+        "c2": [
+          "a",
+          null,
+          "c",
+          "d"
+        ],
+        "c3": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "schemas": {
+        "spark": {
+          "c1": "IntegerType",
+          "c2": "StringType",
+          "c3": "StringType"
+        }
+      },
+      "tests": [
+        {
+          "title": "basic_positive_case",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "value": 4
+          },
+          "kwargs": {},
+          "out": {
+            "success": true,
+            "observed_value": 4
+          }
+        },
+        {
+          "title": "basic_negative_case_upper_error",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "value": 5
+          },
+          "out": {
+            "success": false,
+            "observed_value": 4
+          }
+        },
+        {
+          "title": "basic_negative_case_lower_error",
+          "exact_match_out": false,
+          "in": {
+            "value": 0
+          },
+          "out": {
+            "success": false,
+            "observed_value": 4
+          }
+        },
+        {
+          "title": "basic_negative_case_kwargs_args",
+          "exact_match_out": false,
+          "in": {
+            "value": 3
+          },
+          "out": {
+            "success": false,
+            "observed_value": 4
+          }
+        },
+        {
+          "title": "invalid_arguments_throws_exception",
+          "exact_match_out": false,
+          "in": {
+            "value": "hello",
+            "catch_exceptions": true
+          },
+          "out": {
+            "success": false,
+            "traceback_substring": "ValueError"
+          }
+        }
+      ]
+    }
+  ]
+}

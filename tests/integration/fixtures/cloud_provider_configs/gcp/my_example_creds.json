@@ -1,0 +1,13 @@
+{
+  "type": "authorized_user",
+  "project_id": "some_project_id",
+  "private_key_id": "some_private_key_id",
+  "client_secret": "some_client_secret",
+  "refresh_token": "some_refresh_token",
+  "client_email": "some_client_email",
+  "client_id": "some_client_id",
+  "auth_uri": "some_auth_uri",
+  "token_uri": "some_token_uri",
+  "auth_provider_x509_cert_url": "some_auth_provider_x509_cert_url",
+  "client_x509_cert_url": "some_client_x509_cert_url"
+}

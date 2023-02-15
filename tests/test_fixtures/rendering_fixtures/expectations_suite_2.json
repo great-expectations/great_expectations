@@ -1,0 +1,2592 @@
+[
+  {
+    "expectation_type": "expect_column_value_lengths_to_equal",
+    "kwargs": {
+      "column": "equal_length_string",
+      "value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_equal",
+    "kwargs": {
+      "column": "equal_length_string",
+      "value": 2
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_equal",
+    "kwargs": {
+      "column": "s3",
+      "value": 4,
+      "mostly": 0.5
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_equal",
+    "kwargs": {
+      "column": "s1",
+      "value": 5
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_equal",
+    "kwargs": {
+      "column": "s1",
+      "value": 5,
+      "mostly": 0.8
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_equal",
+    "kwargs": {
+      "column": "equal_length_integer",
+      "value": 1,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_null",
+    "kwargs": {
+      "column": "no_null",
+      "result_format": "BASIC"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_null",
+    "kwargs": {
+      "column": "all_null",
+      "result_format": "COMPLETE"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_null",
+    "kwargs": {
+      "column": "one_null",
+      "mostly": 0.7,
+      "result_format": "COMPLETE"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_null",
+    "kwargs": {
+      "column": "one_null",
+      "result_format": "COMPLETE"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_null",
+    "kwargs": {
+      "column": "one_null",
+      "mostly": 0.8
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_null",
+    "kwargs": {
+      "column": "no_null",
+      "mostly": 0.9
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_null",
+    "kwargs": {
+      "column": "three_null"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex_list",
+    "kwargs": {
+      "column": "w",
+      "regex_list": [
+        "\\d+"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex_list",
+    "kwargs": {
+      "column": "w",
+      "regex_list": [
+        "[123]+",
+        "[456]+"
+      ],
+      "match_on": "any"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex_list",
+    "kwargs": {
+      "column": "w",
+      "regex_list": [
+        "[123]+",
+        "[456]+"
+      ],
+      "match_on": "all"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex_list",
+    "kwargs": {
+      "column": "x",
+      "regex_list": [
+        "^.*a.*$"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex_list",
+    "kwargs": {
+      "column": "x",
+      "regex_list": [
+        "^.*a.*$",
+        "b.t"
+      ],
+      "match_on": "any"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 20,
+      "min_value": 0
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 20
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": null,
+      "max_value": 20
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": 0
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": 0,
+      "max_value": null
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 9,
+      "min_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 3
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 1,
+      "result_format": "BOOLEAN_ONLY"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 20,
+      "min_value": 0,
+      "result_format": "BOOLEAN_ONLY"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 9,
+      "min_value": 1,
+      "result_format": "BOOLEAN_ONLY"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 3,
+      "result_format": "BOOLEAN_ONLY"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 1,
+      "mostly": 0.9
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 20,
+      "min_value": 0,
+      "mostly": 0.9
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 9,
+      "min_value": 1,
+      "mostly": 0.9
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": 10,
+      "min_value": 3,
+      "mostly": 0.9
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "max_value": 10,
+      "min_value": 1,
+      "mostly": 0.95,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "max_value": 10,
+      "min_value": 1,
+      "mostly": 0.9,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "max_value": 10,
+      "min_value": 1,
+      "mostly": 0.8,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "z",
+      "max_value": 4,
+      "min_value": 1,
+      "mostly": 0.9
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "z",
+      "max_value": 4,
+      "min_value": 1,
+      "mostly": 0.8
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "ts",
+      "max_value": "Dec 31 2000",
+      "min_value": "Jan 01 2000",
+      "parse_strings_as_datetimes": true,
+      "output_strftime_format": "%b %d %Y %H:%M:%S"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "numeric",
+      "max_value": 10,
+      "min_value": 0,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": 10,
+      "max_value": 0,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "min_value": 0,
+      "max_value": 10,
+      "allow_cross_type_comparisons": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "numeric",
+      "min_value": 0,
+      "max_value": 10,
+      "allow_cross_type_comparisons": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "max_value": null,
+      "min_value": null,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "a",
+      "regex": "^a",
+      "mostly": 0.9
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "a",
+      "regex": "^a",
+      "mostly": 0.8
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "a",
+      "regex": "^a",
+      "mostly": 0.7
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "b",
+      "regex": "^a",
+      "mostly": 0.8
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "b",
+      "regex": "^a",
+      "mostly": 0.75
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "b",
+      "regex": "^a",
+      "mostly": 0.7
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "c",
+      "regex": "^a"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "c",
+      "regex": "^a",
+      "mostly": 0.2
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "b",
+      "regex": ""
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "b",
+      "regex": "[ab]{1}[a-d]{2}"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_regex",
+    "kwargs": {
+      "column": "a",
+      "regex": "b",
+      "mostly": 0.4
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        0
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        1
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": []
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_in_set",
+    "kwargs": {
+      "column": "z",
+      "value_set": [
+        "hello",
+        "jello",
+        "mello"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_in_set",
+    "kwargs": {
+      "column": "z",
+      "value_set": [
+        "ello"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_in_set",
+    "kwargs": {
+      "column": "y",
+      "value_set": [
+        1.1,
+        2.2
+      ],
+      "mostly": 0.65
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_in_set",
+    "kwargs": {
+      "column": "y",
+      "value_set": [
+        1.1,
+        2.2
+      ],
+      "mostly": 0.7
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_in_set",
+    "kwargs": {
+      "column": "n",
+      "value_set": [
+        null
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_be_in_set",
+    "kwargs": {
+      "column": "z",
+      "value_set": null,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_of_type",
+    "kwargs": {
+      "column": "x",
+      "type_": "int"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_of_type",
+    "kwargs": {
+      "column": "x",
+      "type_": "string"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_of_type",
+    "kwargs": {
+      "column": "y",
+      "type_": "float"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_of_type",
+    "kwargs": {
+      "column": "z",
+      "type_": "string"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_of_type",
+    "kwargs": {
+      "column": "b",
+      "type_": "boolean"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        1,
+        2,
+        4
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        2,
+        4
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": []
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "z",
+      "value_set": [
+        "hello",
+        "jello",
+        "mello"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "z",
+      "value_set": [
+        "hello",
+        "jello"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        3
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "y",
+      "value_set": [
+        1.1,
+        2.2,
+        5.5
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "y",
+      "value_set": [
+        1.11,
+        2.22,
+        5.51
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "z",
+      "value_set": null,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "empty_column",
+      "value_set": [
+        "cat",
+        "dog"
+      ],
+      "catch_exceptions": false
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "dates",
+      "value_set": [
+        "2018-01-01",
+        "2018-01-02",
+        "2018-01-02 00:34:01"
+      ],
+      "parse_strings_as_datetimes": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_set",
+    "kwargs": {
+      "column": "dates",
+      "value_set": [
+        "2018-01-02",
+        "2018-01-02 00:34:01"
+      ],
+      "parse_strings_as_datetimes": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_decreasing",
+    "kwargs": {
+      "column": "w",
+      "mostly": 0.6
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_decreasing",
+    "kwargs": {
+      "column": "y"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_decreasing",
+    "kwargs": {
+      "column": "y",
+      "strictly": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_decreasing",
+    "kwargs": {
+      "column": "x"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_decreasing",
+    "kwargs": {
+      "column": "z",
+      "parse_strings_as_datetimes": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_decreasing",
+    "kwargs": {
+      "column": "z",
+      "parse_strings_as_datetimes": true,
+      "strictly": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_decreasing",
+    "kwargs": {
+      "column": "empty_column",
+      "catch_exceptions": false
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex",
+    "kwargs": {
+      "column": "a",
+      "regex": "^a",
+      "mostly": 0.3
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex",
+    "kwargs": {
+      "column": "a",
+      "regex": "^a",
+      "mostly": 0.2
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex",
+    "kwargs": {
+      "column": "a",
+      "regex": "^a",
+      "mostly": 0.1
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex",
+    "kwargs": {
+      "column": "b",
+      "regex": "^a",
+      "mostly": 0.5
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex",
+    "kwargs": {
+      "column": "b",
+      "regex": "^c"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex",
+    "kwargs": {
+      "column": "c",
+      "regex": "^a"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex",
+    "kwargs": {
+      "column": "c",
+      "regex": "^a",
+      "mostly": 0.2
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex",
+    "kwargs": {
+      "column": "b",
+      "regex": ""
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex",
+    "kwargs": {
+      "column": "a",
+      "regex": "b",
+      "mostly": 0.6
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex_list",
+    "kwargs": {
+      "column": "w",
+      "regex_list": [
+        "\\s+"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex_list",
+    "kwargs": {
+      "column": "w",
+      "regex_list": [
+        "\\s+",
+        "[a-zA-Z]"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex_list",
+    "kwargs": {
+      "column": "w",
+      "regex_list": [
+        "[12]+",
+        "[45]+"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_not_match_regex_list",
+    "kwargs": {
+      "column": "x",
+      "regex_list": [
+        "opatomus",
+        "ovat",
+        "h.*t"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_increasing",
+    "kwargs": {
+      "column": "x"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_increasing",
+    "kwargs": {
+      "column": "y"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_increasing",
+    "kwargs": {
+      "column": "y",
+      "strictly": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_increasing",
+    "kwargs": {
+      "column": "w"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_increasing",
+    "kwargs": {
+      "column": "zz",
+      "parse_strings_as_datetimes": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_increasing",
+    "kwargs": {
+      "column": "a"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_increasing",
+    "kwargs": {
+      "column": "b"
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "column": "s1",
+      "min_value": 4,
+      "max_value": 5
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "column": "s2",
+      "min_value": 4,
+      "max_value": 8
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "column": "s2",
+      "min_value": 5,
+      "max_value": 9
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "column": "s1",
+      "min_value": null,
+      "max_value": 5
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "column": "s1",
+      "min_value": 4,
+      "max_value": null
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "column": "s1",
+      "min_value": 1,
+      "max_value": 0
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "column": "s3",
+      "min_value": 4,
+      "max_value": 9
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "min_value": "quack",
+      "max_value": 0,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "min_value": 0,
+      "max_value": "quack",
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "column": "s1",
+      "min_value": null,
+      "max_value": null,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_value_lengths_to_be_between",
+    "kwargs": {
+      "column": "s4",
+      "min_value": 0,
+      "max_value": 1,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_unique",
+    "kwargs": {
+      "column": "unique"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_unique",
+    "kwargs": {
+      "column": "a"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_unique",
+    "kwargs": {
+      "column": "c",
+      "mostly": 0.3
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_unique",
+    "kwargs": {
+      "column": "c",
+      "mostly": 0.3
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_unique",
+    "kwargs": {
+      "column": "c",
+      "mostly": 0.4
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_unique",
+    "kwargs": {
+      "column": "n"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_unique",
+    "kwargs": {
+      "column": "c"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_unique",
+    "kwargs": {
+      "column": "null"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_unique",
+    "kwargs": {
+      "column": "mult_dup"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_json_schema",
+    "kwargs": {
+      "column": "x",
+      "json_schema": {}
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_json_schema",
+    "kwargs": {
+      "column": "x",
+      "json_schema": {
+        "properties": {
+          "a": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "a"
+        ]
+      }
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_match_json_schema",
+    "kwargs": {
+      "column": "x",
+      "json_schema": {
+        "properties": {
+          "a": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "b"
+        ]
+      }
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_null",
+    "kwargs": {
+      "column": "all_null",
+      "result_format": "BASIC"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_null",
+    "kwargs": {
+      "column": "no_null"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_null",
+    "kwargs": {
+      "column": "three_null",
+      "mostly": 0.75
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_null",
+    "kwargs": {
+      "column": "three_null",
+      "mostly": 0.8
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_null",
+    "kwargs": {
+      "column": "all_null",
+      "mostly": 0.9
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_null",
+    "kwargs": {
+      "column": "one_null"
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_type_list",
+    "kwargs": {
+      "column": "x",
+      "type_list": [
+        "int"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_type_list",
+    "kwargs": {
+      "column": "x",
+      "type_list": [
+        "string"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_type_list",
+    "kwargs": {
+      "column": "y",
+      "type_list": [
+        "float"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_type_list",
+    "kwargs": {
+      "column": "z",
+      "type_list": [
+        "string"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_type_list",
+    "kwargs": {
+      "column": "b",
+      "type_list": [
+        "boolean"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_values_to_be_in_type_list",
+    "kwargs": {
+      "column": "s",
+      "type_list": [
+        "string",
+        "int"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_stdev_to_be_between",
+    "kwargs": {
+      "column": "dist1",
+      "min_value": 0.5,
+      "max_value": 1.5
+    }
+  },
+  {
+    "expectation_type": "expect_column_stdev_to_be_between",
+    "kwargs": {
+      "column": "dist1",
+      "min_value": 1.1547005383792517,
+      "max_value": 1.1547005383792517
+    }
+  },
+  {
+    "expectation_type": "expect_column_stdev_to_be_between",
+    "kwargs": {
+      "column": "dist1",
+      "min_value": 0,
+      "max_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_stdev_to_be_between",
+    "kwargs": {
+      "column": "zero",
+      "min_value": 0,
+      "max_value": 0
+    }
+  },
+  {
+    "expectation_type": "expect_column_stdev_to_be_between",
+    "kwargs": {
+      "column": "dist2",
+      "min_value": 1,
+      "max_value": null
+    }
+  },
+  {
+    "expectation_type": "expect_column_stdev_to_be_between",
+    "kwargs": {
+      "column": "dist2",
+      "min_value": null,
+      "max_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_stdev_to_be_between",
+    "kwargs": {
+      "column": "dist2",
+      "min_value": 1.5,
+      "max_value": null
+    }
+  },
+  {
+    "expectation_type": "expect_column_stdev_to_be_between",
+    "kwargs": {
+      "column": "dist2",
+      "min_value": null,
+      "max_value": 0.5
+    }
+  },
+  {
+    "expectation_type": "expect_column_stdev_to_be_between",
+    "kwargs": {
+      "column": "missing",
+      "min_value": 1,
+      "max_value": 1,
+      "result_format": "COMPLETE"
+    }
+  },
+  {
+    "expectation_type": "expect_column_stdev_to_be_between",
+    "kwargs": {
+      "column": "missing",
+      "min_value": null,
+      "max_value": null,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_most_common_value_to_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        1
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_most_common_value_to_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_most_common_value_to_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        1
+      ],
+      "ties_okay": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_most_common_value_to_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        2
+      ],
+      "ties_okay": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_most_common_value_to_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        3
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_most_common_value_to_be_in_set",
+    "kwargs": {
+      "column": "x",
+      "value_set": [
+        3
+      ],
+      "ties_okay": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_most_common_value_to_be_in_set",
+    "kwargs": {
+      "column": "y",
+      "value_set": [
+        "jello",
+        "hello"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_most_common_value_to_be_in_set",
+    "kwargs": {
+      "column": "y",
+      "value_set": [
+        "mello",
+        "hello"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_max_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "result_format": "BASIC",
+      "min_value": 4,
+      "max_value": 6
+    }
+  },
+  {
+    "expectation_type": "expect_column_max_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "result_format": "BASIC",
+      "min_value": null,
+      "max_value": 4
+    }
+  },
+  {
+    "expectation_type": "expect_column_max_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "result_format": "SUMMARY",
+      "min_value": 0,
+      "max_value": 5
+    }
+  },
+  {
+    "expectation_type": "expect_column_max_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": 3
+    }
+  },
+  {
+    "expectation_type": "expect_column_max_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "min_value": 50
+    }
+  },
+  {
+    "expectation_type": "expect_column_max_to_be_between",
+    "kwargs": {
+      "column": "zz",
+      "min_value": "2/1/2016",
+      "max_value": "3/1/2016",
+      "parse_strings_as_datetimes": true,
+      "output_strftime_format": "%m/%d/%Y"
+    }
+  },
+  {
+    "expectation_type": "expect_column_max_to_be_between",
+    "kwargs": {
+      "column": "zzz",
+      "min_value": "2/1/2016",
+      "max_value": "3/1/2016",
+      "parse_strings_as_datetimes": false
+    }
+  },
+  {
+    "expectation_type": "expect_column_max_to_be_between",
+    "kwargs": {
+      "column": "z",
+      "min_value": "d",
+      "max_value": "f"
+    }
+  },
+  {
+    "expectation_type": "expect_column_max_to_be_between",
+    "kwargs": {
+      "column": "empty_column",
+      "min_value": 0,
+      "max_value": 0,
+      "catch_exceptions": false
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "norm_std",
+      "result_format": "BASIC",
+      "params": {
+        "mean": 0,
+        "std_dev": 1
+      },
+      "distribution": "norm",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "norm_std",
+      "result_format": "BASIC",
+      "params": {
+        "mean": 1,
+        "std_dev": 1
+      },
+      "distribution": "norm",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "beta",
+      "result_format": "BASIC",
+      "params": {
+        "alpha": 0.5,
+        "beta": 10,
+        "loc": 5,
+        "scale": 11
+      },
+      "distribution": "beta",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "beta",
+      "result_format": "BASIC",
+      "params": [
+        0.5,
+        10,
+        5,
+        11
+      ],
+      "distribution": "beta",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "beta",
+      "result_format": "BASIC",
+      "params": {
+        "alpha": 1,
+        "beta": 11,
+        "loc": 5,
+        "scale": 11
+      },
+      "distribution": "beta",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "beta",
+      "result_format": "BASIC",
+      "params": [
+        1,
+        11,
+        5,
+        11
+      ],
+      "distribution": "beta",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "gamma",
+      "result_format": "BASIC",
+      "params": {
+        "alpha": 2,
+        "loc": 20,
+        "scale": 3
+      },
+      "distribution": "gamma",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "gamma",
+      "result_format": "BASIC",
+      "params": [
+        2,
+        20,
+        3
+      ],
+      "distribution": "gamma",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "gamma",
+      "result_format": "BASIC",
+      "params": {
+        "alpha": 3,
+        "loc": 20,
+        "scale": 3
+      },
+      "distribution": "gamma",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "gamma",
+      "result_format": "BASIC",
+      "params": [
+        3,
+        20,
+        3
+      ],
+      "distribution": "gamma",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "uniform",
+      "result_format": "BASIC",
+      "params": {
+        "min": -5,
+        "max": 11
+      },
+      "distribution": "uniform",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "uniform",
+      "result_format": "BASIC",
+      "params": [
+        -5,
+        11
+      ],
+      "distribution": "uniform",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "uniform",
+      "result_format": "BASIC",
+      "params": {
+        "min": -4,
+        "max": 12
+      },
+      "distribution": "uniform",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "uniform",
+      "result_format": "BASIC",
+      "params": [
+        -4,
+        12
+      ],
+      "distribution": "uniform",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "chi2",
+      "result_format": "BASIC",
+      "params": {
+        "df": 30,
+        "loc": 3,
+        "scale": 5
+      },
+      "distribution": "chi2",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "chi2",
+      "result_format": "COMPLETE",
+      "params": [
+        30,
+        3,
+        5
+      ],
+      "distribution": "chi2",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "chi2",
+      "result_format": "BASIC",
+      "params": {
+        "df": 33,
+        "loc": 3,
+        "scale": 5
+      },
+      "distribution": "chi2",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "chi2",
+      "result_format": "BASIC",
+      "params": [
+        33,
+        3,
+        5
+      ],
+      "distribution": "chi2",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "exponential",
+      "result_format": "BASIC",
+      "params": {
+        "loc": 4.2,
+        "scale": 10
+      },
+      "distribution": "expon",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "exponential",
+      "result_format": "BASIC",
+      "params": [
+        4.2,
+        10
+      ],
+      "distribution": "expon",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "exponential",
+      "result_format": "BASIC",
+      "params": {
+        "loc": 5,
+        "scale": 10
+      },
+      "distribution": "expon",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "kwargs": {
+      "column": "exponential",
+      "result_format": "BASIC",
+      "params": [
+        5,
+        10
+      ],
+      "distribution": "expon",
+      "p_value": 0.05
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": 2,
+      "max_value": 5
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": 1,
+      "max_value": 2
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "min_value": 5,
+      "max_value": 5
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "min_value": 4,
+      "max_value": 4
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "z",
+      "min_value": 5,
+      "max_value": 5
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "z",
+      "min_value": 13,
+      "max_value": 14
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "n",
+      "min_value": 0,
+      "max_value": 0
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "s",
+      "min_value": 0,
+      "max_value": 0,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "b",
+      "min_value": 0,
+      "max_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": 0,
+      "max_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": "s",
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "max_value": "s",
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": null,
+      "max_value": null,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_mean_to_be_between",
+    "kwargs": {
+      "column": "empty_column",
+      "min_value": 0,
+      "max_value": 1,
+      "catch_exceptions": false
+    }
+  },
+  {
+    "expectation_type": "expect_column_sum_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "result_format": "BASIC",
+      "min_value": 30,
+      "max_value": 30
+    }
+  },
+  {
+    "expectation_type": "expect_column_sum_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "result_format": "BASIC",
+      "min_value": 40,
+      "max_value": 50
+    }
+  },
+  {
+    "expectation_type": "expect_column_sum_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "result_format": "SUMMARY",
+      "min_value": 20,
+      "max_value": 40
+    }
+  },
+  {
+    "expectation_type": "expect_column_sum_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": 30
+    }
+  },
+  {
+    "expectation_type": "expect_column_sum_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "min_value": 50
+    }
+  },
+  {
+    "expectation_type": "expect_column_sum_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "max_value": 20
+    }
+  },
+  {
+    "expectation_type": "expect_column_sum_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_unique_value_count_to_be_between",
+    "kwargs": {
+      "column": "dist1",
+      "min_value": 0,
+      "max_value": 10
+    }
+  },
+  {
+    "expectation_type": "expect_column_unique_value_count_to_be_between",
+    "kwargs": {
+      "column": "dist2",
+      "min_value": 0,
+      "max_value": 10
+    }
+  },
+  {
+    "expectation_type": "expect_column_unique_value_count_to_be_between",
+    "kwargs": {
+      "column": "dist3",
+      "min_value": null,
+      "max_value": 10
+    }
+  },
+  {
+    "expectation_type": "expect_column_unique_value_count_to_be_between",
+    "kwargs": {
+      "column": "dist4",
+      "min_value": 2,
+      "max_value": null
+    }
+  },
+  {
+    "expectation_type": "expect_column_unique_value_count_to_be_between",
+    "kwargs": {
+      "column": "dist1",
+      "min_value": null,
+      "max_value": null,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_median_to_be_between",
+    "kwargs": {
+      "column": "a",
+      "min_value": 2.5,
+      "max_value": 2.5
+    }
+  },
+  {
+    "expectation_type": "expect_column_median_to_be_between",
+    "kwargs": {
+      "column": "a",
+      "min_value": null,
+      "max_value": 3
+    }
+  },
+  {
+    "expectation_type": "expect_column_median_to_be_between",
+    "kwargs": {
+      "column": "a",
+      "min_value": 2,
+      "max_value": null
+    }
+  },
+  {
+    "expectation_type": "expect_column_median_to_be_between",
+    "kwargs": {
+      "column": "b",
+      "min_value": 5,
+      "max_value": 5
+    }
+  },
+  {
+    "expectation_type": "expect_column_median_to_be_between",
+    "kwargs": {
+      "column": "b",
+      "min_value": null,
+      "max_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_median_to_be_between",
+    "kwargs": {
+      "column": "b",
+      "min_value": 2.5,
+      "max_value": null
+    }
+  },
+  {
+    "expectation_type": "expect_column_median_to_be_between",
+    "kwargs": {
+      "column": "c",
+      "min_value": 6,
+      "max_value": 6,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_median_to_be_between",
+    "kwargs": {
+      "column": "c",
+      "min_value": 7,
+      "max_value": 7,
+      "result_format": "COMPLETE"
+    }
+  },
+  {
+    "expectation_type": "expect_column_median_to_be_between",
+    "kwargs": {
+      "column": "c",
+      "min_value": null,
+      "max_value": null,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_median_to_be_between",
+    "kwargs": {
+      "column": "empty_column",
+      "min_value": 0,
+      "max_value": 0,
+      "catch_exceptions": false
+    }
+  },
+  {
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "result_format": "BASIC",
+      "min_value": -10,
+      "max_value": 5
+    }
+  },
+  {
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "result_format": "BASIC",
+      "min_value": 4,
+      "max_value": null
+    }
+  },
+  {
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "result_format": "SUMMARY",
+      "min_value": 0,
+      "max_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+      "column": "x",
+      "min_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+      "column": "w",
+      "min_value": 50
+    }
+  },
+  {
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+      "column": "a",
+      "min_value": 1,
+      "max_value": 2
+    }
+  },
+  {
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+      "column": "zz",
+      "min_value": "2/1/2016",
+      "max_value": "3/1/2016",
+      "parse_strings_as_datetimes": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+      "column": "zz",
+      "min_value": "2/1/2016",
+      "max_value": "3/1/2016",
+      "parse_strings_as_datetimes": true,
+      "output_strftime_format": "%m/%d/%Y"
+    }
+  },
+  {
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "max_value": 0
+    }
+  },
+  {
+    "expectation_type": "expect_column_min_to_be_between",
+    "kwargs": {
+      "column": "y",
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+    "kwargs": {
+      "column": "dist1",
+      "min_value": 0.5,
+      "max_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+    "kwargs": {
+      "column": "dist2",
+      "min_value": 0.5,
+      "max_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+    "kwargs": {
+      "column": "dist3",
+      "min_value": 0.6,
+      "max_value": 0.7
+    }
+  },
+  {
+    "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+    "kwargs": {
+      "column": "dist4",
+      "min_value": 0.3,
+      "max_value": null
+    }
+  },
+  {
+    "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+    "kwargs": {
+      "column": "dist1",
+      "min_value": null,
+      "max_value": null,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_equal",
+    "kwargs": [
+      4
+    ]
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_equal",
+    "kwargs": [
+      5
+    ]
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_equal",
+    "kwargs": [
+      0
+    ]
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_equal",
+    "kwargs": {
+      "value": 3
+    }
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_equal",
+    "kwargs": {
+      "value": "hello",
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_column_to_exist",
+    "kwargs": {
+      "column": "c1"
+    }
+  },
+  {
+    "expectation_type": "expect_column_to_exist",
+    "kwargs": {
+      "column": "covfefe"
+    }
+  },
+  {
+    "expectation_type": "expect_column_to_exist",
+    "kwargs": {
+      "column": "c2",
+      "column_index": 1
+    }
+  },
+  {
+    "expectation_type": "expect_column_to_exist",
+    "kwargs": {
+      "column": "c3",
+      "column_index": 4
+    }
+  },
+  {
+    "expectation_type": "expect_column_to_exist",
+    "kwargs": [
+      "a"
+    ]
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_be_between",
+    "kwargs": {
+      "min_value": 3,
+      "max_value": 5
+    }
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_be_between",
+    "kwargs": {
+      "min_value": 0,
+      "max_value": 1
+    }
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_be_between",
+    "kwargs": {
+      "min_value": null,
+      "max_value": 4
+    }
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_be_between",
+    "kwargs": {
+      "min_value": 1,
+      "max_value": 0
+    }
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_be_between",
+    "kwargs": {
+      "min_value": null,
+      "max_value": 10
+    }
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_be_between",
+    "kwargs": {
+      "min_value": "quack",
+      "max_value": 0,
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_table_row_count_to_be_between",
+    "kwargs": {
+      "max_value": "quack",
+      "catch_exceptions": true
+    }
+  },
+  {
+    "expectation_type": "expect_table_columns_to_match_ordered_list",
+    "kwargs": {
+      "column_list": [
+        "c1",
+        "c2",
+        "c3"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_table_columns_to_match_ordered_list",
+    "kwargs": {
+      "column_list": [
+        "c1",
+        "c2"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_table_columns_to_match_ordered_list",
+    "kwargs": {
+      "column_list": [
+        "b1",
+        "c2",
+        "c3"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_table_columns_to_match_ordered_list",
+    "kwargs": {
+      "column_list": [
+        "c3",
+        "c2",
+        "c1"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_table_columns_to_match_ordered_list",
+    "kwargs": {
+      "column_list": [
+        "c1",
+        "c2",
+        "c3",
+        "c4"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_select_column_values_to_be_unique_within_record",
+    "kwargs": {
+      "column_list": [
+        "w",
+        "x"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_select_column_values_to_be_unique_within_record",
+    "kwargs": {
+      "column_list": [
+        "w",
+        "x"
+      ],
+      "ignore_row_if": "any_value_is_missing"
+    }
+  },
+  {
+    "expectation_type": "expect_select_column_values_to_be_unique_within_record",
+    "kwargs": {
+      "column_list": [
+        "a",
+        "b"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_select_column_values_to_be_unique_within_record",
+    "kwargs": {
+      "column_list": [
+        "a",
+        "b"
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_equal",
+    "kwargs": {
+      "column_A": "x",
+      "column_B": "x"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_equal",
+    "kwargs": {
+      "column_A": "x",
+      "column_B": "y"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_equal",
+    "kwargs": {
+      "column_A": "x",
+      "column_B": "y",
+      "mostly": 0.9
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_equal",
+    "kwargs": {
+      "column_A": "y",
+      "column_B": "z",
+      "ignore_row_if": "either_value_is_missing"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_equal",
+    "kwargs": {
+      "column_A": "w",
+      "column_B": "z",
+      "ignore_row_if": "both_values_are_missing"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_equal",
+    "kwargs": {
+      "column_A": "w",
+      "column_B": "z"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_equal",
+    "kwargs": {
+      "column_A": "w",
+      "column_B": "z"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_equal",
+    "kwargs": {
+      "column_A": "w",
+      "column_B": "z",
+      "mostly": 0.5
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_equal",
+    "kwargs": {
+      "column_A": "w",
+      "column_B": "z",
+      "ignore_row_if": "either_value_is_missing"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_in_set",
+    "kwargs": {
+      "column_A": "x",
+      "column_B": "x",
+      "value_pairs_set": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          6
+        ],
+        [
+          7,
+          7
+        ],
+        [
+          8,
+          8
+        ],
+        [
+          9,
+          9
+        ],
+        [
+          10,
+          10
+        ]
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_in_set",
+    "kwargs": {
+      "column_A": "x",
+      "column_B": "z",
+      "ignore_row_if": "either_value_is_missing",
+      "value_pairs_set": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          5
+        ]
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_in_set",
+    "kwargs": {
+      "column_A": "x",
+      "column_B": "z",
+      "value_pairs_set": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          5
+        ]
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_to_be_in_set",
+    "kwargs": {
+      "column_A": "a",
+      "column_B": "b",
+      "ignore_row_if": "both_values_are_missing",
+      "value_pairs_set": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "kwargs": {
+      "column_A": "x",
+      "column_B": "w"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "kwargs": {
+      "column_A": "x",
+      "column_B": "z",
+      "ignore_row_if": "either_value_is_missing"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "kwargs": {
+      "column_A": "w",
+      "column_B": "z",
+      "ignore_row_if": "either_value_is_missing"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "kwargs": {
+      "column_A": "w",
+      "column_B": "z",
+      "or_equal": true,
+      "ignore_row_if": "either_value_is_missing"
+    }
+  },
+  {
+    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+    "kwargs": {
+      "column_A": "a",
+      "column_B": "b",
+      "parse_strings_as_datetimes": true,
+      "mostly": 0.6
+    }
+  }
+]

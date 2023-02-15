@@ -1,0 +1,53 @@
+# This profiler is meant to be used on the NYC taxi data:
+# tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_20(18|19|20)-*.csv
+name: quentin user workflow
+class_name: RuleBasedProfiler
+config_version: 1.0
+
+variables:
+  quantiles:
+    - 2.5e-1
+    - 5.0e-1
+    - 7.5e-1
+
+  false_positive_rate: 5.0e-2
+
+  n_resamples: 9139
+  random_seed: 43792
+
+  quantile_statistic_interpolation_method: auto
+  quantile_bias_std_error_ratio_threshold: 0.25
+  include_estimator_samples_histogram_in_details: False
+
+  allow_relative_error: linear
+
+rules:
+  column_quantiles_rule:
+    domain_builder:
+      class_name: ColumnDomainBuilder
+      include_column_name_suffixes:
+        - _amount
+    parameter_builders:
+      - name: quantile_value_ranges
+        class_name: NumericMetricRangeMultiBatchParameterBuilder
+        metric_name: column.quantile_values
+        metric_domain_kwargs: $domain.domain_kwargs
+        metric_value_kwargs:
+          quantiles: $variables.quantiles
+          allow_relative_error: $variables.allow_relative_error
+        false_positive_rate: $variables.false_positive_rate
+        n_resamples: $variables.n_resamples
+        random_seed: $variables.random_seed
+        quantile_statistic_interpolation_method: $variables.quantile_statistic_interpolation_method
+        quantile_bias_std_error_ratio_threshold: $variables.quantile_bias_std_error_ratio_threshold
+    expectation_configuration_builders:
+      - expectation_type: expect_column_quantile_values_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        column: $domain.domain_kwargs.column
+        quantile_ranges:
+          quantiles: $variables.quantiles
+          value_ranges: $parameter.quantile_value_ranges.value
+        allow_relative_error: $variables.allow_relative_error
+        meta:
+          profiler_details: $parameter.quantile_value_ranges.details

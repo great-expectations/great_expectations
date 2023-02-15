@@ -1,0 +1,38 @@
+# This profiler is meant to be used on the NYC taxi data:
+# tests/test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_20(18|19|20)-*.csv
+name: bobster user workflow
+class_name: RuleBasedProfiler
+config_version: 1.0
+
+variables:
+  false_positive_rate: 5.0e-2
+  n_resamples: 9999
+  random_seed: 43792
+  quantile_statistic_interpolation_method: auto
+  quantile_bias_std_error_ratio_threshold: 0.25
+  include_estimator_samples_histogram_in_details: False
+
+rules:
+  row_count_range_rule:
+    domain_builder:
+      class_name: TableDomainBuilder
+    parameter_builders:
+      - name: row_count_range
+        class_name: NumericMetricRangeMultiBatchParameterBuilder
+        metric_name: table.row_count
+        false_positive_rate: $variables.false_positive_rate
+        n_resamples: $variables.n_resamples
+        random_seed: $variables.random_seed
+        quantile_statistic_interpolation_method: $variables.quantile_statistic_interpolation_method
+        quantile_bias_std_error_ratio_threshold: $variables.quantile_bias_std_error_ratio_threshold
+        truncate_values:
+          lower_bound: 0
+        round_decimals: 0
+    expectation_configuration_builders:
+      - expectation_type: expect_table_row_count_to_be_between
+        class_name: DefaultExpectationConfigurationBuilder
+        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
+        min_value: $parameter.row_count_range.value[0]
+        max_value: $parameter.row_count_range.value[1]
+        meta:
+          profiler_details: $parameter.row_count_range.details

@@ -1,0 +1,9 @@
+replace_me:
+  n1: v1
+replace_me_1: ${FOO}
+replace_me_2:
+  inner_env_sub: ${FOO}
+arg1:
+  v1: 2
+REPLACE_ME_FROM_ESCAPED_ENV: ${REPLACE_ME_ESCAPED_ENV}
+escaped_password_already_in_config_yml: correct_hor\$e_battery_\$taple

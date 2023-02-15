@@ -1,0 +1,37 @@
+config_version: 0
+datasources:
+  # For example, this one.
+  mydatasource:
+    module_name: great_expectations.datasource
+    class_name: PandasDatasource
+    data_asset_type:
+      class_name: PandasDataset
+    batch_kwargs_generators:
+      # The name default is read if no datasource or generator is specified
+      mygenerator:
+        class_name: SubdirReaderBatchKwargsGenerator
+        base_directory: ../data
+        reader_options:
+          sep:
+          engine: python
+
+
+config_variables_file_path: uncommitted/config_variables.yml
+
+plugins_directory: plugins/
+evaluation_parameter_store_name: evaluation_parameter_store
+expectations_store_name: expectations_store
+validations_store_name: "foo"
+
+data_docs_sites:
+  not_a_real_site
+
+stores:
+  expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: expectations/
+  evaluation_parameter_store:
+    module_name: great_expectations.data_context.store
+    class_name: EvaluationParameterStore

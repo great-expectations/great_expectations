@@ -1,0 +1,138 @@
+{
+  "expectation_type" : "expect_column_sum_to_be_between",
+  "datasets" : [{
+    "data" : {
+      "w" : [1, 2, 3, 4, 5, 5, 4, 3, 2, 1],
+      "x" : [2, 3, 4, 5, 6, 7, 8, 9, null, null],
+      "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
+      "z" : ["a", "b", "c", "d", "e", null, null, null, null, null],
+      "zz" : ["1/1/2016", "1/2/2016", "2/2/2016", "2/2/2016", "3/1/2016", null, null, null, null, null],
+      "a" : [null, 0, null, null, 1, null, null, 2, null, null],
+      "b" : [null, 0, null, null, 2, null, null, 1, null, null]
+    },
+    "schemas": {
+      "sqlite": {
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "INTEGER",
+        "z": "VARCHAR",
+        "zz": "DATETIME",
+        "a": "INTEGER",
+        "b": "INTEGER"
+      },
+      "postgresql": {
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "INTEGER",
+        "z": "TEXT",
+        "zz": "TIMESTAMP",
+        "a": "INTEGER",
+        "b": "INTEGER"
+      },
+      "bigquery": {
+        "w": "INTEGER",
+        "x": "INTEGER",
+        "y": "INTEGER",
+        "z": "STRING",
+        "zz": "TIMESTAMP",
+        "a": "INTEGER",
+        "b": "INTEGER"
+      },
+      "spark": {
+        "w": "IntegerType",
+        "x": "IntegerType",
+        "y": "IntegerType",
+        "z": "StringType",
+        "zz": "StringType",
+        "a": "IntegerType",
+        "b": "IntegerType"
+      }
+    },
+    "tests" : [{
+      "title": "basic_positive_test_case",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "result_format": "BASIC",
+        "min_value": 30,
+        "max_value": 30
+      },
+      "out": {
+        "success": true,
+        "observed_value": 30
+      }
+    },{
+      "title": "basic_negative_test_case",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "result_format": "BASIC",
+        "min_value": 40,
+        "max_value": 50
+      },
+      "out": {
+        "success": false,
+        "observed_value": 30
+      }
+    },{
+      "title": "test_case_with_result_format_summary",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "result_format": "SUMMARY",
+        "min_value": 20,
+        "max_value": 40
+      },
+      "out": {
+        "success": true,
+        "observed_value": 30
+      }
+    },{
+      "title": "test_case_with_only_a_lower_bound_and_a_missing_value",
+      "exact_match_out" : false,
+      "in": {
+        "column": "x",
+        "min_value": 30
+      },
+      "out": {
+        "success": true,
+          "observed_value": 44
+        }
+    },{
+      "title": "negative_test_case_with_only_a_lower_bound",
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "min_value": 50
+      },
+      "out": {
+        "success": false,
+        "observed_value": 30
+      }
+    },{
+      "title": "negative_test_case_with_only_a_max",
+      "exact_match_out" : false,
+      "in": {
+        "column": "y",
+        "max_value": 20
+      },
+      "out": {
+        "success": false,
+        "observed_value": 22
+      }
+    },{
+      "title": "raise_valueerror_with_both_max_and_min_are_missing",
+      "exact_match_out" : false,
+      "in": {
+        "column": "y",
+        "catch_exceptions": true
+      },
+      "out" : {},
+      "error": {
+        "traceback_substring": "cannot both be None"
+      }
+    }]
+  }]
+}

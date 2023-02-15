@@ -1,0 +1,71 @@
+config_version: 3.0
+datasources:
+  spark_s3:
+    module_name: great_expectations.datasource
+    class_name: Datasource
+    execution_engine:
+      module_name: great_expectations.execution_engine
+      class_name: SparkDFExecutionEngine
+    data_connectors:
+      default_inferred_data_connector_name:
+        class_name: InferredAssetS3DataConnector
+        bucket: bucket_name
+        prefix: data_folder/
+        default_regex:
+          pattern: (.*)
+          group_names:
+            - data_asset_name
+      default_runtime_data_connector_name:
+        batch_identifiers:
+          - runtime_batch_identifier_name
+        module_name: great_expectations.datasource.data_connector
+        class_name: RuntimeDataConnector
+config_variables_file_path: great_expectations/uncommitted/config_variables.yml
+
+
+plugins_directory: great_expectations/plugins/
+
+stores:
+  expectations_S3_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: TupleS3StoreBackend
+      bucket: 'bucket_name'
+      prefix: 'great_expectations/expectations/'
+
+  validations_S3_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: TupleS3StoreBackend
+      bucket: 'bucket_name'
+      prefix: 'great_expectations/uncommitted/validations/'
+
+  evaluation_parameter_store:
+    class_name: EvaluationParameterStore
+
+  checkpoint_S3_store:
+    class_name: CheckpointStore
+    store_backend:
+      class_name: TupleS3StoreBackend
+      bucket: 'bucket_name'
+      prefix: 'great_expectations/checkpoints/'
+
+expectations_store_name: expectations_S3_store
+validations_store_name: validations_S3_store
+evaluation_parameter_store_name: evaluation_parameter_store
+checkpoint_store_name: checkpoint_S3_store
+
+data_docs_sites:
+  s3_site:
+    class_name: SiteBuilder
+    show_how_to_buttons: false
+    store_backend:
+      class_name: TupleS3StoreBackend
+      bucket: crystall-profiling-test
+      boto3_options:
+        endpoint_url: https://bucket_name.s3.region.amazonaws.com/
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+
+anonymous_usage_statistics:
+  enabled: True

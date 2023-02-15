@@ -1,0 +1,441 @@
+{
+  "expectation_suite_name": "default",
+  "meta": {
+    "great_expectations_version": "0.7.0-beta"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "min_value": 0,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_table_columns_to_match_ordered_list",
+      "kwargs": {
+        "column_list": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": {
+        "column": "Unnamed: 0",
+        "type_list": [
+          "BIGINT",
+          "INTEGER",
+          "IntegerType",
+          "LongType",
+          "SMALLINT",
+          "int"
+        ]
+      },
+      "meta": {
+        "notes": {
+          "format": "markdown",
+          "content": [
+            "#### These are expectation notes \n - you can use markdown \n - or just strings"
+          ]
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "Unnamed: 0",
+        "min_value": null,
+        "max_value": null
+      },
+      "meta": {
+        "notes": {
+          "format": "string",
+          "content": [
+            "This is a",
+            "string list,",
+            "assigned to the 'content' key of a notes dict.",
+            "Cool",
+            "huh?"
+          ]
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+      "kwargs": {
+        "column": "Unnamed: 0",
+        "min_value": null,
+        "max_value": null
+      },
+      "meta": {
+        "notes": {
+          "format": "string",
+          "content": "This is just a single string, assigned to the 'content' key of a notes dict."
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "Unnamed: 0",
+        "mostly": 0.5
+      },
+      "meta": {
+        "notes": ["This is a list", "of strings", "assigned to the notes", "key."]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_unique",
+      "kwargs": {
+        "column": "Unnamed: 0"
+      },
+      "meta": {
+        "notes": "This is a single string assigned to the 'notes' key."
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": {
+        "column": "Name",
+        "type_list": [
+          "CHAR",
+          "StringType",
+          "TEXT",
+          "VARCHAR",
+          "str",
+          "string"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "Name",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+      "kwargs": {
+        "column": "Name",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "Name",
+        "mostly": 0.5
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": {
+        "column": "PClass",
+        "type_list": [
+          "CHAR",
+          "StringType",
+          "TEXT",
+          "VARCHAR",
+          "str",
+          "string"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "PClass",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+      "kwargs": {
+        "column": "PClass",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "PClass",
+        "mostly": 0.5
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_match_regex",
+      "kwargs": {
+        "column": "PClass",
+        "regex": "^\\s+|\\s+$"
+      }
+    },
+    {
+      "expectation_type": "expect_column_distinct_values_to_be_in_set",
+      "kwargs": {
+        "column": "PClass",
+        "value_set": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": {
+        "column": "Age",
+        "type_list": [
+          "DOUBLE_PRECISION",
+          "DoubleType",
+          "FLOAT",
+          "FloatType",
+          "NUMERIC",
+          "float"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "Age",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+      "kwargs": {
+        "column": "Age",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "Age",
+        "mostly": 0.5
+      }
+    },
+    {
+      "expectation_type": "expect_column_min_to_be_between",
+      "kwargs": {
+        "column": "Age",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_max_to_be_between",
+      "kwargs": {
+        "column": "Age",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_mean_to_be_between",
+      "kwargs": {
+        "column": "Age",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_median_to_be_between",
+      "kwargs": {
+        "column": "Age",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_quantile_values_to_be_between",
+      "kwargs": {
+        "column": "Age",
+        "quantile_ranges": {
+          "quantiles": [
+            0.05,
+            0.25,
+            0.5,
+            0.75,
+            0.95
+          ],
+          "value_ranges": [
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ],
+            [
+              null,
+              null
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+      "kwargs": {
+        "column": "Age",
+        "partition_object": {
+          "bins": [0,5,10,30,50],
+          "weights": [0.2, 0.3, 0.1, 0.4]
+        },
+        "threshold": 0.1
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": {
+        "column": "Sex",
+        "type_list": [
+          "CHAR",
+          "StringType",
+          "TEXT",
+          "VARCHAR",
+          "str",
+          "string"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "Sex",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+      "kwargs": {
+        "column": "Sex",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "Sex",
+        "mostly": 0.5
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_match_regex",
+      "kwargs": {
+        "column": "Sex",
+        "regex": "^\\s+|\\s+$"
+      }
+    },
+    {
+      "expectation_type": "expect_column_distinct_values_to_be_in_set",
+      "kwargs": {
+        "column": "Sex",
+        "value_set": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": {
+        "column": "Survived",
+        "type_list": [
+          "BIGINT",
+          "INTEGER",
+          "IntegerType",
+          "LongType",
+          "SMALLINT",
+          "int"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "Survived",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+      "kwargs": {
+        "column": "Survived",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "Survived",
+        "mostly": 0.5
+      }
+    },
+    {
+      "expectation_type": "expect_column_distinct_values_to_be_in_set",
+      "kwargs": {
+        "column": "Survived",
+        "value_set": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_type_list",
+      "kwargs": {
+        "column": "SexCode",
+        "type_list": [
+          "BIGINT",
+          "INTEGER",
+          "IntegerType",
+          "LongType",
+          "SMALLINT",
+          "int"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_unique_value_count_to_be_between",
+      "kwargs": {
+        "column": "SexCode",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_proportion_of_unique_values_to_be_between",
+      "kwargs": {
+        "column": "SexCode",
+        "min_value": null,
+        "max_value": null
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "SexCode",
+        "mostly": 0.5
+      }
+    },
+    {
+      "expectation_type": "expect_column_distinct_values_to_be_in_set",
+      "kwargs": {
+        "column": "SexCode",
+        "value_set": null
+      }
+    }
+  ],
+  "data_asset_type": "Dataset"
+}

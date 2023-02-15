@@ -1,0 +1,11 @@
+include *.txt
+include reqs/*.txt
+include LICENSE
+include great_expectations/data_context/checkpoint_template.yml
+include great_expectations/init_notebooks/*/*.ipynb
+recursive-include great_expectations/render *.j2 *.md *.py
+graft great_expectations/render/view/static
+graft tests
+global-exclude *.py[co]
+include versioneer.py
+include great_expectations/_version.py

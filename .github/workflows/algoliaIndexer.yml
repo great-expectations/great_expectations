@@ -1,0 +1,17 @@
+name: Alogolia Indexer
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  ALGOLIA_INDEXER_API_KEY: ${{ secrets.ALGOLIA_INDEXER_API_KEY }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run a one-line script
+        run: curl -H 'Content-Type:application/json' -X POST --user $ALGOLIA_INDEXER_API_KEY 'https://crawler.algolia.com/api/1/crawlers/3ba40ab3-93f5-444b-930c-29fee09903e5/reindex'

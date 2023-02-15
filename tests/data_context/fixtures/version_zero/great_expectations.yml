@@ -1,0 +1,87 @@
+datasources:
+  edw:
+    type: sqlalchemy
+    batch_kwargs_generators:
+      default:
+        type: queries
+    data_asset_type:
+      class_name: SqlAlchemyDataset
+    profile: edw
+
+plugins_directory: plugins/
+validations_stores:
+   remote:
+     type: s3
+     bucket: sch-internal-ge-validation-data
+     key_prefix: ge/
+data_docs:
+  sites:
+    local_site:
+      type: SiteBuilder
+      site_store:
+        type: filesystem
+        base_directory: uncommitted/documentation/local_site
+      validations_store:
+        type: filesystem
+        base_directory: uncommitted/validations/
+        run_name_filter:
+          ne: profiling
+      profiling_store:
+        type: filesystem
+        base_directory: uncommitted/validations/
+        run_name_filter:
+          eq: profiling
+
+      datasources: '*'
+      sections:
+        index:
+          renderer:
+            module: great_expectations.render.renderer
+            class: SiteIndexPageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaIndexPageView
+        validations:
+          renderer:
+            module: great_expectations.render.renderer
+            class: ValidationResultsPageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaPageView
+        expectations:
+          renderer:
+            module: great_expectations.render.renderer
+            class: ExpectationSuitePageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaPageView
+        profiling:
+          renderer:
+            module: great_expectations.render.renderer
+            class: ProfilingResultsPageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaPageView
+
+    team_site:
+      type: SiteBuilder
+      site_store:
+        type: filesystem
+        base_directory: uncommitted/documentation/team_site
+
+      datasources: '*'
+      sections:
+        index:
+          renderer:
+            module: great_expectations.render.renderer
+            class: SiteIndexPageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaIndexPageView
+        expectations:
+          renderer:
+            module: great_expectations.render.renderer
+            class: ExpectationSuitePageRenderer
+          view:
+            module: great_expectations.render.view
+            class: DefaultJinjaPageView

@@ -1,0 +1,122 @@
+{
+  "expectation_type" : "expect_column_most_common_value_to_be_in_set",
+  "datasets" : [{
+    "data" : {
+      "x" : [1,1,2,2,3,null, null, null, null, null],
+      "y" : ["hello", "jello", "mello", "hello", "jello", "mello", "hello", "jello", "mello", "jello"],
+      "z" : [1,2,2,3,3,3,4,4,4,4]
+    },
+    "schemas": {
+      "sqlite": {
+        "x": "INTEGER",
+        "y": "VARCHAR",
+        "z": "INTEGER"
+      },
+      "postgresql": {
+        "x": "INTEGER",
+        "y": "TEXT",
+        "z": "INTEGER"
+      }
+    },
+    "tests" : [
+      {
+        "title": "negative_test_tie_for_most_common_with_missing_values_and_complete_result_format",
+        "include_in_gallery": true,
+        "exact_match_out": true,
+        "in": {
+          "column": "x",
+          "value_set": [1]
+        },
+        "out": {
+          "success": false,
+          "result": {
+            "observed_value": [1, 2],
+            "element_count": 10,
+            "missing_count": 5,
+            "missing_percent": 50.0
+          }
+        }
+      },{
+      "title" : "negative_test__tie_for_most_common__full_value_set__ties_okay__false",
+      "exact_match_out" : false,
+      "in": {
+        "column": "x",
+        "value_set": [1, 2]
+      },
+      "out": {
+        "success": false,
+        "observed_value": [1, 2]
+      }
+    },{
+        "title" : "positive_test__tie_for_most_common__ties_okay__true",
+        "include_in_gallery": true,
+        "exact_match_out" : false,
+        "in": {
+          "column": "x",
+          "value_set": [1],
+          "ties_okay": true
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1, 2]
+        }
+      },{
+        "title" : "positive_test__tie_for_most_common_but_test_for_last_value__ties_okay__true",
+        "exact_match_out" : false,
+        "in": {
+          "column": "x",
+          "value_set": [2],
+          "ties_okay": true
+        },
+        "out": {
+          "success": true,
+          "observed_value": [1, 2]
+        }
+      },{
+        "title" : "negative_test__tie_for_most_common__value_set_does_not_match__ties_okay__false",
+        "exact_match_out" : false,
+        "in": {
+          "column": "x",
+          "value_set": [3]
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1, 2]
+        }
+      },{
+        "title" : "negative_test__tie_for_most_common__value_set_does_not_match__ties_okay__true",
+        "exact_match_out" : false,
+        "in": {
+          "column": "x",
+          "value_set": [3],
+          "ties_okay": true
+        },
+        "out": {
+          "success": false,
+          "observed_value": [1, 2]
+        }
+      },{
+        "title": "positive_test_string_values_value_set_contains_more_than_actual_mode_list",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "value_set": ["jello", "hello"]
+        },
+        "out": {
+          "success": true,
+          "observed_value": ["jello"]
+        }
+      },{
+        "title": "negative_test_string_values_value_set_contains_more_than_actual_mode_list",
+        "exact_match_out": false,
+        "in": {
+          "column": "y",
+          "value_set": ["mello", "hello"]
+        },
+        "out": {
+          "success": false,
+          "observed_value": ["jello"]
+        }
+      }]
+  }]
+}

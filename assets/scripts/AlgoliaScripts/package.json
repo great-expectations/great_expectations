@@ -1,0 +1,18 @@
+{
+  "name": "writetoalgolia",
+  "version": "1.0.0",
+  "description": "Writing to Algolia",
+  "main": "index.js",
+  "scripts": {
+    "upload-expec": "node upload_s3_expectation_to_algolia.js",
+    "upload-packages": "node upload_s3_packages_to_algolia.js"
+  },
+  "author": "Novvum",
+  "license": "ISC",
+  "dependencies": {
+    "algoliasearch": "^4.12.1",
+    "dotenv": "^16.0.2",
+    "node-fetch": "^2.6.7",
+    "remove-markdown": "^0.5.0"
+  }
+}

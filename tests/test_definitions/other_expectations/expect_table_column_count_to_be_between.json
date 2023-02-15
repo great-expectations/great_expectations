@@ -1,0 +1,112 @@
+{
+  "expectation_type" : "expect_table_column_count_to_be_between",
+  "datasets" : [{
+    "data" : {
+      "c1" : [4,5,6,7],
+      "c2" : ["a","b","c","d"],
+      "c3" : [null,null,null,null],
+      "c4" : [4.0, 3.0, 3.5, 1.2]
+    },
+    "schemas": {
+      "spark": {
+        "c1": "IntegerType",
+        "c2": "StringType",
+        "c3": "StringType",
+        "c4": "FloatType"
+      }
+    },
+    "tests": [{
+      "title": "basic_positive_test",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in":{
+        "min_value": 3,
+        "max_value": 5
+      },
+      "out":{
+        "success":true,
+        "observed_value": 4
+      }
+    },
+    {
+      "title": "vacuously_true",
+      "exact_match_out" : false,
+      "in":{
+      },
+      "out":{
+        "success":true,
+        "observed_value": 4
+      }
+    },
+    {
+      "title": "basic_negative_test",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in":{
+        "min_value": 0,
+        "max_value": 1
+      },
+      "out":{
+        "success":false,
+        "observed_value": 4
+      }
+    },{
+      "title": "positive_test_with_null_min_value",
+      "exact_match_out" : false,
+      "in":{
+        "min_value": null,
+        "max_value": 4
+      },
+      "out":{
+        "success":true,
+        "observed_value": 4
+      }
+    },{
+      "title": "test_error_handling_for_max_lt_min",
+      "exact_match_out" : false,
+      "in":{
+        "min_value": 1,
+        "max_value": 0,
+        "catch_exceptions": true
+      },
+      "out": {},
+      "error":{
+      "traceback_substring": "min_value cannot be greater than max_value"
+      }
+    },{
+      "title": "positive_test_with_null_min",
+      "exact_match_out" : false,
+      "in":{
+        "min_value": null,
+        "max_value": 10
+      },
+      "out":{
+        "success": true,
+        "observed_value": 4
+      }
+    },{
+      "title": "test_error_handling_for_non_int_min_value",
+      "exact_match_out" : false,
+      "in":{
+        "min_value": "quack",
+        "max_value": 0,
+        "catch_exceptions": true
+      },
+      "out" : {},
+      "error":{
+        "traceback_substring": "must be integers"
+      }
+    },{
+      "title": "test_error_handling_for_non_int_max_value",
+      "exact_match_out" : false,
+      "in":{
+        "max_value": "quack",
+        "catch_exceptions": true
+      },
+      "out" : {},
+      "error":{
+        "traceback_substring": "must be integers"
+      }
+    }]
+  }]
+}

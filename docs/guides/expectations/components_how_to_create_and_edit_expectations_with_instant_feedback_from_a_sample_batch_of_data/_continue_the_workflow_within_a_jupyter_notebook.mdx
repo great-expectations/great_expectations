@@ -1,0 +1,10 @@
+
+At this point the CLI will create an empty Expectation Suite according to the specifications you provided, and then open a Jupyter Notebook that contains the rest of the Interactive Mode workflow.
+
+The code provided in the Jupyter Notebook will do two things.
+
+In the first cell, it will perform all the necessary steps to provide you with a `validator` object that is set up to work with your specified Expectation Suite and a Batch Request for your specified Data Asset.
+
+In the final code cell, it will save any edits you have made to your Expectation Suite and then test the Expectation Suite by running a `SimpleCheckpoint`.  The results of that Checkpoint will then be displayed in Data Docs.
+
+In between those two code cells, you will insert the code to create new Expectations for your Expectation Suite.  Simply insert an empty cell and create new Expectations by calling specific Expectation methods on the `validator` object that was created in the first cell.

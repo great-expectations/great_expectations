@@ -1,0 +1,85 @@
+config_version: 1
+plugins_directory: plugins/
+
+expectations_store_name: local_expectations_store
+evaluation_parameter_store_name: evaluation_parameter_store
+validations_store_name: validations_store
+
+datasources:
+  data__dir:
+    type: pandas
+    data_asset_type:
+      class_name: PandasDataset
+    batch_kwargs_generators:
+      default:
+        reader_options:
+          engine: python
+          sep:
+        base_directory: ../data
+        type: subdir_reader
+
+validation_operators:
+  errors_and_warnings_validation_operator:
+    class_name: WarningAndFailureExpectationSuitesValidationOperator
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+          target_store_name: validations_store
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction
+          target_store_name: evaluation_parameter_store
+
+stores:
+  local_expectations_store:
+    class_name: ExpectationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: expectations/
+  validations_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: uncommitted/validations/
+  fixture_validation_results_store:
+    class_name: ValidationsStore
+    store_backend:
+      class_name: TupleFilesystemStoreBackend
+      base_directory: fixtures/validations
+
+  evaluation_parameter_store:
+    class_name: EvaluationParameterStore
+
+data_docs_sites:
+  local_site: # site name
+    class_name: SiteBuilder
+    store_backend:
+      class_name: HtmlSiteStore
+      base_directory: uncommitted/data_docs/local_site/
+
+    site_index_builder:
+      class_name: DefaultSiteIndexBuilder
+
+    site_section_builders:
+      expectations:
+        class_name: DefaultSiteSectionBuilder
+        source_store_name: expectations_store
+        renderer:
+          class_name: ExpectationSuitePageRenderer
+
+      validations:
+        class_name: DefaultSiteSectionBuilder
+        source_store_name: validations_store
+        run_name_filter:
+          ne: profiling
+        renderer:
+          class_name: ValidationResultsPageRenderer
+
+      profiling:
+        class_name: DefaultSiteSectionBuilder
+        source_store_name: validations_store
+        run_name_filter:
+          eq: profiling
+        renderer:
+          class_name: ProfilingResultsPageRenderer

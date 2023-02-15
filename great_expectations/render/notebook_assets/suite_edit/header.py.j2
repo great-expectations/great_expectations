@@ -1,0 +1,19 @@
+import datetime
+import great_expectations as gx
+import great_expectations.jupyter_ux
+from great_expectations.checkpoint import LegacyCheckpoint
+from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
+
+context = gx.get_context()
+
+# Feel free to change the name of your suite here. Renaming this will not
+# remove the other one.
+expectation_suite_name = "{{ suite_name }}"
+suite = context.get_expectation_suite(expectation_suite_name)
+suite.expectations = []
+{% if suite_notes is not none -%}
+suite.meta["notes"] = {{ suite_notes }}
+{%- endif %}
+batch_kwargs = {{ batch_kwargs }}
+batch = context.get_batch(batch_kwargs, suite)
+batch.head()

@@ -1,0 +1,26 @@
+{
+  "evaluation_parameters": {},
+  "success": true,
+  "meta": {
+    "great_expectations_version": "0.10.5",
+    "expectation_suite_name": "diabetic_data.warning",
+    "run_id": "20200430T191246.763896Z",
+    "batch_kwargs": {
+      "path": "/Users/roblim/Dropbox/coding/superconductive/test_ge_project_dir/dataset_diabetes/diabetic_data.csv",
+      "datasource": "files_datasource",
+      "reader_method": "read_csv"
+    },
+    "batch_markers": {
+      "ge_load_time": "20200430T191246.780851Z",
+      "pandas_data_fingerprint": "123fd1d4ae7cd02824bd5ce61befd533"
+    },
+    "batch_parameters": null
+  },
+  "statistics": {
+    "evaluated_expectations": 12,
+    "successful_expectations": 12,
+    "unsuccessful_expectations": 0,
+    "success_percent": 100.0
+  },
+  "results": []
+}

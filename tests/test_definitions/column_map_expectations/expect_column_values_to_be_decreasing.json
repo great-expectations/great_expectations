@@ -1,0 +1,75 @@
+{
+  "expectation_type" : "expect_column_values_to_be_decreasing",
+  "datasets" : [{
+    "data" : {
+      "w" : [1, 2, 3, 7, 6, 5, 4, 3, 2, 1],
+      "x" : [null, null, 10, 9, 8, 7, null, 6, 5, 4],
+      "y" : [1, 1, 1, 2, 2, 2, 3, 3, 3, 4],
+      "z" : ["12/1/2016", "11/2/2016", "10/2/2016", "10/2/2016", "8/1/2016", null, null, null, null, null]
+    },
+    "tests" : [{
+      "title" : "positive_test_with_mostly",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column": "w",
+        "mostly": 0.6
+      },
+      "out": {
+        "unexpected_list": [2,3,7],
+        "unexpected_index_list":[{"w": 2, "pk_index": 1}, {"w": 3, "pk_index": 2}, {"w": 7, "pk_index": 3}],
+        "success": true
+      }
+    },{
+      "title" : "basic_negative_test",
+      "include_in_gallery": true,
+      "exact_match_out" : false,
+      "in": {
+        "column": "y"
+      },
+      "out": {
+        "unexpected_list": [2,3,4],
+        "unexpected_index_list": [{"y": 2, "pk_index": 3}, {"y": 3, "pk_index": 6}, {"y": 4, "pk_index": 9}],
+        "success": false
+      }
+    },{
+      "title" : "basic_negative_test_with_strictly",
+      "exact_match_out" : false,
+      "in": {
+        "column": "y",
+        "strictly": true
+      },
+      "out": {
+        "unexpected_list": [1,1,2,2,2,3,3,3,4],
+        "unexpected_index_list": [{"y": 1, "pk_index": 1}, {"y": 1, "pk_index": 2}, {"y": 2, "pk_index": 3}, {"y": 2, "pk_index": 4}, {"y": 2, "pk_index": 5}, {"y": 3, "pk_index": 6}, {"y": 3, "pk_index": 7}, {"y": 3, "pk_index": 8}, {"y": 4, "pk_index": 9}],
+        "success": false
+      }
+    },{
+      "title" : "basic_positive_test",
+      "exact_match_out" : false,
+      "in": {
+        "column": "x"
+      },
+      "out": {
+        "unexpected_list": [],
+        "unexpected_index_list": [],
+        "success": true
+      }
+    }]},
+    {
+      "data": {
+        "empty_column": []
+      },
+      "tests": [{
+        "title": "test_empty_column_should_be_vacuously_true",
+        "exact_match_out": false,
+        "in": {
+          "column": "empty_column",
+          "catch_exceptions": false
+        },
+        "out": {
+          "success": true
+        }
+      }]
+  }]
+}
