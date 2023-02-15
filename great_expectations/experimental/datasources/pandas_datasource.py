@@ -59,7 +59,7 @@ class _PandasDataAsset(DataAsset):
         ...
 
 
-_BLACK_LIST = (
+_FILESYSTEM_BLACK_LIST = (
     # "read_csv",
     # "read_json",
     # "read_excel",
@@ -83,13 +83,36 @@ _BLACK_LIST = (
 
 _FILESYSTEM_ASSET_MODELS = _generate_pandas_data_asset_models(
     _FilesystemDataAsset,
-    blacklist=_BLACK_LIST,
+    blacklist=_FILESYSTEM_BLACK_LIST,
     use_docstring_from_method=True,
     skip_first_param=True,
 )
 
-_ALL_ASSET_MODELS = _generate_pandas_data_asset_models(
+_PANDAS_BLACK_LIST = (
+    # "read_csv",
+    # "read_json",
+    # "read_excel",
+    # "read_parquet",
+    # "read_clipboard",
+    # "read_feather",
+    # "read_fwf",
+    # "read_gbq",
+    # "read_hdf",
+    # "read_html",
+    # "read_orc",
+    # "read_pickle",
+    # "read_sas",
+    # "read_spss",
+    # "read_sql",
+    # "read_sql_query",
+    # "read_sql_table",
+    # "read_table",
+    # "read_xml",
+)
+
+_PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
     _PandasDataAsset,
+    blacklist=_PANDAS_BLACK_LIST,
     use_docstring_from_method=True,
     skip_first_param=False,
 )
@@ -112,13 +135,7 @@ except KeyError as key_err:
 
 class _PandasDatasource(Datasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = list(_ALL_ASSET_MODELS.values())
-
-    # instance attributes
-    assets: Dict[
-        str,
-        _FilesystemDataAsset,
-    ] = {}
+    asset_types: ClassVar[List[Type[DataAsset]]] = []
 
     # Abstract Methods
     @property
@@ -149,9 +166,11 @@ class _PandasDatasource(Datasource):
 
 class PandasDatasource(_PandasDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = list(_ALL_ASSET_MODELS.values())
+    asset_types: ClassVar[List[Type[DataAsset]]] = list(_PANDAS_ASSET_MODELS.values())
 
     # instance attributes
+    type: Literal["pandas"] = "pandas"
+    name: str
     assets: Dict[
         str,
         _PandasDataAsset,
