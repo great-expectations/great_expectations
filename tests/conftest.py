@@ -37,9 +37,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context import (
+    AbstractDataContext,
     BaseDataContext,
     CloudDataContext,
-    AbstractDataContext,
 )
 from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
