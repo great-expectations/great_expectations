@@ -1,21 +1,27 @@
+from __future__ import annotations
+
 import os
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import jinja2
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
-    NotebookConfig,
-    NotebookTemplateConfig,
+    NotebookConfig,  # noqa: TCH001
+    NotebookTemplateConfig,  # noqa: TCH001
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
     SuiteEditNotebookCustomTemplateModuleNotFoundError,
 )
 from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class SuiteEditNotebookRenderer(BaseNotebookRenderer):
@@ -42,7 +48,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         footer_code: Optional[NotebookTemplateConfig] = None,
         column_expectation_code: Optional[NotebookTemplateConfig] = None,
         table_expectation_code: Optional[NotebookTemplateConfig] = None,
-        context: Optional[DataContext] = None,
+        context: Optional[AbstractDataContext] = None,
     ) -> None:
         super().__init__()
         custom_loader = []

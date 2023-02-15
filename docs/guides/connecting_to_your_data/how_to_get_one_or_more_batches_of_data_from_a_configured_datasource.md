@@ -8,18 +8,16 @@ This guide will help you load a <TechnicalTag tag="batch" text="Batch" /> for va
 
 A <TechnicalTag tag="validator" text="Validator" /> knows how to <TechnicalTag tag="validation" text="Validate" /> a particular Batch of data on a particular <TechnicalTag tag="execution_engine" text="Execution Engine" /> against a particular <TechnicalTag tag="expectation_suite" text="Expectation Suite" />. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
 
-You can read more about the core classes that make Great Expectations run in our [Core Concepts reference guide](../../reference/core_concepts.md).
-
 <Prerequisites>
 
 - [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
-- [Configured a Datasource and Data Connector](../../reference/datasources.md)
+- [Configured a Datasource and Data Connector](../../terms/datasource.md)
   
 </Prerequisites>
 
 ## Steps: Loading one or more Batches of data
 
-To load one or more `Batch(es)`, the steps you will take are the same regardless of the type of `Datasource` or `Data Connector` you have set up. To learn more about `Datasources`, `Data Connectors` and `Batch(es)` see our [Datasources Core Concepts Guide](../../reference/datasources.md) in the [Core Concepts reference guide](../../reference/core_concepts.md). 
+To load one or more `Batch(es)`, the steps you will take are the same regardless of the type of `Datasource` or `Data Connector` you have set up. To learn more about `Datasources`, `Data Connectors` and `Batch(es)` see our [Datasources Guide](../../terms/datasource.md). 
 
 ### 1. Construct a BatchRequest
 
@@ -30,7 +28,7 @@ As outlined in the `Datasource` and `Data Connector` docs mentioned above, this 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L39-L44
 ```
 
-Since a `BatchRequest` can return multiple `Batch(es)`, you can optionally provide additional parameters to filter the retrieved `Batch(es)`. See [Datasources Core Concepts Guide](../../reference/datasources.md) for more info on filtering besides `batch_filter_parameters` and `limit` including custom filter functions and sampling. The example `BatchRequest`s below shows several non-exhaustive possibilities. 
+Since a `BatchRequest` can return multiple `Batch(es)`, you can optionally provide additional parameters to filter the retrieved `Batch(es)`. See [Datasources Guide](../../terms/datasource.md) for more info on filtering besides `batch_filter_parameters` and `limit` including custom filter functions and sampling. The example `BatchRequest`s below shows several non-exhaustive possibilities. 
 
 ```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.py#L54-L64
 ```

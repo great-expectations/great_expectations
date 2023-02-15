@@ -4,10 +4,10 @@ from unittest import mock
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -73,9 +73,10 @@ def test_histogram_single_batch_parameter_builder_alice(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
-    expected_parameter_value: dict = {
+    expected_parameter_node_as_dict: dict = {
         "value": {
             "bins": [397433.0, 4942918.5, 9488404.0],
             "weights": [0.6666666666666666, 0.3333333333333333],
@@ -86,7 +87,6 @@ def test_histogram_single_batch_parameter_builder_alice(
                 "metric_name": "column.histogram",
                 "domain_kwargs": {"column": "user_id"},
                 "metric_value_kwargs": {"bins": [397433.0, 4942918.5, 9488404.0]},
-                "metric_dependencies": None,
             },
             "num_batches": 1,
         },
@@ -100,7 +100,7 @@ def test_histogram_single_batch_parameter_builder_alice(
         parameters=parameters,
     )
 
-    assert parameter_node == expected_parameter_value
+    assert parameter_node == expected_parameter_node_as_dict
 
 
 @pytest.mark.integration
@@ -140,7 +140,7 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
         "great_expectations.expectations.metrics.column_aggregate_metrics.column_partition._get_column_partition_using_metrics",
         return_value=None,
     ):
-        with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+        with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
             variables: Optional[ParameterContainer] = None
             # noinspection PyUnusedLocal
             parameter_builder.build_parameters(
@@ -148,6 +148,7 @@ def test_histogram_single_batch_parameter_builder_alice_null_bins(
                 variables=variables,
                 parameters=parameters,
                 batch_request=batch_request,
+                runtime_configuration=None,
             )
 
         assert (
@@ -210,16 +211,16 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
-        expected_parameter_value: dict = {
+        expected_parameter_node_as_dict: dict = {
             "value": {"bins": [None], "weights": [], "tail_weights": [0.5, 0.5]},
             "details": {
                 "metric_configuration": {
                     "metric_name": "column.histogram",
                     "domain_kwargs": {"column": "my_column"},
                     "metric_value_kwargs": {"bins": [None]},
-                    "metric_dependencies": None,
                 },
                 "num_batches": 1,
             },
@@ -233,7 +234,7 @@ def test_histogram_single_batch_parameter_builder_alice_nan_valued_bins(
             parameters=parameters,
         )
 
-        assert parameter_node == expected_parameter_value
+        assert parameter_node == expected_parameter_node_as_dict
 
 
 @pytest.mark.integration
@@ -270,13 +271,14 @@ def test_histogram_single_batch_parameter_builder_alice_wrong_type_bins(
     assert parameter_container.parameter_nodes is None
 
     variables: Optional[ParameterContainer] = None
-    with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+    with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
         # noinspection PyUnusedLocal
         parameter_builder.build_parameters(
             domain=domain,
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
     assert (
@@ -352,7 +354,7 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
 
     variables: Optional[ParameterContainer] = None
 
-    expected_parameter_value: dict
+    expected_parameter_node_as_dict: dict
     parameter_node: ParameterNode
 
     with mock.patch(
@@ -369,9 +371,10 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
-        expected_parameter_value = {
+        expected_parameter_node_as_dict = {
             "value": {"bins": bins, "weights": [], "tail_weights": [0.5, 0.5]},
             "details": {
                 "metric_configuration": {
@@ -380,7 +383,6 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
                     "metric_value_kwargs": {
                         "bins": bins,
                     },
-                    "metric_dependencies": None,
                 },
                 "num_batches": 1,
             },
@@ -394,7 +396,7 @@ def test_histogram_single_batch_parameter_builder_alice_reduced_bins_count(
             parameters=parameters,
         )
 
-        assert parameter_node == expected_parameter_value
+        assert parameter_node == expected_parameter_node_as_dict
 
 
 @pytest.mark.integration

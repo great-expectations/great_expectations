@@ -3,6 +3,7 @@ import pytest
 
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.profile.json_schema_profiler import JsonSchemaProfiler
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 
 
 @pytest.fixture
@@ -1691,7 +1692,7 @@ def test_has_profile_create_expectations_from_complex_schema(
     assert isinstance(obs, ExpectationSuite)
     assert obs.expectation_suite_name == "complex"
     assert obs.meta["notes"] == {
-        "format": "markdown",
+        "format": MetaNotesFormat.MARKDOWN,
         "content": ["### Description:\nAn address"],
     }
 
@@ -1764,7 +1765,7 @@ def test_has_profile_create_expectations_from_complex_schema(
         {
             "meta": {
                 "notes": {
-                    "format": "markdown",
+                    "format": MetaNotesFormat.MARKDOWN,
                     "content": ["### Description:\nOnly the address number."],
                 }
             },

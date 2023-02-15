@@ -202,7 +202,7 @@ class Anonymizer(BaseAnonymizer):
 
         anonymized_values: List[dict] = []
         for suite in payload:
-            anonymize_value: dict = anonymizer.anonymize(expectation_suite=suite)
+            anonymize_value: dict = anonymizer.anonymize(obj=suite)
             anonymized_values.append(anonymize_value)
 
         return anonymized_values

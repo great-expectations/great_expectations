@@ -5,13 +5,11 @@ from typing import Any, Dict
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
@@ -84,10 +82,10 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         parse_strings_as_datetimes: bool = (
             metric_value_kwargs.get("parse_strings_as_datetimes") or False

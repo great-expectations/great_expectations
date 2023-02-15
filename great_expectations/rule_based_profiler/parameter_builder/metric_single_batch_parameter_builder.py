@@ -1,7 +1,11 @@
-from typing import Dict, List, Optional, Set, Union
+from __future__ import annotations
 
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
+
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -16,6 +20,11 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types.attributes import Attributes
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     """
@@ -23,8 +32,8 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     and metric_name as arguments.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "single_batch_mode",
     }
@@ -41,7 +50,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -58,11 +67,11 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
-            metric_name=metric_name,
+            metric_name=metric_name,  # type: ignore[arg-type] # could be None
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
             single_batch_mode=True,
@@ -78,7 +87,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -92,7 +101,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            recompute_existing_parameter_values=recompute_existing_parameter_values,
+            runtime_configuration=runtime_configuration,
         )
 
         # Retrieve metric values for one Batch object (expressed as list of Batch objects).

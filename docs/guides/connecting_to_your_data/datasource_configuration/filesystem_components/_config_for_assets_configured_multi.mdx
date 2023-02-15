@@ -13,8 +13,7 @@ First, you need to add an empty dictionary entry into the `assets` dictionary.  
 
 At this point, your entry in the `assets dictionary will look like:
 
-```python
-  "yellow_trip_data_2020": {}
+```python name="empty data asset for configured, multi batch datasource"
 ```
 
 Next, you will need to define the `pattern` value and `group_names` value for this Data Asset.
@@ -23,14 +22,12 @@ Since you want this Data Asset to all of the 2020 files, the value for `pattern`
 
 Looking back at the files in our `data` directory, you can see that each file differs from the others only in the digits indicating the month of the file.  Therefore, the regular expression we create will separate those specific characters into a group, and will define the content of that group using special characters capable of matching on any values, like so:
 
-```python
-"pattern": "yellow_tripdata_sample_2020-(.*)\\.csv"
+```python name="pattern for asset in configured, multi-batch datasource"
 ```
 
 To correspond to the single group that was defined in your `pattern`, you will define a single entry in the list for the `group_names` key.  Since the `assets` dictionary key is used for this Data Asset's name, you can give this group a name relevant to what it is matching on:
 
-```python
-    "group_names": ["month"],
+```python name="group_names for asset in configured, multi-batch datasource"
 ```
 
 Since the group in the above regular expression will match on any characters, this regex will successfully match on each of the file names in our `data` directory, and will associate each file with the identifier `month` that corresponds to the file's grouped characters:
@@ -40,11 +37,7 @@ Since the group in the above regular expression will match on any characters, th
 
 Put entirely together, your `assets` entry will look like:
 
-```python
-  "yellow_tripdata_2020": {
-    "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
-    "group_names": ["month"],
-  }
+```python name="multi batch data asset for configured pandas datasource"
 ```
 
 Looking back at our sample files, this entry will result in the `ConfiguredAssetFilesystemDataConnector` providing one Data Asset, which can be accessed by the name `yellow_tripdata_2020`.  In future workflows you will be able to refer to this Data Asset and by providing that name, and refer to a specific Batch in this Data Asset by providing your Batch Request with a `batch_identifier` entry using the key `month` and the value corresponding to the month portion of the filename of the file that corresponds to the Batch in question.
@@ -53,15 +46,5 @@ Looking back at our sample files, this entry will result in the `ConfiguredAsset
 
 With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
 
-```python
-        "name_of_my_configured_data_connector": {
-            "class_name": "ConfiguredAssetFilesystemDataConnector",
-            "base_directory": "../data",
-            "assets": {
-                "yellow_tripdata_2020": {
-                  "pattern": "yellow_tripdata_sample_2020-(.*)\\.csv",
-                  "group_names": ["month"],
-                }
-            }
-        }
+```python name="data connector for configured, multi-batch, Pandas datasource"
 ```

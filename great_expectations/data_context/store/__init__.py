@@ -4,6 +4,7 @@ from .store import Store  # isort:skip
 from .store_backend import (  # isort:skip
     StoreBackend,
 )
+from .gx_cloud_store_backend import GXCloudStoreBackend  # isort:skip
 from .ge_cloud_store_backend import GeCloudStoreBackend  # isort:skip
 from .tuple_store_backend import (  # isort:skip
     TupleFilesystemStoreBackend,

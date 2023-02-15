@@ -2,13 +2,13 @@ from typing import List
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchRequest
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
+from great_expectations.util import get_context
 
 # NOTE: InMemoryStoreBackendDefaults SHOULD NOT BE USED in normal settings. You
 # may experience data loss as it persists nothing. It is used here for testing.
@@ -18,7 +18,7 @@ data_context_config = DataContextConfig(
     store_backend_defaults=store_backend_defaults,
     checkpoint_store_name=store_backend_defaults.checkpoint_store_name,
 )
-context = BaseDataContext(project_config=data_context_config)
+context = get_context(project_config=data_context_config)
 
 datasource_yaml = rf"""
 name: my_s3_datasource
@@ -68,16 +68,14 @@ batch_request.runtime_parameters[
     "path"
 ] = "s3a://superconductive-public/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 # Here is a BatchRequest naming a data_asset
 batch_request = BatchRequest(
@@ -93,16 +91,14 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_s3_datasource"]
 assert set(
     context.get_available_data_asset_names()["my_s3_datasource"][

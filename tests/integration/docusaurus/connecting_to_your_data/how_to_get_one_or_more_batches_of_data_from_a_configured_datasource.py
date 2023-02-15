@@ -1,10 +1,10 @@
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-context = ge.get_context()
+context = gx.get_context()
 
 # Please note the naming of this datasource is only to provide good UX for docs and tests.
 datasource_yaml = rf"""
@@ -43,9 +43,7 @@ batch_request = BatchRequest(
     data_asset_name="insert_your_data_asset_name_here",
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -129,9 +127,7 @@ assert len(validator.batches) == 1
 batch_list = context.get_batch_list(batch_request=batch_request)
 
 # Now we can review a sample of data using a Validator
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -167,7 +163,7 @@ assert (
     == "12"
 )
 
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert "insert_your_datasource_name_here" in [
     ds["name"] for ds in context.list_datasources()
 ]

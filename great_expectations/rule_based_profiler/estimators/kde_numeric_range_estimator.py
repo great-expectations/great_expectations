@@ -3,10 +3,10 @@ from typing import Callable, Dict, Optional, Union
 
 import numpy as np
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.domain import Domain
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
-    NumericRangeEstimationResult,
+    NumericRangeEstimationResult,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
     NumericRangeEstimator,
@@ -18,9 +18,9 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_quantile_statistic_interpolation_method_from_rule_state,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
-from great_expectations.types.attributes import Attributes
+from great_expectations.types.attributes import Attributes  # noqa: TCH001
 from great_expectations.util import is_ndarray_datetime_dtype
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ class KdeNumericRangeEstimator(NumericRangeEstimator):
             parse_strings_as_datetimes=True,
             fuzzy=False,
         ):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f'Estimator "{self.__class__.__name__}" does not support DateTime/TimeStamp data types.'
             )
 

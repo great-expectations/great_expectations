@@ -1,4 +1,5 @@
 include *.txt
+include reqs/*.txt
 include LICENSE
 include great_expectations/data_context/checkpoint_template.yml
 include great_expectations/init_notebooks/*/*.ipynb

@@ -9,10 +9,10 @@ yarn-debug.log*
 yarn-error.log*
 
 # Render test output
-tests/render/output/*
+capitalone_dataprofiler_expectations/tests/render/output/*
 
 # DataContext test output
-tests/data_context/output/*
+capitalone_dataprofiler_expectations/tests/data_context/output/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -33,13 +33,13 @@ Set up your machine for the tutorial
 
 For this tutorial, we will use a simplified version of the NYC taxi ride data.
 
-Clone the `ge_tutorials <https://github.com/superconductive/ge_tutorials>`_ repository to download the data and directories with the final versions of the tutorial, which you can use for reference:
+Clone the `ge_tutorials <https://github.com/great-expectations/gx_tutorials>`_ repository to download the data and directories with the final versions of the tutorial, which you can use for reference:
 
 .. code-block:: bash
 
-   git clone https://github.com/superconductive/ge_tutorials
+   git clone https://github.com/great-expectations/gx_tutorials
    cd ge_tutorials
-   
+
 
 What you find in the ge_tutorials repository
 ---------------------------------------------
@@ -100,7 +100,7 @@ You should see this:
             |-- documentation
             |-- validations
 
-    OK to proceed? [Y/n]: 
+    OK to proceed? [Y/n]:
 
 **Let's pause there for a moment and take a look under the hood.**
 

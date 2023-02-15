@@ -1,15 +1,29 @@
+from __future__ import annotations
+
 import copy
 import datetime
 import itertools
 import logging
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Set, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Union,
+)
 
 import numpy as np
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
     BootstrapNumericRangeEstimator,
 )
@@ -24,7 +38,7 @@ from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_
     NumericRangeEstimationResult,
 )
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
-    NumericRangeEstimator,
+    NumericRangeEstimator,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_estimator import (
     QuantilesNumericRangeEstimator,
@@ -37,8 +51,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValue,
-    MetricValues,
+    MetricValues,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
@@ -53,10 +66,16 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import (
     convert_ndarray_decimal_to_float_dtype,
+    does_ndarray_contain_decimal_dtype,
     is_ndarray_datetime_dtype,
-    is_ndarray_decimal_dtype,
     is_numeric,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -93,8 +112,12 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         "upper_bound",
     }
 
-    exclude_field_names: Set[
-        str
+    METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING: set = {
+        "column.unique_proportion",
+    }
+
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "single_batch_mode",
     }
@@ -125,7 +148,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -169,7 +192,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
                 ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
                 These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -229,7 +252,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                     not truncate_values_keys
                     <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
                 ):
-                    raise ge_exceptions.ProfilerExecutionError(
+                    raise gx_exceptions.ProfilerExecutionError(
                         message=f"""Unrecognized truncate_values key(s) in {self.__class__.__name__}:
 "{str(truncate_values_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" \
 detected.
@@ -293,7 +316,7 @@ detected.
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -302,7 +325,7 @@ detected.
             Attributes object, containing computed parameter values and parameter computation details metadata.
 
          The algorithm operates according to the following steps:
-         1. Obtain batch IDs of interest using BaseDataContext and BatchRequest (unless passed explicitly as argument).
+         1. Obtain batch IDs of interest using AbstractDataContext and BatchRequest (unless passed explicitly as argument).
          2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
          3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
             order to have access to all Batch objects, on each of which the specified metric_name will be computed.
@@ -336,7 +359,7 @@ detected.
                 variables=variables,
                 parameters=parameters,
                 parameter_computation_impl=super()._build_parameters,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
             parameter_reference = self.raw_fully_qualified_parameter_name
 
@@ -353,7 +376,11 @@ detected.
         ]
 
         round_decimals: int
-        if integer_semantic_domain_type(domain=domain):
+        if (
+            self.metric_name
+            not in NumericMetricRangeMultiBatchParameterBuilder.METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING
+            and integer_semantic_domain_type(domain=domain)
+        ):
             round_decimals = 0
         else:
             round_decimals = self._get_round_decimals_using_heuristics(
@@ -432,7 +459,7 @@ detected.
             estimator
             not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
         ):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
 {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
 """
@@ -592,7 +619,6 @@ detected.
         for metric_value_idx in metric_value_vector_indices:
             # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
             metric_value_vector = metric_values[metric_value_idx]
-            metric_value: MetricValue
             if not datetime_detected and np.all(
                 np.isclose(metric_value_vector, metric_value_vector[0])
             ):
@@ -698,7 +724,7 @@ detected.
         metric_value_vector: np.ndarray
         for metric_value_idx in metric_value_vector_indices:
             metric_value_vector = metric_values[metric_value_idx]
-            if not is_ndarray_decimal_dtype(data=metric_value_vector):
+            if not does_ndarray_contain_decimal_dtype(data=metric_value_vector):
                 return False
 
         return True
@@ -733,7 +759,7 @@ detected.
                 for distribution_boundary in truncate_values.values()
             ]
         ):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "truncate_values" for {self.__class__.__name__} must specify the
 [lower_bound, upper_bound] closed interval, where either boundary is a numeric value (or None).
 """
@@ -773,7 +799,7 @@ detected.
             round_decimals is None
             or (isinstance(round_decimals, int) and (round_decimals >= 0))
         ):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).
 """

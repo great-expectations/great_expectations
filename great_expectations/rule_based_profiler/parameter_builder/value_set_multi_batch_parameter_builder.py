@@ -1,19 +1,33 @@
+from __future__ import annotations
+
 import itertools
-from typing import Any, Collection, Dict, List, Optional, Set, Union
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Collection,
+    Dict,
+    List,
+    Optional,
+    Set,
+    TypeVar,
+    Union,
+)
 
 import numpy as np
 
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
 )
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValues,
+    MetricValues,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
@@ -27,6 +41,11 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 from great_expectations.types.attributes import Attributes
 from great_expectations.util import is_ndarray_datetime_dtype
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
@@ -48,8 +67,8 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         2. This ParameterBuilder filters null values out from the unique value_set.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
         "metric_name",
         "single_batch_mode",
@@ -66,7 +85,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -78,7 +97,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -97,7 +116,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -111,7 +130,7 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            recompute_existing_parameter_values=recompute_existing_parameter_values,
+            runtime_configuration=runtime_configuration,
         )
 
         # Retrieve and replace list of unique values for each Batch with set of unique values for all batches in domain.
@@ -129,8 +148,8 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         )
         details: dict = parameter_node[FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY]
 
-        unique_values: Set[Any] = _get_unique_values_from_nested_collection_of_sets(
-            collection=metric_values
+        unique_values: set = _get_unique_values_from_nested_collection_of_sets(
+            collection=metric_values  # type: ignore[arg-type] # could be None
         )
 
         unique_values_as_array: np.ndarray = np.asarray(unique_values)
@@ -153,9 +172,12 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         )
 
 
+V = TypeVar("V")
+
+
 def _get_unique_values_from_nested_collection_of_sets(
-    collection: Collection[Collection[Set[Any]]],
-) -> Set[Any]:
+    collection: Collection[Collection[Set[V]]],
+) -> Set[V]:
     """Get unique values from a collection of sets e.g. a list of sets.
 
     Args:
@@ -166,10 +188,10 @@ def _get_unique_values_from_nested_collection_of_sets(
         Single flattened set containing unique values.
     """
 
-    flattened: Union[List[Set[Any]], Set[Any]] = list(
+    flattened: Union[List[Set[V]], Set[V]] = list(
         itertools.chain.from_iterable(collection)
     )
-    element: Any
+    element: V
     if all(isinstance(element, set) for element in flattened):
         flattened = set().union(*flattened)
 
@@ -178,8 +200,8 @@ def _get_unique_values_from_nested_collection_of_sets(
     reliance on "np.ndarray", "None" gets converted to "numpy.Inf", whereas "numpy.Inf == numpy.Inf" returns False,
     resulting in numerous "None" elements in final set.  For this reason, all "None" elements must be filtered out.
     """
-    unique_values: Set[Any] = set(
-        sorted(
+    unique_values: Set[V] = set(
+        sorted(  # type: ignore[type-var,arg-type] # lambda destroys type info?
             filter(
                 lambda element: not (
                     (element is None)

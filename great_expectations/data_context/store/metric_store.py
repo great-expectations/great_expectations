@@ -1,11 +1,13 @@
 import json
 
-from great_expectations.core.metric import ValidationMetricIdentifier
-from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
 from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationMetricIdentifier,
+)
 from great_expectations.util import (
     filter_properties_dict,
     load_class,

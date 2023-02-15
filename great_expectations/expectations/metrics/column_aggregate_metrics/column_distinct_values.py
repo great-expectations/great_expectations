@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -58,12 +58,21 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         column: sa_sql_expression_ColumnClause = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
 
-        distinct_values: List[sqlalchemy_engine_Engine] = sqlalchemy_engine.execute(
-            sa.select([column])
-            .where(column.is_not(None))
-            .distinct()
-            .select_from(selectable)
-        ).fetchall()
+        distinct_values: List[sqlalchemy_engine_Engine]
+        if hasattr(column, "is_not"):
+            distinct_values = sqlalchemy_engine.execute(
+                sa.select([column])
+                .where(column.is_not(None))
+                .distinct()
+                .select_from(selectable)
+            ).fetchall()
+        else:
+            distinct_values = sqlalchemy_engine.execute(
+                sa.select([column])
+                .where(column.isnot(None))
+                .distinct()
+                .select_from(selectable)
+            ).fetchall()
         # Vectorized operation is not faster here due to overhead of converting to and from numpy array
         return {row[0] for row in distinct_values}
 

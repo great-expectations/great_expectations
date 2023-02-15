@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -72,7 +72,7 @@ def test_instantiation_without_args(
     assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
 
@@ -115,7 +115,7 @@ def test_instantiation_with_filename_arg(
     assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
 
@@ -158,7 +158,7 @@ def test_instantiation_with_info_arg(
     assert my_data_connector.self_check() == expected_config_dict
 
     my_data_connector._refresh_data_references_cache()
-    assert my_data_connector.get_data_reference_list_count() == 4
+    assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_unmatched_data_references() == []
 
 
@@ -1139,7 +1139,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
           """,
     )
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
             runtime_environment={
@@ -1204,7 +1204,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
           """,
     )
 
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         instantiate_class_from_config(
             config=my_data_connector_yaml,
             runtime_environment={

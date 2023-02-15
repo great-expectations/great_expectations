@@ -1,14 +1,19 @@
 import copy
 import datetime
 import logging
-from typing import Union
+from typing import Dict, Tuple, Union
 
 import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypes,
+    MetricPartialFunctionTypeSuffixes,
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -17,7 +22,13 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import pyspark_sql_Column
+from great_expectations.expectations.metrics.import_manager import (
+    pyspark_sql_Column,
+    quoted_name,
+)
+from great_expectations.expectations.metrics.util import (
+    get_dbms_compatible_column_names,
+)
 from great_expectations.expectations.registry import get_metric_provider
 from great_expectations.self_check.util import (
     build_pandas_engine,
@@ -25,6 +36,7 @@ from great_expectations.self_check.util import (
     build_spark_engine,
 )
 from great_expectations.util import isclose
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
@@ -38,10 +50,10 @@ def test_basic_metric_pd():
     batch = Batch(data=df)
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -50,10 +62,10 @@ def test_basic_metric_pd():
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -65,10 +77,10 @@ def test_basic_metric_pd():
 def test_mean_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -77,10 +89,10 @@ def test_mean_metric_pd():
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -91,10 +103,10 @@ def test_mean_metric_pd():
 def test_stdev_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -103,10 +115,10 @@ def test_stdev_metric_pd():
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -132,10 +144,10 @@ def test_column_value_lengths_min_metric_pd():
         )
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -144,15 +156,112 @@ def test_column_value_lengths_min_metric_pd():
         metric_name="column_values.length.min",
         metric_domain_kwargs={"column": "names"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
     assert results == {desired_metric.id: 8}
+
+
+def test_column_quoted_name_type_sa(sa):
+    engine = build_sa_engine(
+        pd.DataFrame(
+            {
+                "names": [
+                    "Ada Lovelace",
+                    "Alan Kay",
+                    "Donald Knuth",
+                    "Edsger Dijkstra",
+                    "Guido van Rossum",
+                    "John McCarthy",
+                    "Marvin Minsky",
+                    "Ray Ozzie",
+                ]
+            }
+        ),
+        sa,
+    )
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    table_columns_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="table.columns",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    table_columns_metric_id: Tuple[str, str, str] = table_columns_metric.id
+    batch_column_list = metrics[table_columns_metric_id]
+
+    column_name: str
+    quoted_batch_column_list = [
+        quoted_name(value=str(column_name), quote=True)
+        for column_name in batch_column_list
+    ]
+
+    column_name = "names"
+
+    str_column_name = get_dbms_compatible_column_names(
+        column_names=column_name,
+        batch_columns_list=batch_column_list,
+    )
+    assert isinstance(str_column_name, str)
+
+    quoted_column_name = get_dbms_compatible_column_names(
+        column_names=column_name,
+        batch_columns_list=quoted_batch_column_list,
+    )
+    assert isinstance(quoted_column_name, sa.sql.elements.quoted_name)
+    assert quoted_column_name.quote is True
+
+    for column_name in [
+        "non_existent_column",
+        '"NAMES"',
+        '"Names"',
+    ]:
+        with pytest.raises(
+            gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
+        ) as eee:
+            _ = get_dbms_compatible_column_names(
+                column_names=column_name,
+                batch_columns_list=batch_column_list,
+            )
+        assert (
+            str(eee.value)
+            == f'Error: The column "{column_name}" in BatchData does not exist.'
+        )
+
+    quoted_batch_column_list = [
+        quoted_name(value=str(column_name), quote=True)
+        for column_name in [
+            "Names",
+            "names",
+        ]
+    ]
+    for column_name in [
+        "non_existent_column",
+        "NAMES",
+    ]:
+        with pytest.raises(
+            gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
+        ) as eee:
+            _ = get_dbms_compatible_column_names(
+                column_names=column_name,
+                batch_columns_list=quoted_batch_column_list,
+            )
+        assert (
+            str(eee.value)
+            == f'Error: The column "{column_name}" in BatchData does not exist.'
+        )
 
 
 def test_column_value_lengths_min_metric_sa(sa):
@@ -174,34 +283,34 @@ def test_column_value_lengths_min_metric_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.length.min.aggregate_fn",
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column_values.length.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={
             "column": "names",
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
         metric_value_kwargs=None,
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.length.min",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=results
     )
@@ -229,34 +338,34 @@ def test_column_value_lengths_min_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.length.min.aggregate_fn",
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column_values.length.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={
             "column": "names",
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
         metric_value_kwargs=None,
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.length.min",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=results
     )
@@ -282,10 +391,10 @@ def test_column_value_lengths_max_metric_pd():
         )
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -294,10 +403,10 @@ def test_column_value_lengths_max_metric_pd():
         metric_name="column_values.length.max",
         metric_domain_kwargs={"column": "names"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -324,34 +433,34 @@ def test_column_value_lengths_max_metric_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.length.max.aggregate_fn",
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column_values.length.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={
             "column": "names",
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
         metric_value_kwargs=None,
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.length.max",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=results
     )
@@ -379,34 +488,34 @@ def test_column_value_lengths_max_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.length.max.aggregate_fn",
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column_values.length.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={
             "column": "names",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
 
     desired_metric = MetricConfiguration(
         metric_name="column_values.length.max",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=results
     )
@@ -417,10 +526,10 @@ def test_column_value_lengths_max_metric_spark(spark_session):
 def test_quantiles_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 4]}))
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -432,10 +541,10 @@ def test_quantiles_metric_pd():
             "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
             "allow_relative_error": "linear",
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -446,16 +555,16 @@ def test_quantiles_metric_pd():
 def test_quantiles_metric_sa(sa):
     engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 4]}), sa)
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name="table.row_count.aggregate_fn",
+        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -469,10 +578,10 @@ def test_quantiles_metric_sa(sa):
         metric_name="table.row_count",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": partial_metric,
-        },
     )
+    table_row_count_metric.metric_dependencies = {
+        "metric_partial_fn": partial_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(table_row_count_metric,), metrics=metrics
     )
@@ -484,11 +593,11 @@ def test_quantiles_metric_sa(sa):
         metric_value_kwargs={
             "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-            "table.row_count": table_row_count_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "table.row_count": table_row_count_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -503,10 +612,10 @@ def test_quantiles_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -517,10 +626,10 @@ def test_quantiles_metric_spark(spark_session):
         metric_value_kwargs={
             "quantiles": [2.5e-1, 5.0e-1, 7.5e-1],
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -548,10 +657,10 @@ def test_column_histogram_metric_pd():
         )
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -562,10 +671,10 @@ def test_column_histogram_metric_pd():
         metric_value_kwargs={
             "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -606,10 +715,10 @@ def test_column_histogram_metric_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -620,10 +729,10 @@ def test_column_histogram_metric_sa(sa):
         metric_value_kwargs={
             "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -636,10 +745,10 @@ def test_column_histogram_metric_sa(sa):
         metric_value_kwargs={
             "bins": [0.0],
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -669,10 +778,10 @@ def test_column_histogram_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -683,10 +792,10 @@ def test_column_histogram_metric_spark(spark_session):
         metric_value_kwargs={
             "bins": [0.0, 0.9, 1.8, 2.7, 3.6, 4.5, 5.4, 6.3, 7.2, 8.1, 9.0],
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -705,7 +814,7 @@ def test_column_partition_metric_pd():
     For standard numerical data, test set contains 12 evenly spaced integers.
     For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
 
-    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
     week_idx: int
     engine = build_pandas_engine(
@@ -734,7 +843,7 @@ def test_column_partition_metric_pd():
         ),
     )
 
-    second_in_week: int = 604800
+    seconds_in_week: int = 604800
 
     n_bins: int = 10
 
@@ -742,10 +851,10 @@ def test_column_partition_metric_pd():
     idx: int
     element: Union[float, pd.Timestamp]
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     # Test using standard numeric column.
 
@@ -758,20 +867,20 @@ def test_column_partition_metric_pd():
         metric_value_kwargs={
             "parse_strings_as_datetimes": False,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    column_min_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "parse_strings_as_datetimes": False,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    column_max_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             column_min_metric,
@@ -789,12 +898,12 @@ def test_column_partition_metric_pd():
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-            "column.min": column_min_metric,
-            "column.max": column_max_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "column.min": column_min_metric,
+        "column.max": column_max_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -818,20 +927,20 @@ def test_column_partition_metric_pd():
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    column_min_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    column_max_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             column_min_metric,
@@ -849,19 +958,19 @@ def test_column_partition_metric_pd():
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-            "column.min": column_min_metric,
-            "column.max": column_max_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "column.min": column_min_metric,
+        "column.max": column_max_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
 
     increment = datetime.timedelta(
-        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+        seconds=(seconds_in_week * float(n_bins + 1) / n_bins)
     )
     assert all(
         isclose(
@@ -884,7 +993,7 @@ def test_column_partition_metric_sa(sa):
     For standard numerical data, test set contains 12 evenly spaced integers.
     For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
 
-    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
     week_idx: int
     engine = build_sa_engine(
@@ -914,7 +1023,7 @@ def test_column_partition_metric_sa(sa):
         sa,
     )
 
-    second_in_week: int = 604800
+    seconds_in_week: int = 604800
 
     n_bins: int = 10
 
@@ -922,10 +1031,10 @@ def test_column_partition_metric_sa(sa):
     idx: int
     element: Union[float, pd.Timestamp]
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     # Test using standard numeric column.
 
@@ -933,21 +1042,21 @@ def test_column_partition_metric_sa(sa):
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_column_min_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     partial_column_max_metric = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_column_max_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             partial_column_min_metric,
@@ -963,22 +1072,22 @@ def test_column_partition_metric_sa(sa):
         metric_value_kwargs={
             "parse_strings_as_datetimes": False,
         },
-        metric_dependencies={
-            "metric_partial_fn": partial_column_min_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_min_metric.metric_dependencies = {
+        "metric_partial_fn": partial_column_min_metric,
+        "table.columns": table_columns_metric,
+    }
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "parse_strings_as_datetimes": False,
         },
-        metric_dependencies={
-            "metric_partial_fn": partial_column_max_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_max_metric.metric_dependencies = {
+        "metric_partial_fn": partial_column_max_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             column_min_metric,
@@ -996,12 +1105,12 @@ def test_column_partition_metric_sa(sa):
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-            "column.min": column_min_metric,
-            "column.max": column_max_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "column.min": column_min_metric,
+        "column.max": column_max_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -1020,21 +1129,21 @@ def test_column_partition_metric_sa(sa):
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_column_min_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     partial_column_max_metric = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_column_max_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             partial_column_min_metric,
@@ -1050,22 +1159,22 @@ def test_column_partition_metric_sa(sa):
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "metric_partial_fn": partial_column_min_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_min_metric.metric_dependencies = {
+        "metric_partial_fn": partial_column_min_metric,
+        "table.columns": table_columns_metric,
+    }
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "metric_partial_fn": partial_column_max_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_max_metric.metric_dependencies = {
+        "metric_partial_fn": partial_column_max_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             column_min_metric,
@@ -1083,19 +1192,19 @@ def test_column_partition_metric_sa(sa):
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-            "column.min": column_min_metric,
-            "column.max": column_max_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "column.min": column_min_metric,
+        "column.max": column_max_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
 
     increment = datetime.timedelta(
-        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+        seconds=(seconds_in_week * float(n_bins + 1) / n_bins)
     )
     assert all(
         isclose(
@@ -1118,7 +1227,7 @@ def test_column_partition_metric_spark(spark_session):
     For standard numerical data, test set contains 12 evenly spaced integers.
     For "datetime.datetime" data, test set contains 12 dates, starting with January 1, 2021, separated by 7 days.
 
-    Expected partion boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
+    Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
     from great_expectations.expectations.metrics.import_manager import sparktypes
 
@@ -1157,7 +1266,7 @@ def test_column_partition_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    second_in_week: int = 604800
+    seconds_in_week: int = 604800
 
     n_bins: int = 10
 
@@ -1165,10 +1274,10 @@ def test_column_partition_metric_spark(spark_session):
     idx: int
     element: Union[float, pd.Timestamp]
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     # Test using standard numeric column.
 
@@ -1176,21 +1285,21 @@ def test_column_partition_metric_spark(spark_session):
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_column_min_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     partial_column_max_metric = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_column_max_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             partial_column_min_metric,
@@ -1206,22 +1315,22 @@ def test_column_partition_metric_spark(spark_session):
         metric_value_kwargs={
             "parse_strings_as_datetimes": False,
         },
-        metric_dependencies={
-            "metric_partial_fn": partial_column_min_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_min_metric.metric_dependencies = {
+        "metric_partial_fn": partial_column_min_metric,
+        "table.columns": table_columns_metric,
+    }
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "parse_strings_as_datetimes": False,
         },
-        metric_dependencies={
-            "metric_partial_fn": partial_column_max_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_max_metric.metric_dependencies = {
+        "metric_partial_fn": partial_column_max_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             column_min_metric,
@@ -1239,12 +1348,12 @@ def test_column_partition_metric_spark(spark_session):
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-            "column.min": column_min_metric,
-            "column.max": column_max_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "column.min": column_min_metric,
+        "column.max": column_max_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -1263,21 +1372,21 @@ def test_column_partition_metric_spark(spark_session):
     metrics.update(results)
 
     partial_column_min_metric = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_column_min_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     partial_column_max_metric = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_column_max_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             partial_column_min_metric,
@@ -1293,22 +1402,22 @@ def test_column_partition_metric_spark(spark_session):
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "metric_partial_fn": partial_column_min_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_min_metric.metric_dependencies = {
+        "metric_partial_fn": partial_column_min_metric,
+        "table.columns": table_columns_metric,
+    }
     column_max_metric: MetricConfiguration = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "metric_partial_fn": partial_column_max_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_max_metric.metric_dependencies = {
+        "metric_partial_fn": partial_column_max_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
             column_min_metric,
@@ -1326,19 +1435,19 @@ def test_column_partition_metric_spark(spark_session):
             "n_bins": n_bins,
             "allow_relative_error": False,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-            "column.min": column_min_metric,
-            "column.max": column_max_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "column.min": column_min_metric,
+        "column.max": column_max_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
 
     increment = datetime.timedelta(
-        seconds=(second_in_week * float(n_bins + 1) / n_bins)
+        seconds=(seconds_in_week * float(n_bins + 1) / n_bins)
     )
     assert all(
         isclose(
@@ -1354,10 +1463,10 @@ def test_max_metric_column_exists_pd():
     batch = Batch(data=df)
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -1366,10 +1475,10 @@ def test_max_metric_column_exists_pd():
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -1382,10 +1491,10 @@ def test_max_metric_column_does_not_exist_pd():
     batch = Batch(data=df)
     engine = PandasExecutionEngine(batch_data_dict={batch.id: batch.data})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -1394,12 +1503,12 @@ def test_max_metric_column_does_not_exist_pd():
         metric_name="column.max",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -1414,22 +1523,22 @@ def test_max_metric_column_does_not_exist_pd():
 def test_max_metric_column_exists_sa(sa):
     engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(partial_metric,), metrics=metrics
@@ -1440,11 +1549,11 @@ def test_max_metric_column_exists_sa(sa):
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": partial_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": partial_metric,
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -1456,24 +1565,24 @@ def test_max_metric_column_exists_sa(sa):
 def test_max_metric_column_does_not_exist_sa(sa):
     engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, None]}), sa)
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(partial_metric,), metrics=metrics
@@ -1492,22 +1601,22 @@ def test_max_metric_column_exists_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(partial_metric,), metrics=metrics
@@ -1518,11 +1627,11 @@ def test_max_metric_column_exists_spark(spark_session):
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": partial_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": partial_metric,
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -1538,24 +1647,24 @@ def test_max_metric_column_does_not_exist_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    partial_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(partial_metric,), metrics=metrics
@@ -1570,45 +1679,47 @@ def test_max_metric_column_does_not_exist_spark(spark_session):
 def test_map_value_set_sa(sa):
     engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}), sa)
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.condition",
+        metric_name=f"column_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     metrics = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name="column_values.in_set.unexpected_count.aggregate_fn",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"unexpected_condition": desired_metric},
     )
+    aggregate_partial.metric_dependencies = {
+        "unexpected_condition": desired_metric,
+    }
 
     metrics = engine.resolve_metrics(
         metrics_to_resolve=(aggregate_partial,), metrics=metrics
     )
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.unexpected_count",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={
-            "metric_partial_fn": aggregate_partial,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_partial,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -1632,7 +1743,9 @@ def test_map_of_type_sa(sa):
     )
 
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    # noinspection PyTypeChecker
     assert results[desired_metric.id][0]["name"] == "a"
+    # noinspection PyTypeChecker
     assert isinstance(results[desired_metric.id][0]["type"], sa.FLOAT)
 
 
@@ -1645,26 +1758,26 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.in_set.condition",
+        metric_name=f"column_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column": "a",
         },
         metric_value_kwargs={
             "value_set": [1, 2, 3],
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,), metrics=metrics
     )
@@ -1672,33 +1785,33 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name="column_values.in_set.unexpected_count.aggregate_fn",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={
             "column": "a",
         },
         metric_value_kwargs={
             "value_set": [1, 2, 3],
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-        },
     )
+    aggregate_partial.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(aggregate_partial,), metrics=metrics
     )
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.unexpected_count",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={
             "column": "a",
         },
         metric_value_kwargs={
             "value_set": [1, 2, 3],
         },
-        metric_dependencies={
-            "metric_partial_fn": aggregate_partial,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_partial,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -1714,13 +1827,13 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     engine.load_batch_data(batch_id="my_id", batch_data=df)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.in_set.condition",
+        metric_name=f"column_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,), metrics=metrics
     )
@@ -1728,23 +1841,25 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name="column_values.in_set.unexpected_count.aggregate_fn",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={"unexpected_condition": condition_metric},
     )
+    aggregate_partial.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(aggregate_partial,), metrics=metrics
     )
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.unexpected_count",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
-        metric_dependencies={
-            "metric_partial_fn": aggregate_partial,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_partial,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -1758,27 +1873,30 @@ def test_map_column_value_lengths_between_pd():
         pd.DataFrame({"a": ["a", "aaa", "bcbc", "defgh", None]})
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.value_length.map",
+        metric_name=f"column_values.value_length.{MetricPartialFunctionTypeSuffixes.MAP.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
-    ser_expected_lengths = pd.Series([1, 3, 4, 5])
+    metrics.update(results)
+
     result_series, _, _ = results[desired_metric.id]
+
+    ser_expected_lengths = pd.Series([1, 3, 4, 5])
     assert ser_expected_lengths.equals(result_series)
 
 
@@ -1802,25 +1920,25 @@ def test_map_column_values_increasing_pd():
         )
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.increasing.condition",
+        metric_name=f"column_values.increasing.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     with pytest.warns(DeprecationWarning) as record:
         results = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,),
@@ -1833,14 +1951,14 @@ def test_map_column_values_increasing_pd():
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name="column_values.increasing.unexpected_count",
+        metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -1858,16 +1976,16 @@ def test_map_column_values_increasing_pd():
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name="column_values.increasing.unexpected_rows",
+        metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -1890,10 +2008,10 @@ def test_map_column_values_increasing_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -1912,17 +2030,17 @@ def test_map_column_values_increasing_spark(spark_session):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.increasing.condition",
+        metric_name=f"column_values.increasing.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-            "table.column_types": table_column_types,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "table.column_types": table_column_types,
+    }
     with pytest.warns(DeprecationWarning) as record:
         results = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,),
@@ -1935,14 +2053,14 @@ def test_map_column_values_increasing_spark(spark_session):
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name="column_values.increasing.unexpected_count",
+        metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -1951,16 +2069,16 @@ def test_map_column_values_increasing_spark(spark_session):
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name="column_values.increasing.unexpected_rows",
+        metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -1991,25 +2109,25 @@ def test_map_column_values_decreasing_pd():
         )
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.condition",
+        metric_name=f"column_values.decreasing.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     with pytest.warns(DeprecationWarning) as record:
         results = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,),
@@ -2022,14 +2140,14 @@ def test_map_column_values_decreasing_pd():
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.unexpected_count",
+        metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -2047,16 +2165,16 @@ def test_map_column_values_decreasing_pd():
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.unexpected_rows",
+        metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -2079,10 +2197,10 @@ def test_map_column_values_decreasing_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -2101,17 +2219,17 @@ def test_map_column_values_decreasing_spark(spark_session):
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.condition",
+        metric_name=f"column_values.decreasing.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "strictly": True,
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-            "table.column_types": table_column_types,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "table.column_types": table_column_types,
+    }
     with pytest.warns(DeprecationWarning) as record:
         results = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,),
@@ -2124,14 +2242,14 @@ def test_map_column_values_decreasing_spark(spark_session):
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.unexpected_count",
+        metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -2140,16 +2258,16 @@ def test_map_column_values_decreasing_spark(spark_session):
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.unexpected_rows",
+        metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -2161,22 +2279,22 @@ def test_map_column_values_decreasing_spark(spark_session):
 def test_map_unique_column_exists_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, 4, None]}))
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -2184,14 +2302,14 @@ def test_map_unique_column_exists_pd():
     metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -2201,16 +2319,16 @@ def test_map_unique_column_exists_pd():
     assert metrics[unexpected_count_metric.id] == 2
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_rows",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -2223,24 +2341,24 @@ def test_map_unique_column_exists_pd():
 def test_map_unique_column_does_not_exist_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, 3, None]}))
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         results = engine.resolve_metrics(
             metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -2259,49 +2377,36 @@ def test_map_unique_column_exists_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,), metrics=metrics
     )
     metrics.update(results)
 
-    # This is no longer a MAP_CONDITION because mssql does not support it. Instead, it is a WINDOW_CONDITION
-    #
-    # aggregate_fn = MetricConfiguration(
-    #     metric_name="column_values.unique.unexpected_count.aggregate_fn",
-    #     metric_domain_kwargs={"column": "a"},
-    #     metric_value_kwargs=None,
-    #     metric_dependencies={"unexpected_condition": condition_metric},
-    # )
-    # aggregate_fn_metrics = engine.resolve_metrics(
-    #     metrics_to_resolve=(aggregate_fn,), metrics=metrics
-    # )
-
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        # metric_dependencies={"metric_partial_fn": aggregate_fn},
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,),
         metrics=metrics,  # metrics=aggregate_fn_metrics
@@ -2310,16 +2415,16 @@ def test_map_unique_column_exists_sa(sa):
     assert results[desired_metric.id] == 2
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_values",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -2327,32 +2432,32 @@ def test_map_unique_column_exists_sa(sa):
     assert results[desired_metric.id] == [3, 3]
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_value_counts",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     assert results[desired_metric.id] == [(3, 2)]
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_rows",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -2368,23 +2473,23 @@ def test_map_unique_column_does_not_exist_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,), metrics=metrics
@@ -2407,27 +2512,27 @@ def test_map_unique_empty_query_sa(sa):
     table_columns_metric, metrics = get_table_columns_metric(engine=engine)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,), metrics=metrics
     )
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,),
         metrics=metrics,
@@ -2447,22 +2552,22 @@ def test_map_unique_column_exists_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,), metrics=metrics
     )
@@ -2470,14 +2575,14 @@ def test_map_unique_column_exists_spark(spark_session):
 
     # unique is a *window* function so does not use the aggregate_fn version of unexpected count
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -2485,16 +2590,16 @@ def test_map_unique_column_exists_spark(spark_session):
     assert results[desired_metric.id] == 2
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_values",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -2502,16 +2607,16 @@ def test_map_unique_column_exists_spark(spark_session):
     assert results[desired_metric.id] == [3, 3]
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_value_counts",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -2519,17 +2624,17 @@ def test_map_unique_column_exists_spark(spark_session):
     assert results[desired_metric.id] == [(3, 2)]
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_rows",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={
             "column": "a",
         },
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -2549,24 +2654,24 @@ def test_map_unique_column_does_not_exist_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_values.unique.condition",
+        metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "non_existent_column"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
-    with pytest.raises(ge_exceptions.MetricResolutionError) as eee:
+    with pytest.raises(gx_exceptions.MetricResolutionError) as eee:
         # noinspection PyUnusedLocal
         metrics = engine.resolve_metrics(
             metrics_to_resolve=(condition_metric,), metrics=metrics
@@ -2581,10 +2686,10 @@ def test_z_score_under_threshold_pd():
     df = pd.DataFrame({"a": [1, 2, 3, None]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -2593,58 +2698,63 @@ def test_z_score_under_threshold_pd():
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    mean.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    stdev.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     desired_metrics = (mean, stdev)
     results = engine.resolve_metrics(
         metrics_to_resolve=desired_metrics, metrics=metrics
     )
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map",
+    column_values_z_score_map_metric = MetricConfiguration(
+        metric_name=f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "column.standard_deviation": stdev,
-            "column.mean": mean,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_values_z_score_map_metric.metric_dependencies = {
+        "column.standard_deviation": stdev,
+        "column.mean": mean,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
+        metrics_to_resolve=(column_values_z_score_map_metric,), metrics=metrics
     )
     metrics.update(results)
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold.condition",
+    column_values_z_score_under_threshold_condition_metric = MetricConfiguration(
+        metric_name=f"column_values.z_score.under_threshold.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={
-            "column_values.z_score.map": desired_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_values_z_score_under_threshold_condition_metric.metric_dependencies = {
+        f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}": column_values_z_score_map_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
+        metrics_to_resolve=(column_values_z_score_under_threshold_condition_metric,),
+        metrics=metrics,
     )
-    assert list(results[desired_metric.id][0]) == [False, False, False]
+    assert list(
+        results[column_values_z_score_under_threshold_condition_metric.id][0]
+    ) == [False, False, False]
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold.unexpected_count",
+        metric_name=f"column_values.z_score.under_threshold.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"unexpected_condition": desired_metric},
     )
+    desired_metric.metric_dependencies = {
+        "unexpected_condition": column_values_z_score_under_threshold_condition_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -2660,31 +2770,34 @@ def test_z_score_under_threshold_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    mean = MetricConfiguration(
-        metric_name="column.mean.aggregate_fn",
+    column_mean_aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column.mean.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    stdev = MetricConfiguration(
-        metric_name="column.standard_deviation.aggregate_fn",
+    column_mean_aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    column_standard_deviation_aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column.standard_deviation.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metrics = (mean, stdev)
+    column_standard_deviation_aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_metrics = (
+        column_mean_aggregate_fn_metric,
+        column_standard_deviation_aggregate_fn_metric,
+    )
     results = engine.resolve_metrics(
         metrics_to_resolve=desired_metrics, metrics=metrics
     )
@@ -2694,72 +2807,74 @@ def test_z_score_under_threshold_spark(spark_session):
         metric_name="column.mean",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": mean,
-        },
     )
+    mean.metric_dependencies = {
+        "metric_partial_fn": column_mean_aggregate_fn_metric,
+    }
     stdev = MetricConfiguration(
         metric_name="column.standard_deviation",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": stdev,
-            "table.columns": table_columns_metric,
-        },
     )
+    stdev.metric_dependencies = {
+        "metric_partial_fn": column_standard_deviation_aggregate_fn_metric,
+        "table.columns": table_columns_metric,
+    }
     desired_metrics = (mean, stdev)
     results = engine.resolve_metrics(
         metrics_to_resolve=desired_metrics, metrics=metrics
     )
     metrics.update(results)
 
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.map",
+    column_values_z_score_map_metric = MetricConfiguration(
+        metric_name=f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "column.standard_deviation": stdev,
-            "column.mean": mean,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_values_z_score_map_metric.metric_dependencies = {
+        "column.standard_deviation": stdev,
+        "column.mean": mean,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
+        metrics_to_resolve=(column_values_z_score_map_metric,), metrics=metrics
     )
     metrics.update(results)
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold.condition",
+    condition_metric = MetricConfiguration(
+        metric_name=f"column_values.z_score.under_threshold.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={
-            "column_values.z_score.map": desired_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        f"column_values.z_score.{MetricPartialFunctionTypeSuffixes.MAP.value}": column_values_z_score_map_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
+        metrics_to_resolve=(condition_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column_values.z_score.under_threshold.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_domain_kwargs={"column": "a"},
+        metric_value_kwargs={"double_sided": True, "threshold": 2},
+    )
+    aggregate_fn_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+    }
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(aggregate_fn_metric,), metrics=metrics
     )
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold.unexpected_count.aggregate_fn",
+        metric_name=f"column_values.z_score.under_threshold.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={"unexpected_condition": desired_metric},
     )
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(desired_metric,), metrics=metrics
-    )
-    metrics.update(results)
-
-    desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold.unexpected_count",
-        metric_domain_kwargs={"column": "a"},
-        metric_value_kwargs={"double_sided": True, "threshold": 2},
-        metric_dependencies={
-            "metric_partial_fn": desired_metric,
-        },
-    )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -2777,7 +2892,7 @@ def test_table_metric_pd(caplog):
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 5}
     assert (
-        'Unexpected key(s) "column" found in domain_kwargs for domain type "table"'
+        'Unexpected key(s) "column" found in domain_kwargs for Domain type "table"'
         in caplog.text
     )
 
@@ -2794,10 +2909,10 @@ def test_map_column_pairs_equal_metric_pd():
         )
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -2812,10 +2927,18 @@ def test_map_column_pairs_equal_metric_pd():
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "column_pair_values.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -2826,10 +2949,10 @@ def test_map_column_pairs_equal_metric_pd():
             "column_B": "c",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -2843,11 +2966,11 @@ def test_map_column_pairs_equal_metric_pd():
             "column_B": "c",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -2866,11 +2989,11 @@ def test_map_column_pairs_equal_metric_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -2888,11 +3011,11 @@ def test_map_column_pairs_equal_metric_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -2913,10 +3036,10 @@ def test_map_column_pairs_equal_metric_pd():
             "column_B": "d",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -2930,11 +3053,11 @@ def test_map_column_pairs_equal_metric_pd():
             "column_B": "d",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -2953,11 +3076,11 @@ def test_map_column_pairs_equal_metric_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -2983,11 +3106,11 @@ def test_map_column_pairs_equal_metric_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -3000,21 +3123,21 @@ def test_map_column_pairs_equal_metric_pd():
 def test_table_metric_sa(sa):
     engine = build_sa_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}), sa)
 
-    desired_metric = MetricConfiguration(
-        metric_name="table.row_count.aggregate_fn",
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=results
     )
@@ -3035,10 +3158,10 @@ def test_map_column_pairs_equal_metric_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -3053,10 +3176,18 @@ def test_map_column_pairs_equal_metric_sa(sa):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "column_pair_values.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -3067,10 +3198,10 @@ def test_map_column_pairs_equal_metric_sa(sa):
             "column_B": "c",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3084,11 +3215,11 @@ def test_map_column_pairs_equal_metric_sa(sa):
             "column_B": "c",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -3105,11 +3236,11 @@ def test_map_column_pairs_equal_metric_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -3126,11 +3257,11 @@ def test_map_column_pairs_equal_metric_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -3151,10 +3282,10 @@ def test_map_column_pairs_equal_metric_sa(sa):
             "column_B": "d",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3168,11 +3299,11 @@ def test_map_column_pairs_equal_metric_sa(sa):
             "column_B": "d",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -3189,11 +3320,11 @@ def test_map_column_pairs_equal_metric_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -3214,11 +3345,11 @@ def test_map_column_pairs_equal_metric_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -3242,10 +3373,10 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -3260,10 +3391,18 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "column_pair_values.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -3274,10 +3413,10 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
             "column_B": "c",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3291,11 +3430,11 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
             "column_B": "c",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -3313,11 +3452,11 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -3334,11 +3473,11 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -3359,10 +3498,10 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
             "column_B": "d",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3376,11 +3515,11 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
             "column_B": "d",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -3398,11 +3537,11 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -3423,11 +3562,11 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -3441,16 +3580,16 @@ def test_map_column_pairs_greater_metric_pd():
     df = pd.DataFrame({"a": [2, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.condition",
+        metric_name=f"column_pair_values.a_greater_than_b.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3463,10 +3602,10 @@ def test_map_column_pairs_greater_metric_pd():
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3480,7 +3619,7 @@ def test_map_column_pairs_greater_metric_pd():
     )
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.unexpected_values",
+        metric_name=f"column_pair_values.a_greater_than_b.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3493,11 +3632,11 @@ def test_map_column_pairs_greater_metric_pd():
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -3518,16 +3657,16 @@ def test_map_column_pairs_greater_metric_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.condition",
+        metric_name=f"column_pair_values.a_greater_than_b.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3540,10 +3679,10 @@ def test_map_column_pairs_greater_metric_sa(sa):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3551,7 +3690,7 @@ def test_map_column_pairs_greater_metric_sa(sa):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.unexpected_values",
+        metric_name=f"column_pair_values.a_greater_than_b.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3564,11 +3703,11 @@ def test_map_column_pairs_greater_metric_sa(sa):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -3590,16 +3729,16 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.condition",
+        metric_name=f"column_pair_values.a_greater_than_b.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3612,10 +3751,10 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3623,7 +3762,7 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.unexpected_values",
+        metric_name=f"column_pair_values.a_greater_than_b.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3636,11 +3775,11 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -3654,16 +3793,16 @@ def test_map_column_pairs_in_set_metric_pd():
     df = pd.DataFrame({"a": [10, 3, 4, None, 3, None], "b": [1, 2, 3, None, 3, 5]})
     engine = PandasExecutionEngine(batch_data_dict={"my_id": df})
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.condition",
+        metric_name=f"column_pair_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3672,10 +3811,10 @@ def test_map_column_pairs_in_set_metric_pd():
         metric_value_kwargs={
             "value_pairs_set": [(2, 1), (3, 2), (4, 3), (3, 3)],
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3697,16 +3836,16 @@ def test_map_column_pairs_in_set_metric_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.condition",
+        metric_name=f"column_pair_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3719,10 +3858,10 @@ def test_map_column_pairs_in_set_metric_sa(sa):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3730,7 +3869,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.unexpected_values",
+        metric_name=f"column_pair_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3743,11 +3882,11 @@ def test_map_column_pairs_in_set_metric_sa(sa):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,),
         metrics=metrics,
@@ -3757,7 +3896,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     assert results[unexpected_values_metric.id] == [(10, 1), (9, 4)]
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.condition",
+        metric_name=f"column_pair_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3770,10 +3909,10 @@ def test_map_column_pairs_in_set_metric_sa(sa):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3781,7 +3920,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.unexpected_values",
+        metric_name=f"column_pair_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3794,11 +3933,11 @@ def test_map_column_pairs_in_set_metric_sa(sa):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,),
         metrics=metrics,
@@ -3821,16 +3960,16 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.condition",
+        metric_name=f"column_pair_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3843,10 +3982,10 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3854,7 +3993,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.unexpected_values",
+        metric_name=f"column_pair_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3867,11 +4006,11 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,),
         metrics=metrics,
@@ -3881,7 +4020,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     assert results[unexpected_values_metric.id] == [(10, 1), (9, 4)]
 
     condition_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.condition",
+        metric_name=f"column_pair_values.in_set.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3894,10 +4033,10 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -3905,7 +4044,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.unexpected_values",
+        metric_name=f"column_pair_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3918,11 +4057,11 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
                 "partial_unexpected_count": 6,
             },
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,),
         metrics=metrics,
@@ -3945,19 +4084,21 @@ def test_table_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    desired_metric = MetricConfiguration(
-        metric_name="table.row_count.aggregate_fn",
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
 
     desired_metric = MetricConfiguration(
         metric_name="table.row_count",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={"metric_partial_fn": desired_metric},
     )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=results
     )
@@ -3972,10 +4113,10 @@ def test_column_median_metric_pd():
         )
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -3984,10 +4125,10 @@ def test_column_median_metric_pd():
         metric_name="column.median",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -4014,16 +4155,16 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
     partial_metric = MetricConfiguration(
-        metric_name="table.row_count.aggregate_fn",
+        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
@@ -4037,38 +4178,38 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
         metric_name="table.row_count",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": partial_metric,
-        },
     )
+    table_row_count_metric.metric_dependencies = {
+        "metric_partial_fn": partial_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(table_row_count_metric,), metrics=metrics
     )
     metrics.update(results)
 
     column_values_null_condition_metric = MetricConfiguration(
-        metric_name="column_values.null.condition",
+        metric_name=f"column_values.null.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    column_values_null_condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_values_null_condition_metric,), metrics=metrics
     )
     metrics.update(results)
 
     column_values_nonnull_count_metric = MetricConfiguration(
-        metric_name="column_values.null.unexpected_count",
+        metric_name=f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": column_values_null_condition_metric,
-            "metric_partial_fn": partial_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_values_nonnull_count_metric.metric_dependencies = {
+        "unexpected_condition": column_values_null_condition_metric,
+        "metric_partial_fn": partial_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_values_nonnull_count_metric,), metrics=metrics
     )
@@ -4078,12 +4219,12 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
         metric_name="column.median",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-            "table.row_count": table_row_count_metric,
-            "column_values.nonnull.count": column_values_nonnull_count_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "table.row_count": table_row_count_metric,
+        "column_values.nonnull.count": column_values_nonnull_count_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -4100,27 +4241,31 @@ def test_column_median_metric_spark(spark_session):
         batch_id="my_id",
     )
 
-    desired_metric = MetricConfiguration(
-        metric_name="table.row_count.aggregate_fn",
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"table.row_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
-    metrics = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
+    metrics = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
 
     row_count = MetricConfiguration(
         metric_name="table.row_count",
         metric_domain_kwargs={},
         metric_value_kwargs=None,
-        metric_dependencies={"metric_partial_fn": desired_metric},
     )
+    row_count.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
     metrics = engine.resolve_metrics(metrics_to_resolve=(row_count,), metrics=metrics)
 
     desired_metric = MetricConfiguration(
         metric_name="column.median",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={"table.row_count": row_count},
     )
+    desired_metric.metric_dependencies = {
+        "table.row_count": row_count,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
@@ -4131,10 +4276,10 @@ def test_column_median_metric_spark(spark_session):
 def test_value_counts_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -4143,10 +4288,10 @@ def test_value_counts_metric_pd():
         metric_name="column.value_counts",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"sort": "value", "collate": None},
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
@@ -4178,12 +4323,10 @@ def test_value_counts_metric_sa(sa):
     assert pd.Series(
         index=pd.Index(data=[1, 2, 3], name="value"),
         data=[2, 2, 2],
-        dtype=np.object,
     ).equals(metrics[desired_metric.id])
     assert pd.Series(
         index=pd.Index(data=[4], name="value"),
         data=[6],
-        dtype=np.object,
     ).equals(metrics[desired_metric_b.id])
 
 
@@ -4247,10 +4390,10 @@ def test_distinct_metric_spark(
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -4259,10 +4402,10 @@ def test_distinct_metric_spark(
         metric_name="column.distinct_values",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    column_distinct_values_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_metric,),
@@ -4272,13 +4415,13 @@ def test_distinct_metric_spark(
     assert metrics[column_distinct_values_metric.id] == {1, 2, 3}
 
     column_distinct_values_count_metric_partial_fn = MetricConfiguration(
-        metric_name="column.distinct_values.count.aggregate_fn",
+        metric_name=f"column.distinct_values.count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    column_distinct_values_count_metric_partial_fn.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_count_metric_partial_fn,),
@@ -4294,10 +4437,10 @@ def test_distinct_metric_spark(
         metric_name="column.distinct_values.count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": column_distinct_values_count_metric_partial_fn
-        },
     )
+    column_distinct_values_count_metric.metric_dependencies = {
+        "metric_partial_fn": column_distinct_values_count_metric_partial_fn
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_count_metric,), metrics=metrics
@@ -4309,10 +4452,10 @@ def test_distinct_metric_spark(
         metric_name="column.distinct_values.count.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"threshold": 5},
-        metric_dependencies={
-            "column.distinct_values.count": column_distinct_values_count_metric,
-        },
     )
+    column_distinct_values_count_threshold_metric.metric_dependencies = {
+        "column.distinct_values.count": column_distinct_values_count_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_count_threshold_metric,),
@@ -4335,10 +4478,10 @@ def test_distinct_metric_sa(
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -4347,10 +4490,10 @@ def test_distinct_metric_sa(
         metric_name="column.distinct_values",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    column_distinct_values_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_metric,),
@@ -4360,13 +4503,13 @@ def test_distinct_metric_sa(
     assert metrics[column_distinct_values_metric.id] == {1, 2, 3}
 
     column_distinct_values_count_metric_partial_fn = MetricConfiguration(
-        metric_name="column.distinct_values.count.aggregate_fn",
+        metric_name=f"column.distinct_values.count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    column_distinct_values_count_metric_partial_fn.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_count_metric_partial_fn,),
@@ -4382,10 +4525,10 @@ def test_distinct_metric_sa(
         metric_name="column.distinct_values.count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": column_distinct_values_count_metric_partial_fn
-        },
     )
+    column_distinct_values_count_metric.metric_dependencies = {
+        "metric_partial_fn": column_distinct_values_count_metric_partial_fn
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_count_metric,), metrics=metrics
@@ -4397,10 +4540,10 @@ def test_distinct_metric_sa(
         metric_name="column.distinct_values.count.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"threshold": 5},
-        metric_dependencies={
-            "column.distinct_values.count": column_distinct_values_count_metric,
-        },
     )
+    column_distinct_values_count_threshold_metric.metric_dependencies = {
+        "column.distinct_values.count": column_distinct_values_count_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_count_threshold_metric,),
@@ -4414,10 +4557,10 @@ def test_distinct_metric_sa(
 def test_distinct_metric_pd():
     engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 1, 2, 3, 3]}))
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -4426,10 +4569,10 @@ def test_distinct_metric_pd():
         metric_name="column.distinct_values",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    column_distinct_values_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_metric,), metrics=metrics
@@ -4441,11 +4584,11 @@ def test_distinct_metric_pd():
         metric_name="column.distinct_values.count",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "column.distinct_values": column_distinct_values_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_distinct_values_count_metric.metric_dependencies = {
+        "column.distinct_values": column_distinct_values_metric,
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_count_metric,), metrics=metrics
@@ -4457,11 +4600,11 @@ def test_distinct_metric_pd():
         metric_name="column.distinct_values.count.under_threshold",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"threshold": 5},
-        metric_dependencies={
-            "column.distinct_values.count": column_distinct_values_count_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    column_distinct_values_count_threshold_metric.metric_dependencies = {
+        "column.distinct_values.count": column_distinct_values_count_metric,
+        "table.columns": table_columns_metric,
+    }
 
     results = engine.resolve_metrics(
         metrics_to_resolve=(column_distinct_values_count_threshold_metric,),
@@ -4499,10 +4642,10 @@ def test_batch_aggregate_metrics_pd():
         )
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -4513,40 +4656,40 @@ def test_batch_aggregate_metrics_pd():
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_1.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_2.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_3.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs={
             "parse_strings_as_datetimes": True,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_4.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
 
     start = datetime.datetime.now()
     with pytest.warns(DeprecationWarning) as records:
@@ -4580,52 +4723,52 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric_1 = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+    desired_aggregate_fn_metric_1 = MetricConfiguration(
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_2 = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+    desired_aggregate_fn_metric_1.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_2 = MetricConfiguration(
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_3 = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+    desired_aggregate_fn_metric_2.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_3 = MetricConfiguration(
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_4 = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+    desired_aggregate_fn_metric_3.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_4 = MetricConfiguration(
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_aggregate_fn_metric_4.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
-            desired_metric_1,
-            desired_metric_2,
-            desired_metric_3,
-            desired_metric_4,
+            desired_aggregate_fn_metric_1,
+            desired_aggregate_fn_metric_2,
+            desired_aggregate_fn_metric_3,
+            desired_aggregate_fn_metric_4,
         ),
         metrics=metrics,
     )
@@ -4635,38 +4778,38 @@ def test_batch_aggregate_metrics_sa(caplog, sa):
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_1,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_1.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_1,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_2,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_2.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_2,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_3,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_3.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_3,
+        "table.columns": table_columns_metric,
+    }
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "metric_partial_fn": desired_metric_4,
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_metric_4.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_4,
+        "table.columns": table_columns_metric,
+    }
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
     start = datetime.datetime.now()
@@ -4710,52 +4853,52 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
 
-    desired_metric_1 = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+    desired_aggregate_fn_metric_1 = MetricConfiguration(
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_2 = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+    desired_aggregate_fn_metric_1.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_2 = MetricConfiguration(
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_3 = MetricConfiguration(
-        metric_name="column.max.aggregate_fn",
+    desired_aggregate_fn_metric_2.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_3 = MetricConfiguration(
+        metric_name=f"column.max.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
-    desired_metric_4 = MetricConfiguration(
-        metric_name="column.min.aggregate_fn",
+    desired_aggregate_fn_metric_3.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    desired_aggregate_fn_metric_4 = MetricConfiguration(
+        metric_name=f"column.min.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    desired_aggregate_fn_metric_4.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(
-            desired_metric_1,
-            desired_metric_2,
-            desired_metric_3,
-            desired_metric_4,
+            desired_aggregate_fn_metric_1,
+            desired_aggregate_fn_metric_2,
+            desired_aggregate_fn_metric_3,
+            desired_aggregate_fn_metric_4,
         ),
         metrics=metrics,
     )
@@ -4765,26 +4908,34 @@ def test_batch_aggregate_metrics_spark(caplog, spark_session):
         metric_name="column.max",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={"metric_partial_fn": desired_metric_1},
     )
+    desired_metric_1.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_1,
+    }
     desired_metric_2 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
-        metric_dependencies={"metric_partial_fn": desired_metric_2},
     )
+    desired_metric_2.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_2,
+    }
     desired_metric_3 = MetricConfiguration(
         metric_name="column.max",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={"metric_partial_fn": desired_metric_3},
     )
+    desired_metric_3.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_3,
+    }
     desired_metric_4 = MetricConfiguration(
         metric_name="column.min",
         metric_domain_kwargs={"column": "b"},
         metric_value_kwargs=None,
-        metric_dependencies={"metric_partial_fn": desired_metric_4},
     )
+    desired_metric_4.metric_dependencies = {
+        "metric_partial_fn": desired_aggregate_fn_metric_4,
+    }
     start = datetime.datetime.now()
     caplog.clear()
     caplog.set_level(logging.DEBUG, logger="great_expectations")
@@ -4823,10 +4974,10 @@ def test_map_multicolumn_sum_equal_pd():
         )
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -4841,10 +4992,18 @@ def test_map_multicolumn_sum_equal_pd():
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "multicolumn_sum.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -4856,10 +5015,10 @@ def test_map_multicolumn_sum_equal_pd():
         metric_value_kwargs={
             "sum_total": 5,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -4872,11 +5031,11 @@ def test_map_multicolumn_sum_equal_pd():
             "column_list": ["a", "b"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -4894,11 +5053,11 @@ def test_map_multicolumn_sum_equal_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -4915,11 +5074,11 @@ def test_map_multicolumn_sum_equal_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -4941,10 +5100,10 @@ def test_map_multicolumn_sum_equal_pd():
         metric_value_kwargs={
             "sum_total": 5,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -4957,11 +5116,11 @@ def test_map_multicolumn_sum_equal_pd():
             "column_list": ["a", "b", "c"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -4979,11 +5138,11 @@ def test_map_multicolumn_sum_equal_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -5005,11 +5164,11 @@ def test_map_multicolumn_sum_equal_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -5027,10 +5186,10 @@ def test_map_multicolumn_sum_equal_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -5045,10 +5204,18 @@ def test_map_multicolumn_sum_equal_sa(sa):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "multicolumn_sum.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
     condition_metric = MetricConfiguration(
@@ -5059,10 +5226,10 @@ def test_map_multicolumn_sum_equal_sa(sa):
         metric_value_kwargs={
             "sum_total": 5,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -5075,11 +5242,11 @@ def test_map_multicolumn_sum_equal_sa(sa):
             "column_list": ["a", "b"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -5095,11 +5262,11 @@ def test_map_multicolumn_sum_equal_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -5115,11 +5282,11 @@ def test_map_multicolumn_sum_equal_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -5141,10 +5308,10 @@ def test_map_multicolumn_sum_equal_sa(sa):
         metric_value_kwargs={
             "sum_total": 5,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -5157,11 +5324,11 @@ def test_map_multicolumn_sum_equal_sa(sa):
             "column_list": ["a", "b", "c"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -5177,11 +5344,11 @@ def test_map_multicolumn_sum_equal_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -5198,11 +5365,11 @@ def test_map_multicolumn_sum_equal_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -5221,10 +5388,10 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -5239,10 +5406,18 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "multicolumn_sum.equal"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
     condition_metric = MetricConfiguration(
@@ -5253,10 +5428,10 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
         metric_value_kwargs={
             "sum_total": 5,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -5269,11 +5444,11 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
             "column_list": ["a", "b"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -5290,11 +5465,11 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -5310,11 +5485,11 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -5336,10 +5511,10 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
         metric_value_kwargs={
             "sum_total": 5,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -5352,11 +5527,11 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
             "column_list": ["a", "b", "c"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -5373,11 +5548,11 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -5394,11 +5569,11 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -5413,10 +5588,10 @@ def test_map_compound_columns_unique_pd():
         pd.DataFrame(data={"a": [0, 1, 1], "b": [1, 2, 3], "c": [0, 2, 2]})
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -5431,10 +5606,18 @@ def test_map_compound_columns_unique_pd():
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "compound_columns.unique"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -5444,10 +5627,10 @@ def test_map_compound_columns_unique_pd():
             "column_list": ["a", "b"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -5460,11 +5643,11 @@ def test_map_compound_columns_unique_pd():
             "column_list": ["a", "b"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -5482,11 +5665,11 @@ def test_map_compound_columns_unique_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -5503,11 +5686,11 @@ def test_map_compound_columns_unique_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -5527,10 +5710,10 @@ def test_map_compound_columns_unique_pd():
             "column_list": ["a", "c"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -5543,11 +5726,11 @@ def test_map_compound_columns_unique_pd():
             "column_list": ["a", "c"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -5565,11 +5748,11 @@ def test_map_compound_columns_unique_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -5591,11 +5774,11 @@ def test_map_compound_columns_unique_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -5611,10 +5794,10 @@ def test_map_compound_columns_unique_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -5628,7 +5811,9 @@ def test_map_compound_columns_unique_sa(sa):
     # Save original metrics for testing unexpected results.
     metrics_save: dict = copy.deepcopy(metrics)
 
-    prerequisite_function_metric_name: str = "compound_columns.count.map"
+    prerequisite_function_metric_name: str = (
+        f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+    )
 
     prerequisite_function_metric = MetricConfiguration(
         metric_name=prerequisite_function_metric_name,
@@ -5636,10 +5821,10 @@ def test_map_compound_columns_unique_sa(sa):
             "column_list": ["a", "b"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    prerequisite_function_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(prerequisite_function_metric,),
         metrics=metrics,
@@ -5647,10 +5832,18 @@ def test_map_compound_columns_unique_sa(sa):
     metrics.update(results)
 
     metric_name: str = "compound_columns.unique"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -5660,11 +5853,11 @@ def test_map_compound_columns_unique_sa(sa):
             "column_list": ["a", "b"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "compound_columns.count.map": prerequisite_function_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}": prerequisite_function_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -5677,11 +5870,11 @@ def test_map_compound_columns_unique_sa(sa):
             "column_list": ["a", "b"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -5698,11 +5891,11 @@ def test_map_compound_columns_unique_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -5718,11 +5911,11 @@ def test_map_compound_columns_unique_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -5741,10 +5934,10 @@ def test_map_compound_columns_unique_sa(sa):
             "column_list": ["a", "c"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    prerequisite_function_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(prerequisite_function_metric,),
         metrics=metrics,
@@ -5757,11 +5950,11 @@ def test_map_compound_columns_unique_sa(sa):
             "column_list": ["a", "c"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "compound_columns.count.map": prerequisite_function_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}": prerequisite_function_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -5774,11 +5967,11 @@ def test_map_compound_columns_unique_sa(sa):
             "column_list": ["a", "c"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -5795,11 +5988,11 @@ def test_map_compound_columns_unique_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -5815,11 +6008,11 @@ def test_map_compound_columns_unique_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -5836,10 +6029,10 @@ def test_map_compound_columns_unique_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -5854,10 +6047,18 @@ def test_map_compound_columns_unique_spark(spark_session):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "compound_columns.unique"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -5867,10 +6068,10 @@ def test_map_compound_columns_unique_spark(spark_session):
             "column_list": ["a", "b"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -5883,11 +6084,11 @@ def test_map_compound_columns_unique_spark(spark_session):
             "column_list": ["a", "b"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -5904,11 +6105,11 @@ def test_map_compound_columns_unique_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -5924,11 +6125,11 @@ def test_map_compound_columns_unique_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -5948,10 +6149,10 @@ def test_map_compound_columns_unique_spark(spark_session):
             "column_list": ["a", "c"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -5964,11 +6165,11 @@ def test_map_compound_columns_unique_spark(spark_session):
             "column_list": ["a", "c"],
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -5985,11 +6186,11 @@ def test_map_compound_columns_unique_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -6005,11 +6206,11 @@ def test_map_compound_columns_unique_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -6030,10 +6231,10 @@ def test_map_select_column_values_unique_within_record_pd():
         )
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -6042,10 +6243,18 @@ def test_map_select_column_values_unique_within_record_pd():
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "select_column_values.unique.within_record"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -6054,10 +6263,10 @@ def test_map_select_column_values_unique_within_record_pd():
             "ignore_row_if": "all_values_are_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -6071,11 +6280,11 @@ def test_map_select_column_values_unique_within_record_pd():
             "ignore_row_if": "all_values_are_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -6102,11 +6311,11 @@ def test_map_select_column_values_unique_within_record_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 8}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -6132,11 +6341,11 @@ def test_map_select_column_values_unique_within_record_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -6168,10 +6377,10 @@ def test_map_select_column_values_unique_within_record_pd():
             "ignore_row_if": "any_value_is_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -6185,11 +6394,11 @@ def test_map_select_column_values_unique_within_record_pd():
             "ignore_row_if": "any_value_is_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -6215,11 +6424,11 @@ def test_map_select_column_values_unique_within_record_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -6244,11 +6453,11 @@ def test_map_select_column_values_unique_within_record_pd():
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -6273,10 +6482,10 @@ def test_map_select_column_values_unique_within_record_sa(sa):
         sa,
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -6285,10 +6494,18 @@ def test_map_select_column_values_unique_within_record_sa(sa):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "select_column_values.unique.within_record"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -6297,10 +6514,10 @@ def test_map_select_column_values_unique_within_record_sa(sa):
             "ignore_row_if": "all_values_are_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -6314,11 +6531,11 @@ def test_map_select_column_values_unique_within_record_sa(sa):
             "ignore_row_if": "all_values_are_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -6336,11 +6553,11 @@ def test_map_select_column_values_unique_within_record_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 8}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -6361,11 +6578,11 @@ def test_map_select_column_values_unique_within_record_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -6389,10 +6606,10 @@ def test_map_select_column_values_unique_within_record_sa(sa):
             "ignore_row_if": "any_value_is_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -6406,11 +6623,11 @@ def test_map_select_column_values_unique_within_record_sa(sa):
             "ignore_row_if": "any_value_is_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -6428,11 +6645,11 @@ def test_map_select_column_values_unique_within_record_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -6449,11 +6666,11 @@ def test_map_select_column_values_unique_within_record_sa(sa):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -6479,10 +6696,10 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         batch_id="my_id",
     )
 
-    metrics: dict = {}
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
     table_columns_metric: MetricConfiguration
-    results: dict
+    results: Dict[Tuple[str, str, str], MetricValue]
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
@@ -6491,10 +6708,18 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
     metrics_save: dict = copy.deepcopy(metrics)
 
     metric_name: str = "select_column_values.unique.within_record"
-    condition_metric_name: str = f"{metric_name}.condition"
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    condition_metric_name: str = (
+        f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+    )
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -6503,10 +6728,10 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
             "ignore_row_if": "all_values_are_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -6520,11 +6745,11 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
             "ignore_row_if": "all_values_are_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -6542,11 +6767,11 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 8}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -6567,11 +6792,11 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )
@@ -6603,10 +6828,10 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
             "ignore_row_if": "any_value_is_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "table.columns": table_columns_metric,
-        },
     )
+    condition_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,),
         metrics=metrics,
@@ -6620,11 +6845,11 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
             "ignore_row_if": "any_value_is_missing",
         },
         metric_value_kwargs=None,
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_count_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_count_metric,), metrics=metrics
     )
@@ -6642,11 +6867,11 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_rows_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_rows_metric,), metrics=metrics
     )
@@ -6663,11 +6888,11 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 3}
         },
-        metric_dependencies={
-            "unexpected_condition": condition_metric,
-            "table.columns": table_columns_metric,
-        },
     )
+    unexpected_values_metric.metric_dependencies = {
+        "unexpected_condition": condition_metric,
+        "table.columns": table_columns_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_values_metric,), metrics=metrics
     )

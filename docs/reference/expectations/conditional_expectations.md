@@ -15,14 +15,16 @@ feature is **experimental**. Please expect changes to API as additional backends
 
 When using conditional Expectations the `row_condition` argument should be a boolean expression string.
 
+Additionally, the `condition_parser` argument must be provided, which defines the syntax of conditions. When implementing conditional Expectations with Pandas, 
+this argument must be set to `"pandas"`. When implementing conditional Expectations with Spark or SQLAlchemy, this argument must be set to `"great_expectations__experimental__"`. 
+As support for conditional Expectations matures, available `condition_parser` arguments may change.
+
 :::note
 In Pandas the `row_condition` value will be passed to `pandas.DataFrame.query()` before Expectation Validation (see
 the [Pandas docs](https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.query.html).
-:::
 
-Additionally, the `condition_parser` argument must be provided, which defines the syntax of conditions. Since the
-feature is **experimental** and only available for Pandas this argument must be set to *"pandas"* by default, thus,
-demanding the appropriate syntax. Other engines might be implemented in the future.
+In Spark & SQLAlchemy, the `row_condition` value will be parsed as a filter or query to your data before Expectation Validation.
+:::
 
 The feature can be used, e.g., to test if different encodings of identical pieces of information are consistent with
 each other. See the following example setup:
@@ -148,4 +150,4 @@ nature and therefore do not take the `row_condition` argument:
 * ```expect_table_column_count_to_be_between```
 * ```expect_table_column_count_to_equal```
 
-For more information, see the [Data Docs](../data_docs.md) feature guide.
+For more information, see the [Data Docs](../../terms/data_docs.md) feature guide.

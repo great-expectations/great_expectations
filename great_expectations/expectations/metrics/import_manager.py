@@ -40,6 +40,12 @@ except ImportError:
     sa_sql_expression_Selectable = None
 
 try:
+    from sqlalchemy.sql.elements import quoted_name
+except ImportError:
+    logger.debug("No SqlAlchemy.sql.elements module available.")
+    quoted_name = None
+
+try:
     import pyspark.sql.functions as F
     import pyspark.sql.types as sparktypes
 except ImportError:

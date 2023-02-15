@@ -1,17 +1,31 @@
+from __future__ import annotations
+
 import copy
 import datetime
+import hashlib
 import itertools
 import logging
 import re
 import uuid
 import warnings
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import numpy as np
 import scipy.stats as stats
+from typing_extensions import Protocol, TypeGuard
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
@@ -20,10 +34,12 @@ from great_expectations.core.batch import (
     RuntimeBatchRequest,
     materialize_batch_request,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.rule_based_profiler.domain import (
+from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     SemanticDomainTypes,
+)
+from great_expectations.core.metric_domain_types import (
+    MetricDomainTypes,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
     NUM_HISTOGRAM_BINS,
@@ -45,7 +61,16 @@ from great_expectations.util import (
     convert_ndarray_to_datetime_dtype_best_effort,
     numpy_quantile,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -68,14 +93,14 @@ RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    data_context: Optional[AbstractDataContext] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     domain: Optional[Domain] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional["Validator"]:  # noqa: F821
-    validator: Optional["Validator"]  # noqa: F821
+) -> Optional[Validator]:
+    validator: Optional[Validator]
 
     expectation_suite_name: str = f"tmp.{purpose}"
     if domain is None:
@@ -101,7 +126,7 @@ def get_validator(
     else:
         num_batches: int = len(batch_list)
         if num_batches == 0:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""{__name__}.get_validator() must utilize at least one Batch ({num_batches} are available).
 """
             )
@@ -123,7 +148,7 @@ def get_validator(
 
 
 def get_batch_ids(
-    data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+    data_context: Optional[AbstractDataContext] = None,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
     limit: Optional[int] = None,
@@ -147,12 +172,20 @@ def get_batch_ids(
 
     batch_ids: List[str] = [batch.id for batch in batch_list]
 
-    if limit is not None:
-        batch_ids = batch_ids[0:limit]
-
     num_batch_ids: int = len(batch_ids)
+
+    if limit is not None:
+        # No need to verify that type of "limit" is "integer", because static type checking already ascertains this.
+        if not (0 <= limit <= num_batch_ids):
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f"""{__name__}.get_batch_ids() allows integer limit values between 0 and {num_batch_ids} \
+({limit} was requested).
+"""
+            )
+        batch_ids = batch_ids[-limit:]
+
     if num_batch_ids == 0:
-        raise ge_exceptions.ProfilerExecutionError(
+        raise gx_exceptions.ProfilerExecutionError(
             message=f"""{__name__}.get_batch_ids() must return at least one batch_id ({num_batch_ids} were retrieved).
 """
         )
@@ -218,7 +251,7 @@ def get_parameter_value_and_validate_return_type(
     expected_return_type: Optional[Union[type, tuple]] = None,
     variables: Optional[ParameterContainer] = None,
     parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Any]:
+) -> Any:
     """
     This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
     or as a fully-qualified parameter name.  In either case, it can optionally validate the type of the return value.
@@ -235,7 +268,7 @@ def get_parameter_value_and_validate_return_type(
 
     if expected_return_type is not None:
         if not isinstance(parameter_reference, expected_return_type):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{parameter_reference}" must be of type "{str(expected_return_type)}" \
 (value of type "{str(type(parameter_reference))}" was encountered).
 """
@@ -299,9 +332,10 @@ def get_parameter_value(
 
 
 def get_resolved_metrics_by_key(
-    validator: "Validator",  # noqa: F821
+    validator: Validator,
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
-) -> Dict[str, Dict[Tuple[str, str, str], Any]]:
+    runtime_configuration: Optional[dict] = None,
+) -> Dict[str, Dict[Tuple[str, str, str], MetricValue]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
 
@@ -311,10 +345,11 @@ def get_resolved_metrics_by_key(
         Dictionary of the form {
             "my_key": List[MetricConfiguration],  # examples of "my_key" are: "my_column_name", "my_batch_id", etc.
         }
+        runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
     Returns:
         Dictionary of the form {
-            "my_key": Dict[Tuple[str, str, str], Any],
+            "my_key": Dict[Tuple[str, str, str], MetricValue],
         }
     """
     key: str
@@ -323,12 +358,16 @@ def get_resolved_metrics_by_key(
 
     # Step 1: Gather "MetricConfiguration" objects corresponding to all possible key values/combinations.
     # and compute all metric values (resolve "MetricConfiguration" objects ) using a single method call.
-    resolved_metrics: Dict[Tuple[str, str, str], Any] = validator.compute_metrics(
+    resolved_metrics: Dict[
+        Tuple[str, str, str], MetricValue
+    ] = validator.compute_metrics(
         metric_configurations=[
             metric_configuration
             for key, metric_configurations_for_key in metric_configurations_by_key.items()
             for metric_configuration in metric_configurations_for_key
         ],
+        runtime_configuration=runtime_configuration,
+        min_graph_edges_pbar_enable=0,
     )
 
     # Step 2: Gather "MetricConfiguration" ID values for each key (one element per batch_id in every list).
@@ -378,7 +417,7 @@ def get_resolved_metrics_by_key(
         )
     ]
 
-    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], Any]] = {
+    resolved_metrics_by_key: Dict[str, Dict[Tuple[str, str, str], MetricValue]] = {
         key: {
             metric_configuration.id: resolved_metrics[metric_configuration.id]
             for metric_configuration in metric_configurations_by_key[key]
@@ -534,7 +573,7 @@ def get_false_positive_rate_from_rule_state(
         parameters=parameters,
     )
     if not (0.0 <= false_positive_rate <= 1.0):
-        raise ge_exceptions.ProfilerExecutionError(
+        raise gx_exceptions.ProfilerExecutionError(
             f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but \
 {false_positive_rate} was provided.
 """
@@ -582,7 +621,7 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
         quantile_statistic_interpolation_method
         not in RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS
     ):
-        raise ge_exceptions.ProfilerExecutionError(
+        raise gx_exceptions.ProfilerExecutionError(
             message=f"""The directive "quantile_statistic_interpolation_method" can be only one of \
 {RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS} ("{quantile_statistic_interpolation_method}" was detected).
 """
@@ -938,14 +977,14 @@ def convert_metric_values_to_float_dtype_best_effort(
 
 
 def get_validator_with_expectation_suite(
-    data_context: "BaseDataContext",  # noqa: F821
+    data_context: AbstractDataContext,
     batch_list: Optional[List[Batch]] = None,
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
     component_name: str = "test",
     persist: bool = False,
-) -> "Validator":  # noqa: F821
+) -> Validator:
     """
     Instantiates and returns "Validator" using "data_context", "batch_list" or "batch_request", and other information.
     Use "expectation_suite" if provided; otherwise, if "expectation_suite_name" is specified, then create
@@ -962,7 +1001,7 @@ def get_validator_with_expectation_suite(
         persist=persist,
     )
     batch_request = materialize_batch_request(batch_request=batch_request)
-    validator: "Validator" = data_context.get_validator(  # noqa: F821
+    validator: Validator = data_context.get_validator(
         batch_list=batch_list,
         batch_request=batch_request,
         expectation_suite=expectation_suite,
@@ -972,12 +1011,12 @@ def get_validator_with_expectation_suite(
 
 
 def get_or_create_expectation_suite(
-    data_context: "BaseDataContext",  # noqa: F821
-    expectation_suite: Optional["ExpectationSuite"] = None,  # noqa: F821
+    data_context: Optional[AbstractDataContext],
+    expectation_suite: Optional[ExpectationSuite] = None,
     expectation_suite_name: Optional[str] = None,
     component_name: Optional[str] = None,
     persist: bool = False,
-) -> "ExpectationSuite":  # noqa: F821
+) -> ExpectationSuite:
     """
     Use "expectation_suite" if provided.  If not, then if "expectation_suite_name" is specified, then create
     "ExpectationSuite" from it.  Otherwise, generate temporary "expectation_suite_name" using supplied "component_name".
@@ -1015,8 +1054,8 @@ def get_or_create_expectation_suite(
                 expectation_suite = data_context.get_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
-            except ge_exceptions.DataContextError:
-                expectation_suite = data_context.create_expectation_suite(
+            except gx_exceptions.DataContextError:
+                expectation_suite = data_context.add_expectation_suite(
                     expectation_suite_name=expectation_suite_name
                 )
                 logger.info(
@@ -1031,8 +1070,42 @@ def get_or_create_expectation_suite(
     return expectation_suite
 
 
-def sanitize_parameter_name(name: str) -> str:
+def sanitize_parameter_name(
+    name: str,
+    suffix: Optional[str] = None,
+) -> str:
     """
-    This method provides display-friendly version of "name" argument.
+    This method provides display-friendly version of "name" argument (with optional "suffix" argument).
+
+    In most situations, "suffix" is not needed.  However, in certain use cases, "name" argument is same among different
+    calling structures, whereby "name" can be disambiguated by addition of distinguishing "suffix" argument.  Using
+    list of "MetricConfiguration" objects as example, "metric_name" and "metric_domain_kwargs" are commonly same among
+    them, while "metric_value_kwargs" are different (i.e., calculating values of same metric with different parameters).
+    In this case, supplying "MetricConfiguration.metric_domain_kwargs_id" as "suffix" makes sanitized names unique.
+
+    Args:
+        name: string-valued "name" argument to be sanitized
+        suffix: additional component (i.e., "suffix") argument to be appended to "name" and sanitized together
+
+    Returns:
+        string-valued sanitized concatenation of "name" and MD5-digest of "suffix" arguments.
     """
+    if suffix:
+        suffix = hashlib.md5(suffix.encode("utf-8")).hexdigest()
+        name = f"{name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{suffix}"
+
     return name.replace(FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER, "_")
+
+
+class _NumericIterableWithDtype(Iterable, Protocol):
+    @property
+    def dtype(self) -> Any:
+        ...
+
+
+def _is_iterable_of_numeric_dtypes(
+    obj: Any,
+) -> TypeGuard[_NumericIterableWithDtype]:
+    if hasattr(obj, "dtype") and np.issubdtype(obj.dtype, np.number):
+        return True
+    return False

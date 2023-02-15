@@ -18,9 +18,9 @@ The <TechnicalTag relative="../../" tag="cli" text="CLI" /> will help you create
 
 ### Create an Expectation Suite using the CLI
 
-Since we are using the CLI, you will want to return to your console and the `ge_tutorials` folder.  Remember: This is where we initialized our <TechnicalTag relative="../../" tag="data_context" text="Data Context" />, and the Data Context is our access point to everything else in Great Expectations!
+Since we are using the CLI, you will want to return to your console and the `gx_tutorials` folder.  Remember: This is where we initialized our <TechnicalTag relative="../../" tag="data_context" text="Data Context" />, and the Data Context is our access point to everything else in Great Expectations!
 
-From the `ge_tutorials` folder, type the following into your terminal:
+From the `gx_tutorials` folder, type the following into your terminal:
 
 ```console
 great_expectations suite new
@@ -30,9 +30,9 @@ This will bring up the following prompt:
 
 ```console
 How would you like to create your Expectation Suite?
-    1. Manually, without interacting with a sample batch of data (default)
-    2. Interactively, with a sample batch of data
-    3. Automatically, using a profiler
+    1. Manually, without interacting with a sample Batch of data (default)
+    2. Interactively, with a sample Batch of data
+    3. Automatically, using a Data Assistant
 : 3
 ```
 
@@ -72,7 +72,7 @@ generate expectations about them to demonstrate some examples of assertions you 
 
 When you run this notebook, Great Expectations will store these expectations in a new Expectation Suite "Name the new Expectation Suite [yellow_tripdata_sample_2019-01.csv.warning]: getting_started_expectation_suite_taxi.demo" here:
 
-  <Path of your project folder>/ge_tutorials/great_expectations/expectations/Name the new Expectation Suite [yellow_tripdata_sample_2019-01/csv/warning]: getting_started_expectation_suite_taxi/demo.json
+  <Path of your project folder>/gx_tutorials/great_expectations/expectations/Name the new Expectation Suite [yellow_tripdata_sample_2019-01/csv/warning]: getting_started_expectation_suite_taxi/demo.json
 
 Would you like to proceed? [Y/n]: Y
 ```
@@ -97,13 +97,13 @@ Since notebooks are often less permanent, creating Expectations in a notebook al
 
 2. The second cell allows you to specify which columns you want to **ignore** when creating Expectations. For our tutorial, we're going to ensure that the number of passengers recorded in our data is reasonable.  To do this, we'll want our Data Assistant to examine the `passenger_count` column and determine just what a reasonable range _is_ based on our January data. **Let’s comment just this one line to include it**:
 
-```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L86-L105
+```python file=../../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L89-L108
 ```
 
 **Cell 3**
 ![Cell3](../../images/getting_started_tutorial/tutorial_create_expectations_cell3_onboarding_assistant.png)
 
-3. Cell 3 is where you run a Data Assistant.  In this case, the assistant being used is the Onboarding Assistant, which will Data Assistant the data provided by your Batch Request and create the relevant Expectations to add to your `taxi.demo` suite.
+3. Cell 3 is where you run a Data Assistant.  In this case, the assistant being used is the Onboarding Assistant, which will analyze the data provided by your Batch Request and create the relevant Expectations to add to your `taxi.demo` suite.
 
 **Cell 4**
 ![Cell4](../../images/getting_started_tutorial/tutorial_create_expectations_cell4.png)

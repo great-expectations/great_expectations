@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import cProfile
 import datetime
@@ -36,11 +38,14 @@ from typing import (
     Callable,
     Dict,
     List,
+    Mapping,
     Optional,
     Set,
+    SupportsFloat,
     Tuple,
     Union,
     cast,
+    overload,
 )
 
 import numpy as np
@@ -48,21 +53,15 @@ import pandas as pd
 from dateutil.parser import parse
 from packaging import version
 from pkg_resources import Distribution
+from typing_extensions import Literal, TypeGuard
 
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.exceptions import (
+    GXCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
-from great_expectations.expectations.registry import _registered_expectations
-
-if TYPE_CHECKING:
-    # needed until numpy min version 1.20
-    import numpy.typing as npt
-
-try:
-    from typing import TypeGuard  # type: ignore[attr-defined]
-except ImportError:
-    from typing_extensions import TypeGuard
 
 try:
     import black
@@ -74,7 +73,7 @@ try:
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
     # Fallback for python < 3.8
-    import importlib_metadata  # type: ignore[no-redef]
+    import importlib_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +90,17 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
+
+if TYPE_CHECKING:
+    # needed until numpy min version 1.20
+    import numpy.typing as npt
+
+    from great_expectations.alias_types import PathStr
+    from great_expectations.data_context import FileDataContext
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.data_context.types.base import DataContextConfig
 
 
 p1 = re.compile(r"(.)([A-Z][a-z]+)")
@@ -258,8 +268,8 @@ def get_project_distribution() -> Optional[Distribution]:
         except ValueError:
             pass
         else:
-            if relative_path in distr.files:  # type: ignore[operator]
-                return distr  # type: ignore[return-value]
+            if relative_path in distr.files:
+                return distr
     return None
 
 
@@ -353,16 +363,18 @@ def verify_dynamic_loading_support(
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
     """
+    # noinspection PyUnresolvedReferences
+    module_spec: Optional[importlib.machinery.ModuleSpec]
     try:
         # noinspection PyUnresolvedReferences
-        module_spec: importlib.machinery.ModuleSpec = importlib.util.find_spec(  # type: ignore[assignment,attr-defined]
-            module_name, package=package_name
-        )
+        module_spec = importlib.util.find_spec(module_name, package=package_name)
     except ModuleNotFoundError:
-        module_spec = None  # type: ignore[assignment]
+        module_spec = None
+
     if not module_spec:
         if not package_name:
             package_name = ""
+
         message: str = f"""No module named "{package_name + module_name}" could be found in the repository. Please \
 make sure that the file, corresponding to this package and module, exists and that dynamic loading of code modules, \
 templates, and assets is supported in your execution environment.  This error is unrecoverable.
@@ -390,7 +402,7 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name: str, module_name: str):
+def load_class(class_name: str, module_name: str) -> Any:
     if class_name is None:
         raise TypeError("class_name must not be None")
     if not isinstance(class_name, str):
@@ -408,6 +420,7 @@ def load_class(class_name: str, module_name: str):
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
+
     try:
         klass_ = getattr(module_obj, class_name)
     except AttributeError:
@@ -877,6 +890,64 @@ def read_sas(
         )
 
 
+def build_in_memory_runtime_context() -> AbstractDataContext:
+    """
+    Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
+    """
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        InMemoryStoreBackendDefaults,
+    )
+
+    data_context_config: DataContextConfig = DataContextConfig(
+        datasources={  # type: ignore[arg-type]
+            "pandas_datasource": {
+                "execution_engine": {
+                    "class_name": "PandasExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "runtime_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
+                },
+            },
+            "spark_datasource": {
+                "execution_engine": {
+                    "class_name": "SparkDFExecutionEngine",
+                    "module_name": "great_expectations.execution_engine",
+                },
+                "class_name": "Datasource",
+                "module_name": "great_expectations.datasource",
+                "data_connectors": {
+                    "runtime_data_connector": {
+                        "class_name": "RuntimeDataConnector",
+                        "batch_identifiers": [
+                            "id_key_0",
+                            "id_key_1",
+                        ],
+                    }
+                },
+            },
+        },
+        expectations_store_name="expectations_store",
+        validations_store_name="validations_store",
+        evaluation_parameter_store_name="evaluation_parameter_store",
+        checkpoint_store_name="checkpoint_store",
+        store_backend_defaults=InMemoryStoreBackendDefaults(),
+    )
+
+    context = get_context(project_config=data_context_config)
+
+    return context
+
+
 def validate(
     data_asset,
     expectation_suite=None,
@@ -918,9 +989,7 @@ def validate(
         logger.info("Using expectation suite from DataContext.")
         # Allow data_context to be a string, and try loading it from path in that case
         if isinstance(data_context, str):
-            from great_expectations.data_context import DataContext
-
-            data_context = DataContext(data_context)
+            data_context = get_context(context_root_dir=data_context)
 
         expectation_suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
@@ -973,7 +1042,7 @@ def validate(
     from great_expectations.dataset import Dataset, PandasDataset
 
     if data_asset_class is None:
-        # Guess the GE data_asset_type based on the type of the data_asset
+        # Guess the GX data_asset_type based on the type of the data_asset
         if isinstance(data_asset, pd.DataFrame):
             data_asset_class = PandasDataset
         # Add other data_asset_type conditions here as needed
@@ -1213,15 +1282,80 @@ def filter_properties_dict(
     return properties
 
 
+@overload
 def deep_filter_properties_iterable(
-    properties: Optional[Any] = None,
+    properties: dict,
+    keep_fields: Optional[Set[str]] = ...,
+    delete_fields: Optional[Set[str]] = ...,
+    clean_nulls: bool = ...,
+    clean_falsy: bool = ...,
+    keep_falsy_numerics: bool = ...,
+    inplace: bool = ...,
+) -> dict:
+    ...
+
+
+@overload
+def deep_filter_properties_iterable(
+    properties: list,
+    keep_fields: Optional[Set[str]] = ...,
+    delete_fields: Optional[Set[str]] = ...,
+    clean_nulls: bool = ...,
+    clean_falsy: bool = ...,
+    keep_falsy_numerics: bool = ...,
+    inplace: bool = ...,
+) -> list:
+    ...
+
+
+@overload
+def deep_filter_properties_iterable(
+    properties: set,
+    keep_fields: Optional[Set[str]] = ...,
+    delete_fields: Optional[Set[str]] = ...,
+    clean_nulls: bool = ...,
+    clean_falsy: bool = ...,
+    keep_falsy_numerics: bool = ...,
+    inplace: bool = ...,
+) -> set:
+    ...
+
+
+@overload
+def deep_filter_properties_iterable(
+    properties: tuple,
+    keep_fields: Optional[Set[str]] = ...,
+    delete_fields: Optional[Set[str]] = ...,
+    clean_nulls: bool = ...,
+    clean_falsy: bool = ...,
+    keep_falsy_numerics: bool = ...,
+    inplace: bool = ...,
+) -> tuple:
+    ...
+
+
+@overload
+def deep_filter_properties_iterable(
+    properties: None,
+    keep_fields: Optional[Set[str]] = ...,
+    delete_fields: Optional[Set[str]] = ...,
+    clean_nulls: bool = ...,
+    clean_falsy: bool = ...,
+    keep_falsy_numerics: bool = ...,
+    inplace: bool = ...,
+) -> None:
+    ...
+
+
+def deep_filter_properties_iterable(
+    properties: Union[dict, list, set, tuple, None] = None,
     keep_fields: Optional[Set[str]] = None,
     delete_fields: Optional[Set[str]] = None,
     clean_nulls: bool = True,
     clean_falsy: bool = False,
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
-) -> Optional[Union[dict, list, set]]:
+) -> Union[dict, list, set, tuple, None]:
     if keep_fields is None:
         keep_fields = set()
 
@@ -1365,7 +1499,7 @@ def is_nan(value: Any) -> bool:
         return True
 
 
-def convert_decimal_to_float(d: decimal.Decimal) -> float:
+def convert_decimal_to_float(d: SupportsFloat) -> float:
     """
     This method convers "decimal.Decimal" to standard "float" type.
     """
@@ -1382,7 +1516,11 @@ def convert_decimal_to_float(d: decimal.Decimal) -> float:
         )
         > 0
     )
-    if not rule_based_profiler_call and requires_lossy_conversion(d=d):
+    if (
+        not rule_based_profiler_call
+        and isinstance(d, decimal.Decimal)
+        and requires_lossy_conversion(d=d)
+    ):
         logger.warning(
             f"Using lossy conversion for decimal {d} to float object to support serialization."
         )
@@ -1437,12 +1575,15 @@ def isclose(
         operand_a = operand_a.total_seconds()  # type: ignore[assignment]
         operand_b = operand_b.total_seconds()  # type: ignore[assignment]
 
-    return np.isclose(
-        a=np.float64(operand_a),  # type: ignore[arg-type]
-        b=np.float64(operand_b),  # type: ignore[arg-type]
-        rtol=rtol,
-        atol=atol,
-        equal_nan=equal_nan,
+    return cast(
+        bool,
+        np.isclose(
+            a=np.float64(operand_a),  # type:ignore[arg-type]
+            b=np.float64(operand_b),  # type:ignore[arg-type]
+            rtol=rtol,
+            atol=atol,
+            equal_nan=equal_nan,
+        ),
     )
 
 
@@ -1569,14 +1710,14 @@ def convert_ndarray_float_to_datetime_tuple(
     return tuple(convert_ndarray_float_to_datetime_dtype(data=data).tolist())
 
 
-def is_ndarray_decimal_dtype(
-    data: "npt.NDArray",
-) -> TypeGuard["npt.NDArray"]:
+def does_ndarray_contain_decimal_dtype(
+    data: npt.NDArray,
+) -> TypeGuard[npt.NDArray]:
     """
     Determine whether or not all elements of 1-D "np.ndarray" argument are "decimal.Decimal" type objects.
     """
     value: Any
-    result: bool = all(isinstance(value, decimal.Decimal) for value in data)
+    result: bool = any(isinstance(value, decimal.Decimal) for value in data)
     return result
 
 
@@ -1590,10 +1731,254 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
     return convert_decimal_to_float_vectorized(data)
 
 
-def get_context():
-    from great_expectations.data_context.data_context import DataContext
+@overload
+def get_context(
+    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    context_root_dir: PathStr = ...,
+    runtime_environment: Optional[dict] = ...,
+    cloud_base_url: None = ...,
+    cloud_access_token: None = ...,
+    cloud_organization_id: None = ...,
+    cloud_mode: Optional[Literal[False]] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: None = ...,
+    ge_cloud_access_token: None = ...,
+    ge_cloud_organization_id: None = ...,
+    ge_cloud_mode: Optional[Literal[False]] = ...,
+) -> FileDataContext:
+    ...
 
-    return DataContext()
+
+@overload
+def get_context(
+    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    context_root_dir: Optional[PathStr] = ...,
+    runtime_environment: Optional[dict] = ...,
+    cloud_base_url: Optional[str] = ...,
+    cloud_access_token: Optional[str] = ...,
+    cloud_organization_id: Optional[str] = ...,
+    cloud_mode: Optional[bool] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: Optional[str] = ...,
+    ge_cloud_access_token: Optional[str] = ...,
+    ge_cloud_organization_id: Optional[str] = ...,
+    ge_cloud_mode: Optional[bool] = ...,
+) -> AbstractDataContext:
+    ...
+
+
+@public_api
+@deprecated_argument(argument_name="ge_cloud_base_url", version="0.15.37")
+@deprecated_argument(argument_name="ge_cloud_access_token", version="0.15.37")
+@deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
+@deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
+def get_context(
+    project_config: Optional[Union[DataContextConfig, Mapping]] = None,
+    context_root_dir: Optional[PathStr] = None,
+    runtime_environment: Optional[dict] = None,
+    cloud_base_url: Optional[str] = None,
+    cloud_access_token: Optional[str] = None,
+    cloud_organization_id: Optional[str] = None,
+    cloud_mode: Optional[bool] = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: Optional[str] = None,
+    ge_cloud_access_token: Optional[str] = None,
+    ge_cloud_organization_id: Optional[str] = None,
+    ge_cloud_mode: Optional[bool] = None,
+) -> AbstractDataContext:
+    """Method to return the appropriate Data Context depending on parameters and environment.
+
+    Usage:
+        `import great_expectations as gx`
+
+        `my_context = gx.get_context(<insert_your_parameters>)`
+
+    This method returns the appropriate Data Context based on which parameters you've passed and / or your environment configuration:
+
+    - FileDataContext: Configuration stored in a file.
+
+    - EphemeralDataContext: Configuration passed in at runtime.
+
+    - CloudDataContext: Configuration stored in Great Expectations Cloud.
+
+    Read on for more details about each of the Data Context types:
+
+    **FileDataContext:** A Data Context configured via a yaml file. Returned by default if you have no cloud configuration set up and pass no parameters. If you pass context_root_dir, we will look for a great_expectations.yml configuration there. If not we will look at the following locations:
+
+    - Path defined in a GX_HOME environment variable.
+
+    - The current directory.
+
+    - Parent directories of the current directory (e.g. in case you invoke the CLI in a sub folder of your Great Expectations directory).
+
+    Relevant parameters
+
+    - context_root_dir: Provide an alternative directory to look for GX config.
+
+    - project_config: Optionally override the configuration on disk - only if `context_root_dir` is also provided.
+
+    - runtime_environment: Optionally override specific configuration values.
+
+    **EphemeralDataContext:** A temporary, in-memory Data Context typically used in a pipeline. The default if you pass in only a project_config and have no cloud configuration set up.
+
+    Relevant parameters
+
+    - project_config: Used to configure the Data Context.
+
+    - runtime_environment: Optionally override specific configuration values.
+
+    **CloudDataContext:** A Data Context whose configuration comes from Great Expectations Cloud. The default if you have a cloud configuration set up. Pass `cloud_mode=False` if you have a cloud configuration set up and you do not wish to create a CloudDataContext.
+
+    Cloud configuration can be set up by passing `cloud_*` parameters to `get_context()`, configuring cloud environment variables, or in a great_expectations.conf file.
+
+    Relevant parameters
+
+    - cloud_base_url: Override env var or great_expectations.conf file.
+
+    - cloud_access_token: Override env var or great_expectations.conf file.
+
+    - cloud_organization_id: Override env var or great_expectations.conf file.
+
+    - cloud_mode: Set to True or False to explicitly enable/disable cloud mode.
+
+    - project_config: Optionally override the cloud configuration.
+
+    - runtime_environment: Optionally override specific configuration values.
+
+    Args:
+        project_config: In-memory configuration for Data Context.
+        context_root_dir (str or pathlib.Path): Path to directory that contains great_expectations.yml file
+        runtime_environment: A dictionary of values can be passed to a DataContext when it is instantiated.
+            These values will override both values from the config variables file and
+            from environment variables.
+        cloud_base_url: url for GX Cloud endpoint.
+        cloud_access_token: access_token for GX Cloud account.
+        cloud_organization_id: org_id for GX Cloud account.
+        cloud_mode: whether to run GX in Cloud mode (default is None).
+            If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.
+        ge_cloud_base_url: url for GX Cloud endpoint.
+        ge_cloud_access_token: access_token for GX Cloud account.
+        ge_cloud_organization_id: org_id for GX Cloud account.
+        ge_cloud_mode: whether to run GX in Cloud mode (default is None).
+            If None, cloud mode is assumed if cloud credentials are set up. Set to False to override.
+
+    Returns:
+        A Data Context. Either a FileDataContext, EphemeralDataContext, or
+        CloudDataContext depending on environment and/or
+        parameters.
+
+    Raises:
+        GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
+    """
+    from great_expectations.data_context.data_context import (
+        CloudDataContext,
+        EphemeralDataContext,
+        FileDataContext,
+    )
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        InMemoryStoreBackendDefaults,
+    )
+
+    # If available and applicable, convert project_config mapping into a rich config type
+    if project_config:
+        project_config = EphemeralDataContext.get_or_create_data_context_config(
+            project_config
+        )
+    assert project_config is None or isinstance(
+        project_config, DataContextConfig
+    ), "project_config must be of type Optional[DataContextConfig]"
+
+    # Chetan - 20221208 - not formally deprecating these values until a future date
+    (
+        cloud_base_url,
+        cloud_access_token,
+        cloud_organization_id,
+        cloud_mode,
+    ) = _resolve_cloud_args(
+        cloud_mode=cloud_mode,
+        cloud_base_url=cloud_base_url,
+        cloud_access_token=cloud_access_token,
+        cloud_organization_id=cloud_organization_id,
+        ge_cloud_mode=ge_cloud_mode,
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_access_token=ge_cloud_access_token,
+        ge_cloud_organization_id=ge_cloud_organization_id,
+    )
+
+    # First, check for GX Cloud conditions
+    config_available = CloudDataContext.is_cloud_config_available(
+        cloud_base_url=cloud_base_url,
+        cloud_access_token=cloud_access_token,
+        cloud_organization_id=cloud_organization_id,
+    )
+
+    # If config available and not explicitly disabled
+    if config_available and cloud_mode is not False:
+        return CloudDataContext(
+            project_config=project_config,
+            runtime_environment=runtime_environment,
+            context_root_dir=context_root_dir,
+            cloud_base_url=cloud_base_url,
+            cloud_access_token=cloud_access_token,
+            cloud_organization_id=cloud_organization_id,
+        )
+
+    if cloud_mode and not config_available:
+        raise GXCloudConfigurationError(
+            "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"
+        )
+
+    # Second, check for which type of local
+    # Prioritize FileDataContext but default to EphemeralDataContext if no context_root_dir
+    if not context_root_dir:
+        try:
+            context_root_dir = FileDataContext.find_context_root_dir()
+        except gx_exceptions.ConfigNotFoundError:
+            logger.info("Could not find local context root directory")
+
+    if context_root_dir:
+        return FileDataContext(
+            project_config=project_config,
+            context_root_dir=context_root_dir,
+            runtime_environment=runtime_environment,
+        )
+
+    if not project_config:
+        project_config = DataContextConfig(
+            store_backend_defaults=InMemoryStoreBackendDefaults(
+                init_temp_docs_sites=True
+            )
+        )
+
+    return EphemeralDataContext(
+        project_config=project_config,
+        runtime_environment=runtime_environment,
+    )
+
+
+def _resolve_cloud_args(
+    cloud_base_url: Optional[str] = None,
+    cloud_access_token: Optional[str] = None,
+    cloud_organization_id: Optional[str] = None,
+    cloud_mode: Optional[bool] = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: Optional[str] = None,
+    ge_cloud_access_token: Optional[str] = None,
+    ge_cloud_organization_id: Optional[str] = None,
+    ge_cloud_mode: Optional[bool] = None,
+) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[bool]]:
+    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
+    cloud_access_token = (
+        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
+    )
+    cloud_organization_id = (
+        cloud_organization_id
+        if cloud_organization_id is not None
+        else ge_cloud_organization_id
+    )
+    cloud_mode = cloud_mode if cloud_mode is not None else ge_cloud_mode
+    return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
 
 
 def is_sane_slack_webhook(url: str) -> bool:
@@ -1610,6 +1995,8 @@ def is_list_of_strings(_list) -> TypeGuard[List[str]]:
 
 def generate_library_json_from_registered_expectations():
     """Generate the JSON object used to populate the public gallery"""
+    from great_expectations.expectations.registry import _registered_expectations
+
     library_json = {}
 
     for expectation_name, expectation in _registered_expectations.items():
@@ -1742,13 +2129,13 @@ def pandas_series_between_inclusive(
 
 
 def numpy_quantile(
-    a: np.ndarray, q: float, method: str, axis: Optional[int] = None
-) -> Union[np.float64, np.ndarray]:
+    a: npt.NDArray, q: float, method: str, axis: Optional[int] = None
+) -> Union[np.float64, npt.NDArray]:
     """
     As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
     """
-    quantile: np.ndarray
+    quantile: npt.NDArray
     if version.parse(np.__version__) >= version.parse("1.22.0"):
         quantile = np.quantile(  # type: ignore[call-arg]
             a=a,

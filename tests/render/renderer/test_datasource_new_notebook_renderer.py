@@ -41,7 +41,7 @@ def construct_datasource_new_notebook_assets():
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "import great_expectations as ge\nfrom great_expectations.cli.datasource import sanitize_yaml_and_save_datasource, check_if_datasource_name_exists\ncontext = ge.get_context()",
+                "source": "import great_expectations as gx\nfrom great_expectations.cli.datasource import sanitize_yaml_and_save_datasource, check_if_datasource_name_exists\ncontext = gx.get_context()",
                 "outputs": [],
             },
         ]

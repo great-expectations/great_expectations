@@ -168,7 +168,7 @@ def recursively_convert_to_json_serializable(test_obj):  # noqa: C901 - complexi
                 index_name: recursively_convert_to_json_serializable(idx),
                 value_name: recursively_convert_to_json_serializable(val),
             }
-            for idx, val in test_obj.iteritems()
+            for idx, val in test_obj.items()
         ]
 
     elif isinstance(test_obj, pd.DataFrame):

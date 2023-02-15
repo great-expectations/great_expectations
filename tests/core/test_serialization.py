@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import copy
 import inspect
 import logging
 from decimal import Decimal
-from typing import Union
+from typing import TYPE_CHECKING, Union
 from unittest import mock
 
 import pandas as pd
@@ -40,9 +42,13 @@ except ImportError:
     StructField = None
     StructType = None
 
+if TYPE_CHECKING:
+    from pyspark.sql import SparkSession
+    from pyspark.sql.types import StructType
+
 
 @pytest.fixture
-def spark_schema(spark_session) -> "StructType":
+def spark_schema(spark_session: SparkSession) -> StructType:
     return StructType(
         [
             StructField("a", IntegerType(), True, None),
@@ -55,7 +61,7 @@ def spark_schema(spark_session) -> "StructType":
 # Spark schemas. They follow the pattern described in:
 # https://miguendes.me/how-to-use-fixtures-as-arguments-in-pytestmarkparametrize
 @pytest.fixture
-def checkpoint_config_spark(spark_session) -> CheckpointConfig:
+def checkpoint_config_spark(spark_session: SparkSession) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
@@ -78,7 +84,7 @@ def checkpoint_config_spark(spark_session) -> CheckpointConfig:
 
 @pytest.fixture
 def checkpoint_config_with_schema_spark(
-    spark_session, spark_schema
+    spark_session: SparkSession, spark_schema
 ) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
@@ -103,7 +109,7 @@ def checkpoint_config_with_schema_spark(
 
 
 @pytest.fixture
-def datasource_config_spark(spark_session) -> DatasourceConfig:
+def datasource_config_spark(spark_session: SparkSession) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
         class_name="Datasource",
@@ -132,7 +138,7 @@ def datasource_config_spark(spark_session) -> DatasourceConfig:
 
 @pytest.fixture
 def datasource_config_with_schema_at_asset_level_spark(
-    spark_session, spark_schema
+    spark_session: SparkSession, spark_schema
 ) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
@@ -165,7 +171,7 @@ def datasource_config_with_schema_at_asset_level_spark(
 
 @pytest.fixture
 def datasource_config_with_schema_at_data_connector_level_spark(
-    spark_session, spark_schema
+    spark_session: SparkSession, spark_schema
 ) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
@@ -1035,7 +1041,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 def test_checkpoint_config_and_nested_objects_are_serialized_spark(
     checkpoint_config: Union[CheckpointConfig, str],
     expected_serialized_checkpoint_config: dict,
-    spark_session: "SparkSession",
+    spark_session: SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1185,7 +1191,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
 def test_datasource_config_and_nested_objects_are_serialized_spark(
     datasource_config: Union[DatasourceConfig, str],
     expected_serialized_datasource_config: dict,
-    spark_session: "SparkSession",
+    spark_session: SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1254,7 +1260,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
 def test_data_connector_and_nested_objects_are_serialized_spark(
     data_connector_config: DataConnectorConfig,
     expected_serialized_data_connector_config: dict,
-    spark_session: "SparkSession",
+    spark_session: SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1320,7 +1326,7 @@ def test_data_connector_and_nested_objects_are_serialized_spark(
 def test_asset_and_nested_objects_are_serialized_spark(
     asset_config: AssetConfig,
     expected_serialized_asset_config: dict,
-    spark_session: "SparkSession",
+    spark_session: SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call

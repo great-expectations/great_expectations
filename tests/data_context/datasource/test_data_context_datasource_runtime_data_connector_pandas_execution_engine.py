@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 import great_expectations
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.id_dict import BatchSpec
@@ -110,7 +110,7 @@ def test_batch_data_get_batch_ambiguous_parameter_pandas_engine(
     test_df: pd.DataFrame = test_df_pandas
 
     # raised by get_batch_list()
-    with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
+    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
         # noinspection PyUnusedLocal
         batch_list: List[Batch] = context.get_batch_list(
             RuntimeBatchRequest(
@@ -255,7 +255,7 @@ def test_batch_data_get_validator_successful_specification_pandas_engine(
     context: DataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = test_df_pandas
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
     my_validator: Validator = context.get_validator(
         batch_request=RuntimeBatchRequest(
@@ -277,7 +277,7 @@ def test_batch_data_get_validator_successful_specification_pandas_engine_named_a
     test_df: pd.DataFrame = test_df_pandas
 
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
 
     # Successful specification using a RuntimeBatchRequest
     my_validator: Validator = context.get_validator(
@@ -309,9 +309,9 @@ def test_batch_data_get_validator_ambiguous_parameter_pandas_engine(
     context: DataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = test_df_pandas
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # raised by get_batch_list() in DataContext
-    with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
+    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
         batch_list: List[Batch] = context.get_validator(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -330,7 +330,7 @@ def test_get_validator_wrong_type_pandas_engine(
     context: DataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = test_df_pandas
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     # data_connector_name should be a dict not an int
@@ -355,7 +355,7 @@ def test_batch_data_get_validator_failed_specification_no_batch_identifier_panda
     context: DataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = test_df_pandas
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     # batch_identifiers should not be None
@@ -390,7 +390,7 @@ def test_batch_data_get_validator_failed_specification_incorrect_batch_spec_pass
     context: DataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = test_df_pandas
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # incorrect batch_spec_passthrough, which should be a dict
@@ -413,7 +413,7 @@ def test_batch_data_get_validator_failed_specification_no_runtime_parameters_pan
     context: DataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = test_df_pandas
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     with pytest.raises(TypeError):
         # runtime_parameters should not be None
         batch: list = context.get_validator(
@@ -446,7 +446,7 @@ def test_batch_data_get_validator_wrong_runtime_parameters_pandas_engine(
     context: DataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = test_df_pandas
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(
         great_expectations.exceptions.exceptions.InvalidBatchRequestError
@@ -526,7 +526,7 @@ def test_file_path_get_batch_pandas_not_supported_directory(
     data_context_with_datasource_pandas_engine, taxi_test_file_directory
 ):
     context: DataContext = data_context_with_datasource_pandas_engine
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[Batch] = context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -542,7 +542,7 @@ def test_file_path_get_batch_pandas_not_supported_directory(
 
 def test_get_batch_pandas_wrong_path(data_context_with_datasource_pandas_engine):
     context: DataContext = data_context_with_datasource_pandas_engine
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[Batch] = context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -560,7 +560,7 @@ def test_file_path_get_batch_pandas_wrong_reader_method(
     data_context_with_datasource_pandas_engine, taxi_test_file
 ):
     context: DataContext = data_context_with_datasource_pandas_engine
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[Batch] = context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -637,7 +637,7 @@ def test_file_path_get_validator_successful_specification_pandas_engine_named_as
 ):
     context: DataContext = data_context_with_datasource_pandas_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
     my_validator: Validator = context.get_validator(
         batch_request=RuntimeBatchRequest(

@@ -29,12 +29,12 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L5-L8
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py imports"
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L15
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py get_context"
 ```
 
 ### 3. Configure your Datasource
@@ -87,30 +87,30 @@ The below configuration is representative of the default setup you'll see when p
   {label: 'YAML', value:'yaml'},
   {label: 'Python', value:'python'},
   ]}>
-  
+
   <TabItem value="yaml">
-  
+
   ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L19-L43
   ```
-  
+
   Run this code to test your configuration.
-  
+
   ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L60
   ```
   </TabItem>
-  
+
   <TabItem value="python">
-  
+
   ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L13-L38
   ```
-  
+
   Run this code to test your configuration.
-  
+
   ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L59
   ```
-  
+
   </TabItem>
-  
+
   </Tabs>
 
 </TabItem>
@@ -175,7 +175,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L64
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py add_datasource"
 ```
 
 </TabItem>
@@ -195,11 +195,11 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Add the name of the data asset to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L69-L73
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py batch_request"
 ```
 
 Then load data into the `Validator`.
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L83-L88
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py validator_creation"
 ```
 
 <Congratulations />

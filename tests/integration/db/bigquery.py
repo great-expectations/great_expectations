@@ -4,7 +4,7 @@ import os
 import pytest
 from google.cloud import bigquery
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -13,7 +13,7 @@ from great_expectations.validator.validator import Validator
 """
 What does this test and why?
 
-This integration test is part of the deprecation of the bigquery_temp_table parameter. As of GE 0.15.3,
+This integration test is part of the deprecation of the bigquery_temp_table parameter. As of GX 0.15.3,
 tables that are created as the result of a query are created as permanent tables with an expiration of 24 hours, with
 more information to be found:
 
@@ -38,7 +38,7 @@ CONNECTION_STRING: str = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 yaml = YAMLHandler()
 
-context: DataContext = ge.get_context()
+context: DataContext = gx.get_context()
 
 datasource_yaml: str = f"""
 name: my_bigquery_datasource
@@ -72,9 +72,7 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_expectation_suite(expectation_suite_name="test_suite")
 validator: Validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -108,9 +106,7 @@ batch_request: RuntimeBatchRequest = RuntimeBatchRequest(
     },  # this is the name of the table you would like to use a 'temp_table'
 )
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite_2", overwrite_existing=True
-)
+context.add_expectation_suite(expectation_suite_name="test_suite_2")
 with pytest.warns(DeprecationWarning):
     validator: Validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite_2"

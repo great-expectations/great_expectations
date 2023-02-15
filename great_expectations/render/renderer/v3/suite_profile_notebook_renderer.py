@@ -1,8 +1,9 @@
-from typing import Any, Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import nbformat
 
-from great_expectations import DataContext
 from great_expectations.core.batch import (
     BatchRequest,
     standardize_batch_request_display_ordering,
@@ -12,11 +13,16 @@ from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
 )
 from great_expectations.util import deep_filter_properties_iterable
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
     def __init__(
         self,
-        context: DataContext,
+        context: AbstractDataContext,
         expectation_suite_name: str,
         profiler_name: str,
         batch_request: Optional[Union[str, Dict[str, Any]]] = None,
@@ -128,7 +134,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -137,7 +143,7 @@ from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = ge.data_context.DataContext()
+context = gx.get_context()
 
 batch_request = {self._batch_request}
 
@@ -193,13 +199,13 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = ge.data_context.DataContext()
+context = gx.get_context()
 
 batch_request = {self._batch_request}
 
@@ -234,13 +240,13 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError
 
-context = ge.data_context.DataContext()
+context = gx.get_context()
 
 batch_request = {self._batch_request}
 

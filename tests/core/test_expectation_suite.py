@@ -545,7 +545,7 @@ class TestEqDunder:
         assert different_but_equivalent_suite != suite_with_single_expectation
 
 
-#### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
+# ### Below this line are mainly existing tests and fixtures that we are in the process of cleaning up
 
 
 @pytest.fixture
@@ -1035,7 +1035,7 @@ def test_expectation_suite_send_usage_message(success: bool):
     assert dc_message_spy.messages
     assert len(dc_message_spy.messages) == 1
     assert dc_message_spy.messages[0] == {
-        "event": UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION.value,
+        "event": UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION,
         "event_payload": {},
         "success": success,
     }

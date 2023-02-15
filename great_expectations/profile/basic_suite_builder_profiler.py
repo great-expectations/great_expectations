@@ -11,6 +11,7 @@ from great_expectations.profile.basic_dataset_profiler import (
     BasicDatasetProfilerBase,
     logger,
 )
+from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.util import is_nan
 
 
@@ -732,7 +733,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
         expectation_suite = cls._build_column_description_metadata(dataset)
 
         expectation_suite.meta["notes"] = {
-            "format": "markdown",
+            "format": MetaNotesFormat.MARKDOWN,
             "content": [
                 """#### This is an _example_ suite
 

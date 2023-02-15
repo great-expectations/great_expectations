@@ -2,8 +2,8 @@ import json
 import logging
 from typing import Any, List, Union, ValuesView
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.batch import BatchDefinition
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 
@@ -14,9 +14,9 @@ class Sorter:
         if orderby is None or orderby == "asc":
             reverse: bool = False
         elif orderby == "desc":
-            reverse: bool = True
+            reverse = True
         else:
-            raise ge_exceptions.SorterError(
+            raise gx_exceptions.SorterError(
                 f'Illegal sort order "{orderby}" for attribute "{name}".'
             )
         self._reverse = reverse

@@ -2,7 +2,7 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 redshift_username = os.environ.get("REDSHIFT_USERNAME")
@@ -23,7 +23,7 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
-context = ge.get_context()
+context = gx.get_context()
 
 datasource_yaml = f"""
 name: my_redshift_datasource
@@ -61,16 +61,14 @@ batch_request = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 
 # Second test for BatchRequest naming a table
 batch_request = BatchRequest(
@@ -78,16 +76,14 @@ batch_request = BatchRequest(
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="taxi_data",  # this is the name of the table you want to retrieve
 )
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["my_redshift_datasource"]
 assert "taxi_data" in set(
     context.get_available_data_asset_names()["my_redshift_datasource"][

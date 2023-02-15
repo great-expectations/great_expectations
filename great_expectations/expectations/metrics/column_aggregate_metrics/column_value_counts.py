@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional
 
-import numpy as np
 import pandas as pd
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -96,16 +95,28 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         )
         column: str = accessor_domain_kwargs["column"]
 
-        query: sa_sql_expression_Select = (
-            sa.select(
-                [
-                    sa.column(column).label("value"),
-                    sa.func.count(sa.column(column)).label("count"),
-                ]
+        if hasattr(sa.column(column), "is_not"):
+            query: sa_sql_expression_Select = (
+                sa.select(
+                    [
+                        sa.column(column).label("value"),
+                        sa.func.count(sa.column(column)).label("count"),
+                    ]
+                )
+                .where(sa.column(column).is_not(None))
+                .group_by(sa.column(column))
             )
-            .where(sa.column(column).is_not(None))
-            .group_by(sa.column(column))
-        )
+        else:
+            query: sa_sql_expression_Select = (
+                sa.select(
+                    [
+                        sa.column(column).label("value"),
+                        sa.func.count(sa.column(column)).label("count"),
+                    ]
+                )
+                .where(sa.column(column).isnot(None))
+                .group_by(sa.column(column))
+            )
         if sort == "value":
             # NOTE: depending on the way the underlying database collates columns,
             # ordering can vary. postgresql collate "C" matches default sort
@@ -125,7 +136,6 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
             data=[row[1] for row in results],
             index=pd.Index(data=[row[0] for row in results], name="value"),
             name="count",
-            dtype="object",
         )
         return series
 

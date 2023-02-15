@@ -2,7 +2,8 @@ import copy
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -10,18 +11,26 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
 )
-from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.data_context.types.base import ConcurrencyConfig
+from great_expectations.core.batch_spec import PathBatchSpec  # noqa: TCH001
+from great_expectations.data_context.types.base import ConcurrencyConfig  # noqa: TCH001
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import DataConnector
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.datasource.data_connector import DataConnector  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class BaseDatasource:
-    """
-    An Datasource is the glue between an ExecutionEngine and a DataConnector.
+    """A Datasource is the glue between an `ExecutionEngine` and a `DataConnector`. This class should be considered
+    abstract and not directly instantiated; please use `Datasource` instead.
+
+    Args:
+        name: the name for the datasource
+        execution_engine: the type of compute engine to produce
+        data_context_root_directory: Installation directory path (if installed on a filesystem).
+        concurrency: Concurrency config used to configure the execution engine.
+        id: Identifier specific to this datasource.
     """
 
     recognized_batch_parameters: set = {"limit"}
@@ -29,7 +38,7 @@ class BaseDatasource:
     def __init__(
         self,
         name: str,
-        execution_engine=None,
+        execution_engine: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,
@@ -49,7 +58,7 @@ class BaseDatasource:
 
         self._data_context_root_directory = data_context_root_directory
         if execution_engine is None:
-            raise ge_exceptions.ExecutionEngineError(
+            raise gx_exceptions.ExecutionEngineError(
                 message="No ExecutionEngine configuration provided."
             )
 
@@ -59,13 +68,19 @@ class BaseDatasource:
                 runtime_environment={"concurrency": concurrency},
                 config_defaults={"module_name": "great_expectations.execution_engine"},
             )
-            self._datasource_config: dict = {
-                "execution_engine": execution_engine,
-                "id": id,
-                "name": name,
-            }
         except Exception as e:
-            raise ge_exceptions.ExecutionEngineError(message=str(e))
+            raise gx_exceptions.ExecutionEngineError(message=str(e))
+
+        self._datasource_config: dict = {
+            "execution_engine": execution_engine,
+            "id": id,
+            "name": name,
+        }
+
+        # Chetan - 20221103 - This attribute is meant to represent the config args used to instantiate the object (before ${VARIABLE} substitution).
+        # While downstream logic should override this value, we default to `self._datasource_config` as a backup.
+        # This is to be removed once substitution logic is migrated from the context to the individual object level.
+        self._raw_config = self._datasource_config
 
         self._data_connectors: dict = {}
 
@@ -233,29 +248,32 @@ class BaseDatasource:
         self.data_connectors[name] = new_data_connector
         return new_data_connector
 
+    @public_api
     def get_available_data_asset_names(
         self, data_connector_names: Optional[Union[list, str]] = None
     ) -> Dict[str, List[str]]:
-        """
-        Returns a dictionary of data_asset_names that the specified data
-        connector can provide. Note that some data_connectors may not be
+        """Returns a dictionary of data_asset_names that the specified dataconnector can provide.
+
+        Note that some data_connectors may not be
         capable of describing specific named data assets, and some (such as
         inferred_asset_data_connector) require the user to configure
         data asset names.
+
+        Example return value:
+        ```python
+        {
+          data_connector_name: {
+            names: [ data_asset_1, data_asset_2 ... ]
+          }
+          ...
+        }
+        ```
 
         Args:
             data_connector_names: the DataConnector for which to get available data asset names.
 
         Returns:
-            dictionary consisting of sets of data assets available for the specified data connectors:
-            ::
-
-                {
-                  data_connector_name: {
-                    names: [ data_asset_1, data_asset_2 ... ]
-                  }
-                  ...
-                }
+            Dictionary consisting of sets of data assets available for the specified data connectors.
         """
         available_data_asset_names: dict = {}
         if data_connector_names is None:
@@ -401,9 +419,17 @@ class BaseDatasource:
         return copy.deepcopy(self._datasource_config)
 
 
+@public_api
 class Datasource(BaseDatasource):
-    """
-    An Datasource is the glue between an ExecutionEngine and a DataConnector.
+    """A Datasource is the glue between an `ExecutionEngine` and a `DataConnector`.
+
+    Args:
+        name: the name for the datasource
+        execution_engine: the type of compute engine to produce
+        data_connectors: DataConnectors to add to the datasource
+        data_context_root_directory: Installation directory path (if installed on a filesystem).
+        concurrency: Concurrency config used to configure the execution engine.
+        id: Identifier specific to this datasource.
     """
 
     recognized_batch_parameters: set = {"limit"}
@@ -411,8 +437,8 @@ class Datasource(BaseDatasource):
     def __init__(
         self,
         name: str,
-        execution_engine=None,
-        data_connectors=None,
+        execution_engine: Optional[dict] = None,
+        data_connectors: Optional[dict] = None,
         data_context_root_directory: Optional[str] = None,
         concurrency: Optional[ConcurrencyConfig] = None,
         id: Optional[str] = None,

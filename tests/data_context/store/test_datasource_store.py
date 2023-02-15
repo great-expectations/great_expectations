@@ -5,6 +5,7 @@ from unittest import mock
 
 import pytest
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextVariableKey
 from great_expectations.core.serializer import (
     AbstractConfigSerializer,
@@ -12,13 +13,14 @@ from great_expectations.core.serializer import (
     JsonConfigSerializer,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context_variables import (
     DataContextVariableSchema,
 )
 from great_expectations.data_context.store.datasource_store import DatasourceStore
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudRESTResource,
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
 )
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
@@ -189,9 +191,9 @@ def test_datasource_store_set_cloud_mode(
     ge_cloud_organization_id: str,
 ) -> None:
     ge_cloud_store_backend_config: dict = {
-        "class_name": "GeCloudStoreBackend",
+        "class_name": GXCloudStoreBackend.__name__,
         "ge_cloud_base_url": ge_cloud_base_url,
-        "ge_cloud_resource_type": GeCloudRESTResource.DATASOURCE,
+        "ge_cloud_resource_type": GXCloudRESTResource.DATASOURCE,
         "ge_cloud_credentials": {
             "access_token": ge_cloud_access_token,
             "organization_id": ge_cloud_organization_id,
@@ -278,14 +280,14 @@ def test_datasource_store_with_inline_store_backend(
 
 
 @pytest.mark.unit
-def test_datasource_store_set_by_name(
+def test_datasource_store_add_by_name(
     empty_datasource_store: DatasourceStore,
     datasource_config: DatasourceConfig,
     fake_datasource_name,
 ) -> None:
     assert len(empty_datasource_store.list_keys()) == 0
 
-    empty_datasource_store.set_by_name(
+    empty_datasource_store.add_by_name(
         datasource_name=fake_datasource_name, datasource_config=datasource_config
     )
 
@@ -336,14 +338,18 @@ def test_datasource_store_retrieve_by_name(
 
 
 @pytest.mark.unit
-def test_datasource_store_delete_by_name(
-    fake_datasource_name,
+def test_datasource_store_delete(
+    datasource_config: DatasourceConfig,
     datasource_store_with_single_datasource: DatasourceStore,
 ) -> None:
-    assert len(datasource_store_with_single_datasource.list_keys()) == 1
+    initial_keys = datasource_store_with_single_datasource.list_keys()
+    assert len(initial_keys) == 1
 
-    datasource_store_with_single_datasource.delete_by_name(
-        datasource_name=fake_datasource_name
+    datasource_name = initial_keys[0][0]
+    datasource_config.name = datasource_name
+
+    datasource_store_with_single_datasource.delete(
+        datasource_config=datasource_config,
     )
 
     assert len(datasource_store_with_single_datasource.list_keys()) == 0
@@ -390,13 +396,16 @@ def test_datasource_store_update_raises_error_if_datasource_doesnt_exist(
     empty_datasource_store: DatasourceStore,
 ) -> None:
     updated_datasource_config = DatasourceConfig()
-    with pytest.raises(ValueError) as e:
+    with pytest.raises(gx_exceptions.DatasourceNotFoundError) as e:
         empty_datasource_store.update_by_name(
             datasource_name=fake_datasource_name,
             datasource_config=updated_datasource_config,
         )
 
-    assert f"Unable to load datasource `{fake_datasource_name}`" in str(e.value)
+    assert (
+        f"Could not find an existing Datasource named {fake_datasource_name}."
+        in str(e.value)
+    )
 
 
 @pytest.mark.integration

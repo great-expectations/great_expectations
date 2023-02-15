@@ -1,3 +1,5 @@
+from unittest import mock
+
 import pytest
 
 from great_expectations import DataContext
@@ -45,14 +47,22 @@ def test_datasource_delete_removes_from_cache_and_config_cloud_data_context(
 
     assert len(context.datasources) == 0
     datasource_config["name"] = datasource_name
-    context.add_datasource(**datasource_config.to_dict())
+
+    with pytest.deprecated_call():
+        context.add_datasource(**datasource_config.to_dict(), save_changes=False)
 
     # ensure datasource is accessible
     assert len(context.datasources) == 1
     assert datasource_name in context.datasources
     assert datasource_name in context.config.datasources
 
-    context.delete_datasource(datasource_name)
+    with mock.patch(
+        "great_expectations.data_context.store.datasource_store.DatasourceStore.delete",
+        autospec=True,
+    ) as mock_delete:
+        context.delete_datasource(datasource_name)
+
+    mock_delete.assert_called_once()
 
     # ensure deleted
     assert len(context.datasources) == 0

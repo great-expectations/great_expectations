@@ -53,4 +53,4 @@ Done building Data Docs
 
 ## Additional resources
 
-- [Core concepts: Data Docs](../../../reference/data_docs.md)
+- <TechnicalTag tag="data_docs" text="Data Docs"/>

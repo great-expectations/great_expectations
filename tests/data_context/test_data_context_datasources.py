@@ -3,12 +3,12 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.data_context.data_context.base_data_context import (
-    BaseDataContext,
-)
 from great_expectations.data_context.data_context.data_context import DataContext
-from great_expectations.data_context.store.ge_cloud_store_backend import (
-    GeCloudStoreBackend,
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
 )
 from great_expectations.data_context.store.inline_store_backend import (
     InlineStoreBackend,
@@ -16,9 +16,10 @@ from great_expectations.data_context.store.inline_store_backend import (
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
-    GeCloudConfig,
+    GXCloudConfig,
 )
 from great_expectations.datasource import Datasource
+from great_expectations.util import get_context
 
 
 @pytest.fixture
@@ -49,10 +50,11 @@ def pandas_enabled_datasource_config() -> dict:
 
 
 @pytest.mark.integration
-def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
+@pytest.mark.cloud
+def test_data_context_instantiates_gx_cloud_store_backend_with_cloud_config(
     tmp_path: pathlib,
     data_context_config_with_datasources: DataContextConfig,
-    ge_cloud_config: GeCloudConfig,
+    ge_cloud_config: GXCloudConfig,
 ) -> None:
     project_path = tmp_path / "my_data_context"
     project_path.mkdir()
@@ -60,14 +62,16 @@ def test_data_context_instantiates_ge_cloud_store_backend_with_cloud_config(
     # Clear datasources to improve test performance in DataContext._init_datasources
     data_context_config_with_datasources.datasources = {}
 
-    context = BaseDataContext(
+    context = get_context(
         project_config=data_context_config_with_datasources,
         context_root_dir=str(project_path),
-        ge_cloud_mode=True,
-        ge_cloud_config=ge_cloud_config,
+        cloud_base_url=ge_cloud_config.base_url,
+        cloud_access_token=ge_cloud_config.access_token,
+        cloud_organization_id=ge_cloud_config.organization_id,
+        cloud_mode=True,
     )
 
-    assert isinstance(context._datasource_store.store_backend, GeCloudStoreBackend)
+    assert isinstance(context._datasource_store.store_backend, GXCloudStoreBackend)
 
 
 @pytest.mark.integration
@@ -81,10 +85,10 @@ def test_data_context_instantiates_inline_store_backend_with_filesystem_config(
     # Clear datasources to improve test performance in DataContext._init_datasources
     data_context_config_with_datasources.datasources = {}
 
-    context = BaseDataContext(
+    context = get_context(
         project_config=data_context_config_with_datasources,
         context_root_dir=str(project_path),
-        ge_cloud_mode=False,
+        cloud_mode=False,
     )
 
     assert isinstance(context._datasource_store.store_backend, InlineStoreBackend)
@@ -167,7 +171,7 @@ def test_get_datasource_cache_miss(
     with mock.patch(
         "great_expectations.data_context.store.DatasourceStore.has_key"
     ), mock.patch(
-        "great_expectations.data_context.data_context.BaseDataContext._instantiate_datasource_from_config"
+        "great_expectations.data_context.data_context.AbstractDataContext._instantiate_datasource_from_config"
     ), mock.patch(
         "great_expectations.data_context.types.base.datasourceConfigSchema.load",
     ), mock.patch(
@@ -187,6 +191,7 @@ def test_get_datasource_cache_miss(
 
 
 @pytest.mark.unit
+@pytest.mark.cloud
 def test_DataContext_add_datasource_updates_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
     datasource_config_with_names: DatasourceConfig,
@@ -219,6 +224,7 @@ def test_DataContext_add_datasource_updates_cache_and_store(
 
 
 @pytest.mark.unit
+@pytest.mark.cloud
 def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
     pandas_enabled_datasource_config: dict,
@@ -243,11 +249,11 @@ def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store
     with mock.patch(
         "great_expectations.data_context.store.DatasourceStore.has_key"
     ), mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.set"
-    ) as mock_set:
+        "great_expectations.data_context.store.DatasourceStore.update"
+    ) as mock_update:
         context.update_datasource(datasource)
 
-    mock_set.assert_called_once()
+    mock_update.assert_called_once()
     assert name in context.datasources
 
     with mock.patch(
@@ -260,6 +266,7 @@ def test_DataContext_update_datasource_updates_existing_value_in_cache_and_store
 
 
 @pytest.mark.unit
+@pytest.mark.cloud
 def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
     pandas_enabled_datasource_config: dict,
@@ -282,15 +289,16 @@ def test_DataContext_update_datasource_creates_new_value_in_cache_and_store(
     with mock.patch(
         "great_expectations.data_context.store.DatasourceStore.has_key"
     ), mock.patch(
-        "great_expectations.data_context.store.DatasourceStore.set"
-    ) as mock_set:
+        "great_expectations.data_context.store.DatasourceStore.update"
+    ) as mock_update:
         context.update_datasource(datasource)
 
-    mock_set.assert_called_once()
+    mock_update.assert_called_once()
     assert name in context.datasources
 
 
 @pytest.mark.unit
+@pytest.mark.cloud
 def test_DataContext_delete_datasource_updates_cache(
     cloud_data_context_in_cloud_mode_with_datasource_pandas_engine: DataContext,
 ) -> None:
@@ -316,7 +324,7 @@ def test_DataContext_delete_datasource_updates_cache(
 
 @pytest.mark.unit
 def test_BaseDataContext_add_datasource_updates_cache(
-    in_memory_runtime_context: BaseDataContext,
+    in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
@@ -338,13 +346,13 @@ def test_BaseDataContext_add_datasource_updates_cache(
 
 @pytest.mark.unit
 def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
-    in_memory_runtime_context: BaseDataContext,
+    in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
     What does this test and why?
 
-    For persistence-disabled contexts, we should only update the cache upon
+    When save_changes is set to False, we should only update the cache upon
     updating an existing datasource.
     """
     context = in_memory_runtime_context
@@ -359,8 +367,9 @@ def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
     cached_datasource = context.datasources[name]
     assert cached_datasource.data_connectors.keys() != data_connectors.keys()
 
-    # Ensure that our cache value is updated to reflect changes
-    context.update_datasource(datasource)
+    with pytest.deprecated_call():
+        # Ensure that our cache value is updated to reflect changes
+        context.update_datasource(datasource, save_changes=False)
 
     assert name in context.datasources
     cached_datasource = context.datasources[name]
@@ -372,13 +381,13 @@ def test_BaseDataContext_update_datasource_updates_existing_value_in_cache(
 
 @pytest.mark.unit
 def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
-    in_memory_runtime_context: BaseDataContext,
+    in_memory_runtime_context: EphemeralDataContext,
     pandas_enabled_datasource_config: dict,
 ) -> None:
     """
     What does this test and why?
 
-    For persistence-disabled contexts, we should only update the cache upon
+    When save_changes is set to False, we should only update the cache upon
     using update to create a new datasource.
     """
     context = in_memory_runtime_context
@@ -390,19 +399,20 @@ def test_BaseDataContext_update_datasource_creates_new_value_in_cache(
     assert name not in context.datasources
 
     # Ensure that a brand new cache value is added to reflect changes
-    context.update_datasource(datasource)
+    with pytest.deprecated_call():
+        context.update_datasource(datasource, save_changes=False)
 
     assert name in context.datasources
 
 
 @pytest.mark.unit
 def test_BaseDataContext_delete_datasource_updates_cache(
-    in_memory_runtime_context: BaseDataContext,
+    in_memory_runtime_context: EphemeralDataContext,
 ) -> None:
     """
     What does this test and why?
 
-    For persistence-disabled contexts, we should only delete the value from
+    When save_changes is set to False, we should only delete the value from
     the cache.
     """
     context = in_memory_runtime_context
@@ -412,8 +422,8 @@ def test_BaseDataContext_delete_datasource_updates_cache(
     # If the value is in the cache, no store methods should be invoked
     with mock.patch(
         "great_expectations.data_context.store.DatasourceStore.remove_key"
-    ) as mock_delete:
-        context.delete_datasource(name)
+    ) as mock_delete, pytest.deprecated_call():
+        context.delete_datasource(name, save_changes=False)
 
     assert not mock_delete.called
     assert name not in context.datasources

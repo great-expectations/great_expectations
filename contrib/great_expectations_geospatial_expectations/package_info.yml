@@ -1,0 +1,31 @@
+# The purpose of this file is to allow you to add relevant pieces of metadata
+# to your package before it is uploaded to the Expectation Gallery.
+#
+# While most of the information about the data is parsed through the `great_expectations_contrib`
+# CLI, this file allows you to configure particular settings like images and individuals.
+#
+# The three primary sections of the file are:
+#   1. general:        High-level, miscellaneous details about the package
+#   2. code_owners:    The individuals responsible for the package
+#   3. domain_experts: Any individual with highly specialized knowledge of the given domain
+#
+# For an example of a valid package_info.yml configuration, please visit the contributing section
+# in our official docs.
+
+general:
+  package_name: Great Expectations Geospatial Expectations
+  icon: ~ # May be a relative path to `assets/` or a URL
+  description: A collection of Expectations to validate Geospatial data with Great Expectations.
+
+# Please add more code owners as you see fit
+code_owners:
+  - username: austiezr
+    full_name: Austin Robinson
+
+# Please fill in the details and add more domain experts as you see fit
+domain_experts:
+  # - full_name: ~
+  #   social_links:
+  #     - account_type: ~ # May be one of TWITTER | INSTAGRAM | LINKEDIN | MEDIUM
+  #       identifier: ~
+  #   picture: ~ # May be a relative path to `assets/` or a URL

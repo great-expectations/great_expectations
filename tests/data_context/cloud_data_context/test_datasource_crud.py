@@ -1,10 +1,13 @@
 """This file is meant for integration tests related to datasource CRUD."""
 import copy
-from typing import TYPE_CHECKING, Callable
+import random
+import string
+from typing import Callable, cast
 from unittest import mock
 
 import pytest
 
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.data_context import BaseDataContext, CloudDataContext
 from great_expectations.data_context.types.base import (
@@ -15,10 +18,8 @@ from great_expectations.datasource import BaseDatasource
 from great_expectations.datasource.datasource_serializer import (
     JsonDatasourceConfigSerializer,
 )
+from great_expectations.datasource.new_datasource import Datasource
 from tests.data_context.conftest import MockResponse
-
-if TYPE_CHECKING:
-    from _pytest.fixtures import FixtureRequest
 
 
 @pytest.mark.cloud
@@ -61,8 +62,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 
     context: BaseDataContext = empty_base_data_context_in_cloud_mode
     # Make sure the fixture has the right configuration
-    assert isinstance(context, BaseDataContext)
-    assert context.ge_cloud_mode
+    assert isinstance(context, CloudDataContext)
     assert len(context.list_datasources()) == 0
 
     # Setup
@@ -180,8 +180,7 @@ def test_data_context_in_cloud_mode_add_datasource(
 
     context: DataContext = empty_data_context_in_cloud_mode
     # Make sure the fixture has the right configuration
-    assert isinstance(context, DataContext)
-    assert context.ge_cloud_mode
+    assert isinstance(context, CloudDataContext)
     assert len(context.list_datasources()) == 0
 
     # Setup
@@ -291,7 +290,6 @@ def test_cloud_data_context_add_datasource(
     context: CloudDataContext = empty_cloud_data_context
     # Make sure the fixture has the right configuration
     assert isinstance(context, CloudDataContext)
-    assert context.ge_cloud_mode
     assert len(context.list_datasources()) == 0
 
     # Setup
@@ -370,3 +368,32 @@ def test_cloud_data_context_add_datasource(
         assert stored_datasource.name == datasource_name
         assert stored_datasource.config["name"] == datasource_name
         assert stored_data_connector.name == data_connector_name
+
+
+@pytest.mark.e2e
+@pytest.mark.cloud
+def test_cloud_context_datasource_crud_e2e() -> None:
+    context = cast(CloudDataContext, gx.get_context(cloud_mode=True))
+    datasource_name = f"OSSTestDatasource_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+    datasource = Datasource(
+        name=datasource_name,
+        execution_engine={"class_name": "PandasExecutionEngine"},
+        data_connectors={
+            "default_runtime_data_connector_name": {
+                "class_name": "RuntimeDataConnector",
+                "batch_identifiers": ["default_identifier_name"],
+            },
+        },
+    )
+
+    context.save_datasource(datasource)
+
+    saved_datasource = context.get_datasource(datasource_name)
+    assert saved_datasource is not None and saved_datasource.name == datasource_name
+
+    context.delete_datasource(datasource_name)
+
+    # Make another call to the backend to confirm deletion
+    with pytest.raises(ValueError) as e:
+        context.get_datasource(datasource_name)
+    assert f"Unable to load datasource `{datasource_name}`" in str(e.value)

@@ -40,7 +40,7 @@ resources:
     ports:
       - 1433:1433
   - container: trino
-    image: trinodb/trino:379
+    image: trinodb/trino:400
     ports:
       - 8088:8080
 
@@ -51,7 +51,7 @@ variables:
 stages:
   - stage: scope_check
     pool:
-      vmImage: 'ubuntu-20.04'
+      vmImage: 'ubuntu-latest'
     jobs:
       - job: changes
         steps:
@@ -60,25 +60,33 @@ stages:
             inputs:
               verbose: true
               rules: |
-                [ContribChanged]
-                contrib/**
-
-                [ExperimentalChanged]
-                contrib/experimental/**
-
                 [DocsChanged]
                 docs/**
                 tests/integration/docusaurus/**
                 tests/integration/fixtures/**
                 tests/test_sets/**
+                examples/expectations/*.py
+                static/_redirects
+                static/index.html
+                /*.js
+                /*.json
+                yarn.lock
 
-                [GEChanged]
-                great_expectations/**
+                [GXChanged]
+                great_expectations/**/*.py
+                pyproject.toml
+                setup.cfg
+                setup.py
+                MANIFEST.in
                 tests/**
                 /*.txt
                 /*.yml
                 requirements*
-                azure-pipelines*
+                reqs/*.txt
+                azure/**/*.yml
+                assets/scripts/**
+                scripts/*.py
+                scripts/*.sh
 
   - stage: lint
     dependsOn: scope_check
@@ -87,7 +95,7 @@ stages:
 
     jobs:
       - job: lint
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -95,11 +103,10 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install isort[requirements]==5.10.1 flake8==5.0.4 black==22.3.0 pyupgrade==2.7.2 invoke==1.7.1
+              pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
               EXIT_STATUS=0
               invoke fmt --check || EXIT_STATUS=$?
               invoke lint || EXIT_STATUS=$?
-              pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
   - stage: custom_checks
@@ -108,154 +115,128 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-    - job: type_hint_checker
-      steps:
-      - script: |
-          pip install mypy invoke # Prereq for type hint script
-          invoke type-coverage
-        name: TypeHintChecker
-
     - job: static_type_check
       steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: 3.7
+        displayName: 'Use Python 3.7'
       - script: |
-          pip install mypy invoke
-          invoke type-check --install-types
+          pip install --requirement requirements-types.txt
+          invoke type-check --ci --pretty
         name: StaticTypeCheck
 
-    - job: docstring_checker
+    - job: docstring_linter
       steps:
-      - bash: python scripts/check_docstring_coverage.py
-        name: DocstringChecker
+      - script: |
+          pip install --requirement reqs/requirements-dev-test.txt
+          invoke docstrings
+        name: DocstringLinter
 
     - job: unused_import_checker
       steps:
       - script: |
-          pip install flake8
+          pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
           # https://www.flake8rules.com/rules/F401.html
-          flake8 --select F401 great_expectations tests
+          ruff --select F401 great_expectations tests
         name: UnusedImportChecker
 
+    - job: docs_snippet_checker
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      steps:
+      - script: |
+          yarn install
+          python scripts/validate_docs_snippets.py
+        name: DocsSnippetChecker
+
   - stage: import_ge
-    dependsOn: [lint]
+    dependsOn: scope_check
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-20.04'
 
     jobs:
       - job: import_ge
 
-        strategy:
-         matrix:
-           Python37:
-             python.version: '3.7'
-           Python38:
-             python.version: '3.8'
-           Python39:
-             python.version: '3.9'
-
         steps:
          - task: UsePythonVersion@0
            inputs:
-             versionSpec: '$(python.version)'
-           displayName: 'Use Python $(python.version)'
+             versionSpec: '3.7'
+           displayName: 'Use Python 3.7'
 
          - bash: python -m pip install --upgrade pip==21.3.1
            displayName: 'Update pip'
 
          - script: |
              pip install  .
-           displayName: 'Install GE and required dependencies (i.e. not sqlalchemy)'
+           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
          - script: |
-             python -c "import great_expectations as ge; print('Successfully imported GE Version:', ge.__version__)"
+             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
   - stage: required
     dependsOn: [scope_check, lint, import_ge, custom_checks]
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-20.04'
 
     jobs:
-      - job: compatibility_matrix
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        variables:
-          GE_pytest_opts: '--no-sqlalchemy'
+      # Runs pytest without any additional flags
+      - job: minimal
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
+          # This matrix is intended to split up our sizeable test suite into two distinct components.
+          # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
+          # at the cost of an additional Azure worker.
+          #
+          # To work as intended, "standard" and "slow" should be equally performant.
           matrix:
-            Python37-Pandas023:
-              python.version: '3.7'
-              numpy.version: '1.17.0'
-              pandas.version: '0.23.4'
-              scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
-            Python37-Pandas025:
-              python.version: '3.7'
-              numpy.version: '1.17.0'
-              pandas.version: '0.25.3'
-              scipy.version: 'latest'
-              # numpy 1.20 and pandas 0.25.3 do not coexist happily
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
-            Python38-PandasLatest:
-              python.version: '3.8'
-              numpy.version: 'latest'
-              pandas.version: 'latest'
-              scipy.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev-test.txt --constraint constraints-dev.txt'
+            standard:
+              pytest_args: 'tests --ignore "tests/rule_based_profiler" --ignore "tests/integration"'
+              run_unit_tests: true
+            slow:
+              pytest_args: 'tests/rule_based_profiler tests/integration'
+              run_unit_tests: false
 
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
-              if [[ $(numpy.version) == 'latest' ]]; then
-                pip install numpy
-              else
-                pip install numpy==$(numpy.version)
-              fi
-            displayName: 'Install numpy'
-
-          - script: |
-              if [[ $(pandas.version) == 'latest' ]]; then
-                pip install pandas
-              else
-                pip install pandas==$(pandas.version)
-              fi
-            displayName: 'Install pandas'
-
-          - script: |
-              if [[ $(scipy.version) == 'latest' ]]; then
-                pip install scipy
-              else
-                pip install scipy==$(scipy.version)
-              fi
-            displayName: 'Install scipy'
-
-          - script: |
-              pip install --requirement requirements.txt
-              echo "about to run pip install $(GE_pytest_pip_opts)"
-              pip install $(GE_pytest_pip_opts)
-              pip install  .
+              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
-              # Install dependencies
-              pip install pytest-cov pytest-icdiff pytest-mock pytest-azurepipelines invoke
-
               # Run unit-tests
-              invoke tests --ci --cloud --timeout=3.0
+              if $(run_unit_tests); then
+                invoke tests --ci --cloud --timeout=3.0
+              fi
 
             displayName: 'Unit Tests'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
           - script: |
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not unit and not e2e' --durations=10
+              pytest $(pytest_args) \
+                --no-sqlalchemy \
+                --ignore 'tests/cli' \
+                --ignore 'tests/integration/usage_statistics' \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html \
+                -m 'not unit and not e2e' \
+                --durations=10
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -269,71 +250,54 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
+      # Runs pytest with Spark and Postgres enabled
       - job: comprehensive
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+        strategy:
+          # This matrix is intended to split up our sizeable test suite into two distinct components.
+          # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
+          # at the cost of an additional Azure worker.
+          #
+          # To work as intended, "standard" and "slow" should be equally performant.
+          matrix:
+            standard:
+              pytest_args: 'tests --ignore "tests/rule_based_profiler" --ignore "tests/integration"'
+            slow:
+              pytest_args: 'tests/rule_based_profiler tests/integration'
 
         services:
           postgres: postgres
 
-        variables:
-          GE_pytest_opts: '--postgresql --spark'
-
-        strategy:
-          matrix:
-            Python37:
-              python.version: '3.7'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python38:
-              python.version: '3.8'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-            Python39:
-              python.version: '3.9'
-              pandas.version: 'latest'
-              GE_pytest_pip_opts: '--requirement requirements-dev.txt --constraint constraints-dev.txt'
-
-
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
           - bash: python -m pip install --upgrade pip==21.3.1
             displayName: 'Update pip'
 
           - script: |
-              if [[ $(pandas.version) == 'latest' ]]; then
-                pip install pandas
-              else
-                pip install pandas==$(pandas.version)
-              fi
-            displayName: 'Install pandas'
-
-          - script: |
-              pip install --requirement requirements.txt
-              echo "about to run pip install $(GE_pytest_pip_opts)"
-              pip install $(GE_pytest_pip_opts)
-              pip install  .
+              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
-              pip install pytest-cov pytest-azurepipelines
-
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                $(GE_pytest_opts) --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html -m 'not e2e'
+              pytest $(pytest_args) \
+                --postgresql \
+                --spark \
+                --ignore 'tests/cli' \
+                --ignore 'tests/integration/usage_statistics' \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html \
+                -m 'not unit and not e2e'
 
             displayName: 'pytest'
-
-          - script: |
-              # These are tests that are specific to Great Expectations Cloud.
-              # In order to ensure coverage, we run them during each CI/CD cycle.
-              pytest tests --cloud -m "cloud and not e2e"
-
-            displayName: 'cloud-overrides'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -354,7 +318,7 @@ stages:
 
     jobs:
       - job: test_usage_stats_messages
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         variables:
           python.version: '3.8'
 
@@ -368,17 +332,16 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-test.txt
-              pip install --requirement requirements.txt
-              pip install .
+              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              pip install pytest-azurepipelines
               pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
   - stage: db_integration
     pool:
@@ -388,8 +351,7 @@ stages:
 
     jobs:
       - job: mysql
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
         services:
           mysql: mysql
@@ -420,24 +382,25 @@ stages:
             displayName: 'Configure mysql'
 
           - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
+              pip install --constraint constraints-dev.txt ".[test, mysql]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
-              # Install dependencies
-              pip install pytest-cov pytest-azurepipelines
-
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                --mysql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest tests/test_definitions tests/expectations \
+                --mysql \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
       - job: mssql
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
         services:
           mssql: mssql
@@ -458,24 +421,25 @@ stages:
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
           - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
+              pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
-              # Install dependencies
-              pip install pytest-cov pytest-azurepipelines
-
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                --mssql --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest tests/test_definitions tests/expectations \
+                --mssql \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
       - job: trino
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
-        timeoutInMinutes: 120
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
         services:
           trino: trino
@@ -502,20 +466,22 @@ stages:
             displayName: Wait for database to initialise
 
           - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
+              pip install --constraint constraints-dev.txt ".[test, trino]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
-              # Install dependencies
-              pip install pytest-cov pytest-azurepipelines
-
               # Run pytest
-              pytest tests --ignore 'tests/cli' --ignore 'contrib/cli/tests' --ignore 'tests/integration/usage_statistics' \
-                --trino --napoleon-docstrings --junitxml=junit/test-results.xml --cov=. --cov-report=xml --cov-report=html
+              pytest tests/test_definitions tests/expectations \
+                --trino \
+                --napoleon-docstrings \
+                --junitxml=junit/test-results.xml \
+                --cov=. \
+                --cov-report=xml \
+                --cov-report=html
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, import_ge, custom_checks]
@@ -524,7 +490,7 @@ stages:
 
     jobs:
       - job: test_cli
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GEChanged'], true)
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
         services:
           postgres: postgres
@@ -542,9 +508,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --requirement requirements-dev-test.txt --requirement requirements-dev-spark.txt --requirement requirements-dev-sqlalchemy.txt --constraint constraints-dev.txt
-              pip install --requirement requirements.txt
-              pip install .
+              pip install --constraint constraints-dev.txt ".[test, postgresql, spark]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
@@ -552,3 +516,5 @@ stages:
               pytest --postgresql --spark --aws-integration tests/cli
 
             displayName: 'pytest'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}

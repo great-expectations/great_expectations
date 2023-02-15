@@ -2,10 +2,10 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 
-context = ge.get_context()
+context = gx.get_context()
 
 datasource_yaml = f"""
 name: taxi_datasource
@@ -76,9 +76,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -205,7 +203,7 @@ assert len(batch_list) == 1
 assert batch_list[0].data.dataframe.shape[0] < 200
 
 # NOTE: The following code is only for testing and can be ignored by users.
-assert isinstance(validator, ge.validator.validator.Validator)
+assert isinstance(validator, gx.validator.validator.Validator)
 assert "taxi_datasource" in [ds["name"] for ds in context.list_datasources()]
 assert "yellow_tripdata_sample_2019-01.csv" in set(
     context.get_available_data_asset_names()["taxi_datasource"][

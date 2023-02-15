@@ -5,6 +5,7 @@ import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 Great Expectations works well with many types of Databricks workflows. This guide will help you run Great Expectations in [Databricks](https://databricks.com/).
 
@@ -50,28 +51,28 @@ After that we will take care of some imports that will be used later. Choose you
   ]}>
   <TabItem value="file-yaml">
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L3-L10
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py imports"
 ```
 
   </TabItem>
 
   <TabItem value="file-python">
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L3-L10
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports"
 ```
 
   </TabItem>
 
   <TabItem value="dataframe-yaml">
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L3-L13
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py imports"
 ```
 
   </TabItem>
 
   <TabItem value="dataframe-python">
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L3-L13
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py imports"
 ```
 
   </TabItem>
@@ -80,14 +81,14 @@ After that we will take care of some imports that will be used later. Choose you
 
 ### 2. Set up Great Expectations
 
-In this guide, we will be using the [Databricks File Store (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and [Data Docs](../reference/data_docs.md) store. This is a simple way to get up and running within the Databricks environment without configuring external resources. For other options for storing data see our "Metadata Stores" and "Data Docs" sections in the "How to Guides" for "Setting up Great Expectations."
+In this guide, we will be using the [Databricks File Store (DBFS)](https://docs.databricks.com/data/databricks-file-system.html) for your Metadata Stores and <TechnicalTag tag="data_docs" text="Data Docs"/> store. This is a simple way to get up and running within the Databricks environment without configuring external resources. For other options for storing data see our "Metadata Stores" and "Data Docs" sections in the "How to Guides" for "Setting up Great Expectations."
 
   <details>
     <summary>What is DBFS?</summary>
     Paraphrased from the Databricks docs: DBFS is a distributed file system mounted into a Databricks workspace and available on Databricks clusters. Files on DBFS can be written and read as if they were on a local filesystem, just by <a href="https://docs.databricks.com/data/databricks-file-system.html#local-file-apis">adding the /dbfs/ prefix to the path</a>. It is also persisted to object storage, so you won’t lose data after you terminate a cluster. See the Databricks documentation for best practices including mounting object stores.
   </details>
 
-Run the following code to set up a [Data Context](../reference/data_context.md) in code using the appropriate defaults:
+Run the following code to set up a <TechnicalTag tag="data_context" text="Data Context"/> in code using the appropriate defaults:
 
 <details>
   <summary>What is an "in code" Data Context?</summary>
@@ -111,36 +112,36 @@ The root_directory here refers to the directory that will hold the data for your
   ]}>
   <TabItem value="file-yaml">
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L21
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py root directory"
 ```
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L26-L31
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py set up context"
 ```
 
   </TabItem>
 
   <TabItem value="file-python">
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L21
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py root directory"
 ```
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L26-L31
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py set up context"
 ```
 
   </TabItem>
 
   <TabItem value="dataframe-yaml">
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L28
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py root directory"
 ```
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L33-L38
+```python "tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py set up context"
 ```
 
   </TabItem>
 
   <TabItem value="dataframe-python">
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L32
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py root directory"
 ```
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L37-L42
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py set up context"
 ```
 
   </TabItem>
@@ -227,7 +228,7 @@ df = spark.read.format("csv")\
   ]}>
   <TabItem value="file-yaml">
 
-Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and <TechnicalTag tag="data_connector" text="Data Connector"/> by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
 <details>
   <summary>What does this configuration contain?</summary>
@@ -241,26 +242,26 @@ Here we are setting up a Datasource using a SparkDFExecutionEngine (which loads 
 </details>
 
 Datasource configuration:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L50-L69
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py datasource config"
 ```
 
 Check the Datasource:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L92
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py test datasource config"
 ```
 
 Add the Datasource:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L94
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py add datasource config"
 ```
 
 Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating Expectations:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L96-L106
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py create batch request"
 ```
 
   </TabItem>
 
   <TabItem value="file-python">
 
-Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and <TechnicalTag tag="data_connector" text="Data Connector"/> by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
 <details>
   <summary>What does this configuration contain?</summary>
@@ -274,41 +275,41 @@ Here we are setting up a Datasource using a SparkDFExecutionEngine (which loads 
 </details>
 
 Datasource configuration:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L51-L74
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py datasource_config"
 ```
 
 Check the Datasource:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L98
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py test datasource_config"
 ```
 
 Add the Datasource:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L100
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource_config"
 ```
 
 Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating Expectations:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L102-L112
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py create batch request"
 ```
 
   </TabItem>
 
   <TabItem value="dataframe-yaml">
 
-Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and <TechnicalTag tag="data_connector" text="Data Connector"/> by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
 Datasource configuration:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L68-L80
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py datasource config"
 ```
 
 Check the Datasource:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L82
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py test datasource config"
 ```
 
 Add the Datasource:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L84
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py add datasource config"
 ```
 
 Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating Expectations:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L86-L95
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py create batch request"
 ```
 
 
@@ -316,22 +317,22 @@ Then we create a `BatchRequest` using the `DataAsset` we configured earlier to u
 
   <TabItem value="dataframe-python">
 
-Here we add a [Datasource and Data Connector](../reference/datasources.md) by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and <TechnicalTag tag="data_connector" text="Data Connector"/> by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
 Datasource configuration:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L72-L86
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py datasource config"
 ```
 
 Check the Datasource:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L88
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py test datasource config"
 ```
 
 Add the Datasource:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L90
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add datasource config"
 ```
 
 Then we create a `BatchRequest` using the `DataAsset` we configured earlier to use as a sample of data when creating Expectations:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L92-L101
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py create batch request"
 ```
 
   </TabItem>
@@ -343,9 +344,9 @@ Now let's keep going to create an Expectation Suite and validate our data.
 
 ### 5. Create Expectations
 
-Here we will use a `Validator` to interact with our batch of data and generate an `Expectation Suite`.
+Here we will use a <TechincalTag tag="validator" text="Validator"/> to interact with our batch of data and generate an <TechincalTag tag="expectation_suite" text="Expectation Suite"/>.
 
-Each time we evaluate an Expectation (e.g. via `validator.expect_*`), the Expectation configuration is stored in the Validator. When you have run all of the Expectations you want for this dataset, you can call `validator.save_expectation_suite()` to save all of your Expectation configurations into an Expectation Suite for later use in a checkpoint.
+Each time we evaluate an Expectation (e.g. via `validator.expect_*`), it will immediately be Validated against your data. This instant feedback helps you zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration. Also, the Expectation configuration will be stored in the Validator. When you have run all of the Expectations you want for this dataset, you can call `validator.save_expectation_suite()` to save all of your Expectation configurations into an Expectation Suite for later use in a checkpoint.
 
 This is the same method of interactive Expectation Suite editing used in the CLI interactive mode notebook accessed via `great_expectations suite new --interactive`. For more information, see our documentation on [How to create and edit Expectations with instant feedback from a sample Batch of data](../../docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md). You can also create Expectation Suites using a [profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md) to automatically create expectations based on your data or [manually using domain knowledge and without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md). 
 
@@ -361,17 +362,15 @@ This is the same method of interactive Expectation Suite editing used in the CLI
   <TabItem value="file-yaml">
 
 First we create the suite and get a `Validator`:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L153-L162
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py get validator"
 ```
 
 Then we use the `Validator` to add a few Expectations:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L164
-```
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L166-L168
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py add expectations"
 ```
 
 Finally we save our Expectation Suite (all of the unique Expectation Configurations from each run of `validator.expect_*`) to our Expectation Store:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L170
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py save suite"
 ```
 
   </TabItem>
@@ -379,34 +378,30 @@ Finally we save our Expectation Suite (all of the unique Expectation Configurati
   <TabItem value="file-python">
 
 First we create the suite and get a `Validator`:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L159-L168
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py get validator"
 ```
 
 Then we use the `Validator` to add a few Expectations:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L170
-```
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L172-L174
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add expectations"
 ```
 
 Finally we save our Expectation Suite (all of the unique Expectation Configurations from each run of `validator.expect_*`) to our Expectation Store:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L173
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py save suite"
 ```
 
   </TabItem>
   <TabItem value="dataframe-yaml">
 
 First we create the suite and get a `Validator`:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L114-L123
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py get validator"
 ```
 
 Then we use the `Validator` to add a few Expectations:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L125
-```
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L127-L129
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py add expectations"
 ```
 
 Finally we save our Expectation Suite (all of the unique Expectation Configurations from each run of `validator.expect_*`) to our Expectation Store:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L131
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py save suite"
 ```
 
   </TabItem>
@@ -414,17 +409,15 @@ Finally we save our Expectation Suite (all of the unique Expectation Configurati
   <TabItem value="dataframe-python">
 
 First we create the suite and get a `Validator`:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L120-L129
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py get validator"
 ```
 
 Then we use the `Validator` to add a few Expectations:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L131
-```
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L133-L135
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add expectations"
 ```
 
 Finally we save our Expectation Suite (all of the unique Expectation Configurations from each run of `validator.expect_*`) to our Expectation Store:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L137
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py save suite"
 ```
 
   </TabItem>
@@ -444,92 +437,92 @@ Finally we save our Expectation Suite (all of the unique Expectation Configurati
   ]}>
   <TabItem value="file-yaml">
 
-Here we will create and store a [Checkpoint](../reference/checkpoints_and_actions.md) for our batch, which we can use to [Validate](../reference/validation.md) and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
+Here we will create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for our batch, which we can use to validate and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
 
 First we create the Checkpoint configuration mirroring our `batch_request` configuration above and using the Expectation Suite we created:
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L182-L200
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py checkpoint config"
 ```
 
 Then we test our syntax using `test_yaml_config`:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L207
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py test checkpoint config"
 ```
 
 If all is well, we add the Checkpoint:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L209
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py add checkpoint config"
 ```
 
 Finally we run the Checkpoint:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py#L211-L213
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py run checkpoint"
 ```
 
   </TabItem>
 
   <TabItem value="file-python">
 
-Here we will create and store a [Checkpoint](../reference/checkpoints_and_actions.md) for our batch, which we can use to [Validate](../reference/validation.md) and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
+Here we will create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for our batch, which we can use to validate and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
 
 First we create the Checkpoint configuration mirroring our `batch_request` configuration above and using the Expectation Suite we created:
 
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L188-L213
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py checkpoint config"
 ```
 
 Then we test our syntax using `test_yaml_config`:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L220
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py test checkpoint config"
 ```
 
 If all is well, we add the Checkpoint:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L222
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add checkpoint config"
 ```
 
 Finally we run the Checkpoint:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py#L224-L226
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py run checkpoint"
 ```
 
   </TabItem>
 
   <TabItem value="dataframe-yaml">
 
-Here we will create and store a Checkpoint with no defined validations, then pass in our dataframe at runtime.
+Here we will create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> with no defined validations, then pass in our dataframe at runtime.
 
 First we create the Checkpoint configuration:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L142-L148
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py checkpoint config"
 ```
 
 Then we test our syntax using `test_yaml_config`:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L150
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py test checkpoint config"
 ```
 Note that we get a message that the Checkpoint contains no validations. This is OK because we will pass them in at runtime, as we can see below when we call `context.run_checkpoint()`.
 
 If all is well, we add the Checkpoint:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L152
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py add checkpoint config"
 ```
 
 Finally we run it with a validation defined using the Batch Request containing a reference to our dataframe and our Expectation Suite name:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py#L154-L162
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py run checkpoint"
 ```
 
   </TabItem>
 
   <TabItem value="dataframe-python">
 
-Here we will create and store a Checkpoint with no defined validations, then pass in our dataframe at runtime.
+Here we will create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> with no defined validations, then pass in our dataframe at runtime.
 
 First we create the Checkpoint configuration:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L148-L154
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py checkpoint config"
 ```
 
 Then we test our syntax using `test_yaml_config`:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L156
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py test checkpoint config"
 ```
 Note that we get a message that the Checkpoint contains no validations. This is OK because we will pass them in at runtime, as we can see below when we call `context.run_checkpoint()`.
 
 If all is well, we add the Checkpoint:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L158
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add checkpoint config"
 ```
 
 Finally we run it with a validation defined using the Batch Request containing a reference to our dataframe and our Expectation Suite name:
-```python file=../../tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py#L160-L168
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py run checkpoint"
 ```
 
   </TabItem>
@@ -538,7 +531,7 @@ Finally we run it with a validation defined using the Batch Request containing a
 
 ### 7. Build and view Data Docs
 
-Since we used a `SimpleCheckpoint`, our Checkpoint already contained an `UpdateDataDocsAction` which rendered our [Data Docs](../reference/data_docs.md) from the validation we just ran. That means our Data Docs store will contain a new rendered validation result.
+Since we used a `SimpleCheckpoint`, our Checkpoint already contained an `UpdateDataDocsAction` which rendered our <TechnicalTag tag="data_docs" text="Data Docs"/> from the validation we just ran. That means our Data Docs store will contain a new rendered validation result.
 
 <details>
 <summary>How do I customize these actions?</summary>
@@ -552,6 +545,15 @@ Since we used DBFS for our Data Docs store, we need to download our data docs lo
 Run the following [Databricks CLI](https://docs.databricks.com/dev-tools/cli/index.html) command to download your data docs (replacing the paths as appropriate), then open the local copy of `index.html` to view your updated Data Docs:
 ```bash
 databricks fs cp -r dbfs:/great_expectations/uncommitted/data_docs/local_site/ great_expectations/uncommitted/data_docs/local_site/
+```
+
+Using the `displayHTML` command is another option for displaying Data Docs in a Databricks notebook. There is a restriction, though, in that clicking on a link in the displayed data documents will result in an empty page. If you wish to see some validation results, use this approach.
+
+```python 
+html = '/dbfs/great_expectations/uncommitted/data_docs/local_site/index.html'
+with open(html, "r") as f:
+    data = "".join([l for l in f])
+displayHTML(data)
 ```
 
 ### 8. Congratulations!

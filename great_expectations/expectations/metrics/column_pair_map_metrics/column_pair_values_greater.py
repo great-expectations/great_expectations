@@ -90,7 +90,8 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         or_equal: bool = kwargs.get("or_equal") or False
         if or_equal:
             return sa.or_(
-                column_A >= column_B, sa.and_(column_A == None, column_B == None)
+                column_A >= column_B,
+                sa.and_(column_A == None, column_B == None),  # noqa: E711
             )
         else:
             return column_A > column_B

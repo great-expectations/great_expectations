@@ -5,8 +5,6 @@ from unittest import mock
 import pytest
 from ruamel.yaml import YAML
 
-from great_expectations import DataContext
-
 # noinspection PyProtectedMember
 from great_expectations.cli.suite import _suite_edit_workflow
 from great_expectations.core import (
@@ -24,6 +22,7 @@ from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.util import get_context
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 from tests.render.test_util import find_code_in_notebook, run_notebook
 
@@ -36,7 +35,7 @@ SNIPPETS_USER_CONFIGURABLE_PROFILER: List[str] = [
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -71,7 +70,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
@@ -101,7 +100,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
@@ -174,7 +173,6 @@ EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT: List[
                 "profiler_details": {
                     "metric_configuration": {
                         "domain_kwargs": {},
-                        "metric_dependencies": None,
                         "metric_name": "table.row_count",
                         "metric_value_kwargs": None,
                     },
@@ -204,7 +202,7 @@ EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT: List[
 ]
 
 
-@mock.patch("great_expectations.data_context.DataContext")
+@mock.patch("great_expectations.data_context.FileDataContext")
 def test_suite_notebook_renderer_render_onboarding_data_assistant_configuration(
     mock_data_context: mock.MagicMock,
 ):
@@ -245,12 +243,12 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
     uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
     expectation_suite_name: str = "warning"
 
-    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -370,7 +368,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     )
 
     # Assertions about output
-    context = DataContext(context_root_dir=root_dir)
+    context = get_context(context_root_dir=root_dir)
     obs_validation_result: ExpectationSuiteValidationResult = (
         context.get_validation_result(expectation_suite_name="warning")
     )
@@ -417,7 +415,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     assert expectations_from_suite == expected_expectations
 
 
-@mock.patch("great_expectations.data_context.DataContext")
+@mock.patch("great_expectations.data_context.FileDataContext")
 def test_suite_notebook_renderer_render_rule_based_profiler_configuration(
     mock_data_context: mock.MagicMock,
 ):
@@ -459,12 +457,12 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
     uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
     expectation_suite_name: str = "warning"
 
-    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -610,7 +608,7 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
     )
 
     # Assertions about output
-    context = DataContext(context_root_dir=root_dir)
+    context = get_context(context_root_dir=root_dir)
     obs_validation_result: ExpectationSuiteValidationResult = (
         context.get_validation_result(expectation_suite_name="warning")
     )
@@ -628,7 +626,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {},
-                            "metric_dependencies": None,
                             "metric_name": "table.row_count",
                             "metric_value_kwargs": None,
                         },
@@ -645,7 +642,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Unnamed: 0"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -667,7 +663,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Unnamed: 0"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -689,7 +684,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Age"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -711,7 +705,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Age"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -733,7 +726,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Survived"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -755,7 +747,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Survived"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -777,7 +768,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "SexCode"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -799,7 +789,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "SexCode"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },

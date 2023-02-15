@@ -11,9 +11,9 @@ default_args = {
 }
 
 dag = DAG(
-    "GE_checkpoint_run",
+    "GX_checkpoint_run",
     default_args=default_args,
-    description="running GE checkpoint",
+    description="running GX checkpoint",
     schedule_interval=None,
     dagrun_timeout=timedelta(minutes=5),
 )

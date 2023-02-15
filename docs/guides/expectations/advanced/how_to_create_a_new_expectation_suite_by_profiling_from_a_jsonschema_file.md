@@ -13,7 +13,7 @@ The ``JsonSchemaProfiler`` helps you quickly create <TechnicalTag tag="expectati
 
 </Prerequisites>
 
-:::warning 
+:::warning
 This implementation does not traverse any levels of nesting.
 :::
 
@@ -29,7 +29,7 @@ suite_name = "YOUR_SUITE_NAME"
 ### 2. Load a DataContext
 
 ```python
-context = ge.data_context.DataContext()
+context = gx.get_context()
 ```
 
 ### 3. Load the jsonschema file
@@ -79,13 +79,13 @@ The full example script is here:
 
 ```python
 import json
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.profile.json_schema_profiler import JsonSchemaProfiler
 
 jsonschema_file = "YOUR_JSON_SCHEMA_FILE.json"
 suite_name = "YOUR_SUITE_NAME"
 
-context = ge.data_context.DataContext()
+context = gx.get_context()
 
 with open(jsonschema_file, "r") as f:
     raw_json = f.read()

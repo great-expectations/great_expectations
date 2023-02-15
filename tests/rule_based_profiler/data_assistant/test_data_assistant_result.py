@@ -4,7 +4,7 @@ import altair as alt
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
@@ -52,7 +52,7 @@ def test_get_chart_titles():
     assert chart_title == title_text
 
     # case where no title exists
-    with pytest.raises(ge_exceptions.DataAssistantResultExecutionError) as e:
+    with pytest.raises(gx_exceptions.DataAssistantResultExecutionError) as e:
         DataAssistantResult._get_chart_titles(charts=[layer_a])
 
     assert e.value.message == "All DataAssistantResult charts must have a title."

@@ -9,7 +9,6 @@ import ExpectationStores from './components_index/_expectation_stores.mdx'
 import ValidationResultStores from './components_index/_validation_result_stores.mdx'
 import MetricStores from './components_index/_metric_stores.mdx'
 import DataDocs from './components_index/_data_docs.mdx'
-import Miscellaneous from './components_index/_miscellaneous.mdx'
 
 # [![Setup Icon](../../images/universal_map/Gear-active.png)](./setup_overview.md) Setup: Index
 
@@ -33,5 +32,3 @@ import Miscellaneous from './components_index/_miscellaneous.mdx'
 ## Data Docs
 <DataDocs />
 
-## Miscellaneous
-<Miscellaneous />

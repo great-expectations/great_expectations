@@ -1,15 +1,19 @@
-from typing import Dict, List, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 import numpy as np
 
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
-from great_expectations.rule_based_profiler.domain import Domain
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricComputationDetails,
-    MetricComputationResult,
+    MetricComputationDetails,  # noqa: TCH001
+    MetricComputationResult,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -19,6 +23,11 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
 
 
 class MetricMultiBatchParameterBuilder(ParameterBuilder):
@@ -40,7 +49,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -58,7 +67,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -118,7 +127,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -144,6 +153,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             limit=limit,
             enforce_numeric_metric=self.enforce_numeric_metric,
             replace_nan_with_zero=self.replace_nan_with_zero,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,

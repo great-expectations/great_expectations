@@ -15,8 +15,7 @@ For instance, let's assume you are getting a daily update to your data, and so y
 
 To do this, you would simply add a `batch_timestamp` entry in your `batch_identifiers` list.  This would look like:
 
-```python
-            "batch_identifiers": ["batch_timestamp"]
+```python name="batch_identifiers for filesystem runtime data connector"
 ```
 
 Then, when you create your Batch Request you would populate the `batch_timestamp` value in its `batch_identifiers` dictionary with the value of the current date and time.  This will attach the current date and time to the returned Batch, allowing you to reference the Batch again in the future even if the current data (the data that would be provided by the Runtime Data Connector if you requested a new Batch) had changed.

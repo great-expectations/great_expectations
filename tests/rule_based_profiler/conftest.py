@@ -1,14 +1,12 @@
-import datetime
 from typing import Any, Dict
 
-import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.domain import Domain
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     DefaultExpectationConfigurationBuilder,
@@ -20,7 +18,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
-from great_expectations.rule_based_profiler.rule_state import RuleState
+from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 
 yaml = YAML()
 
@@ -441,6 +439,7 @@ def rule_state_with_domains_and_parameters(
             column_Age_domain,
             column_Date_domain,
         ],
+        variables=None,
         parameters={
             column_Age_domain.id: single_part_name_parameter_container,
             column_Date_domain.id: multi_part_name_parameter_container,

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import json
 import logging
@@ -11,6 +13,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Sequence,
     Tuple,
     Type,
     Union,
@@ -18,8 +21,14 @@ from typing import (
 
 from marshmallow import Schema, ValidationError, fields, pre_dump
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import __version__ as ge_version
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.core._docs_decorators import (
+    deprecated_argument,
+    new_argument,
+    public_api,
+)
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
 )
@@ -33,7 +42,6 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
-    get_datetime_string_from_strftime_format,
     nested_update,
     parse_string_to_datetime,
 )
@@ -41,7 +49,12 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
     ClassInstantiationError,
     DataContextError,
+    GreatExpectationsTypeError,
     InvalidExpectationConfigurationError,
+)
+from great_expectations.render import (
+    AtomicPrescriptiveRendererType,
+    RenderedAtomicContent,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
@@ -54,25 +67,42 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@public_api
+@deprecated_argument(argument_name="data_asset_type", version="0.14.0")
+@new_argument(
+    argument_name="ge_cloud_id",
+    version="0.13.33",
+    message="Used in GX Cloud deployments.",
+)
 class ExpectationSuite(SerializableDictDot):
-    """
-    This ExpectationSuite object has create, read, update, and delete functionality for its expectations:
-        -create: self.add_expectation()
-        -read: self.find_expectation_indexes()
-        -update: self.add_expectation() or self.patch_expectation()
-        -delete: self.remove_expectation()
+    """Suite of expectations plus create, read, update, and delete functionality.
+
+    - create: add_expectation(), append_expectation()
+    - read: find_expectation_indexes(), find_expectations(), show_expectations_by_domain_type(), show_expectations_by_expectation_type()
+    - update: add_expectation(), append_expectation(), patch_expectation(), replace_expectation(), add_expectation_configurations()
+    - delete: remove_expectation(), remove_all_expectations_of_type()
+
+    Args:
+        expectation_suite_name: Name of the Expectation Suite.
+        data_context: Data Context associated with this Expectation Suite.
+        expectations: Expectation Configurations to associate with this Expectation Suite.
+        evaluation_parameters: Evaluation parameters to be substituted when evaluating Expectations.
+        data_asset_type: Type of data asset to associate with this suite.
+        execution_engine_type: Name of the execution engine type.
+        meta: Metadata related to the suite.
+        ge_cloud_id: Great Expectations Cloud id for this Expectation Suite.
     """
 
     def __init__(
         self,
         expectation_suite_name: str,
-        data_context: "AbstractDataContext" = None,
-        expectations: List[Union[dict, ExpectationConfiguration]] = None,
-        evaluation_parameters: dict = None,
-        data_asset_type: str = None,
-        execution_engine_type: Type["ExecutionEngine"] = None,
-        meta: dict = None,
-        ge_cloud_id: str = None,
+        data_context: Optional[AbstractDataContext] = None,
+        expectations: Optional[Sequence[Union[dict, ExpectationConfiguration]]] = None,
+        evaluation_parameters: Optional[dict] = None,
+        data_asset_type: Optional[str] = None,
+        execution_engine_type: Optional[Type[ExecutionEngine]] = None,
+        meta: Optional[dict] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
@@ -102,6 +132,10 @@ class ExpectationSuite(SerializableDictDot):
         ensure_json_serializable(meta)
         self.meta = meta
 
+    @property
+    def name(self) -> str:
+        return self.expectation_suite_name
+
     def add_citation(
         self,
         comment: str,
@@ -119,15 +153,22 @@ class ExpectationSuite(SerializableDictDot):
         if "citations" not in self.meta:
             self.meta["citations"] = []
 
-        if isinstance(citation_date, str):
-            citation_date = parse_string_to_datetime(datetime_string=citation_date)  # type: ignore[assignment]
+        citation_date_obj: datetime.datetime
+        _citation_date_types = (type(None), str, datetime.datetime)
 
-        citation_date = citation_date or datetime.datetime.now(datetime.timezone.utc)
+        if citation_date is None:
+            citation_date_obj = datetime.datetime.now(datetime.timezone.utc)
+        elif isinstance(citation_date, str):
+            citation_date_obj = parse_string_to_datetime(datetime_string=citation_date)
+        elif isinstance(citation_date, datetime.datetime):
+            citation_date_obj = citation_date
+        else:
+            raise GreatExpectationsTypeError(
+                f"citation_date should be of type - {' '.join(str(t) for t in _citation_date_types)}"
+            )
+
         citation: Dict[str, Any] = {
-            "citation_date": get_datetime_string_from_strftime_format(
-                format_str="%Y-%m-%dT%H:%M:%S.%fZ",
-                datetime_obj=citation_date,  # type: ignore[arg-type]
-            ),
+            "citation_date": citation_date_obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
             "batch_request": batch_request,
             "batch_definition": batch_definition,
             "batch_spec": batch_spec,
@@ -137,7 +178,7 @@ class ExpectationSuite(SerializableDictDot):
             "profiler_config": profiler_config,
             "comment": comment,
         }
-        ge.util.filter_properties_dict(
+        gx.util.filter_properties_dict(
             properties=citation, clean_falsy=True, inplace=True
         )
         self.meta["citations"].append(citation)
@@ -215,7 +256,13 @@ class ExpectationSuite(SerializableDictDot):
 
         return result
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> Dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this ExpectationSuite.
+
+        Returns:
+            A JSON-serializable dict representation of this ExpectationSuite.
+        """
         myself = expectationSuiteSchema.dump(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
@@ -291,6 +338,12 @@ class ExpectationSuite(SerializableDictDot):
         """
         self.expectations.append(expectation_config)
 
+    @public_api
+    @new_argument(
+        argument_name="ge_cloud_id",
+        version="0.13.33",
+        message="Used in cloud deployments.",
+    )
     def remove_expectation(
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
@@ -298,21 +351,23 @@ class ExpectationSuite(SerializableDictDot):
         remove_multiple_matches: bool = False,
         ge_cloud_id: Optional[Union[str, uuid.UUID]] = None,
     ) -> List[ExpectationConfiguration]:
-        """
+        """Remove an ExpectationConfiguration from the ExpectationSuite.
 
         Args:
-            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against for
-                the removal of expectations.
+            expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against.
             match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
                 on the data evaluated by that expectation, 'success' to match based on all configuration parameters
-                 that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
-                 based on all configuration parameters
-            remove_multiple_matches: If True, will remove multiple matching expectations. If False, will raise a ValueError.
-        Returns: The list of deleted ExpectationConfigurations
+                that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
+                based on all configuration parameters.
+            remove_multiple_matches: If True, will remove multiple matching expectations.
+            ge_cloud_id: Great Expectations Cloud id for an Expectation.
+
+        Returns:
+            The list of deleted ExpectationConfigurations.
 
         Raises:
-            No match
-            More than 1 match, if remove_multiple_matches = False
+            TypeError: Must provide either expectation_configuration or ge_cloud_id.
+            ValueError: No match or multiple matches found (and remove_multiple_matches=False).
         """
         if expectation_configuration is None and ge_cloud_id is None:
             raise TypeError(
@@ -365,7 +420,7 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_configuration: Optional[ExpectationConfiguration] = None,
         match_type: str = "domain",
-        ge_cloud_id: str = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> List[int]:
         """
         Find indexes of Expectations matching the given ExpectationConfiguration on the given match_type.
@@ -545,7 +600,7 @@ class ExpectationSuite(SerializableDictDot):
         """
         This is a private method for adding expectations that allows for usage_events to be suppressed when
         Expectations are added through internal processing (ie. while building profilers, rendering or validation). It
-        takes in send_usage_event boolean.
+        takes in send_usage_event boolean.  If successful, upserts ExpectationConfiguration into this ExpectationSuite.
 
         Args:
             expectation_configuration: The ExpectationConfiguration to add or update
@@ -558,6 +613,7 @@ class ExpectationSuite(SerializableDictDot):
 
         Returns:
             The ExpectationConfiguration to add or replace.
+
         Raises:
             More than one match
             One match if overwrite_existing = False
@@ -613,7 +669,7 @@ class ExpectationSuite(SerializableDictDot):
         usage_stats_event_payload: dict = {}
         if self._data_context is not None:
             self._data_context.send_usage_message(
-                event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION.value,
+                event=UsageStatsEvents.EXPECTATION_SUITE_ADD_EXPECTATION,
                 event_payload=usage_stats_event_payload,
                 success=success,
             )
@@ -625,7 +681,8 @@ class ExpectationSuite(SerializableDictDot):
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> List[ExpectationConfiguration]:
-        """
+        """Upsert a list of ExpectationConfigurations into this ExpectationSuite.
+
         Args:
             expectation_configurations: The List of candidate new/modifed "ExpectationConfiguration" objects for Suite.
             send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
@@ -638,6 +695,7 @@ class ExpectationSuite(SerializableDictDot):
         Returns:
             The List of "ExpectationConfiguration" objects attempted to be added or replaced (can differ from the list
             of "ExpectationConfiguration" objects in "self.expectations" at the completion of this method's execution).
+
         Raises:
             More than one match
             One match if overwrite_existing = False
@@ -656,6 +714,7 @@ class ExpectationSuite(SerializableDictDot):
         ]
         return expectation_configurations_attempted_to_be_added
 
+    @public_api
     def add_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
@@ -663,9 +722,10 @@ class ExpectationSuite(SerializableDictDot):
         match_type: str = "domain",
         overwrite_existing: bool = True,
     ) -> ExpectationConfiguration:
-        """
+        """Upsert specified ExpectationConfiguration into this ExpectationSuite.
+
         Args:
-            expectation_configuration: The ExpectationConfiguration to add or update
+            expectation_configuration: The ExpectationConfiguration to add or update.
             send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
                 public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
@@ -675,9 +735,12 @@ class ExpectationSuite(SerializableDictDot):
 
         Returns:
             The ExpectationConfiguration to add or replace.
+
         Raises:
-            More than one match
-            One match if overwrite_existing = False
+            ValueError: More than one match
+            DataContextError: One match if overwrite_existing = False
+
+        # noqa: DAR402
         """
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
@@ -686,9 +749,11 @@ class ExpectationSuite(SerializableDictDot):
             overwrite_existing=overwrite_existing,
         )
 
+    @public_api
     def show_expectations_by_domain_type(self) -> None:
-        """
-        Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
+        """Displays "ExpectationConfiguration" list, grouped by "domain_type", in predetermined designated order.
+
+        The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
         """
         expectation_configurations_by_domain: Dict[
             str, List[ExpectationConfiguration]
@@ -709,8 +774,9 @@ class ExpectationSuite(SerializableDictDot):
         self,
         expectation_configurations: Optional[List[ExpectationConfiguration]] = None,
     ) -> None:
-        """
-        Displays "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
+        """Displays "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
+
+        The means of displaying is through the use of the "Pretty Print" library method "pprint.pprint()".
         """
         if expectation_configurations is None:
             expectation_configurations = (
@@ -732,10 +798,9 @@ class ExpectationSuite(SerializableDictDot):
                     }
                 }
             )
-        pprint.pprint(  # type: ignore[call-arg]
+        pprint.pprint(
             object=pprint_objects,
             indent=2,
-            sort_dicts=False,
         )
 
     def get_grouped_and_ordered_expectations_by_domain_type(
@@ -811,7 +876,7 @@ class ExpectationSuite(SerializableDictDot):
 
         expectation_configuration: ExpectationConfiguration
         for expectation_configuration in expectation_configurations:
-            expectation_configuration.kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            expectation_configuration.kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
 
@@ -830,7 +895,7 @@ class ExpectationSuite(SerializableDictDot):
         kwargs: dict
         column_name: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_name = kwargs.pop("column")
@@ -854,7 +919,7 @@ class ExpectationSuite(SerializableDictDot):
         column_A_name: str
         column_B_name: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_A_name = kwargs.pop("column_A")
@@ -881,7 +946,7 @@ class ExpectationSuite(SerializableDictDot):
         kwargs: dict
         column_list: str
         for expectation_configuration in expectation_configurations:
-            kwargs = deep_filter_properties_iterable(  # type: ignore[assignment]
+            kwargs = deep_filter_properties_iterable(
                 properties=expectation_configuration.kwargs, clean_falsy=True
             )
             column_list = kwargs.pop("column_list")
@@ -961,7 +1026,7 @@ class ExpectationSuite(SerializableDictDot):
            this ExpectationSuite to ExpectationConfiguration.rendered_content.
         """
         for expectation_configuration in self.expectations:
-            inline_renderer_config: "InlineRendererConfig" = {  # type: ignore[assignment]
+            inline_renderer_config: InlineRendererConfig = {
                 "class_name": "InlineRenderer",
                 "render_object": expectation_configuration,
             }
@@ -978,8 +1043,14 @@ class ExpectationSuite(SerializableDictDot):
                     class_name=inline_renderer_config["class_name"],
                 )
 
-            expectation_configuration.rendered_content = (
-                inline_renderer.get_rendered_content()
+            rendered_content: List[
+                RenderedAtomicContent
+            ] = inline_renderer.get_rendered_content()
+
+            expectation_configuration.rendered_content = inline_renderer.replace_or_keep_existing_rendered_content(
+                existing_rendered_content=expectation_configuration.rendered_content,
+                new_rendered_content=rendered_content,
+                failed_renderer_type=AtomicPrescriptiveRendererType.FAILED,
             )
 
 
