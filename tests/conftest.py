@@ -852,13 +852,16 @@ def data_context_with_connection_to_metrics_db(
 
 @pytest.fixture
 def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
-    tmp_path_factory,
+    tmp_path,
     monkeypatch,
 ):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
-    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
+    path = tmp_path / "titanic_data_context"
+    path.mkdir()
+
+    project_path: str = str(path)
     context_path: str = os.path.join(project_path, "great_expectations")
     os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
     data_path: str = os.path.join(context_path, "..", "data", "titanic")
@@ -1435,10 +1438,14 @@ def empty_context_with_checkpoint(empty_data_context):
 
 
 @pytest.fixture
-def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
+def empty_data_context_stats_enabled(tmp_path, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)
-    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
+
+    path = tmp_path / "empty_data_context"
+    path.mkdir()
+
+    project_path = str(path)
     context = gx.data_context.FileDataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")
     asset_config_path = os.path.join(context_path, "expectations")
