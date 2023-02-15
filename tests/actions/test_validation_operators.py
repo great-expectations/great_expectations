@@ -84,7 +84,7 @@ def warning_failure_validation_operator_data_context(
     failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
     failure_expectations.expectation_suite_name = "f1.failure"
-    data_context.add_expectation_suite(expectation_suite=failure_expectations)
+    data_context.update_expectation_suite(expectation_suite=failure_expectations)
 
     data_context.add_expectation_suite(expectation_suite_name="f1.warning")
     df = data_context.get_batch(
@@ -100,7 +100,7 @@ def warning_failure_validation_operator_data_context(
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
     warning_expectations.expectation_suite_name = "f1.warning"
-    data_context.add_expectation_suite(expectation_suite=warning_expectations)
+    data_context.update_expectation_suite(expectation_suite=warning_expectations)
 
     failure_expectations.expectation_suite_name = "f2.failure"
     data_context.add_expectation_suite(expectation_suite=failure_expectations)

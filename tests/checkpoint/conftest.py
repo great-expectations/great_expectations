@@ -21,7 +21,7 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
         kwargs={"column": "col1", "min_value": 1, "max_value": 2},
     )
     suite.add_expectation(expectation, send_usage_event=False)
-    context.add_expectation_suite(expectation_suite=suite)
+    context.update_expectation_suite(expectation_suite=suite)
     return context
 
 
@@ -217,5 +217,5 @@ def context_with_single_csv_spark_and_suite(
         kwargs={"column": "pickup_datetime"},
     )
     suite.add_expectation(expectation, send_usage_event=False)
-    context.add_expectation_suite(expectation_suite=suite)
+    context.update_expectation_suite(expectation_suite=suite)
     return context
