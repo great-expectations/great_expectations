@@ -2583,7 +2583,7 @@ def _sqlalchemy_map_condition_index(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> List[Dict[str, Any]] | None:
+) -> list[dict[str, Any]] | None:
     """
     Returns indices of the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -2598,7 +2598,7 @@ def _sqlalchemy_map_condition_index(
     ) = metrics.get("unexpected_condition")
 
     result_format = metric_value_kwargs["result_format"]
-    if not result_format.get("unexpected_index_column_names"):
+    if "unexpected_index_column_names" not in result_format:
         return None
 
     domain_column_name_list: List[str] = list()
@@ -2870,7 +2870,7 @@ def _spark_map_condition_index(
         return None
 
     result_format = metric_value_kwargs["result_format"]
-    if not result_format.get("unexpected_index_column_names"):
+    if "unexpected_index_column_names" not in result_format:
         return None
 
     domain_column_name_list: List[str] = list()

@@ -96,7 +96,7 @@ if TYPE_CHECKING:
     import numpy.typing as npt
 
     from great_expectations.alias_types import PathStr
-    from great_expectations.data_context import FileDataContext
+    from great_expectations.data_context import EphemeralDataContext, FileDataContext
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -890,7 +890,7 @@ def read_sas(
         )
 
 
-def build_in_memory_runtime_context() -> AbstractDataContext:
+def build_in_memory_runtime_context() -> EphemeralDataContext:
     """
     Create generic in-memory "BaseDataContext" context for manipulations as required by tests.
     """
