@@ -2,27 +2,30 @@ import json
 from typing import Optional
 
 import indiapins
-from great_expectations.core.expectation_configuration import \
-    ExpectationConfiguration
+
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (PandasExecutionEngine,
-                                                 SparkDFExecutionEngine,
-                                                 SqlAlchemyExecutionEngine)
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
 from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.metrics import (ColumnMapMetricProvider,
-                                                     column_condition_partial)
+from great_expectations.expectations.metrics import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
 
 
-def is_valid_india_zip(zip:str):
-    if len(zip)!=6:
+def is_valid_india_zip(zip: str):
+    if len(zip) != 6:
         return False
-    elif zip.isnumeric()==False:
+    elif zip.isnumeric() == False:
         return False
     elif indiapins.isvalid(zip):
         return True
     else:
         return False
-
 
 
 # This class defines a Metric to support your Expectation.
@@ -57,7 +60,7 @@ class ExpectColumnValuesToBeValidIndiaZip(ColumnMapExpectation):
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
-          {
+        {
             "data": {
                 "valid_india_zip": ["421306", "421301", "400078", "400051"],
                 "invalid_india_zip": ["-10000", "1234", "099999", "25487"],
@@ -74,7 +77,7 @@ class ExpectColumnValuesToBeValidIndiaZip(ColumnMapExpectation):
                     "title": "basic_negative_test",
                     "exact_match_out": False,
                     "include_in_gallery": True,
-                    "in": {"column": "invalid_india_zip","mostly": 1},
+                    "in": {"column": "invalid_india_zip", "mostly": 1},
                     "out": {"success": False},
                 },
             ],
@@ -122,14 +125,17 @@ class ExpectColumnValuesToBeValidIndiaZip(ColumnMapExpectation):
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
-        "maturity": "experimental", 
-        "tags": [ "typed-entities","india","pincode",],  # Tags for this Expectation in the Gallery
+        "maturity": "experimental",
+        "tags": [
+            "typed-entities",
+            "india",
+            "pincode",
+        ],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
-            "@prachijain136", 
-            "@jainamshahh", # Don't forget to add your github handle here!
+            "@prachijain136",
+            "@jainamshahh",  # Don't forget to add your github handle here!
         ],
-         "requirements": ["indiapins"],
-
+        "requirements": ["indiapins"],
     }
 
 

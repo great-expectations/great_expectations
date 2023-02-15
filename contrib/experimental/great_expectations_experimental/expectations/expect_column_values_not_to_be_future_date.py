@@ -8,13 +8,15 @@ from datetime import date
 from typing import Optional
 
 from dateutil.parser import parse
-from great_expectations.core.expectation_configuration import \
-    ExpectationConfiguration
+
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
-from great_expectations.expectations.metrics import (ColumnMapMetricProvider,
-                                                     column_condition_partial)
+from great_expectations.expectations.metrics import (
+    ColumnMapMetricProvider,
+    column_condition_partial,
+)
 
 
 def is_not_a_future_date(date_in: str) -> bool:
@@ -24,8 +26,8 @@ def is_not_a_future_date(date_in: str) -> bool:
             d = parse(date_in)
         else:
             d = date_in
-        d=d.date()
-        if d>today:
+        d = d.date()
+        if d > today:
             return False
         else:
             return True
@@ -58,7 +60,7 @@ class ColumnValuesNotToBeFutureDate(ColumnMapMetricProvider):
 
 # This class defines the Expectation itself
 class ExpectColumnValuesNotToBeFutureDate(ColumnMapExpectation):
-    """Expect column values not to be the future date """
+    """Expect column values not to be the future date"""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
