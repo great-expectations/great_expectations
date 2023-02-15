@@ -4,7 +4,7 @@ import logging
 from typing import TYPE_CHECKING, ClassVar, Optional, Set
 
 import great_expectations.exceptions as ge_exceptions
-from great_expectations.experimental.datasources.data_asset.data_connector.filesystem_data_connector import (
+from great_expectations.experimental.datasources.data_asset.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.experimental.datasources.file_path_data_asset import (

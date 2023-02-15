@@ -43,7 +43,9 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
-    from great_expectations.datasource import DataConnector
+    from great_expectations.experimental.datasources.data_asset.data_connector import (
+        DataConnector,
+    )
 
 try:
     import pyspark

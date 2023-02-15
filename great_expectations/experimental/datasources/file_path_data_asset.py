@@ -37,9 +37,6 @@ if TYPE_CHECKING:
         PandasExecutionEngine,
         SparkDFExecutionEngine,
     )
-    from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
-        DataConnector,
-    )
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +61,6 @@ class _FilePathDataAsset(DataAsset):
     _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
     _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
     _all_group_names: List[str] = pydantic.PrivateAttr()
-
-    _data_connector: DataConnector = pydantic.PrivateAttr()
 
     class Config:
         """
@@ -92,9 +87,6 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
-
-    def __post_init_post_parse__(self):
-        self._data_connector = self._get_data_connector()
 
     def batch_request_options_template(
         self,
