@@ -219,9 +219,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     request = asset.build_batch_request({"year": "2018"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert (len(batches)) == 12
-    batch_filenames = [
-        pathlib.Path(batch.metadata["base_directory"]).stem for batch in batches
-    ]
+    batch_filenames = [batch.metadata["path"].stem for batch in batches]
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)
