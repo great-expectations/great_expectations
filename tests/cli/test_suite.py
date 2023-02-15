@@ -1794,7 +1794,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     assert isinstance(suite, ExpectationSuite)
 
     suite.meta.pop("citations", None)
-    context.save_expectation_suite(expectation_suite=suite)
+    context.update_expectation_suite(expectation_suite=suite)
 
     # Actual testing really starts here
     runner = CliRunner(mix_stderr=False)

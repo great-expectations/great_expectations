@@ -199,7 +199,7 @@ def test_cli_datasource_new(
                         "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
-                    "base_directory": "../../test_cli_datasource_new0/filesystem_csv_2",
+                    "base_directory": "../../filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
                 },
