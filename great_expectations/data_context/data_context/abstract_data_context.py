@@ -71,6 +71,7 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
     _YamlConfigValidator,
 )
 from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
@@ -154,9 +155,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
-    )
-    from great_expectations.data_context.store.profiler_store import (
-        ProfilerStore,  # noqa: TCH004
     )
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
@@ -2849,8 +2847,21 @@ class AbstractDataContext(ConfigPeer, ABC):
                 meta=meta,
             )
 
-        expectation_suite_name = expectation_suite.expectation_suite_name
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        return self._persist_suite_with_store(
+            expectation_suite=expectation_suite,
+            overwrite_existing=overwrite_existing,
+            **kwargs,
+        )
+
+    def _persist_suite_with_store(
+        self,
+        expectation_suite: ExpectationSuite,
+        overwrite_existing: bool,
+        **kwargs,
+    ) -> ExpectationSuite:
+        key = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite.expectation_suite_name
+        )
 
         persistence_fn: Callable
         if overwrite_existing:
