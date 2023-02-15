@@ -554,7 +554,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error_with_
     mock_emit, caplog, titanic_data_context_stats_enabled_config_version_2
 ):
     context = titanic_data_context_stats_enabled_config_version_2
-    suite = context.create_expectation_suite("bar")
+    suite = context.add_expectation_suite("bar")
     context.save_expectation_suite(suite)
     assert context.list_expectation_suite_names() == ["bar"]
     mock_emit.reset_mock()
@@ -702,7 +702,7 @@ def test_checkpoint_run_on_non_existent_validation_operator_with_ge_config_v2(
     root_dir = context.root_directory
     csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
 
-    suite = context.create_expectation_suite("iceberg")
+    suite = context.add_expectation_suite("iceberg")
     context.save_expectation_suite(suite)
     assert context.list_expectation_suite_names() == ["iceberg"]
     mock_emit.reset_mock()

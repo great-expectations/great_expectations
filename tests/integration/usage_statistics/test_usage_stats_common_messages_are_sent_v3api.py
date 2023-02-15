@@ -129,16 +129,13 @@ def test_common_usage_stats_are_sent_no_mocking(
         batch_identifiers={"default_identifier_name": "default_identifier"},
     )
 
-    context.create_expectation_suite(
-        expectation_suite_name="test_suite", overwrite_existing=True
-    )
+    context.add_expectation_suite(expectation_suite_name="test_suite")
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )
     expected_events.append("data_context.get_batch_list")
     validator.expect_table_row_count_to_equal(value=2)
     validator.save_expectation_suite()
-    expected_events.append("data_context.save_expectation_suite")
 
     checkpoint_yaml = """
     name: my_checkpoint

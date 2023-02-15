@@ -48,7 +48,7 @@ def run_checkpoint_and_data_doc(
 
     # Define an expectation suite
     suite_name = "my_suite"
-    context.create_expectation_suite(expectation_suite_name=suite_name)
+    context.add_expectation_suite(expectation_suite_name=suite_name)
     validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=suite_name,
@@ -338,9 +338,7 @@ def _configure_and_run_data_assistant(
     batch_request: BatchRequest,
 ) -> tuple[DataAssistantResult, CheckpointResult]:
     expectation_suite_name = "my_onboarding_assistant_suite"
-    context.create_expectation_suite(
-        expectation_suite_name=expectation_suite_name, overwrite_existing=True
-    )
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     data_assistant_result = context.assistants.onboarding.run(
         batch_request=batch_request,
         numeric_columns_rule={

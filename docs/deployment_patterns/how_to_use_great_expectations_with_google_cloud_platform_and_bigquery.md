@@ -21,13 +21,13 @@ This guide will help you integrate Great Expectations (GX) with [Google Cloud Pl
 
 :::caution Note on Installing Great Expectations in Google Cloud Composer
 
-  Currently, Great Expectations will only install in Composer 1 and Composer 2 environments with the following packages pinned. 
+  Currently, Great Expectations will only install in Composer 1 and Composer 2 environments with the following packages pinned.
 
   `[tornado]==6.2`
   `[nbconvert]==6.4.5`
   `[mistune]==0.8.4`
 
-  We are currently investigating ways to provide a smoother deployment experience in Google Composer, and will have more updates soon. 
+  We are currently investigating ways to provide a smoother deployment experience in Google Composer, and will have more updates soon.
 
 :::
 
@@ -219,7 +219,7 @@ First, load a batch of data by specifying a `data_asset_name` in a `BatchRequest
 
 Next, create an ExpectationSuite (`test_gcs_suite` in our example), and use it to get a `Validator`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py create_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_expectation_suite"
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
@@ -246,7 +246,7 @@ First, load a batch of data by specifying an SQL query in a `RuntimeBatchRequest
 
 Next, create an ExpectationSuite (`test_bigquery_suite` in our example), and use it to get a `Validator`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py create_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_or_update_expectation_suite"
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
