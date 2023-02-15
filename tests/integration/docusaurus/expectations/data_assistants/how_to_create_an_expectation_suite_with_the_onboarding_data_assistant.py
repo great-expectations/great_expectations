@@ -65,8 +65,8 @@ except ValueError:
 # <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py expectation_suite">
 expectation_suite_name = "my_onboarding_assistant_suite"
 
-expectation_suite = context.create_expectation_suite(
-    expectation_suite_name=expectation_suite_name, overwrite_existing=True
+expectation_suite = context.add_or_update_expectation_suite(
+    expectation_suite_name=expectation_suite_name
 )
 # </snippet>
 

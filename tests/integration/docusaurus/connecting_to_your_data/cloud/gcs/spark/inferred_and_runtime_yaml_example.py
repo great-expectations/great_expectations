@@ -78,9 +78,7 @@ batch_request.runtime_parameters[
 ] = "gs://test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv"
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation">
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -108,9 +106,7 @@ batch_request.data_asset_name = (
 )
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py validator_creation_2">
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
