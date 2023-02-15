@@ -171,18 +171,23 @@ def test_get_batch_list_from_fully_specified_batch_request(
         header=True,
         infer_schema=True,
     )
-    request = asset.build_batch_request({"year": "2018", "month": "04"})
+    path = "yellow_tripdata_sample_2018-04.csv"
+    request = asset.build_batch_request({"year": "2018", "month": "04", "path": path})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
     assert batch.batch_request.datasource_name == spark_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {"year": "2018", "month": "04"}
+    assert batch.batch_request.options == {
+        "year": "2018",
+        "month": "04",
+        "path": pathlib.Path(path),
+    }
     assert batch.metadata == {
         "year": "2018",
         "month": "04",
-        "base_directory": spark_datasource.base_directory
-        / "yellow_tripdata_sample_2018-04.csv",
+        "base_directory": spark_datasource.base_directory,
+        "path": pathlib.Path(path),
     }
     assert batch.id == "spark_datasource-csv_asset-year_2018-month_04"
 
