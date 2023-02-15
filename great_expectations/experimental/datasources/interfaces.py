@@ -522,7 +522,7 @@ class Batch(ExperimentalBaseModel):
         # We need a unique identifier. This will likely change as we get more input.
         options_list = []
         for key, value in values["batch_request"].options.items():
-            if key != "filename":
+            if key != "path":
                 options_list.append(f"{key}_{value}")
 
         values["id"] = "-".join(
