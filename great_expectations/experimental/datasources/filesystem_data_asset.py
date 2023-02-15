@@ -81,8 +81,10 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
 
         abs_path: pathlib.Path
         for abs_path in all_paths:
-            path_relative_to_base_dir = str(abs_path.relative_to(base_directory))
-            match = self._regex_parser.get_matches(target=path_relative_to_base_dir)
+            path_relative_to_base_dir = abs_path.relative_to(base_directory)
+            match = self._regex_parser.get_matches(
+                target=str(path_relative_to_base_dir)
+            )
             if match:
                 # Create the batch request that would correlate to this regex match
                 match_options = {}
@@ -92,15 +94,20 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                     match_options[
                         self._all_group_index_to_group_name_mapping[group_id]
                     ] = match.group(group_id)
-                    match_options["path"] = abs_path
+                    match_options["filename"] = path_relative_to_base_dir
                 # Determine if this file_name matches the batch_request
                 allowed_match = True
                 for key, value in batch_request.options.items():
-                    if key == "path" and isinstance(value, str):
-                        value = pathlib.Path(value)
-                    if match_options[key] != value:
-                        allowed_match = False
-                        break
+                    if key == "path":
+                        if isinstance(value, str):
+                            value = pathlib.Path(value).relative_to(base_directory)
+                        if match_options["filename"] != value:
+                            allowed_match = False
+                            break
+                    else:
+                        if match_options[key] != value:
+                            allowed_match = False
+                            break
                 if allowed_match:
                     batch_requests_with_path.append(
                         (

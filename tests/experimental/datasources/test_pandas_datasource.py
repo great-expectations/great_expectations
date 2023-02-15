@@ -358,22 +358,24 @@ def test_get_batch_list_from_fully_specified_batch_request(
         name="csv_asset",
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
     )
-    path = (
-        pandas_filesystem_datasource.base_directory
-        / "yellow_tripdata_sample_2018-04.csv"
-    )
+    filename = "yellow_tripdata_sample_2018-04.csv"
+    path = pandas_filesystem_datasource.base_directory / filename
     request = asset.build_batch_request({"year": "2018", "month": "04", "path": str(path)})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert len(batches) == 1
     batch = batches[0]
     assert batch.batch_request.datasource_name == pandas_filesystem_datasource.name
     assert batch.batch_request.data_asset_name == asset.name  # type: ignore[attr-defined]
-    assert batch.batch_request.options == {"year": "2018", "month": "04", "path": path}
+    assert batch.batch_request.options == {
+        "year": "2018",
+        "month": "04",
+        "filename": pathlib.Path(filename),
+    }
     assert batch.metadata == {
         "year": "2018",
         "month": "04",
         "base_directory": pandas_filesystem_datasource.base_directory,
-        "path": path,
+        "filename": path.relative_to(pandas_filesystem_datasource.base_directory),
     }
     assert batch.id == "pandas_filesystem_datasource-csv_asset-year_2018-month_04"
 
