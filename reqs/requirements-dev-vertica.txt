@@ -1,1 +1,0 @@
-sqlalchemy-vertica-python>=0.5.10

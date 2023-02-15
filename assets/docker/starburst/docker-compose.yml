@@ -1,6 +1,0 @@
-version: '3.2'
-services:
-  starburst_db:
-    image: starburstdata/starburst-enterprise:373-e
-    ports:
-      - "8088:8080"

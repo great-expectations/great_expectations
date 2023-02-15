@@ -1,3 +1,0 @@
---requirement requirements-dev-lite.txt
---requirement requirements-dev-contrib.txt
---requirement requirements-dev-api-docs-test.txt

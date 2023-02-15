@@ -1,2 +1,0 @@
-connection_string: postgresql+psycopg2://postgres:@localhost/test_ci
-dialect: postgres
