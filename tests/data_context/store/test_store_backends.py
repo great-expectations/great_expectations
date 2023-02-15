@@ -120,7 +120,7 @@ def validation_operators_data_context(
             }
         },
     )
-    data_context.create_expectation_suite("f1.foo")
+    data_context.add_expectation_suite("f1.foo")
 
     df = data_context.get_batch(
         batch_kwargs=data_context.build_batch_kwargs(

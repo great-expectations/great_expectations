@@ -987,7 +987,7 @@ def test_suite_edit_datasource_and_batch_request_error(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     assert (
@@ -1140,7 +1140,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     assert (
@@ -2213,7 +2213,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     assert (
@@ -2363,7 +2363,7 @@ def test_suite_list_with_one_suite(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
 
@@ -2423,15 +2423,15 @@ def test_suite_list_with_multiple_suites(
     project_dir: str = context.root_directory
 
     # noinspection PyUnusedLocal
-    suite_0: ExpectationSuite = context.create_expectation_suite(
+    suite_0: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="a.warning"
     )
     # noinspection PyUnusedLocal
-    suite_1: ExpectationSuite = context.create_expectation_suite(
+    suite_1: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="b.warning"
     )
     # noinspection PyUnusedLocal
-    suite_2: ExpectationSuite = context.create_expectation_suite(
+    suite_2: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="c.warning"
     )
 
@@ -2547,7 +2547,7 @@ def test_suite_delete_with_non_existent_suite(
 
     expectation_suite_name: str = "test_suite_name"
 
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -2616,7 +2616,7 @@ def test_suite_delete_with_one_suite(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -2697,7 +2697,7 @@ def test_suite_delete_canceled_with_one_suite(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -2771,7 +2771,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     expectation_suite_name: str = "test_suite_name"
 
     # noinspection PyUnusedLocal
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=f"{expectation_suite_dir_name}.{expectation_suite_name}"
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -2955,7 +2955,7 @@ def test_suite_new_profile_on_existing_suite_raises_error(
 
     expectation_suite_name: str = "test_suite_name"
 
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
     context.save_expectation_suite(expectation_suite=suite)

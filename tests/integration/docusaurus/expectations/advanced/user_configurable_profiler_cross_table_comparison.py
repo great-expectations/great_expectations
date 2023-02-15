@@ -121,7 +121,7 @@ run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 expectation_suite_name: {expectation_suite_name}
 """
 
-context.add_checkpoint(**yaml.load(yaml_config))
+context.add_or_update_checkpoint(**yaml.load(yaml_config))
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py run_checkpoint">
 results = context.run_checkpoint(
