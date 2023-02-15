@@ -4,7 +4,8 @@ import copy
 import logging
 import re
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set
+from functools import wraps
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
@@ -17,9 +18,6 @@ from great_expectations.datasource.data_connector.util import (
 )
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     DataConnector,
-)
-from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
-    data_references_loader,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector.regex_parser import (
     RegExParser,
@@ -36,6 +34,63 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+
+def data_references_loader(
+    data_references_cache_property_name: str = "_data_references_cache",
+    refresh_data_references_cache_method_name: str = "_refresh_data_references_cache",
+    force: bool = False,
+) -> Callable:
+    """
+    Initialize "DataConnector._data_references_cache" instance variable (if it does not exist) and call specified method
+    that performs best-effort translation of data references to lists of "BatchDefinition" objects and cache results
+    into Dict[str, List[BatchDefinition] | None] | None (with "data_reference" as key) in order to improve performance.
+
+    Args:
+        data_references_cache_property_name: Property attribute name, provided in "kwargs", sets data_references_cache dictionary.
+        refresh_data_references_cache_method_name: Method name, provided in "kwargs", which updates data_references_cache contents.
+        force: Directive to "refresh_data_references_cache_method_name" method (overwrite if True; skip, otherwise)
+
+    Returns:
+        Callable -- configured "_load_data_references_decorator" function.
+    """
+
+    def _load_data_references_decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def _data_connector_method_call(self, *args, **kwargs) -> Any:
+            """
+            Calls "data_references_cache_holder_object_reference_name" of decorated function to set
+            "data_references_cache" into specified "data_references_cache_property_name" of passed object reference.
+            Then computes and returns value of decorated function.
+
+            Settable property "{self}.{data_references_cache_property_name}" property should exist.
+            Method "{self}.{refresh_data_references_cache_method_name}()" must exist.
+
+            Args:
+                args: Positional arguments of original function being decorated.
+                kwargs: Keyword arguments of original function being decorated.
+
+            Returns:
+                Any (output value of original function being decorated).
+            """
+            data_references_cache_property: Dict[
+                str, List[BatchDefinition] | None
+            ] | None = getattr(self, data_references_cache_property_name, None)
+            if data_references_cache_property is None:
+                data_references_cache_property = {}
+                setattr(
+                    self,
+                    data_references_cache_property_name,
+                    data_references_cache_property,
+                )
+
+            getattr(self, refresh_data_references_cache_method_name)(force=force)
+
+            return func(self, *args, **kwargs)
+
+        return _data_connector_method_call
+
+    return _load_data_references_decorator
 
 
 class FilePathDataConnector(DataConnector):
