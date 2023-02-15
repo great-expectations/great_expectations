@@ -452,8 +452,8 @@ def test_save_expectation_suite_saves_suite_to_cloud(
 
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ):
-        context.add_expectation_suite(expectation_suite=suite)
+    ), pytest.deprecated_call():
+        context.save_expectation_suite(suite)
 
     assert suite.ge_cloud_id is not None
 
@@ -472,8 +472,10 @@ def test_save_expectation_suite_overwrites_existing_suite(
 
     with mock.patch(
         "requests.Session.put", autospec=True, return_value=mock.Mock(status_code=405)
-    ) as mock_put, mock.patch("requests.Session.patch", autospec=True) as mock_patch:
-        context.add_expectation_suite(expectation_suite=suite)
+    ) as mock_put, mock.patch(
+        "requests.Session.patch", autospec=True
+    ) as mock_patch, pytest.deprecated_call():
+        context.save_expectation_suite(suite)
 
     expected_suite_json = {
         "data_asset_type": None,
@@ -507,10 +509,12 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 
     existing_suite_names = [suite_name]
 
-    with pytest.raises(DataContextError) as e:
+    with pytest.raises(DataContextError) as e, pytest.deprecated_call():
         mock_expectations_store_has_key.return_value = False
         mock_list_expectation_suite_names.return_value = existing_suite_names
-        context.add_expectation_suite(expectation_suite=suite)
+        context.save_expectation_suite(
+            expectation_suite=suite, overwrite_existing=False
+        )
 
     assert f"expectation_suite '{suite_name}' already exists" in str(e.value)
 
@@ -528,10 +532,10 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     suite_id = suite_1.id
     suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
 
-    with pytest.raises(DataContextError) as e:
+    with pytest.raises(DataContextError) as e, pytest.deprecated_call():
         mock_expectations_store_has_key.return_value = True
-        context.add_expectation_suite(
-            expectation_suite=suite,
+        context.save_expectation_suite(
+            expectation_suite=suite, overwrite_existing=False
         )
 
     mock_expectations_store_has_key.assert_called_once_with(
