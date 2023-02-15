@@ -187,7 +187,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
             )
 
             batch_metadata = copy.deepcopy(request.options)
-            batch_metadata["base_directory"] = path
+            batch_metadata["base_directory"] = str(self.datasource.base_directory)
 
             # Some pydantic annotations are postponed due to circular imports.
             # Batch.update_forward_refs() will set the annotations before we
