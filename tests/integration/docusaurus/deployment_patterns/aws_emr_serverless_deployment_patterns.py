@@ -94,7 +94,7 @@ if __name__ == "__main__":
             }
         ],
     }
-    context_gx.add_checkpoint(**python_config)
+    context_gx.add_or_update_checkpoint(**python_config)
 
     results = context_gx.run_checkpoint(
         checkpoint_name=my_checkpoint_name,
