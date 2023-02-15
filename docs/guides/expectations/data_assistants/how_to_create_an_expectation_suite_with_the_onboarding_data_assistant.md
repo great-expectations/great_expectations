@@ -30,7 +30,7 @@ great_expectations suite new --profile
 ### 1. Prepare your Batch Request
 
 Data Assistants excel at automating the Profiling process across multiple Batches. Therefore, for this guide you will
- be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Datasource that our Batch 
+ be using a Batch Request that covers multiple Batches. For the purposes of this demo, the Datasource that our Batch
  Request queries will consist of a sample of the New York taxi trip data.
 
 This is the configuration that you will use for your `Datasource`:
@@ -44,14 +44,14 @@ And this is the configuration that you will use for your `BatchRequest`:
 ```
 
 :::caution
-The Onboarding Data Assistant will run a high volume of queries against your `Datasource`. Data Assistant performance 
-  can vary significantly depending on the number of Batches, count of records per Batch, and network latency. It is 
+The Onboarding Data Assistant will run a high volume of queries against your `Datasource`. Data Assistant performance
+  can vary significantly depending on the number of Batches, count of records per Batch, and network latency. It is
   recommended that you start with a smaller `BatchRequest` if you find that Data Assistant runtimes are too long.
 :::
 
 ### 2. Prepare a new Expectation Suite
 
-Preparing a new Expectation Suite is done with the Data Context's `create_expectation_suite(...)` method, as seen in
+Preparing a new Expectation Suite is done with the Data Context's `add_expectation_suite(...)` method, as seen in
 this code example:
 
 ```python name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py expectation_suite"
@@ -74,14 +74,14 @@ The following code shows how to run the Onboarding Assistant. In this code block
 ```
 
 :::note
-If you consider your `BatchRequest` data valid, and want to produce Expectations with ranges that are identical to the 
+If you consider your `BatchRequest` data valid, and want to produce Expectations with ranges that are identical to the
   data in the `BatchRequest`, there is no need to alter the command above. You will be using the default `estimation` parameter (`"exact"`).
   If you want to identify potential outliers in your `BatchRequest` data, pass `estimation="flag_outliers"` to the `run(...)` method.
 :::
 
 :::note
-The Onboarding Data Assistant `run(...)` method can accept other parameters in addition to `exclude_column_names` such 
-  as `include_column_names`, `include_column_name_suffixes`, and `cardinality_limit_mode`. 
+The Onboarding Data Assistant `run(...)` method can accept other parameters in addition to `exclude_column_names` such
+  as `include_column_names`, `include_column_name_suffixes`, and `cardinality_limit_mode`.
   For a description of the available parameters please see this docstring [here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/data_assistant/onboarding_data_assistant.py#L44).
 :::
 

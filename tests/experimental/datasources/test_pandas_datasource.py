@@ -105,14 +105,14 @@ class TestDynamicPandasAssets:
     @pytest.mark.parametrize(
         "method_name",
         [
-            param("read_clipboard"),
+            param("read_clipboard", marks=pytest.mark.xfail(reason="not path based")),
             param("read_csv"),
             param("read_excel"),
             param("read_feather"),
             param(
                 "read_fwf", marks=pytest.mark.xfail(reason="unhandled type annotation")
             ),
-            param("read_gbq"),
+            param("read_gbq", marks=pytest.mark.xfail(reason="not path based")),
             param("read_hdf"),
             param("read_html"),
             param("read_json"),
@@ -123,20 +123,24 @@ class TestDynamicPandasAssets:
             param("read_spss"),
             param(
                 "read_sql",
-                marks=pytest.mark.xfail(reason="conflict with 'sql' type name"),
+                marks=pytest.mark.xfail(reason="name conflict & not path based"),
             ),
             param(
                 "read_sql_query",
-                marks=pytest.mark.xfail(reason="type name logic expects 'sqlquery'"),
+                marks=pytest.mark.xfail(
+                    reason="type name logic expects 'sqltable' & not path based"
+                ),
             ),
             param(
                 "read_sql_table",
-                marks=pytest.mark.xfail(reason="type name logic expects 'sqltable'"),
+                marks=pytest.mark.xfail(
+                    reason="type name logic expects 'sqltable' & not path based"
+                ),
             ),
             param("read_stata"),
             param(
                 "read_table",
-                marks=pytest.mark.xfail(reason="conflict with 'table' type name"),
+                marks=pytest.mark.xfail(reason="name conflict & not path based"),
             ),
             param(
                 "read_xml",

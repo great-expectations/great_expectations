@@ -15,7 +15,7 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     # create expectation suite
-    suite = context.create_expectation_suite("my_expectation_suite")
+    suite = context.add_expectation_suite("my_expectation_suite")
     expectation = ExpectationConfiguration(
         expectation_type="expect_column_values_to_be_between",
         kwargs={"column": "col1", "min_value": 1, "max_value": 2},
@@ -211,7 +211,7 @@ def context_with_single_csv_spark_and_suite(
 ):
     context = context_with_single_taxi_csv_spark
     # create expectation suite
-    suite = context.create_expectation_suite("my_expectation_suite")
+    suite = context.add_expectation_suite("my_expectation_suite")
     expectation = ExpectationConfiguration(
         expectation_type="expect_column_to_exist",
         kwargs={"column": "pickup_datetime"},

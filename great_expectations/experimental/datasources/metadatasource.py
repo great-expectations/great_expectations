@@ -36,9 +36,9 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
 
         cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
 
-        if cls_name == "Datasource":
+        if cls_name == "Datasource" or cls_name.startswith("_"):
             # NOTE: the above check is brittle and must be kept in-line with the Datasource.__name__
-            logger.debug("1c. Skip factory registration of base `Datasource`")
+            logger.debug(f"1c. Skip factory registration of base `{cls_name}`")
             return cls
 
         logger.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")

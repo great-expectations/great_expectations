@@ -69,12 +69,6 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
         "SqliteTableAsset.json",
         "SqliteQueryAsset.json",
         "SASAsset.json",
-        "SQLDatasource.json",
-        "PostgresDatasource.json",
-        "PandasFilesystemDatasource.json",
-        "SparkDatasource.json",
-        "_PandasDatasource.json",
-        "_SparkDatasource.json",
     ):
         pytest.xfail(f"{schema_path.name} does not exist")
 

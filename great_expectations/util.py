@@ -73,7 +73,7 @@ try:
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
     # Fallback for python < 3.8
-    import importlib_metadata  # type: ignore[no-redef]
+    import importlib_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -420,6 +420,7 @@ def load_class(class_name: str, module_name: str):
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
+
     try:
         klass_ = getattr(module_obj, class_name)
     except AttributeError:

@@ -1,13 +1,13 @@
 {
-    "title": "SparkDatasource",
+    "title": "PandasFilesystemDatasource",
     "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
     "type": "object",
     "properties": {
         "type": {
             "title": "Type",
-            "default": "spark",
+            "default": "pandas_filesystem",
             "enum": [
-                "spark"
+                "pandas_filesystem"
             ],
             "type": "string"
         },
@@ -20,7 +20,7 @@
             "default": {},
             "type": "object",
             "additionalProperties": {
-                "$ref": "#/definitions/CSVSparkAsset"
+                "$ref": "#/definitions/_FilesystemDataAsset"
             }
         },
         "base_directory": {
@@ -53,8 +53,8 @@
                 "key"
             ]
         },
-        "CSVSparkAsset": {
-            "title": "CSVSparkAsset",
+        "_FilesystemDataAsset": {
+            "title": "_FilesystemDataAsset",
             "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -64,10 +64,6 @@
                 },
                 "type": {
                     "title": "Type",
-                    "default": "csv_spark",
-                    "enum": [
-                        "csv_spark"
-                    ],
                     "type": "string"
                 },
                 "order_by": {
@@ -81,20 +77,11 @@
                     "title": "Regex",
                     "type": "string",
                     "format": "regex"
-                },
-                "header": {
-                    "title": "Header",
-                    "default": false,
-                    "type": "boolean"
-                },
-                "inferSchema": {
-                    "title": "Inferschema",
-                    "default": false,
-                    "type": "boolean"
                 }
             },
             "required": [
                 "name",
+                "type",
                 "regex"
             ]
         }
