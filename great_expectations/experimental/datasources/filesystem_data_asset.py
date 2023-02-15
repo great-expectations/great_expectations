@@ -73,16 +73,16 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
             batch request.
         """
         base_directory: pathlib.Path = self.datasource.base_directory
-        all_paths_relative_to_base_dir: list[str] = [
-            str(file.relative_to(base_directory))
-            for file in base_directory.glob("**/*.*")
+        all_paths: list[pathlib.Path] = [
+            pathlib.Path(path) for path in base_directory.glob("**/*.*")
         ]
 
         batch_requests_with_path: list[tuple[BatchRequest, pathlib.Path]] = []
 
-        rel_path: str
-        for rel_path in all_paths_relative_to_base_dir:
-            match = self._regex_parser.get_matches(target=rel_path)
+        abs_path: pathlib.Path
+        for abs_path in all_paths:
+            path_relative_to_base_dir = str(abs_path.relative_to(base_directory))
+            match = self._regex_parser.get_matches(target=path_relative_to_base_dir)
             if match:
                 # Create the batch request that would correlate to this regex match
                 match_options = {}
@@ -92,6 +92,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                     match_options[
                         self._all_group_index_to_group_name_mapping[group_id]
                     ] = match.group(group_id)
+                    match_options["path"] = str(abs_path)
                 # Determine if this file_name matches the batch_request
                 allowed_match = True
                 for key, value in batch_request.options.items():
@@ -106,10 +107,10 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),
-                            base_directory / rel_path,
+                            abs_path,
                         )
                     )
-                    logger.debug(f"Matching path: {base_directory / rel_path}")
+                    logger.debug(f"Matching path: {abs_path}")
         if not batch_requests_with_path:
             logger.warning(
                 f"Batch request {batch_request} corresponds to no data files."

@@ -521,8 +521,9 @@ class Batch(ExperimentalBaseModel):
     def _set_id(cls, values: dict) -> dict:
         # We need a unique identifier. This will likely change as we get more input.
         options_list = []
-        for k, v in values["batch_request"].options.items():
-            options_list.append(f"{k}_{v}")
+        for key, value in values["batch_request"].options.items():
+            if key != "path":
+                options_list.append(f"{key}_{value}")
 
         values["id"] = "-".join(
             [values["datasource"].name, values["data_asset"].name, *options_list]
