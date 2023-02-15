@@ -79,7 +79,7 @@ Let's save the scaffolded expectation suite as a JSON file in the
             "action_list_operator"
         ):
             code_cell = """\
-context.add_expectation_suite(expectation_suite=suite)
+context.update_expectation_suite(expectation_suite=suite)
 
 results = LegacyCheckpoint(
     name="_temp_checkpoint",
@@ -97,7 +97,7 @@ context.build_data_docs()
 context.open_data_docs(validation_result_identifier)"""
         else:
             code_cell = """\
-context.add_expectation_suite(expectation_suite=suite)
+context.update_expectation_suite(expectation_suite=suite)
 
 results = LegacyCheckpoint(
     name="_temp_checkpoint",
