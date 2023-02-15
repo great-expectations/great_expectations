@@ -321,7 +321,7 @@ def test_sa_unexpected_index_query_metric_without_id_pk(sa, animal_table_df):
         )
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_spark_unexpected_index_list_metric_with_id_pk(
     spark_session, animal_table_df, metric_value_kwargs_complete
 ):
@@ -347,7 +347,7 @@ def test_spark_unexpected_index_list_metric_with_id_pk(
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_list,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for val in results.values():
         assert val == [
             {"animals": "giraffe", "pk_1": 3},
             {"animals": "lion", "pk_1": 4},
@@ -355,7 +355,7 @@ def test_spark_unexpected_index_list_metric_with_id_pk(
         ]
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_spark_unexpected_index_list_metric_without_id_pk(
     spark_session, animal_table_df
 ):
@@ -393,7 +393,7 @@ def test_spark_unexpected_index_list_metric_without_id_pk(
     assert list(results.values())[0] is None
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_spark_unexpected_index_query_metric_with_id_pk(
     spark_session, animal_table_df, metric_value_kwargs_complete
 ):
@@ -419,14 +419,14 @@ def test_spark_unexpected_index_query_metric_with_id_pk(
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for val in results.values():
         assert (
             val
             == "df.filter(F.expr((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog)))))"
         )
 
 
-@pytest.mark.unit
+@pytest.mark.integration
 def test_spark_unexpected_index_query_metric_without_id_pk(
     spark_session, animal_table_df, metric_value_kwargs_complete
 ):
@@ -461,7 +461,7 @@ def test_spark_unexpected_index_query_metric_without_id_pk(
     results: Dict[Tuple[str, str, str], MetricValue] = engine.resolve_metrics(
         metrics_to_resolve=(unexpected_index_query,), metrics=metrics
     )
-    for (key, val) in results.items():
+    for val in results.values():
         assert (
             val
             == "df.filter(F.expr((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog)))))"
