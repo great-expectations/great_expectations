@@ -220,6 +220,9 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
             """One must implement "_validate_batch_request" on a DataAsset subclass."""
         )
 
+    def _build_data_connector(self) -> None:
+        raise NotImplementedError
+
     # Sorter methods
     @pydantic.validator("order_by", pre=True, each_item=True)
     def _parse_order_by_sorter(
@@ -409,6 +412,7 @@ class Datasource(
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
+        asset._build_data_connector()
         asset.test_connection()
         self.assets[asset.name] = asset
         # pydantic needs to know that an asset has been set so that it doesn't get excluded

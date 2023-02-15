@@ -14,7 +14,6 @@ from typing import (
     Optional,
     Pattern,
     Set,
-    Union,
 )
 
 import pydantic
@@ -38,10 +37,6 @@ if TYPE_CHECKING:
         PandasExecutionEngine,
         SparkDFExecutionEngine,
     )
-    from great_expectations.experimental.datasources import (
-        PandasFilesystemDatasource,
-        SparkDatasource,
-    )
     from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
         DataConnector,
     )
@@ -61,11 +56,6 @@ class _FilePathDataAsset(DataAsset):
     # General file-path DataAsset pertaining attributes.
     regex: Pattern
 
-    # Internal attributes
-    _datasource: Union[
-        PandasFilesystemDatasource, SparkDatasource
-    ] = pydantic.PrivateAttr()
-
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
     )
@@ -74,6 +64,8 @@ class _FilePathDataAsset(DataAsset):
     _all_group_name_to_group_index_mapping: Dict[str, int] = pydantic.PrivateAttr()
     _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
     _all_group_names: List[str] = pydantic.PrivateAttr()
+
+    _data_connector: DataConnector = pydantic.PrivateAttr()
 
     class Config:
         """
@@ -87,6 +79,7 @@ class _FilePathDataAsset(DataAsset):
 
     def __init__(self, **data):
         super().__init__(**data)
+
         self._regex_parser = RegExParser(
             regex_pattern=self.regex,
             unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
@@ -100,6 +93,7 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
+    def __post_init_post_parse__(self):
         self._data_connector = self._get_data_connector()
 
     def batch_request_options_template(
@@ -245,9 +239,6 @@ class _FilePathDataAsset(DataAsset):
             raise TestConnectionError(
                 f"""No data references found in DataAsset "{self.name}"."""
             )
-
-    def _get_data_connector(self) -> DataConnector:
-        raise NotImplementedError
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(

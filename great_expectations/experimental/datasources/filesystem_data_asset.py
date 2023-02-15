@@ -12,9 +12,6 @@ from great_expectations.experimental.datasources.file_path_data_asset import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
-        DataConnector,
-    )
     from great_expectations.experimental.datasources.interfaces import (
         BatchRequest,
         BatchRequestOptions,
@@ -55,8 +52,8 @@ class _FilesystemDataAsset(_FilePathDataAsset):
 
         return super().build_batch_request(options)
 
-    def _get_data_connector(self) -> DataConnector:
-        data_connector: DataConnector = FilesystemDataConnector(
+    def _build_data_connector(self) -> None:
+        self._data_connector = FilesystemDataConnector(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             base_directory=self.datasource.base_directory,
@@ -64,4 +61,3 @@ class _FilesystemDataAsset(_FilePathDataAsset):
             glob_directive=self.glob_directive,
             data_context_root_directory=self.datasource.data_context_root_directory,
         )
-        return data_connector
