@@ -80,7 +80,7 @@ def test_sparkdf_datasource_custom_data_asset(
     )
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context_parameterized_expectation_suite.create_expectation_suite(
+    data_context_parameterized_expectation_suite.add_expectation_suite(
         "test_sparkdf_datasource.default"
     )
     batch_kwargs = data_context_parameterized_expectation_suite.build_batch_kwargs(
@@ -131,9 +131,7 @@ def test_force_reuse_spark_context(
 
     df = spark.read.format("parquet").load(tmp_parquet_filename)
     batch_kwargs = {"dataset": df, "datasource": dataset_name}
-    _ = data_context_parameterized_expectation_suite.create_expectation_suite(
-        dataset_name
-    )
+    _ = data_context_parameterized_expectation_suite.add_expectation_suite(dataset_name)
     batch = data_context_parameterized_expectation_suite.get_batch(
         batch_kwargs=batch_kwargs, expectation_suite_name=dataset_name
     )
@@ -349,7 +347,7 @@ def test_standalone_spark_passthrough_datasource(
     # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the
     # datasource built in a data context
     # Our dataset fixture is parameterized by all backends. The spark source should only accept a spark dataset
-    data_context_parameterized_expectation_suite.create_expectation_suite("new_suite")
+    data_context_parameterized_expectation_suite.add_expectation_suite("new_suite")
     batch_kwargs = InMemoryBatchKwargs(datasource="spark_source", dataset=dataset)
 
     if isinstance(dataset, SparkDFDataset):

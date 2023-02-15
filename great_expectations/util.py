@@ -420,6 +420,7 @@ def load_class(class_name: str, module_name: str) -> Any:
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
+
     try:
         klass_ = getattr(module_obj, class_name)
     except AttributeError:

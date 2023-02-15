@@ -715,7 +715,7 @@ def test_suite_edit_with_invalid_json_batch_kwargs_raises_helpful_error(
     """
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
 
     runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
@@ -750,7 +750,7 @@ def test_suite_edit_with_batch_kwargs_unable_to_load_a_batch_raises_helpful_erro
     project_dir = empty_data_context.root_directory
 
     context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
     context.add_datasource("source", class_name="PandasDatasource")
 
     runner = CliRunner(mix_stderr=False)
@@ -820,7 +820,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     """
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
     assert context.list_expectation_suites()[0].expectation_suite_name == "foo"
 
     runner = CliRunner(mix_stderr=False)
@@ -1141,7 +1141,7 @@ def test_suite_edit_on_existing_suite_one_datasources_with_batch_kwargs_without_
     '"""
     project_dir = titanic_data_context.root_directory
     context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
 
     runner = CliRunner(mix_stderr=False)
     batch_kwargs = {"path": "../data/Titanic.csv"}
@@ -1195,7 +1195,7 @@ def test_suite_edit_on_exsiting_suite_one_datasources_with_datasource_arg_and_ba
     """
     project_dir = titanic_data_context.root_directory
     context = DataContext(project_dir)
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
 
     runner = CliRunner(mix_stderr=False)
     batch_kwargs = {"path": os.path.join(project_dir, "../", "data", "Titanic.csv")}
@@ -1346,7 +1346,7 @@ def test_suite_list_with_zero_suites(caplog, empty_data_context):
 def test_suite_list_with_one_suite(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
-    context.create_expectation_suite("a.warning")
+    context.add_expectation_suite("a.warning")
     runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(
@@ -1366,9 +1366,9 @@ def test_suite_list_with_one_suite(caplog, empty_data_context):
 def test_suite_list_with_multiple_suites(caplog, empty_data_context):
     project_dir = empty_data_context.root_directory
     context = DataContext(project_dir)
-    context.create_expectation_suite("a.warning")
-    context.create_expectation_suite("b.warning")
-    context.create_expectation_suite("c.warning")
+    context.add_expectation_suite("a.warning")
+    context.add_expectation_suite("b.warning")
+    context.add_expectation_suite("c.warning")
 
     runner = CliRunner(mix_stderr=False)
 
@@ -1435,7 +1435,7 @@ def test_suite_delete_with_non_existent_suite(
 ):
     context = empty_data_context_stats_enabled
     project_dir = context.root_directory
-    suite = context.create_expectation_suite("foo")
+    suite = context.add_expectation_suite("foo")
     context.save_expectation_suite(suite)
     mock_emit.reset_mock()
 
@@ -1475,7 +1475,7 @@ def test_suite_delete_with_one_suite(
 ):
     project_dir = empty_data_context_stats_enabled.root_directory
     context = DataContext(project_dir)
-    suite = context.create_expectation_suite("a.warning")
+    suite = context.add_expectation_suite("a.warning")
     context.save_expectation_suite(suite)
     mock_emit.reset_mock()
 
@@ -1583,7 +1583,7 @@ def test_suite_scaffold_on_existing_suite_raises_error(
     """
     context = empty_data_context_stats_enabled
     root_dir = context.root_directory
-    suite = context.create_expectation_suite("foop")
+    suite = context.add_expectation_suite("foop")
     context.save_expectation_suite(suite)
     assert context.list_expectation_suite_names() == ["foop"]
     mock_emit.reset_mock()

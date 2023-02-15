@@ -59,7 +59,7 @@ def validator_with_titanic_1911_asset(
 
     register_expectation(ExpectNothing)
 
-    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.create_expectation_suite(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled.add_expectation_suite(
         expectation_suite_name="titanic_1911_suite"
     )
     batch_request = BatchRequest(

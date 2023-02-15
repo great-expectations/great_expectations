@@ -29,12 +29,6 @@ from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
-from great_expectations.core.batch import (
-    Batch,  # noqa: TCH001
-    BatchData,  # noqa: TCH001
-    BatchDefinition,  # noqa: TCH001
-    BatchMarkers,  # noqa: TCH001
-)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
@@ -44,55 +38,37 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
-from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
-from great_expectations.dataset.sqlalchemy_dataset import SqlAlchemyBatchReference
+from great_expectations.dataset.pandas_dataset import PandasDataset
+from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
+from great_expectations.dataset.sqlalchemy_dataset import (
+    SqlAlchemyBatchReference,
+    SqlAlchemyDataset,
+)
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
 )
-from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     list_registered_expectation_implementations,
 )
-from great_expectations.experimental.datasources.interfaces import (
-    Batch as XBatch,  # noqa: TCH001
-)
-from great_expectations.rule_based_profiler import (
-    RuleBasedProfilerResult,  # noqa: TCH001
-)
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
-from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-    ExpectationConfigurationBuilder,  # noqa: TCH001
-)
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
     ReconciliationDirectives,
     ReconciliationStrategy,
 )
-from great_expectations.rule_based_profiler.parameter_builder import (
-    ParameterBuilder,  # noqa: TCH001
-)
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,  # noqa: TCH001
-)
-from great_expectations.rule_based_profiler.rule import Rule  # noqa: TCH001
 from great_expectations.rule_based_profiler.rule_based_profiler import (
     BaseRuleBasedProfiler,
 )
 from great_expectations.types import ClassConfig
 from great_expectations.util import load_class, verify_dynamic_loading_support
-from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.exception_info import ExceptionInfo
-from great_expectations.validator.metric_configuration import (
-    MetricConfiguration,  # noqa: TCH001
-)
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 from great_expectations.validator.validation_graph import (
     ExpectationValidationGraph,
@@ -113,7 +89,34 @@ except ImportError:
     )
 
 if TYPE_CHECKING:
+    from great_expectations.core.batch import (
+        Batch,
+        BatchData,
+        BatchDefinition,
+        BatchMarkers,
+    )
+    from great_expectations.core.id_dict import BatchSpec
     from great_expectations.data_context.data_context import AbstractDataContext
+    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.expectations.expectation import Expectation
+    from great_expectations.experimental.datasources.interfaces import Batch as XBatch
+    from great_expectations.rule_based_profiler import (
+        RuleBasedProfilerResult,
+    )
+    from great_expectations.rule_based_profiler.expectation_configuration_builder import (
+        ExpectationConfigurationBuilder,
+    )
+    from great_expectations.rule_based_profiler.parameter_builder import (
+        ParameterBuilder,
+    )
+    from great_expectations.rule_based_profiler.parameter_container import (
+        ParameterContainer,
+    )
+    from great_expectations.rule_based_profiler.rule import Rule
+    from great_expectations.validator.computed_metric import MetricValue
+    from great_expectations.validator.metric_configuration import (
+        MetricConfiguration,
+    )
 
 
 @dataclass
@@ -617,7 +620,7 @@ class Validator:
         expectation_type: str,
         expectation_kwargs: dict,
         meta: dict,
-        expectation_impl: "Expectation",  # noqa: F821
+        expectation_impl: Expectation,
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationConfiguration:
         auto: bool = expectation_kwargs.get("auto", False)
@@ -1539,7 +1542,9 @@ class Validator:
             suppress_warnings,
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.save_expectation_suite(expectation_suite)
+            self._data_context.add_or_update_expectation_suite(
+                expectation_suite=expectation_suite
+            )
             if self.cloud_mode:
                 updated_suite = self._data_context.get_expectation_suite(
                     ge_cloud_id=str(expectation_suite.ge_cloud_id)

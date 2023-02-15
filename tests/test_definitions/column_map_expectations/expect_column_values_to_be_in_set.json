@@ -300,7 +300,12 @@
       },
       "out": {
         "success": false,
-        "unexpected_index_list": [0],
+        "unexpected_index_list": [
+          {
+            "pk_index": 0,
+            "dates": "2018-01-01"
+          }
+        ],
         "unexpected_list": ["2018-01-01"]
       }
     }

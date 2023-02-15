@@ -69,7 +69,7 @@ batch_kwargs = {
     "table": "genres_movies"
 }
 expectation_suite_name = "genres_movies.fkey"
-context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
+context.add_or_update_expectation_suite(expectation_suite_name)
 batch = context.get_batch(
     batch_kwargs=batch_kwargs,
     expectation_suite_name=expectation_suite_name

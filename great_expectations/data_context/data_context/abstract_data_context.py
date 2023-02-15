@@ -155,7 +155,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
-    from great_expectations.data_context.store.profiler_store import ProfilerStore
+    from great_expectations.data_context.store.profiler_store import (
+        ProfilerStore,  # noqa: TCH004
+    )
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
@@ -2374,7 +2376,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 include_rendered_content=include_rendered_content,
             )
         if create_expectation_suite_with_name is not None:
-            expectation_suite = self.create_expectation_suite(
+            expectation_suite = self.add_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name,
             )
 
@@ -3648,8 +3650,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                     + profiler.__name__
                 )
 
-        self.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name, overwrite_existing=True
+        self.add_or_update_expectation_suite(
+            expectation_suite_name=expectation_suite_name
         )
 
         # TODO: Add batch_parameters
