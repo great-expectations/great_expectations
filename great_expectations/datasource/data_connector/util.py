@@ -351,11 +351,11 @@ def normalize_directory_path(
 ) -> pathlib.Path:
     dir_path = pathlib.Path(dir_path)
 
-    root_directory_path = pathlib.Path(root_directory_path)
-
     # If directory is a relative path, interpret it as relative to the root directory.
     if dir_path.is_absolute() or root_directory_path is None:
         return dir_path
+
+    root_directory_path = pathlib.Path(root_directory_path)
 
     return root_directory_path.joinpath(dir_path)
 
