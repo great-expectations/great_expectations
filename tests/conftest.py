@@ -859,7 +859,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     monkeypatch.delenv("GE_USAGE_STATS")
 
     path = tmp_path / "titanic_data_context"
-    path.mkdir()
+    path.mkdir(exist_ok=True)
 
     project_path: str = str(path)
     context_path: str = os.path.join(project_path, "great_expectations")
@@ -1443,7 +1443,7 @@ def empty_data_context_stats_enabled(tmp_path, monkeypatch):
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)
 
     path = tmp_path / "empty_data_context"
-    path.mkdir()
+    path.mkdir(exist_ok=True)
 
     project_path = str(path)
     context = gx.data_context.FileDataContext.create(project_path)
