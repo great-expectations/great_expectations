@@ -92,10 +92,12 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                     match_options[
                         self._all_group_index_to_group_name_mapping[group_id]
                     ] = match.group(group_id)
-                    match_options["path"] = str(abs_path)
+                    match_options["path"] = abs_path
                 # Determine if this file_name matches the batch_request
                 allowed_match = True
                 for key, value in batch_request.options.items():
+                    if key == "path" and isinstance(value, str):
+                        value = pathlib.Path(value)
                     if match_options[key] != value:
                         allowed_match = False
                         break
@@ -187,7 +189,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
             )
 
             batch_metadata = copy.deepcopy(request.options)
-            batch_metadata["base_directory"] = str(self.datasource.base_directory)
+            batch_metadata["base_directory"] = self.datasource.base_directory
 
             # Some pydantic annotations are postponed due to circular imports.
             # Batch.update_forward_refs() will set the annotations before we
