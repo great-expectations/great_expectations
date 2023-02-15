@@ -62,5 +62,6 @@ class _FilesystemDataAsset(_FilePathDataAsset):
             base_directory=self.datasource.base_directory,
             regex=self.regex,
             glob_directive=self.glob_directive,
+            data_context_root_directory=self.datasource.data_context_root_directory,
         )
         return data_connector

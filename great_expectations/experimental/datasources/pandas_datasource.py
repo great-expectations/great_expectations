@@ -116,6 +116,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     type: Literal["pandas_filesystem"] = "pandas_filesystem"
     name: str
     base_directory: pathlib.Path
+    data_context_root_directory: pathlib.Path
     assets: Dict[
         str,
         _FilesystemDataAsset,

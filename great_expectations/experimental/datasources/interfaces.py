@@ -43,6 +43,7 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
+    from great_expectations.datasource import DataConnector
 
 try:
     import pyspark
@@ -151,6 +152,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
+    _data_connector: DataConnector = pydantic.PrivateAttr()
 
     @property
     def datasource(self) -> _DatasourceT:

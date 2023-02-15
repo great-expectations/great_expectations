@@ -100,6 +100,8 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
+        self._data_connector = self._get_data_connector()
+
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
@@ -165,11 +167,9 @@ class _FilePathDataAsset(DataAsset):
             self.datasource.get_execution_engine()
         )
 
-        data_connector: DataConnector = self._get_data_connector()
-
         batch_definition_list: List[
             BatchDefinition
-        ] = data_connector.get_batch_definition_list(batch_request=batch_request)
+        ] = self._data_connector.get_batch_definition_list(batch_request=batch_request)
 
         batch_list: List[Batch] = []
 
@@ -180,7 +180,7 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchRequestOptions
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = data_connector.build_batch_spec(
+            batch_spec = self._data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
             batch_spec_options = {
@@ -238,10 +238,9 @@ class _FilePathDataAsset(DataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        data_connector: DataConnector = self._get_data_connector()
         if (
-            data_connector.get_unmatched_data_reference_count()
-            == data_connector.get_data_reference_count()
+            self._data_connector.get_unmatched_data_reference_count()
+            == self._data_connector.get_data_reference_count()
         ):
             raise TestConnectionError(
                 f"""No data references found in DataAsset "{self.name}"."""

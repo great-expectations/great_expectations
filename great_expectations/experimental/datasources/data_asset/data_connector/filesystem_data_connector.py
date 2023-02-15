@@ -39,15 +39,18 @@ class FilesystemDataConnector(FilePathDataConnector):
         base_directory: pathlib.Path,
         regex: re.Pattern,
         glob_directive: str = "**/*",
+        data_context_root_directory: Optional[pathlib.Path] = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
     ) -> None:
-        self._data_context_root_directory: Optional[pathlib.Path] = None
-
         self._base_directory = base_directory
         self._glob_directive: str = glob_directive
+
+        self._data_context_root_directory: Optional[
+            pathlib.Path
+        ] = data_context_root_directory
 
         super().__init__(
             datasource_name=datasource_name,
@@ -61,16 +64,6 @@ class FilesystemDataConnector(FilePathDataConnector):
         )
 
     @property
-    def data_context_root_directory(self) -> Optional[pathlib.Path]:
-        return self._data_context_root_directory
-
-    @data_context_root_directory.setter
-    def data_context_root_directory(
-        self, data_context_root_directory: Optional[pathlib.Path]
-    ) -> None:
-        self._data_context_root_directory = data_context_root_directory
-
-    @property
     def base_directory(self) -> pathlib.Path:
         """
         Accessor method for base_directory. If directory is a relative path, interpret it as relative to the
@@ -78,7 +71,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         """
         return normalize_directory_path(
             dir_path=self._base_directory,
-            root_directory_path=self.data_context_root_directory,
+            root_directory_path=self._data_context_root_directory,
         )
 
     # Interface Method
