@@ -816,6 +816,8 @@ def test_spark_single_column_complete_result_format(
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
+        "unexpected_index_query": "df.filter(F.expr((animals IS NOT NULL) AND (NOT "
+        "(animals IN (cat, fish, dog)))))",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
@@ -1025,6 +1027,10 @@ def test_sqlite_single_column_complete_result_format(
         ],
         "partial_unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_count": 3,
+        "unexpected_index_query": "SELECT animals \n"
+        "FROM animal_names \n"
+        "WHERE animals IS NOT NULL AND (animals NOT IN "
+        "('cat', 'fish', 'dog'));",
         "unexpected_list": ["giraffe", "lion", "zebra"],
         "unexpected_percent": 50.0,
         "unexpected_percent_nonmissing": 50.0,
