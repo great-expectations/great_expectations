@@ -1041,7 +1041,7 @@ def add_citation_with_batch_request(
             comment="Created suite added via CLI",
             batch_request=batch_request,  # type: ignore[arg-type] # values union
         )
-        data_context.save_expectation_suite(expectation_suite=expectation_suite)
+        data_context.add_expectation_suite(expectation_suite=expectation_suite)
 
 
 def get_batch_request_from_json_file(

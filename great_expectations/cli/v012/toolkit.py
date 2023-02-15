@@ -295,7 +295,7 @@ Great Expectations will create a new Expectation Suite '{:s}' and store it here:
     )
     suite = context.create_expectation_suite(expectation_suite_name)
     suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
-    context.save_expectation_suite(suite, expectation_suite_name)
+    context.save_expectation_suite(expectation_suite=suite)
 
 
 def launch_jupyter_notebook(notebook_path: str) -> None:
