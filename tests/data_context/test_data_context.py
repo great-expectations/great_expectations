@@ -3166,7 +3166,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             ),
         ],
     )
-    context.add_expectation_suite(expectation_suite=expectation_suite)
+    context.update_expectation_suite(expectation_suite=expectation_suite)
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )

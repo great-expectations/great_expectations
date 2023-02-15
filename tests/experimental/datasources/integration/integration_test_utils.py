@@ -352,7 +352,7 @@ def _configure_and_run_data_assistant(
     expectation_suite = data_assistant_result.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
-    context.add_expectation_suite(expectation_suite=expectation_suite)
+    context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
 
     # Run a checkpoint
     checkpoint_config = {
