@@ -60,8 +60,8 @@ def test_catch_exceptions_no_exceptions(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
+        "test_suite"
     )
 
     expectation_configuration: ExpectationConfiguration
@@ -174,8 +174,8 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_false(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
+        "test_suite"
     )
 
     expectation_configuration: ExpectationConfiguration
@@ -291,8 +291,8 @@ def test_catch_exceptions_exception_occurred_catch_exceptions_true(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
+        "test_suite"
     )
 
     expectation_configuration: ExpectationConfiguration
@@ -444,9 +444,7 @@ def test_result_format_configured_no_set_default_override(
 
     suite: ExpectationSuite
 
-    suite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
-    )
+    suite = in_memory_runtime_context.add_expectation_suite("test_suite")
 
     expectation_configuration: ExpectationConfiguration
 
@@ -518,9 +516,7 @@ def test_result_format_configured_no_set_default_override(
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
-    )
+    suite = in_memory_runtime_context.add_or_update_expectation_suite("test_suite")
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -560,9 +556,7 @@ def test_result_format_configured_no_set_default_override(
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
-    )
+    suite = in_memory_runtime_context.add_or_update_expectation_suite("test_suite")
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -672,9 +666,7 @@ def test_result_format_configured_with_set_default_override(
 
     suite: ExpectationSuite
 
-    suite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
-    )
+    suite = in_memory_runtime_context.add_expectation_suite("test_suite")
 
     expectation_configuration: ExpectationConfiguration
 
@@ -763,9 +755,7 @@ def test_result_format_configured_with_set_default_override(
         "result_format": result_format,
     }
 
-    suite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
-    )
+    suite = in_memory_runtime_context.add_or_update_expectation_suite("test_suite")
 
     expectation_arguments_without_meta = dict(
         **runtime_environment_arguments, **expectation_arguments_column
@@ -851,8 +841,8 @@ def test_in_memory_runtime_context_configured_with_usage_stats_handler(
         "result_format": result_format,
     }
 
-    suite: ExpectationSuite = in_memory_runtime_context.create_expectation_suite(
-        "test_suite", overwrite_existing=True
+    suite: ExpectationSuite = in_memory_runtime_context.add_expectation_suite(
+        "test_suite"
     )
 
     expectation_configuration: ExpectationConfiguration

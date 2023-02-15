@@ -50,7 +50,7 @@ context = gx.get_context()
 expectation_suite_name = "{self.suite_name}"
 
 # Wipe the suite clean to prevent unwanted expectations in the batch
-suite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
+suite = context.add_or_update_expectation_suite(expectation_suite_name)
 
 batch_kwargs = {self.batch_kwargs}
 batch = context.get_batch(batch_kwargs, suite)

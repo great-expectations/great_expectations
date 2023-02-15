@@ -75,7 +75,7 @@ expectation_suite_name = "getting_started_expectation_suite_taxi.demo"
 # Getting Started Guide is being used. It can be ignored by users
 expectation_suite_name = GETTING_STARTED_EXPECTATION_SUITE_NAME
 
-context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name=expectation_suite_name

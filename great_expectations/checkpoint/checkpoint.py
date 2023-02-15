@@ -4,7 +4,7 @@ import copy
 import datetime
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union, cast
 from uuid import UUID
 
 import great_expectations.exceptions as gx_exceptions
@@ -55,17 +55,26 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
+    load_class,
 )
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,  # noqa: TCH001
 )
-from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.validator.validator import Validator
+
 
 logger = logging.getLogger(__name__)
+
+
+def _get_validator_class() -> Type[Validator]:
+    """Using this function helps work around circular import dependncies."""
+    module_name = "great_expectations.validator.validator"
+    class_name = "Validator"
+    return load_class(class_name=class_name, module_name=module_name)
 
 
 class BaseCheckpoint(ConfigPeer):
@@ -1073,7 +1082,7 @@ class LegacyCheckpoint(Checkpoint):
             )
 
         for batch in assets_to_validate:
-            if not isinstance(batch, (tuple, DataAsset, Validator)):
+            if not isinstance(batch, (tuple, DataAsset, _get_validator_class())):
                 raise gx_exceptions.DataContextError(
                     "Batches are required to be of type DataAsset or Validator"
                 )

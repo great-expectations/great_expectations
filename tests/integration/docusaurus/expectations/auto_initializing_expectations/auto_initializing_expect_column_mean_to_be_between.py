@@ -65,8 +65,8 @@ batch_request_2018_data: BatchRequest = BatchRequest(
     data_asset_name="yellow_tripdata_sample_2018",
 )
 
-suite = data_context.create_expectation_suite(
-    expectation_suite_name="new_expectation_suite", overwrite_existing=True
+suite = data_context.add_or_update_expectation_suite(
+    expectation_suite_name="new_expectation_suite"
 )
 validator = data_context.get_validator(
     expectation_suite=suite, batch_request=batch_request_2018_data

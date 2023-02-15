@@ -265,10 +265,8 @@ batch_request.data_asset_name = (
     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
 )
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py create_expectation_suite">
-context.create_expectation_suite(
-    expectation_suite_name="test_gcs_suite", overwrite_existing=True
-)
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_expectation_suite">
+context.add_or_update_expectation_suite(expectation_suite_name="test_gcs_suite")
 
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_gcs_suite"
@@ -323,7 +321,7 @@ checkpoint_config = checkpoint_config.replace(
 )
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_checkpoint">
-context.add_checkpoint(**yaml.load(checkpoint_config))
+context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py run_checkpoint">

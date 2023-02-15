@@ -37,7 +37,7 @@ data_connectors:
 datasource = context.add_datasource(**yaml.safe_load(datasource_config))
 
 expectation_suite_name = "my_expectation_suite"
-context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 checkpoint_name = "my_checkpoint"
 checkpoint_config = f"""
@@ -51,7 +51,7 @@ validations:
       data_asset_name: yellow_tripdata_sample_2019-01
     expectation_suite_name: {expectation_suite_name}
 """
-context.add_checkpoint(**yaml.safe_load(checkpoint_config))
+context.add_or_update_checkpoint(**yaml.safe_load(checkpoint_config))
 
 # run the checkpoint twice to create two validations
 context.run_checkpoint(checkpoint_name=checkpoint_name)
