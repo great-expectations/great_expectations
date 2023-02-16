@@ -147,7 +147,6 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting">
 no_nesting = f"""
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting just the yaml">
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -175,15 +174,8 @@ runtime_configuration:
   result_format:
     result_format: BASIC
     partial_unexpected_count: 20
-# </snippet>
 """
 # </snippet>
-no_nesting_split = no_nesting.split("\n")
-no_nesting_list = []
-for line in no_nesting_split:
-    if not "# <snip" in line and not "# </snip" in line:
-        no_nesting_list.append(line)
-no_nesting = "\n".join(no_nesting_list)
 
 context.add_or_update_checkpoint(**yaml.load(no_nesting))
 
@@ -206,7 +198,6 @@ assert (
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults">
 nesting_with_defaults = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults just the yaml">
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -238,15 +229,8 @@ runtime_configuration:
   result_format:
     result_format: BASIC
     partial_unexpected_count: 20
-# </snippet>
 """
 # </snippet>
-nesting_with_defaults_split = nesting_with_defaults.split("\n")
-nesting_with_defaults_list = []
-for line in nesting_with_defaults_split:
-    if not "# <snip" in line and not "# </snip" in line:
-        nesting_with_defaults_list.append(line)
-nesting_with_defaults = "\n".join(nesting_with_defaults_list)
 
 add_or_update_checkpoint(**yaml.load(nesting_with_defaults))
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2">
@@ -274,7 +258,6 @@ assert second_data_asset == "yellow_tripdata_sample_2019-02"
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results">
 documentation_results = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results just the string">
 print(first_expectation_suite)
 my_expectation_suite
 
@@ -286,15 +269,8 @@ my_expectation_suite
 
 print(second_data_asset)
 yellow_tripdata_sample_2019-02
-# </snippet>
 """
 # </snippet>
-documentation_results_split = documentation_results.split("\n")
-documentation_results_list = []
-for line in documentation_results_split:
-    if not "# <snip" in line and not "# </snip" in line:
-        documentation_results_list.append(line)
-documentation_results = "\n".join(documentation_results_list)
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime">
 keys_passed_at_runtime = """
