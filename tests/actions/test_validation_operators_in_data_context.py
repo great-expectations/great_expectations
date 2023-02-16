@@ -59,7 +59,7 @@ def validation_operators_data_context(
     data_context.add_expectation_suite(expectation_suite=failure_expectations)
 
     warning_expectations.expectation_suite_name = "f1.warning"
-    data_context.save_expectation_suite(expectation_suite=warning_expectations)
+    data_context.add_expectation_suite(expectation_suite=warning_expectations)
 
     return data_context
 
