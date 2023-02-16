@@ -1858,7 +1858,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
 
     assert mock_webbrowser.call_count == 0
 
-    assert mock_emit.call_count == 8
+    assert mock_emit.call_count == 7
     assert mock_emit.call_args_list == [
         mock.call(
             {
