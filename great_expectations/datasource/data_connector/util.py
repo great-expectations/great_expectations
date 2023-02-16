@@ -3,12 +3,12 @@ from __future__ import annotations
 import copy
 import logging
 import os
+import pathlib
 import re
 import sre_constants
 import sre_parse
 import warnings
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
@@ -19,6 +19,7 @@ from great_expectations.datasource.data_connector.asset import Asset  # noqa: TC
 from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.datasource import DataConnector
 
 logger = logging.getLogger(__name__)
@@ -190,7 +191,7 @@ def _determine_batch_identifiers_using_named_groups(
 
 def map_batch_definition_to_data_reference_string_using_regex(
     batch_definition: BatchDefinition,
-    regex_pattern: str,
+    regex_pattern: re.Pattern,
     group_names: List[str],
 ) -> str:
     if not isinstance(batch_definition, BatchDefinition):
@@ -214,7 +215,7 @@ def map_batch_definition_to_data_reference_string_using_regex(
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
 def convert_batch_identifiers_to_data_reference_string_using_regex(
     batch_identifiers: IDDict,
-    regex_pattern: str,
+    regex_pattern: re.Pattern,
     group_names: List[str],
     data_asset_name: Optional[str] = None,
 ) -> str:
@@ -237,7 +238,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
 
 # noinspection PyUnresolvedReferences
 def _invert_regex_to_data_reference_template(
-    regex_pattern: str,
+    regex_pattern: re.Pattern | str,
     group_names: List[str],
 ) -> str:
     r"""Create a string template based on a regex and corresponding list of group names.
@@ -268,8 +269,11 @@ def _invert_regex_to_data_reference_template(
 
     num_groups = len(group_names)
 
+    if isinstance(regex_pattern, re.Pattern):
+        regex_pattern = regex_pattern.pattern
+
     # print("-"*80)
-    parsed_sre = sre_parse.parse(regex_pattern)
+    parsed_sre = sre_parse.parse(str(regex_pattern))
     for token, value in parsed_sre:  # type: ignore[attr-defined]
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
@@ -342,17 +346,22 @@ def sanitize_prefix_for_s3(text: str) -> str:
 
 
 def normalize_directory_path(
-    dir_path: str, root_directory_path: Optional[str] = None
-) -> str:
+    dir_path: Union[PathStr],
+    root_directory_path: Optional[PathStr] = None,
+) -> pathlib.Path:
+    dir_path = pathlib.Path(dir_path)
+
     # If directory is a relative path, interpret it as relative to the root directory.
-    if Path(dir_path).is_absolute() or root_directory_path is None:
+    if dir_path.is_absolute() or root_directory_path is None:
         return dir_path
 
-    return str(Path(root_directory_path).joinpath(dir_path))
+    root_directory_path = pathlib.Path(root_directory_path)
+
+    return root_directory_path.joinpath(dir_path)
 
 
 def get_filesystem_one_level_directory_glob_path_list(
-    base_directory_path: str, glob_directive: str
+    base_directory_path: Union[PathStr], glob_directive: str
 ) -> List[str]:
     """
     List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
@@ -360,11 +369,16 @@ def get_filesystem_one_level_directory_glob_path_list(
     :param glob_directive -- glob expansion directive
     :returns -- list of relative file paths
     """
-    globbed_paths = Path(base_directory_path).glob(glob_directive)
+    if isinstance(base_directory_path, str):
+        base_directory_path = pathlib.Path(base_directory_path)
+
+    globbed_paths = base_directory_path.glob(glob_directive)
+
     path_list: List[str] = [
         os.path.relpath(str(posix_path), base_directory_path)
         for posix_path in globbed_paths
     ]
+
     return path_list
 
 

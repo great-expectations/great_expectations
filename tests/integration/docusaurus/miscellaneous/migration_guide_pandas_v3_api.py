@@ -87,14 +87,12 @@ validations:
         index: -1
     expectation_suite_name: Titanic.profiled
 profilers: []
-ge_cloud_id:
-expectation_suite_ge_cloud_id:
 """
 
 assert actual_checkpoint_yaml == yaml.safe_load(expected_checkpoint_yaml)
 
 # run checkpoint
-context.add_checkpoint(**actual_checkpoint_yaml)
+context.add_or_update_checkpoint(**actual_checkpoint_yaml)
 results = context.run_checkpoint(checkpoint_name="test_v3_checkpoint")
 
 assert results["success"] is True

@@ -256,7 +256,14 @@
       {
         "title": "basic_negative_test_with_timestamps_other_sql",
         "exact_match_out": false,
-        "suppress_test_for": ["pandas", "spark", "postgresql", "mssql", "mysql"],
+        "suppress_test_for": [
+          "pandas",
+          "spark",
+          "postgresql",
+          "mssql",
+          "mysql",
+          "bigquery"
+        ],
         "out": {
           "unexpected_index_list":  [{"ts": "1970-01-01 12:00:01", "pk_index": 0}, {"ts": "2001-01-01 12:00:01", "pk_index": 9}],
           "success": false

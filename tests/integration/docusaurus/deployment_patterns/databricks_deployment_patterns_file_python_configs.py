@@ -173,9 +173,7 @@ assert (
 # CODE vvvvv vvvvv
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py get validator">
 expectation_suite_name = "insert_your_expectation_suite_name_here"
-context.create_expectation_suite(
-    expectation_suite_name=expectation_suite_name, overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 validator = context.get_validator(
     batch_request=batch_request,
     expectation_suite_name=expectation_suite_name,
@@ -245,7 +243,7 @@ my_checkpoint = context.test_yaml_config(yaml.dump(checkpoint_config))
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add checkpoint config">
-context.add_checkpoint(**checkpoint_config)
+context.add_or_update_checkpoint(**checkpoint_config)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py run checkpoint">
