@@ -113,7 +113,7 @@ profiler = UserConfigurableProfiler(
 expectation_suite_name = "compare_two_tables"
 suite = profiler.build_suite()
 suite.expectation_suite_name = expectation_suite_name
-context.save_expectation_suite(expectation_suite=suite)
+context.add_expectation_suite(expectation_suite=suite)
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py checkpoint_config">
 my_checkpoint_name = "comparison_checkpoint"
