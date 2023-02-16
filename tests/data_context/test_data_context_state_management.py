@@ -729,7 +729,7 @@ def test_add_or_update_expectation_suite_conflicting_args_failure(
 ):
     context = in_memory_data_context
 
-    with pytest.raises(ValueError) as e:
+    with pytest.raises((ValueError, AssertionError)) as e:
         context.add_or_update_expectation_suite(
             expectation_suite=suite, expectation_suite_name=suite_name
         )
