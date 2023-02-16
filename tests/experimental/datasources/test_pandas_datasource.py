@@ -5,6 +5,7 @@ import pathlib
 import re
 from dataclasses import dataclass
 from pprint import pformat as pf
+import inspect
 from typing import TYPE_CHECKING, Any, Type
 
 import pydantic
@@ -189,6 +190,32 @@ class TestDynamicPandasAssets:
             )
         # importantly check that the method creates (or attempts to create) the intended asset
         assert exc_info.value.model == asset_class
+
+    @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
+    def test_add_asset_method_signaturel(self, asset_class: Type[_FilesystemDataAsset]):
+        type_name: str = _get_field_details(asset_class, "type").default_value
+        method_name: str = f"add_{type_name}_asset"
+
+        ds = PandasFilesystemDatasource(
+            name="ds_for_testing_add_asset_methods",
+            base_directory=pathlib.Path.cwd(),
+        )
+        method = getattr(ds, method_name)
+        add_asset_method_sig: inspect.Signature = inspect.signature(method)
+        print(f"\t{method_name}()\n{add_asset_method_sig}\n")
+
+        asset_class_init_sig: inspect.Signature = inspect.signature(
+            asset_class.__init__
+        )
+        print(f"\t{asset_class.__name__}.__init__()\n{asset_class_init_sig}\n")
+
+        for i, param_name in enumerate(asset_class_init_sig.parameters):
+            print(f"{i} {param_name} ", end="")
+            if param_name == "self":
+                print("⏩")
+                continue
+            assert param_name in add_asset_method_sig.parameters
+            print("✅")
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
     def test_minimal_validation(self, asset_class: Type[_FilesystemDataAsset]):
