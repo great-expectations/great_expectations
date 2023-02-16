@@ -89,11 +89,13 @@ class CLI(click.MultiCommand):
             legacy_module += ".v012"
 
         try:
+            breakpoint()
             requested_module = f"great_expectations.cli{legacy_module}.{module_name}"
             module = importlib.import_module(requested_module)
             return getattr(module, module_name)
 
         except ModuleNotFoundError:
+            # this is the message that we get. Is it what we want?
             cli_message(
                 f"<red>The command `{name}` does not exist.\nPlease use one of: {self.list_commands(None)}</red>"  # type: ignore[arg-type] # expects click Context
             )

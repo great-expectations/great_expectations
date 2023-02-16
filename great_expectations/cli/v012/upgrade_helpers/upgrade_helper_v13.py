@@ -29,6 +29,7 @@ task for the full deprecation of this path has been placed in the backlog.
 
 class UpgradeHelperV13(BaseUpgradeHelper):
     def __init__(self, data_context=None, context_root_dir=None) -> None:
+        breakpoint()
         assert (
             data_context or context_root_dir
         ), "Please provide a data_context object or a context_root_dir."
