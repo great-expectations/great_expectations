@@ -498,6 +498,7 @@ def type_schema(
 
     from great_expectations.experimental.datasources import _PANDAS_SCHEMA_VERSION
     from great_expectations.experimental.datasources.pandas_datasource import (
+        PandasDatasource,
         PandasFilesystemDatasource,
         _PandasDatasource,
     )
@@ -530,6 +531,7 @@ def type_schema(
                     (
                         _PandasDatasource,
                         *PandasFilesystemDatasource.asset_types,
+                        *PandasDatasource.asset_types,
                     ),
                 )
                 and _PANDAS_SCHEMA_VERSION != pandas.__version__

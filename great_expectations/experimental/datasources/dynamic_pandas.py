@@ -386,6 +386,7 @@ def _generate_pandas_data_asset_models(
         # TODO: remove this special case once we have namespace type-lookups
         if type_prefix:
             type_name = type_prefix + type_name
+            model_name = type_prefix + model_name
 
         try:
             asset_model = _create_pandas_asset_model(
