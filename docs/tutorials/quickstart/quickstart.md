@@ -8,6 +8,7 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 
 import TipUseAVenv from '/docs/components/setting_up/installing_gx/_tip_use_a_venv.md'
 import GxInstallationVerifySuccess from '/docs/components/setting_up/installing_gx/_gx_installation_verify_success.md'
+import TipUseTheExpectationGallery from '/docs/components/creating_expectations/individually/_tip_use_the_expectation_gallery.md'
 
 ## Introduction
 
@@ -125,13 +126,15 @@ At this point, we will describe our Expectations for the data in question.  In t
 
 The code we will use for this is:
 
-```python title="Python code
+```python title="Python code"
 validator.expect_column_values_to_not_be_null("pickup_datetime")
 ```
 
 The `validator` object that we received when we connected to our data is capable of introspecting the data in its associated Datasource.  With the Expectation defined above, we are stating that we _expect_ the column `pickup_datetime` to always be populated.  That is: none of the column's values should be null.
 
 In the future, you may define numerous Expectations by using the `validator.expect_*` syntax.  When you Validate data with the `validator` object, all of you Expectations will be run against the `validator`'s associated Datasource.
+
+<TipUseTheExpectationGallery /> 
 
 ### 4. Validate data
 
@@ -157,9 +160,13 @@ result.view()
 
 Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases.
 
-To help with this we have prepared some more detailed setting up guides tailored to specific environments:
-- How to install a GX locally
-- How to install GX in a hosted environment
+To help with this we have prepared some more detailed installation and setting up guides tailored to specific environments and resources:
+- Installing and setting up GX for local filesystem data with pip
+- Installing and setting up GX for local filesystem data with conda
+- Installing and setting up GX for PostgreSQL
+- Installing and setting up GX for Amazon S3
+- Installing and setting up GX for Azure Blob Storage
+- Installing and setting up GX for GCS
 
 ## Additional information
 
@@ -172,7 +179,12 @@ To see the full source code used for the examples in this guide, please referenc
 
 For more information on the GX Python objects and APIs used in this guide, please reference the following pages of our public API documentation:
 
+- [get_context()](https://docs.greatexpectations.io/docs/reference/api/util.py/#great_expectations.util.get_context)
+
 - [Validator](/docs/reference/api/validator/validator/Validator_class.md)
+  - [.validate()](https://docs.greatexpectations.io/docs/reference/api/validator/validator/Validator_class#great_expectations.validator.validator.Validator.validate)
+  - [.expect_column_values_to_not_be_null()](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null)
+
 - [DataContext](/docs/reference/api/data_context/FileDataContext_class.md)
 
 For more information on the `venv` module, please reference [Python's official `venv` documentation](https://docs.python.org/3/library/venv.html).
