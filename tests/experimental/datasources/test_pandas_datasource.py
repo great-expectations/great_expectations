@@ -204,16 +204,19 @@ class TestDynamicPandasAssets:
         add_asset_method_sig: inspect.Signature = inspect.signature(method)
         print(f"\t{method_name}()\n{add_asset_method_sig}\n")
 
-        asset_class_init_sig: inspect.Signature = inspect.signature(
-            asset_class.__init__
-        )
-        print(f"\t{asset_class.__name__}.__init__()\n{asset_class_init_sig}\n")
+        asset_class_init_sig: inspect.Signature = inspect.signature(asset_class)
+        print(f"\t{asset_class.__name__}\n{asset_class_init_sig}\n")
 
         for i, param_name in enumerate(asset_class_init_sig.parameters):
             print(f"{i} {param_name} ", end="")
-            if param_name == "self":
-                print("⏩")
+
+            if param_name == "type":
+                print("⏩ ✅")
+                assert (
+                    param_name not in add_asset_method_sig.parameters
+                ), "type should not be part of the `add_<TYPE>_asset` method"
                 continue
+
             assert param_name in add_asset_method_sig.parameters
             print("✅")
 
