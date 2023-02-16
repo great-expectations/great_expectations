@@ -530,8 +530,8 @@ def type_schema(
                     model,
                     (
                         _PandasDatasource,
-                        *PandasFilesystemDatasource.asset_types,
                         *PandasDatasource.asset_types,
+                        *PandasFilesystemDatasource.asset_types,
                     ),
                 )
                 and _PANDAS_SCHEMA_VERSION != pandas.__version__
