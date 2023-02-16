@@ -33,10 +33,12 @@ from great_expectations.experimental.datasources.interfaces import (
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
-    from great_expectations.datasource import DataConnector
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
+    )
+    from great_expectations.experimental.datasources.data_asset.data_connector import (
+        DataConnector,
     )
 
 logger = logging.getLogger(__name__)
