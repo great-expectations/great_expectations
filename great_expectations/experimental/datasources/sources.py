@@ -198,6 +198,7 @@ class _SourceFactories:
             logger.debug(
                 f"`{asset_factory_method_name}()` already defined `{ds_type.__name__}`"
             )
+        # TODO: update signature for method, regardless of provenance
 
     @property
     def factories(self) -> List[str]:
