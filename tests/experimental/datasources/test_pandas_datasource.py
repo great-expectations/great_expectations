@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import inspect
 import logging
 import pathlib
 import re
 from dataclasses import dataclass
 from pprint import pformat as pf
-import inspect
 from typing import TYPE_CHECKING, Any, Type
 
 import pydantic
