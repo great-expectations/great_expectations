@@ -4,8 +4,7 @@ import copy
 import logging
 import re
 from abc import abstractmethod
-from functools import wraps
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
@@ -34,61 +33,6 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
-
-
-def data_references_loader(
-    data_references_cache_property_name: str = "_data_references_cache",
-    refresh_data_references_cache_method_name: str = "_refresh_data_references_cache",
-) -> Callable:
-    """
-    Initialize "DataConnector._data_references_cache" instance variable (if it does not exist) and call specified method
-    that performs best-effort translation of data references to lists of "BatchDefinition" objects and cache results
-    into Dict[str, List[BatchDefinition] | None] | None (with "data_reference" as key) in order to improve performance.
-
-    Args:
-        data_references_cache_property_name: Property attribute name, provided in "kwargs", sets data_references_cache dictionary.
-        refresh_data_references_cache_method_name: Method name, provided in "kwargs", which updates data_references_cache contents.
-
-    Returns:
-        Callable -- configured "_load_data_references_decorator" function.
-    """
-
-    def _load_data_references_decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def _data_connector_method_call(self, *args, **kwargs) -> Any:
-            """
-            Calls "data_references_cache_holder_object_reference_name" of decorated function to set
-            "data_references_cache" into specified "data_references_cache_property_name" of passed object reference.
-            Then computes and returns value of decorated function.
-
-            Settable property "{self}.{data_references_cache_property_name}" property should exist.
-            Method "{self}.{refresh_data_references_cache_method_name}()" must exist.
-
-            Args:
-                args: Positional arguments of original function being decorated.
-                kwargs: Keyword arguments of original function being decorated.
-
-            Returns:
-                Any (output value of original function being decorated).
-            """
-            data_references_cache_property: Dict[
-                str, List[BatchDefinition] | None
-            ] | None = getattr(self, data_references_cache_property_name, None)
-            if data_references_cache_property is None:
-                data_references_cache_property = {}
-                setattr(
-                    self,
-                    data_references_cache_property_name,
-                    data_references_cache_property,
-                )
-
-            getattr(self, refresh_data_references_cache_method_name)()
-
-            return func(self, *args, **kwargs)
-
-        return _data_connector_method_call
-
-    return _load_data_references_decorator
 
 
 class FilePathDataConnector(DataConnector):
@@ -139,9 +83,7 @@ class FilePathDataConnector(DataConnector):
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache: Dict[
-            str, List[BatchDefinition] | None
-        ] | None = None
+        self._data_references_cache: Dict[str, List[BatchDefinition] | None] = {}
 
     # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
     # TODO: <Alex>ALEX</Alex>
@@ -151,7 +93,6 @@ class FilePathDataConnector(DataConnector):
     # TODO: <Alex>ALEX</Alex>
 
     # Interface Method
-    @data_references_loader()
     def get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> List[BatchDefinition]:
@@ -172,6 +113,8 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """
+        self._refresh_data_references_cache()
+
         # Use a combination of a list and set to preserve iteration order
         batch_definition_list: List[BatchDefinition] = list()
         batch_definition_set = set()
@@ -233,7 +176,6 @@ class FilePathDataConnector(DataConnector):
         return PathBatchSpec(batch_spec)
 
     # Interface Method
-    @data_references_loader()
     def get_data_reference_count(self) -> int:
         """
         Returns the list of data_references known by this DataConnector from its _data_references_cache
@@ -241,11 +183,12 @@ class FilePathDataConnector(DataConnector):
         Returns:
             number of data_references known by this DataConnector.
         """
-        total_references: int = len(self._data_references_cache or {})
+        self._refresh_data_references_cache()
+
+        total_references: int = len(self._data_references_cache)
         return total_references
 
     # Interface Method
-    @data_references_loader()
     def get_unmatched_data_references(self) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in
@@ -254,20 +197,20 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
+        self._refresh_data_references_cache()
 
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
                 filter(
                     lambda element: element[1] is None,
-                    (self._data_references_cache or {}).items(),
+                    self._data_references_cache.items(),
                 )
             ).keys()
         )
         return unmatched_data_references
 
     # Interface Method
-    @data_references_loader()
     def get_unmatched_data_reference_count(self) -> int:
         """
         Returns the list of unmached data_references known by this DataConnector from its _data_references_cache
@@ -275,7 +218,10 @@ class FilePathDataConnector(DataConnector):
         Returns:
             number of unmached data_references known by this DataConnector.
         """
+        self._refresh_data_references_cache()
+
         unmached_references: int = len(self.get_unmatched_data_references())
+
         return unmached_references
 
     # Interface Method
@@ -363,7 +309,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     ) -> List[BatchDefinition]:
         batch_definition_list: List[BatchDefinition] = [
             batch_definitions[0]
-            for batch_definitions in (self._data_references_cache or {}).values()
+            for batch_definitions in self._data_references_cache.values()
             if batch_definitions is not None
         ]
         return batch_definition_list
