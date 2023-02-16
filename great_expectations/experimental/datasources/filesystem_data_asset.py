@@ -146,6 +146,10 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
         self._validate_batch_request(batch_request)
         batch_list: List[Batch] = []
 
+        kwargs: dict | None = getattr(self, "kwargs", None)
+        if not kwargs:
+            kwargs = {}
+
         for request, path in self._fully_specified_batch_requests_with_path(
             batch_request
         ):
@@ -157,6 +161,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                     exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                     exclude_unset=True,
                     by_alias=True,
+                    **kwargs,
                 ),
             )
             execution_engine: PandasExecutionEngine | SparkDFExecutionEngine = (

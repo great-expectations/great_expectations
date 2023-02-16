@@ -2,7 +2,20 @@
 
 # Build API docs then build docusaurus docs.
 # Currently used in our netlify pipeline.
-# Note: Will be modified to build API docs on latest tagged release.
+
+CURRENT_COMMIT=$(git rev-parse HEAD)
+# git pull to get the latest tags
+git pull
+
+# Get latest released version from tag, check out to build API docs.
+# Only if not PR deploy preview.
+if [ "$PULL_REQUEST" == "false" ]
+then
+  GX_LATEST=$(git tag | grep -E "(^[0-9]{1,}\.)+[0-9]{1,}" | sort -V | tail -1)
+  echo "Not in a pull request. Using latest released version ${GX_LATEST} at $(git rev-parse HEAD) to build API docs."
+  git checkout "$GX_LATEST"
+  git pull
+fi
 
 echo "Installing dev dependencies"
 pip install -c constraints-dev.txt -e ".[test]"
@@ -12,6 +25,13 @@ echo "Installing dev dependencies"
 
 echo "Building sphinx API docs."
 (cd docs/sphinx_api_docs_source; invoke docs)
+
+if [ "$PULL_REQUEST" == "false" ]
+then
+  echo "Not in a pull request. Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs."
+  git checkout "$CURRENT_COMMIT"
+  git pull
+fi
 
 echo "Copying previous versions"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"

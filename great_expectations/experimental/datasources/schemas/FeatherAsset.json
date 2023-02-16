@@ -27,9 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "path": {
-            "title": "Path"
-        },
         "columns": {
             "title": "Columns"
         },
@@ -45,8 +42,7 @@
     },
     "required": [
         "name",
-        "regex",
-        "path"
+        "regex"
     ],
     "additionalProperties": false,
     "definitions": {

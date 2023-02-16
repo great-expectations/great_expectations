@@ -27,9 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "path": {
-            "title": "Path"
-        },
         "engine": {
             "title": "Engine",
             "default": "auto",
@@ -48,14 +45,14 @@
             "type": "boolean"
         },
         "kwargs": {
-            "title": "Kwargs"
+            "title": "Kwargs",
+            "description": "Extra keyword arguments that will be passed to the reader method",
+            "type": "object"
         }
     },
     "required": [
         "name",
-        "regex",
-        "path",
-        "kwargs"
+        "regex"
     ],
     "additionalProperties": false,
     "definitions": {

@@ -125,18 +125,17 @@ def data_context_with_bad_datasource(tmp_path_factory):
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
     # create new expectation suite
-    assert titanic_data_context.create_expectation_suite(
+    assert titanic_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     # attempt to create expectation suite with name that already exists on data asset
     with pytest.raises(gx_exceptions.DataContextError):
-        titanic_data_context.create_expectation_suite(
+        titanic_data_context.add_expectation_suite(
             expectation_suite_name="titanic.test_create_expectation_suite"
         )
     # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True
-    assert titanic_data_context.create_expectation_suite(
+    assert titanic_data_context.add_or_update_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite",
-        overwrite_existing=True,
     )
 
 
@@ -242,7 +241,7 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
 
 def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_does_not_exist.default"
         )
     )
@@ -255,7 +254,7 @@ def test_get_new_expectation_suite(data_context_parameterized_expectation_suite)
 
 def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
     )
@@ -280,7 +279,7 @@ def test_save_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
     expectation_suite: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
     )
@@ -313,7 +312,7 @@ def test_get_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
     expectation_suite: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
     )
@@ -576,7 +575,7 @@ def test_data_context_get_datasource(titanic_data_context):
 
 
 def test_data_context_expectation_suite_delete(empty_data_context):
-    assert empty_data_context.create_expectation_suite(
+    assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
@@ -589,11 +588,11 @@ def test_data_context_expectation_suite_delete(empty_data_context):
 
 
 def test_data_context_expectation_nested_suite_delete(empty_data_context):
-    assert empty_data_context.create_expectation_suite(
+    assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test.create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert empty_data_context.create_expectation_suite(
+    assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test.a.create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
@@ -1108,7 +1107,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context = empty_context
     ge_dir = context.root_directory
     context.add_datasource("arthur", class_name="PandasDatasource")
-    context.create_expectation_suite("dent")
+    context.add_expectation_suite("dent")
     assert len(context.list_expectation_suites()) == 1
 
     assert FileDataContext.is_project_initialized(ge_dir) == True
@@ -1441,16 +1440,16 @@ def test_list_expectation_suite_with_no_suites(titanic_data_context):
 
 
 def test_list_expectation_suite_with_one_suite(titanic_data_context):
-    titanic_data_context.create_expectation_suite("warning")
+    titanic_data_context.add_expectation_suite("warning")
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
     assert observed == ["warning"]
 
 
 def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
-    titanic_data_context.create_expectation_suite("a.warning")
-    titanic_data_context.create_expectation_suite("b.warning")
-    titanic_data_context.create_expectation_suite("c.warning")
+    titanic_data_context.add_expectation_suite("a.warning")
+    titanic_data_context.add_expectation_suite("b.warning")
+    titanic_data_context.add_expectation_suite("c.warning")
 
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
@@ -1479,7 +1478,7 @@ def test_get_batch_when_passed_a_suite_name(titanic_data_context):
         "datasource": "mydatasource",
         "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),
     }
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
     assert context.list_expectation_suite_names() == ["foo"]
     batch = context.get_batch(batch_kwargs, "foo")
     assert isinstance(batch, Dataset)
@@ -1493,7 +1492,7 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
         "datasource": "mydatasource",
         "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),
     }
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
     assert context.list_expectation_suite_names() == ["foo"]
     suite = context.get_expectation_suite("foo")
 
@@ -1756,7 +1755,7 @@ def test_run_checkpoint_new_style(
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name=checkpoint_config.name
@@ -1982,7 +1981,7 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
     """
 
     context = data_context_with_bad_datasource
-    context.create_expectation_suite(expectation_suite_name="local_test.default")
+    context.add_expectation_suite(expectation_suite_name="local_test.default")
     expectation_suite = context.get_expectation_suite("local_test.default")
     context.add_datasource("pandas_datasource", class_name="PandasDatasource")
     df = pd.DataFrame({"a": [1, 2, 3]})
@@ -2001,7 +2000,7 @@ def test_add_expectation_to_expectation_suite(
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+    expectation_suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="my_new_expectation_suite"
     )
     expectation_suite.add_expectation(
@@ -2956,7 +2955,7 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     """End to end test demonstrating usage of Stores evaluation parameters"""
     context = data_context_with_query_store
     suite_name = "eval_param_suite"
-    context.create_expectation_suite(expectation_suite_name=suite_name)
+    context.add_expectation_suite(expectation_suite_name=suite_name)
     batch_request = {
         "datasource_name": "my_datasource",
         "data_connector_name": "default_runtime_data_connector_name",

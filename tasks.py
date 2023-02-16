@@ -497,9 +497,9 @@ def type_schema(
     import pandas
 
     from great_expectations.experimental.datasources import _PANDAS_SCHEMA_VERSION
-    from great_expectations.experimental.datasources.interfaces import Datasource
     from great_expectations.experimental.datasources.pandas_datasource import (
         PandasFilesystemDatasource,
+        _PandasDatasource,
     )
     from great_expectations.experimental.datasources.sources import _SourceFactories
 
@@ -525,12 +525,18 @@ def type_schema(
             model = _SourceFactories.type_lookup[name]
 
             if (
-                model
-                in {*PandasFilesystemDatasource.asset_types, PandasFilesystemDatasource}
+                issubclass(
+                    model,
+                    (
+                        _PandasDatasource,
+                        *PandasFilesystemDatasource.asset_types,
+                    ),
+                )
                 and _PANDAS_SCHEMA_VERSION != pandas.__version__
             ):
                 print(
-                    f"🙈  {name} - was generated with pandas {_PANDAS_SCHEMA_VERSION}; skipping"
+                    f"🙈  {name} - was generated with pandas"
+                    f" {_PANDAS_SCHEMA_VERSION} but you have {pandas.__version__}; skipping"
                 )
                 continue
 
@@ -538,19 +544,16 @@ def type_schema(
                 schema_path = schema_dir.joinpath(f"{model.__name__}.json")
                 json_str: str = model.schema_json(indent=indent) + "\n"
 
-                if issubclass(model, Datasource):
-                    print(f"🙈  {name} - is a Datasource; skipping")
-                    continue
-
                 if schema_path.exists():
                     if json_str == schema_path.read_text():
                         print(f"✅  {name} - {schema_path.name} unchanged")
                         continue
 
                 schema_path.write_text(json_str)
-                print(f"✅  {name} - {schema_path.name} schema updated")
+                print(f"🔃  {name} - {schema_path.name} schema updated")
             except TypeError as err:
                 print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
+        raise invoke.Exit(code=0)
 
     text: str = buffer.getvalue()
     if save_path:

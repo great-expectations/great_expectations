@@ -5,7 +5,18 @@ requires = ["setuptools", "wheel"]
 # build-backend = "setuptools.build_meta"
 
 [tool.black]
-extend_excludes = '''(docs/.*|tests/.*.fixture|.*.ge_store_backend_id)'''
+extend_excludes = '''
+(
+     docs/.*
+    | tests/.*.fixture
+    | .*.ge_store_backend_id
+)
+'''
+# exclude unparseable notebooks
+# https://stackoverflow.com/a/73296261/6304433
+force-exclude = '''
+(tests/data_context/fixtures/post_init_project_v0.8.0_A/great_expectations/notebooks/.*\.ipynb)
+'''
 
 [tool.isort]
 profile = "black"
@@ -160,7 +171,6 @@ exclude = [
     'rule_based_profiler/estimators/bootstrap_numeric_range_estimator\.py',  # 8
     'rule_based_profiler/estimators/kde_numeric_range_estimator\.py',  # 7
     'rule_based_profiler/expectation_configuration_builder',  # 13
-    'rule_based_profiler/helpers/cardinality_checker\.py',  # 9
     'rule_based_profiler/helpers/util\.py',  # 46
     'rule_based_profiler/parameter_builder/mean_unexpected_map_metric_multi_batch_parameter_builder\.py',  # 19
     'rule_based_profiler/parameter_builder/metric_multi_batch_parameter_builder\.py',  # 15

@@ -27,18 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "path": {
-            "title": "Path",
-            "anyOf": [
-                {
-                    "type": "string"
-                },
-                {
-                    "type": "string",
-                    "format": "path"
-                }
-            ]
-        },
         "usecols": {
             "title": "Usecols",
             "anyOf": [
@@ -64,8 +52,7 @@
     },
     "required": [
         "name",
-        "regex",
-        "path"
+        "regex"
     ],
     "additionalProperties": false,
     "definitions": {

@@ -247,7 +247,7 @@ def test_BasicDatasetProfiler_numeric_high_cardinality(numeric_high_card_dataset
 def test_BasicDatasetProfiler_with_context(filesystem_csv_data_context):
     context = filesystem_csv_data_context
 
-    context.create_expectation_suite("default")
+    context.add_expectation_suite("default")
     datasource = context.datasources["rad_datasource"]
     base_dir = datasource.config["batch_kwargs_generators"]["subdir_reader"][
         "base_directory"

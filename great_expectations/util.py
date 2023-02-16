@@ -73,7 +73,7 @@ try:
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
     # Fallback for python < 3.8
-    import importlib_metadata  # type: ignore[no-redef]
+    import importlib_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -402,7 +402,7 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name: str, module_name: str):
+def load_class(class_name: str, module_name: str) -> Any:
     if class_name is None:
         raise TypeError("class_name must not be None")
     if not isinstance(class_name, str):
@@ -420,6 +420,7 @@ def load_class(class_name: str, module_name: str):
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
+
     try:
         klass_ = getattr(module_obj, class_name)
     except AttributeError:

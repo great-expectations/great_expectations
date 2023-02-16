@@ -5,7 +5,6 @@ import pathlib
 import re
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
-import pydantic
 from typing_extensions import Literal
 
 from great_expectations.experimental.datasources.dynamic_pandas import (
@@ -21,6 +20,7 @@ from great_expectations.experimental.datasources.interfaces import (
     TestConnectionError,
     _batch_sorter_from_list,
 )
+from great_expectations.experimental.datasources.signatures import _merge_signatures
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import PandasExecutionEngine
@@ -37,19 +37,19 @@ _BLACK_LIST = (
     # "read_json",
     # "read_excel",
     # "read_parquet",
-    # "read_clipboard",
+    "read_clipboard",  # not path based
     # "read_feather",
     "read_fwf",  # unhandled type
-    # "read_gbq",
+    "read_gbq",  # not path based
     # "read_hdf",
     # "read_html",
     # "read_orc",
     # "read_pickle",
     # "read_sas",  # invalid json schema
     # "read_spss",
-    "read_sql",  # type-name conflict
-    # "read_sql_query",
-    # "read_sql_table",
+    "read_sql",  # not path based & type-name conflict
+    "read_sql_query",  # not path based
+    "read_sql_table",  # not path based
     "read_table",  # type-name conflict
     # "read_xml",
 )
@@ -80,7 +80,6 @@ class _PandasDatasource(Datasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_ASSET_MODELS.values())
 
     # instance attributes
-    type: str = pydantic.Field("_pandas")
     assets: Dict[
         str,
         _FilesystemDataAsset,
@@ -240,3 +239,10 @@ class PandasFilesystemDatasource(_PandasDatasource):
             **kwargs,
         )
         return self.add_asset(asset)
+
+    # attr-defined issue
+    # https://github.com/python/mypy/issues/12472
+    add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset)  # type: ignore[attr-defined]
+    add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset)  # type: ignore[attr-defined]
+    add_json_asset.__signature__ = _merge_signatures(add_json_asset, JSONAsset)  # type: ignore[attr-defined]
+    add_parquet_asset.__signature__ = _merge_signatures(add_parquet_asset, ParquetAsset)  # type: ignore[attr-defined]

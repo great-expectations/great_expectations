@@ -31,7 +31,7 @@ from great_expectations.experimental.datasources.experimental_base_model import 
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -461,7 +461,7 @@ class Batch(ExperimentalBaseModel):
     datasource: Datasource
     data_asset: DataAsset
     batch_request: BatchRequest
-    data: "BatchData"
+    data: BatchData
     id: str = ""
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
@@ -469,9 +469,9 @@ class Batch(ExperimentalBaseModel):
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    batch_markers: "BatchMarkers" = Field(..., alias="legacy_batch_markers")
+    batch_markers: BatchMarkers = Field(..., alias="legacy_batch_markers")
     batch_spec: BatchSpec = Field(..., alias="legacy_batch_spec")
-    batch_definition: "BatchDefinition" = Field(..., alias="legacy_batch_definition")
+    batch_definition: BatchDefinition = Field(..., alias="legacy_batch_definition")
 
     class Config:
         allow_mutation = False
@@ -483,9 +483,11 @@ class Batch(ExperimentalBaseModel):
         options_list = []
         for k, v in values["batch_request"].options.items():
             options_list.append(f"{k}_{v}")
+
         values["id"] = "-".join(
             [values["datasource"].name, values["data_asset"].name, *options_list]
         )
+
         return values
 
     @classmethod
@@ -505,7 +507,7 @@ class Batch(ExperimentalBaseModel):
     @validate_arguments
     def head(
         self,
-        n_rows: Optional[StrictInt] = None,
+        n_rows: StrictInt = 5,
         fetch_all: StrictBool = False,
     ) -> HeadData:
         """Return the first n rows of this Batch.
@@ -524,29 +526,13 @@ class Batch(ExperimentalBaseModel):
             HeadData
         """
         self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
-        metric = MetricConfiguration(
-            metric_name="table.head",
-            metric_domain_kwargs={"batch_id": self.id},
-            metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
+        metrics_calculator = MetricsCalculator(
+            execution_engine=self.data.execution_engine,
+            show_progress_bars=True,
         )
-        table_head_metric_value: pd.DataFrame | list[
-            pyspark_sql_Row
-        ] | pyspark_sql_Row = self.data.execution_engine.resolve_metrics(
-            metrics_to_resolve=(metric,)
-        )[
-            metric.id
-        ]
-        table_head_df: pd.DataFrame
-        if isinstance(table_head_metric_value, pd.DataFrame):
-            # table_head_metric_value is a pd.DataFrame already
-            table_head_df = table_head_metric_value
-        elif isinstance(table_head_metric_value, list):
-            # convert list of pyspark.sql.Row to pd.DataFrame
-            table_head_df = pd.DataFrame(
-                [row.asDict() for row in table_head_metric_value]
-            )
-        else:
-            # otherwise convert pyspark.sql.Row to pd.DataFrame
-            table_head_df = pd.DataFrame(table_head_metric_value.asDict())
-
+        table_head_df: pd.DataFrame = metrics_calculator.head(
+            n_rows=n_rows,
+            domain_kwargs={"batch_id": self.id},
+            fetch_all=fetch_all,
+        )
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))

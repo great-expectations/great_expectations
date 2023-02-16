@@ -43,9 +43,7 @@ batch_request = BatchRequest(
     data_asset_name="insert_your_data_asset_name_here",
 )
 # NOTE: The following assertion is only for testing and can be ignored by users.
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -129,9 +127,7 @@ assert len(validator.batches) == 1
 batch_list = context.get_batch_list(batch_request=batch_request)
 
 # Now we can review a sample of data using a Validator
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
