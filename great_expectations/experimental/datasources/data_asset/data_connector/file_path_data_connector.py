@@ -39,7 +39,6 @@ logger = logging.getLogger(__name__)
 def data_references_loader(
     data_references_cache_property_name: str = "_data_references_cache",
     refresh_data_references_cache_method_name: str = "_refresh_data_references_cache",
-    force: bool = False,
 ) -> Callable:
     """
     Initialize "DataConnector._data_references_cache" instance variable (if it does not exist) and call specified method
@@ -49,7 +48,6 @@ def data_references_loader(
     Args:
         data_references_cache_property_name: Property attribute name, provided in "kwargs", sets data_references_cache dictionary.
         refresh_data_references_cache_method_name: Method name, provided in "kwargs", which updates data_references_cache contents.
-        force: Directive to "refresh_data_references_cache_method_name" method (overwrite if True; skip, otherwise)
 
     Returns:
         Callable -- configured "_load_data_references_decorator" function.
@@ -84,7 +82,7 @@ def data_references_loader(
                     data_references_cache_property,
                 )
 
-            getattr(self, refresh_data_references_cache_method_name)(force=force)
+            getattr(self, refresh_data_references_cache_method_name)()
 
             return func(self, *args, **kwargs)
 
@@ -313,7 +311,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {"path": path}
 
-    def _refresh_data_references_cache(self, force=False) -> None:
+    def _refresh_data_references_cache(self) -> None:
         """
         This prototypical method populates cache, whose keys are data references and values are "BatchDefinition"
         objects.  Subsequently, "BatchDefinition" objects generated are amenable to flexible querying and sorting.
@@ -321,11 +319,8 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         It examines every "data_reference" handle and converts it to zero or more "BatchDefinition" objects, based on
         partitioning behavior of given subclass (e.g., Regular Expressions for file path based DataConnector
         implementations).  Type of each "data_reference" is storage dependent.
-
-        Args:
-            force: Overwrite directive (overwrite if True; skip, otherwise)
         """
-        if force or not self._data_references_cache:
+        if not self._data_references_cache:
             self._data_references_cache = {}
 
             # Map data_references to batch_definitions.
