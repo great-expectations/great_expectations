@@ -3,7 +3,17 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    ClassVar,
+    Dict,
+    Generic,
+    List,
+    MutableMapping,
+    Optional,
+    Type,
+    Union,
+)
 
 from typing_extensions import Literal
 
@@ -21,6 +31,7 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
     TestConnectionError,
     _batch_sorter_from_list,
+    _DataAssetT,
 )
 from great_expectations.experimental.datasources.signatures import _merge_signatures
 
@@ -148,9 +159,15 @@ except KeyError as key_err:
     ParquetAsset = _FilesystemDataAsset
 
 
-class _PandasDatasource(Datasource):
+class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = []
+
+    # instance attributes
+    assets: MutableMapping[
+        str,
+        _DataAssetT,
+    ] = {}
 
     # Abstract Methods
     @property
