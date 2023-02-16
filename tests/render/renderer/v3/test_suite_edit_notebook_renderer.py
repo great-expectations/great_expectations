@@ -542,7 +542,7 @@ def test_render_with_no_column_cells_without_batch_request(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": "print(context.get_expectation_suite(expectation_suite_name=expectation_suite_name))\ncontext.save_expectation_suite(expectation_suite=suite, expectation_suite_name=expectation_suite_name)\n\nsuite_identifier = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)\ncontext.build_data_docs(resource_identifiers=[suite_identifier])\ncontext.open_data_docs(resource_identifier=suite_identifier)",
+                "source": "print(context.get_expectation_suite(expectation_suite_name=expectation_suite_name))\ncontext.add_or_update_expectation_suite(expectation_suite=suite)\n\nsuite_identifier = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)\ncontext.build_data_docs(resource_identifiers=[suite_identifier])\ncontext.open_data_docs(resource_identifier=suite_identifier)",
                 "outputs": [],
             },
         ],
