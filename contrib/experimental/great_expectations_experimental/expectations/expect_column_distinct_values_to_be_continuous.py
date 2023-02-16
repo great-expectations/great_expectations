@@ -21,11 +21,86 @@ from great_expectations.render.util import (
 
 class ExpectColumnDistinctValuesToBeContinuous(ColumnExpectation):
 
+    examples = [
+        {
+            "data": {
+                "a": [
+                    "2021-01-01",
+                    "2021-01-31",
+                    "2021-02-28",
+                    "2021-03-20",
+                    "2021-02-21",
+                    "2021-05-01",
+                    "2021-06-18",
+                ]
+            },
+            "only_for": ["pandas"],
+            "tests": [
+                {
+                    "title": "fail_for_missing_date",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "a", "datetime_format": "%Y-%m-%d"},
+                    "out": {"success": False},
+                },
+            ],
+        },
+        {
+            "data": {
+                "a": [
+                    "2021-01-01 10:56:30",
+                    "2021-01-03 10:56:30",
+                    "2021-01-02 10:56:30",  # out of order row to make sure we're ignoring order
+                    "2021-01-04 10:56:30",
+                    "2021-01-05 10:56:30",
+                    "2021-01-06 10:56:30",
+                    "2021-01-07 10:56:30",
+                ]
+            },
+            "only_for": ["pandas"],
+            "tests": [
+                {
+                    "title": "pass_for_continuous_date",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "a", "datetime_format": "%Y-%m-%d %H:%M:%S"},
+                    "out": {"success": True},
+                },
+            ],
+        },
+        {
+            "data": {"a": [2, 3, 4, 5, 6, 7, 8, 9, 1]},
+            "only_for": ["pandas"],
+            "tests": [
+                {
+                    "title": "pass_for_continuous_integers",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "a"},
+                    "out": {"success": True},
+                },
+            ],
+        },
+        {
+            "data": {"a": [1, 2, 3, 4, 5, 8, 9]},
+            "only_for": ["pandas"],
+            "tests": [
+                {
+                    "title": "fail_for_non_continuous_integers",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {"column": "a"},
+                    "out": {"success": False},
+                },
+            ],
+        },
+    ]
+
     # This dictionary contains metadata for display in the public gallery
     library_metadata = {
         "maturity": "experimental",
         "tags": ["core expectation", "column aggregate expectation"],
-        "contributors": ["@great_expectations", "@mozeq"],
+        "contributors": ["@jmoskovc"],
         "requirements": [],
         "has_full_test_suite": True,
         "manually_reviewed_code": False,
@@ -222,3 +297,7 @@ class ExpectColumnDistinctValuesToBeContinuous(ColumnExpectation):
                 "observed_value": f"Missing values {sorted(expected_set - observed_set)}",
             },
         }
+
+
+if __name__ == "__main__":
+    ExpectColumnDistinctValuesToBeContinuous().print_diagnostic_checklist()
