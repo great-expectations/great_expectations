@@ -3,7 +3,7 @@ title: 'Tutorial, Step 1: Setup'
 ---  
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
-import VersionSnippet from './tutorial_version_snippet.mdx'
+import VersionSnippet from '/docs/components/versions/_gx_version_code_box.mdx'
 
 <UniversalMap setup='active' connect='inactive' create='inactive' validate='inactive'/> 
 
