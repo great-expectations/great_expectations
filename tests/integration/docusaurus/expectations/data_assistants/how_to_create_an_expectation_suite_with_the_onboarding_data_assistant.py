@@ -117,9 +117,7 @@ expectation_suite = data_assistant_result.get_expectation_suite(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py save_expectation_suite">
-context.save_expectation_suite(
-    expectation_suite=expectation_suite, discard_failed_expectations=False
-)
+context.add_expectation_suite(expectation_suite=expectation_suite)
 # </snippet>
 
 # Use a SimpleCheckpoint to verify that your new Expectation Suite works.
