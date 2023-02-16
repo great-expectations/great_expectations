@@ -240,7 +240,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
 
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
-    add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset)  # type: ignore[attr-defined]
-    add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset)  # type: ignore[attr-defined]
-    add_json_asset.__signature__ = _merge_signatures(add_json_asset, JSONAsset)  # type: ignore[attr-defined]
-    add_parquet_asset.__signature__ = _merge_signatures(add_parquet_asset, ParquetAsset)  # type: ignore[attr-defined]
+    add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_json_asset.__signature__ = _merge_signatures(add_json_asset, JSONAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_parquet_asset.__signature__ = _merge_signatures(add_parquet_asset, ParquetAsset, exclude={"type"})  # type: ignore[attr-defined]
