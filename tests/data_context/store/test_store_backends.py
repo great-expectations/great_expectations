@@ -134,12 +134,10 @@ def validation_operators_data_context(
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
 
-    data_context.save_expectation_suite(
-        failure_expectations, expectation_suite_name="f1.failure"
-    )
-    data_context.save_expectation_suite(
-        warning_expectations, expectation_suite_name="f1.warning"
-    )
+    failure_expectations.expectation_suite_name = "f1.failure"
+    data_context.add_expectation_suite(expectation_suite=failure_expectations)
+    warning_expectations.expectation_suite_name = "f1.warning"
+    data_context.add_expectation_suite(expectation_suite=warning_expectations)
 
     return data_context
 

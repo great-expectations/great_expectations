@@ -431,6 +431,5 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
     )
 
     # Save the expectation suite or else it doesn't show up in the data docs.
-    context.save_expectation_suite(
-        expectation_suite=suite, expectation_suite_name=suite_name
-    )
+    suite.expectation_suite_name = suite_name
+    context.add_expectation_suite(expectation_suite=suite)
