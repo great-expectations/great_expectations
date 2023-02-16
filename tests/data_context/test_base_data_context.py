@@ -213,10 +213,9 @@ def prepare_validator_for_cloud_e2e() -> Callable[
         for config in configs:
             suite.add_expectation(expectation_configuration=config)
 
-        context.save_expectation_suite(
+        suite.ge_cloud_id = expectation_suite_ge_cloud_id
+        context.add_or_update_expectation_suite(
             expectation_suite=suite,
-            ge_cloud_id=expectation_suite_ge_cloud_id,
-            overwrite_existing=True,
         )
 
         assert len(suite.expectations) == 4

@@ -3129,7 +3129,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             ),
         ],
     )
-    context.save_expectation_suite(expectation_suite=expectation_suite)
+    context.add_expectation_suite(expectation_suite=expectation_suite)
 
     # Without include_rendered_content set, all legacy rendered_content was None.
     expectation_suite = context.get_expectation_suite(
@@ -3166,7 +3166,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             ),
         ],
     )
-    context.save_expectation_suite(expectation_suite=expectation_suite)
+    context.update_expectation_suite(expectation_suite=expectation_suite)
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
