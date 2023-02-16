@@ -237,8 +237,9 @@ class _FilePathDataAsset(DataAsset):
             self._data_connector.get_unmatched_data_reference_count()
             == self._data_connector.get_data_reference_count()
         ):
+            "No file at path: {csv_path.resolve()} matched the regex: {regex.pattern}"
             raise TestConnectionError(
-                f"""No data references found in DataAsset "{self.name}"."""
+                f"""No file at base_directory path "{self.datasource.base_directory.resolve()}" matched regular expressions pattern "{self.regex.pattern}" for DataAsset "{self.name}"."""
             )
 
     def _insure_single_data_connector_instance_exists(self) -> None:
