@@ -20,6 +20,7 @@ from great_expectations.experimental.datasources.interfaces import (
     TestConnectionError,
     _batch_sorter_from_list,
 )
+from great_expectations.experimental.datasources.signatures import _merge_signatures
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import PandasExecutionEngine
@@ -313,3 +314,10 @@ class PandasFilesystemDatasource(_PandasDatasource):
             **kwargs,
         )
         return self.add_asset(asset)
+
+    # attr-defined issue
+    # https://github.com/python/mypy/issues/12472
+    add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset)  # type: ignore[attr-defined]
+    add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset)  # type: ignore[attr-defined]
+    add_json_asset.__signature__ = _merge_signatures(add_json_asset, JSONAsset)  # type: ignore[attr-defined]
+    add_parquet_asset.__signature__ = _merge_signatures(add_parquet_asset, ParquetAsset)  # type: ignore[attr-defined]
