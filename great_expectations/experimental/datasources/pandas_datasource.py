@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import dataclasses
 import logging
 import pathlib
 import re
+from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     ClassVar,
@@ -51,7 +53,7 @@ class PandasDatasourceError(Exception):
 
 class _PandasDataAsset(DataAsset):
     def test_connection(self) -> None:
-        ...
+        pass
 
     def batch_request_options_template(
         self,
@@ -81,7 +83,26 @@ class _PandasDataAsset(DataAsset):
         )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
-        ...
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
+        if not (
+            batch_request.datasource_name == self.datasource.name
+            and batch_request.data_asset_name == self.name
+            and self._valid_batch_request_options(batch_request.options)
+        ):
+            expect_batch_request_form = BatchRequest(
+                datasource_name=self.datasource.name,
+                data_asset_name=self.name,
+                options=self.batch_request_options_template(),
+            )
+            raise gx_exceptions.InvalidBatchRequestError(
+                "BatchRequest should have form:\n"
+                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
+                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+            )
 
 
 _FILESYSTEM_BLACK_LIST = (
