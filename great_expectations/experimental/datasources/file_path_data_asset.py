@@ -38,6 +38,10 @@ class _FilePathDataAsset(DataAsset):
         "kwargs",  # kwargs need to be unpacked and passed separately
     }
 
+    _ALWAYS_INCLUDE_IN_BATCH_REQUEST_OPTIONS_TEMPLATE: ClassVar[Set[str]] = {
+        "path",
+    }
+
     # General file-path DataAsset pertaining attributes.
     regex: Pattern
 
@@ -89,9 +93,10 @@ class _FilePathDataAsset(DataAsset):
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        idx: int
-        batch_request_options_template = {idx: None for idx in self._all_group_names}
-        batch_request_options_template["path"] = None
+        options: list[str] = self._all_group_names.append(
+            list(self._ALWAYS_INCLUDE_IN_BATCH_REQUEST_OPTIONS_TEMPLATE)
+        )
+        batch_request_options_template = {option: None for option in options}
         return batch_request_options_template
 
     def build_batch_request(

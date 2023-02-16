@@ -173,7 +173,7 @@ def test_sql_query_data_asset(empty_data_context):
         ),
     ],
 )
-def test_filesystem_data_asset(
+def test_filesystem_data_asset_regex(
     filesystem_datasource: PandasFilesystemDatasource | SparkDatasource,
     base_directory: pathlib.Path,
     regex: str | None,
