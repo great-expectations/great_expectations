@@ -158,11 +158,11 @@ class _FilePathDataAsset(DataAsset):
             self.datasource.get_execution_engine()
         )
 
-        self._ensure_single_data_connector_instance_exists()
-
         batch_definition_list: List[
             BatchDefinition
-        ] = self._data_connector.get_batch_definition_list(batch_request=batch_request)
+        ] = self._build_or_get_data_connector().get_batch_definition_list(
+            batch_request=batch_request
+        )
 
         batch_list: List[Batch] = []
 
@@ -173,7 +173,7 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchRequestOptions
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = self._data_connector.build_batch_spec(
+            batch_spec = self._build_or_get_data_connector().build_batch_spec(
                 batch_definition=batch_definition
             )
             batch_spec_options = {
@@ -231,25 +231,28 @@ class _FilePathDataAsset(DataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        self._ensure_single_data_connector_instance_exists()
-
+        data_connector: DataConnector = self._build_data_connector()
         if (
-            self._data_connector.get_unmatched_data_reference_count()
-            == self._data_connector.get_data_reference_count()
+            data_connector.get_unmatched_data_reference_count()
+            == data_connector.get_data_reference_count()
         ):
             "No file at path: {csv_path.resolve()} matched the regex: {regex.pattern}"
             raise TestConnectionError(
                 f"""No file at base_directory path "{self.datasource.base_directory.resolve()}" matched regular expressions pattern "{self.regex.pattern}" for DataAsset "{self.name}"."""
             )
 
-    def _ensure_single_data_connector_instance_exists(self) -> None:
+    def _build_or_get_data_connector(self) -> DataConnector:
         """This private method ensures that exactly one instance of "DataConnector" class is available."""
+        data_connector: DataConnector
         try:
-            _ = self._data_connector
+            data_connector = self._data_connector
         except AttributeError:
-            self._data_connector = self._get_data_connector()
+            data_connector = self._build_data_connector()
+            self._data_connector = data_connector
 
-    def _get_data_connector(self) -> DataConnector:
+        return data_connector
+
+    def _build_data_connector(self) -> DataConnector:
         """DataAsset implementations must instantiate appropriate DataConnector class."""
         raise NotImplementedError
 

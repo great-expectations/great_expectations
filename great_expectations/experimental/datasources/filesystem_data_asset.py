@@ -53,7 +53,7 @@ class _FilesystemDataAsset(_FilePathDataAsset):
 
         return super().build_batch_request(options)
 
-    def _get_data_connector(self) -> DataConnector:
+    def _build_data_connector(self) -> DataConnector:
         data_connector: DataConnector = FilesystemDataConnector(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
