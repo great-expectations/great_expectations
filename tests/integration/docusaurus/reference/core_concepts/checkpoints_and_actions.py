@@ -41,8 +41,8 @@ data_connectors:
 context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-context.create_expectation_suite("my_expectation_suite")
-context.create_expectation_suite("my_other_expectation_suite")
+context.add_or_update_expectation_suite("my_expectation_suite")
+context.add_or_update_expectation_suite("my_other_expectation_suite")
 
 # Add a Checkpoint
 checkpoint_yaml = """
@@ -67,7 +67,7 @@ validations:
         action:
           class_name: UpdateDataDocsAction
 """
-context.add_checkpoint(**yaml.load(checkpoint_yaml))
+context.add_or_update_checkpoint(**yaml.load(checkpoint_yaml))
 assert context.list_checkpoints() == ["test_checkpoint"]
 
 results = context.run_checkpoint(checkpoint_name="test_checkpoint")
@@ -185,7 +185,8 @@ for line in no_nesting_split:
         no_nesting_list.append(line)
 no_nesting = "\n".join(no_nesting_list)
 
-context.add_checkpoint(**yaml.load(no_nesting))
+context.add_or_update_checkpoint(**yaml.load(no_nesting))
+
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -247,7 +248,7 @@ for line in nesting_with_defaults_split:
         nesting_with_defaults_list.append(line)
 nesting_with_defaults = "\n".join(nesting_with_defaults_list)
 
-context.add_checkpoint(**yaml.load(nesting_with_defaults))
+add_or_update_checkpoint(**yaml.load(nesting_with_defaults))
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -320,7 +321,7 @@ runtime_configuration:
     partial_unexpected_count: 20
 """
 # </snippet>
-context.add_checkpoint(**yaml.load(keys_passed_at_runtime))
+context.add_or_update_checkpoint(**yaml.load(keys_passed_at_runtime))
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_3">
 results = context.run_checkpoint(
@@ -381,8 +382,8 @@ yellow_tripdata_sample_2019-02
 """
 # </snippet>
 
-context.create_expectation_suite("my_expectation_suite", overwrite_existing=True)
-context.create_expectation_suite("my_other_expectation_suite", overwrite_existing=True)
+context.add_or_update_expectation_suite("my_expectation_suite")
+context.add_or_update_expectation_suite("my_other_expectation_suite")
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template">
 using_template = """
@@ -403,7 +404,7 @@ validations:
     expectation_suite_name: my_other_expectation_suite
 """
 # </snippet>
-context.add_checkpoint(**yaml.load(using_template))
+context.add_or_update_checkpoint(**yaml.load(using_template))
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_4">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -464,7 +465,7 @@ notify_with: all
 using_simple_checkpoint = using_simple_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
-context.add_checkpoint(**yaml.load(using_simple_checkpoint))
+context.add_or_update_checkpoint(**yaml.load(using_simple_checkpoint))
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_5">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -521,7 +522,7 @@ action_list:
 equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
     "<YOUR SLACK WEBHOOK URL>", "https://hooks.slack.com/foo/bar"
 )
-context.add_checkpoint(**yaml.load(equivalent_using_checkpoint))
+context.add_or_update_checkpoint(**yaml.load(equivalent_using_checkpoint))
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_6">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
