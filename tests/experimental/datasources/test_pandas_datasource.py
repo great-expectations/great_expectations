@@ -511,7 +511,7 @@ def test_pandas_sorter(
 def bad_regex_config(csv_path: pathlib.Path) -> tuple[re.Pattern, TestConnectionError]:
     regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     test_connection_error = TestConnectionError(
-        f"No file at path: {csv_path.resolve()} matched the regex: {regex.pattern}"
+        f'No file at path: "{csv_path.resolve()}" matched the regex: "{regex.pattern}"'
     )
     return regex, test_connection_error
 

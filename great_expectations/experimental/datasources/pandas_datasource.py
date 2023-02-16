@@ -133,7 +133,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         """
         if not self.base_directory.exists():
             raise TestConnectionError(
-                f"base_directory path: {self.base_directory.resolve()} does not exist."
+                f'base_directory path: "{self.base_directory.resolve()}" does not exist.'
             )
 
         if self.assets and test_assets:
