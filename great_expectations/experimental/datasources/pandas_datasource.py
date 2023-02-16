@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 from typing_extensions import Literal
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.experimental.datasources.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
@@ -14,6 +15,7 @@ from great_expectations.experimental.datasources.filesystem_data_asset import (
     _FilesystemDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
+    BatchRequest,
     BatchSortersDefinition,
     DataAsset,
     Datasource,
@@ -26,7 +28,6 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.experimental.datasources.interfaces import (
         Batch,
-        BatchRequest,
         BatchRequestOptions,
     )
 
@@ -44,17 +45,29 @@ class _PandasDataAsset(DataAsset):
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        ...
+        return {}
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
-        ...
+        return []
 
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
-        ...
+        if options is not None and not self._valid_batch_request_options(options):
+            allowed_keys = set(self.batch_request_options_template().keys())
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(
+                "Batch request options should only contain keys from the following set:\n"
+                f"{allowed_keys}\nbut your specified keys contain\n"
+                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
+            )
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options=options or {},
+        )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         ...
@@ -178,7 +191,7 @@ class PandasDatasource(_PandasDatasource):
         _PandasDataAsset,
     ] = {}
 
-    def test_connection(self) -> None:
+    def test_connection(self, test_assets: bool = True) -> None:
         ...
 
 
