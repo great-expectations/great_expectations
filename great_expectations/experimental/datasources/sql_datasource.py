@@ -193,10 +193,6 @@ class _SQLAsset(DataAsset, Generic[_ColumnSplitterT]):
     # Internal attributes
     _datasource: SQLDatasource = pydantic.PrivateAttr()
 
-    def _build_data_connector(self) -> None:
-        """This DataAsset does not yet utilize DataConnector (potentially future enhancement)."""
-        pass
-
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
