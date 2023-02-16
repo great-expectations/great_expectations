@@ -70,8 +70,8 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
     ), mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._update"
     ) as mock_update:
-        context.save_expectation_suite(
-            expectation_suite,
+        context.add_expectation_suite(
+            expectation_suite=expectation_suite,
         )
 
         # remove dynamic great_expectations version
