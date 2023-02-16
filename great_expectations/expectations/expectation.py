@@ -77,8 +77,6 @@ from great_expectations.exceptions import (
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import (
@@ -2765,64 +2763,33 @@ class ColumnMapExpectation(TableExpectation, ABC):
         if result_format_str in ["BASIC"]:
             return validation_dependencies
 
-        # only for SUMMARY and COMPLETE
-        if isinstance(execution_engine, PandasExecutionEngine):
-            metric_kwargs = get_metric_kwargs(
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-            metric_kwargs = get_metric_kwargs(
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-        if isinstance(
-            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
-        ):
-            if "unexpected_index_column_names" in validation_dependencies.result_format:
-                metric_kwargs = get_metric_kwargs(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    configuration=configuration,
-                    runtime_configuration=runtime_configuration,
-                )
-                validation_dependencies.set_metric_configuration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    metric_configuration=MetricConfiguration(
-                        metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                    ),
-                )
-                metric_kwargs = get_metric_kwargs(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    configuration=configuration,
-                    runtime_configuration=runtime_configuration,
-                )
-                validation_dependencies.set_metric_configuration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    metric_configuration=MetricConfiguration(
-                        metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                    ),
-                )
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
+
         return validation_dependencies
 
     def _validate(
