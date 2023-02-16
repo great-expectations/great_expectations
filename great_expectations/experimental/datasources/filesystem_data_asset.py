@@ -124,7 +124,9 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        options: set[str] = self._ALWAYS_INCLUDE_IN_BATCH_REQUEST_OPTIONS_TEMPLATE
+        options: set[str] = copy.deepcopy(
+            self._ALWAYS_INCLUDE_IN_BATCH_REQUEST_OPTIONS_TEMPLATE
+        )
         options.update(set(self._all_group_names))
         return {option: None for option in options}
 
