@@ -93,11 +93,9 @@ class _FilePathDataAsset(DataAsset):
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        options: list[str] = self._all_group_names.append(
-            list(self._ALWAYS_INCLUDE_IN_BATCH_REQUEST_OPTIONS_TEMPLATE)
-        )
-        batch_request_options_template = {option: None for option in options}
-        return batch_request_options_template
+        options: set[str] = self._ALWAYS_INCLUDE_IN_BATCH_REQUEST_OPTIONS_TEMPLATE
+        options.update(set(self._all_group_names))
+        return {option: None for option in options}
 
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
