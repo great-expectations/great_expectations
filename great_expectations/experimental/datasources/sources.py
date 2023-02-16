@@ -13,6 +13,7 @@ from typing import (
     Union,
 )
 
+from great_expectations.experimental.datasources.signatures import _merge_signatures
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
@@ -193,12 +194,16 @@ class _SourceFactories:
                 asset = asset_type(name=name, **kwargs)
                 return self.add_asset(asset)
 
+            # attr-defined issue
+            # https://github.com/python/mypy/issues/12472
+            _add_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+                _add_asset_factory, asset_type, exclude={"type"}
+            )
             setattr(ds_type, asset_factory_method_name, _add_asset_factory)
         else:
             logger.debug(
                 f"`{asset_factory_method_name}()` already defined `{ds_type.__name__}`"
             )
-        # TODO: update signature for method, regardless of provenance
 
     @property
     def factories(self) -> List[str]:
