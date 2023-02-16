@@ -36,7 +36,11 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context import BaseDataContext, CloudDataContext
+from great_expectations.data_context import (
+    AbstractDataContext,
+    BaseDataContext,
+    CloudDataContext,
+)
 from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
     GXCloudRESTResource,
@@ -7109,7 +7113,7 @@ data_connectors:
 
 
 @pytest.fixture
-def in_memory_runtime_context():
+def in_memory_runtime_context() -> AbstractDataContext:
     return build_in_memory_runtime_context()
 
 
@@ -7289,7 +7293,7 @@ def pandas_column_pairs_dataframe_for_unexpected_rows_and_index():
 
 
 @pytest.fixture
-def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index():
+def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
