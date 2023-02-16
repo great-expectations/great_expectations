@@ -186,7 +186,7 @@ class FilePathDataConnector(DataConnector):
         """
         self._populate_data_reference_cache_if_empty()
 
-        total_references: int = len(self._data_references_cache)
+        total_references: int = len(self._get_data_reference_cache())
         return total_references
 
     # Interface Method
@@ -205,7 +205,7 @@ class FilePathDataConnector(DataConnector):
             dict(
                 filter(
                     lambda element: element[1] is None,
-                    self._data_references_cache.items(),
+                    self._get_data_reference_cache().items(),
                 )
             ).keys()
         )
@@ -258,6 +258,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {"path": path}
 
+    def _get_data_reference_cache(self) -> Dict[str, List[BatchDefinition] | None]:
+        return self._data_references_cache
+
     def _reset_data_reference_cache(self) -> None:
         self._data_references_cache = {}
 
@@ -270,7 +273,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         partitioning behavior of given subclass (e.g., Regular Expressions for file path based DataConnector
         implementations).  Type of each "data_reference" is storage dependent.
         """
-        if not self._data_references_cache:
+        if len(self._get_data_reference_cache()) == 0:
             # Map data_references to batch_definitions.
             for data_reference in self.get_data_references():
                 mapped_batch_definition_list: List[
@@ -278,7 +281,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
                 ] | None = self._map_data_reference_string_to_batch_definition_list_using_regex(
                     data_reference=data_reference
                 )
-                self._data_references_cache[
+                self._get_data_reference_cache()[
                     data_reference
                 ] = mapped_batch_definition_list
 
@@ -311,7 +314,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     ) -> List[BatchDefinition]:
         batch_definition_list: List[BatchDefinition] = [
             batch_definitions[0]
-            for batch_definitions in self._data_references_cache.values()
+            for batch_definitions in self._get_data_reference_cache().values()
             if batch_definitions is not None
         ]
         return batch_definition_list
