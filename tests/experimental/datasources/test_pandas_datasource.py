@@ -201,6 +201,7 @@ class TestDynamicPandasAssets:
             base_directory=pathlib.Path.cwd(),
         )
         method = getattr(ds, method_name)
+
         add_asset_method_sig: inspect.Signature = inspect.signature(method)
         print(f"\t{method_name}()\n{add_asset_method_sig}\n")
 
@@ -211,10 +212,10 @@ class TestDynamicPandasAssets:
             print(f"{i} {param_name} ", end="")
 
             if param_name == "type":
-                print("⏩ ✅")
                 assert (
                     param_name not in add_asset_method_sig.parameters
                 ), "type should not be part of the `add_<TYPE>_asset` method"
+                print("⏩")
                 continue
 
             assert param_name in add_asset_method_sig.parameters
