@@ -122,27 +122,25 @@ class _SourceFactories:
                 f"No `{ds_type.__name__}.asset_types` have be declared for the `Datasource`"
             )
 
-        for asset_type in asset_types:
-            if asset_type.__name__.startswith("_"):
+        for t in asset_types:
+            if t.__name__.startswith("_"):
                 logger.debug(
-                    f"{asset_type} is private, assuming not intended as a public concrete type. Skipping registration"
+                    f"{t} is private, assuming not intended as a public concrete type. Skipping registration"
                 )
                 continue
             try:
-                asset_type_name = asset_type.__fields__["type"].default
+                asset_type_name = t.__fields__["type"].default
                 if asset_type_name is None:
                     raise TypeError(
-                        f"{asset_type.__name__} `type` field must be assigned and cannot be `None`"
+                        f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
                 logger.debug(
-                    f"2b. Registering `DataAsset` `{asset_type.__name__}` as {asset_type_name}"
+                    f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
                 )
-                asset_type_lookup[
-                    (ds_type, asset_type)
-                ] = f"{ds_type.__name__}.{asset_type_name}"
+                asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
                 raise TypeRegistrationError(
-                    f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{asset_type.__name__}` unable to register asset type",
+                    f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",
                 ) from bad_field_exc
 
     @property
