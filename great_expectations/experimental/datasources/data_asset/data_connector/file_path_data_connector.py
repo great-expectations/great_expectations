@@ -113,7 +113,7 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """
-        self._refresh_data_references_cache()
+        self._build_data_reference_cache_if_empty()
 
         # Use a combination of a list and set to preserve iteration order
         batch_definition_list: List[BatchDefinition] = list()
@@ -183,7 +183,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             number of data_references known by this DataConnector.
         """
-        self._refresh_data_references_cache()
+        self._build_data_reference_cache_if_empty()
 
         total_references: int = len(self._data_references_cache)
         return total_references
@@ -197,7 +197,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
-        self._refresh_data_references_cache()
+        self._build_data_reference_cache_if_empty()
 
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
@@ -218,7 +218,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             number of unmached data_references known by this DataConnector.
         """
-        self._refresh_data_references_cache()
+        self._build_data_reference_cache_if_empty()
 
         unmached_references: int = len(self.get_unmatched_data_references())
 
@@ -257,7 +257,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {"path": path}
 
-    def _refresh_data_references_cache(self) -> None:
+    def _build_data_reference_cache_if_empty(self) -> None:
         """
         This prototypical method populates cache, whose keys are data references and values are "BatchDefinition"
         objects.  Subsequently, "BatchDefinition" objects generated are amenable to flexible querying and sorting.
