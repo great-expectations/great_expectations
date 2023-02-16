@@ -65,6 +65,8 @@ class _FilePathDataAsset(DataAsset):
     _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
     _all_group_names: List[str] = pydantic.PrivateAttr()
 
+    _data_connector: DataConnector = pydantic.PrivateAttr()
+
     class Config:
         """
         Need to allow extra fields for the base type because pydantic will first create
@@ -156,11 +158,11 @@ class _FilePathDataAsset(DataAsset):
             self.datasource.get_execution_engine()
         )
 
-        data_connector: DataConnector = self._get_data_connector()
+        self._insure_single_data_connector_instance_exists()
 
         batch_definition_list: List[
             BatchDefinition
-        ] = data_connector.get_batch_definition_list(batch_request=batch_request)
+        ] = self._data_connector.get_batch_definition_list(batch_request=batch_request)
 
         batch_list: List[Batch] = []
 
@@ -171,7 +173,7 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchRequestOptions
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = data_connector.build_batch_spec(
+            batch_spec = self._data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
             batch_spec_options = {
@@ -229,14 +231,22 @@ class _FilePathDataAsset(DataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        data_connector: DataConnector = self._get_data_connector()
+        self._insure_single_data_connector_instance_exists()
+
         if (
-            data_connector.get_unmatched_data_reference_count()
-            == data_connector.get_data_reference_count()
+            self._data_connector.get_unmatched_data_reference_count()
+            == self._data_connector.get_data_reference_count()
         ):
             raise TestConnectionError(
                 f"""No data references found in DataAsset "{self.name}"."""
             )
+
+    def _insure_single_data_connector_instance_exists(self) -> None:
+        """This private method insures that exactly one instance of "DataConnector" class is available."""
+        try:
+            _ = self._data_connector
+        except AttributeError:
+            self._data_connector = self._get_data_connector()
 
     def _get_data_connector(self) -> DataConnector:
         """DataAsset implementations must instantiate appropriate DataConnector class."""

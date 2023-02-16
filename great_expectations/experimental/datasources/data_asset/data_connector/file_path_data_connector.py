@@ -83,8 +83,7 @@ class FilePathDataConnector(DataConnector):
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache: Dict[str, List[BatchDefinition] | None]
-        self._reset_data_reference_cache()
+        self._data_references_cache: Dict[str, List[BatchDefinition] | None] = {}
 
     # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
     # TODO: <Alex>ALEX</Alex>
@@ -182,9 +181,7 @@ class FilePathDataConnector(DataConnector):
         Returns:
             number of data_references known by this DataConnector.
         """
-        self._populate_data_reference_cache_if_empty()
-
-        total_references: int = len(self._get_data_reference_cache())
+        total_references: int = len(self._get_data_references_cache())
         return total_references
 
     # Interface Method
@@ -196,14 +193,12 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
-        self._populate_data_reference_cache_if_empty()
-
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
                 filter(
                     lambda element: element[1] is None,
-                    self._get_data_reference_cache().items(),
+                    self._get_data_references_cache().items(),
                 )
             ).keys()
         )
@@ -254,13 +249,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {"path": path}
 
-    def _get_data_reference_cache(self) -> Dict[str, List[BatchDefinition] | None]:
-        return self._data_references_cache
-
-    def _reset_data_reference_cache(self) -> None:
-        self._data_references_cache = {}
-
-    def _populate_data_reference_cache_if_empty(self) -> None:
+    def _get_data_references_cache(self) -> Dict[str, List[BatchDefinition] | None]:
         """
         This prototypical method populates cache, whose keys are data references and values are "BatchDefinition"
         objects.  Subsequently, "BatchDefinition" objects generated are amenable to flexible querying and sorting.
@@ -269,7 +258,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         partitioning behavior of given subclass (e.g., Regular Expressions for file path based DataConnector
         implementations).  Type of each "data_reference" is storage dependent.
         """
-        if len(self._get_data_reference_cache()) == 0:
+        if len(self._data_references_cache) == 0:
             # Map data_references to batch_definitions.
             for data_reference in self.get_data_references():
                 mapped_batch_definition_list: List[
@@ -277,9 +266,11 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
                 ] | None = self._map_data_reference_string_to_batch_definition_list_using_regex(
                     data_reference=data_reference
                 )
-                self._get_data_reference_cache()[
+                self._data_references_cache[
                     data_reference
                 ] = mapped_batch_definition_list
+
+        return self._data_references_cache
 
     # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
     # TODO: <Alex>ALEX</Alex>
@@ -308,11 +299,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     def _get_batch_definition_list_from_data_references_cache(
         self,
     ) -> List[BatchDefinition]:
-        self._populate_data_reference_cache_if_empty()
-
         batch_definition_list: List[BatchDefinition] = [
             batch_definitions[0]
-            for batch_definitions in self._get_data_reference_cache().values()
+            for batch_definitions in self._get_data_references_cache().values()
             if batch_definitions is not None
         ]
         return batch_definition_list
