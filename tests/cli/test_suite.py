@@ -878,7 +878,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
 
     assert mock_webbrowser.call_count == 0
 
-    assert mock_emit.call_count == 4
+    assert mock_emit.call_count == 5
     assert mock_emit.call_args_list == [
         mock.call(
             {
@@ -894,15 +894,15 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
@@ -1363,7 +1363,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
 
     assert mock_webbrowser.call_count == 0
 
-    assert mock_emit.call_count == 7
+    assert mock_emit.call_count == 10
     assert mock_emit.call_args_list == [
         mock.call(
             {
@@ -1379,15 +1379,15 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
@@ -1408,15 +1408,15 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "data_context.__init__",
@@ -1431,15 +1431,15 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "cli.suite.edit.end",
@@ -1616,7 +1616,7 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
 
     assert mock_webbrowser.call_count == 0
 
-    assert mock_emit.call_count == 7
+    assert mock_emit.call_count == 8
     assert mock_emit.call_args_list == [
         mock.call(
             {
@@ -1632,15 +1632,15 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
@@ -1858,7 +1858,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
 
     assert mock_webbrowser.call_count == 0
 
-    assert mock_emit.call_count == 7
+    assert mock_emit.call_count == 10
     assert mock_emit.call_args_list == [
         mock.call(
             {
@@ -1874,15 +1874,15 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
@@ -1903,15 +1903,15 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "data_context.__init__",
@@ -1926,15 +1926,15 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "cli.suite.edit.end",
@@ -2110,7 +2110,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
 
     assert mock_webbrowser.call_count == 0
 
-    assert mock_emit.call_count == 7
+    assert mock_emit.call_count == 8
     assert mock_emit.call_args_list == [
         mock.call(
             {
@@ -2126,15 +2126,15 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
@@ -3201,7 +3201,7 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
 
     assert mock_webbrowser.call_count == 0
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
     assert mock_emit.call_args_list == [
         mock.call(
             {
@@ -3217,15 +3217,15 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
@@ -3430,7 +3430,7 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
 
     assert mock_webbrowser.call_count == 0
 
-    assert mock_emit.call_count == 5
+    assert mock_emit.call_count == 6
     assert mock_emit.call_args_list == [
         mock.call(
             {
@@ -3446,15 +3446,15 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
                 "success": True,
             }
         ),
-        # mock.call(
-        #     {
-        #         "event": "data_context.save_expectation_suite",
-        #         "event_payload": {
-        #             "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
-        #         },
-        #         "success": True,
-        #     }
-        # ),
+        mock.call(
+            {
+                "event": "data_context.save_expectation_suite",
+                "event_payload": {
+                    "anonymized_expectation_suite_name": "9df638a13b727807e51b13ec1839bcbe"
+                },
+                "success": True,
+            }
+        ),
         mock.call(
             {
                 "event": "cli.suite.new.end",
