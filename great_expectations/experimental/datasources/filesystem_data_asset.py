@@ -11,6 +11,7 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
 from great_expectations.experimental.datasources.file_path_data_asset import (
     _FilePathDataAsset,
 )
+from great_expectations.experimental.datasources.interfaces import TestConnectionError
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import (
@@ -63,3 +64,8 @@ class _FilesystemDataAsset(_FilePathDataAsset):
             data_context_root_directory=self.datasource.data_context_root_directory,
         )
         return data_connector
+
+    def _build_test_connection_error(self) -> TestConnectionError:
+        return TestConnectionError(
+            f"""No file at base_directory path "{self.datasource.base_directory.resolve()}" matched regular expressions pattern "{self.regex.pattern}" and/or glob_directive "{self.glob_directive}" for DataAsset "{self.name}"."""
+        )

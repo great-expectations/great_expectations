@@ -27,7 +27,6 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
-    TestConnectionError,
 )
 
 if TYPE_CHECKING:
@@ -39,6 +38,9 @@ if TYPE_CHECKING:
     )
     from great_expectations.experimental.datasources.data_asset.data_connector import (
         DataConnector,
+    )
+    from great_expectations.experimental.datasources.interfaces import (
+        TestConnectionError,
     )
 
 logger = logging.getLogger(__name__)
@@ -225,22 +227,6 @@ class _FilePathDataAsset(DataAsset):
 
         return batch_list
 
-    def test_connection(self) -> None:
-        """Test the connection for the DataAsset.
-
-        Raises:
-            TestConnectionError: If the connection test fails.
-        """
-        data_connector: DataConnector = self._build_data_connector()
-        if (
-            data_connector.get_unmatched_data_reference_count()
-            == data_connector.get_data_reference_count()
-        ):
-            "No file at path: {csv_path.resolve()} matched the regex: {regex.pattern}"
-            raise TestConnectionError(
-                f"""No file at base_directory path "{self.datasource.base_directory.resolve()}" matched regular expressions pattern "{self.regex.pattern}" for DataAsset "{self.name}"."""
-            )
-
     def _build_or_get_data_connector(self) -> DataConnector:
         """This private method ensures that exactly one instance of "DataConnector" class is available."""
         data_connector: DataConnector
@@ -252,9 +238,27 @@ class _FilePathDataAsset(DataAsset):
 
         return data_connector
 
+    def test_connection(self) -> None:
+        """Test the connection for the DataAsset.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        data_connector: DataConnector = self._build_data_connector()
+        if (
+            data_connector.get_unmatched_data_reference_count()
+            == data_connector.get_data_reference_count()
+        ):
+            raise self._build_test_connection_error()
+
     def _build_data_connector(self) -> DataConnector:
         """DataAsset implementations must instantiate appropriate DataConnector class."""
         raise NotImplementedError
+
+    def _build_test_connection_error(self) -> TestConnectionError:
+        raise NotImplementedError(
+            """One needs to explicitly provide "TestConnectionError" instance, containing parametrized error message."""
+        )
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
