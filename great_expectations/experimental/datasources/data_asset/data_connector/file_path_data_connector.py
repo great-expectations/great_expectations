@@ -114,8 +114,6 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """
-        self._populate_data_reference_cache_if_empty()
-
         # Use a combination of a list and set to preserve iteration order
         batch_definition_list: List[BatchDefinition] = list()
         batch_definition_set = set()
@@ -219,8 +217,6 @@ class FilePathDataConnector(DataConnector):
         Returns:
             number of unmached data_references known by this DataConnector.
         """
-        self._populate_data_reference_cache_if_empty()
-
         unmached_references: int = len(self.get_unmatched_data_references())
 
         return unmached_references
@@ -312,6 +308,8 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     def _get_batch_definition_list_from_data_references_cache(
         self,
     ) -> List[BatchDefinition]:
+        self._populate_data_reference_cache_if_empty()
+
         batch_definition_list: List[BatchDefinition] = [
             batch_definitions[0]
             for batch_definitions in self._get_data_reference_cache().values()
