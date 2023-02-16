@@ -33,6 +33,7 @@ from great_expectations.experimental.datasources.interfaces import (
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
+    from great_expectations.datasource import DataConnector
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -153,9 +154,11 @@ class _FilePathDataAsset(DataAsset):
             self.datasource.get_execution_engine()
         )
 
+        data_connector: DataConnector = self._get_data_connector()
+
         batch_definition_list: List[
             BatchDefinition
-        ] = self._data_connector.get_batch_definition_list(batch_request=batch_request)
+        ] = data_connector.get_batch_definition_list(batch_request=batch_request)
 
         batch_list: List[Batch] = []
 
@@ -166,7 +169,7 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchRequestOptions
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = self._data_connector.build_batch_spec(
+            batch_spec = data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
             batch_spec_options = {
@@ -224,13 +227,18 @@ class _FilePathDataAsset(DataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
+        data_connector: DataConnector = self._get_data_connector()
         if (
-            self._data_connector.get_unmatched_data_reference_count()
-            == self._data_connector.get_data_reference_count()
+            data_connector.get_unmatched_data_reference_count()
+            == data_connector.get_data_reference_count()
         ):
             raise TestConnectionError(
                 f"""No data references found in DataAsset "{self.name}"."""
             )
+
+    def _get_data_connector(self) -> DataConnector:
+        """DataAsset implementations must instantiate appropriate DataConnector class."""
+        raise NotImplementedError
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(

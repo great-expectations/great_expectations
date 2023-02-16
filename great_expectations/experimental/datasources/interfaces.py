@@ -43,9 +43,6 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
-    from great_expectations.experimental.datasources.data_asset.data_connector import (
-        DataConnector,
-    )
 
 try:
     import pyspark
@@ -154,7 +151,6 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
-    _data_connector: DataConnector = pydantic.PrivateAttr()
 
     @property
     def datasource(self) -> _DatasourceT:
@@ -221,10 +217,6 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError(
             """One must implement "_validate_batch_request" on a DataAsset subclass."""
         )
-
-    def _build_data_connector(self) -> None:
-        """All DataAsset implementations that utilize DataConnector should instantiate appropriate DataConnector class (or simply pass)."""
-        raise NotImplementedError
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True, each_item=True)
@@ -415,7 +407,6 @@ class Datasource(
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
-        asset._build_data_connector()
         asset.test_connection()
         self.assets[asset.name] = asset
         # pydantic needs to know that an asset has been set so that it doesn't get excluded
