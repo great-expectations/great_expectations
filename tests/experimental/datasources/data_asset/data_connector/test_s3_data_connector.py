@@ -293,7 +293,7 @@ def test_return_all_batch_definitions_unsorted():
 #         prefix="",
 #     )
 #     # noinspection PyProtectedMember
-#     my_data_connector._build_data_reference_cache_if_empty()
+#     my_data_connector._populate_data_reference_cache_if_empty()
 #
 #     assert my_data_connector.get_data_reference_count() == 3
 #     assert my_data_connector._get_data_reference_list()[:3] == [
