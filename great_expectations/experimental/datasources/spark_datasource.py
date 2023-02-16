@@ -104,7 +104,6 @@ class SparkDatasource(_SparkDatasource):
 
         if self.assets and test_assets:
             for asset in self.assets.values():
-                asset._datasource = self
                 asset.test_connection()
 
     def add_csv_asset(

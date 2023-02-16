@@ -133,10 +133,8 @@ class PandasFilesystemDatasource(_PandasDatasource):
                 f"Path: {self.base_directory.resolve()} does not exist."
             )
 
-        # TODO: <Alex></Alex>
         if self.assets and test_assets:
             for asset in self.assets.values():
-                asset._datasource = self
                 asset.test_connection()
 
     def add_csv_asset(
