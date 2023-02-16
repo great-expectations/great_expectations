@@ -2874,6 +2874,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
+    # 20230216 - Chetan - Decorating with save to ensure no gaps in usage stats collection
+    # A future effort will add more granular event names
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        args_payload_fn=save_expectation_suite_usage_statistics,
+    )
     def update_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -2931,6 +2937,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
+    # 20230216 - Chetan - Decorating with save to ensure no gaps in usage stats collection
+    # A future effort will add more granular event names
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        args_payload_fn=save_expectation_suite_usage_statistics,
+    )
     def add_or_update_expectation_suite(
         self,
         expectation_suite_name: str | None = None,

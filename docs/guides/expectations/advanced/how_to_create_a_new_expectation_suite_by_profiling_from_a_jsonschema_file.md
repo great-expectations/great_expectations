@@ -54,7 +54,7 @@ suite = profiler.profile(schema, suite_name)
 ### 6. Save the suite
 
 ```python
-context.save_expectation_suite(suite)
+context.add_expectation_suite(expectation_suite=suite)
 ```
 
 ## 7. (Optional) Generate Data Docs and review the results
@@ -94,6 +94,6 @@ with open(jsonschema_file, "r") as f:
 print("Generating suite...")
 profiler = JsonSchemaProfiler()
 suite = profiler.profile(schema, suite_name)
-context.save_expectation_suite(suite)
+context.add_expectation_suite(expectation_suite=suite)
 ```
 
