@@ -83,7 +83,8 @@ class FilePathDataConnector(DataConnector):
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
         # This is a dictionary which maps data_references onto batch_requests.
-        self._data_references_cache: Dict[str, List[BatchDefinition] | None] = {}
+        self._data_references_cache: Dict[str, List[BatchDefinition] | None]
+        self._reset_data_reference_cache()
 
     # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
     # TODO: <Alex>ALEX</Alex>
@@ -257,6 +258,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {"path": path}
 
+    def _reset_data_reference_cache(self) -> None:
+        self._data_references_cache = {}
+
     def _populate_data_reference_cache_if_empty(self) -> None:
         """
         This prototypical method populates cache, whose keys are data references and values are "BatchDefinition"
@@ -267,8 +271,6 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         implementations).  Type of each "data_reference" is storage dependent.
         """
         if not self._data_references_cache:
-            self._data_references_cache = {}
-
             # Map data_references to batch_definitions.
             for data_reference in self.get_data_references():
                 mapped_batch_definition_list: List[
