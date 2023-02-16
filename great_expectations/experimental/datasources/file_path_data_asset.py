@@ -158,7 +158,7 @@ class _FilePathDataAsset(DataAsset):
             self.datasource.get_execution_engine()
         )
 
-        self._insure_single_data_connector_instance_exists()
+        self._ensure_single_data_connector_instance_exists()
 
         batch_definition_list: List[
             BatchDefinition
@@ -231,7 +231,7 @@ class _FilePathDataAsset(DataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        self._insure_single_data_connector_instance_exists()
+        self._ensure_single_data_connector_instance_exists()
 
         if (
             self._data_connector.get_unmatched_data_reference_count()
@@ -242,8 +242,8 @@ class _FilePathDataAsset(DataAsset):
                 f"""No file at base_directory path "{self.datasource.base_directory.resolve()}" matched regular expressions pattern "{self.regex.pattern}" for DataAsset "{self.name}"."""
             )
 
-    def _insure_single_data_connector_instance_exists(self) -> None:
-        """This private method insures that exactly one instance of "DataConnector" class is available."""
+    def _ensure_single_data_connector_instance_exists(self) -> None:
+        """This private method ensures that exactly one instance of "DataConnector" class is available."""
         try:
             _ = self._data_connector
         except AttributeError:
