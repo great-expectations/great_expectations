@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
 from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.configuration import AbstractConfig  # noqa: TCH001
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
@@ -18,6 +17,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
+
+if TYPE_CHECKING:
+    from great_expectations.core.configuration import AbstractConfig
 
 logger = logging.getLogger(__name__)
 
