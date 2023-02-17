@@ -10,6 +10,7 @@ import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.data_context.types.base import DataContextConfigDefaults
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -40,7 +41,7 @@ class FileMigrator:
         self._migrate_stores(
             dst_stores=dst_context.stores,
         )
-        self._migrate_data_docs_sites(dst_context=dst_context)
+        self._migrate_data_docs_sites(dst_root=pathlib.Path(dst_context.root_directory))
 
         # Re-init context to parse filesystem changes into config
         dst_context = FileDataContext()
@@ -79,12 +80,14 @@ class FileMigrator:
 
     def _migrate_data_docs_sites(
         self,
-        dst_context: FileDataContext,
+        dst_root: pathlib.Path,
     ) -> None:
         src_configs = self._src_context.variables.data_docs_sites or {}
 
-        dst_root = pathlib.Path(dst_context.root_directory)
-        dst_base_directory = dst_root.joinpath("uncommitted/data_docs")
+        # dst_root = pathlib.Path(dst_context.root_directory)
+        dst_base_directory = dst_root.joinpath(
+            DataContextConfigDefaults.DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME.value
+        )
         assert (
             dst_base_directory.exists()
         ), f"{dst_base_directory} should have been set up by upstream scaffolding"
