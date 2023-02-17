@@ -7,7 +7,7 @@
             "title": "Type",
             "default": "spark_filesystem",
             "enum": [
-                "spark"
+                "spark_filesystem"
             ],
             "type": "string"
         },
