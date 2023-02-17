@@ -61,6 +61,12 @@ class _PandasDataAsset(DataAsset):
         "type",
     }
 
+    def _get_reader_method(self) -> str:
+        raise NotImplementedError(
+            """One needs to explicitly provide "reader_method" for Pandas DataAsset extensions as temporary \
+work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
+        )
+
     def test_connection(self) -> None:
         pass
 
@@ -126,18 +132,17 @@ class _PandasDataAsset(DataAsset):
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
-        if options is not None and not self._valid_batch_request_options(options):
-            allowed_keys = set(self.batch_request_options_template().keys())
+        if options:
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
-                "Batch request options should only contain keys from the following set:\n"
-                f"{allowed_keys}\nbut your specified keys contain\n"
-                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
+                "Data Assets associated with PandasDatasource can only contain a single batch,\n"
+                "therefore BatchRequest options cannot be supplied. BatchRequest options with keys:\n"
+                f"{actual_keys}\nwere passed.\n"
             )
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
-            options=options or {},
+            options={},
         )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -149,12 +154,12 @@ class _PandasDataAsset(DataAsset):
         if not (
             batch_request.datasource_name == self.datasource.name
             and batch_request.data_asset_name == self.name
-            and self._valid_batch_request_options(batch_request.options)
+            and not batch_request.options
         ):
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
-                options=self.batch_request_options_template(),
+                options={},
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
