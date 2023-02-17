@@ -9,10 +9,8 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from great_expectations.cli import cli
 from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
-from moto.athena import mock_athena
 
 
-@mock_athena
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
