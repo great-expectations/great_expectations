@@ -156,6 +156,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
+    from great_expectations.data_context.store.store import StoreConfigTypedDict
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
@@ -1467,7 +1468,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return masked_config
 
     @public_api
-    def add_store(self, store_name: str, store_config: dict) -> Store:
+    def add_store(self, store_name: str, store_config: StoreConfigTypedDict) -> Store:
         """Add a new Store to the DataContext.
 
         Args:
@@ -4357,7 +4358,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             conf_file_option="usage_statistics_url",
         )
 
-    def _build_store_from_config(self, store_name: str, store_config: dict) -> Store:
+    def _build_store_from_config(
+        self, store_name: str, store_config: StoreConfigTypedDict
+    ) -> Store:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
         # the expectations_store does not yet exist by:
@@ -4436,7 +4439,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def data_context_id(self) -> str:
         return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
+    def _init_stores(self, store_configs: Dict[str, StoreConfigTypedDict]) -> None:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
