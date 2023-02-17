@@ -7,6 +7,7 @@ from great_expectations.core.batch import Batch, BatchRequest
 
 context = gx.get_context()
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py datasource config">
 datasource_yaml = f"""
 name: my_gcs_datasource
 class_name: Datasource
@@ -25,6 +26,7 @@ data_connectors:
         assets:
             taxi_data:
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -35,7 +37,9 @@ datasource_yaml = datasource_yaml.replace(
 
 context.test_yaml_config(datasource_yaml)
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py test datasource config">
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 
 # Here is a BatchRequest naming a data_asset
 batch_request = BatchRequest(
