@@ -158,11 +158,11 @@ class _FilePathDataAsset(DataAsset):
             self.datasource.get_execution_engine()
         )
 
+        data_connector: DataConnector = self._get_data_connector()
+
         batch_definition_list: List[
             BatchDefinition
-        ] = self._get_data_connector().get_batch_definition_list(
-            batch_request=batch_request
-        )
+        ] = data_connector.get_batch_definition_list(batch_request=batch_request)
 
         batch_list: List[Batch] = []
 
@@ -173,7 +173,7 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchRequestOptions
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = self._get_data_connector().build_batch_spec(
+            batch_spec = data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
             batch_spec_options = {
