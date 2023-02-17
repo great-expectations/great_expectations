@@ -181,10 +181,9 @@ For more information on the GX Python objects and APIs used in this guide, pleas
 
 - [get_context()](https://docs.greatexpectations.io/docs/reference/api/util.py/#great_expectations.util.get_context)
 
-- [Validator](/docs/reference/api/validator/validator/Validator_class.md)
+- Validator
   - [.validate()](https://docs.greatexpectations.io/docs/reference/api/validator/validator/Validator_class#great_expectations.validator.validator.Validator.validate)
   - [.expect_column_values_to_not_be_null()](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null)
 
-- [DataContext](/docs/reference/api/data_context/FileDataContext_class.md)
 
 For more information on the `venv` module, please reference [Python's official `venv` documentation](https://docs.python.org/3/library/venv.html).
