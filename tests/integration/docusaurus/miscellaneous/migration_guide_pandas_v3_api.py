@@ -58,7 +58,7 @@ with open(checkpoint_yaml_file_path) as f:
 
 expected_checkpoint_yaml = """
 name: test_v3_checkpoint
-config_version: 1.0
+config_version: 1.0 # Note this is the version of the Checkpoint configuration, and not the great_expectations.yml configuration
 template_name:
 module_name: great_expectations.checkpoint
 class_name: Checkpoint
@@ -88,7 +88,6 @@ validations:
     expectation_suite_name: Titanic.profiled
 profilers: []
 """
-
 assert actual_checkpoint_yaml == yaml.safe_load(expected_checkpoint_yaml)
 
 # run checkpoint
