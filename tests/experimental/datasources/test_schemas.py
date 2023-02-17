@@ -65,7 +65,6 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
 
     # TODO: remove this logic and make this fail once all json schemas are working
     if schema_path.name in (
-        "SqliteDatasource.json",
         "SqliteTableAsset.json",
         "SqliteQueryAsset.json",
         "SASAsset.json",
