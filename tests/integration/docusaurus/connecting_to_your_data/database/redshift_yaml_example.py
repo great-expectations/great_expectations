@@ -26,6 +26,7 @@ load_data_into_test_database(
 context = gx.get_context()
 
 datasource_yaml = f"""
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource config">
 name: my_redshift_datasource
 class_name: Datasource
 execution_engine:
@@ -39,6 +40,7 @@ data_connectors:
    default_inferred_data_connector_name:
        class_name: InferredAssetSqlDataConnector
        include_schema_name: true
+# </snippet>
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -48,7 +50,9 @@ datasource_yaml = datasource_yaml.replace(
     CONNECTION_STRING,
 )
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py test datasource config">
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
 context.add_datasource(**yaml.load(datasource_yaml))
 
