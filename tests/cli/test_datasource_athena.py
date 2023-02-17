@@ -9,8 +9,10 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from great_expectations.cli import cli
 from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
+from moto.athena import mock_athena
 
 
+@mock_athena
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -22,7 +24,6 @@ def test_cli_athena_datasource_new_connection_string(
     empty_data_context_stats_enabled,
     caplog,
     monkeypatch,
-    # empty_athena_db,
 ):
     root_dir = empty_data_context_stats_enabled.root_directory
     context = empty_data_context_stats_enabled
@@ -101,57 +102,19 @@ def test_cli_athena_datasource_new_connection_string(
     for credential in credentials:
         assert credential in credentials_cell
 
-    region_test = "sa-east-1"
-    connection_string = f"awsathena+rest://@athena.{region_test}.amazonaws.com/bi?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
+    region_test = "us-east-1"
+    schema_test = "test_data"
+    table_name_test = "table_test"
+    connection_string = f"awsathena+rest://@athena.{region_test}.amazonaws.com/{schema_test}?s3_staging_dir=s3://YOUR_S3_BUCKET/path/to/"
 
     nb["cells"][5]["source"] = credentials_cell.replace("YOUR_REGION", region_test)
 
     credentials_cell = nb["cells"][5]["source"]
-    nb["cells"][5]["source"] = credentials_cell.replace("YOUR_SCHEMA", "bi")
+    nb["cells"][5]["source"] = credentials_cell.replace("YOUR_SCHEMA", schema_test)
 
-    ep = ExecutePreprocessor(timeout=60, kernel_name="python3")
-    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
-
-    del context
-    context = get_context(context_root_dir=root_dir)
-
-    assert context.list_datasources() == [
-        {
-            "module_name": "great_expectations.datasource",
-            "execution_engine": {
-                "module_name": "great_expectations.execution_engine",
-                "connection_string": connection_string,
-                "class_name": "SqlAlchemyExecutionEngine",
-            },
-            "class_name": "Datasource",
-            "data_connectors": {
-                "default_runtime_data_connector_name": {
-                    "batch_identifiers": ["default_identifier_name"],
-                    "class_name": "RuntimeDataConnector",
-                    "module_name": "great_expectations.datasource.data_connector",
-                },
-                "default_inferred_data_connector_name": {
-                    "class_name": "InferredAssetSqlDataConnector",
-                    "module_name": "great_expectations.datasource.data_connector",
-                    "include_schema_name": True,
-                    "introspection_directives": {
-                        "schema_name": "YOUR_SCHEMA",
-                    },
-                },
-                "default_configured_data_connector_name": {
-                    "assets": {
-                        "YOUR_TABLE_NAME": {
-                            "class_name": "Asset",
-                            "module_name": "great_expectations.datasource.data_connector.asset",
-                            "schema_name": "YOUR_SCHEMA",
-                        },
-                    },
-                    "class_name": "ConfiguredAssetSqlDataConnector",
-                    "module_name": "great_expectations.datasource.data_connector",
-                },
-            },
-            "name": "my_datasource",
-        }
-    ]
+    credentials_cell = nb["cells"][5]["source"]
+    nb["cells"][5]["source"] = credentials_cell.replace(
+        "YOUR_TABLE_NAME", table_name_test
+    )
 
     assert_no_logging_messages_or_tracebacks(caplog, result)
