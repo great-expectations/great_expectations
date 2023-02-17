@@ -153,6 +153,9 @@ if TYPE_CHECKING:
         CheckpointStore,
         EvaluationParameterStore,
     )
+    from great_expectations.data_context.store.datasource_store import (
+        DatasourceStore,
+    )
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
@@ -277,7 +280,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         # Init stores
         self._stores: dict = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
+        self._init_primary_stores(self.project_config_with_variables_substituted.stores)
+        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
+        # As such, it must be instantiated separately.
+        self._datasource_store = self._init_datasource_store()
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -4436,7 +4442,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def data_context_id(self) -> str:
         return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
+    def _init_primary_stores(self, store_configs: Dict[str, dict]) -> None:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
@@ -4448,12 +4454,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
-        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
-        # As such, it must be instantiated separately.
-        self._init_datasource_store()
-
     @abstractmethod
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
 
         Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default

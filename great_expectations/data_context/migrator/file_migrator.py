@@ -23,6 +23,10 @@ logger = logging.getLogger(__name__)
 
 
 class FileMigrator:
+    """
+    TODO
+    """
+
     def __init__(self, context: AbstractDataContext) -> None:
         if isinstance(context, FileDataContext):
             raise gx_exceptions.MigrationError(
@@ -30,9 +34,10 @@ class FileMigrator:
             )
         self._src_context = context
 
-    def migrate(
-        self,
-    ) -> FileDataContext:
+    def migrate(self) -> FileDataContext:
+        """
+        TODO
+        """
         pwd = os.getcwd()
         dst_context = cast(
             FileDataContext, FileDataContext.create(project_root_dir=pwd)
@@ -72,7 +77,7 @@ class FileMigrator:
     def _migrate_datasource_store(self, dst_store: DatasourceStore) -> None:
         src_store = self._src_context._datasource_store
         self._migrate_store(
-            store_name="datasource name", src_store=src_store, dst_store=dst_store
+            store_name="datasource store", src_store=src_store, dst_store=dst_store
         )
 
     def _migrate_store(
@@ -92,9 +97,8 @@ class FileMigrator:
     ) -> None:
         src_configs = self._src_context.variables.data_docs_sites or {}
 
-        # dst_root = pathlib.Path(dst_context.root_directory)
         dst_base_directory = dst_root.joinpath(
-            DataContextConfigDefaults.DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME.value
+            DataContextConfigDefaults.DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME
         )
         assert (
             dst_base_directory.exists()

@@ -57,6 +57,9 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.data_context.store.datasource_store import (
+        DatasourceStore,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -367,7 +370,7 @@ class CloudDataContext(SerializableDataContext):
             conf_file_option=conf_file_option,
         )
 
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
@@ -391,7 +394,7 @@ class CloudDataContext(SerializableDataContext):
             runtime_environment=runtime_environment,
             serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
         )
-        self._datasource_store = datasource_store
+        return datasource_store
 
     def list_expectation_suite_names(self) -> List[str]:
         """
