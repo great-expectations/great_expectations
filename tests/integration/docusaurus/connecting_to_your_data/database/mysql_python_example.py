@@ -16,7 +16,7 @@ load_data_into_test_database(
 
 context = gx.get_context()
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py test datasource config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py datasource config">
 datasource_config = {
     "name": "my_mysql_datasource",
     "class_name": "Datasource",

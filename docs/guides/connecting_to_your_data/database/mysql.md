@@ -85,7 +85,7 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py test datasource config"
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py datasource config"
 ```
 
 Run this code to test your configuration.
