@@ -57,6 +57,7 @@ context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 
 # First test for RuntimeBatchRequest using a query
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py load data with query">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_redshift_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -70,6 +71,7 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)

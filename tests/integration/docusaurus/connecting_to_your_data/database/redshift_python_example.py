@@ -75,6 +75,7 @@ print(validator.head())
 assert isinstance(validator, gx.validator.validator.Validator)
 
 # Second test for BatchRequest naming a table
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py load data with table name">
 batch_request = BatchRequest(
     datasource_name="my_redshift_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -85,6 +86,7 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
