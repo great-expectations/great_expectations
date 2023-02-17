@@ -82,7 +82,7 @@ class _SparkDatasource(Datasource):
 
 class SparkFilesystemDatasource(_SparkDatasource):
     # instance attributes
-    type: Literal["spark"] = "spark_filesystem"
+    type: Literal["spark_filesystem"] = "spark_filesystem"
     name: str
     base_directory: pathlib.Path
     data_context_root_directory: Optional[pathlib.Path] = None
