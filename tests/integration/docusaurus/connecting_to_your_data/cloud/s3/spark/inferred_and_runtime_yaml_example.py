@@ -58,7 +58,9 @@ datasource_yaml = datasource_yaml.replace(
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py add datasource config">
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py batch request 1">
