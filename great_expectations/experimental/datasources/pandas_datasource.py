@@ -19,6 +19,7 @@ from typing import (
     Union,
 )
 
+import pydantic
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
@@ -60,6 +61,16 @@ class _PandasDataAsset(DataAsset):
         "order_by",
         "type",
     }
+
+    class Config:
+        """
+        Need to allow extra fields for the base type because pydantic will first create
+        an instance of `_PandasDataAsset` before we select and create the more specific
+        asset subtype.
+        Each specific subtype should `forbid` extra fields.
+        """
+
+        extra = pydantic.Extra.allow
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
