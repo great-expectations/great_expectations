@@ -121,6 +121,10 @@ FIELD_SKIPPED_UNSUPPORTED_TYPE: Set[str] = set()
 FIELD_SKIPPED_NO_ANNOTATION: Set[str] = set()
 
 
+class DynamicAssetError(Exception):
+    pass
+
+
 class _SignatureTuple(NamedTuple):
     name: str
     signature: inspect.Signature
@@ -416,7 +420,9 @@ def _generate_pandas_data_asset_models(
         try:
             asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
         except TypeError as e:
-            raise TypeError(f"Asset Model {asset_model.__name__}: {e}")
+            raise DynamicAssetError(
+                f"Updating forward references for asset model {asset_model.__name__} raised TypeError: {e}"
+            ) from e
 
     logger.debug(f"Needs extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")
     logger.debug(f"No Annotation\n{FIELD_SKIPPED_NO_ANNOTATION}")
