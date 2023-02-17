@@ -12,7 +12,7 @@ import TipUseTheExpectationGallery from '/docs/components/creating_expectations/
 
 ## Introduction
 
-Welcome to Great Expectations!  This guide will demonstrate the ease with which you can implement the basic GX workflow. We will walk you through the entire process of installing GX, connecting to some sample data, building your first Expectation based off of an initial Batch of that data, and finally using that Expectation to validate additional data.
+We here at GX know that few things are as daunting as taking your first steps with a new piece of software.  That's why the purpose of this guide is to demonstrate the ease with which you can implement the basic GX workflow. We will walk you through the entire process of installing GX, connecting to some sample data, building your first Expectation based off of an initial Batch of that data, and finally saving that Expectation so that it can be used to validate additional data in the future.
 
 Once you have completed this guide you will have a foundation in the basics of using GX.  In the future you will be able to adapt GX to suit your specific needs by customizing the execution of the individual steps you will learn here.
 
