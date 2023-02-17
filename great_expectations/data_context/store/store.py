@@ -279,16 +279,15 @@ class Store:
                 config_defaults=config_defaults,
             )
         except gx_exceptions.DataContextError as e:
-            new_store = None
             logger.critical(
                 f"Error {e} occurred while attempting to instantiate a store."
             )
-        if not new_store:
             class_name: str = store_config["class_name"]
             module_name = store_config["module_name"]  # TODO: use .get() ???
             raise gx_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
                 class_name=class_name,
-            )
+            ) from e
+
         return new_store
