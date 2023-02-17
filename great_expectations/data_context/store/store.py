@@ -285,7 +285,7 @@ class Store:
             )
         if not new_store:
             class_name: str = store_config["class_name"]
-            module_name = store_config["module_name"]
+            module_name = store_config["module_name"]  # TODO: use .get() ???
             raise gx_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
