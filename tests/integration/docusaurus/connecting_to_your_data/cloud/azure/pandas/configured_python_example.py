@@ -10,6 +10,7 @@ CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
 context = gx.get_context()
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py datasource config">
 datasource_config = {
     "name": "my_azure_datasource",
     "class_name": "Datasource",
@@ -37,6 +38,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -57,7 +59,9 @@ datasource_config["data_connectors"]["configured_data_connector_name"][
     "name_starts_with"
 ] = "data/taxi_yellow_tripdata_samples/"
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py test datasource config">
 context.test_yaml_config(yaml.dump(datasource_config))
+# </snippet>
 
 context.add_datasource(**datasource_config)
 

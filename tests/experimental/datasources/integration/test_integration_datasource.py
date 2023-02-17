@@ -107,7 +107,7 @@ def test_sql_query_data_asset(empty_data_context):
             name="query_asset",
             query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
         )
-        .add_year_and_month_splitter(column_name="pickup_datetime")
+        .add_splitter_year_and_month(column_name="pickup_datetime")
         .add_sorters(["year"])
     )
     validator = context.get_validator(

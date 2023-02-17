@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 import pathlib
 import re
@@ -21,6 +22,7 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     PandasFilesystemDatasource,
     _FilesystemDataAsset,
 )
+from great_expectations.experimental.datasources.sources import _get_field_details
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -162,6 +164,62 @@ class TestDynamicPandasAssets:
         print(asset_class_names)
 
         assert type_name in asset_class_names
+
+    @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
+    def test_add_asset_method_exists_and_is_functional(
+        self, asset_class: Type[_FilesystemDataAsset]
+    ):
+        type_name: str = _get_field_details(asset_class, "type").default_value
+        method_name: str = f"add_{type_name}_asset"
+
+        print(f"{method_name}() -> {asset_class.__name__}")
+
+        assert method_name in PandasFilesystemDatasource.__dict__
+
+        ds = PandasFilesystemDatasource(
+            name="ds_for_testing_add_asset_methods",
+            base_directory=pathlib.Path.cwd(),
+        )
+        method = getattr(ds, method_name)
+
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            method(
+                f"{asset_class.__name__}_add_asset_test",
+                regex="great_expectations",
+                _invalid_key="foobar",
+            )
+        # importantly check that the method creates (or attempts to create) the intended asset
+        assert exc_info.value.model == asset_class
+
+    @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
+    def test_add_asset_method_signaturel(self, asset_class: Type[_FilesystemDataAsset]):
+        type_name: str = _get_field_details(asset_class, "type").default_value
+        method_name: str = f"add_{type_name}_asset"
+
+        ds = PandasFilesystemDatasource(
+            name="ds_for_testing_add_asset_methods",
+            base_directory=pathlib.Path.cwd(),
+        )
+        method = getattr(ds, method_name)
+
+        add_asset_method_sig: inspect.Signature = inspect.signature(method)
+        print(f"\t{method_name}()\n{add_asset_method_sig}\n")
+
+        asset_class_init_sig: inspect.Signature = inspect.signature(asset_class)
+        print(f"\t{asset_class.__name__}\n{asset_class_init_sig}\n")
+
+        for i, param_name in enumerate(asset_class_init_sig.parameters):
+            print(f"{i} {param_name} ", end="")
+
+            if param_name == "type":
+                assert (
+                    param_name not in add_asset_method_sig.parameters
+                ), "type should not be part of the `add_<TYPE>_asset` method"
+                print("⏩")
+                continue
+
+            assert param_name in add_asset_method_sig.parameters
+            print("✅")
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
     def test_minimal_validation(self, asset_class: Type[_FilesystemDataAsset]):
