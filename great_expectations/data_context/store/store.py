@@ -28,6 +28,7 @@ class StoreConfigTypedDict(TypedDict):
     class_name: str
     module_name: str
     store_backend: dict
+    # NOTE: TypeDict values may be incomplete
 
 
 class Store:
