@@ -24,6 +24,7 @@ data_context_config = DataContextConfig(
 context = get_context(project_config=data_context_config)
 
 datasource_yaml = rf"""
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py datasource config">
 name: my_s3_datasource
 class_name: Datasource
 execution_engine:
@@ -41,6 +42,7 @@ data_connectors:
             pattern: (.*)\.csv
             group_names:
                 - data_asset_name
+# </snippet>
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -52,7 +54,9 @@ datasource_yaml = datasource_yaml.replace(
     "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
 )
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py test datasource config">
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
 context.add_datasource(**yaml.load(datasource_yaml))
 

@@ -20,6 +20,7 @@ data_context_config = DataContextConfig(
 )
 context = get_context(project_config=data_context_config)
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py datasource config">
 datasource_config = {
     "name": "my_s3_datasource",
     "class_name": "Datasource",
@@ -40,6 +41,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -50,7 +52,9 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
     "prefix"
 ] = "data/taxi_yellow_tripdata_samples/"
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py test datasource config">
 context.test_yaml_config(yaml.dump(datasource_config))
+# </snippet>
 
 context.add_datasource(**datasource_config)
 

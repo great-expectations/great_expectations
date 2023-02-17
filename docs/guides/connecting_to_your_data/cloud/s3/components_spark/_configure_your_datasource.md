@@ -13,24 +13,24 @@ Using this example configuration, add in your S3 bucket and path to a directory 
 
 <TabItem value="yaml">
 
-```python file=../../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L23-L42
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L52
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py test datasource config"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py#L21-L42
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py#L53
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py test datasource config"
 ```
 
 </TabItem>
