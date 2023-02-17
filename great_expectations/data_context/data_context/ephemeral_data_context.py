@@ -84,6 +84,10 @@ class EphemeralDataContext(AbstractDataContext):
 
         return datasource_store
 
+    # Add public_api decorator?
     def convert_to_file_context(self) -> FileDataContext:
+        """
+        TODO
+        """
         migrator = FileMigrator(context=self)
         return migrator.migrate()

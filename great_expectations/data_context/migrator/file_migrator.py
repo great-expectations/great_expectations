@@ -57,10 +57,7 @@ class FileMigrator:
         )
         return dst_context
 
-    def _migrate_primary_stores(
-        self,
-        dst_stores: dict[str, Store],
-    ) -> None:
+    def _migrate_primary_stores(self, dst_stores: dict[str, Store]) -> None:
         src_stores = self._src_context.stores
         if src_stores.keys() != dst_stores.keys():
             raise gx_exceptions.MigrationError(
@@ -68,10 +65,8 @@ class FileMigrator:
             )
 
         for name in src_stores:
-            src_store = src_stores[name]
-            dst_store = dst_stores[name]
             self._migrate_store(
-                store_name=name, src_store=src_store, dst_store=dst_store
+                store_name=name, src_store=src_stores[name], dst_store=dst_stores[name]
             )
 
     def _migrate_datasource_store(self, dst_store: DatasourceStore) -> None:
@@ -93,10 +88,7 @@ class FileMigrator:
             dst_store.add(key=key, value=src_obj)
             logger.info(f"Successfully migrated stored object saved with key {key}.")
 
-    def _migrate_data_docs_sites(
-        self,
-        dst_root: pathlib.Path,
-    ) -> None:
+    def _migrate_data_docs_sites(self, dst_root: pathlib.Path) -> None:
         src_configs = self._src_context.variables.data_docs_sites or {}
 
         dst_base_directory = dst_root.joinpath(
