@@ -31,7 +31,7 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py#L4-L7
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py imports"
 ```
 
 <SparkDataContextNote />
@@ -52,7 +52,7 @@ Using this example configuration, add in your ABS container and path to a direct
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py#L13-L37
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py datasource config"
 ```
 
 :::info Authentication
@@ -70,19 +70,19 @@ For more details regarding authentication, please visit the following:
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py#L52
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py test datasource"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py#L13-L38
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py#L59
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py test datasource"
 ```
 
 </TabItem>
@@ -107,14 +107,14 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py#L54
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py add datasource"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py#L61
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py add datasource"
 ```
 
 </TabItem>
@@ -127,11 +127,11 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py#L57-L62
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py batch request"
 ```
 
 Then load data into the `Validator`.
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py#L70-L75
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py get validator"
 ```
 
 <Congratulations />

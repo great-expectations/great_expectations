@@ -10,6 +10,7 @@ CREDENTIAL = os.getenv("AZURE_CREDENTIAL", "")
 
 context = gx.get_context()
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py datasource config">
 datasource_yaml = f"""
 name: my_azure_datasource
 class_name: Datasource
@@ -34,6 +35,7 @@ data_connectors:
         assets:
             taxi_data:
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -48,7 +50,9 @@ datasource_yaml = datasource_yaml.replace(
 )
 datasource_yaml = datasource_yaml.replace("<YOUR_CREDENTIAL>", CREDENTIAL)
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py test datasource">
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
 context.add_datasource(**yaml.load(datasource_yaml))
 
