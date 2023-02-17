@@ -141,7 +141,7 @@ _PANDAS_BLACK_LIST = (
     # "read_parquet",
     # "read_clipboard",
     # "read_feather",
-    # "read_fwf",
+    "read_fwf",  # unhandled type
     # "read_gbq",
     # "read_hdf",
     # "read_html",

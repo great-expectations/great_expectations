@@ -416,7 +416,7 @@ def _generate_pandas_data_asset_models(
         try:
             asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
         except TypeError as e:
-            raise Exception(f"{asset_model.type}: {e}")
+            raise TypeError(f"Asset Model {asset_model.__name__}: {e}")
 
     logger.debug(f"Needs extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")
     logger.debug(f"No Annotation\n{FIELD_SKIPPED_NO_ANNOTATION}")
