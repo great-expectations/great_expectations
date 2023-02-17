@@ -1774,7 +1774,7 @@ will appear repeatedly until your configuration is updated.)
             )
 
 
-class DataContextConfigDefaults(enum.Enum, str):
+class DataContextConfigDefaults(str, enum.Enum):
     DEFAULT_CONFIG_VERSION = CURRENT_GX_CONFIG_VERSION
     UNCOMMITTED = "uncommitted"
 
@@ -1796,6 +1796,9 @@ class DataContextConfigDefaults(enum.Enum, str):
     DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME = (
         f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
     )
+
+    # Checkpoints
+    DEFAULT_DATASOURCE_STORE_NAME = "datasource_store"
 
     # Checkpoints
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"

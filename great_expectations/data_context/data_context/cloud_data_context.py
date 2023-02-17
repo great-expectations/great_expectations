@@ -57,9 +57,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
-    from great_expectations.data_context.store.datasource_store import (
-        DatasourceStore,
-    )
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
 
 logger = logging.getLogger(__name__)
 
@@ -378,8 +376,9 @@ class CloudDataContext(SerializableDataContext):
             GXCloudStoreBackend,
         )
 
-        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
+        # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
+        store_name = DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,

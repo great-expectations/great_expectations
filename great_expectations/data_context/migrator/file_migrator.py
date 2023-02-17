@@ -77,7 +77,9 @@ class FileMigrator:
     def _migrate_datasource_store(self, dst_store: DatasourceStore) -> None:
         src_store = self._src_context._datasource_store
         self._migrate_store(
-            store_name="datasource store", src_store=src_store, dst_store=dst_store
+            store_name=DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME,
+            src_store=src_store,
+            dst_store=dst_store,
         )
 
     def _migrate_store(
