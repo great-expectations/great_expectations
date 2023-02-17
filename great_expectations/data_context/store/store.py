@@ -283,7 +283,7 @@ class Store:
                 f"Error {e} occurred while attempting to instantiate a store."
             )
             class_name: str = store_config["class_name"]
-            module_name = store_config["module_name"]  # TODO: use .get() ???
+            module_name = store_config.get("module_name", module_name)
             raise gx_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
