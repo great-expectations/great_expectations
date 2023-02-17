@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Dict, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, Mapping, Optional, Union, cast
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.serializer import DictConfigSerializer
@@ -9,11 +11,17 @@ from great_expectations.data_context.data_context.abstract_data_context import (
 from great_expectations.data_context.data_context_variables import (
     EphemeralDataContextVariables,
 )
+from great_expectations.data_context.migrator.file_migrator import FileMigrator
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     datasourceConfigSchema,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.file_data_context import (
+        FileDataContext,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -72,3 +80,7 @@ class EphemeralDataContext(AbstractDataContext):
             datasource_store.add_by_name(datasource_name=name, datasource_config=config)
 
         self._datasource_store = datasource_store
+
+    def convert_to_file_context(self) -> FileDataContext:
+        migrator = FileMigrator()
+        return migrator.migrate(self)
