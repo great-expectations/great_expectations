@@ -11,10 +11,10 @@ from ruamel.yaml.compat import StringIO
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint  # noqa: TCH001
+from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.cli.v012.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.v012.datasource import get_batch_kwargs
 from great_expectations.cli.v012.docs import build_docs
-from great_expectations.cli.v012.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.cli.v012.util import cli_colorize_string, cli_message
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite  # noqa: TCH001
