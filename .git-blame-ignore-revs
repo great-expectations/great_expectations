@@ -6,4 +6,3 @@
 # https://black.readthedocs.io/en/stable/guides/introducing_black_to_your_project.html#avoiding-ruining-git-blame
 # Apply noqa markers for all TCH001 violations
 f5e7df1846102d9a62cc9b9110387925ffae60cc
-d0da1a2b1216d95f3ca3a02a080a25593ea18c88
