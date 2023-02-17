@@ -47,6 +47,18 @@ def test_open_docs_with_single_local_site(mock_webbrowser, empty_data_context):
     )
 
 
+@pytest.mark.unit
+def test_get_context_no_args_successfully_builds_and_opens_docs():
+    context = get_context()
+
+    sites = context.build_data_docs()
+    assert len(sites) == 1
+
+    with mock.patch("webbrowser.open") as mock_open:
+        context.open_data_docs()
+    mock_open.assert_called_once()
+
+
 @pytest.fixture
 def context_with_multiple_built_sites(empty_data_context):
     context = empty_data_context

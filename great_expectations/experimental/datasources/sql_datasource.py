@@ -1,17 +1,15 @@
 from __future__ import annotations
 
 import copy
-import itertools
-from datetime import datetime
+import dataclasses
+from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
-    Callable,
+    ClassVar,
     Dict,
     List,
-    NamedTuple,
     Optional,
-    Sequence,
     Type,
     Union,
     cast,
@@ -19,8 +17,9 @@ from typing import (
 
 import pydantic
 from pydantic import dataclasses as pydantic_dc
-from typing_extensions import ClassVar, Literal
+from typing_extensions import Literal
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
@@ -30,6 +29,7 @@ from great_expectations.experimental.datasources.interfaces import (
     DataAsset,
     Datasource,
     TestConnectionError,
+    _batch_sorter_from_list,
 )
 
 SQLALCHEMY_IMPORTED = False
@@ -41,7 +41,7 @@ except ImportError:
     pass
 
 if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 class SQLDatasourceError(Exception):
@@ -56,10 +56,45 @@ class SQLDatasourceWarning(UserWarning):
 class ColumnSplitter:
     column_name: str
     method_name: str
-    param_names: Sequence[str]
 
-    def param_defaults(self, sql_asset: _SQLAsset) -> Dict[str, List]:
-        raise NotImplementedError
+    def param_defaults(self, sql_asset: _SQLAsset) -> List[Dict]:
+        from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
+            SqlAlchemyDataSplitter,
+        )
+
+        execution_engine = sql_asset.datasource.get_execution_engine()
+        splitter = SqlAlchemyDataSplitter(execution_engine.dialect_name)
+        batch_identifiers = splitter.get_data_for_batch_identifiers(
+            execution_engine=execution_engine,
+            selectable=sql_asset.as_selectable(),
+            splitter_method_name=self.method_name,
+            splitter_kwargs={"column_name": self.column_name},
+        )
+        params: List[Dict] = []
+        for batch_identifier in batch_identifiers:
+            # batch_identifiers is a list of dicts where each dict contains
+            # a column name key whose value is the batch parameters
+            params.append(batch_identifier[self.column_name])
+        return params
+
+    def _param_names_from_method_name(self):
+        # This is a method instead of a ClassVar to break circular imports.
+        # TODO: Don't import the experimental package from core
+        from great_expectations.execution_engine.split_and_sample.data_splitter import (
+            SplitterMethod,
+        )
+
+        param_names = {
+            SplitterMethod.SPLIT_ON_YEAR: ["year"],
+            SplitterMethod.SPLIT_ON_YEAR_AND_MONTH: ["year", "month"],
+            SplitterMethod.SPLIT_ON_YEAR_AND_MONTH_AND_DAY: ["year", "month", "day"],
+        }
+        # self.method_name is a key into param_names because of _splitter_method_exists validator
+        return param_names[self.method_name]
+
+    @property
+    def param_names(self):
+        return self._param_names_from_method_name()
 
     @pydantic.validator("method_name")
     def _splitter_method_exists(cls, v: str):
@@ -80,92 +115,45 @@ class ColumnSplitter:
             raise ValueError(f"unexpected value; permitted: '{permitted_values_str}'")
         return v
 
-
-class DatetimeRange(NamedTuple):
-    min: datetime
-    max: datetime
-
-
-@pydantic_dc.dataclass(frozen=True)
-class SqlYearMonthSplitter(ColumnSplitter):
-    method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
-    param_names: List[Literal["year", "month"]] = pydantic.Field(
-        default_factory=lambda: ["year", "month"]
-    )
-
-    def param_defaults(self, sql_asset: _SQLAsset) -> Dict[str, List]:
-        """Query sql database to get the years and months to split over.
+    def test_connection(self, table_asset: TableAsset) -> None:
+        """Test the connection for the ColumnSplitter.
 
         Args:
-            sql_asset: A SQL DataAsset over which we want to split the data.
+            table_asset: The TableAsset to which the ColumnSplitter will be applied.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
         """
-        return _query_for_year_and_month(
-            sql_asset, self.column_name, _get_sql_datetime_range
+        datasource: SQLDatasource = table_asset.datasource
+        engine: sqlalchemy.engine.Engine = datasource.get_engine()
+        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+
+        columns: list[dict[str, Any]] = inspector.get_columns(
+            table_name=table_asset.table_name, schema=table_asset.schema_name
         )
-
-
-def _query_for_year_and_month(
-    sql_asset: _SQLAsset,
-    column_name: str,
-    query_datetime_range: Callable[
-        [sqlalchemy.engine.base.Connection, sqlalchemy.sql.Selectable, str],
-        DatetimeRange,
-    ],
-) -> Dict[str, List]:
-    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
-    execution_engine = sql_asset.datasource.get_execution_engine()
-    assert isinstance(execution_engine, SqlAlchemyExecutionEngine)
-
-    with execution_engine.engine.connect() as conn:
-        datetimes: DatetimeRange = query_datetime_range(
-            conn,
-            sql_asset.as_selectable(),
-            column_name,
-        )
-    year: List[int] = list(range(datetimes.min.year, datetimes.max.year + 1))
-    month: List[int]
-    if datetimes.min.year == datetimes.max.year:
-        month = list(range(datetimes.min.month, datetimes.max.month + 1))
-    else:
-        month = list(range(1, 13))
-    return {"year": year, "month": month}
-
-
-def _get_sql_datetime_range(
-    conn: sqlalchemy.engine.base.Connection,
-    selectable: sqlalchemy.sql.Selectable,
-    col_name: str,
-) -> DatetimeRange:
-    import sqlalchemy as sa
-
-    column = sa.column(col_name)
-    query = sa.select([sa.func.min(column), sa.func.max(column)]).select_from(
-        selectable
-    )
-    min_max_dt = list(
-        conn.execute(query.compile(compile_kwargs={"literal_binds": True}))
-    )[0]
-    if min_max_dt[0] is None or min_max_dt[1] is None:
-        raise SQLDatasourceError(
-            f"Data date range can not be determined for the query: {query}. The returned range was {min_max_dt}."
-        )
-    return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
+        column_names: list[str] = [column["name"] for column in columns]
+        if self.column_name not in column_names:
+            raise TestConnectionError(
+                f'The column "{self.column_name}" was not found in table "{table_asset.qualified_name}"'
+            )
 
 
 class _SQLAsset(DataAsset):
     # Instance fields
-    type: Literal["_sqlasset"] = "_sqlasset"
-    column_splitter: Optional[SqlYearMonthSplitter] = None
+    type: str = pydantic.Field("_sql_asset")
+    column_splitter: Optional[ColumnSplitter] = None
     name: str
+
+    # Internal attributes
+    _datasource: SQLDatasource = pydantic.PrivateAttr()
 
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        """A BatchRequestOptions template for get_batch_request.
+        """A BatchRequestOptions template for build_batch_request.
 
         Returns:
-            A BatchRequestOptions dictionary with the correct shape that get_batch_request
+            A BatchRequestOptions dictionary with the correct shape that build_batch_request
             will understand. All the option values are defaulted to None.
         """
         template: BatchRequestOptions = {}
@@ -173,76 +161,84 @@ class _SQLAsset(DataAsset):
             return template
         return {p: None for p in self.column_splitter.param_names}
 
-    # This asset type will support a variety of splitters
-    def add_year_and_month_splitter(
+    def _add_splitter(self, method_name: str, column_name: str):
+        self.column_splitter = ColumnSplitter(
+            column_name=column_name,
+            method_name=method_name,
+        )
+        self.test_column_splitter_connection()
+        return self
+
+    def add_splitter_year(
         self,
         column_name: str,
     ) -> _SQLAsset:
-        """Associates a year month splitter with this DataAsset
-
+        """Associates a year splitter with this sql data asset.
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
-
         Returns:
-            This DataAsset so we can use this method fluently.
+            This sql asset so we can use this method fluently.
         """
-        self.column_splitter = SqlYearMonthSplitter(
-            column_name=column_name,
-        )
-        return self
+        return self._add_splitter(method_name="split_on_year", column_name=column_name)
 
-    def _fully_specified_batch_requests(self, batch_request) -> List[BatchRequest]:
+    def add_splitter_year_and_month(
+        self,
+        column_name: str,
+    ) -> _SQLAsset:
+        """Associates a year, month splitter with this sql asset.
+        Args:
+            column_name: A column name of the date column where year and month will be parsed out.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
+        return self._add_splitter(
+            method_name="split_on_year_and_month", column_name=column_name
+        )
+
+    def add_splitter_year_and_month_and_day(
+        self,
+        column_name: str,
+    ) -> _SQLAsset:
+        """Associates a year, month, day splitter with this sql asset.
+        Args:
+            column_name: A column name of the date column where year and month will be parsed out.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
+        return self._add_splitter(
+            method_name="split_on_year_and_month_and_day", column_name=column_name
+        )
+
+    def test_connection(self) -> None:
+        pass
+
+    def test_column_splitter_connection(self) -> None:
+        pass
+
+    def _fully_specified_batch_requests(
+        self, batch_request: BatchRequest
+    ) -> List[BatchRequest]:
         """Populates a batch requests unspecified params producing a list of batch requests."""
         if self.column_splitter is None:
             # Currently batch_request.options is complete determined by the presence of a
             # column splitter. If column_splitter is None, then there are no specifiable options
-            # so we return early.
+            # so we return early. Since the passed in batch_request is verified, it must be the
+            # empty, ie {}.
             # In the future, if there are options that are not determined by the column splitter
             # this check will have to be generalized.
             return [batch_request]
 
-        # Make a list of the specified and unspecified params in batch_request
-        specified_options = []
-        unspecified_options = []
-        options_template = self.batch_request_options_template()
-        for option_name in options_template.keys():
-            if (
-                option_name in batch_request.options
-                and batch_request.options[option_name] is not None
-            ):
-                specified_options.append(option_name)
-            else:
-                unspecified_options.append(option_name)
-
-        # Make a list of the all possible batch_request.options by expanding out the unspecified
-        # options
         batch_requests: List[BatchRequest] = []
-
-        if not unspecified_options:
-            batch_requests.append(batch_request)
-        else:
-            # All options are defined by the splitter, so we look at its default values to fill
-            # in the option values.
-            default_option_values = []
-            for option in unspecified_options:
-                default_option_values.append(
-                    self.column_splitter.param_defaults(self)[option]
+        for params in self.column_splitter.param_defaults(self):
+            options = copy.deepcopy(batch_request.options)
+            options.update(params)
+            batch_requests.append(
+                BatchRequest(
+                    datasource_name=batch_request.datasource_name,
+                    data_asset_name=batch_request.data_asset_name,
+                    options=options,
                 )
-            for option_values in itertools.product(*default_option_values):
-                # Add options from specified options
-                options = {
-                    name: batch_request.options[name] for name in specified_options
-                }
-                # Add options from unspecified options
-                for i, option_value in enumerate(option_values):
-                    options[unspecified_options[i]] = option_value
-                batch_requests.append(
-                    BatchRequest(
-                        datasource_name=batch_request.datasource_name,
-                        data_asset_name=batch_request.data_asset_name,
-                        options=options,
-                    )
-                )
+            )
         return batch_requests
 
     def get_batch_list_from_batch_request(
@@ -252,7 +248,7 @@ class _SQLAsset(DataAsset):
 
         Args:
             batch_request: A batch request for this asset. Usually obtained by calling
-                get_batch_request on the asset.
+                build_batch_request on the asset.
 
         Returns:
             A list of batches that match the options specified in the batch request.
@@ -277,7 +273,9 @@ class _SQLAsset(DataAsset):
                 )
             # Creating the batch_spec is our hook into the execution engine.
             batch_spec = SqlAlchemyDatasourceBatchSpec(**batch_spec_kwargs)
-            execution_engine: ExecutionEngine = self.datasource.get_execution_engine()
+            execution_engine: SqlAlchemyExecutionEngine = (
+                self.datasource.get_execution_engine()
+            )
             data, markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
             )
@@ -316,6 +314,56 @@ class _SQLAsset(DataAsset):
         self.sort_batches(batch_list)
         return batch_list
 
+    def build_batch_request(
+        self, options: Optional[BatchRequestOptions] = None
+    ) -> BatchRequest:
+        """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            options: A dict that can be used to limit the number of batches returned from the asset.
+                The dict structure depends on the asset type. A template of the dict can be obtained by
+                calling batch_request_options_template.
+
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
+        if options is not None and not self._valid_batch_request_options(options):
+            allowed_keys = set(self.batch_request_options_template().keys())
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(
+                "Batch request options should only contain keys from the following set:\n"
+                f"{allowed_keys}\nbut your specified keys contain\n"
+                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
+            )
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options=options or {},
+        )
+
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
+        if not (
+            batch_request.datasource_name == self.datasource.name
+            and batch_request.data_asset_name == self.name
+            and self._valid_batch_request_options(batch_request.options)
+        ):
+            expect_batch_request_form = BatchRequest(
+                datasource_name=self.datasource.name,
+                data_asset_name=self.name,
+                options=self.batch_request_options_template(),
+            )
+            raise gx_exceptions.InvalidBatchRequestError(
+                "BatchRequest should have form:\n"
+                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
+                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+            )
+
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         """Creates batch_spec_kwargs used to instantiate a SqlAlchemyDatasourceBatchSpec
 
@@ -337,11 +385,8 @@ class _SQLAsset(DataAsset):
 
 class QueryAsset(_SQLAsset):
     # Instance fields
-    type: Literal["query"] = "query"  # type: ignore[assignment]
+    type: Literal["query"] = "query"
     query: str
-
-    def test_connection(self) -> None:
-        pass
 
     @pydantic.validator("query")
     def query_must_start_with_select(cls, v: str):
@@ -370,9 +415,17 @@ class QueryAsset(_SQLAsset):
 
 class TableAsset(_SQLAsset):
     # Instance fields
-    type: Literal["table"] = "table"  # type: ignore[assignment]
+    type: Literal["table"] = "table"
     table_name: str
     schema_name: Optional[str] = None
+
+    @property
+    def qualified_name(self) -> str:
+        return (
+            f"{self.schema_name}.{self.table_name}"
+            if self.schema_name
+            else self.table_name
+        )
 
     def test_connection(self) -> None:
         """Test the connection for the TableAsset.
@@ -380,19 +433,13 @@ class TableAsset(_SQLAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        assert isinstance(self.datasource, SQLDatasource)
-        engine: sqlalchemy.engine.Engine = self.datasource.get_engine()
+        datasource: SQLDatasource = self.datasource
+        engine: sqlalchemy.engine.Engine = datasource.get_engine()
         inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
-
-        table_str = (
-            f"{self.schema_name}.{self.table_name}"
-            if self.schema_name
-            else self.table_name
-        )
 
         if self.schema_name and self.schema_name not in inspector.get_schema_names():
             raise TestConnectionError(
-                f'Attempt to connect to table: "{table_str}" failed because the schema '
+                f'Attempt to connect to table: "{self.qualified_name}" failed because the schema '
                 f'"{self.schema_name}" does not exist.'
             )
 
@@ -402,9 +449,13 @@ class TableAsset(_SQLAsset):
         )
         if not table_exists:
             raise TestConnectionError(
-                f'Attempt to connect to table: "{table_str}" failed because the table '
+                f'Attempt to connect to table: "{self.qualified_name}" failed because the table '
                 f'"{self.table_name}" does not exist.'
             )
+
+    def test_column_splitter_connection(self) -> None:
+        if self.column_splitter:
+            self.column_splitter.test_connection(table_asset=self)
 
     def as_selectable(self) -> sqlalchemy.sql.Selectable:
         """Returns the table as a sqlalchemy Selectable.
@@ -452,7 +503,7 @@ class SQLDatasource(Datasource):
     _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
 
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
+    def execution_engine_type(self) -> Type[SqlAlchemyExecutionEngine]:
         """Returns the default execution engine type."""
         from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
@@ -523,7 +574,7 @@ class SQLDatasource(Datasource):
             name=name,
             table_name=table_name,
             schema_name=schema_name,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=_batch_sorter_from_list(order_by or []),
             # see DataAsset._parse_order_by_sorter()
         )
         return self.add_asset(asset)
@@ -547,6 +598,6 @@ class SQLDatasource(Datasource):
         asset = QueryAsset(
             name=name,
             query=query,
-            order_by=order_by or [],  # type: ignore[arg-type]  # coerce list[str]
+            order_by=_batch_sorter_from_list(order_by or []),
         )
         return self.add_asset(asset)

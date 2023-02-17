@@ -61,10 +61,11 @@ def perform_check(suppress_output: bool) -> bool:
             "black --check .",
             "Please ensure that your files are linted properly with `black .`",
         ),
+        # TODO: update this (or don't)
         Command(
-            "isort",
-            "isort --profile black --check .",
-            "Please ensure that your imports are sorted properly with `isort --profile black .`",
+            "ruff",
+            "ruff --select I --fix .",
+            "Please ensure that your imports are sorted properly with `ruff --select I --fix .`",
         ),
         Command(
             "pytest",

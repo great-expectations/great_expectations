@@ -99,11 +99,11 @@ def test_sql_query_data_asset(empty_data_context):
             name="query_asset",
             query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
         )
-        .add_year_and_month_splitter(column_name="pickup_datetime")
+        .add_splitter_year_and_month(column_name="pickup_datetime")
         .add_sorters(["year"])
     )
     validator = context.get_validator(
-        batch_request=asset.get_batch_request({"year": 2019})
+        batch_request=asset.build_batch_request({"year": 2019})
     )
     result = validator.expect_column_distinct_values_to_equal_set(
         column="passenger_count",

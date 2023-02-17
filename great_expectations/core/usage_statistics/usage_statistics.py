@@ -22,10 +22,6 @@ import requests
 from great_expectations import __version__ as ge_version
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
-from great_expectations.core.usage_statistics.anonymizers.types.base import (
-    CLISuiteInteractiveFlagCombinations,
-)
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.execution_environment import (
     GXExecutionEnvironment,
     PackageInfo,
@@ -40,10 +36,17 @@ from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfi
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.core.usage_statistics.anonymizers.types.base import (
+        CLISuiteInteractiveFlagCombinations,
+    )
+    from great_expectations.core.usage_statistics.events import UsageStatsEvents
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource import LegacyDatasource
+    from great_expectations.datasource.new_datasource import BaseDatasource
     from great_expectations.rule_based_profiler.rule_based_profiler import (
         RuleBasedProfiler,
     )
+
 
 STOP_SIGNAL = object()
 
@@ -309,7 +312,8 @@ def usage_statistics_enabled_method(
             time_begin: int = int(round(time.time() * 1000))
             try:
                 if args_payload_fn is not None:
-                    nested_update(event_payload, args_payload_fn(*args, **kwargs))
+                    args_payload = args_payload_fn(*args, **kwargs) or {}
+                    nested_update(event_payload, args_payload)
 
                 result = func(*args, **kwargs)
                 message["success"] = True
@@ -392,8 +396,8 @@ def run_validation_operator_usage_statistics(
 # noinspection PyUnusedLocal
 def save_expectation_suite_usage_statistics(
     data_context: AbstractDataContext,
-    expectation_suite: ExpectationSuite,
-    expectation_suite_name: Optional[str] = None,
+    expectation_suite: ExpectationSuite | None = None,
+    expectation_suite_name: str | None = None,
     **kwargs: dict,
 ) -> dict:
     """
@@ -447,7 +451,10 @@ def edit_expectation_suite_usage_statistics(
 
 
 def add_datasource_usage_statistics(
-    data_context: AbstractDataContext, name: str, **kwargs
+    data_context: AbstractDataContext,
+    name: str | None = None,
+    datasource: LegacyDatasource | BaseDatasource | None = None,
+    **kwargs,
 ) -> dict:
     if not data_context._usage_statistics_handler:
         return {}
@@ -468,6 +475,10 @@ def add_datasource_usage_statistics(
     payload = {}
     # noinspection PyBroadException
     try:
+        assert (
+            name or datasource
+        ), "Guaranteed to have either one of these values due to prior validation"
+        name = name or datasource.name
         payload = datasource_anonymizer._anonymize_datasource_info(name, kwargs)
     except Exception as e:
         logger.debug(
@@ -644,9 +655,9 @@ def send_usage_message_from_handler(
 def _handle_expectation_suite_usage_statistics(
     data_context: AbstractDataContext,
     event_arguments_payload_handler_name: str,
-    expectation_suite: Optional[ExpectationSuite] = None,
-    expectation_suite_name: Optional[str] = None,
-    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
+    expectation_suite: ExpectationSuite | None = None,
+    expectation_suite_name: str | None = None,
+    interactive_mode: CLISuiteInteractiveFlagCombinations | None = None,
     **kwargs,
 ) -> dict:
     """
@@ -670,6 +681,9 @@ def _handle_expectation_suite_usage_statistics(
     else:
         payload = copy.deepcopy(interactive_mode.value)
 
+    assert (
+        expectation_suite or expectation_suite_name
+    ), "Guaranteed to have at least one of these values from context CRUD"
     if expectation_suite_name is None:
         if isinstance(expectation_suite, ExpectationSuite):
             expectation_suite_name = expectation_suite.expectation_suite_name

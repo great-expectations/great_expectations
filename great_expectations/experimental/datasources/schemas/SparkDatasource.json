@@ -22,10 +22,16 @@
             "additionalProperties": {
                 "$ref": "#/definitions/CSVSparkAsset"
             }
+        },
+        "base_directory": {
+            "title": "Base Directory",
+            "type": "string",
+            "format": "path"
         }
     },
     "required": [
-        "name"
+        "name",
+        "base_directory"
     ],
     "additionalProperties": false,
     "definitions": {
@@ -71,11 +77,6 @@
                         "$ref": "#/definitions/BatchSorter"
                     }
                 },
-                "base_directory": {
-                    "title": "Base Directory",
-                    "type": "string",
-                    "format": "path"
-                },
                 "regex": {
                     "title": "Regex",
                     "type": "string",
@@ -94,7 +95,6 @@
             },
             "required": [
                 "name",
-                "base_directory",
                 "regex"
             ]
         }

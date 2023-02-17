@@ -11,11 +11,11 @@ from great_expectations.core.batch import (
     BatchRequest,
     RuntimeBatchRequest,
 )
-from great_expectations.core.batch_spec import PathBatchSpec
-from great_expectations.data_context.types.base import ConcurrencyConfig
+from great_expectations.core.batch_spec import PathBatchSpec  # noqa: TCH001
+from great_expectations.data_context.types.base import ConcurrencyConfig  # noqa: TCH001
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector import DataConnector
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.datasource.data_connector import DataConnector  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 

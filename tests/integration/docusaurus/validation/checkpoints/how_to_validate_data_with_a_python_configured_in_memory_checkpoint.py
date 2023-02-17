@@ -51,7 +51,7 @@ context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
 # Add Expectation Suite for use in Checkpoint config
-context.create_expectation_suite("my_expectation_suite")
+context.add_or_update_expectation_suite("my_expectation_suite")
 
 # Define your checkpoint's configuration.
 # NOTE: Because we are directly using the Checkpoint class, we do not need to

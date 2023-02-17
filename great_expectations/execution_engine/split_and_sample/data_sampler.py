@@ -4,7 +4,7 @@ import abc
 from typing import Any, Callable, Optional, TypeVar
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 
 T = TypeVar("T")
 

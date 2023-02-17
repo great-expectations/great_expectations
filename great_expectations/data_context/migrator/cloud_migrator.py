@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Dict, List, NamedTuple, Optional
 import requests
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.configuration import AbstractConfig
+from great_expectations.core.configuration import AbstractConfig  # noqa: TCH001
 from great_expectations.core.http import create_session
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import send_usage_message

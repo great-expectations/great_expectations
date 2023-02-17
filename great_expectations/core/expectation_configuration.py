@@ -21,7 +21,7 @@ from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from pyparsing import ParseResults
 from typing_extensions import TypedDict
 
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,

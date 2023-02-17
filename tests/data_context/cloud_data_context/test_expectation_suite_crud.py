@@ -300,7 +300,7 @@ def test_create_expectation_suite_saves_suite_to_cloud(
 
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ):
+    ), pytest.deprecated_call():
         mock_list_expectation_suite_names.return_value = existing_suite_names
         suite = context.create_expectation_suite(suite_name)
 
@@ -323,7 +323,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
 
     with mock.patch(
         "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.expectations_store"
-    ):
+    ), pytest.deprecated_call():
         mock_list_expectation_suite_names.return_value = existing_suite_names
         mock_list_expectation_suites.return_value = [
             GXCloudIdentifier(
@@ -350,7 +350,7 @@ def test_create_expectation_suite_namespace_collision_raises_error(
     suite_name = "my_suite"
     existing_suite_names = [suite_name]
 
-    with pytest.raises(DataContextError) as e:
+    with pytest.raises(DataContextError) as e, pytest.deprecated_call():
         mock_list_expectation_suite_names.return_value = existing_suite_names
         context.create_expectation_suite(suite_name)
 
@@ -452,7 +452,7 @@ def test_save_expectation_suite_saves_suite_to_cloud(
 
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ):
+    ), pytest.deprecated_call():
         context.save_expectation_suite(suite)
 
     assert suite.ge_cloud_id is not None
@@ -472,7 +472,9 @@ def test_save_expectation_suite_overwrites_existing_suite(
 
     with mock.patch(
         "requests.Session.put", autospec=True, return_value=mock.Mock(status_code=405)
-    ) as mock_put, mock.patch("requests.Session.patch", autospec=True) as mock_patch:
+    ) as mock_put, mock.patch(
+        "requests.Session.patch", autospec=True
+    ) as mock_patch, pytest.deprecated_call():
         context.save_expectation_suite(suite)
 
     expected_suite_json = {
@@ -507,7 +509,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 
     existing_suite_names = [suite_name]
 
-    with pytest.raises(DataContextError) as e:
+    with pytest.raises(DataContextError) as e, pytest.deprecated_call():
         mock_expectations_store_has_key.return_value = False
         mock_list_expectation_suite_names.return_value = existing_suite_names
         context.save_expectation_suite(
@@ -530,7 +532,7 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     suite_id = suite_1.id
     suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
 
-    with pytest.raises(DataContextError) as e:
+    with pytest.raises(DataContextError) as e, pytest.deprecated_call():
         mock_expectations_store_has_key.return_value = True
         context.save_expectation_suite(
             expectation_suite=suite, overwrite_existing=False

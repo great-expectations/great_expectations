@@ -5,8 +5,8 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
-from great_expectations.datasource.data_connector.asset import Asset
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 
 logger = logging.getLogger(__name__)
 
@@ -62,14 +62,8 @@ class ConfiguredAssetDBFSDataConnector(ConfiguredAssetFilesystemDataConnector):
     def _get_full_file_path_for_asset(
         self, path: str, asset: Optional[Asset] = None
     ) -> str:
-
         full_path = super()._get_full_file_path_for_asset(path=path, asset=asset)
-
         template_arguments: dict = {
             "path": full_path,
         }
-
-        return self.execution_engine.resolve_data_reference(
-            data_connector_name=self.__class__.__name__,
-            template_arguments=template_arguments,
-        )
+        return self.resolve_data_reference(template_arguments=template_arguments)

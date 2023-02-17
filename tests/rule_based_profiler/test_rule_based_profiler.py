@@ -1171,17 +1171,20 @@ def test_add_profiler(
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
     mock_data_context.cloud_mode = False
+
+    profiler_args = profiler_config_with_placeholder_args.to_dict()
+    for attr in ("class_name", "module_name"):
+        profiler_args.pop(attr)
+
     profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
-        profiler_config_with_placeholder_args,
         data_context=mock_data_context,
         profiler_store=mock_data_context.profiler_store,
+        **profiler_args,
     )
 
     assert isinstance(profiler, RuleBasedProfiler)
     assert profiler.name == profiler_config_with_placeholder_args.name
-    assert mock_data_context.profiler_store.set.call_args == mock.call(
-        key=profiler_key, value=profiler_config_with_placeholder_args
-    )
+    mock_data_context.profiler_store.add.asset_called_once()
 
 
 @pytest.mark.cloud
@@ -1191,21 +1194,23 @@ def test_add_profiler_ge_cloud_mode(
     ge_cloud_profiler_key: GXCloudIdentifier,
     profiler_config_with_placeholder_args: RuleBasedProfilerConfig,
 ):
+    profiler_args = profiler_config_with_placeholder_args.to_dict()
+    for attr in ("class_name", "module_name"):
+        profiler_args.pop(attr)
+
     with mock.patch(
         "great_expectations.data_context.data_context.CloudDataContext",
         spec=CloudDataContext,
     ) as mock_data_context:
         profiler: RuleBasedProfiler = RuleBasedProfiler.add_profiler(
-            profiler_config_with_placeholder_args,
             data_context=mock_data_context,
             profiler_store=mock_data_context.profiler_store,
+            **profiler_args,
         )
 
     assert isinstance(profiler, RuleBasedProfiler)
     assert profiler.name == profiler_config_with_placeholder_args.name
-    assert mock_data_context.profiler_store.set.call_args == mock.call(
-        key=ge_cloud_profiler_key, value=profiler_config_with_placeholder_args
-    )
+    mock_data_context.profiler_store.add.assert_called_once()
 
 
 @mock.patch("great_expectations.data_context.data_context.AbstractDataContext")
@@ -1213,41 +1218,41 @@ def test_add_profiler_ge_cloud_mode(
 def test_add_profiler_with_batch_request_containing_batch_data_raises_error(
     mock_data_context: mock.MagicMock,
 ):
-    profiler_config = RuleBasedProfilerConfig(
-        name="my_profiler_config",
-        config_version=1.0,
-        rules={
-            "rule_1": {
-                "domain_builder": {
-                    "class_name": "TableDomainBuilder",
-                    "batch_request": {
-                        "runtime_parameters": {
-                            "batch_data": pd.DataFrame()  # Cannot be serialized in store
-                        }
-                    },
+    name = "my_profiler_config"
+    config_version = 1.0
+    rules = {
+        "rule_1": {
+            "domain_builder": {
+                "class_name": "TableDomainBuilder",
+                "batch_request": {
+                    "runtime_parameters": {
+                        "batch_data": pd.DataFrame()  # Cannot be serialized in store
+                    }
                 },
-                "parameter_builders": [
-                    {
-                        "class_name": "MetricMultiBatchParameterBuilder",
-                        "name": "my_parameter",
-                        "metric_name": "my_metric",
-                    },
-                ],
-                "expectation_configuration_builders": [
-                    {
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
-                    },
-                ],
-            }
-        },
-    )
+            },
+            "parameter_builders": [
+                {
+                    "class_name": "MetricMultiBatchParameterBuilder",
+                    "name": "my_parameter",
+                    "metric_name": "my_metric",
+                },
+            ],
+            "expectation_configuration_builders": [
+                {
+                    "class_name": "DefaultExpectationConfigurationBuilder",
+                    "expectation_type": "expect_column_pair_values_A_to_be_greater_than_B",
+                },
+            ],
+        }
+    }
 
     with pytest.raises(InvalidConfigError) as e:
         RuleBasedProfiler.add_profiler(
-            profiler_config,
             data_context=mock_data_context,
             profiler_store=mock_data_context.profiler_store,
+            name=name,
+            config_version=config_version,
+            rules=rules,
         )
 
     assert "batch_data found in batch_request" in str(e.value)

@@ -12,8 +12,8 @@ from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SqlAlchemyExecutionEngine,
+    PandasExecutionEngine,  # noqa: TCH001
+    SqlAlchemyExecutionEngine,  # noqa: TCH001
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -1074,7 +1074,7 @@ def sql_statement_with_post_compile_to_string(
         String representation of select_statement
 
     """
-    sqlalchemy_connection: "sa.engine.base.Connection" = engine.engine
+    sqlalchemy_connection: sa.engine.base.Connection = engine.engine
     compiled = select_statement.compile(
         sqlalchemy_connection,
         compile_kwargs={"render_postcompile": True},

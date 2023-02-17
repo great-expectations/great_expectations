@@ -14,7 +14,6 @@ from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
-    SqlYearMonthSplitter,
     TableAsset,
 )
 
@@ -72,13 +71,13 @@ PG_COMPLEX_CONFIG_DICT = {
             },
         },
         "my_pandas_ds": {
-            "type": "pandas",
+            "type": "pandas_filesystem",
             "name": "my_pandas_ds",
+            "base_directory": __file__,
             "assets": {
                 "my_csv_asset": {
                     "name": "my_csv_asset",
                     "type": "csv",
-                    "base_directory": __file__,
                     "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
@@ -86,7 +85,6 @@ PG_COMPLEX_CONFIG_DICT = {
                 "my_json_asset": {
                     "name": "my_json_asset",
                     "type": "json",
-                    "base_directory": __file__,
                     "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
                     "orient": "records",
                 },
@@ -152,7 +150,7 @@ class TestExcludeUnsetAssetFields:
     """
 
     def test_from_datasource(self, asset_dict: dict):
-        ds_mapping = {"csv": "pandas", "json": "pandas"}
+        ds_mapping = {"csv": "pandas_filesystem", "json": "pandas_filesystem"}
 
         ds_type_: str = ds_mapping[asset_dict["type"]]
         ds_class = _SourceFactories.type_lookup[ds_type_]
@@ -161,12 +159,15 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "base_directory": pathlib.Path(__file__),
                 "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
         asset_name = asset_dict["name"]
-        ds_dict = {"name": "my_ds", "assets": {asset_name: asset_dict}}
+        ds_dict = {
+            "name": "my_ds",
+            "base_directory": pathlib.Path(__file__),
+            "assets": {asset_name: asset_dict},
+        }
         datasource: Datasource = ds_class.parse_obj(ds_dict)
         assert asset_dict == datasource.dict()["assets"][asset_name]
 
@@ -178,14 +179,14 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "base_directory": pathlib.Path(__file__),
                 "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
             }
         )
         asset_name = asset_dict["name"]
         ds_dict = {
             "name": "my_ds",
-            "type": "pandas",
+            "type": "pandas_filesystem",
+            "base_directory": pathlib.Path(__file__),
             "assets": {asset_name: asset_dict},
         }
         gx_config = GxConfig.parse_obj({"xdatasources": {"my_ds": ds_dict}})
@@ -289,30 +290,8 @@ def test_catch_bad_top_level_config(
                 "column_splitter",
                 "method_name",
             ),
-            "unexpected value; permitted: 'split_on_year_and_month'",
+            "unexpected value; permitted:",
             id="unknown splitter method",
-        ),
-        p(
-            {
-                "name": "bad splitter param",
-                "type": "table",
-                "table_name": "pool",
-                "column_splitter": {
-                    "method_name": "split_on_year_and_month",
-                    "column_name": "foo",
-                    "param_names": ["year", "month", "INVALID"],
-                },
-            },
-            (
-                "xdatasources",
-                "assets",
-                "bad splitter param",
-                "column_splitter",
-                "param_names",
-                2,
-            ),
-            "unexpected value; permitted: 'year', 'month'",
-            id="invalid splitter param_name",
         ),
     ],
 )
@@ -344,7 +323,7 @@ def test_catch_bad_asset_configs(
         if expected_error_loc == all_errors[0]["loc"]:
             test_msg = error["msg"]
             break
-    assert expected_msg == test_msg
+    assert test_msg.startswith(expected_msg)
 
 
 @pytest.mark.unit
@@ -441,6 +420,7 @@ def test_yaml_config_round_trip(
     assert re_loaded
 
     assert from_yaml_gx_config.dict() == re_loaded.dict()
+    assert dumped == re_loaded.yaml()
 
 
 def test_yaml_file_config_round_trip(
@@ -468,7 +448,7 @@ def test_splitters_deserialization(
     table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
-    assert isinstance(table_asset.column_splitter, SqlYearMonthSplitter)
+    assert isinstance(table_asset.column_splitter, ColumnSplitter)
     assert table_asset.column_splitter.method_name == "split_on_year_and_month"
 
 

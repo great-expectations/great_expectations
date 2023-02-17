@@ -699,7 +699,9 @@ class DataAsset:
             suppress_warnings,
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.save_expectation_suite(expectation_suite)
+            self._data_context.add_or_update_expectation_suite(
+                expectation_suite=expectation_suite
+            )
         elif filepath is not None:
             with open(filepath, "w") as outfile:
                 json.dump(

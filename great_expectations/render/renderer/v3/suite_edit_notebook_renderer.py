@@ -6,15 +6,15 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 import jinja2
 import nbformat
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.batch import (
     BatchRequest,
     standardize_batch_request_display_ordering,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.types.base import (
-    NotebookConfig,
-    NotebookTemplateConfig,
+    NotebookConfig,  # noqa: TCH001
+    NotebookTemplateConfig,  # noqa: TCH001
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (

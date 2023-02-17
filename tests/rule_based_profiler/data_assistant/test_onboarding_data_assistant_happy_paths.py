@@ -96,7 +96,7 @@ def test_pandas_happy_path_onboarding_data_assistant(empty_data_context) -> None
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.add_expectation_suite(expectation_suite=suite)
 
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
@@ -206,7 +206,7 @@ def test_spark_happy_path_onboarding_data_assistant(
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.add_expectation_suite(expectation_suite=suite)
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_data",
@@ -311,7 +311,7 @@ def test_sql_happy_path_onboarding_data_assistant(
     suite.add_expectation_configurations(
         expectation_configurations=result.expectation_configurations
     )
-    data_context.save_expectation_suite(expectation_suite=suite)
+    data_context.add_expectation_suite(expectation_suite=suite)
     # batch_request for checkpoint
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_multi_batch_sql_datasource",
@@ -370,11 +370,11 @@ def test_sql_happy_path_onboarding_data_assistant_null_column_quantiles_metric_v
             name="my_asset",
             table_name=table_name,
         )
-        .add_year_and_month_splitter(column_name=split_col)
+        .add_splitter_year_and_month(column_name=split_col)
         .add_sorters(["year", "month"])
     )
 
-    batch_request = asset.get_batch_request({"year": 2019, "month": 1})
+    batch_request = asset.build_batch_request({"year": 2019, "month": 1})
 
     result = context.assistants.onboarding.run(
         batch_request=batch_request,
@@ -462,11 +462,11 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
             name="sampled_yellow_tripdata_test",
             table_name=table_name,
         )
-        .add_year_and_month_splitter(column_name="tpep_pickup_datetime")
+        .add_splitter_year_and_month(column_name="tpep_pickup_datetime")
         .add_sorters(["year", "-month"])
     )
 
-    batch_request = data_asset.get_batch_request(batch_options)
+    batch_request = data_asset.build_batch_request(batch_options)
 
     result = context.assistants.onboarding.run(
         batch_request=batch_request,
