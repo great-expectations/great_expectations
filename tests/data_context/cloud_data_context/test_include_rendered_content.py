@@ -10,12 +10,10 @@ from great_expectations.core import (
 )
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
-from great_expectations.data_context.data_context.cloud_data_context import (
-    CloudDataContext,
-)
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
+from great_expectations.data_context import CloudDataContext
 
 
 @pytest.mark.cloud
@@ -24,7 +22,7 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
     empty_cloud_data_context: CloudDataContext,
 ) -> None:
     """
-    Cloud-backed contexts  should save an ExpectationSuite with rendered_content by default.
+    Cloud-backed contexts should save an ExpectationSuite with rendered_content by default.
     """
     context = empty_cloud_data_context
 
@@ -56,7 +54,7 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
     ), mock.patch(
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._update"
     ) as mock_update:
-        context.update_expectation_suite(
+        context.save_expectation_suite(
             expectation_suite=expectation_suite,
         )
 
