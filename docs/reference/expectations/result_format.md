@@ -46,7 +46,8 @@ rendered in DataDocs when `COMPLETE` is selected.
 
 The `unexpected_index_query`, which for `SQL` and `Spark` is a query that allows you to retrieve the full set of 
 unexpected values from the dataset, is also rendered by default when `COMPLETE` is selected. For `Pandas`, this parameter 
-returns the full set of unexpected indices, which can also be used to retrieve the full set of unexpected values. 
+returns the full set of unexpected indices, which can also be used to retrieve the full set of unexpected values. This is returned
+whether or not the `unexpected_index_column_names` are defined. 
 
 To suppress this output, the `return_unexpected_index_query` parameter can be set to `False`. 
 

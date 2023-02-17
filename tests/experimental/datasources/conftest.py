@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import logging
 from contextlib import contextmanager
-from datetime import datetime
-from typing import Any, Callable, Generator, Type
+from typing import Any, Callable, Dict, Generator, List, Type
 
 import pytest
 from pytest import MonkeyPatch
@@ -23,10 +22,15 @@ from great_expectations.experimental.datasources.sources import _SourceFactories
 logger = logging.getLogger(__name__)
 
 
-# This is the default min/max time that we are using in our mocks.
-# They are made global so our tests can reference them directly.
-DEFAULT_MIN_DT = datetime(2021, 1, 1, 0, 0, 0)
-DEFAULT_MAX_DT = datetime(2022, 12, 31, 0, 0, 0)
+class MockSaInspector:
+    def get_columns(self) -> list[dict[str, Any]]:  # type: ignore[empty-body]
+        ...
+
+    def get_schema_names(self) -> list[str]:  # type: ignore[empty-body]
+        ...
+
+    def has_table(self, table_name: str, schema: str) -> bool:  # type: ignore[empty-body]
+        ...
 
 
 class Dialect:
@@ -37,30 +41,6 @@ class Dialect:
 class _MockConnection:
     def __init__(self, dialect: Dialect):
         self.dialect = dialect
-
-    def execute(self, query):
-        """Execute a query over a sqlalchemy engine connection.
-
-        Currently this mock assumes the query is always of the form:
-        "select min(col), max(col) from table"
-        where col is a datetime column since that's all that's necessary.
-        This can be generalized if needed.
-
-        Args:
-            query: The SQL query to execute.
-        """
-        return [(DEFAULT_MIN_DT, DEFAULT_MAX_DT)]
-
-
-class MockSaInspector:
-    def get_columns(self) -> list[dict[str, Any]]:  # type: ignore[empty-body]
-        ...
-
-    def get_schema_names(self) -> list[str]:  # type: ignore[empty-body]
-        ...
-
-    def has_table(self, table_name: str, schema: str) -> bool:  # type: ignore[empty-body]
-        ...
 
 
 class MockSaEngine:
@@ -74,7 +54,9 @@ class MockSaEngine:
 
 
 def sqlachemy_execution_engine_mock_cls(
-    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None], dialect: str
+    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
+    dialect: str,
+    splitter_query_response: List[Dict[str, Any]],
 ):
     """Creates a mock gx sql alchemy engine class
 
@@ -82,6 +64,9 @@ def sqlachemy_execution_engine_mock_cls(
         validate_batch_spec: A hook that can be used to validate the generated the batch spec
             passed into get_batch_data_and_markers
         dialect: A string representing the SQL Engine dialect. Examples include: postgresql, sqlite
+        splitter_query_response: A list of dictionaries. Each dictionary is a row returned back from
+            the splitter query. The keys are the column names and the value is the column values, eg:
+            [{'year': 2021, 'month': 1}, {'year': 2021, 'month': 2}]
     """
 
     class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
@@ -96,6 +81,14 @@ def sqlachemy_execution_engine_mock_cls(
         ) -> tuple[BatchData, BatchMarkers]:
             validate_batch_spec(batch_spec)
             return BatchData(self), BatchMarkers(ge_load_time=None)
+
+        def execute_split_query(self, split_query):
+            class Row:
+                def __init__(self, attributes):
+                    for k, v in attributes.items():
+                        setattr(self, k, v)
+
+            return [Row(row_dict) for row_dict in splitter_query_response]
 
     return MockSqlAlchemyExecutionEngine
 
