@@ -116,16 +116,6 @@ class FileDataContext(SerializableDataContext):
         )
         self._datasource_store = datasource_store
 
-    @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        """
-        return self._context_root_directory
-
     def _init_variables(self) -> FileDataContextVariables:
         variables = FileDataContextVariables(
             config=self._project_config,

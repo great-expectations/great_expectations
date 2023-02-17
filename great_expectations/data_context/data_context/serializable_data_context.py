@@ -72,6 +72,13 @@ class SerializableDataContext(AbstractDataContext):
     def _init_variables(self):
         raise NotImplementedError  # Required by parent ABC but this class is never instantiated
 
+    @property
+    def root_directory(self) -> str:
+        """The root directory for configuration objects in the data context; the location in which
+        ``great_expectations.yml`` is located.
+        """
+        return self._context_root_directory
+
     def _save_project_config(self) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
