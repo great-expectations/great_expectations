@@ -87,7 +87,11 @@ class CLI(click.MultiCommand):
         legacy_module = ""
         if not self.is_v3_api(ctx):
             legacy_module += ".v012"
-
+        if legacy_module == ".v012" and module_name == "upgrade":
+            cli_message(
+                "<red>You are trying to upgrade in the `--v2-api`, but this is no longer supported. If you need to migrate to the latest version, see: https://docs.greatexpectations.io/docs/guides/miscellaneous/migration_guide/#migrating-to-the-batch-request-v3-api, or use an earlier version of great_expectations<0.15 for migration support.</red>"
+            )
+            return None
         try:
             requested_module = f"great_expectations.cli{legacy_module}.{module_name}"
             module = importlib.import_module(requested_module)
