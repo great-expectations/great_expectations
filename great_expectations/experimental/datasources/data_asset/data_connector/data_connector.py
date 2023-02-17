@@ -90,6 +90,16 @@ class DataConnector(ABC):
         batch_spec = BatchSpec(**batch_spec_params)
         return batch_spec
 
+    def test_connection(self) -> bool:
+        """Test the connection to data, accessible to the present "DataConnector" object.
+
+        Raises:
+            bool: True of connection test succeeds; False, otherwise.
+        """
+        return (
+            self.get_unmatched_data_reference_count() < self.get_data_reference_count()
+        )
+
     @abstractmethod
     def get_data_references(self) -> List[Any]:
         """

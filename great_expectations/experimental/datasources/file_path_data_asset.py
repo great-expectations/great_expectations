@@ -160,7 +160,7 @@ class _FilePathDataAsset(DataAsset):
 
         batch_definition_list: List[
             BatchDefinition
-        ] = self._build_or_get_data_connector().get_batch_definition_list(
+        ] = self._get_data_connector().get_batch_definition_list(
             batch_request=batch_request
         )
 
@@ -173,7 +173,7 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchRequestOptions
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = self._build_or_get_data_connector().build_batch_spec(
+            batch_spec = self._get_data_connector().build_batch_spec(
                 batch_definition=batch_definition
             )
             batch_spec_options = {
@@ -225,7 +225,7 @@ class _FilePathDataAsset(DataAsset):
 
         return batch_list
 
-    def _build_or_get_data_connector(self) -> DataConnector:
+    def _get_data_connector(self) -> DataConnector:
         """This private method ensures that exactly one instance of "DataConnector" class is available."""
         data_connector: DataConnector
         try:
@@ -243,10 +243,7 @@ class _FilePathDataAsset(DataAsset):
             TestConnectionError: If the connection test fails.
         """
         data_connector: DataConnector = self._build_data_connector()
-        if (
-            data_connector.get_unmatched_data_reference_count()
-            == data_connector.get_data_reference_count()
-        ):
+        if not data_connector.test_connection():
             raise TestConnectionError(self._build_test_connection_error_message())
 
     def _build_data_connector(self) -> DataConnector:
