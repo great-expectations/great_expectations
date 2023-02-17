@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.store import Store
 
 logger = logging.getLogger(__name__)
@@ -36,21 +37,22 @@ class FileMigrator:
         dst_context = cast(
             FileDataContext, FileDataContext.create(project_root_dir=pwd)
         )
-        logger.info(f"Constructed destination {FileDataContext.__name__}")
+        logger.info("Scaffolded necessary directories for a file-backed context")
 
-        self._migrate_stores(
+        self._migrate_primary_stores(
             dst_stores=dst_context.stores,
         )
+        self._migrate_datasource_store(dst_store=dst_context._datasource_store)
         self._migrate_data_docs_sites(dst_root=pathlib.Path(dst_context.root_directory))
 
         # Re-init context to parse filesystem changes into config
         dst_context = FileDataContext()
         print(
-            f"Successfully migrated {self._src_context.__class__} to {dst_context.__class__}!"
+            f"Successfully migrated {self._src_context.__class__.__name__} to {dst_context.__class__.__name__}!"
         )
         return dst_context
 
-    def _migrate_stores(
+    def _migrate_primary_stores(
         self,
         dst_stores: dict[str, Store],
     ) -> None:
@@ -66,6 +68,12 @@ class FileMigrator:
             self._migrate_store(
                 store_name=name, src_store=src_store, dst_store=dst_store
             )
+
+    def _migrate_datasource_store(self, dst_store: DatasourceStore) -> None:
+        src_store = self._src_context._datasource_store
+        self._migrate_store(
+            store_name="datasource name", src_store=src_store, dst_store=dst_store
+        )
 
     def _migrate_store(
         self, store_name: str, src_store: Store, dst_store: Store
