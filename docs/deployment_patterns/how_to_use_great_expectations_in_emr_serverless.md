@@ -10,7 +10,7 @@ We will cover case with RuntimeDataConnector and use S3 as metadata store.
 ### 0. Pre-requirements
 
 - Configure great_expectations.yaml and upload to your S3 bucket or generate it dynamically from code, notice critical moment, that you need to add endpoint_url to data_doc section
-```yaml file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns_great_expectations.yaml#L1-L71
+```yaml name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns_great_expectations.yaml"
 ```
 
 
@@ -44,24 +44,24 @@ When you will configure a job, it's necessary to define additional params to Spa
 ```
 
 Then import necessary libs:
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L1-L11
+```python name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py imports"
 ```
 
 ### 2. Set up Great Expectations
 Here we initialize a Spark, and read great_expectations.yaml
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L13-L26
+```python name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py initialize spark"
 ```
 
 ### 3. Connect to your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L27-L48
+```python name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py connect to data"
 ```
 
 ### 4. Create Expectations
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L50-L68
+```python name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py create expectations"
 ```
 
 ### 5. Validate your data
-```python file=../../tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py#L70-L111
+```python name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py validate"
 ```
 
 ### 6. Congratulations!

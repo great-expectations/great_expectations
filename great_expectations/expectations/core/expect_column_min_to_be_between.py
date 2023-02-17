@@ -254,7 +254,10 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"minimum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+                if params.min_value == params.max_value:
+                    template_str = "minimum value must be $min_value"
+                else:
+                    template_str = f"minimum value must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif not params.min_value:
                 template_str = f"minimum value must be {at_most_str} $max_value."
             else:
