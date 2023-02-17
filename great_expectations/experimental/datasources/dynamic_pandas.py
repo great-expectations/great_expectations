@@ -121,6 +121,10 @@ FIELD_SKIPPED_UNSUPPORTED_TYPE: Set[str] = set()
 FIELD_SKIPPED_NO_ANNOTATION: Set[str] = set()
 
 
+class DynamicAssetError(Exception):
+    pass
+
+
 class _SignatureTuple(NamedTuple):
     name: str
     signature: inspect.Signature
@@ -365,6 +369,8 @@ def _generate_pandas_data_asset_models(
     base_model_class: M,
     blacklist: Optional[Sequence[str]] = None,
     use_docstring_from_method: bool = False,
+    skip_first_param: bool = False,
+    type_prefix: Optional[str] = None,
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(blacklist)
     io_method_sigs = _extract_io_signatures(io_methods)
@@ -374,12 +380,17 @@ def _generate_pandas_data_asset_models(
 
         # skip the first parameter as this corresponds to the path/buffer/io field
         # paths to specific files are provided by the batch building logic
-        fields = _to_pydantic_fields(signature_tuple, skip_first_param=True)
+        fields = _to_pydantic_fields(signature_tuple, skip_first_param=skip_first_param)
 
         type_name = signature_tuple.name.split("read_")[1]
         model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
             type_name, f"{type_name.capitalize()}Asset"
         )
+
+        # TODO: remove this special case once we have namespace type-lookups
+        if type_prefix:
+            type_name = "_".join((type_prefix, type_name))
+            model_name = type_prefix.capitalize() + model_name
 
         try:
             asset_model = _create_pandas_asset_model(
@@ -406,7 +417,12 @@ def _generate_pandas_data_asset_models(
             continue
 
         data_asset_models[type_name] = asset_model
-        asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
+        try:
+            asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
+        except TypeError as e:
+            raise DynamicAssetError(
+                f"Updating forward references for asset model {asset_model.__name__} raised TypeError: {e}"
+            ) from e
 
     logger.debug(f"Needs extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")
     logger.debug(f"No Annotation\n{FIELD_SKIPPED_NO_ANNOTATION}")

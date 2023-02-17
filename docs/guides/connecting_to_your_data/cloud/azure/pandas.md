@@ -90,23 +90,23 @@ The below configuration is representative of the default setup you'll see when p
 
   <TabItem value="yaml">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L19-L43
+  ```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py datasource_yaml"
   ```
 
   Run this code to test your configuration.
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py#L60
+  ```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py test_yaml_config"
   ```
   </TabItem>
 
   <TabItem value="python">
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L13-L38
+  ```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py datasource config"
   ```
 
   Run this code to test your configuration.
 
-  ```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L59
+  ```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py test datasource"
   ```
 
   </TabItem>
@@ -130,24 +130,24 @@ values={[
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py#L10-L27
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py#L38
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py test datasource"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py#L10-L27
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py#L37
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py test datasource config"
 ```
 </TabItem>
 
@@ -182,7 +182,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py#L61
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py add datasource"
 ```
 
 </TabItem>

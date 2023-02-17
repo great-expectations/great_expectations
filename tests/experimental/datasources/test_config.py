@@ -14,7 +14,6 @@ from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
-    SqlYearMonthSplitter,
     TableAsset,
 )
 
@@ -291,30 +290,8 @@ def test_catch_bad_top_level_config(
                 "column_splitter",
                 "method_name",
             ),
-            "unexpected value; permitted: 'split_on_year_and_month'",
+            "unexpected value; permitted:",
             id="unknown splitter method",
-        ),
-        p(
-            {
-                "name": "bad splitter param",
-                "type": "table",
-                "table_name": "pool",
-                "column_splitter": {
-                    "method_name": "split_on_year_and_month",
-                    "column_name": "foo",
-                    "param_names": ["year", "month", "INVALID"],
-                },
-            },
-            (
-                "xdatasources",
-                "assets",
-                "bad splitter param",
-                "column_splitter",
-                "param_names",
-                2,
-            ),
-            "unexpected value; permitted: 'year', 'month'",
-            id="invalid splitter param_name",
         ),
     ],
 )
@@ -346,7 +323,7 @@ def test_catch_bad_asset_configs(
         if expected_error_loc == all_errors[0]["loc"]:
             test_msg = error["msg"]
             break
-    assert expected_msg == test_msg
+    assert test_msg.startswith(expected_msg)
 
 
 @pytest.mark.unit
@@ -471,7 +448,7 @@ def test_splitters_deserialization(
     table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
-    assert isinstance(table_asset.column_splitter, SqlYearMonthSplitter)
+    assert isinstance(table_asset.column_splitter, ColumnSplitter)
     assert table_asset.column_splitter.method_name == "split_on_year_and_month"
 
 

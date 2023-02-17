@@ -44,7 +44,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
         )
 
     def test_connection(self) -> None:
-        """Test the connection for the CSVAsset.
+        """Test the connection for the FilesystemDataAsset.
 
         Raises:
             TestConnectionError: If the connection test fails.
