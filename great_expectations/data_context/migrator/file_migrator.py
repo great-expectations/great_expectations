@@ -13,8 +13,8 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 
 if TYPE_CHECKING:
-    from great_expectations.data_context.data_context.abstract_data_context import (
-        AbstractDataContext,
+    from great_expectations.data_context.data_context_variables import (
+        DataContextVariables,
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.store import Store
@@ -27,12 +27,15 @@ class FileMigrator:
     TODO
     """
 
-    def __init__(self, context: AbstractDataContext) -> None:
-        if isinstance(context, FileDataContext):
-            raise gx_exceptions.MigrationError(
-                f"Context is already an instance of {FileDataContext.__name__}; cannot migrate."
-            )
-        self._src_context = context
+    def __init__(
+        self,
+        primary_stores: dict[str, Store],
+        datasource_store: DatasourceStore,
+        variables: DataContextVariables,
+    ) -> None:
+        self._primary_stores = primary_stores
+        self._datasource_store = datasource_store
+        self._variables = variables
 
     def migrate(self) -> FileDataContext:
         """
@@ -52,13 +55,11 @@ class FileMigrator:
 
         # Re-init context to parse filesystem changes into config
         dst_context = FileDataContext()
-        print(
-            f"Successfully migrated {self._src_context.__class__.__name__} to {dst_context.__class__.__name__}!"
-        )
+        print(f"Successfully migrated to {dst_context.__class__.__name__}!")
         return dst_context
 
     def _migrate_primary_stores(self, dst_stores: dict[str, Store]) -> None:
-        src_stores = self._src_context.stores
+        src_stores = self._primary_stores
         if src_stores.keys() != dst_stores.keys():
             raise gx_exceptions.MigrationError(
                 "Cannot migrate context due to store configurations being out of sync."
@@ -70,7 +71,7 @@ class FileMigrator:
             )
 
     def _migrate_datasource_store(self, dst_store: DatasourceStore) -> None:
-        src_store = self._src_context._datasource_store
+        src_store = self._datasource_store
         self._migrate_store(
             store_name=DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME.value,
             src_store=src_store,
@@ -89,7 +90,7 @@ class FileMigrator:
             logger.info(f"Successfully migrated stored object saved with key {key}.")
 
     def _migrate_data_docs_sites(self, dst_root: pathlib.Path) -> None:
-        src_configs = self._src_context.variables.data_docs_sites or {}
+        src_configs = self._variables.data_docs_sites or {}
 
         dst_base_directory = dst_root.joinpath(
             DataContextConfigDefaults.DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME.value

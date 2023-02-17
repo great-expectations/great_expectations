@@ -22,9 +22,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.data_context.file_data_context import (
         FileDataContext,
     )
-    from great_expectations.data_context.store.datasource_store import (
-        DatasourceStore,
-    )
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
 
 logger = logging.getLogger(__name__)
 
@@ -89,5 +87,9 @@ class EphemeralDataContext(AbstractDataContext):
         """
         TODO
         """
-        migrator = FileMigrator(context=self)
+        migrator = FileMigrator(
+            primary_stores=self.stores,
+            datasource_store=self._datasource_store,
+            variables=self.variables,
+        )
         return migrator.migrate()
