@@ -4359,7 +4359,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
 
     def _build_store_from_config(
-        self, store_name: str, store_config: StoreConfigTypedDict
+        self, store_name: str, store_config: dict | StoreConfigTypedDict
     ) -> Store:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
@@ -4384,7 +4384,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         new_store = Store.build_store_from_config(
             store_name=store_name,
-            store_config=store_config,
+            store_config=store_config,  # type: ignore[arg-type] # from config
             module_name=module_name,
             runtime_environment={
                 "root_directory": self.root_directory,
