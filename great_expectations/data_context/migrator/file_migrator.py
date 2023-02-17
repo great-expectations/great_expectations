@@ -12,7 +12,6 @@ from great_expectations.data_context.data_context.file_data_context import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -31,20 +30,20 @@ class FileMigrator:
 
     def migrate(
         self,
-        project_root_dir: PathStr = os.getcwd(),
     ) -> FileDataContext:
+        pwd = os.getcwd()
         dst_context = cast(
-            FileDataContext, FileDataContext.create(project_root_dir=project_root_dir)
+            FileDataContext, FileDataContext.create(project_root_dir=pwd)
         )
-        logger.info(
-            f"Constructed destination {FileDataContext.__name__} at {project_root_dir}"
-        )
+        logger.info(f"Constructed destination {FileDataContext.__name__}")
 
         self._migrate_stores(
             dst_stores=dst_context.stores,
         )
         self._migrate_data_docs_sites(dst_context=dst_context)
 
+        # Re-init context to parse filesystem changes into config
+        dst_context = FileDataContext()
         print(
             f"Successfully migrated {self._src_context.__class__} to {dst_context.__class__}!"
         )
@@ -90,34 +89,25 @@ class FileMigrator:
             dst_base_directory.exists()
         ), f"{dst_base_directory} should have been set up by upstream scaffolding"
 
-        updated_site_configs = {}
         for site_name, site_config in src_configs.items():
-            updated_site_configs[site_name] = self._migrate_data_docs_site(
+            self._migrate_data_docs_site(
                 site_name=site_name,
                 site_config=site_config,
                 dst_base_directory=dst_base_directory,
             )
 
-        dst_context.variables.data_docs_sites = updated_site_configs
-        dst_context.variables.save_config()
-
     def _migrate_data_docs_site(
         self, site_name: str, site_config: dict, dst_base_directory: pathlib.Path
-    ) -> dict:
+    ) -> None:
         store_backend = site_config["store_backend"]
 
         src_site = pathlib.Path(store_backend["base_directory"])
         dst_site = dst_base_directory.joinpath(site_name)
 
-        if not src_site.exists():
+        if src_site.exists():
+            shutil.copytree(src=str(src_site), dst=str(dst_site))
+            logger.info(f"Migrated {site_name} from {src_site} to {dst_site}.")
+        else:
             logger.info(
                 f"{site_name} has never been built by the src context; skipping file copying."
             )
-        else:
-            shutil.copytree(src=str(src_site), dst=str(dst_site))
-            logger.info(f"Migrated {site_name} from {src_site} to {dst_site}.")
-
-        updated_config = site_config
-        updated_config["store_backend"]["base_directory"] = str(dst_site)
-
-        return updated_config

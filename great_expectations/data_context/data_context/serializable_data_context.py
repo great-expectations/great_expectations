@@ -85,7 +85,7 @@ class SerializableDataContext(AbstractDataContext):
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        config_filepath = os.path.join(self.root_directory, self.GX_YML)  # type: ignore[arg-type]
+        config_filepath = os.path.join(self.root_directory, self.GX_YML)
 
         logger.debug(
             f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
