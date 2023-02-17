@@ -11,10 +11,10 @@ from ruamel.yaml.compat import StringIO
 
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint  # noqa: TCH001
+from great_expectations.cli.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.cli.v012.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.v012.datasource import get_batch_kwargs
 from great_expectations.cli.v012.docs import build_docs
-from great_expectations.cli.v012.upgrade_helpers import GE_UPGRADE_HELPER_VERSION_MAP
 from great_expectations.cli.v012.util import cli_colorize_string, cli_message
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite  # noqa: TCH001
@@ -295,7 +295,7 @@ Great Expectations will create a new Expectation Suite '{:s}' and store it here:
     )
     suite = context.create_expectation_suite(expectation_suite_name)
     suite.add_citation(comment="New suite added via CLI", batch_kwargs=batch_kwargs)
-    context.save_expectation_suite(suite, expectation_suite_name)
+    context.update_expectation_suite(expectation_suite=suite)
 
 
 def launch_jupyter_notebook(notebook_path: str) -> None:

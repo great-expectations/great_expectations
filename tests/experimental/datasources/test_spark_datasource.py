@@ -63,7 +63,7 @@ def test_add_csv_asset_to_datasource(
 ):
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -79,7 +79,7 @@ def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
     asset = CSVSparkAsset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",  # Ignoring IDE warning (type declarations are consistent).
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",  # Ignoring IDE warning (type declarations are consistent).
     )
     assert asset.name == "csv_asset"
     assert asset.regex.match("random string") is None
@@ -94,7 +94,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
 ):
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -108,7 +108,7 @@ def test_csv_asset_with_regex_named_parameters(
 ):
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -122,7 +122,7 @@ def test_csv_asset_with_some_regex_named_parameters(
 ):
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -136,7 +136,7 @@ def test_csv_asset_with_non_string_regex_named_parameters(
 ):
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -152,7 +152,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
 ):
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -193,7 +193,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
 
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -267,7 +267,7 @@ def test_spark_sorter(
 
     asset = spark_datasource.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=order_by,
     )
     batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
@@ -303,9 +303,9 @@ def test_spark_sorter(
 
 
 def bad_regex_config(csv_path: pathlib.Path) -> tuple[re.Pattern, TestConnectionError]:
-    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
+    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
     test_connection_error = TestConnectionError(
-        f"No file at path: {csv_path.resolve()} matched the regex: {regex.pattern}",
+        f"""No file at base_directory path "{csv_path.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_spark_asset"."""
     )
     return regex, test_connection_error
 
@@ -337,4 +337,5 @@ def test_test_connection_failures(
 
     with pytest.raises(type(test_connection_error)) as e:
         spark_datasource.test_connection()
+
     assert str(e.value) == str(test_connection_error)

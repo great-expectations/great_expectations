@@ -94,6 +94,7 @@ updated_configuration = actual_checkpoint_yaml
 updated_configuration["batches"][0]["batch_kwargs"]["path"] = file_relative_path(
     __file__, "data/Titanic.csv"
 )
+updated_configuration["name"] = "test_updated_v2_checkpoint"
 
 # run checkpoint
 context.add_or_update_checkpoint(**updated_configuration)

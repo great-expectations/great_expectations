@@ -76,7 +76,7 @@ class ProfilerStore(ConfigurationStore):
 
     def add(self, key, value, **kwargs):
         try:
-            super().add(key=key, value=value, **kwargs)
+            return super().add(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ProfilerError(
                 f"A Profiler named {value.name} already exists."
@@ -84,7 +84,7 @@ class ProfilerStore(ConfigurationStore):
 
     def update(self, key, value, **kwargs):
         try:
-            super().update(key=key, value=value, **kwargs)
+            return super().update(key=key, value=value, **kwargs)
         except gx_exceptions.StoreBackendError:
             raise gx_exceptions.ProfilerNotFoundError(
                 f"Could not find an existing Profiler named {value.name}."

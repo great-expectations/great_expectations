@@ -193,13 +193,12 @@ def test_cli_datasource_new(
             "class_name": "Datasource",
             "data_connectors": {
                 "default_inferred_data_connector_name": {
-                    "base_directory": "../../filesystem_csv_2",
+                    "base_directory": "../../test_cli_datasource_new0/filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
                     "default_regex": {
                         "group_names": ["data_asset_name"],
                         "pattern": "(.*)",
                     },
-                    "base_directory": "../../test_cli_datasource_new0/filesystem_csv_2",
                     "class_name": "InferredAssetFilesystemDataConnector",
                     "module_name": "great_expectations.datasource.data_connector",
                 },
