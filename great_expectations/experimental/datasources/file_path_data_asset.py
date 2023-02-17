@@ -65,7 +65,7 @@ class _FilePathDataAsset(DataAsset):
     _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
     _all_group_names: List[str] = pydantic.PrivateAttr()
 
-    _data_connector: DataConnector = pydantic.PrivateAttr()
+    _data_connector: DataConnector | None = pydantic.PrivateAttr()
 
     class Config:
         """
@@ -92,6 +92,8 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
+
+        self._data_connector = None
 
     def batch_request_options_template(
         self,
@@ -227,13 +229,9 @@ class _FilePathDataAsset(DataAsset):
 
     def _get_data_connector(self) -> DataConnector:
         """This private method ensures that exactly one instance of "DataConnector" class is available."""
-        data_connector: DataConnector
-        try:
-            data_connector = self._data_connector
-        except AttributeError:
-            data_connector = self._build_data_connector()
-            self._data_connector = data_connector
-
+        data_connector: DataConnector = (
+            self._data_connector or self._build_data_connector()
+        )
         return data_connector
 
     def test_connection(self) -> None:
@@ -242,7 +240,7 @@ class _FilePathDataAsset(DataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        data_connector: DataConnector = self._build_data_connector()
+        data_connector: DataConnector = self._get_data_connector()
         if not data_connector.test_connection():
             raise TestConnectionError(self._build_test_connection_error_message())
 
