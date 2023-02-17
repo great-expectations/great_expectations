@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 class StoreConfigTypedDict(TypedDict):
     class_name: str
     module_name: str
+    store_backend: dict
 
 
 class Store:
