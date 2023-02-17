@@ -262,7 +262,7 @@ class Store:
     @staticmethod
     def build_store_from_config(
         store_name: Optional[str] = None,
-        store_config: Optional[StoreConfigTypedDict] = None,
+        store_config: StoreConfigTypedDict | dict | None = None,
         module_name: str = "great_expectations.data_context.store",
         runtime_environment: Optional[dict] = None,
     ) -> Store:

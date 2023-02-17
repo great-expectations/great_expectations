@@ -4384,7 +4384,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         new_store = Store.build_store_from_config(
             store_name=store_name,
-            store_config=store_config,  # type: ignore[arg-type] # from config
+            store_config=store_config,
             module_name=module_name,
             runtime_environment={
                 "root_directory": self.root_directory,
