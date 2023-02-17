@@ -176,7 +176,9 @@ runtime_configuration:
     partial_unexpected_count: 20
 """
 # </snippet>
+
 context.add_or_update_checkpoint(**yaml.load(no_nesting))
+
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -229,7 +231,8 @@ runtime_configuration:
     partial_unexpected_count: 20
 """
 # </snippet>
-context.add_or_update_checkpoint(**yaml.load(nesting_with_defaults))
+
+add_or_update_checkpoint(**yaml.load(nesting_with_defaults))
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -268,7 +271,6 @@ print(second_data_asset)
 yellow_tripdata_sample_2019-02
 """
 # </snippet>
-
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime">
 keys_passed_at_runtime = """
