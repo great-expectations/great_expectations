@@ -198,6 +198,7 @@ assert (
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults">
 nesting_with_defaults = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults just the yaml">
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -229,6 +230,7 @@ runtime_configuration:
   result_format:
     result_format: BASIC
     partial_unexpected_count: 20
+# </snippet>
 """
 # </snippet>
 
@@ -258,6 +260,7 @@ assert second_data_asset == "yellow_tripdata_sample_2019-02"
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results">
 documentation_results = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results just the text">
 print(first_expectation_suite)
 my_expectation_suite
 
@@ -269,6 +272,7 @@ my_expectation_suite
 
 print(second_data_asset)
 yellow_tripdata_sample_2019-02
+# </snippet>
 """
 # </snippet>
 
