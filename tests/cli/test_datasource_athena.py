@@ -15,7 +15,7 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
-@pytest.mark.slow  # 9.81s
+@pytest.mark.slow  # 1.85s
 def test_cli_athena_datasource_new_connection_string(
     mock_subprocess,
     mock_emit,
