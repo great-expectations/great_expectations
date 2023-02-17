@@ -77,7 +77,7 @@ class FileMigrator:
     def _migrate_datasource_store(self, dst_store: DatasourceStore) -> None:
         src_store = self._src_context._datasource_store
         self._migrate_store(
-            store_name=DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME,
+            store_name=DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME.value,
             src_store=src_store,
             dst_store=dst_store,
         )
@@ -100,7 +100,7 @@ class FileMigrator:
         src_configs = self._src_context.variables.data_docs_sites or {}
 
         dst_base_directory = dst_root.joinpath(
-            DataContextConfigDefaults.DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME
+            DataContextConfigDefaults.DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME.value
         )
         assert (
             dst_base_directory.exists()

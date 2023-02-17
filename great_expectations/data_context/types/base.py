@@ -1774,7 +1774,7 @@ will appear repeatedly until your configuration is updated.)
             )
 
 
-class DataContextConfigDefaults(str, enum.Enum):
+class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VERSION = CURRENT_GX_CONFIG_VERSION
     UNCOMMITTED = "uncommitted"
 

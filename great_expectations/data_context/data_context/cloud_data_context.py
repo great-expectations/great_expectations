@@ -378,7 +378,7 @@ class CloudDataContext(SerializableDataContext):
 
         # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
-        store_name = DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME
+        store_name = DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME.value
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
