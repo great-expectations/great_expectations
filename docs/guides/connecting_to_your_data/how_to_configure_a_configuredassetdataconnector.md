@@ -38,14 +38,14 @@ Import these necessary packages and modules:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L1-L4
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L3-L4
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports"
 ```
 
 </TabItem>
@@ -125,14 +125,14 @@ In that case, the configuration would look like the following:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L9-L25
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py yaml datasource"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L36-L56
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource"
 ```
 
 </TabItem>
@@ -163,13 +163,13 @@ A corresponding configuration for `ConfiguredAssetS3DataConnector` would look si
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L99-L116
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py yaml datasource s3"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L128-L149
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource s3"
 ```
 
 </TabItem>

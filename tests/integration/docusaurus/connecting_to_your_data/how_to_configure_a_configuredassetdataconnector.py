@@ -1,11 +1,15 @@
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports">
 from ruamel import yaml
 
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 
+# </snippet>
+
 context = gx.get_context()
 
 # YAML
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py yaml datasource">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -23,6 +27,7 @@ data_connectors:
         group_names:
           - month
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -33,6 +38,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -54,6 +60,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
@@ -96,6 +103,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py yaml datasource s3">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -114,6 +122,7 @@ data_connectors:
         group_names:
           - month
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -127,6 +136,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource s3">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -149,6 +159,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
