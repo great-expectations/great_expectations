@@ -85,6 +85,7 @@ class SparkDatasource(_SparkDatasource):
     type: Literal["spark"] = "spark"
     name: str
     base_directory: pathlib.Path
+    data_context_root_directory: Optional[pathlib.Path] = None
     assets: Dict[str, CSVSparkAsset] = {}
 
     def test_connection(self, test_assets: bool = True) -> None:

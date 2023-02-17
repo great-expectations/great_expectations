@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.validator.metrics_calculator import MetricsCalculator
 
+
 logger = logging.getLogger(__name__)
 
 try:

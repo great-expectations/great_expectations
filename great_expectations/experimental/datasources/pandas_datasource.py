@@ -243,10 +243,8 @@ class PandasFilesystemDatasource(_PandasDatasource):
     type: Literal["pandas_filesystem"] = "pandas_filesystem"
     name: str
     base_directory: pathlib.Path
-    assets: Dict[
-        str,
-        _FilesystemDataAsset,
-    ] = {}
+    data_context_root_directory: Optional[pathlib.Path] = None
+    assets: Dict[str, _FilesystemDataAsset] = {}
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the PandasDatasource.
