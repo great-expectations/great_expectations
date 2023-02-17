@@ -82,5 +82,5 @@ class EphemeralDataContext(AbstractDataContext):
         self._datasource_store = datasource_store
 
     def convert_to_file_context(self) -> FileDataContext:
-        migrator = FileMigrator()
-        return migrator.migrate(self)
+        migrator = FileMigrator(context=self)
+        return migrator.migrate()
