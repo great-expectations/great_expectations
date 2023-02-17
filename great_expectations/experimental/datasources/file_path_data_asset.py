@@ -27,6 +27,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
+    TestConnectionError,
 )
 
 if TYPE_CHECKING:
@@ -38,9 +39,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.experimental.datasources.data_asset.data_connector import (
         DataConnector,
-    )
-    from great_expectations.experimental.datasources.interfaces import (
-        TestConnectionError,
     )
 
 logger = logging.getLogger(__name__)
@@ -249,13 +247,13 @@ class _FilePathDataAsset(DataAsset):
             data_connector.get_unmatched_data_reference_count()
             == data_connector.get_data_reference_count()
         ):
-            raise self._build_test_connection_error()
+            raise TestConnectionError(self._build_test_connection_error_message())
 
     def _build_data_connector(self) -> DataConnector:
         """DataAsset implementations must instantiate appropriate DataConnector class."""
         raise NotImplementedError
 
-    def _build_test_connection_error(self) -> TestConnectionError:
+    def _build_test_connection_error_message(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "TestConnectionError" instance, containing parametrized error message."""
         )
