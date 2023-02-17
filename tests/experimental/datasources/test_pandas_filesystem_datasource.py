@@ -15,14 +15,17 @@ from pytest import MonkeyPatch, param
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
+from great_expectations.experimental.datasources.filesystem_data_asset import (
+    _FilesystemDataAsset,
+)
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     JSONAsset,
     PandasFilesystemDatasource,
-    _FilesystemDataAsset,
 )
 from great_expectations.experimental.datasources.sources import _get_field_details
+from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -158,7 +161,7 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            t.__name__.lower().split("asset")[0]
+            camel_to_snake(t.__name__)[:-6]
             for t in PandasFilesystemDatasource.asset_types
         }
         print(asset_class_names)
@@ -192,7 +195,7 @@ class TestDynamicPandasAssets:
         assert exc_info.value.model == asset_class
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_add_asset_method_signaturel(self, asset_class: Type[_FilesystemDataAsset]):
+    def test_add_asset_method_signature(self, asset_class: Type[_FilesystemDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 

@@ -76,9 +76,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
             This list will be empty if no files exist on disk that correspond to the input
             batch request.
         """
-        datasource: PandasFilesystemDatasource | SparkDatasource = self.datasource
-
-        base_directory: pathlib.Path = datasource.base_directory
+        base_directory: pathlib.Path = self.datasource.base_directory
         all_files: List[pathlib.Path] = list(pathlib.Path(base_directory).iterdir())
 
         batch_requests_with_path: List[Tuple[BatchRequest, pathlib.Path]] = []
@@ -105,7 +103,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                     batch_requests_with_path.append(
                         (
                             BatchRequest(
-                                datasource_name=datasource.name,
+                                datasource_name=self.datasource.name,
                                 data_asset_name=self.name,
                                 options=match_options,
                             ),
