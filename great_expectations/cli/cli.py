@@ -98,7 +98,6 @@ class CLI(click.MultiCommand):
             return getattr(module, module_name)
 
         except ModuleNotFoundError:
-            # this is the message that we get. Is it what we want?
             cli_message(
                 f"<red>The command `{name}` does not exist.\nPlease use one of: {self.list_commands(None)}</red>"  # type: ignore[arg-type] # expects click Context
             )
