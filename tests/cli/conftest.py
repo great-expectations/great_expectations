@@ -2,7 +2,6 @@ import os
 import shutil
 
 import pytest
-from moto import mock_athena
 from great_expectations.data_context.util import file_relative_path
 
 
