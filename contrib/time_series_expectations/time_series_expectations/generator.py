@@ -39,7 +39,7 @@ def generate_annual_seasonality(
 def generate_posneg_pareto(alpha, size):
     """Generate a positive or negative pareto distribution."""
 
-    if alpha != None:
+    if alpha is not None:
         return np.random.pareto(a=alpha, size=size) * np.random.randint(-1, 2, size=size)
     else:
         return 0
@@ -84,7 +84,7 @@ def generate_time_series(
 ) -> np.ndarray:
     """Generate a time series."""
     
-    if trend_params == None:
+    if trend_params is None:
         trend_params = [{
             "alpha": 0,
             "beta": 0.06,
@@ -103,10 +103,10 @@ def generate_time_series(
             "cutpoint": size,
         }]
     
-    if weekday_dummy_params == None:
+    if weekday_dummy_params is None:
         weekday_dummy_params = [np.random.normal() for i in range(7)]
         
-    if annual_seasonality_params == None:
+    if annual_seasonality_params is None:
         annual_seasonality_params = [(np.random.normal(), np.random.normal(), ) for i in range(10)]
 
     time_series_components = generate_component_time_series(
