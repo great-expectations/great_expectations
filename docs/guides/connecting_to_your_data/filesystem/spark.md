@@ -164,7 +164,7 @@ You could write a `BatchRequest` that reads in the entire folder as a single Spa
 
 Once that step is complete, then we can confirm that our Validator contains a <TechnicalTag tag="batch" text="Batch" /> with the expected 30,000 lines. 
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request validator"
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory validator"
 ```
 
 To view the full scripts used in this page, see them on GitHub:
