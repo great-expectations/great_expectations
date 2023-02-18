@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import copy
 import os
 import sys
@@ -61,7 +63,7 @@ def suite(ctx: click.Context) -> None:
         end_event_name,
     ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
         noun=cli_event_noun,
-        verb=ctx.invoked_subcommand,
+        verb=ctx.invoked_subcommand,  # type: ignore[arg-type]
     )
     send_usage_message(
         data_context=ctx.obj.data_context,
@@ -711,7 +713,7 @@ def _suite_edit_workflow(  # noqa: C901 - 19
     expectation_suite_name: str,
     profile: bool,
     profiler_name: Optional[str],
-    usage_event: str,
+    usage_event: str | None,
     interactive_mode: CLISuiteInteractiveFlagCombinations,
     no_jupyter: bool,
     create_if_not_exist: bool = False,
@@ -798,7 +800,7 @@ def _suite_edit_workflow(  # noqa: C901 - 19
             renderer = SuiteProfileNotebookRenderer(
                 context=context,
                 expectation_suite_name=expectation_suite_name,
-                profiler_name=profiler_name,
+                profiler_name=profiler_name,  # type: ignore[arg-type] # could be None
                 batch_request=batch_request,
             )
             renderer.render_to_disk(notebook_file_path=notebook_path)
@@ -866,7 +868,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
         raise e
 
 
-@mark.cli_as_deprecation
+@mark.cli_as_deprecation  # type: ignore[arg-type] # expected `str`` got `Command`
 @suite.command(name="demo")
 @click.pass_context
 def suite_demo(ctx: click.Context) -> None:
