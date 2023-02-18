@@ -261,7 +261,7 @@ class ColumnSplitterDividedInteger(_ColumnSplitter):
 
     @property
     def param_names(self) -> List[str]:
-        return ["divisor"]
+        return ["quotient"]
 
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "divisor": self.divisor}
@@ -269,11 +269,11 @@ class ColumnSplitterDividedInteger(_ColumnSplitter):
     def request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
-        if "divisor" not in options:
+        if "quotient" not in options:
             raise ValueError(
-                "'divisor' must be specified in the batch request options to create a batch identifier"
+                "'quotient' must be specified in the batch request options to create a batch identifier"
             )
-        return {self.column_name: options["divisor"]}
+        return {self.column_name: options["quotient"]}
 
 
 ColumnSplitter = Union[
