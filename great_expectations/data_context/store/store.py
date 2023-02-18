@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+
+from typing_extensions import NotRequired, TypedDict
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.configuration import AbstractConfig  # noqa: TCH001
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
@@ -17,7 +18,17 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
+if TYPE_CHECKING:
+    from great_expectations.core.configuration import AbstractConfig
+
 logger = logging.getLogger(__name__)
+
+
+class StoreConfigTypedDict(TypedDict):
+    # NOTE: TypeDict values may be incomplete, update as needed
+    class_name: str
+    module_name: NotRequired[str]
+    store_backend: dict
 
 
 class Store:
@@ -251,7 +262,7 @@ class Store:
     @staticmethod
     def build_store_from_config(
         store_name: Optional[str] = None,
-        store_config: Optional[dict] = None,
+        store_config: StoreConfigTypedDict | dict | None = None,
         module_name: str = "great_expectations.data_context.store",
         runtime_environment: Optional[dict] = None,
     ) -> Store:
@@ -271,16 +282,15 @@ class Store:
                 config_defaults=config_defaults,
             )
         except gx_exceptions.DataContextError as e:
-            new_store = None
             logger.critical(
                 f"Error {e} occurred while attempting to instantiate a store."
             )
-        if not new_store:
             class_name: str = store_config["class_name"]
-            module_name = store_config["module_name"]
+            module_name = store_config.get("module_name", module_name)
             raise gx_exceptions.ClassInstantiationError(
                 module_name=module_name,
                 package_name=None,
                 class_name=class_name,
-            )
+            ) from e
+
         return new_store
