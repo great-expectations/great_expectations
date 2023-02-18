@@ -12,10 +12,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 import click
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint  # noqa: TCH001
-from great_expectations.checkpoint.types.checkpoint_result import (
-    CheckpointResult,  # noqa: TCH001
-)
 from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
@@ -31,16 +27,18 @@ from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
-from great_expectations.datasource import BaseDatasource  # noqa: TCH001
+from great_expectations.datasource import BaseDatasource
 from great_expectations.util import get_context
-from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
     from great_expectations.core.batch import JSONValues
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.experimental.datasources.interfaces import (
         Datasource as XDatasource,
     )
+    from great_expectations.validator.validator import Validator
 
 
 logger = logging.getLogger(__name__)
