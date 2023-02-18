@@ -20,7 +20,7 @@ example_data = pd.read_csv("./example_data.csv")
 
 
 class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
-    
+
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_pair_values.match_prophet_forecast"
 

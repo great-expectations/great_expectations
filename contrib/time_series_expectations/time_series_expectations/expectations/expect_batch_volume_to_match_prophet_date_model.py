@@ -5,10 +5,10 @@ For detailed instructions on how to use it, please see:
 """
 
 
+from typing import Dict, Optional
+
 import pandas as pd
 from prophet.serialize import model_from_json
-
-from typing import Dict, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -19,56 +19,60 @@ from great_expectations.expectations.expectation import TableExpectation
 with open("./example_prophet_date_model.json") as f_:
     example_prophet_date_model = f_.read()
 
+
 class ExpectBatchVolumeToMathProphetDateModel(TableExpectation):
     """This Expectation checks to see if the volume of a Batch matches the predictions of a prophet model for a given date."""
 
-    examples = [{
-        "data": { "foo": [1, 2, 3, 4] },
-        "tests": [
-            {
-                "title": "positive_test",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {
-                    "date": "2022-01-11",
-                    "model": example_prophet_date_model,
+    examples = [
+        {
+            "data": {"foo": [1, 2, 3, 4]},
+            "tests": [
+                {
+                    "title": "positive_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "date": "2022-01-11",
+                        "model": example_prophet_date_model,
+                    },
+                    "out": {
+                        "success": True,
+                        "observed_value": 4,
+                    },
+                }
+            ],
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                    "dialects": None,
                 },
-                "out": {
-                    "success": True,
-                    "observed_value": 4,
+            ],
+        },
+        {
+            "data": {"foo": range(100)},
+            "tests": [
+                {
+                    "title": "negative_test",
+                    "exact_match_out": False,
+                    "include_in_gallery": True,
+                    "in": {
+                        "date": "2022-01-01",
+                        "model": example_prophet_date_model,
+                    },
+                    "out": {
+                        "success": False,
+                        "observed_value": 100,
+                    },
+                }
+            ],
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                    "dialects": None,
                 },
-            }
-        ],
-        "test_backends": [
-            {
-                "backend": "pandas",
-                "dialects": None,
-            },
-        ]
-    },{
-        "data": { "foo": range(100) },
-        "tests": [
-            {
-                "title": "negative_test",
-                "exact_match_out": False,
-                "include_in_gallery": True,
-                "in": {
-                    "date": "2022-01-01",
-                    "model": example_prophet_date_model,
-                },
-                "out": {
-                    "success": False,
-                    "observed_value": 100,
-                },
-            }
-        ],
-        "test_backends": [
-            {
-                "backend": "pandas",
-                "dialects": None,
-            },
-        ]
-    }]
+            ],
+        },
+    ]
 
     metric_dependencies = ("table.row_count",)
 
@@ -124,7 +128,9 @@ class ExpectBatchVolumeToMathProphetDateModel(TableExpectation):
         forecast_lower_bound = forecast.yhat_lower[0]
         forecast_upper_bound = forecast.yhat_upper[0]
 
-        in_bounds = (forecast_lower_bound < batch_volume) & (batch_volume < forecast_upper_bound)
+        in_bounds = (forecast_lower_bound < batch_volume) & (
+            batch_volume < forecast_upper_bound
+        )
 
         return {
             "success": in_bounds,
@@ -133,9 +139,8 @@ class ExpectBatchVolumeToMathProphetDateModel(TableExpectation):
                 "forecast_value": forecast_value,
                 "forecast_lower_bound": forecast_lower_bound,
                 "forecast_upper_bound": forecast_upper_bound,
-            }
+            },
         }
-
 
     # This object contains metadata for display in the public Gallery
     library_metadata = {
