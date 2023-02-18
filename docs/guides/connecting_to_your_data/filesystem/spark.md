@@ -31,7 +31,7 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L1-L4
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py imports"
 ```
 
 <SparkDataContextNote />
@@ -51,23 +51,22 @@ Using this example configuration, add in your path to a directory that contains 
   ]}>
   <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L20-L38
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py yaml"
 ```
 
 Run this code to test your configuration.
-
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L44
-```
+'''python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py test_yaml_config"
+'''
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L21-L39
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py python"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L47
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py test_yaml_config"
 ```
 
 </TabItem>
@@ -91,13 +90,13 @@ Save the configuration into your <TechnicalTag tag="data_context" text="Data Con
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L46
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py test_yaml_config"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L49
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py add_datasource"
 ```
 
 </TabItem>
@@ -116,11 +115,12 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
   <TabItem value="runtime_batch_request">
 
 Add the path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
-
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L49-L55
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py runtime_batch_request"
 ```
+
 Then load data into the Validator.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L61-L67
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py runtime_batch_request validator"
 ```
 
   </TabItem>
@@ -128,10 +128,11 @@ Then load data into the Validator.
 
 Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L73-L77
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py batch_request"
 ```
+
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py#L83-L89
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py batch_request validator"
 ```
 
   </TabItem>
@@ -158,12 +159,12 @@ If you have a directory with 3 CSV files with each file having 10,000 lines each
 
 You could write a `BatchRequest` that reads in the entire folder as a single Spark Dataframe by specifying the `reader_method` to be `csv`, `header` to be set to `True` in the `reader_options`. 
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L106-L113
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request directory"
 ```
 
 Once that step is complete, then we can confirm that our Validator contains a <TechnicalTag tag="batch" text="Batch" /> with the expected 30,000 lines. 
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py#L119-L127
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py batch_request validator"
 ```
 
 To view the full scripts used in this page, see them on GitHub:
