@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import dataclasses
+import functools
 import logging
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     ClassVar,
     Dict,
     Generic,
@@ -273,7 +275,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         for sorter in reversed(self.order_by):
             try:
                 batch_list.sort(
-                    key=lambda b: b.metadata[sorter.key],
+                    key=functools.cmp_to_key(_sort_batches_with_none(sorter.key)),
                     reverse=sorter.reverse,
                 )
             except KeyError as e:
@@ -281,6 +283,27 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
                     f"Trying to sort {self.name} table asset batches on key {sorter.key} "
                     "which isn't available on all batches."
                 ) from e
+
+
+def _sort_batches_with_none(
+    key: str,
+) -> Callable[[Optional[Batch], Optional[Batch]], int]:
+    def _compare_function(a: Optional[Batch], b: Optional[Batch]) -> int:
+        if a.metadata[key] is not None and b.metadata[key] is not None:
+            if a.metadata[key] < b.metadata[key]:
+                return -1
+            elif a.metadata[key] > b.metadata[key]:
+                return 1
+            else:
+                return 0
+        elif a.metadata[key] is None and b.metadata[key] is None:
+            return 0
+        elif a.metadata[key] is None:  # b.metadata[key] is not None
+            return -1
+        else:  # b.metadata[key] is None, a.metadata[key] is not None
+            return 0
+
+    return _compare_function
 
 
 # If a Datasource can have more than 1 _DataAssetT, this will need to change.

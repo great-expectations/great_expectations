@@ -13,7 +13,7 @@ from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
-    ColumnSplitter,
+    ColumnSplitterYearAndMonth,
     TableAsset,
 )
 
@@ -323,6 +323,7 @@ def test_catch_bad_asset_configs(
         if expected_error_loc == all_errors[0]["loc"]:
             test_msg = error["msg"]
             break
+    # BDIRKS this error message is now different
     assert test_msg.startswith(expected_msg)
 
 
@@ -348,13 +349,15 @@ def test_general_column_splitter_errors(
     expected_msg: str,
 ):
 
+    # BDIRKS - should i test others
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        ColumnSplitter(**bad_column_kwargs)
+        ColumnSplitterYearAndMonth(**bad_column_kwargs)
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
     all_errors = exc_info.value.errors()
     assert len(all_errors) == 1, "Expected 1 error"
+    # BDIRKS this error is different
     assert expected_error_type == all_errors[0]["type"]
     assert all_errors[0]["msg"].startswith(expected_msg)
 
@@ -448,7 +451,7 @@ def test_splitters_deserialization(
     table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
-    assert isinstance(table_asset.column_splitter, ColumnSplitter)
+    assert isinstance(table_asset.column_splitter, ColumnSplitterYearAndMonth)
     assert table_asset.column_splitter.method_name == "split_on_year_and_month"
 
 

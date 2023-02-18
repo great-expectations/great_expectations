@@ -22,6 +22,7 @@ from great_expectations.experimental.datasources.postgres_datasource import (
 )
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
+    ColumnSplitterYearAndMonth,
     TableAsset,
 )
 from tests.experimental.datasources.conftest import (
@@ -207,8 +208,8 @@ def create_and_add_table_asset_without_testing_connection(
     return source, table_asset
 
 
-def year_month_splitter(column_name: str) -> ColumnSplitter:
-    return ColumnSplitter(
+def year_month_splitter(column_name: str) -> ColumnSplitterYearAndMonth:
+    return ColumnSplitterYearAndMonth(
         column_name=column_name,
         method_name="split_on_year_and_month",
     )
