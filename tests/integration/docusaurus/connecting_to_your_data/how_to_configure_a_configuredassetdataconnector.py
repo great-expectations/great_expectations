@@ -76,6 +76,7 @@ assert test_yaml == test_python
 
 context.add_datasource(**datasource_config)
 
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic datasource workthrough">
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_configured_data_connector_name",
@@ -92,6 +93,7 @@ validator = context.get_validator(
     batch_identifiers={"month": "2019-02"},
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
@@ -186,6 +188,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -203,7 +206,7 @@ data_connectors:
         group_names:
           - month
 """
-
+# </snippet>
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_yaml = datasource_yaml.replace(
@@ -213,6 +216,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -234,7 +238,7 @@ datasource_config = {
         },
     },
 }
-
+# </snippet>
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
 datasource_config["data_connectors"]["default_configured_data_connector_name"][
@@ -247,6 +251,7 @@ test_python = context.test_yaml_config(
 
 assert test_yaml == test_python
 
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset output">
 context.add_datasource(**datasource_config)
 
 batch_request = BatchRequest(
@@ -260,6 +265,7 @@ validator = context.get_validator(
     expectation_suite_name="<MY EXPECTATION SUITE NAME>",
     batch_identifiers={"month": "2019-02"},
 )
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
@@ -271,6 +277,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml no regex">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -288,6 +295,7 @@ data_connectors:
         group_names:
           - month
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -298,6 +306,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python no regex">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -319,6 +328,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
@@ -340,6 +350,7 @@ assert "yellow_tripdata" in set(
 )
 
 # YAML
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 2 yaml">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -363,6 +374,7 @@ data_connectors:
           - year
           - month
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -373,6 +385,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 2 python">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -398,6 +411,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
@@ -425,6 +439,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 3 yaml">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -450,6 +465,7 @@ data_connectors:
           - year
           - month
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -460,6 +476,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 3 python">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -487,6 +504,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
@@ -513,6 +531,7 @@ assert "green_tripdata" in set(
 )
 
 # YAML
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 4 yaml">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -538,6 +557,7 @@ data_connectors:
         base_directory: green_tripdata/
         glob_directive: "*.csv"
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -548,6 +568,7 @@ datasource_yaml = datasource_yaml.replace(
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 4 python">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -577,6 +598,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the code above.
