@@ -120,7 +120,7 @@ class SparkFilesystemDatasource(_SparkDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
-            glob_directive (str): glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
+            glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
