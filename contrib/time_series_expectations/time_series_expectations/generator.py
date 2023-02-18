@@ -1,6 +1,8 @@
 from io import StringIO
+
 import numpy as np
 import pandas as pd
+
 
 def generate_trend(
     time,
