@@ -277,7 +277,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
-            glob_directive (str): glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
+            glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
@@ -307,7 +307,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
-            glob_directive (str): glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
+            glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
@@ -337,7 +337,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
-            glob_directive (str): glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
+            glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
@@ -367,7 +367,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
-            glob_directive (str): glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
+            glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
