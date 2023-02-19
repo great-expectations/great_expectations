@@ -275,7 +275,9 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         for sorter in reversed(self.order_by):
             try:
                 batch_list.sort(
-                    key=functools.cmp_to_key(_sort_batches_with_none(sorter.key)),
+                    key=functools.cmp_to_key(
+                        _sort_batches_with_none_metadata_values(sorter.key)
+                    ),
                     reverse=sorter.reverse,
                 )
             except KeyError as e:
@@ -285,7 +287,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
                 ) from e
 
 
-def _sort_batches_with_none(
+def _sort_batches_with_none_metadata_values(
     key: str,
 ) -> Callable[[Batch, Batch], int]:
     def _compare_function(a: Batch, b: Batch) -> int:
