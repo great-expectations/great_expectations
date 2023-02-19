@@ -127,10 +127,11 @@ def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
     """
     if sort_key[0] == "-":
         return BatchSorter(key=sort_key[1:], reverse=True)
-    elif sort_key[0] == "+":
+
+    if sort_key[0] == "+":
         return BatchSorter(key=sort_key[1:], reverse=False)
-    else:
-        return BatchSorter(key=sort_key, reverse=False)
+
+    return BatchSorter(key=sort_key, reverse=False)
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
