@@ -399,7 +399,7 @@ class _SQLAsset(DataAsset):
         candidate: Dict, requested_options: BatchRequestOptions
     ) -> bool:
         for k, v in requested_options.items():
-            if candidate[k] != v:
+            if v is not None and candidate[k] != v:
                 return False
         return True
 
