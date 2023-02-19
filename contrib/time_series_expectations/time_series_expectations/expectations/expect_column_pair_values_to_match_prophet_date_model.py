@@ -61,6 +61,8 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
         # forecast = model.predict(pd.DataFrame({"ds": column_A_pandas}))
         # in_bounds = (forecast.yhat_lower < column_B_pandas) & (column_B_pandas < forecast.yhat_upper)
 
+        # return in_bounds
+
         # This approach creates a Spark UDF, and executes the business logic within pyspark.
         model = model_from_json(model_json)
 
@@ -84,9 +86,12 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
             sparktypes.BooleanType()
         )
 
-        return check_if_value_is_in_model_forecast_bounds_udf(
+        result = check_if_value_is_in_model_forecast_bounds_udf(
             F.struct(column_A, column_B)
         )
+        print(type(result))
+
+        return result
 
 
 
