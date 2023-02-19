@@ -3,9 +3,12 @@ from typing import Optional
 import pandas as pd
 from prophet.serialize import model_from_json
 
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
+    SqlAlchemyExecutionEngine,
+    SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnPairMapExpectation
 from great_expectations.expectations.metrics.map_metric_provider import (
@@ -39,15 +42,52 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
 
         return in_bounds
 
-    # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(cls, column_A, column_B, _dialect, **kwargs):
+    #     print(column_A)
+    #     print(type(column_A))
     #     raise NotImplementedError
 
-    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-    # @column_pair_condition_partial(engine=SparkDFExecutionEngine)
-    # def _spark(cls, column_A, column_B, **kwargs):
-    #     raise NotImplementedError
+    @column_pair_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column_A, column_B, model_json, **kwargs):
+        # This approach converts the Spark Columns to Pandas Series. The business logic is executed in pandas.
+        # print(column_A)
+        # print(type(column_A))
+
+        # column_A_pandas = column_A.toPandas()
+        # column_B_pandas = column_B.toPandas()
+
+        # model = model_from_json(model_json)
+        # forecast = model.predict(pd.DataFrame({"ds": column_A_pandas}))
+        # in_bounds = (forecast.yhat_lower < column_B_pandas) & (column_B_pandas < forecast.yhat_upper)
+
+        # This approach creates a Spark UDF, and executes the business logic within pyspark.
+        model = model_from_json(model_json)
+
+        def check_if_value_is_in_model_forecast_bounds(date_value_pair, model=model):
+            date = date_value_pair[0]
+            value = date_value_pair[1]
+
+            forecast = model.predict(pd.DataFrame({"ds": [date]}))
+
+            forecast_lower_bound = forecast.yhat_lower[0]
+            forecast_upper_bound = forecast.yhat_upper[0]
+
+            in_bounds = (forecast_lower_bound < value) & (
+                value < forecast_upper_bound
+            )
+
+            return bool(in_bounds)
+
+        check_if_value_is_in_model_forecast_bounds_udf = F.udf(
+            check_if_value_is_in_model_forecast_bounds,
+            sparktypes.BooleanType()
+        )
+
+        return check_if_value_is_in_model_forecast_bounds_udf(
+            F.struct(column_A, column_B)
+        )
+
 
 
 class ExpectColumnPairValuesToMatchProphetDateForecast(ColumnPairMapExpectation):
@@ -100,6 +140,20 @@ class ExpectColumnPairValuesToMatchProphetDateForecast(ColumnPairMapExpectation)
                     "out": {
                         "success": False,
                     },
+                },
+            ],
+            "test_backends": [
+                {
+                    "backend": "pandas",
+                    "dialects": None,
+                },
+                # {
+                #     "backend": "sqlalchemy",
+                #     "dialects": ["sqlite", "postgresql"],
+                # },
+                {
+                    "backend": "spark",
+                    "dialects": None,
                 },
             ],
         }
