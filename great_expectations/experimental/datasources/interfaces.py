@@ -287,8 +287,8 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
 
 def _sort_batches_with_none(
     key: str,
-) -> Callable[[Optional[Batch], Optional[Batch]], int]:
-    def _compare_function(a: Optional[Batch], b: Optional[Batch]) -> int:
+) -> Callable[[Batch, Batch], int]:
+    def _compare_function(a: Batch, b: Batch) -> int:
         if a.metadata[key] is not None and b.metadata[key] is not None:
             if a.metadata[key] < b.metadata[key]:
                 return -1
