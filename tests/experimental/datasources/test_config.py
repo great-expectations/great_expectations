@@ -46,8 +46,6 @@ PG_COMPLEX_CONFIG_DICT = {
                     "column_splitter": {
                         "column_name": "my_column",
                         "method_name": "split_on_year_and_month",
-                        "name": "y_m_splitter",
-                        "param_names": ["year", "month"],
                     },
                     "name": "with_splitter",
                     "table_name": "another_table",
@@ -335,9 +333,8 @@ def test_catch_bad_asset_configs(
             {
                 "column_name": "flavor",
                 "method_name": "NOT_VALID",
-                "param_names": ["cherry", "strawberry"],
             },
-            "value_error",
+            "value_error.const",
             "unexpected value; permitted:",
         )
     ],
@@ -348,8 +345,6 @@ def test_general_column_splitter_errors(
     expected_error_type: str,
     expected_msg: str,
 ):
-
-    # BDIRKS - should i test others
     with pytest.raises(pydantic.ValidationError) as exc_info:
         ColumnSplitterYearAndMonth(**bad_column_kwargs)
 
@@ -357,7 +352,6 @@ def test_general_column_splitter_errors(
 
     all_errors = exc_info.value.errors()
     assert len(all_errors) == 1, "Expected 1 error"
-    # BDIRKS this error is different
     assert expected_error_type == all_errors[0]["type"]
     assert all_errors[0]["msg"].startswith(expected_msg)
 
