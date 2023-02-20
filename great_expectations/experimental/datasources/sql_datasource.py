@@ -60,12 +60,26 @@ class _ColumnSplitter(ExperimentalBaseModel):
 
     @property
     def param_names(self) -> List[str]:
+        """Returns the parameter names that specify a batch derived from this column splitter
+
+        For example, for ColumnSplitterYearMonth this returns ["year", "month"]. For more
+        examples, please see _ColumnSplitter subclasses.
+        """
         raise NotImplementedError
 
     def splitter_method_kwargs(self) -> Dict[str, Any]:
+        """A shim to our sqlalchemy execution engine splitter methods
+
+        We translate any internal _ColumnSplitter state and what is passed in from
+        a batch_request to the splitter_kwargs required by our execution engine
+        data splitters defined in:
+        great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter
+
+        Look at _ColumnSplitter subclasses for concrete examples.
+        """
         raise NotImplementedError
 
-    def request_options_to_batch_spec_kwarg_identifiers(
+    def batch_batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         """Translate the batch request options to the dictionary needed to by our execution engine
@@ -144,7 +158,7 @@ class ColumnSplitterYear(_ColumnSplitter):
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
-    def request_options_to_batch_spec_kwarg_identifiers(
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         return _request_options_to_datetime_batch_spec_kwargs(self, options)
@@ -160,7 +174,7 @@ class ColumnSplitterYearAndMonth(_ColumnSplitter):
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
-    def request_options_to_batch_spec_kwarg_identifiers(
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         return _request_options_to_datetime_batch_spec_kwargs(self, options)
@@ -178,7 +192,7 @@ class ColumnSplitterYearAndMonthAndDay(_ColumnSplitter):
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
-    def request_options_to_batch_spec_kwarg_identifiers(
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         return _request_options_to_datetime_batch_spec_kwargs(self, options)
@@ -196,7 +210,7 @@ class ColumnSplitterDatetimePart(_ColumnSplitter):
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "date_parts": self.param_names}
 
-    def request_options_to_batch_spec_kwarg_identifiers(
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         return _request_options_to_datetime_batch_spec_kwargs(self, options)
@@ -245,7 +259,7 @@ class ColumnSplitterColumnValue(_ColumnSplitter):
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name}
 
-    def request_options_to_batch_spec_kwarg_identifiers(
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if self.column_name not in options:
@@ -266,7 +280,7 @@ class ColumnSplitterDividedInteger(_ColumnSplitter):
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         return {"column_name": self.column_name, "divisor": self.divisor}
 
-    def request_options_to_batch_spec_kwarg_identifiers(
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
         self, options: BatchRequestOptions
     ) -> Dict[str, Any]:
         if "quotient" not in options:
@@ -464,7 +478,7 @@ class _SQLAsset(DataAsset):
                 # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
                 # it is hardcoded to a dict above, so we cast it here.
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
-                    column_splitter.request_options_to_batch_spec_kwarg_identifiers(
+                    column_splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
                         request.options
                     )
                 )

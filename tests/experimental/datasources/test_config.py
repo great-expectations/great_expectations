@@ -321,7 +321,6 @@ def test_catch_bad_asset_configs(
         if expected_error_loc == all_errors[0]["loc"]:
             test_msg = error["msg"]
             break
-    # BDIRKS this error message is now different
     assert test_msg.startswith(expected_msg)
 
 

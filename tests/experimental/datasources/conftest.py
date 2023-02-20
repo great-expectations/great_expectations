@@ -98,8 +98,7 @@ def sqlachemy_execution_engine_mock_cls(
             # Otherwise, a list of values is returned.
             if isinstance(splitter_query_response[0], dict):
                 return [Row(row_dict) for row_dict in splitter_query_response]
-            else:
-                return splitter_query_response
+            return splitter_query_response
 
     return MockSqlAlchemyExecutionEngine
 
