@@ -10,6 +10,7 @@ from typing import Dict, Optional
 
 import pandas as pd
 
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -18,11 +19,15 @@ from great_expectations.expectations.expectation import TableExpectation
 
 from time_series_expectations.expectations.util import get_prophet_model_from_json
 
-with open("./example_prophet_date_model.json") as f_:
-    example_prophet_date_model = f_.read()
 
+with open(
+    file_relative_path(
+        __file__,
+        "example_prophet_date_model.json"
+    )) as f_:
+    example_prophet_date_model_json = f_.read()
 
-class ExpectBatchVolumeToMathProphetDateModel(TableExpectation):
+class ExpectBatchVolumeToMatchProphetDateModel(TableExpectation):
     """This Expectation checks to see if the volume of a Batch matches the predictions of a prophet model for a given date."""
 
     examples = [
@@ -35,7 +40,7 @@ class ExpectBatchVolumeToMathProphetDateModel(TableExpectation):
                     "include_in_gallery": True,
                     "in": {
                         "date": "2022-01-11",
-                        "model": example_prophet_date_model,
+                        "model": example_prophet_date_model_json,
                     },
                     "out": {
                         "success": True,
@@ -59,7 +64,7 @@ class ExpectBatchVolumeToMathProphetDateModel(TableExpectation):
                     "include_in_gallery": True,
                     "in": {
                         "date": "2022-01-01",
-                        "model": example_prophet_date_model,
+                        "model": example_prophet_date_model_json,
                     },
                     "out": {
                         "success": False,
@@ -154,4 +159,4 @@ class ExpectBatchVolumeToMathProphetDateModel(TableExpectation):
 
 
 if __name__ == "__main__":
-    ExpectBatchVolumeToMathProphetDateModel().print_diagnostic_checklist()
+    ExpectBatchVolumeToMatchProphetDateModel().print_diagnostic_checklist()

@@ -2,6 +2,7 @@ from typing import Optional
 
 import pandas as pd
 
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
@@ -17,10 +18,19 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 from time_series_expectations.expectations.util import get_prophet_model_from_json
 
-with open("./example_prophet_date_model.json") as f_:
+with open(
+    file_relative_path(
+        __file__,
+        "example_prophet_date_model.json"
+    )) as f_:
     model_json = f_.read()
 
-example_data = pd.read_csv("./example_data.csv")
+example_data = pd.read_csv(
+    file_relative_path(
+        __file__,
+        "example_data.csv"
+    )
+)
 
 
 class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
@@ -95,7 +105,7 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
 
 
 
-class ExpectColumnPairValuesToMatchProphetDateForecast(ColumnPairMapExpectation):
+class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
     """This Expectation is used to compare the values in a column to a Prophet forecast, based on a timestamp in a second column."""
 
     # These examples will be shown in the public gallery.
@@ -213,4 +223,4 @@ class ExpectColumnPairValuesToMatchProphetDateForecast(ColumnPairMapExpectation)
 
 
 if __name__ == "__main__":
-    ExpectColumnPairValuesToMatchProphetDateForecast().print_diagnostic_checklist()
+    ExpectColumnPairValuesToMatchProphetDateModel().print_diagnostic_checklist()
