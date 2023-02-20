@@ -89,7 +89,6 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
         result = check_if_value_is_in_model_forecast_bounds_udf(
             F.struct(column_A, column_B)
         )
-        print(type(result))
 
         return result
 
