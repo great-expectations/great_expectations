@@ -944,7 +944,7 @@ def load_json_file_into_dict(
     filepath: str,
     data_context: FileDataContext,
     usage_event: Optional[str] = None,
-) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
+) -> Dict[str, str | int | dict]:
     suppress_usage_message: bool = (usage_event is None) or (data_context is None)
 
     error_message: str
@@ -1002,8 +1002,7 @@ def load_json_file_into_dict(
             suppress_usage_message=suppress_usage_message,
             message=f"<red>{error_message}</red>",
         )
-
-    return batch_request
+    return batch_request  # type: ignore[return-value] # will exit early if None
 
 
 def get_batch_request_from_citations(
