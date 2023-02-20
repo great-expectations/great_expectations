@@ -5,27 +5,21 @@ For detailed instructions on how to use it, please see:
 """
 
 
-import logging
 from typing import Dict, Optional
 
 import pandas as pd
 
-from great_expectations.data_context.util import file_relative_path
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     ExecutionEngine,
 )
 from great_expectations.expectations.expectation import TableExpectation
-
 from time_series_expectations.expectations.util import get_prophet_model_from_json
 
-
-with open(
-    file_relative_path(
-        __file__,
-        "example_prophet_date_model.json"
-    )) as f_:
+with open(file_relative_path(__file__, "example_prophet_date_model.json")) as f_:
     example_prophet_date_model_json = f_.read()
+
 
 class ExpectBatchVolumeToMatchProphetDateModel(TableExpectation):
     """This Expectation checks to see if the volume of a Batch matches the predictions of a prophet model for a given date."""

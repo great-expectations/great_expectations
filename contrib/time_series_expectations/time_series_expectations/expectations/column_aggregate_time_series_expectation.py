@@ -8,8 +8,8 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnExpectation
-
 from time_series_expectations.expectations.util import get_prophet_model_from_json
+
 
 class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
     """This Expectation is used to compare the values in a column to a Prophet forecast, based on a timestamp in a second column."""

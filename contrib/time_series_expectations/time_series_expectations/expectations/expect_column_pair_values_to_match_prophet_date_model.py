@@ -2,35 +2,24 @@ from typing import Optional
 
 import pandas as pd
 
-from great_expectations.data_context.util import file_relative_path
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SqlAlchemyExecutionEngine,
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnPairMapExpectation
+from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
 )
-
 from time_series_expectations.expectations.util import get_prophet_model_from_json
 
-with open(
-    file_relative_path(
-        __file__,
-        "example_prophet_date_model.json"
-    )) as f_:
+with open(file_relative_path(__file__, "example_prophet_date_model.json")) as f_:
     model_json = f_.read()
 
-example_data = pd.read_csv(
-    file_relative_path(
-        __file__,
-        "example_data.csv"
-    )
-)
+example_data = pd.read_csv(file_relative_path(__file__, "example_data.csv"))
 
 
 class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
@@ -86,15 +75,12 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
             forecast_lower_bound = forecast.yhat_lower[0]
             forecast_upper_bound = forecast.yhat_upper[0]
 
-            in_bounds = (forecast_lower_bound < value) & (
-                value < forecast_upper_bound
-            )
+            in_bounds = (forecast_lower_bound < value) & (value < forecast_upper_bound)
 
             return bool(in_bounds)
 
         check_if_value_is_in_model_forecast_bounds_udf = F.udf(
-            check_if_value_is_in_model_forecast_bounds,
-            sparktypes.BooleanType()
+            check_if_value_is_in_model_forecast_bounds, sparktypes.BooleanType()
         )
 
         result = check_if_value_is_in_model_forecast_bounds_udf(
@@ -102,7 +88,6 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
         )
 
         return result
-
 
 
 class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
