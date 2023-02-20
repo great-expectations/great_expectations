@@ -524,3 +524,15 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     )
     obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
     assert obs == os.path.join("..", "..", "data", "pipeline1")
+
+
+def test_get_default_expectation_suite_name_with_partial_batch_request_definition():
+    batch_request = {
+        "datasource_name": "snowflake",
+        "data_connector_name": "default_runtime_data_connector_name",
+        "limit": 1000,
+    }
+    suite_name = toolkit.get_default_expectation_suite_name(
+        data_asset_name=None, batch_request=batch_request
+    )
+    assert suite_name == "warning"

@@ -144,12 +144,11 @@ def get_default_expectation_suite_name(
 ) -> str:
     suite_name: str
     if data_asset_name:
-        suite_name = f"{data_asset_name}.warning"
-    elif batch_request:
-        suite_name = f"batch-{BatchRequest(**batch_request).id}"  # type: ignore[arg-type] # cannot unpack str
-    else:
-        suite_name = "warning"
-    return suite_name
+        return f"{data_asset_name}.warning"
+    try:
+        return f"batch-{BatchRequest(**batch_request).id}"  # type: ignore[arg-type] # cannot unpack str
+    except Exception:
+        return "warning"
 
 
 def tell_user_suite_exists(
