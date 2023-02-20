@@ -5,16 +5,18 @@ For detailed instructions on how to use it, please see:
 """
 
 
+import logging
 from typing import Dict, Optional
 
 import pandas as pd
-from prophet.serialize import model_from_json
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,
 )
 from great_expectations.expectations.expectation import TableExpectation
+
+from time_series_expectations.expectations.util import get_prophet_model_from_json
 
 with open("./example_prophet_date_model.json") as f_:
     example_prophet_date_model = f_.read()
@@ -121,7 +123,7 @@ class ExpectBatchVolumeToMathProphetDateModel(TableExpectation):
         model_json = configuration.kwargs["model"]
         date = configuration.kwargs["date"]
 
-        model = model_from_json(model_json)
+        model = get_prophet_model_from_json(model_json)
         forecast = model.predict(pd.DataFrame({"ds": [date]}))
 
         forecast_value = forecast.yhat[0]

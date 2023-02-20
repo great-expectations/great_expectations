@@ -1,7 +1,6 @@
 from typing import Optional
 
 import pandas as pd
-from prophet.serialize import model_from_json
 
 from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -15,6 +14,8 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
 )
+
+from time_series_expectations.expectations.util import get_prophet_model_from_json
 
 with open("./example_prophet_date_model.json") as f_:
     model_json = f_.read()
@@ -36,7 +37,7 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
 
     @column_pair_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_A, column_B, model_json, **kwargs):
-        model = model_from_json(model_json)
+        model = get_prophet_model_from_json(model_json)
         forecast = model.predict(pd.DataFrame({"ds": column_A}))
         in_bounds = (forecast.yhat_lower < column_B) & (column_B < forecast.yhat_upper)
 
@@ -64,7 +65,7 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
         # return in_bounds
 
         # This approach creates a Spark UDF, and executes the business logic within pyspark.
-        model = model_from_json(model_json)
+        model = get_prophet_model_from_json(model_json)
 
         def check_if_value_is_in_model_forecast_bounds(date_value_pair, model=model):
             date = date_value_pair[0]
