@@ -401,7 +401,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
 ):
     asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
     request = asset.build_batch_request({"year": "2018", "month": "04"})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
@@ -441,7 +441,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
 
     asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
     request = asset.build_batch_request({"year": "2018"})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
