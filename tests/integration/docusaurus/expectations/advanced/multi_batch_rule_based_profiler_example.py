@@ -8,6 +8,7 @@ from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 profiler_config = r"""
+# <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py full profiler_config">
 # This profiler is meant to be used on the NYC taxi data (yellow_tripdata_sample_<YEAR>-<MONTH>.csv)
 # located in tests/test_sets/taxi_yellow_tripdata_samples/
 
@@ -40,11 +41,14 @@ rules:
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.row_count_range.details
+# <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py column_ranges_rule domain_builder">
   column_ranges_rule:
     domain_builder:
       class_name: ColumnDomainBuilder
       include_semantic_types:
         - numeric
+# </snippet>
+# <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py column_ranges_rule parameter_builders">
     parameter_builders:
       - name: min_range
         class_name: NumericMetricRangeMultiBatchParameterBuilder
@@ -58,6 +62,8 @@ rules:
         metric_domain_kwargs: $domain.domain_kwargs
         false_positive_rate: $variables.false_positive_rate
         round_decimals: 2
+# </snippet>
+# <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py column_ranges_rule expectation_configuration_builders">
     expectation_configuration_builders:
       - expectation_type: expect_column_min_to_be_between
         class_name: DefaultExpectationConfigurationBuilder
@@ -77,7 +83,10 @@ rules:
         mostly: $variables.mostly
         meta:
           profiler_details: $parameter.max_range.details
+# </snippet>
+# </snippet>
 """
+
 
 data_context = DataContext()
 
@@ -108,7 +117,8 @@ expectation_configurations: List[
 print(expectation_configurations)
 
 # Please note that this docstring is here to demonstrate output for docs. It is not needed for normal use.
-first_rule_suite = """
+# <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py row_count_rule_suite">
+row_count_rule_suite = """
     {
         "meta": {"great_expectations_version": "0.13.19+58.gf8a650720.dirty"},
         "data_asset_type": None,
@@ -129,3 +139,4 @@ first_rule_suite = """
         "expectation_suite_name": "tmp_suite_Profiler_e66f7cbb",
     }
 """
+# </snippet>
