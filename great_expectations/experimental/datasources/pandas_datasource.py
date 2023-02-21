@@ -164,7 +164,6 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     # End Abstract Methods
 
 
-# TODO: <Alex>ALEX-THIS_IS_NOT_USED</Alex>
 class PandasDatasource(_PandasDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_PANDAS_ASSET_MODELS.values())
@@ -179,6 +178,3 @@ class PandasDatasource(_PandasDatasource):
 
     def test_connection(self, test_assets: bool = True) -> None:
         ...
-
-
-# TODO: <Alex>ALEX</Alex>
