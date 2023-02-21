@@ -15,10 +15,6 @@ xdatasources:
         column_splitter:
               method_name: split_on_year_and_month
               column_name: my_column
-              name: my_year_and_month_splitter
-              param_names:
-                - year
-                - month
       with_sorters:
         type: table
         name: with_sorters
