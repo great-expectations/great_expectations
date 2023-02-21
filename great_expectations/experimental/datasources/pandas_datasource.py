@@ -198,7 +198,6 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
     blacklist=_PANDAS_READER_METHOD_UNSUPPORTED_LIST,
     use_docstring_from_method=True,
     skip_first_param=False,
-    type_prefix="pandas",
 )
 
 
