@@ -182,9 +182,9 @@ def test_filesystem_data_asset_regex(
     filesystem_datasource.base_directory = base_directory
     if raises_test_connection_error:
         with pytest.raises(TestConnectionError):
-            filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)  # type: ignore[arg-type]
+            filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)
     else:
-        filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)  # type: ignore[arg-type]
+        filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)
 
 
 @pytest.mark.integration
