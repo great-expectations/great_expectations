@@ -110,6 +110,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "FilePath",  # pydantic
     # pandas
     "DtypeArg",
+    "FilePathOrBuffer",
     "CSVEngine",
     "IndexLabel",
     "CompressionOptions",
@@ -194,6 +195,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "Hashable": Hashable,
     "Iterable": Iterable,
     "FilePath": FilePath,
+    "FilePathOrBuffer": FilePath,
     "Pattern": re.Pattern,
     "CSVEngine": CSVEngine,
     "IndexLabel": IndexLabel,
