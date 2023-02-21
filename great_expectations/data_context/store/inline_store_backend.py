@@ -118,7 +118,7 @@ class InlineStoreBackend(StoreBackend):
             "InlineStoreBackend does not support moving of keys; the DataContext's config variables schema is immutable"
         )
 
-    def list_keys(self, prefix: Tuple[str, ...] = ()) -> List[str]:
+    def list_keys(self, prefix: Tuple[str, ...] = ()) -> List[Tuple]:
         """
         See `StoreBackend.list_keys` for more information.
 
@@ -130,20 +130,22 @@ class InlineStoreBackend(StoreBackend):
             A list of string keys from the user's project config.
         """
         config_section: Optional[str] = None
+        if self._resource_type is not DataContextVariableSchema.ALL_VARIABLES:
+            config_section = self._resource_type
         if prefix:
             config_section = prefix[0]
 
-        keys: List[str]
+        keys: List[Tuple]
         config_dict: dict = self._data_context.config.to_dict()
         if config_section is None:
-            keys = list(key for key in config_dict.keys())
+            keys = list((key,) for key in config_dict.keys())
         else:
             config_values: dict = config_dict[config_section]
             if not isinstance(config_values, dict):
                 raise StoreBackendError(
                     "Cannot list keys in a non-iterable section of a project config"
                 )
-            keys = list(key for key in config_values.keys())
+            keys = list((key,) for key in config_values.keys())
 
         return keys
 
