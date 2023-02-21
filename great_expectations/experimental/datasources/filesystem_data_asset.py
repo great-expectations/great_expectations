@@ -63,9 +63,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                 success = True
                 break
         if not success:
-            raise TestConnectionError(
-                f'No file at path: "{self.datasource.base_directory.resolve()}" matched the regex: "{self.regex.pattern}"'
-            )
+            raise TestConnectionError(self._build_test_connection_error_message())
 
     def _fully_specified_batch_requests_with_path(
         self, batch_request: BatchRequest
