@@ -83,12 +83,12 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         )
 
         data_connector: DataConnector = FilesystemDataConnector(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
+            datasource_name=self.name,
+            data_asset_name=name,
             regex=regex,
-            base_directory=self.datasource.base_directory,
+            base_directory=self.base_directory,
             glob_directive=glob_directive,
-            data_context_root_directory=self.datasource.data_context_root_directory,
+            data_context_root_directory=self.data_context_root_directory,
         )
         test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
         return self.add_asset(
@@ -125,12 +125,12 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         )
 
         data_connector: DataConnector = FilesystemDataConnector(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
+            datasource_name=self.name,
+            data_asset_name=name,
             regex=regex,
-            base_directory=self.datasource.base_directory,
+            base_directory=self.base_directory,
             glob_directive=glob_directive,
-            data_context_root_directory=self.datasource.data_context_root_directory,
+            data_context_root_directory=self.data_context_root_directory,
         )
         test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
         return self.add_asset(
@@ -167,12 +167,12 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         )
 
         data_connector: DataConnector = FilesystemDataConnector(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
+            datasource_name=self.name,
+            data_asset_name=name,
             regex=regex,
-            base_directory=self.datasource.base_directory,
+            base_directory=self.base_directory,
             glob_directive=glob_directive,
-            data_context_root_directory=self.datasource.data_context_root_directory,
+            data_context_root_directory=self.data_context_root_directory,
         )
         test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
         return self.add_asset(
@@ -209,12 +209,12 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         )
 
         data_connector: DataConnector = FilesystemDataConnector(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
+            datasource_name=self.name,
+            data_asset_name=name,
             regex=regex,
-            base_directory=self.datasource.base_directory,
+            base_directory=self.base_directory,
             glob_directive=glob_directive,
-            data_context_root_directory=self.datasource.data_context_root_directory,
+            data_context_root_directory=self.data_context_root_directory,
         )
         test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
         return self.add_asset(

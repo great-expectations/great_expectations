@@ -110,8 +110,8 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         )
 
         data_connector: DataConnector = S3DataConnector(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
+            datasource_name=self.name,
+            data_asset_name=name,
             regex=regex,
             s3_client=self._s3_client,
             bucket=self.bucket,
@@ -158,8 +158,8 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         )
 
         data_connector: DataConnector = S3DataConnector(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
+            datasource_name=self.name,
+            data_asset_name=name,
             regex=regex,
             s3_client=self._s3_client,
             bucket=self.bucket,
@@ -206,8 +206,8 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         )
 
         data_connector: DataConnector = S3DataConnector(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
+            datasource_name=self.name,
+            data_asset_name=name,
             regex=regex,
             s3_client=self._s3_client,
             bucket=self.bucket,
@@ -254,8 +254,8 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         )
 
         data_connector: DataConnector = S3DataConnector(
-            datasource_name=self.datasource.name,
-            data_asset_name=self.name,
+            datasource_name=self.name,
+            data_asset_name=name,
             regex=regex,
             s3_client=self._s3_client,
             bucket=self.bucket,
