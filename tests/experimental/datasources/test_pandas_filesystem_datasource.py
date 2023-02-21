@@ -16,7 +16,7 @@ import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
-from great_expectations.experimental.datasources.pandas_datasource import (
+from great_expectations.experimental.datasources.pandas_filesystem_datasource import (
     CSVAsset,
     JSONAsset,
     PandasFilesystemDatasource,
