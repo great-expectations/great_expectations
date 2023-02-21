@@ -31,9 +31,9 @@ class _S3DataAsset(_FilePathDataAsset):
     }
 
     # S3 specific attributes
-    prefix: str = ("",)
-    delimiter: str = ("/",)
-    max_keys: int = (1000,)
+    prefix: str = ""
+    delimiter: str = "/"
+    max_keys: int = 1000
 
     def batch_request_options_template(
         self,
