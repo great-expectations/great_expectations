@@ -143,7 +143,7 @@ class SparkFilesystemDatasource(_SparkDatasource):
 # TODO: <Alex>ALEX-WIP</Alex>
 # class SparkS3Datasource(_SparkDatasource):
 #     # instance attributes
-#     type: Literal["spark_s3"] = "spark_s3`"
+#     type: Literal["spark_s3"] = "spark_s3"
 #     name: str
 #     bucket: str
 #     boto3_options: dict = {}
