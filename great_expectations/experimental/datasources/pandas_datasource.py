@@ -127,6 +127,29 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
 )
 
 
+_FILE_TYPE_READER_METHOD_BLACK_LIST = (
+    # "read_csv",
+    # "read_json",
+    # "read_excel",
+    # "read_parquet",
+    "read_clipboard",  # not path based
+    # "read_feather",
+    "read_fwf",  # unhandled type
+    "read_gbq",  # not path based
+    # "read_hdf",
+    # "read_html",
+    # "read_orc",
+    # "read_pickle",
+    # "read_sas",  # invalid json schema
+    # "read_spss",
+    "read_sql",  # not path based & type-name conflict
+    "read_sql_query",  # not path based
+    "read_sql_table",  # not path based
+    "read_table",  # type-name conflict
+    # "read_xml",
+)
+
+
 class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = []
