@@ -23,8 +23,12 @@ logger = logging.getLogger(__name__)
 
 
 class FileMigrator:
-    """
-    TODO
+    """Encapsulates any logic necessary to convert an existing context to a FileDataContext
+
+    Only takes in the necessary dependencies for conversion:
+        - context.stores
+        - context._datasource_store
+        - context.variables
     """
 
     def __init__(
