@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 from typing import TYPE_CHECKING, Dict, Mapping, Optional, Union, cast
 
 from great_expectations.core._docs_decorators import public_api
@@ -19,6 +20,7 @@ from great_expectations.data_context.types.base import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.data_context.data_context.file_data_context import (
         FileDataContext,
     )
@@ -83,7 +85,9 @@ class EphemeralDataContext(AbstractDataContext):
         return datasource_store
 
     @public_api
-    def convert_to_file_context(self) -> FileDataContext:
+    def convert_to_file_context(
+        self, path: PathStr = pathlib.Path.cwd()
+    ) -> FileDataContext:
         """Convert existing EphemeralDataContext into a FileDataContext.
 
         Scaffolds a file-backed project structure in the current working directory.
@@ -96,4 +100,4 @@ class EphemeralDataContext(AbstractDataContext):
             datasource_store=self._datasource_store,
             variables=self.variables,
         )
-        return migrator.migrate()
+        return migrator.migrate(path=path)

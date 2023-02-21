@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import pathlib
 import shutil
 from typing import TYPE_CHECKING, cast
@@ -13,6 +12,7 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -41,21 +41,13 @@ class FileMigrator:
         self._datasource_store = datasource_store
         self._variables = variables
 
-    def migrate(self) -> FileDataContext:
+    def migrate(self, path: PathStr) -> FileDataContext:
         """Migrate your in-memory Data Context to a file-backed one.
 
         Returns:
             A FileDataContext with an updated config to reflect the state of the current context.
-
-        Raises:
-            MigrationError: Store configurations are out of sync between src and dst contexts.
         """
-        pwd = os.getcwd()
-        dst_context = cast(
-            FileDataContext, FileDataContext.create(project_root_dir=pwd)
-        )
-        logger.info("Scaffolded necessary directories for a file-backed context")
-
+        dst_context = self._scaffold_filesystem(path)
         self._migrate_primary_stores(
             dst_stores=dst_context.stores,
         )
@@ -70,17 +62,33 @@ class FileMigrator:
         print(f"Successfully migrated to {dst_context.__class__.__name__}!")
         return dst_context
 
-    def _migrate_primary_stores(self, dst_stores: dict[str, Store]) -> None:
-        src_stores = self._primary_stores
-        if src_stores.keys() != dst_stores.keys():
+    def _scaffold_filesystem(self, path: PathStr) -> FileDataContext:
+        if isinstance(path, str):
+            path = pathlib.Path(path)
+
+        path = path.absolute()
+        if not path.exists():
             raise gx_exceptions.MigrationError(
-                "Cannot migrate context due to store configurations being out of sync."
+                f"{path} does not exist; cannot migrate to a non-existent directory"
             )
 
-        for name in src_stores:
-            self._migrate_store(
-                store_name=name, src_store=src_stores[name], dst_store=dst_stores[name]
-            )
+        dst_context = cast(
+            FileDataContext, FileDataContext.create(project_root_dir=str(path))
+        )
+        logger.info("Scaffolded necessary directories for a file-backed context")
+
+        return dst_context
+
+    def _migrate_primary_stores(self, dst_stores: dict[str, Store]) -> None:
+        src_stores = self._primary_stores
+        for name, src_store in src_stores.items():
+            dst_store = dst_stores.get(name)
+            if dst_store:
+                self._migrate_store(
+                    store_name=name, src_store=src_store, dst_store=dst_store
+                )
+            else:
+                logger.warning(f"Could not migrate the contents of store {name}")
 
     def _migrate_datasource_store(self, dst_store: DatasourceStore) -> None:
         src_store = self._datasource_store
@@ -112,7 +120,6 @@ class FileMigrator:
         assert (
             dst_base_directory.exists()
         ), f"{dst_base_directory} should have been set up by upstream scaffolding"
-        dst_base_directory = dst_base_directory.relative_to(dst_root)
 
         updated_data_docs_config = {}
         for site_name, site_config in src_configs.items():
