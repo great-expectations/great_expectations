@@ -25,7 +25,6 @@ from great_expectations.experimental.datasources.pandas_filesystem_datasource im
     PandasFilesystemDatasource,
 )
 from great_expectations.experimental.datasources.sources import _get_field_details
-from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -161,7 +160,7 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            camel_to_snake(t.__name__)[:-6]
+            t.__name__.lower().split("asset")[0]
             for t in PandasFilesystemDatasource.asset_types
         }
         print(asset_class_names)

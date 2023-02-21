@@ -19,7 +19,6 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     _PandasDataAsset,
 )
 from great_expectations.experimental.datasources.sources import _get_field_details
-from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -133,7 +132,7 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            camel_to_snake(t.__name__)[7:-6] for t in PandasDatasource.asset_types
+            t.__name__[6:-5] for t in PandasDatasource.asset_types
         }
         print(asset_class_names)
 
