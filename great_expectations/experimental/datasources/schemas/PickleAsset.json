@@ -27,11 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "glob_directive": {
-            "title": "Glob Directive",
-            "default": "**/*",
-            "type": "string"
-        },
         "compression": {
             "title": "Compression",
             "default": "infer",
