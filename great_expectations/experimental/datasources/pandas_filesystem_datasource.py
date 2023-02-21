@@ -4,6 +4,7 @@ import logging
 import pathlib
 import re
 from typing import (
+    TYPE_CHECKING,
     ClassVar,
     Dict,
     List,
@@ -24,12 +25,14 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     TestConnectionError,
-    _batch_sorter_from_list,
 )
 from great_expectations.experimental.datasources.pandas_datasource import (
     _PandasDatasource,
 )
 from great_expectations.experimental.datasources.signatures import _merge_signatures
+
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.interfaces import BatchSorter
 
 logger = logging.getLogger(__name__)
 
@@ -128,14 +131,16 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = CSVAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
             glob_directive=glob_directive,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
 
@@ -158,14 +163,16 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = ExcelAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
             glob_directive=glob_directive,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
 
@@ -188,14 +195,16 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = JSONAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
             glob_directive=glob_directive,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
 
@@ -218,14 +227,16 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = ParquetAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
             glob_directive=glob_directive,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
 
