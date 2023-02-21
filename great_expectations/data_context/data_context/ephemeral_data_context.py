@@ -82,10 +82,14 @@ class EphemeralDataContext(AbstractDataContext):
 
         return datasource_store
 
-    # Add public_api decorator?
+    @public_api
     def convert_to_file_context(self) -> FileDataContext:
-        """
-        TODO
+        """Convert existing EphemeralDataContext into a FileDataContext.
+
+        Scaffolds a file-backed project structure in the current working directory.
+
+        Returns:
+            A FileDataContext with an updated config to reflect the state of the current context.
         """
         migrator = FileMigrator(
             primary_stores=self.stores,

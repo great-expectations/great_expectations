@@ -38,8 +38,13 @@ class FileMigrator:
         self._variables = variables
 
     def migrate(self) -> FileDataContext:
-        """
-        TODO
+        """Migrate your in-memory Data Context to a file-backed one.
+
+        Returns:
+            A FileDataContext with an updated config to reflect the state of the current context.
+
+        Raises:
+            MigrationError: Store configurations are out of sync between src and dst contexts.
         """
         pwd = os.getcwd()
         dst_context = cast(
