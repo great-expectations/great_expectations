@@ -19,12 +19,12 @@ Add the S3 path to your CSV in the `path` key under `runtime_parameters` in your
 The path you will want to use is your S3 URI, not the URL.
 :::
 
-```python file=../../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L57-L63
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py batch request 1"
 ```
 
 Then load data into the `Validator`.
 
-```python file=../../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L71-L77
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py get validator 1"
 ```
 
 </TabItem>
@@ -33,12 +33,12 @@ Then load data into the `Validator`.
 
 Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L83-L88
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py batch request 2"
 ```
 
 Then load data into the `Validator`.
 
-```python file=../../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py#L96-L102
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py get validator 2"
 ```
 
 </TabItem>

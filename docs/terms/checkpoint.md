@@ -145,7 +145,7 @@ This configuration specifies full validation dictionaries - no nesting (defaults
 
 **YAML**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L150-L176
+```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting just the yaml"
 ```
 
 **runtime**:
@@ -159,7 +159,7 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 
 **YAML**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L199-L229
+```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults just the yaml"
 ```
 
 **Runtime**:
@@ -172,7 +172,7 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 ```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets"
 ```
 
-```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L258-L268
+```console name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results just the text"
 ```
 
 </TabItem>
@@ -181,7 +181,7 @@ This configuration omits the "validations" key from the YAML, which means a "val
 
 **YAML**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L275-L295
+```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime just the yaml"
 ```
 
 **Runtime**:
@@ -194,7 +194,7 @@ This configuration omits the "validations" key from the YAML, which means a "val
 ```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_2"
 ```
 
-```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L345-L355
+```console name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_2 just the text"
 ```
 
 </TabItem>
@@ -203,7 +203,7 @@ This configuration references the Checkpoint detailed in the previous example ("
 
 **YAML**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L364-L378
+```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template just the yaml"
 ```
 
 **Runtime**:
@@ -216,7 +216,7 @@ This configuration references the Checkpoint detailed in the previous example ("
 ```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_3"
 ```
 
-```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L407-L417
+```console name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_3 just the text"
 ```
 
 </TabItem>
@@ -225,12 +225,12 @@ This configuration specifies the SimpleCheckpoint class under the "class_name" k
 
 **YAML, using SimpleCheckpoint**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L424-L436
+```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint just the yaml"
 ```
 
 **Equivalent YAML, using Checkpoint**:
 
-```python file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L466-L493
+```yaml name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint just the yaml"
 ```
 
 **Runtime**:
@@ -243,7 +243,7 @@ This configuration specifies the SimpleCheckpoint class under the "class_name" k
 ```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite_2"
 ```
 
-```console file=../../tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py#L516-L520
+```console name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py simple checkpoint doc results"
 ```
 
 </TabItem>
