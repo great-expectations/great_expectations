@@ -39,7 +39,7 @@ class PandasBatchSpec(BatchSpec, metaclass=ABCMeta):
 
     @property
     def reader_options(self) -> dict:
-        return self.get("reader_options") or {}
+        return self.get("reader_options", {})
 
 
 class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
