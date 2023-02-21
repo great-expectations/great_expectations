@@ -45,7 +45,7 @@ Import these necessary packages and modules:
 
 <TabItem value="python">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports"
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports no yaml"
 ```
 
 </TabItem>
