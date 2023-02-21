@@ -112,8 +112,6 @@ class TestMetaDatasource:
     def test__new__updates_asset_type_lookup(
         self, context_sources_cleanup: _SourceFactories
     ):
-        type_lookup = context_sources_cleanup.type_lookup
-
         class FooAsset(DummyDataAsset):
             type: str = "foo"
 
@@ -128,11 +126,13 @@ class TestMetaDatasource:
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
-        print(f" type_lookup ->\n{pf(type_lookup)}\n")
+        print(f" type_lookup ->\n{pf(FooBarDatasource._type_lookup)}\n")
         asset_types = FooBarDatasource.asset_types
         assert asset_types, "No asset types have been declared"
 
-        registered_type_names = [type_lookup.get(t) for t in asset_types]
+        registered_type_names = [
+            FooBarDatasource._type_lookup.get(t) for t in asset_types
+        ]
         for type_, name in zip(asset_types, registered_type_names):
             print(f"`{type_.__name__}` registered as '{name}'")
             assert name, f"{type.__name__} could not be retrieved"
