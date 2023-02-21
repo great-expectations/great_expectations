@@ -127,7 +127,7 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
 )
 
 
-_FILE_TYPE_READER_METHOD_BLACK_LIST = (
+_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST = (
     # "read_csv",
     # "read_json",
     # "read_excel",

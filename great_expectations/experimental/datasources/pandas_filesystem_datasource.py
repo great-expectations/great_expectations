@@ -27,7 +27,7 @@ from great_expectations.experimental.datasources.interfaces import (
     _batch_sorter_from_list,
 )
 from great_expectations.experimental.datasources.pandas_datasource import (
-    _FILE_TYPE_READER_METHOD_BLACK_LIST,
+    _FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST,
     _PandasDatasource,
 )
 from great_expectations.experimental.datasources.signatures import _merge_signatures
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 _FILESYSTEM_ASSET_MODELS = _generate_pandas_data_asset_models(
     _FilesystemDataAsset,
-    blacklist=_FILE_TYPE_READER_METHOD_BLACK_LIST,
+    blacklist=_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST,
     use_docstring_from_method=True,
     skip_first_param=True,
 )
