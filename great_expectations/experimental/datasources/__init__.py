@@ -2,6 +2,9 @@ import pathlib
 
 from great_expectations.experimental.datasources.pandas_datasource import (
     PandasDatasource,
+    _PandasDatasource,
+)
+from great_expectations.experimental.datasources.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (

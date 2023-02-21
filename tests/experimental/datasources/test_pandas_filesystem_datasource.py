@@ -19,7 +19,7 @@ from great_expectations.experimental.datasources.filesystem_data_asset import (
     _FilesystemDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
-from great_expectations.experimental.datasources.pandas_datasource import (
+from great_expectations.experimental.datasources.pandas_filesystem_datasource import (
     CSVAsset,
     JSONAsset,
     PandasFilesystemDatasource,
