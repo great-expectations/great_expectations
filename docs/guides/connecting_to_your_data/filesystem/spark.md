@@ -55,8 +55,8 @@ Using this example configuration, add in your path to a directory that contains 
 ```
 
 Run this code to test your configuration.
-'''python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py test_yaml_config"
-'''
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py test_yaml_config"
+```
 
 </TabItem>
 <TabItem value="python">
