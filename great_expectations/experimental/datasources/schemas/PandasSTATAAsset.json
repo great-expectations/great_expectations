@@ -22,6 +22,11 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
+        "filepath_or_buffer": {
+            "title": "Filepath Or Buffer",
+            "format": "file-path",
+            "type": "string"
+        },
         "convert_dates": {
             "title": "Convert Dates",
             "default": true,
@@ -94,7 +99,8 @@
         }
     },
     "required": [
-        "name"
+        "name",
+        "filepath_or_buffer"
     ],
     "additionalProperties": false,
     "definitions": {
