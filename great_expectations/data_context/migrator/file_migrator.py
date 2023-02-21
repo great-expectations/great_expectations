@@ -41,7 +41,7 @@ class FileMigrator:
         self._datasource_store = datasource_store
         self._variables = variables
 
-    def migrate(self, path: PathStr) -> FileDataContext:
+    def migrate(self, path: PathStr = pathlib.Path.cwd()) -> FileDataContext:
         """Migrate your in-memory Data Context to a file-backed one.
 
         Returns:
