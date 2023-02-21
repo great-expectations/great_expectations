@@ -192,7 +192,7 @@ def measure_execution_time(
 
     Args:
         execution_time_holder_object_reference_name: Handle, provided in "kwargs", holds execution time property setter.
-        execution_time_property_name: Property attribute nane, provided in "kwargs", sets execution time value.
+        execution_time_property_name: Property attribute name, provided in "kwargs", sets execution time value.
         method: Name of method in "time" module (default: "process_time") to be used for recording timestamps.
         pretty_print: If True (default), prints execution time summary to standard output; if False, "silent" mode.
         include_arguments: If True (default), prints arguments of function, whose execution time is measured.
