@@ -1,7 +1,10 @@
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py imports">
 from ruamel import yaml
 
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+
+# </snippet>
 
 CONNECTION_STRING = "mysql+pymysql://root@localhost/test_ci"
 
@@ -14,9 +17,12 @@ load_data_into_test_database(
     connection_string=CONNECTION_STRING,
 )
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py get_context">
 context = gx.get_context()
+# </snippet>
 
 datasource_yaml = r"""
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py datasource config">
 name: my_mysql_datasource
 class_name: Datasource
 execution_engine:
@@ -30,6 +36,7 @@ data_connectors:
    default_inferred_data_connector_name:
        class_name: InferredAssetSqlDataConnector
        include_schema_name: true
+# </snippet>
 """
 
 # Please note this override is only to provide good UX for docs and tests.
@@ -39,11 +46,16 @@ datasource_yaml = datasource_yaml.replace(
     CONNECTION_STRING,
 )
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py test datasource config">
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py add datasource config">
 context.add_datasource(**yaml.load(datasource_yaml))
+# </snippet>
 
 # Here is a RuntimeBatchRequest using a query
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py load data by query">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_mysql_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -56,11 +68,13 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
 
 # Here is a BatchRequest naming a table
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py load data by table name">
 batch_request = BatchRequest(
     datasource_name="my_mysql_datasource",
     data_connector_name="default_inferred_data_connector_name",
@@ -71,6 +85,7 @@ validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)

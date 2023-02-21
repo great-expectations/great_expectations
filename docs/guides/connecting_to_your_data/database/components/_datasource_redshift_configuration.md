@@ -13,12 +13,12 @@ import TabItem from '@theme/TabItem';
 
 Put your connection string in this template:
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L28-L42
+```yaml name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L51
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py test datasource config"
 ```
 
 </TabItem>
@@ -27,12 +27,12 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L28-L45
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L51
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py test datasource config"
 ```
 
 </TabItem>
