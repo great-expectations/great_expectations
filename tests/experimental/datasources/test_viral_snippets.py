@@ -48,8 +48,6 @@ def zep_config_dict(db_file) -> dict:
                         "column_splitter": {
                             "column_name": "pickup_datetime",
                             "method_name": "split_on_year_and_month",
-                            "name": "y_m_splitter",
-                            "param_names": ["year", "month"],
                         },
                         "order_by": [
                             {"key": "year"},
