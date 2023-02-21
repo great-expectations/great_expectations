@@ -15,6 +15,9 @@ from pytest import MonkeyPatch, param
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.experimental.datasources import PandasFilesystemDatasource
+from great_expectations.experimental.datasources.data_asset.data_connector import (
+    FilesystemDataConnector,
+)
 from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_file_path_datasource import (
@@ -568,6 +571,14 @@ def datasource_test_connection_error_messages(
     )
     csv_asset._datasource = pandas_filesystem_datasource
     pandas_filesystem_datasource.assets = {"csv_asset": csv_asset}
+    csv_asset._data_connector = FilesystemDataConnector(
+        datasource_name=pandas_filesystem_datasource.name,
+        data_asset_name=csv_asset.name,
+        regex=regex,
+        base_directory=pandas_filesystem_datasource.base_directory,
+        data_context_root_directory=pandas_filesystem_datasource.data_context_root_directory,
+    )
+    csv_asset._test_connection_error_message = test_connection_error
     return pandas_filesystem_datasource, test_connection_error
 
 

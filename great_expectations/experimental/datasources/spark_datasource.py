@@ -7,6 +7,10 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 from typing_extensions import Literal
 
+from great_expectations.experimental.datasources.data_asset.data_connector import (
+    DataConnector,
+    FilesystemDataConnector,
+)
 from great_expectations.experimental.datasources.file_path_data_asset import (
     _FilePathDataAsset,
 )
@@ -137,4 +141,17 @@ class SparkFilesystemDatasource(_SparkDatasource):
             order_by=_batch_sorter_from_list(order_by or []),
         )
 
-        return self.add_asset(asset)
+        data_connector: DataConnector = FilesystemDataConnector(
+            datasource_name=self.name,
+            data_asset_name=name,
+            regex=regex,
+            base_directory=self.base_directory,
+            glob_directive=glob_directive,
+            data_context_root_directory=self.data_context_root_directory,
+        )
+        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
+        return self.add_asset(
+            asset=asset,
+            data_connector=data_connector,
+            test_connection_error_message=test_connection_error_message,
+        )

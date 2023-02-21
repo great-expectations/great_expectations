@@ -10,6 +10,9 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.experimental.datasources.data_asset.data_connector import (
+    FilesystemDataConnector,
+)
 from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     TestConnectionError,
@@ -323,12 +326,20 @@ def datasource_test_connection_error_messages(
     request,
 ) -> tuple[SparkFilesystemDatasource, TestConnectionError]:
     regex, test_connection_error = request.param(csv_path=csv_path)
-    csv_spark_asset = CSVSparkAsset(
-        name="csv_spark_asset",
+    csv_asset = CSVSparkAsset(  # type: ignore[call-arg]
+        name="csv_asset",
         regex=regex,
     )
-    csv_spark_asset._datasource = spark_filesystem_datasource
-    spark_filesystem_datasource.assets = {"csv_spark_asset": csv_spark_asset}
+    csv_asset._datasource = spark_filesystem_datasource
+    spark_filesystem_datasource.assets = {"csv_asset": csv_asset}
+    csv_asset._data_connector = FilesystemDataConnector(
+        datasource_name=spark_filesystem_datasource.name,
+        data_asset_name=csv_asset.name,
+        regex=regex,
+        base_directory=spark_filesystem_datasource.base_directory,
+        data_context_root_directory=spark_filesystem_datasource.data_context_root_directory,
+    )
+    csv_asset._test_connection_error_message = test_connection_error
     return spark_filesystem_datasource, test_connection_error
 
 
