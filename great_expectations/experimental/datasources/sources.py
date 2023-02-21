@@ -112,16 +112,15 @@ class _SourceFactories:
             )
 
         # rollback type registrations if exception occurs
-        with cls.type_lookup.transaction() as type_lookup:
+        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:
 
-            # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
-            cls._register_assets(ds_type, asset_type_lookup=type_lookup)
+            cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
             cls._register_datasource_and_factory_method(
                 ds_type,
                 factory_fn=factory_fn,
                 ds_type_name=ds_type_name,
-                datasource_type_lookup=type_lookup,
+                datasource_type_lookup=ds_type_lookup,
             )
 
     @classmethod
