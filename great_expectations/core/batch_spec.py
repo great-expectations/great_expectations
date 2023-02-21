@@ -35,11 +35,11 @@ class BatchMarkers(BatchSpec):
 class PandasBatchSpec(BatchSpec, metaclass=ABCMeta):
     @property
     def reader_method(self) -> str:
-        return self.get("reader_method")  # type: ignore[return-value]
+        return self["reader_method"]
 
     @property
     def reader_options(self) -> dict:
-        return self.get("reader_options") or {}
+        return self.get("reader_options", {})
 
 
 class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
