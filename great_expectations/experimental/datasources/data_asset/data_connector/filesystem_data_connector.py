@@ -25,7 +25,7 @@ class FilesystemDataConnector(FilePathDataConnector):
 
     Args:
         regex (pattern): Optional regex pattern for filtering data references
-        glob_directive (str): glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
+        glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): Optional list if you want to sort the data_references

@@ -83,7 +83,7 @@ def spark_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    spark_ds = context.sources.add_spark(
+    spark_ds = context.sources.add_spark_filesystem(
         name="my_spark",
         base_directory=csv_path,
     )
@@ -147,7 +147,7 @@ def multibatch_spark_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    spark_ds = context.sources.add_spark(
+    spark_ds = context.sources.add_spark_filesystem(
         name="my_spark",
         base_directory=csv_path,
     )
