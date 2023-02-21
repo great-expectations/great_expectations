@@ -36,8 +36,8 @@ class FilesystemDataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        base_directory: pathlib.Path,
         regex: re.Pattern,
+        base_directory: pathlib.Path,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>

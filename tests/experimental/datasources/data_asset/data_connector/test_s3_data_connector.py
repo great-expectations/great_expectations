@@ -44,8 +44,9 @@ def test_basic_instantiation():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        bucket=bucket,
         regex=re.compile(r"alpha-(.*)\.csv"),
+        s3_client=client,
+        bucket=bucket,
         prefix="",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -92,8 +93,9 @@ def test_instantiation_regex_does_not_match_paths():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        bucket=bucket,
         regex=re.compile(r"beta-(.*)\.csv"),
+        s3_client=client,
+        bucket=bucket,
         prefix="",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -141,8 +143,9 @@ def test_return_all_batch_definitions_unsorted():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        bucket=bucket,
         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+        s3_client=client,
+        bucket=bucket,
         prefix="",
     )
     # with missing BatchRequest arguments
@@ -288,8 +291,9 @@ def test_return_all_batch_definitions_unsorted():
 #     my_data_connector: DataConnector = S3DataConnector(
 #         datasource_name="my_dataframe_datasource",
 #         data_asset_name="my_s3_data_asset",
-#         bucket=bucket,
 #         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+#         s3_client=client,
+#         bucket=bucket,
 #         prefix="",
 #     )
 #     # noinspection PyProtectedMember
@@ -481,8 +485,9 @@ def test_return_only_unique_batch_definitions():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        bucket=bucket,
         regex=re.compile(r"(?P<name>.+)/.+\.csv"),
+        s3_client=client,
+        bucket=bucket,
         prefix="A",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -512,8 +517,9 @@ def test_return_only_unique_batch_definitions():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        bucket=bucket,
         regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
+        s3_client=client,
+        bucket=bucket,
         prefix="B",
     )
 
@@ -554,8 +560,9 @@ def test_alpha():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)\.csv"),
+        s3_client=client,
+        bucket=bucket,
         prefix="test_dir_alpha",
     )
     assert my_data_connector.get_data_reference_count() == 4
@@ -629,8 +636,9 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        s3_client=client,
+        bucket=bucket,
         prefix="",
     )
     assert my_data_connector.get_data_reference_count() == 0
@@ -641,8 +649,9 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        s3_client=client,
+        bucket=bucket,
         prefix="test_dir_foxtrot/A",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -657,8 +666,9 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
+        s3_client=client,
+        bucket=bucket,
         prefix="test_dir_foxtrot/B",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -673,8 +683,9 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        bucket=bucket,
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        s3_client=client,
+        bucket=bucket,
         prefix="test_dir_foxtrot/C",
     )
     assert my_data_connector.get_data_reference_count() == 3

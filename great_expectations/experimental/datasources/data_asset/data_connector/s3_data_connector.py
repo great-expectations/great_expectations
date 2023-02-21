@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.datasource.data_connector.util import (
@@ -13,17 +13,24 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
     FilePathDataConnector,
 )
 
-try:
-    import boto3
-except ImportError:
-    boto3 = None
-
-
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition
 
 
 logger = logging.getLogger(__name__)
+
+
+try:
+    import boto3
+    import botocore
+    from botocore.client import BaseClient
+except ImportError:
+    logger.debug(
+        "Unable to load boto3 or botocore; install optional boto3 and botocore dependencies for support."
+    )
+    boto3 = None
+    botocore = None
+    BaseClient = None
 
 
 class S3DataConnector(FilePathDataConnector):
@@ -48,31 +55,22 @@ class S3DataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        bucket: str,
         regex: re.Pattern,
+        s3_client: BaseClient,
+        bucket: str,
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
-        boto3_options: Optional[dict] = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
     ) -> None:
-        self._bucket = bucket
-        self._prefix = sanitize_prefix_for_s3(prefix)
-        self._delimiter = delimiter
-        self._max_keys = max_keys
-
-        if boto3_options is None:
-            boto3_options = {}
-
-        try:
-            self._s3 = boto3.client("s3", **boto3_options)
-        except (TypeError, AttributeError):
-            raise ImportError(
-                "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
-            )
+        self._s3_client: BaseClient = s3_client
+        self._bucket: str = bucket
+        self._prefix: str = sanitize_prefix_for_s3(prefix)
+        self._delimiter: str = delimiter
+        self._max_keys: int = max_keys
 
         super().__init__(
             datasource_name=datasource_name,
@@ -110,7 +108,7 @@ class S3DataConnector(FilePathDataConnector):
         path_list: List[str] = [
             key
             for key in list_s3_keys(
-                s3=self._s3,
+                s3=self._s3_client,
                 query_options=query_options,
                 iterator_dict={},
                 recursive=False,

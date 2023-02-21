@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 from typing_extensions import Literal
 
-from great_expectations.experimental.datasources.filesystem_data_asset import (
-    _FilesystemDataAsset,
+from great_expectations.experimental.datasources.file_path_data_asset import (
+    _FilePathDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
@@ -28,13 +28,9 @@ class SparkDatasourceError(Exception):
     pass
 
 
-class CSVSparkAsset(_FilesystemDataAsset):
+class CSVSparkAsset(_FilePathDataAsset):
     # Overridden inherited instance fields
     type: Literal["csv_spark"] = "csv_spark"
-
-    # Spark Filesystem specific attributes
-    header: bool = False
-    inferSchema: bool = False
 
     def _get_reader_method(self) -> str:
         return f"{self.type[0:-6]}"
@@ -52,6 +48,10 @@ class _SparkDatasource(Datasource):
         str,
         CSVSparkAsset,
     ] = {}
+
+    # Spark specific attributes
+    header: bool = False
+    inferSchema: bool = False
 
     # Abstract Methods
     @property

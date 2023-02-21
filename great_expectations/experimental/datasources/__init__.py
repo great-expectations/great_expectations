@@ -4,8 +4,14 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     PandasDatasource,
     _PandasDatasource,
 )
+from great_expectations.experimental.datasources.pandas_file_path_datasource import (
+    _PandasFilePathDatasource,
+)
 from great_expectations.experimental.datasources.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
+)
+from great_expectations.experimental.datasources.pandas_s3_datasource import (
+    PandasS3Datasource,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
     PostgresDatasource,

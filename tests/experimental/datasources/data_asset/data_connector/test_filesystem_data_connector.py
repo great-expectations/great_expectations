@@ -30,8 +30,8 @@ def test_basic_instantiation(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory),
         regex=re.compile(r"alpha-(.*)\.csv"),
+        base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -74,8 +74,8 @@ def test_instantiation_regex_does_not_match_paths(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory),
         regex=re.compile(r"beta-(.*)\.csv"),
+        base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -117,8 +117,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory),
         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+        base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
     # with missing BatchRequest arguments
@@ -258,8 +258,8 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #     my_data_connector: DataConnector = FilesystemDataConnector(
 #         datasource_name="my_dataframe_datasource",
 #         data_asset_name="my_filesystem_data_asset",
-#         base_directory=pathlib.Path(base_directory),
 #         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+#         base_directory=pathlib.Path(base_directory),
 #         glob_directive="*.csv",
 #     )
 #     assert my_data_connector.get_data_reference_count() == 3
@@ -442,8 +442,8 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory),
         regex=re.compile(r"(?P<name>.+)/.+\.csv"),
+        base_directory=pathlib.Path(base_directory),
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
     assert my_data_connector.get_data_reference_count() == 7
@@ -494,8 +494,8 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory),
         regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
+        base_directory=pathlib.Path(base_directory),
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
     unsorted_batch_definition_list: List[
@@ -527,8 +527,8 @@ def test_alpha(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory) / "test_dir_alpha",
         regex=re.compile(r"(?P<part_1>.+)\.csv"),
+        base_directory=pathlib.Path(base_directory) / "test_dir_alpha",
         glob_directive="*.csv",
     )
     assert my_data_connector.get_data_reference_count() == 4
@@ -594,8 +594,8 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot",
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot",
         glob_directive="*.csv",
     )
     assert my_data_connector.get_data_reference_count() == 0
@@ -606,8 +606,8 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "A",
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "A",
         glob_directive="*.csv",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -622,8 +622,8 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "B",
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
+        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "B",
         glob_directive="*.*",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -638,8 +638,8 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "C",
         regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "C",
         glob_directive="*",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -681,8 +681,8 @@ def test_relative_base_directory_path(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A",
         regex=re.compile(r"(?P<part_1>.+)\.csv"),
+        base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A",
         glob_directive="*",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -699,8 +699,8 @@ def test_relative_base_directory_path(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A" / "B" / "C",
         regex=re.compile(r"(?P<name>.+)_(?P<number>.+)\.csv"),
+        base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A" / "B" / "C",
         glob_directive="log*.csv",
     )
     assert my_data_connector.get_data_reference_count() == 1

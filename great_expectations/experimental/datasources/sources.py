@@ -142,7 +142,6 @@ class _SourceFactories:
 
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
-
         asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
         if not asset_types:

@@ -43,6 +43,9 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
+    from great_expectations.experimental.datasources.data_asset.data_connector import (
+        DataConnector,
+    )
 
 try:
     import pyspark
@@ -152,6 +155,8 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
+    _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
+    _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @property
     def datasource(self) -> _DatasourceT:
@@ -399,20 +404,33 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
+    def add_asset(
+        self,
+        asset: _DataAssetT,
+        data_connector: Optional[DataConnector] = None,
+        test_connection_error_message: Optional[str] = None,
+    ) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
             asset: The DataAsset to be added to this datasource.
+            data_connector: Optional reference to "DataConnector" object for connecting Datasource and DataAsset to data
+            test_connection_error_message: Optional message for reporting connection test errors informatively
         """
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
+        asset._data_connector = data_connector
+        asset._test_connection_error_message = test_connection_error_message
+
         asset.test_connection()
+
         self.assets[asset.name] = asset
+
         # pydantic needs to know that an asset has been set so that it doesn't get excluded
         # when dumping to dict, json, yaml etc.
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
+
         return asset
 
     # Abstract Methods
