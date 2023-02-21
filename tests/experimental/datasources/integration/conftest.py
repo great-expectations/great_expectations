@@ -8,7 +8,7 @@ import pytest
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.experimental.datasources import (
     PandasFilesystemDatasource,
-    SparkDatasource,
+    SparkFilesystemDatasource,
     SqliteDatasource,
 )
 from great_expectations.experimental.datasources.interfaces import (
@@ -87,14 +87,14 @@ def sql_data(
 
 def spark_datasource(
     context: AbstractDataContext,
-) -> SparkDatasource:
+) -> SparkFilesystemDatasource:
     relative_path = pathlib.Path(
         "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    spark_ds = context.sources.add_spark(
+    spark_ds = context.sources.add_spark_filesystem(
         name="my_spark",
         base_directory=csv_path,
     )
@@ -103,7 +103,7 @@ def spark_datasource(
 
 def spark_data(
     context: AbstractDataContext,
-) -> tuple[AbstractDataContext, SparkDatasource, DataAsset, BatchRequest]:
+) -> tuple[AbstractDataContext, SparkFilesystemDatasource, DataAsset, BatchRequest]:
     spark_ds = spark_datasource(context=context)
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
@@ -165,7 +165,7 @@ def multibatch_spark_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    spark_ds = context.sources.add_spark(
+    spark_ds = context.sources.add_spark_filesystem(
         name="my_spark",
         base_directory=csv_path,
     )

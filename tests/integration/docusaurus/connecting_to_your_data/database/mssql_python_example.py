@@ -19,6 +19,7 @@ load_data_into_test_database(
 
 context = gx.get_context()
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py datasource config">
 datasource_config = {
     "name": "my_mssql_datasource",
     "class_name": "Datasource",
@@ -37,14 +38,19 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py test datasource config">
 context.test_yaml_config(yaml.dump(datasource_config))
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py add datasource config">
 context.add_datasource(**datasource_config)
+# </snippet>
 
 # Here is a RuntimeBatchRequest using a query
 batch_request = RuntimeBatchRequest(

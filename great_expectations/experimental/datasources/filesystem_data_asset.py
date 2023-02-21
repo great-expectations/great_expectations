@@ -3,17 +3,20 @@ from __future__ import annotations
 import copy
 import logging
 import pathlib
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional, Set
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import PathBatchSpec
+from great_expectations.experimental.datasources.data_asset.data_connector import (
+    DataConnector,
+    FilesystemDataConnector,
+)
 from great_expectations.experimental.datasources.file_path_data_asset import (
     _FilePathDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
-    BatchRequestOptions,
     TestConnectionError,
 )
 
@@ -22,16 +25,22 @@ if TYPE_CHECKING:
         PandasExecutionEngine,
         SparkDFExecutionEngine,
     )
+    from great_expectations.experimental.datasources.interfaces import (
+        BatchRequestOptions,
+    )
 
 logger = logging.getLogger(__name__)
 
 
 class _FilesystemDataAsset(_FilePathDataAsset):
-    def _get_reader_method(self) -> str:
-        raise NotImplementedError(
-            """One needs to explicitly provide "reader_method" for Filesystem DataAsset extensions as temporary \
-work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
-        )
+    _EXCLUDE_FROM_READER_OPTIONS: ClassVar[
+        Set[str]
+    ] = _FilePathDataAsset._EXCLUDE_FROM_READER_OPTIONS | {
+        "glob_directive",
+    }
+
+    # Filesystem specific attributes
+    glob_directive: str = "**/*"
 
     def _get_reader_options_include(self) -> set[str] | None:
         raise NotImplementedError(
@@ -143,6 +152,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                         f"All regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )
+
         return super().build_batch_request(options)
 
     def get_batch_list_from_batch_request(
@@ -212,3 +222,17 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
             )
         self.sort_batches(batch_list)
         return batch_list
+
+    def _build_test_connection_error_message(self) -> str:
+        return f"""No file at base_directory path "{self.datasource.base_directory.resolve()}" matched regular expressions pattern "{self.regex.pattern}" and/or glob_directive "{self.glob_directive}" for DataAsset "{self.name}"."""
+
+    def _build_data_connector(self) -> DataConnector:
+        data_connector: DataConnector = FilesystemDataConnector(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            base_directory=self.datasource.base_directory,
+            regex=self.regex,
+            glob_directive=self.glob_directive,
+            data_context_root_directory=self.datasource.data_context_root_directory,
+        )
+        return data_connector

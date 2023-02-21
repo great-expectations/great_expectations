@@ -80,11 +80,12 @@ class _SparkDatasource(Datasource):
     # End Abstract Methods
 
 
-class SparkDatasource(_SparkDatasource):
+class SparkFilesystemDatasource(_SparkDatasource):
     # instance attributes
-    type: Literal["spark"] = "spark"
+    type: Literal["spark_filesystem"] = "spark_filesystem"
     name: str
     base_directory: pathlib.Path
+    data_context_root_directory: Optional[pathlib.Path] = None
     assets: Dict[str, CSVSparkAsset] = {}
 
     def test_connection(self, test_assets: bool = True) -> None:
@@ -109,6 +110,7 @@ class SparkDatasource(_SparkDatasource):
         self,
         name: str,
         regex: Optional[Union[re.Pattern, str]] = None,
+        glob_directive: str = "**/*",
         header: bool = False,
         infer_schema: bool = False,
         order_by: Optional[BatchSortersDefinition] = None,
@@ -118,6 +120,7 @@ class SparkDatasource(_SparkDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
+            glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
@@ -126,11 +129,14 @@ class SparkDatasource(_SparkDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
+
         asset = CSVSparkAsset(
             name=name,
             regex=regex_pattern,
+            glob_directive=glob_directive,
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
         )
+
         return self.add_asset(asset)
