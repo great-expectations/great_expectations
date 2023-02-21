@@ -105,7 +105,13 @@ class TestDynamicPandasAssets:
             param("read_json"),
             param("read_orc"),
             param("read_parquet"),
-            param("read_pickle"),
+            param(
+                "read_pickle",
+                marks=pytest.mark.skipif(
+                    PANDAS_VERSION < 1.2,
+                    reason=f"read_pickle does not exist on {PANDAS_VERSION} ",
+                ),
+            ),
             param("read_sas"),
             param("read_spss"),
             param("read_sql"),

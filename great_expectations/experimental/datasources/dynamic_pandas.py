@@ -159,6 +159,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
         )
     },
     # misc
+    "filepath_or_buffer": {"filepath_or_buffer": _FieldSpec(FilePath, ...)},  # type: ignore[arg-type]
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
