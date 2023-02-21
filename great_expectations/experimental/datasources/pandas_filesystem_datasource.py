@@ -117,7 +117,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_csv_asset(
         self,
         name: str,
-        regex: Union[re.Pattern, str],
+        regex: Optional[Union[re.Pattern, str]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -149,7 +149,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_excel_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -181,7 +181,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_json_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -213,7 +213,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_parquet_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
