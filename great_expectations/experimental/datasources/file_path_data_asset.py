@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import dataclasses
 import logging
-import pathlib
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -48,7 +47,10 @@ class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "name",
         "regex",  # file_path argument
+        "base_directory",  # filesystem argument
         "glob_directive",  # filesystem argument
+        "data_context_root_directory",  # filesystem argument
+        "bucket",  # s3 argument
         "prefix",  # s3 argument
         "delimiter",  # s3 argument
         "max_keys",  # s3 argument
@@ -198,7 +200,9 @@ class _FilePathDataAsset(DataAsset):
             # TODO: <Alex>ALEX-FIX_TO_INSURE_BASE_DIRECTORY_TYPE_IS_PATHLIB.PATH-CONSISTENTLY</Alex>
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX-FIX_TO_INSURE_PROPERTY_NAME_CORRESPONDDS_TO_ITS_MEANING</Alex>
-            batch_metadata["base_directory"] = pathlib.Path(batch_spec["path"])
+            # TODO: <Alex>ALEX</Alex>
+            # batch_metadata["base_directory"] = pathlib.Path(batch_spec["path"])
+            # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX</Alex>
             batch_metadata.update(batch_definition.batch_identifiers)

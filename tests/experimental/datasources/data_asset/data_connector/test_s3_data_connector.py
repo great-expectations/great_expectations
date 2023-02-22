@@ -4,11 +4,15 @@ from typing import List
 
 import boto3
 import pandas as pd
-import pytest
 from moto import mock_s3
+
+import pytest
+
+import logging
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.util import S3Url
 from great_expectations.datasource.data_connector.util import (
     sanitize_prefix,
     sanitize_prefix_for_s3,
@@ -18,6 +22,21 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
     S3DataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest
+
+
+logger = logging.getLogger(__name__)
+
+try:
+    import boto3
+    import botocore
+    from botocore.client import BaseClient
+except ImportError:
+    logger.debug(
+        "Unable to load boto3 or botocore; install optional boto3 and botocore dependencies for support."
+    )
+    boto3 = None
+    botocore = None
+    BaseClient = None
 
 
 @pytest.mark.integration
@@ -48,6 +67,7 @@ def test_basic_instantiation():
         s3_client=client,
         bucket=bucket,
         prefix="",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -97,6 +117,7 @@ def test_instantiation_regex_does_not_match_paths():
         s3_client=client,
         bucket=bucket,
         prefix="",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -147,6 +168,7 @@ def test_return_all_batch_definitions_unsorted():
         s3_client=client,
         bucket=bucket,
         prefix="",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     # with missing BatchRequest arguments
     with pytest.raises(TypeError):
@@ -295,6 +317,7 @@ def test_return_all_batch_definitions_unsorted():
 #         s3_client=client,
 #         bucket=bucket,
 #         prefix="",
+#         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
 #     )
 #     # noinspection PyProtectedMember
 #     my_data_connector._get_data_references_cache()
@@ -489,6 +512,7 @@ def test_return_only_unique_batch_definitions():
         s3_client=client,
         bucket=bucket,
         prefix="A",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -521,6 +545,7 @@ def test_return_only_unique_batch_definitions():
         s3_client=client,
         bucket=bucket,
         prefix="B",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
 
     unsorted_batch_definition_list: List[
@@ -564,6 +589,7 @@ def test_alpha():
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_alpha",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_data_references()[:3] == [
@@ -640,6 +666,7 @@ def test_foxtrot():
         s3_client=client,
         bucket=bucket,
         prefix="",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 0
     assert my_data_connector.get_data_references()[:3] == []
@@ -653,6 +680,7 @@ def test_foxtrot():
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/A",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -670,6 +698,7 @@ def test_foxtrot():
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/B",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -687,6 +716,7 @@ def test_foxtrot():
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/C",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [

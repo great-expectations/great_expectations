@@ -319,7 +319,13 @@ class Datasource(
         "type",
         "execution_engine",
         "assets",
-        "base_directory",
+        "base_directory",  # filesystem argument
+        "glob_directive",  # filesystem argument
+        "data_context_root_directory",  # filesystem argument
+        "bucket",  # s3 argument
+        "prefix",  # s3 argument
+        "delimiter",  # s3 argument
+        "max_keys",  # s3 argument
     }
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.

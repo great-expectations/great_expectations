@@ -17,7 +17,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     TestConnectionError,
 )
-from great_expectations.experimental.datasources.spark_datasource import (
+from great_expectations.experimental.datasources.spark_filesystem_datasource import (
     CSVSparkAsset,
     SparkFilesystemDatasource,
 )

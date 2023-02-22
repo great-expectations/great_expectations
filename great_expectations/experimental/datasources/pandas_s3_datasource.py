@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional, Union
 import pydantic
 from typing_extensions import Literal
 
+from great_expectations.core.util import S3Url
 from great_expectations.experimental.datasources import _PandasFilePathDatasource
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     DataConnector,
@@ -118,6 +119,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
+            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
         test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{regex.pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
@@ -166,6 +168,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
+            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
         test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{regex.pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
@@ -214,6 +217,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
+            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
         test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{regex.pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
@@ -262,6 +266,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
+            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
         test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{regex.pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(

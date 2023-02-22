@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.datasource.data_connector.util import (
@@ -44,7 +44,6 @@ class S3DataConnector(FilePathDataConnector):
         prefix (str): S3 prefix
         delimiter (str): S3 delimiter
         max_keys (int): S3 max_keys (default is 1000)
-        boto3_options (dict): optional boto3 options
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
@@ -65,6 +64,7 @@ class S3DataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
         self._s3_client: BaseClient = s3_client
         self._bucket: str = bucket
@@ -80,6 +80,7 @@ class S3DataConnector(FilePathDataConnector):
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn=file_path_template_map_fn,
         )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
@@ -130,4 +131,4 @@ requires "file_path_template_map_fn: Callable" to be set.
             "path": path,
         }
 
-        return self._file_path_template_map_fn(template_arguments=template_arguments)
+        return self._file_path_template_map_fn(**template_arguments)
