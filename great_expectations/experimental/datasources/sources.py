@@ -33,6 +33,11 @@ SourceFactoryFn = Callable[..., "Datasource"]
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_PANDAS_DATASOURCE_NAMES: tuple[str, str] = (
+    "default_pandas_datasource",
+    "default_pandas_fluent_datasource",
+)
+
 
 class DefaultPandasDatasourceError(Exception):
     pass
@@ -249,16 +254,11 @@ class _SourceFactories:
             str, LegacyDatasource | BaseDatasource | Datasource
         ] = self._data_context.datasources  # type: ignore[union-attr]  # typing information is being lost in DataContext factory
 
-        # these will be attempted in the order they are listed
-        possible_default_pandas_datasource_names = [
-            "default_pandas_datasource",
-            "default_pandas_fluent_datasource",
-        ]
-
         existing_datasource: LegacyDatasource | BaseDatasource | Datasource | None = (
             None
         )
-        for default_pandas_datasource_name in possible_default_pandas_datasource_names:
+        # datasource names will be attempted in the order they are listed
+        for default_pandas_datasource_name in DEFAULT_PANDAS_DATASOURCE_NAMES:
             # if a legacy datasource with this name already exists, we try a different name
             existing_datasource = datasources.get(default_pandas_datasource_name)
             if not existing_datasource or isinstance(
@@ -267,13 +267,13 @@ class _SourceFactories:
                 break
 
         # if a legacy datasource exists for all possible_default_datasource_names, raise an error
-        if existing_datasource:
+        if existing_datasource and not isinstance(
+            existing_datasource, PandasDatasource
+        ):
             quoted_datasource_names = [
-                f'"{name}"' for name in possible_default_pandas_datasource_names
+                f'"{name}"' for name in DEFAULT_PANDAS_DATASOURCE_NAMES
             ]
-            assert isinstance(
-                existing_datasource, PandasDatasource
-            ), DefaultPandasDatasourceError(
+            raise DefaultPandasDatasourceError(
                 f"Datasources with a legacy type already exist with the names: {', '.join(quoted_datasource_names)}. "
                 "Please rename these datasources if you wish to use the pandas_default PandasDatasource."
             )

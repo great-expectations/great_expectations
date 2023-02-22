@@ -18,7 +18,11 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     PandasTableAsset,
     _PandasDataAsset,
 )
-from great_expectations.experimental.datasources.sources import _get_field_details
+from great_expectations.experimental.datasources.sources import (
+    _get_field_details,
+    DEFAULT_PANDAS_DATASOURCE_NAMES,
+    DefaultPandasDatasourceError,
+)
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -300,6 +304,7 @@ class TestDynamicPandasAssets:
 
         # ensure we get the same datasource when we call pandas_default again
         pandas_datasource = empty_data_context.sources.pandas_default
+        assert pandas_datasource.name == "default_pandas_datasource"
         assert len(pandas_datasource.assets) == 1
         assert pandas_datasource.assets[expected_csv_data_asset_name_1]
 
@@ -308,3 +313,36 @@ class TestDynamicPandasAssets:
         )
         assert csv_data_asset_2.name == expected_csv_data_asset_name_2
         assert len(pandas_datasource.assets) == 2
+
+    def test_default_pandas_datasource_name_conflict(
+        self, empty_data_context: AbstractDataContext, csv_path: pathlib.Path
+    ):
+        (
+            default_pandas_datasource_name_1,
+            default_pandas_datasource_name_2,
+        ) = DEFAULT_PANDAS_DATASOURCE_NAMES
+
+        # These add_datasource calls will create legacy PandasDatasources
+        empty_data_context.add_datasource(
+            name=default_pandas_datasource_name_1, class_name="PandasDatasource"
+        )
+        empty_data_context.add_datasource(
+            name=default_pandas_datasource_name_2, class_name="PandasDatasource"
+        )
+
+        # both datasource names are taken
+        with pytest.raises(DefaultPandasDatasourceError):
+            pandas_datasource = empty_data_context.sources.pandas_default
+
+        # only datasource name 1 is taken
+        empty_data_context.datasources.pop(default_pandas_datasource_name_2)
+        pandas_datasource = empty_data_context.sources.pandas_default
+        assert isinstance(pandas_datasource, PandasDatasource)
+        assert pandas_datasource.name == default_pandas_datasource_name_2
+
+        # both datasource names are available
+        empty_data_context.datasources.pop(default_pandas_datasource_name_1)
+        empty_data_context.datasources.pop(default_pandas_datasource_name_2)
+        pandas_datasource = empty_data_context.sources.pandas_default
+        assert isinstance(pandas_datasource, PandasDatasource)
+        assert pandas_datasource.name == default_pandas_datasource_name_1
