@@ -6,7 +6,9 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 # </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_context">
 context = gx.get_context()
+# </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py yaml">
 datasource_yaml = f"""
@@ -43,8 +45,8 @@ context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py runtime_batch_request">
 # Here is a RuntimeBatchRequest using a path to a single CSV file
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py runtime_batch_request">
 batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -68,8 +70,8 @@ print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request">
 # Here is a BatchRequest naming a data_asset
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request">
 batch_request = BatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_inferred_data_connector_name",

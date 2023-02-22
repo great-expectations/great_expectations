@@ -33,7 +33,7 @@ Import these necessary packages and modules.
 
 Load your <TechnicalTag tag="data_context" text="Data Context" /> into memory using the `get_context()` method.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py test_yaml_config"
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_context"
 ```
 
 ### 3. Configure your Datasource
@@ -136,7 +136,7 @@ Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `
 
 Then load data into the `Validator`.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request"
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request validator"
 ```
 
 </TabItem>
