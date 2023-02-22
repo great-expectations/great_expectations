@@ -16,7 +16,7 @@ from great_expectations.experimental.datasources.file_path_data_asset import (
     _FilePathDataAsset,
 )
 from great_expectations.experimental.datasources.pandas_datasource import (
-    _FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST,
+    _PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST,
     _PandasDatasource,
 )
 
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 _FILE_PATH_ASSET_MODELS = _generate_pandas_data_asset_models(
     _FilePathDataAsset,
-    blacklist=_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST,
+    blacklist=_PANDAS_FILE_TYPE_READER_METHOD_UNSUPPORTED_LIST,
     use_docstring_from_method=True,
     skip_first_param=True,
 )
