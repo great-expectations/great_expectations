@@ -40,7 +40,7 @@ Typically, a PR for a how-to-guide will contain the following:
 
 An example script is found in `/tests/integration/docusaurus/template/script_example.py`.
 
-```python file=../../../tests/integration/docusaurus/template/script_example.py#L1-L9
+```python name="tests/integration/docusaurus/template/script_example.py full"
 ```
 
 It does the following :
@@ -101,18 +101,24 @@ If the user has data in Mongo and wants to configure a Datasource, no additional
 
 **Steps**: Steps describe the golden path steps for successful replication.
 
-- Most steps will include inline code, such as a bash command, or an example yml snippet or two. These can be referenced in the how-to-guide itself using relative imports.
+- Most steps will include inline code, such as a bash command, or an example yml snippet or two. These can be referenced in the how-to-guide itself using named snippet tags.
 
-- The following snippet displays line 1- line 7 of the `script_example.py` file.
+- The following snippet displays the lines of the `script_example.py` file.
 
 ```markdown
-  ```python file=../../../tests/integration/docusaurus/template/script_example.py#L1-L7
+  ```python name="tests/integration/docusaurus/template/script_example.py full"
 ```
 
-:::warning
-Make sure that you lint your script before you finalize the line numbers in your Markdown file. This will prevent unintended line changes and save you pain when the linter changes your Python file without you realizing it.
+- The named tags in the referenced file should correspond to the name used in the snippet: 
 
-:::
+```markdown
+    # <snippet name="tests/integration/docusaurus/template/script_example.py full">
+    your code here...
+    # </snippet>
+```
+
+- Note that named tags can be nested.
+
 - Most steps will also require user input, such as a connection string that needs to be replaced, or a step that allows for testing (such as running `test_yaml_config()`).
 
 - Snippets should be as short as possible, but no shorter. In general, you can think of the snippet like a diff: what needs to change to accomplish this step?
