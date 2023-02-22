@@ -50,7 +50,7 @@ data_connectors:
 """
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py test yaml config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py test yaml_config">
 context.test_yaml_config(datasource_yaml)
 # </snippet>
 

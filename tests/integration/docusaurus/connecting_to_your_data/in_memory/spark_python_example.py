@@ -29,7 +29,7 @@ data_context_config = DataContextConfig(
 )
 context = get_context(project_config=data_context_config)
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py batchrequest">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py config">
 datasource_config = {
     "name": "my_spark_dataframe",
     "class_name": "Datasource",
@@ -43,7 +43,7 @@ datasource_config = {
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py yaml config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py test yaml_config">
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
@@ -62,11 +62,13 @@ batch_request = RuntimeBatchRequest(
 )
 # </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
