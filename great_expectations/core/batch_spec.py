@@ -32,6 +32,16 @@ class BatchMarkers(BatchSpec):
         return self.get("ge_load_time")
 
 
+class PandasBatchSpec(BatchSpec, metaclass=ABCMeta):
+    @property
+    def reader_method(self) -> str:
+        return self["reader_method"]
+
+    @property
+    def reader_options(self) -> dict:
+        return self.get("reader_options", {})
+
+
 class PathBatchSpec(BatchSpec, metaclass=ABCMeta):
     def __init__(
         self,
