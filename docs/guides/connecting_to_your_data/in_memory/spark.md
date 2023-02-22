@@ -53,19 +53,19 @@ Using this example configuration add in the path to a directory that contains so
 
 Run this code to test your configuration.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py yaml config"
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py test yaml config"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py batchrequest"
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py yaml config"
 ```
 
 Run this code to test your configuration.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py yaml config"
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py test yaml config"
 ```
 
 </TabItem>
