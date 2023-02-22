@@ -1113,5 +1113,8 @@ def get_batch_request_using_datasource_name(
         datasource=datasource,  # type: ignore[arg-type] # could be LegacyDatasource
         additional_batch_request_args=additional_batch_request_args,
     )
+    if "data_asset_name" not in batch_request:
+        # Some datasources don't always provide this (`RuntimeDataConnector`)
+        batch_request["data_asset_name"] = "default_data_asset_name"
 
     return batch_request
