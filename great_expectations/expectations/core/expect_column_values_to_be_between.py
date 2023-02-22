@@ -405,12 +405,10 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{  # type: ignore[arg-type] # TODO: https://github.com/python/mypy/issues/5382
-                    "string_template": {
-                        "template": template_str,
-                        "params": params,
-                        "styling": styling,
-                    },
-                }
+                string_template={
+                    "template": template_str,
+                    "params": params,
+                    "styling": styling,
+                },
             )
         ]
