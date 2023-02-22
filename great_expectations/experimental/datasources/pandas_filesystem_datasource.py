@@ -59,7 +59,6 @@ _FILESYSTEM_READER_METHOD_BLACK_LIST = (
     # "read_xml",
 )
 
-
 _FILESYSTEM_ASSET_MODELS = _generate_pandas_data_asset_models(
     _FilesystemDataAsset,
     blacklist=_FILESYSTEM_READER_METHOD_BLACK_LIST,

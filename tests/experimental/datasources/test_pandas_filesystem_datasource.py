@@ -15,12 +15,14 @@ from pytest import MonkeyPatch, param
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
+from great_expectations.experimental.datasources.filesystem_data_asset import (
+    _FilesystemDataAsset,
+)
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_filesystem_datasource import (
     CSVAsset,
     JSONAsset,
     PandasFilesystemDatasource,
-    _FilesystemDataAsset,
 )
 from great_expectations.experimental.datasources.sources import _get_field_details
 
@@ -192,7 +194,7 @@ class TestDynamicPandasAssets:
         assert exc_info.value.model == asset_class
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_add_asset_method_signaturel(self, asset_class: Type[_FilesystemDataAsset]):
+    def test_add_asset_method_signature(self, asset_class: Type[_FilesystemDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
@@ -292,7 +294,7 @@ class TestDynamicPandasAssets:
             )
             .add_csv_asset(
                 "my_csv",
-                regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+                regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                 **extra_kwargs,
             )
             .build_batch_request({"year": "2018"})
@@ -567,9 +569,12 @@ def test_pandas_sorter(
 
 
 def bad_regex_config(csv_path: pathlib.Path) -> tuple[re.Pattern, TestConnectionError]:
-    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv")
+    regex = re.compile(r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv")
     test_connection_error = TestConnectionError(
-        f"""No file at base_directory path "{csv_path.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_asset"."""
+        "No file at base_directory path "
+        f'"{csv_path.resolve()}" matched regular expressions pattern '
+        f'"{regex.pattern}" and/or glob_directive "**/*" for '
+        'DataAsset "csv_asset".'
     )
     return regex, test_connection_error
 
@@ -603,5 +608,4 @@ def test_test_connection_failures(
 
     with pytest.raises(type(test_connection_error)) as e:
         pandas_filesystem_datasource.test_connection()
-
     assert str(e.value) == str(test_connection_error)

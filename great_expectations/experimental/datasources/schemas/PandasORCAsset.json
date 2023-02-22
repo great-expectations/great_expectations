@@ -22,6 +22,11 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
+        "path": {
+            "title": "Path",
+            "format": "file-path",
+            "type": "string"
+        },
         "columns": {
             "title": "Columns",
             "type": "array",
@@ -36,7 +41,8 @@
         }
     },
     "required": [
-        "name"
+        "name",
+        "path"
     ],
     "additionalProperties": false,
     "definitions": {
