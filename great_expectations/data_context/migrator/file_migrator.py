@@ -131,9 +131,6 @@ class FileMigrator:
         target_base_directory = target_root.joinpath(
             DataContextConfigDefaults.DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME.value
         )
-        assert (
-            target_base_directory.exists()
-        ), f"{target_base_directory} should have been set up by upstream scaffolding"
 
         updated_data_docs_config = {}
         for site_name, site_config in source_configs.items():
@@ -144,8 +141,10 @@ class FileMigrator:
             )
             updated_data_docs_config[site_name] = updated_site_config
 
-        target_variables.data_docs_sites = updated_data_docs_config
-        target_variables.save_config()
+        # If no sites to migrate, don't touch config defaults
+        if updated_data_docs_config:
+            target_variables.data_docs_sites = updated_data_docs_config
+            target_variables.save_config()
 
     def _migrate_data_docs_site_config(
         self, site_name: str, site_config: dict, target_base_directory: pathlib.Path
