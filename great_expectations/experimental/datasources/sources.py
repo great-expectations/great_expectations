@@ -14,6 +14,7 @@ from typing import (
     Union,
 )
 
+from great_expectations.datasource import BaseDatasource, LegacyDatasource
 from great_expectations.experimental.datasources.signatures import _merge_signatures
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
@@ -31,6 +32,10 @@ if TYPE_CHECKING:
 SourceFactoryFn = Callable[..., "Datasource"]
 
 logger = logging.getLogger(__name__)
+
+
+class DefaultPandasDatasourceError(Exception):
+    pass
 
 
 class TypeRegistrationError(TypeError):
@@ -208,9 +213,10 @@ class _SourceFactories:
                     asset_name for asset_name in self.assets.keys()
                 )
                 asset_name_prefix = f"{asset_type_name}_asset_"
-                max_asset_number = 1
+                max_asset_number = 0
                 for asset_name in existing_asset_names:
                     try:
+                        # this can fail for an asset named like csv_asset_foo
                         asset_number = int(asset_name.split("_")[-1])
                     except TypeError:
                         asset_number = 1
@@ -220,7 +226,7 @@ class _SourceFactories:
                     ):
                         max_asset_number = asset_number
 
-                name = asset_name_prefix + str(max_asset_number)
+                name = asset_name_prefix + str(max_asset_number + 1)
                 asset = asset_type(name=name, **kwargs)
                 return self.add_asset(asset)
 
@@ -237,7 +243,50 @@ class _SourceFactories:
 
     @property
     def pandas_default(self) -> PandasDatasource:
-        return self._data_context.sources.add_pandas(name="default_pandas_datasource")
+        datasources: dict[
+            str, LegacyDatasource | BaseDatasource | Datasource
+        ] = self._data_context.datasources  # type: ignore[union-attr]  # typing information is being lost in DataContext factory
+
+        possible_default_datasource_names = iter(
+            [
+                "default_pandas_datasource",
+                "default_pandas_fluent_datasource",
+            ]
+        )
+
+        default_pandas_datasource_name = next(possible_default_datasource_names)
+        # if a legacy datasource with this name already exists, we give it a different name
+        if isinstance(
+            datasources.get(default_pandas_datasource_name),
+            (BaseDatasource, LegacyDatasource),
+        ):
+            default_pandas_datasource_name = next(possible_default_datasource_names)
+
+        existing_datasource: LegacyDatasource | BaseDatasource | Datasource | None = (
+            datasources.get(default_pandas_datasource_name)
+        )
+
+        # if a legacy datasource with all possible_default_datasource_names exists, raise an error
+        if existing_datasource and isinstance(
+            existing_datasource, (BaseDatasource, LegacyDatasource)
+        ):
+            raise DefaultPandasDatasourceError(
+                "Datasources of type BaseDatasource or LegacyDatasource already exist with the names: "
+                f"{possible_default_datasource_names}. Please rename these Datasources if you wish to "
+                "use the pandas_default Datasource."
+                ""
+            )
+
+        pandas_datasource = (
+            existing_datasource
+            or self._data_context.sources.add_pandas(
+                name=default_pandas_datasource_name
+            )
+        )
+        assert pandas_datasource and not isinstance(
+            pandas_datasource, (BaseDatasource, LegacyDatasource)
+        )
+        return pandas_datasource
 
     @property
     def factories(self) -> List[str]:

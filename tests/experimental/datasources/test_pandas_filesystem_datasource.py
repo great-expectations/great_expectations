@@ -149,7 +149,7 @@ class TestDynamicPandasAssets:
             param(
                 "read_xml",
                 marks=pytest.mark.skipif(
-                    PANDAS_VERSION < 1.2,
+                    PANDAS_VERSION < 1.3,
                     reason=f"read_xml does not exist on {PANDAS_VERSION} ",
                 ),
             ),
