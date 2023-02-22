@@ -269,12 +269,9 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
 
-        min_val = None
-        max_val = None
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
+        min_val = configuration.kwargs.get("min_value", None)
+        max_val = configuration.kwargs.get("max_value", None)
+
         try:
             assert (
                 min_val is not None or max_val is not None
