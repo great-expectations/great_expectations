@@ -197,20 +197,9 @@ class _FilePathDataAsset(DataAsset):
             )
 
             batch_metadata = copy.deepcopy(batch_request.options)
-            # TODO: <Alex>ALEX-FIX_TO_INSURE_BASE_DIRECTORY_TYPE_IS_PATHLIB.PATH-CONSISTENTLY</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX-FIX_TO_INSURE_PROPERTY_NAME_CORRESPONDDS_TO_ITS_MEANING</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # batch_metadata["base_directory"] = pathlib.Path(batch_spec["path"])
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            batch_metadata.update(batch_spec)
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
             batch_metadata.update(batch_definition.batch_identifiers)
-            batch_request.options.update(batch_definition.batch_identifiers)
-            # TODO: <Alex>ALEX</Alex>
+            batch_metadata.update(batch_spec)
+            batch_request.options.update(batch_metadata)
 
             # Some pydantic annotations are postponed due to circular imports.
             # Batch.update_forward_refs() will set the annotations before we

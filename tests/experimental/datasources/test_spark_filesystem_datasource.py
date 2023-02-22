@@ -289,15 +289,15 @@ def test_spark_sorter(
 
     ordered_years = reversed(years) if "-year" in order_by else years
     ordered_months = reversed(months) if "-month" in order_by else months
-    if "year" in order_by[0]:
+    if "year" in order_by[0]:  # type: ignore[arg-type]
         ordered = [
-            TimeRange(key="year", range=ordered_years),
-            TimeRange(key="month", range=ordered_months),
+            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
+            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
         ]
     else:
         ordered = [
-            TimeRange(key="month", range=ordered_months),
-            TimeRange(key="year", range=ordered_years),
+            TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
+            TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
         ]
 
     batch_index = -1
@@ -326,7 +326,7 @@ def datasource_test_connection_error_messages(
     request,
 ) -> tuple[SparkFilesystemDatasource, TestConnectionError]:
     regex, test_connection_error = request.param(csv_path=csv_path)
-    csv_asset = CSVSparkAsset(  # type: ignore[call-arg]
+    csv_asset = CSVSparkAsset(
         name="csv_asset",
         regex=regex,
     )

@@ -123,10 +123,10 @@ def test_add_csv_asset_to_datasource():
         name="csv_asset",
         regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
-    assert asset.name == "csv_asset"  # type: ignore[attr-defined]
-    assert asset.regex.match("random string") is None  # type: ignore[attr-defined]
-    assert asset.regex.match("alex_20200819_13D0.csv") is None  # type: ignore[attr-defined]
-    m1 = asset.regex.match("alex_20200819_1300.csv")  # type: ignore[attr-defined]
+    assert asset.name == "csv_asset"
+    assert asset.regex.match("random string") is None
+    assert asset.regex.match("alex_20200819_13D0.csv") is None
+    m1 = asset.regex.match("alex_20200819_1300.csv")
     assert m1 is not None
 
 
@@ -153,7 +153,7 @@ def test_csv_asset_with_regex_unnamed_parameters():
         name="csv_asset",
         regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()  # type: ignore[attr-defined]
+    options = asset.batch_request_options_template()
     assert options == {
         "batch_request_param_1": None,
         "batch_request_param_2": None,
@@ -169,7 +169,7 @@ def test_csv_asset_with_regex_named_parameters():
         name="csv_asset",
         regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()  # type: ignore[attr-defined]
+    options = asset.batch_request_options_template()
     assert options == {"name": None, "timestamp": None, "price": None}
 
 
@@ -181,7 +181,7 @@ def test_csv_asset_with_some_regex_named_parameters():
         name="csv_asset",
         regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()  # type: ignore[attr-defined]
+    options = asset.batch_request_options_template()
     assert options == {"name": None, "batch_request_param_2": None, "price": None}
 
 
@@ -195,7 +195,9 @@ def test_csv_asset_with_non_string_regex_named_parameters():
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
-        asset.build_batch_request({"name": "alex", "timestamp": "1234567890", "price": 1300})  # type: ignore[attr-defined]
+        asset.build_batch_request(
+            {"name": "alex", "timestamp": "1234567890", "price": 1300}
+        )
 
 
 @pytest.mark.integration
@@ -207,12 +209,14 @@ def test_get_batch_list_from_fully_specified_batch_request():
         regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
 
-    request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})  # type: ignore[attr-defined]
-    batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
+    request = asset.build_batch_request(
+        {"name": "alex", "timestamp": "20200819", "price": "1300"}
+    )
+    batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
     assert batch.batch_request.datasource_name == pandas_s3_datasource.name
-    assert batch.batch_request.data_asset_name == asset.name  # type: ignore[attr-defined]
+    assert batch.batch_request.data_asset_name == asset.name
     assert batch.batch_request.options == {
         "name": "alex",
         "timestamp": "20200819",
@@ -231,8 +235,8 @@ def test_get_batch_list_from_fully_specified_batch_request():
         == "pandas_s3_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
     )
 
-    request = asset.build_batch_request({"name": "alex"})  # type: ignore[attr-defined]
-    batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
+    request = asset.build_batch_request({"name": "alex"})
+    batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 2
 
 
