@@ -48,6 +48,7 @@ Using this example configuration add in the path to a directory that contains so
   ]}>
 
 <TabItem value="yaml">
+
 ```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py yaml config"
 ```
 

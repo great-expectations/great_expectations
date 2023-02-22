@@ -58,8 +58,8 @@ context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py batch request">
 # Here is a RuntimeBatchRequest using a dataframe
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py batch request">
 batch_request = RuntimeBatchRequest(
     datasource_name="my_spark_dataframe",
     data_connector_name="default_runtime_data_connector_name",
