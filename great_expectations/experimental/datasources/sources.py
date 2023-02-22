@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.experimental.context import DataContext
+    from great_expectations.experimental.datasources import PandasDatasource
     from great_expectations.experimental.datasources.interfaces import (
         DataAsset,
         Datasource,
@@ -204,6 +205,10 @@ class _SourceFactories:
             logger.debug(
                 f"`{asset_factory_method_name}()` already defined `{ds_type.__name__}`"
             )
+
+    @property
+    def pandas_default(self) -> PandasDatasource:
+        return self._data_context.sources.add_pandas(name="default_pandas_datasource")
 
     @property
     def factories(self) -> List[str]:

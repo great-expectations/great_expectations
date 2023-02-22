@@ -16,7 +16,7 @@ from great_expectations.experimental.datasources.interfaces import (
 logger = logging.getLogger(__name__)
 
 
-def quickstart_pandas_data(
+def default_pandas_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
     relative_path = pathlib.Path(
@@ -25,9 +25,7 @@ def quickstart_pandas_data(
     csv_path = (
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
-    pandas_ds = context.sources.add_pandas(
-        name="my_pandas",
-    )
+    pandas_ds = context.sources.pandas_default
     asset = pandas_ds.add_pandas_csv_asset(
         name="csv_asset",
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
@@ -182,7 +180,7 @@ def multibatch_spark_data(
     return context, spark_ds, asset, batch_request
 
 
-@pytest.fixture(params=[pandas_data, sql_data, spark_data, quickstart_pandas_data])
+@pytest.fixture(params=[pandas_data, sql_data, spark_data, default_pandas_data])
 def datasource_test_data(
     test_backends, empty_data_context, request
 ) -> tuple[AbstractDataContext, Datasource, DataAsset, BatchRequest]:
