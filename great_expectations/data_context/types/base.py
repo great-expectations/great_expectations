@@ -1797,7 +1797,7 @@ class DataContextConfigDefaults(enum.Enum):
         f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
     )
 
-    # Checkpoints
+    # Datasource
     DEFAULT_DATASOURCE_STORE_NAME = "datasource_store"
 
     # Checkpoints
