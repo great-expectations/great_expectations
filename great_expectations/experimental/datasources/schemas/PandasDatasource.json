@@ -71,8 +71,7 @@
             "required": [
                 "name",
                 "type"
-            ],
-            "additionalProperties": false
+            ]
         }
     }
 }

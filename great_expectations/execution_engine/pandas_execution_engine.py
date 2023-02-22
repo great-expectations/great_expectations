@@ -17,6 +17,7 @@ from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
     GCSBatchSpec,
+    PandasBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
@@ -337,6 +338,12 @@ Bucket: {error}"""
             path = batch_spec.path
             reader_fn = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
+
+        elif isinstance(batch_spec, PandasBatchSpec):
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options
+            reader_fn = self._get_reader_fn(reader_method)
+            df = reader_fn(**reader_options)
 
         else:
             raise gx_exceptions.BatchSpecError(
