@@ -204,7 +204,8 @@ What used to be called a “Batch” in the old API was replaced with <Technical
 5. **Check your data**
 
     You can check that the first few lines of your Batch are what you expect by running:
-    ```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py validator_head">
+
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py validator head"
     ```
 
     Now that you have a Validator, you can use it to [create Expectations](../expectations/create_expectations_overview.md) or [validate the data](../validation/validate_data_overview.md).

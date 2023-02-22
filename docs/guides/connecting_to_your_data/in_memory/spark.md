@@ -59,7 +59,7 @@ Run this code to test your configuration.
 
 <TabItem value="python">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py  config"
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py config"
 ```
 
 Run this code to test your configuration.
