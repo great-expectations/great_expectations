@@ -315,7 +315,7 @@ class TestDynamicPandasAssets:
         assert len(pandas_datasource.assets) == 2
 
     def test_default_pandas_datasource_name_conflict(
-        self, empty_data_context: AbstractDataContext, csv_path: pathlib.Path
+        self, empty_data_context: AbstractDataContext
     ):
         (
             default_pandas_datasource_name_1,
@@ -330,11 +330,11 @@ class TestDynamicPandasAssets:
             name=default_pandas_datasource_name_2, class_name="PandasDatasource"
         )
 
-        # both datasource names are taken
+        # both datasource names are taken by legacy datasources
         with pytest.raises(DefaultPandasDatasourceError):
             pandas_datasource = empty_data_context.sources.pandas_default
 
-        # only datasource name 1 is taken
+        # only datasource name 1 is taken by legacy datasources
         empty_data_context.datasources.pop(default_pandas_datasource_name_2)
         pandas_datasource = empty_data_context.sources.pandas_default
         assert isinstance(pandas_datasource, PandasDatasource)
