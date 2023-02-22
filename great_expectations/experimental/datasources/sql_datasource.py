@@ -493,6 +493,44 @@ class _SQLAsset(DataAsset):
             )
         )
 
+    def add_splitter_hashed_column(
+        self, column_name: str, hash_digits: int
+    ) -> _SQLAsset:
+        from great_expectations.experimental.datasources.sqlite_datasource import (
+            SqliteDatasource,
+        )
+
+        if not isinstance(self._datasource, SqliteDatasource):
+            raise ValueError(
+                "A hashed column splitter can only be used with a Sqlite datasource."
+            )
+        return self._add_splitter(
+            ColumnSplitterHashedColumn(
+                method_name="split_on_hashed_column",
+                column_name=column_name,
+                hash_digits=hash_digits,
+            )
+        )
+
+    def add_splitter_converted_datetime(
+        self, column_name: str, date_format_string: str
+    ) -> _SQLAsset:
+        from great_expectations.experimental.datasources.sqlite_datasource import (
+            SqliteDatasource,
+        )
+
+        if not isinstance(self._datasource, SqliteDatasource):
+            raise ValueError(
+                "A converted datetime splitter can only be used with a Sqlite datasource."
+            )
+        return self._add_splitter(
+            ColumnSplitterConvertedDateTime(
+                method_name="split_on_converted_datetime",
+                column_name=column_name,
+                date_format_string=date_format_string,
+            )
+        )
+
     def test_connection(self) -> None:
         pass
 

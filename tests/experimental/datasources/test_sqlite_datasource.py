@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pathlib
 from contextlib import _GeneratorContextManager, contextmanager
-from typing import Any, Callable, ContextManager, Generator
+from typing import Any, Callable, Generator
 
 import pytest
 from pydantic import ValidationError
