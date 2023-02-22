@@ -336,6 +336,11 @@ class FileDataContextVariables(DataContextVariables):
             InlineStoreBackend,
         )
 
+        # Chetan - 20230222 - `instantiate_class_from_config` used in the Store constructor
+        # causes a runtime error with InlineStoreBackend due to attempting to deepcopy a DataContext.
+        #
+        # This should be resolved by moving the specific logic required from the context to a class
+        # and injecting that object instead of the entire context.
         store_backend = InlineStoreBackend(
             data_context=self.data_context,
             resource_type=DataContextVariableSchema.ALL_VARIABLES,

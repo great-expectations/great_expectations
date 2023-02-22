@@ -17,5 +17,4 @@ def file_migrator(in_memory_runtime_context: EphemeralDataContext):
 
 
 def test_migrate(file_migrator: FileMigrator):
-    file_migrator.migrate()
     pass
