@@ -778,9 +778,16 @@ class CloudDataContext(SerializableDataContext):
         overwrite_existing: bool,
         **kwargs,
     ) -> ExpectationSuite:
+        cloud_id: str | None
+        if expectation_suite.ge_cloud_id:
+            cloud_id = str(expectation_suite.ge_cloud_id)
+        else:
+            cloud_id = None
+
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             resource_name=expectation_suite.expectation_suite_name,
+            cloud_id=cloud_id,
         )
 
         persistence_fn: Callable
