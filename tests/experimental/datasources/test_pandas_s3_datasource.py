@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import List, cast
+from typing import TYPE_CHECKING, List, cast
 
 import pandas as pd
 import pytest
@@ -23,20 +23,18 @@ from great_expectations.experimental.datasources.pandas_file_path_datasource imp
     CSVAsset,
 )
 
+if TYPE_CHECKING:
+    from botocore.client import BaseClient
+
+
 logger = logging.getLogger(__file__)
 
 
 try:
     import boto3
-    import botocore
-    from botocore.client import BaseClient
 except ImportError:
-    logger.debug(
-        "Unable to load boto3 or botocore; install optional boto3 and botocore dependencies for support."
-    )
+    logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
     boto3 = None
-    botocore = None
-    BaseClient = None
 
 
 # apply markers to entire test module

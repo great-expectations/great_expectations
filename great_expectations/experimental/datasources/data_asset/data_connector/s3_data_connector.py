@@ -14,23 +14,12 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
 )
 
 if TYPE_CHECKING:
+    from botocore.client import BaseClient
+
     from great_expectations.core.batch import BatchDefinition
 
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    import boto3
-    import botocore
-    from botocore.client import BaseClient
-except ImportError:
-    logger.debug(
-        "Unable to load boto3 or botocore; install optional boto3 and botocore dependencies for support."
-    )
-    boto3 = None
-    botocore = None
-    BaseClient = None
 
 
 class S3DataConnector(FilePathDataConnector):
