@@ -14,7 +14,6 @@ from typing import (
     Union,
 )
 
-from great_expectations.datasource import BaseDatasource, LegacyDatasource
 from great_expectations.experimental.datasources.signatures import _merge_signatures
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
@@ -22,6 +21,7 @@ if TYPE_CHECKING:
     import pydantic
 
     from great_expectations.data_context import AbstractDataContext as GXDataContext
+    from great_expectations.datasource import BaseDatasource, LegacyDatasource
     from great_expectations.experimental.context import DataContext
     from great_expectations.experimental.datasources import PandasDatasource
     from great_expectations.experimental.datasources.interfaces import (
@@ -243,6 +243,8 @@ class _SourceFactories:
 
     @property
     def pandas_default(self) -> PandasDatasource:
+        from great_expectations.experimental.datasources import PandasDatasource
+
         datasources: dict[
             str, LegacyDatasource | BaseDatasource | Datasource
         ] = self._data_context.datasources  # type: ignore[union-attr]  # typing information is being lost in DataContext factory
@@ -256,9 +258,9 @@ class _SourceFactories:
 
         default_pandas_datasource_name = next(possible_default_datasource_names)
         # if a legacy datasource with this name already exists, we give it a different name
-        if isinstance(
+        if not isinstance(
             datasources.get(default_pandas_datasource_name),
-            (BaseDatasource, LegacyDatasource),
+            PandasDatasource,
         ):
             default_pandas_datasource_name = next(possible_default_datasource_names)
 
@@ -267,14 +269,15 @@ class _SourceFactories:
         )
 
         # if a legacy datasource with all possible_default_datasource_names exists, raise an error
-        if existing_datasource and isinstance(
-            existing_datasource, (BaseDatasource, LegacyDatasource)
-        ):
-            raise DefaultPandasDatasourceError(
-                "Datasources of type BaseDatasource or LegacyDatasource already exist with the names: "
-                f"{possible_default_datasource_names}. Please rename these Datasources if you wish to "
-                "use the pandas_default Datasource."
-                ""
+        if existing_datasource:
+            quoted_datasource_names = [
+                f'"{name}"' for name in possible_default_datasource_names
+            ]
+            assert isinstance(
+                existing_datasource, PandasDatasource
+            ), DefaultPandasDatasourceError(
+                f"Datasources with a legacy type already exist with the names: {', '.join(quoted_datasource_names)}. "
+                "Please rename these datasources if you wish to use the pandas_default PandasDatasource."
             )
 
         pandas_datasource = (
@@ -283,9 +286,9 @@ class _SourceFactories:
                 name=default_pandas_datasource_name
             )
         )
-        assert pandas_datasource and not isinstance(
-            pandas_datasource, (BaseDatasource, LegacyDatasource)
-        )
+        # there is no situation in which this isn't true
+        # return type information must be missing for factory method add_pandas
+        assert isinstance(pandas_datasource, PandasDatasource)
         return pandas_datasource
 
     @property
