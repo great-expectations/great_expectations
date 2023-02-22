@@ -371,7 +371,6 @@ def test_csv_asset_with_regex_unnamed_parameters(
     assert options == {
         "batch_request_param_1": None,
         "batch_request_param_2": None,
-        "path": None,
     }
 
 
@@ -384,7 +383,7 @@ def test_csv_asset_with_regex_named_parameters(
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
     options = asset.batch_request_options_template()  # type: ignore[attr-defined]
-    assert options == {"year": None, "month": None, "path": None}
+    assert options == {"year": None, "month": None}
 
 
 @pytest.mark.unit
@@ -396,7 +395,7 @@ def test_csv_asset_with_some_regex_named_parameters(
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
     )
     options = asset.batch_request_options_template()  # type: ignore[attr-defined]
-    assert options == {"batch_request_param_1": None, "month": None, "path": None}
+    assert options == {"batch_request_param_1": None, "month": None}
 
 
 @pytest.mark.unit

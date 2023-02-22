@@ -23,16 +23,6 @@
                 "$ref": "#/definitions/CSVSparkAsset"
             }
         },
-        "header": {
-            "title": "Header",
-            "default": false,
-            "type": "boolean"
-        },
-        "inferSchema": {
-            "title": "Inferschema",
-            "default": false,
-            "type": "boolean"
-        },
         "base_directory": {
             "title": "Base Directory",
             "type": "string",

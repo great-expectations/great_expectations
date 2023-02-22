@@ -48,7 +48,9 @@ logger = logging.getLogger(__name__)
 
 class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "type",
         "name",
+        "order_by",
         "regex",  # file_path argument
         "base_directory",  # filesystem argument
         "glob_directive",  # filesystem argument
@@ -57,8 +59,6 @@ class _FilePathDataAsset(DataAsset):
         "prefix",  # s3 argument
         "delimiter",  # s3 argument
         "max_keys",  # s3 argument
-        "order_by",
-        "type",
         "kwargs",  # kwargs need to be unpacked and passed separately
     }
 
@@ -80,7 +80,7 @@ class _FilePathDataAsset(DataAsset):
     class Config:
         """
         Need to allow extra fields for the base type because pydantic will first create
-        an instance of `_FilesystemDataAsset` before we select and create the more specific
+        an instance of `_FilePathDataAsset` before we select and create the more specific
         asset subtype.
         Each specific subtype should `forbid` extra fields.
         """

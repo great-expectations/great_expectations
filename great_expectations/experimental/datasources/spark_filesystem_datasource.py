@@ -53,10 +53,6 @@ class _SparkDatasource(Datasource):
         CSVSparkAsset,
     ] = {}
 
-    # Spark specific attributes
-    header: bool = False
-    inferSchema: bool = False
-
     # Abstract Methods
     @property
     def execution_engine_type(self) -> Type[SparkDFExecutionEngine]:
@@ -137,7 +133,6 @@ class SparkFilesystemDatasource(_SparkDatasource):
         asset = CSVSparkAsset(
             name=name,
             regex=regex_pattern,
-            glob_directive=glob_directive,
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
