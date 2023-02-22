@@ -405,6 +405,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
 
         return [
             RenderedStringTemplateContent(
+                # FIXME: https://github.com/python/mypy/issues/5382
                 **{
                     "content_block_type": "string_template",
                     "string_template": {
