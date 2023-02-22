@@ -11,11 +11,11 @@ from great_expectations.experimental.datasources.filesystem_data_asset import (
     _FilesystemDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
+    BatchSorter,
     BatchSortersDefinition,
     DataAsset,
     Datasource,
     TestConnectionError,
-    _batch_sorter_from_list,
 )
 
 if TYPE_CHECKING:
@@ -99,7 +99,7 @@ class SparkFilesystemDatasource(_SparkDatasource):
         """
         if not self.base_directory.exists():
             raise TestConnectionError(
-                f"Path: {self.base_directory.resolve()} does not exist."
+                f"base_directory path: {self.base_directory.resolve()} does not exist."
             )
 
         if self.assets and test_assets:
@@ -109,7 +109,7 @@ class SparkFilesystemDatasource(_SparkDatasource):
     def add_csv_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[re.Pattern, str]] = None,
         glob_directive: str = "**/*",
         header: bool = False,
         infer_schema: bool = False,
@@ -125,16 +125,18 @@ class SparkFilesystemDatasource(_SparkDatasource):
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = CSVSparkAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
             glob_directive=glob_directive,
             header=header,
             inferSchema=infer_schema,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
         )
 
         return self.add_asset(asset)
