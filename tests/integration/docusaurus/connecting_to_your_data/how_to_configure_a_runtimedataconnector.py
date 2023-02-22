@@ -1,12 +1,21 @@
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py import pandas">
 import pandas as pd
+
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py yaml imports">
 from ruamel import yaml
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py python imports">
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 
 context = gx.get_context()
+# </snippet>
+# </snippet>
 
 # YAML
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py datasource_config yaml">
 datasource_yaml = r"""
 name: taxi_datasource
 class_name: Datasource
@@ -20,10 +29,12 @@ data_connectors:
     batch_identifiers:
       - default_identifier_name
 """
+# </snippet>
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
 
 # Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py python datasource_config">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",
@@ -39,6 +50,7 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 test_python = context.test_yaml_config(
     yaml.dump(datasource_config), return_mode="report_object"
@@ -46,8 +58,11 @@ test_python = context.test_yaml_config(
 
 assert test_yaml == test_python
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py add_datasource">
 context.add_datasource(**datasource_config)
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py batch_request 1">
 batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -55,6 +70,7 @@ batch_request = RuntimeBatchRequest(
     runtime_parameters={"path": "<PATH TO YOUR DATA HERE>"},  # Add your path here.
     batch_identifiers={"default_identifier_name": "<YOUR MEANINGFUL IDENTIFIER>"},
 )
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the BatchRequest above.
@@ -62,11 +78,13 @@ batch_request.runtime_parameters[
     "path"
 ] = "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py get_validator 1">
 validator = context.get_validator(
     batch_request=batch_request,
     create_expectation_suite_with_name="<MY EXPECTATION SUITE NAME>",
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
@@ -77,9 +95,12 @@ assert "<YOUR MEANINGFUL NAME>" in set(
     ]
 )
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py path">
 path = "<PATH TO YOUR DATA HERE>"
+# </snippet>
 # Please note this override is only to provide good UX for docs and tests.
 path = "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py batch_request 2">
 df = pd.read_csv(path)
 
 batch_request = RuntimeBatchRequest(
@@ -89,12 +110,15 @@ batch_request = RuntimeBatchRequest(
     runtime_parameters={"batch_data": df},  # Pass your DataFrame here.
     batch_identifiers={"default_identifier_name": "<YOUR MEANINGFUL IDENTIFIER>"},
 )
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py get_validator 2">
 validator = context.get_validator(
     batch_request=batch_request,
     expectation_suite_name="<MY EXPECTATION SUITE NAME>",
 )
 print(validator.head())
+# </snippet>
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
