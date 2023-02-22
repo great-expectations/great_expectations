@@ -110,6 +110,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "FilePath",  # pydantic
     # pandas
     "DtypeArg",
+    "FilePathOrBuffer",
     "CSVEngine",
     "IndexLabel",
     "CompressionOptions",
@@ -158,6 +159,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
         )
     },
     # misc
+    "filepath_or_buffer": {"filepath_or_buffer": _FieldSpec(FilePath, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
@@ -194,6 +196,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "Hashable": Hashable,
     "Iterable": Iterable,
     "FilePath": FilePath,
+    "FilePathOrBuffer": FilePath,
     "Pattern": re.Pattern,
     "CSVEngine": CSVEngine,
     "IndexLabel": IndexLabel,

@@ -38,14 +38,14 @@ Import these necessary packages and modules:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L1-L4
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L3-L4
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py imports no yaml"
 ```
 
 </TabItem>
@@ -125,14 +125,14 @@ In that case, the configuration would look like the following:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L9-L25
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py yaml datasource"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L36-L56
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource"
 ```
 
 </TabItem>
@@ -145,7 +145,7 @@ The configuration would also work with a regex capturing the entire filename (e.
 
 Later on we could retrieve the data in `yellow_tripdata_2019-02.csv` of `yellow_tripdata` as its own batch using `context.get_validator()` by specifying `{"month": "2019-02"}` as the `batch_identifier`.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L72-L87
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic datasource workthrough"
 ```
 
 This ability to access specific Batches using `batch_identifiers` is very useful when validating Data Assets that span multiple files.
@@ -163,13 +163,13 @@ A corresponding configuration for `ConfiguredAssetS3DataConnector` would look si
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L99-L116
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py yaml datasource s3"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L128-L149
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py python datasource s3"
 ```
 
 </TabItem>
@@ -200,13 +200,12 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L176-L192
+```python name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml"
 ```
-
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L203-L223
+```python name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python"
 ```
 
 </TabItem>
@@ -224,7 +223,7 @@ Unmatched data_references (0 of 0):[]
 
 Once configured, you can get a <TechnicalTag tag="validator" text="Validator" /> from the <TechnicalTag tag="data_context" text="Data Context" /> as follows:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L239-L249
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset output"
 ```
 
 But what if the regex does not match any files in the directory?
@@ -241,13 +240,13 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L261-L277
+```python name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml no regex"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L288-L308
+```python name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python no regex"
 ```
 
 </TabItem>
@@ -295,13 +294,13 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L330-L352
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 2 yaml"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L363-L387
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 2 python"
 ```
 
 </TabItem>
@@ -343,13 +342,13 @@ The following configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L415-L439
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 3 yaml"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L450-L476
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 3 python"
 ```
 
 </TabItem>
@@ -391,13 +390,13 @@ The following configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L503-L527
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 4 yaml"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py#L538-L566
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py example 4 python"
 ```
 
 </TabItem>
