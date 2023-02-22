@@ -43,13 +43,13 @@ See [the script that creates examples](link) and [the API docs](link) for additi
 
 ### Future work
 
+* Add better documentation and better testing for synthetic time series generation
+* Add support for additional time series grains (not just daily)
 * Add SQL implementation for `expect_column_pair_values_to_match_prophet_date_model` and other row-level metrics.
 * Add Data Assistants for creating time series Expectations
 * Add better renderers for time series Expectations, including graphs produced by `altair`
 * Add methods for pulling illustrative time series data from real-world sources
-* Add better documentation and better testing for synthetic time series generation
 * Add more options for time series models, other than `prophet` (e.g. `statsmodels.tst.arima`, `pdarima`, `NeuralProphet`)
-* Add support for additional time series grains (not just daily)
 
 
 

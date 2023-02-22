@@ -1,1 +1,1 @@
-# Make sure to include any Profilers your want exported below!
+# Make sure to include any Profilers you want exported below!

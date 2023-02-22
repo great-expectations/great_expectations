@@ -12,7 +12,7 @@ from time_series_expectations.expectations.util import get_prophet_model_from_js
 
 
 class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
-    """This Expectation is used to compare the values in a column to a Prophet forecast, based on a timestamp in a second column."""
+    """This Expectation is used to an aggregate statistic based on the values in a column, based on a timestamp."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
