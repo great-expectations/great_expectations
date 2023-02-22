@@ -76,12 +76,14 @@ class FilePathDataConnector(DataConnector):
             data_asset_name=data_asset_name,
         )
 
-        self._regex: re.Pattern = regex
-        self._regex_parser: RegExParser = RegExParser(
-            regex_pattern=regex, unnamed_regex_group_prefix=unnamed_regex_group_prefix
-        )
-
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
+        self._regex: re.Pattern = self._insure_regex_groups_include_data_reference_key(
+            regex=regex
+        )
+        self._regex_parser: RegExParser = RegExParser(
+            regex_pattern=self._regex,
+            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
+        )
 
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
@@ -252,6 +254,34 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
 
+    def _insure_regex_groups_include_data_reference_key(
+        self, regex: re.Pattern
+    ) -> re.Pattern:
+        """
+        Args:
+            regex: regex pattern for filtering data references; if reserved group name "path" (FILE_PATH_BATCH_SPEC_KEY)
+            is absent, then it is added to enclose original regex pattern, supplied on input.
+
+        Returns:
+            Potentially modified Regular Expression pattern (with enclosing FILE_PATH_BATCH_SPEC_KEY reserved group)
+        """
+        regex_parser: RegExParser = RegExParser(
+            regex_pattern=regex,
+            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
+        )
+        group_names: List[str] = regex_parser.get_all_group_names()
+        if FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY not in group_names:
+            pattern: str = regex.pattern
+            # TODO: <Alex>ALEX</Alex>
+            # pattern = re.escape(f"(?P<{FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY}>{pattern})")
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            pattern = f"(?P<{FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY}>{pattern})"
+            # TODO: <Alex>ALEX</Alex>
+            regex = re.compile(pattern)
+
+        return regex
+
     def _get_data_references_cache(self) -> Dict[str, List[BatchDefinition] | None]:
         """
         This prototypical method populates cache, whose keys are data references and values are "BatchDefinition"
@@ -336,16 +366,20 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self, data_reference: str
     ) -> Optional[IDDict]:
         # noinspection PyUnresolvedReferences
-        matches: Optional[re.Match] = self._regex.match(data_reference)
+        matches: Optional[re.Match] = self._regex_parser.get_matches(
+            target=data_reference
+        )
         if matches is None:
             return None
 
-        num_all_matched_group_values: int = self._regex.groups
+        num_all_matched_group_values: int = (
+            self._regex_parser.get_num_all_matched_group_values()
+        )
 
         # Check for `(?P<name>)` named group syntax
-        defined_group_name_to_group_index_mapping: Dict[str, int] = dict(
-            self._regex.groupindex
-        )
+        defined_group_name_to_group_index_mapping: Dict[
+            str, int
+        ] = self._regex_parser.get_named_group_name_to_group_index_mapping()
         defined_group_name_indexes: Set[int] = set(
             defined_group_name_to_group_index_mapping.values()
         )

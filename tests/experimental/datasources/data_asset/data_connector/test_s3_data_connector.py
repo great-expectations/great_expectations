@@ -187,7 +187,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+                {
+                    "path": "abe_20200809_1040.csv",
+                    "name": "abe",
+                    "timestamp": "20200809",
+                    "price": "1040",
+                }
             ),
         ),
         BatchDefinition(
@@ -195,7 +200,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+                {
+                    "path": "alex_20200809_1000.csv",
+                    "name": "alex",
+                    "timestamp": "20200809",
+                    "price": "1000",
+                }
             ),
         ),
         BatchDefinition(
@@ -203,7 +213,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
+                {
+                    "path": "alex_20200819_1300.csv",
+                    "name": "alex",
+                    "timestamp": "20200819",
+                    "price": "1300",
+                }
             ),
         ),
         BatchDefinition(
@@ -211,7 +226,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+                {
+                    "path": "eugene_20200809_1500.csv",
+                    "name": "eugene",
+                    "timestamp": "20200809",
+                    "price": "1500",
+                }
             ),
         ),
         BatchDefinition(
@@ -219,7 +239,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+                {
+                    "path": "eugene_20201129_1900.csv",
+                    "name": "eugene",
+                    "timestamp": "20201129",
+                    "price": "1900",
+                }
             ),
         ),
         BatchDefinition(
@@ -227,7 +252,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
+                {
+                    "path": "james_20200713_1567.csv",
+                    "name": "james",
+                    "timestamp": "20200713",
+                    "price": "1567",
+                }
             ),
         ),
         BatchDefinition(
@@ -235,7 +265,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
+                {
+                    "path": "james_20200810_1003.csv",
+                    "name": "james",
+                    "timestamp": "20200810",
+                    "price": "1003",
+                }
             ),
         ),
         BatchDefinition(
@@ -243,7 +278,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
+                {
+                    "path": "james_20200811_1009.csv",
+                    "name": "james",
+                    "timestamp": "20200811",
+                    "price": "1009",
+                }
             ),
         ),
         BatchDefinition(
@@ -251,7 +291,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
+                {
+                    "path": "will_20200809_1002.csv",
+                    "name": "will",
+                    "timestamp": "20200809",
+                    "price": "1002",
+                }
             ),
         ),
         BatchDefinition(
@@ -259,7 +304,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
+                {
+                    "path": "will_20200810_1001.csv",
+                    "name": "will",
+                    "timestamp": "20200810",
+                    "price": "1001",
+                }
             ),
         ),
     ]
@@ -524,13 +574,17 @@ def test_return_only_unique_batch_definitions():
             datasource_name="my_dataframe_datasource",
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict({"directory": "B", "filename": "file_1.csv"}),
+            batch_identifiers=IDDict(
+                {"path": "B/file_1.csv", "directory": "B", "filename": "file_1.csv"}
+            ),
         ),
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict({"directory": "B", "filename": "file_2.csv"}),
+            batch_identifiers=IDDict(
+                {"path": "B/file_2.csv", "directory": "B", "filename": "file_2.csv"}
+            ),
         ),
     ]
 
