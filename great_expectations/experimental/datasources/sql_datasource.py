@@ -493,28 +493,6 @@ class _SQLAsset(DataAsset):
             )
         )
 
-    def add_splitter_hashed_column(
-        self, column_name: str, hash_digits: int
-    ) -> _SQLAsset:
-        return self._add_splitter(
-            ColumnSplitterHashedColumn(
-                method_name="split_on_hashed_column",
-                column_name=column_name,
-                hash_digits=hash_digits,
-            )
-        )
-
-    def add_splitter_converted_datetime(
-        self, column_name: str, date_format_string: str
-    ) -> _SQLAsset:
-        return self._add_splitter(
-            ColumnSplitterConvertedDateTime(
-                method_name="split_on_converted_datetime",
-                column_name=column_name,
-                date_format_string=date_format_string,
-            )
-        )
-
     def test_connection(self) -> None:
         pass
 
