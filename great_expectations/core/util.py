@@ -5,6 +5,7 @@ import datetime
 import decimal
 import logging
 import os
+import pathlib
 import re
 import sys
 import uuid
@@ -331,6 +332,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if isinstance(data, bytes):
         return str(data)
 
+    if isinstance(data, pathlib.PurePath):
+        return str(data)
+
     # noinspection PyTypeChecker
     if Polygon and isinstance(data, (Point, Polygon, MultiPolygon, LineString)):
         return str(data)
@@ -446,6 +450,9 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
         return
 
     if isinstance(data, (datetime.datetime, datetime.date)):
+        return
+
+    if isinstance(data, pathlib.PurePath):
         return
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
