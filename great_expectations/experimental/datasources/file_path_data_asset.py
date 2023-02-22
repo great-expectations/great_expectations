@@ -20,6 +20,9 @@ from typing import (
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.experimental.datasources.data_asset.data_connector import (
+    FILE_PATH_BATCH_SPEC_KEY,
+)
 from great_expectations.experimental.datasources.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
@@ -112,7 +115,9 @@ class _FilePathDataAsset(DataAsset):
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        return {option: None for option in set(self._all_group_names)}
+        options: set[str] = {FILE_PATH_BATCH_SPEC_KEY}
+        options.update(set(self._all_group_names))
+        return {option: None for option in options}
 
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -208,7 +213,9 @@ class _FilePathDataAsset(DataAsset):
             batch_request.options.update(batch_definition.batch_identifiers)
 
             batch_metadata = copy.deepcopy(batch_request.options)
-            batch_metadata.update(batch_spec)
+            # TODO: <Alex>ALEX</Alex>
+            # batch_metadata.update(batch_spec)
+            # TODO: <Alex>ALEX</Alex>
 
             # Some pydantic annotations are postponed due to circular imports.
             # Batch.update_forward_refs() will set the annotations before we

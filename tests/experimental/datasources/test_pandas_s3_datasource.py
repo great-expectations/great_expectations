@@ -153,6 +153,7 @@ def test_csv_asset_with_regex_unnamed_parameters():
     )
     options = asset.batch_request_options_template()
     assert options == {
+        "path": None,
         "batch_request_param_1": None,
         "batch_request_param_2": None,
         "batch_request_param_3": None,
@@ -168,7 +169,7 @@ def test_csv_asset_with_regex_named_parameters():
         regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
     options = asset.batch_request_options_template()
-    assert options == {"name": None, "timestamp": None, "price": None}
+    assert options == {"path": None, "name": None, "timestamp": None, "price": None}
 
 
 @pytest.mark.integration
@@ -180,7 +181,12 @@ def test_csv_asset_with_some_regex_named_parameters():
         regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
     )
     options = asset.batch_request_options_template()
-    assert options == {"name": None, "batch_request_param_2": None, "price": None}
+    assert options == {
+        "path": None,
+        "name": None,
+        "batch_request_param_2": None,
+        "price": None,
+    }
 
 
 @pytest.mark.integration
@@ -216,17 +222,16 @@ def test_get_batch_list_from_fully_specified_batch_request():
     assert batch.batch_request.datasource_name == pandas_s3_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
     assert batch.batch_request.options == {
+        "path": "alex_20200819_1300.csv",
         "name": "alex",
         "timestamp": "20200819",
         "price": "1300",
     }
     assert batch.metadata == {
+        "path": "alex_20200819_1300.csv",
         "name": "alex",
         "timestamp": "20200819",
         "price": "1300",
-        "path": "s3a://test_bucket/alex_20200819_1300.csv",
-        "reader_method": "read_csv",
-        "reader_options": {},
     }
     assert (
         batch.id

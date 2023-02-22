@@ -21,7 +21,6 @@ from great_expectations.experimental.datasources.spark_filesystem_datasource imp
     CSVSparkAsset,
     SparkFilesystemDatasource,
 )
-from great_expectations.util import is_candidate_subset_of_target
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +118,11 @@ def test_csv_asset_with_regex_unnamed_parameters(
         infer_schema=True,
     )
     options = asset.batch_request_options_template()
-    assert options == {"batch_request_param_1": None, "batch_request_param_2": None}
+    assert options == {
+        "path": None,
+        "batch_request_param_1": None,
+        "batch_request_param_2": None,
+    }
 
 
 @pytest.mark.unit
@@ -133,7 +136,7 @@ def test_csv_asset_with_regex_named_parameters(
         infer_schema=True,
     )
     options = asset.batch_request_options_template()
-    assert options == {"year": None, "month": None}
+    assert options == {"path": None, "year": None, "month": None}
 
 
 @pytest.mark.unit
@@ -147,7 +150,7 @@ def test_csv_asset_with_some_regex_named_parameters(
         infer_schema=True,
     )
     options = asset.batch_request_options_template()
-    assert options == {"batch_request_param_1": None, "month": None}
+    assert options == {"path": None, "batch_request_param_1": None, "month": None}
 
 
 @pytest.mark.unit
@@ -181,18 +184,11 @@ def test_get_batch_list_from_fully_specified_batch_request(
     batch = batches[0]
     assert batch.batch_request.datasource_name == spark_filesystem_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {"year": "2018", "month": "04"}
-    assert is_candidate_subset_of_target(
-        candidate={
-            "year": "2018",
-            "month": "04",
-        },
-        target=batch.metadata,
-    )
-    assert (
-        pathlib.Path(batch.metadata["path"]).name
-        == "yellow_tripdata_sample_2018-04.csv"
-    )
+
+    path = "yellow_tripdata_sample_2018-04.csv"
+    assert batch.batch_request.options == {"path": path, "year": "2018", "month": "04"}
+    assert batch.metadata == {"path": path, "year": "2018", "month": "04"}
+
     assert batch.id == "spark_filesystem_datasource-csv_asset-year_2018-month_04"
 
 

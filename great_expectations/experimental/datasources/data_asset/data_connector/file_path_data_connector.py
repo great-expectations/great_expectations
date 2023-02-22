@@ -272,12 +272,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         group_names: List[str] = regex_parser.get_all_group_names()
         if FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY not in group_names:
             pattern: str = regex.pattern
-            # TODO: <Alex>ALEX</Alex>
-            # pattern = re.escape(f"(?P<{FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY}>{pattern})")
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
             pattern = f"(?P<{FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY}>{pattern})"
-            # TODO: <Alex>ALEX</Alex>
             regex = re.compile(pattern)
 
         return regex

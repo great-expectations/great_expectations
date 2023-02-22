@@ -26,7 +26,6 @@ from great_expectations.experimental.datasources.pandas_file_path_datasource imp
     _FilePathDataAsset,
 )
 from great_expectations.experimental.datasources.sources import _get_field_details
-from great_expectations.util import is_candidate_subset_of_target
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -369,6 +368,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
     )
     options = asset.batch_request_options_template()  # type: ignore[attr-defined]
     assert options == {
+        "path": None,
         "batch_request_param_1": None,
         "batch_request_param_2": None,
     }
@@ -383,7 +383,7 @@ def test_csv_asset_with_regex_named_parameters(
         regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
     options = asset.batch_request_options_template()  # type: ignore[attr-defined]
-    assert options == {"year": None, "month": None}
+    assert options == {"path": None, "year": None, "month": None}
 
 
 @pytest.mark.unit
@@ -395,7 +395,7 @@ def test_csv_asset_with_some_regex_named_parameters(
         regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
     )
     options = asset.batch_request_options_template()  # type: ignore[attr-defined]
-    assert options == {"batch_request_param_1": None, "month": None}
+    assert options == {"path": None, "batch_request_param_1": None, "month": None}
 
 
 @pytest.mark.unit
@@ -425,18 +425,11 @@ def test_get_batch_list_from_fully_specified_batch_request(
     batch = batches[0]
     assert batch.batch_request.datasource_name == pandas_filesystem_datasource.name
     assert batch.batch_request.data_asset_name == asset.name  # type: ignore[attr-defined]
-    assert batch.batch_request.options == {"year": "2018", "month": "04"}
-    assert is_candidate_subset_of_target(
-        candidate={
-            "year": "2018",
-            "month": "04",
-        },
-        target=batch.metadata,
-    )
-    assert (
-        pathlib.Path(batch.metadata["path"]).name
-        == "yellow_tripdata_sample_2018-04.csv"
-    )
+
+    path = "yellow_tripdata_sample_2018-04.csv"
+    assert batch.batch_request.options == {"path": path, "year": "2018", "month": "04"}
+    assert batch.metadata == {"path": path, "year": "2018", "month": "04"}
+
     assert batch.id == "pandas_filesystem_datasource-csv_asset-year_2018-month_04"
 
 
