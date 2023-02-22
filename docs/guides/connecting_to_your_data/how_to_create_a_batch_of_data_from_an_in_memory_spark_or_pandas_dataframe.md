@@ -44,7 +44,7 @@ What used to be called a “Batch” in the old API was replaced with <Technical
 
     Load an on-disk <TechnicalTag tag="data_context" text="Data Context" /> (ie. from a `great_expectations.yml` configuration) via the `get_context()` command:
 
-    ```python # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_context"
+    ```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_context"
     ```
 
     If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.), load an in-code Data Context using these instructions: [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
