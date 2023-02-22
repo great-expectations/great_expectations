@@ -1,14 +1,11 @@
+import logging
 import os
 import re
 from typing import List
 
-import boto3
 import pandas as pd
-from moto import mock_s3
-
 import pytest
-
-import logging
+from moto import mock_s3
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
@@ -22,7 +19,6 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
     S3DataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest
-
 
 logger = logging.getLogger(__name__)
 
