@@ -43,7 +43,9 @@ datasource_config["data_connectors"]["default_inferred_data_connector_name"][
 context.test_yaml_config(yaml.dump(datasource_config))
 # </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py add_datasource">
 context.add_datasource(**datasource_config)
+# </snippet>
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
 batch_request = RuntimeBatchRequest(
