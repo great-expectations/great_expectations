@@ -152,8 +152,10 @@ At runtime, you would get a Validator from the Data Context by first defining a 
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py import pandas"
 ```
+
 ```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py path"
 ```
+
 ```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py batch_request 2"
 ```
 
