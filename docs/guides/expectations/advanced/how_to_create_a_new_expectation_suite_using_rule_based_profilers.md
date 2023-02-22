@@ -78,7 +78,7 @@ profiler_config = """
 
 First, we'll add some relevant top level keys (`name` and `config_version`) to label our Profiler and associate it with a specific version of the feature.
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L10-L12
+```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py name and config_version"
 ```
 
 :::info Config Versioning
@@ -89,30 +89,30 @@ Note that at the time of writing this document, `1.0` is the only supported conf
 
 Then, we'll add in a `Variables` key and some variables that we'll use. Next, we'll add a top level `rules` key, and then the name of your `rule`:
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L13-L15
+```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py variables and rule name"
 ```
 
 After that, we'll add our Domain Builder. In this case, we'll use a `TableDomainBuilder`, which will indicate that any expectations we build for this Domain will be at the Table level. Each Rule in our Profiler config can only use one Domain Builder.
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L19-L20
+```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py row_count_rule domain_builder"
 ```
 
 Next, we'll use a `NumericMetricRangeMultiBatchParameterBuilder` to get an estimate to use for the `min_value` and `max_value` of our `expect_table_row_count_to_be_between` Expectation. This Parameter Builder will take in a <TechnicalTag tag="batch_request" text="Batch Request" /> consisting of the five Batches prior to our current Batch, and use the row counts of each of those months to get a probable range of row counts that you could use in your `ExpectationConfiguration`.
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L21-L35
+```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py row_count_rule parameter_builders"
 ```
 
 A Rule can have multiple `ParameterBuilders` if needed, but in our case, we'll only use the one for now.
 
 Finally, you would use an `ExpectationConfigurationBuilder` to actually build your `expect_table_row_count_to_be_between` Expectation, where the Domain is the Domain returned by your `TableDomainBuilder` (your entire table), and the `min_value` and `max_value` are Parameters returned by your `NumericMetricRangeMultiBatchParameterBuilder`.
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L36-L44
+```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py row_count_rule expectation_configuration_builders"
 ```
 You can see here that we use a special `$` syntax to reference `variables` and `parameters` that have been previously defined in our config. You can see a more thorough description of this syntax in the  docstring for [`ParameterContainer` here](https://github.com/great-expectations/great_expectations/blob/develop/great_expectations/rule_based_profiler/types/parameter_container.py).
 
 - When we put it all together, here is what our config with our single `row_count_rule` looks like:
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L10-L80
+```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py full row_count_rule"
 ```
 
 ### 5. Run the Profiler
@@ -121,22 +121,22 @@ Now let's use our config to Profile our data and create a simple Expectation Sui
 
 First we'll do some basic set-up - set up a <TechnicalTag tag="data_context" text="Data Context" /> and parse our YAML
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L102-L106
+```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py set up"
 ```
 
 Next, we'll instantiate our Profiler, passing in our config and our Data Context
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L107-L114
+```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py instantiate"
 ```
 
-Finally, we'll run `profile()` and save it to a variable. 
+Finally, we'll run the profiler and save the result to a variable. 
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L115
+```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py run"
 ```
 
 Then, we can print our Expectation Suite so we can see how it looks!
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L120-L138
+```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py row_count_rule_suite"
 ```
 
 ### 6. Add a Rule for Columns
@@ -145,7 +145,7 @@ Let's add one more rule to our Rule-Based Profiler config. This Rule will use th
 
 As before, we will first add the name of our rule, and then specify the `DomainBuilder`.
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L45-L56
+```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py column_ranges_rule domain_builder"
 ```
 
 In this case, our `DomainBuilder` configuration is a bit more complex. First, we are using a `SimpleSemanticTypeColumnDomainBuilder`. This will take a table, and return a list of all columns that match the `semantic_type` specified - `numeric` in our case.
@@ -154,17 +154,17 @@ Then, we need to specify a Batch Request that returns exactly one Batch of data 
 
 After this, we specify our `ParameterBuilders`. This is very similar to the specification in our previous rule, except we will be specifying two `NumericMetricRangeMultiBatchParameterBuilders` to get a probable range for the `min_value` and `max_value` of each of our numeric columns. Thus one `ParameterBuilder` will take the `column.min` `metric_name`, and the other will take the `column.max` `metric_name`.
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L57-L81
+```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py column_ranges_rule parameter_builders"
 ```
 
 Finally, we'll put together our `Domains` and `Parameters` in our `ExpectationConfigurationBuilders`:
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L82-L100
+```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py column_ranges_rule expectation_configuration_builders"
 ```
 
 Putting together our entire config, with both of our Rules, we get:
 
-```yaml file=../../../../tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py#L9-L100
+```yaml name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py full profiler_config"
 ```
 
 And if we re-instantiate our `Profiler` with our config which now has two rules, and then we re-run the `Profiler`, we'll have an updated Expectation Suite with a table row count Expectation for our table, and column min and column max Expectations for each of our numeric columns!
