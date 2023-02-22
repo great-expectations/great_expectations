@@ -41,7 +41,7 @@ context.test_yaml_config(datasource_yaml)
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py add_datasource">
 context.add_datasource(**yaml.load(datasource_yaml))
-# </snippeto>
+# </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py runtime_batch_request">
 # Here is a RuntimeBatchRequest using a path to a single CSV file
