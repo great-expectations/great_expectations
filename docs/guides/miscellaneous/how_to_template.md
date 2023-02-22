@@ -31,14 +31,14 @@ To qualify as a step, the things within it must either:
 
 Run this code to {do a thing}.
 
-```python file=../../../tests/integration/docusaurus/template/script_example.py#L1
+```python name="tests/integration/docusaurus/template/script_example.py first import"
 ```
 
 ### 2. Next do this.
 
 {Concise description of what the user is going to do}.
 
-```python file=../../../tests/integration/docusaurus/template/script_example.py#L7
+```python name="tests/integration/docusaurus/template/script_example.py assert"
 ```
 
 ### 3. Finally, do this.
@@ -69,7 +69,7 @@ great_expectations suite new
 
 Run this code in Python.
 
-```python file=../../../tests/integration/docusaurus/template/script_example.py#L1-L3
+```python name="tests/integration/docusaurus/template/script_example.py imports"
 ```
 
 </TabItem>
