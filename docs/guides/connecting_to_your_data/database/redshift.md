@@ -69,7 +69,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py test datasource config"
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource_yaml"
 ```
 
 </TabItem>

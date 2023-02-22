@@ -30,6 +30,7 @@ load_data_into_test_database(
 context = gx.get_context()
 # </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource_yaml">
 datasource_yaml = f"""
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource config">
 name: my_redshift_datasource
@@ -47,6 +48,7 @@ data_connectors:
        include_schema_name: true
 # </snippet>
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
