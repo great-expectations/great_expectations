@@ -189,11 +189,11 @@ The V3-style Datasource has:
 
 
 #### V2-Style Datasource
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/great_expectations.yml#L16-L26
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/great_expectations.yml datasources"
 ```
 
 #### V3-Style Datasource
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/great_expectations.yml#L16-L31
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/great_expectations.yml datasources"
 ```
 
 <details>
@@ -220,11 +220,11 @@ The V3-style Datasource has:
 
 
 #### V2-Style Datasource
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml#L16-L26
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml datasources"
 ```
 
 #### V3-Style Datasource
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/great_expectations.yml#L16-L34
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/great_expectations.yml full"
 ```
 
 <details>
@@ -256,11 +256,11 @@ One exception to the datatype-agnostic Datasource in the V3 API is the <code>Sim
 :::
 
 #### V2-Style Datasource
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/great_expectations.yml#L16-L23
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/great_expectations.yml datasources"
 ```
 
 #### V3-Style Datasource
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/great_expectations.yml#L16-L32
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/great_expectations.yml datasources"
 ```
 
 <details>
@@ -331,7 +331,7 @@ The example V3-style Checkpoint contains:
 
 #### V2-Style Checkpoint
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/checkpoints/test_v2_checkpoint.yml full"
 ```
 
 <details>
@@ -341,7 +341,7 @@ The example V3-style Checkpoint contains:
 
 The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/great_expectations.yml#L56-L68
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/great_expectations.yml validation_operators"
 ```
 
 #### V3-Style Checkpoint
@@ -354,7 +354,7 @@ For additional examples on how to configure V3-style checkpoints, including how 
 - [How to configure a new Checkpoint using test_yaml_config](../validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
 
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v3/great_expectations/checkpoints/test_v3_checkpoint.yml full"
 ```
 
 <details>
@@ -411,7 +411,7 @@ The example V3-style Checkpoint contains:
 
 #### V2-Style Checkpoint
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L15
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/checkpoints/test_v2_checkpoint.yml full"
 ```
 
 <details>
@@ -421,7 +421,7 @@ The example V3-style Checkpoint contains:
 
 The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml#L57-L69
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml validation_operators"
 ```
 
 #### V3-Style Checkpoint
@@ -434,7 +434,7 @@ For additional examples on how to configure V3-style checkpoints, including how 
 - [How to configure a new Checkpoint using test_yaml_config](../validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
 
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L33
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/checkpoints/test_v3_checkpoint.yml full"
 ```
 
 <details>
@@ -490,7 +490,7 @@ The example V3-style Checkpoint contains:
 
 #### V2-Style Checkpoint
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/checkpoints/test_v2_checkpoint.yml#L1-L13
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/checkpoints/test_v2_checkpoint.yml full"
 ```
 
 <details>
@@ -500,7 +500,7 @@ The example V3-style Checkpoint contains:
 
 The Validation Operator named `action_list_operator` would be part of the `great_expectations.yml` file.
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/great_expectations.yml#L56-L66
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/great_expectations.yml action_list"
 ```
 
 #### V3-Style Checkpoint
@@ -513,7 +513,7 @@ For additional examples on how to configure V3-style checkpoints, including how 
 - [How to configure a new Checkpoint using test_yaml_config](../validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md)
 
 
-```yaml file=../../../tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/checkpoints/test_v3_checkpoint.yml#L1-L35
+```yaml name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/checkpoints/test_v3_checkpoint.yml full"
 ```
 
 <details>
