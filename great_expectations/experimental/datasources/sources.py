@@ -223,7 +223,7 @@ class _SourceFactories:
                     try:
                         # this can fail for an asset named like csv_asset_foo
                         asset_number = int(asset_name.split("_")[-1])
-                    except TypeError:
+                    except ValueError:
                         asset_number = 1
                     if (
                         asset_name.startswith(asset_name_prefix)
