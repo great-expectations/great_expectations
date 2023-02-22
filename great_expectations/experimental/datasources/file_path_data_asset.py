@@ -205,6 +205,9 @@ class _FilePathDataAsset(DataAsset):
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX</Alex>
             # TODO: <Alex>ALEX</Alex>
+            batch_metadata.update(batch_spec)
+            # TODO: <Alex>ALEX</Alex>
+            # TODO: <Alex>ALEX</Alex>
             batch_metadata.update(batch_definition.batch_identifiers)
             batch_request.options.update(batch_definition.batch_identifiers)
             # TODO: <Alex>ALEX</Alex>

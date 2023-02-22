@@ -26,6 +26,7 @@ from great_expectations.experimental.datasources.pandas_file_path_datasource imp
     _FilePathDataAsset,
 )
 from great_expectations.experimental.datasources.sources import _get_field_details
+from great_expectations.util import is_candidate_subset_of_target
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -410,12 +411,17 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert batch.batch_request.datasource_name == pandas_filesystem_datasource.name
     assert batch.batch_request.data_asset_name == asset.name  # type: ignore[attr-defined]
     assert batch.batch_request.options == {"year": "2018", "month": "04"}
-    assert batch.metadata == {
-        "year": "2018",
-        "month": "04",
-        "base_directory": pandas_filesystem_datasource.base_directory
-        / "yellow_tripdata_sample_2018-04.csv",
-    }
+    assert is_candidate_subset_of_target(
+        candidate={
+            "year": "2018",
+            "month": "04",
+        },
+        target=batch.metadata,
+    )
+    assert (
+        pathlib.Path(batch.metadata["path"]).name
+        == "yellow_tripdata_sample_2018-04.csv"
+    )
     assert batch.id == "pandas_filesystem_datasource-csv_asset-year_2018-month_04"
 
 
@@ -446,9 +452,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     request = asset.build_batch_request({"year": "2018"})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert (len(batches)) == 12
-    batch_filenames = [
-        pathlib.Path(batch.metadata["base_directory"]).stem for batch in batches
-    ]
+    batch_filenames = [pathlib.Path(batch.metadata["path"]).stem for batch in batches]
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)

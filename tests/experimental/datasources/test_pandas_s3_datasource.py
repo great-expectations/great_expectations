@@ -204,6 +204,7 @@ def test_get_batch_list_from_fully_specified_batch_request():
         name="csv_asset",
         regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
+
     request = asset.build_batch_request({"name": "alex", "timestamp": "20200819", "price": "1300"})  # type: ignore[attr-defined]
     batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
     assert len(batches) == 1
@@ -215,11 +216,22 @@ def test_get_batch_list_from_fully_specified_batch_request():
         "timestamp": "20200819",
         "price": "1300",
     }
-    assert batch.metadata == {"name": "alex", "timestamp": "20200819", "price": "1300"}
+    assert batch.metadata == {
+        "name": "alex",
+        "timestamp": "20200819",
+        "price": "1300",
+        "path": "s3a://test_bucket/alex_20200819_1300.csv",
+        "reader_method": "read_csv",
+        "reader_options": {},
+    }
     assert (
         batch.id
         == "pandas_s3_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
     )
+
+    request = asset.build_batch_request({"name": "alex"})  # type: ignore[attr-defined]
+    batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
+    assert len(batches) == 2
 
 
 @pytest.mark.integration
