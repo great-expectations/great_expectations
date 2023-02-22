@@ -495,44 +495,6 @@ class _SQLAsset(DataAsset):
             )
         )
 
-    def add_splitter_hashed_column(
-        self: Self, column_name: str, hash_digits: int
-    ) -> Self:
-        from great_expectations.experimental.datasources.sqlite_datasource import (
-            SqliteDatasource,
-        )
-
-        if not isinstance(self._datasource, SqliteDatasource):
-            raise ValueError(
-                "A hashed column splitter can only be used with a Sqlite datasource."
-            )
-        return self._add_splitter(
-            ColumnSplitterHashedColumn(
-                method_name="split_on_hashed_column",
-                column_name=column_name,
-                hash_digits=hash_digits,
-            )
-        )
-
-    def add_splitter_converted_datetime(
-        self: Self, column_name: str, date_format_string: str
-    ) -> Self:
-        from great_expectations.experimental.datasources.sqlite_datasource import (
-            SqliteDatasource,
-        )
-
-        if not isinstance(self._datasource, SqliteDatasource):
-            raise ValueError(
-                "A converted datetime splitter can only be used with a Sqlite datasource."
-            )
-        return self._add_splitter(
-            ColumnSplitterConvertedDateTime(
-                method_name="split_on_converted_datetime",
-                column_name=column_name,
-                date_format_string=date_format_string,
-            )
-        )
-
     def test_connection(self) -> None:
         pass
 
@@ -851,6 +813,8 @@ class SQLDatasource(Datasource):
     # private attrs
     _cached_connection_string: str = pydantic.PrivateAttr("")
     _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
+    _TableAsset: Type = pydantic.PrivateAttr(TableAsset)
+    _QueryAsset: Type = pydantic.PrivateAttr(QueryAsset)
 
     @property
     def execution_engine_type(self) -> Type[SqlAlchemyExecutionEngine]:
@@ -923,7 +887,7 @@ class SQLDatasource(Datasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-        asset = TableAsset(
+        asset = self._TableAsset(
             name=name,
             table_name=table_name,
             schema_name=schema_name,
@@ -936,7 +900,7 @@ class SQLDatasource(Datasource):
         name: str,
         query: str,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> QueryAsset:
+    ) -> QueryAsset:  # BDIRKS, this can be solve via generics?
         """Adds a query asset to this datasource.
 
         Args:
@@ -950,7 +914,7 @@ class SQLDatasource(Datasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-        asset = QueryAsset(
+        asset = self._QueryAsset(
             name=name,
             query=query,
             order_by=order_by_sorters,
