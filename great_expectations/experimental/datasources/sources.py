@@ -249,29 +249,27 @@ class _SourceFactories:
             str, LegacyDatasource | BaseDatasource | Datasource
         ] = self._data_context.datasources  # type: ignore[union-attr]  # typing information is being lost in DataContext factory
 
-        possible_default_datasource_names = iter(
-            [
-                "default_pandas_datasource",
-                "default_pandas_fluent_datasource",
-            ]
-        )
+        # these will be attempted in the order they are listed
+        possible_default_pandas_datasource_names = [
+            "default_pandas_datasource",
+            "default_pandas_fluent_datasource",
+        ]
 
-        # if a legacy datasource with this name already exists, we give it a different name
-        default_pandas_datasource_name = next(possible_default_datasource_names)
         existing_datasource: LegacyDatasource | BaseDatasource | Datasource | None = (
-            datasources.get(default_pandas_datasource_name)
+            None
         )
-        if existing_datasource and not isinstance(
-            existing_datasource,
-            PandasDatasource,
-        ):
-            default_pandas_datasource_name = next(possible_default_datasource_names)
+        for default_pandas_datasource_name in possible_default_pandas_datasource_names:
+            # if a legacy datasource with this name already exists, we try a different name
             existing_datasource = datasources.get(default_pandas_datasource_name)
+            if not existing_datasource or isinstance(
+                existing_datasource, PandasDatasource
+            ):
+                break
 
-        # if a legacy datasource with all possible_default_datasource_names exists, raise an error
+        # if a legacy datasource exists for all possible_default_datasource_names, raise an error
         if existing_datasource:
             quoted_datasource_names = [
-                f'"{name}"' for name in possible_default_datasource_names
+                f'"{name}"' for name in possible_default_pandas_datasource_names
             ]
             assert isinstance(
                 existing_datasource, PandasDatasource
