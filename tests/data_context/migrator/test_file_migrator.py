@@ -13,10 +13,14 @@ from great_expectations.data_context.data_context.ephemeral_data_context import 
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.data_context.data_context.serializable_data_context import (
+    SerializableDataContext,
+)
 from great_expectations.data_context.migrator.file_migrator import FileMigrator
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     DataContextConfigDefaults,
+    DatasourceConfig,
     InMemoryStoreBackendDefaults,
 )
 from tests.test_utils import working_directory
@@ -74,7 +78,7 @@ def test_migrate_scaffolds_filesystem(
 
 
 @pytest.mark.integration
-def test_migrate_transfers_persisted_objects(
+def test_migrate_transfers_store_contents(
     tmpdir: py.path.local,
     construct_file_migrator: Callable,
     ephemeral_context_with_defaults: EphemeralDataContext,
@@ -103,6 +107,43 @@ def test_migrate_transfers_persisted_objects(
     contents = sorted(str(f.stem) for f in expectations_dir.glob("*.json"))
 
     assert contents == suite_names
+
+
+@pytest.mark.integration
+def test_migrate_transfers_datasources(
+    tmpdir: py.path.local,
+    construct_file_migrator: Callable,
+    ephemeral_context_with_defaults: EphemeralDataContext,
+    datasource_config: DatasourceConfig,
+):
+    # Test setup
+    context = ephemeral_context_with_defaults
+    datasource_name = "my_datasource_awaiting_migration"
+
+    config_dict = datasource_config.to_dict()
+    for attr in ("class_name", "module_name"):
+        config_dict.pop(attr)
+    config_dict["name"] = datasource_name
+
+    context.add_datasource(**config_dict)
+
+    # Construct and run migrator
+    d = tmpdir.mkdir("tmp")
+    with working_directory(str(d)):
+        file_migrator = construct_file_migrator(context)
+        migrated_context = file_migrator.migrate()
+
+    # # Check proper config updates
+    assert datasource_name in migrated_context.datasources
+
+    # Check proper filesystem interaction
+    root = pathlib.Path(migrated_context.root_directory)
+    project_config = root.joinpath(SerializableDataContext.GX_YML)
+
+    with project_config.open() as f:
+        contents = f.read()
+
+    assert datasource_name in contents
 
 
 @pytest.mark.integration
