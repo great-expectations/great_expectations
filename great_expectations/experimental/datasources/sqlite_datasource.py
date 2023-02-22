@@ -16,6 +16,10 @@ class SqliteDsn(pydantic.AnyUrl):
     host_required = False
 
 
+# class _SQLiteAsset(_SQLAsset):
+#    pass
+
+
 class SqliteDatasource(SQLDatasource):
     """Adds a sqlite datasource to the data context.
 

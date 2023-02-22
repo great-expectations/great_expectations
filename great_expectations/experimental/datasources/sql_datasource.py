@@ -16,7 +16,7 @@ from typing import (
 )
 
 import pydantic
-from typing_extensions import Literal
+from typing_extensions import Literal, Self
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -411,9 +411,9 @@ class _SQLAsset(DataAsset):
         return self
 
     def add_splitter_year(
-        self,
+        self: Self,
         column_name: str,
-    ) -> _SQLAsset:
+    ) -> Self:
         """Associates a year splitter with this sql data asset.
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
@@ -425,9 +425,9 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_year_and_month(
-        self,
+        self: Self,
         column_name: str,
-    ) -> _SQLAsset:
+    ) -> Self:
         """Associates a year, month splitter with this sql asset.
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
@@ -441,9 +441,9 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_year_and_month_and_day(
-        self,
+        self: Self,
         column_name: str,
-    ) -> _SQLAsset:
+    ) -> Self:
         """Associates a year, month, day splitter with this sql asset.
         Args:
             column_name: A column name of the date column where year and month will be parsed out.
@@ -457,8 +457,8 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_datetime_part(
-        self, column_name: str, datetime_parts: List[str]
-    ) -> _SQLAsset:
+        self: Self, column_name: str, datetime_parts: List[str]
+    ) -> Self:
         return self._add_splitter(
             ColumnSplitterDatetimePart(
                 method_name="split_on_date_parts",
@@ -467,7 +467,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
-    def add_splitter_column_value(self, column_name: str) -> _SQLAsset:
+    def add_splitter_column_value(self: Self, column_name: str) -> Self:
         return self._add_splitter(
             ColumnSplitterColumnValue(
                 method_name="split_on_column_value",
@@ -475,7 +475,9 @@ class _SQLAsset(DataAsset):
             )
         )
 
-    def add_splitter_divided_integer(self, column_name: str, divisor: int) -> _SQLAsset:
+    def add_splitter_divided_integer(
+        self: Self, column_name: str, divisor: int
+    ) -> Self:
         return self._add_splitter(
             ColumnSplitterDividedInteger(
                 method_name="split_on_divided_integer",
@@ -484,7 +486,7 @@ class _SQLAsset(DataAsset):
             )
         )
 
-    def add_splitter_mod_integer(self, column_name: str, mod: int) -> _SQLAsset:
+    def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
         return self._add_splitter(
             ColumnSplitterModInteger(
                 method_name="split_on_mod_integer",
@@ -494,8 +496,8 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_hashed_column(
-        self, column_name: str, hash_digits: int
-    ) -> _SQLAsset:
+        self: Self, column_name: str, hash_digits: int
+    ) -> Self:
         from great_expectations.experimental.datasources.sqlite_datasource import (
             SqliteDatasource,
         )
@@ -513,8 +515,8 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_converted_datetime(
-        self, column_name: str, date_format_string: str
-    ) -> _SQLAsset:
+        self: Self, column_name: str, date_format_string: str
+    ) -> Self:
         from great_expectations.experimental.datasources.sqlite_datasource import (
             SqliteDatasource,
         )
@@ -723,9 +725,9 @@ class _SQLAsset(DataAsset):
         raise NotImplementedError
 
 
-class QueryAsset(_SQLAsset):
+class _QueryAsset(ExperimentalBaseModel):
     # Instance fields
-    type: Literal["query"] = "query"
+    name: str
     query: str
 
     @pydantic.validator("query")
@@ -753,9 +755,13 @@ class QueryAsset(_SQLAsset):
         }
 
 
-class TableAsset(_SQLAsset):
+class QueryAsset(_QueryAsset, _SQLAsset):
+    type: Literal["query"] = "query"
+
+
+class _TableAsset(ExperimentalBaseModel):
     # Instance fields
-    type: Literal["table"] = "table"
+    name: str
     table_name: str
     schema_name: Optional[str] = None
 
@@ -814,6 +820,10 @@ class TableAsset(_SQLAsset):
             "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
+
+
+class TableAsset(_TableAsset, _SQLAsset):
+    type: Literal["table"] = "table"
 
 
 class SQLDatasource(Datasource):
