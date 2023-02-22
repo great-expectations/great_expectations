@@ -5,6 +5,7 @@ import datetime
 import decimal
 import logging
 import os
+import pathlib
 import re
 import sys
 import uuid
@@ -329,6 +330,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return str(data)
 
     if isinstance(data, bytes):
+        return str(data)
+
+    if isinstance(data, pathlib.PurePath):
         return str(data)
 
     # noinspection PyTypeChecker
