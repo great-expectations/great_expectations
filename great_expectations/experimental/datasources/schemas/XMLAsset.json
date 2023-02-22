@@ -63,6 +63,11 @@
             "default": "lxml",
             "type": "string"
         },
+        "stylesheet": {
+            "title": "Stylesheet",
+            "format": "file-path",
+            "type": "string"
+        },
         "compression": {
             "title": "Compression",
             "default": "infer",
