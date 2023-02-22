@@ -22,6 +22,11 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
+        "path_or_buffer": {
+            "title": "Path Or Buffer",
+            "format": "file-path",
+            "type": "string"
+        },
         "xpath": {
             "title": "Xpath",
             "default": "./*",
@@ -58,6 +63,11 @@
             "default": "lxml",
             "type": "string"
         },
+        "stylesheet": {
+            "title": "Stylesheet",
+            "format": "file-path",
+            "type": "string"
+        },
         "compression": {
             "title": "Compression",
             "default": "infer",
@@ -85,7 +95,8 @@
         }
     },
     "required": [
-        "name"
+        "name",
+        "path_or_buffer"
     ],
     "additionalProperties": false,
     "definitions": {

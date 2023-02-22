@@ -4,6 +4,7 @@ import logging
 import pathlib
 import re
 from typing import (
+    TYPE_CHECKING,
     ClassVar,
     Dict,
     List,
@@ -24,20 +25,43 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     DataAsset,
     TestConnectionError,
-    _batch_sorter_from_list,
 )
 from great_expectations.experimental.datasources.pandas_datasource import (
-    _FILE_TYPE_READER_METHOD_BLACK_LIST,
     _PandasDatasource,
 )
 from great_expectations.experimental.datasources.signatures import _merge_signatures
 
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.interfaces import BatchSorter
+
 logger = logging.getLogger(__name__)
 
 
+_FILESYSTEM_READER_METHOD_BLACK_LIST = (
+    # "read_csv",
+    # "read_json",
+    # "read_excel",
+    # "read_parquet",
+    "read_clipboard",  # not path based
+    # "read_feather",
+    "read_fwf",  # unhandled type
+    "read_gbq",  # not path based
+    # "read_hdf",
+    # "read_html",
+    # "read_orc",
+    # "read_pickle",
+    # "read_sas",  # invalid json schema
+    # "read_spss",
+    "read_sql",  # not path based & type-name conflict
+    "read_sql_query",  # not path based
+    "read_sql_table",  # not path based
+    "read_table",  # type-name conflict
+    # "read_xml",
+)
+
 _FILESYSTEM_ASSET_MODELS = _generate_pandas_data_asset_models(
     _FilesystemDataAsset,
-    blacklist=_FILE_TYPE_READER_METHOD_BLACK_LIST,
+    blacklist=_FILESYSTEM_READER_METHOD_BLACK_LIST,
     use_docstring_from_method=True,
     skip_first_param=True,
 )
@@ -92,7 +116,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_csv_asset(
         self,
         name: str,
-        regex: Union[re.Pattern, str],
+        regex: Optional[Union[re.Pattern, str]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -106,14 +130,16 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = CSVAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
             glob_directive=glob_directive,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
 
@@ -122,7 +148,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_excel_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -136,14 +162,16 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = ExcelAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
             glob_directive=glob_directive,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
 
@@ -152,7 +180,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_json_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -166,14 +194,16 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = JSONAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
             glob_directive=glob_directive,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
 
@@ -182,7 +212,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_parquet_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -196,14 +226,16 @@ class PandasFilesystemDatasource(_PandasDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = ParquetAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
             glob_directive=glob_directive,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
             **kwargs,
         )
 
