@@ -26,8 +26,7 @@ def default_pandas_data(
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
     pandas_ds = context.sources.pandas_default
-    asset = pandas_ds.add_pandas_csv_asset(
-        name="csv_asset",
+    asset = pandas_ds.read_pandas_csv(  # type: ignore[attr-defined]
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
     )
     batch_request = asset.build_batch_request()

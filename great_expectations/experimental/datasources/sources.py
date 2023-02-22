@@ -7,6 +7,7 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
+    Generator,
     List,
     NamedTuple,
     Type,
@@ -181,12 +182,12 @@ class _SourceFactories:
         asset_type: Type[DataAsset],
         asset_type_name: str,
     ):
-        asset_factory_method_name = f"add_{asset_type_name}_asset"
-        asset_factory_defined: bool = asset_factory_method_name in ds_type.__dict__
+        add_asset_factory_method_name = f"add_{asset_type_name}_asset"
+        asset_factory_defined: bool = add_asset_factory_method_name in ds_type.__dict__
 
         if not asset_factory_defined:
             logger.debug(
-                f"No `{asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."
+                f"No `{add_asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."
             )
 
             def _add_asset_factory(
@@ -200,10 +201,38 @@ class _SourceFactories:
             _add_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
                 _add_asset_factory, asset_type, exclude={"type"}
             )
-            setattr(ds_type, asset_factory_method_name, _add_asset_factory)
+            setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
+
+            def _read_asset_factory(self: Datasource, **kwargs) -> pydantic.BaseModel:
+                existing_asset_names: Generator[str, None, None] = (
+                    asset_name for asset_name in self.assets.keys()
+                )
+                asset_name_prefix = f"{asset_type_name}_asset_"
+                max_asset_number = 1
+                for asset_name in existing_asset_names:
+                    try:
+                        asset_number = int(asset_name.split("_")[-1])
+                    except TypeError:
+                        asset_number = 1
+                    if (
+                        asset_name.startswith(asset_name_prefix)
+                        and asset_number > max_asset_number
+                    ):
+                        max_asset_number = asset_number
+
+                name = asset_name_prefix + str(max_asset_number)
+                asset = asset_type(name=name, **kwargs)
+                return self.add_asset(asset)
+
+            _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+                _read_asset_factory, asset_type, exclude={"type"}
+            )
+            read_asset_factory_method_name = f"read_{asset_type_name}"
+            setattr(ds_type, read_asset_factory_method_name, _read_asset_factory)
+
         else:
             logger.debug(
-                f"`{asset_factory_method_name}()` already defined `{ds_type.__name__}`"
+                f"`{add_asset_factory_method_name}()` already defined `{ds_type.__name__}`"
             )
 
     @property
