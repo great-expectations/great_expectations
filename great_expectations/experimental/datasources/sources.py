@@ -256,17 +256,17 @@ class _SourceFactories:
             ]
         )
 
-        default_pandas_datasource_name = next(possible_default_datasource_names)
         # if a legacy datasource with this name already exists, we give it a different name
-        if not isinstance(
-            datasources.get(default_pandas_datasource_name),
-            PandasDatasource,
-        ):
-            default_pandas_datasource_name = next(possible_default_datasource_names)
-
+        default_pandas_datasource_name = next(possible_default_datasource_names)
         existing_datasource: LegacyDatasource | BaseDatasource | Datasource | None = (
             datasources.get(default_pandas_datasource_name)
         )
+        if existing_datasource and not isinstance(
+            existing_datasource,
+            PandasDatasource,
+        ):
+            default_pandas_datasource_name = next(possible_default_datasource_names)
+            existing_datasource = datasources.get(default_pandas_datasource_name)
 
         # if a legacy datasource with all possible_default_datasource_names exists, raise an error
         if existing_datasource:
