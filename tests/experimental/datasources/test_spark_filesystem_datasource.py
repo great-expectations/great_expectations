@@ -68,6 +68,18 @@ def test_add_csv_asset_to_datasource(
 ):
     asset = spark_filesystem_datasource.add_csv_asset(
         name="csv_asset",
+    )
+    assert asset.name == "csv_asset"
+    m1 = asset.regex.match("this_can_be_named_anything.csv")
+    assert m1 is not None
+
+
+@pytest.mark.unit
+def test_add_csv_asset_with_regex_to_datasource(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+):
+    asset = spark_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
         regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
         header=True,
         infer_schema=True,
@@ -104,7 +116,11 @@ def test_csv_asset_with_regex_unnamed_parameters(
         infer_schema=True,
     )
     options = asset.batch_request_options_template()
-    assert options == {"batch_request_param_1": None, "batch_request_param_2": None}
+    assert options == {
+        "batch_request_param_1": None,
+        "batch_request_param_2": None,
+        "path": None,
+    }
 
 
 @pytest.mark.unit
@@ -118,7 +134,7 @@ def test_csv_asset_with_regex_named_parameters(
         infer_schema=True,
     )
     options = asset.batch_request_options_template()
-    assert options == {"year": None, "month": None}
+    assert options == {"year": None, "month": None, "path": None}
 
 
 @pytest.mark.unit
@@ -132,7 +148,7 @@ def test_csv_asset_with_some_regex_named_parameters(
         infer_schema=True,
     )
     options = asset.batch_request_options_template()
-    assert options == {"batch_request_param_1": None, "month": None}
+    assert options == {"batch_request_param_1": None, "month": None, "path": None}
 
 
 @pytest.mark.unit
@@ -151,7 +167,6 @@ def test_csv_asset_with_non_string_regex_named_parameters(
 
 
 @pytest.mark.unit
-@pytest.mark.xfail(reason="temp xfail for release 0.15.47")
 def test_get_batch_list_from_fully_specified_batch_request(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -161,24 +176,28 @@ def test_get_batch_list_from_fully_specified_batch_request(
         header=True,
         infer_schema=True,
     )
-    request = asset.build_batch_request({"year": "2018", "month": "04"})
+    path = "yellow_tripdata_sample_2018-04.csv"
+    request = asset.build_batch_request({"year": "2018", "month": "04", "path": path})
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
     assert batch.batch_request.datasource_name == spark_filesystem_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {"year": "2018", "month": "04"}
+    assert batch.batch_request.options == {
+        "year": "2018",
+        "month": "04",
+        "path": pathlib.Path(path),
+    }
     assert batch.metadata == {
         "year": "2018",
         "month": "04",
-        "base_directory": spark_filesystem_datasource.base_directory
-        / "yellow_tripdata_sample_2018-04.csv",
+        "base_directory": spark_filesystem_datasource.base_directory,
+        "path": pathlib.Path(path),
     }
     assert batch.id == "spark_filesystem_datasource-csv_asset-year_2018-month_04"
 
 
 @pytest.mark.unit
-@pytest.mark.xfail(reason="temp xfail for release 0.15.47")
 def test_get_batch_list_from_partially_specified_batch_request(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
@@ -207,9 +226,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
     request = asset.build_batch_request({"year": "2018"})
     batches = asset.get_batch_list_from_batch_request(request)
     assert (len(batches)) == 12
-    batch_filenames = [
-        pathlib.Path(batch.metadata["base_directory"]).stem for batch in batches
-    ]
+    batch_filenames = [batch.metadata["path"].stem for batch in batches]
     assert set(files_for_2018) == set(batch_filenames)
 
     @dataclass(frozen=True)

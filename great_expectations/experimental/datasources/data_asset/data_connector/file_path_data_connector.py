@@ -53,8 +53,11 @@ class FilePathDataConnector(DataConnector):
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: A list of sorters for sorting data references.
+        file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
         # TODO: <Alex>ALEX</Alex>
     """
+
+    FILE_PATH_BATCH_SPEC_KEY = "path"
 
     def __init__(
         self,
@@ -247,7 +250,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         path = self._get_full_file_path(path=path)
 
-        return {"path": path}
+        return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
 
     def _get_data_references_cache(self) -> Dict[str, List[BatchDefinition] | None]:
         """

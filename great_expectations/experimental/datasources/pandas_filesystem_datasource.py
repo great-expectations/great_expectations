@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from typing_extensions import Literal
 
@@ -15,7 +15,6 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
 from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     TestConnectionError,
-    _batch_sorter_from_list,
 )
 from great_expectations.experimental.datasources.pandas_file_path_datasource import (
     CSVAsset,
@@ -24,6 +23,9 @@ from great_expectations.experimental.datasources.pandas_file_path_datasource imp
     ParquetAsset,
 )
 from great_expectations.experimental.datasources.signatures import _merge_signatures
+
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.interfaces import BatchSorter
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +60,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_csv_asset(
         self,
         name: str,
-        regex: Union[re.Pattern, str],
+        regex: Optional[Union[re.Pattern, str]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -72,25 +74,27 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = CSVAsset(
             name=name,
-            regex=regex,
-            order_by=_batch_sorter_from_list(order_by or []),
+            regex=regex_pattern,
+            order_by=order_by_sorters,
             **kwargs,
         )
 
         data_connector: DataConnector = FilesystemDataConnector(
             datasource_name=self.name,
             data_asset_name=name,
-            regex=regex,
+            regex=regex_pattern,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex_pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
@@ -100,7 +104,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_excel_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -114,25 +118,27 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = ExcelAsset(
             name=name,
-            regex=regex,
-            order_by=_batch_sorter_from_list(order_by or []),
+            regex=regex_pattern,
+            order_by=order_by_sorters,
             **kwargs,
         )
 
         data_connector: DataConnector = FilesystemDataConnector(
             datasource_name=self.name,
             data_asset_name=name,
-            regex=regex,
+            regex=regex_pattern,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex_pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
@@ -142,7 +148,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_json_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -156,25 +162,27 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = JSONAsset(
             name=name,
-            regex=regex,
-            order_by=_batch_sorter_from_list(order_by or []),
+            regex=regex_pattern,
+            order_by=order_by_sorters,
             **kwargs,
         )
 
         data_connector: DataConnector = FilesystemDataConnector(
             datasource_name=self.name,
             data_asset_name=name,
-            regex=regex,
+            regex=regex_pattern,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex_pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
@@ -184,7 +192,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_parquet_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -198,25 +206,27 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
 
         asset = ParquetAsset(
             name=name,
-            regex=regex,
-            order_by=_batch_sorter_from_list(order_by or []),
+            regex=regex_pattern,
+            order_by=order_by_sorters,
             **kwargs,
         )
 
         data_connector: DataConnector = FilesystemDataConnector(
             datasource_name=self.name,
             data_asset_name=name,
-            regex=regex,
+            regex=regex_pattern,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{regex_pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,

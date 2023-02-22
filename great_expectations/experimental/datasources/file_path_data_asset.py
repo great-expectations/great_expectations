@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import dataclasses
 import logging
+import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -13,6 +14,7 @@ from typing import (
     Optional,
     Pattern,
     Set,
+    Union,
 )
 
 import pydantic
@@ -26,6 +28,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
+    Datasource,
     TestConnectionError,
 )
 
@@ -100,11 +103,16 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
+    @pydantic.validator("regex", pre=True)
+    def _parse_regex_string(
+        cls, regex: Optional[Union[re.Pattern, str]] = None
+    ) -> re.Pattern:
+        return Datasource.parse_regex_string(regex=regex)
+
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        idx: int
-        return {idx: None for idx in self._all_group_names}
+        return {option: None for option in set(self._all_group_names)}
 
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -128,6 +136,7 @@ class _FilePathDataAsset(DataAsset):
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
