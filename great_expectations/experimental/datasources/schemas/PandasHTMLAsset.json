@@ -22,6 +22,11 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
+        "io": {
+            "title": "Io",
+            "format": "file-path",
+            "type": "string"
+        },
         "match": {
             "title": "Match",
             "default": ".+",
@@ -126,7 +131,8 @@
         }
     },
     "required": [
-        "name"
+        "name",
+        "io"
     ],
     "additionalProperties": false,
     "definitions": {

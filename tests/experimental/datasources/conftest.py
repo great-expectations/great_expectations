@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Generator, List, Type
+from typing import Any, Callable, Dict, Generator, List, Type, Union
 
 import pytest
 from pytest import MonkeyPatch
@@ -56,7 +56,7 @@ class MockSaEngine:
 def sqlachemy_execution_engine_mock_cls(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
-    splitter_query_response: List[Dict[str, Any]],
+    splitter_query_response: Union[List[Dict[str, Any]], List[Any]],
 ):
     """Creates a mock gx sql alchemy engine class
 
@@ -68,6 +68,9 @@ def sqlachemy_execution_engine_mock_cls(
             the splitter query. The keys are the column names and the value is the column values, eg:
             [{'year': 2021, 'month': 1}, {'year': 2021, 'month': 2}]
     """
+
+    if not splitter_query_response:
+        raise ValueError("splitter_query_response must be a non-empty list.")
 
     class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
         def __init__(self, *args, **kwargs):
@@ -88,7 +91,14 @@ def sqlachemy_execution_engine_mock_cls(
                     for k, v in attributes.items():
                         setattr(self, k, v)
 
-            return [Row(row_dict) for row_dict in splitter_query_response]
+            # We know that splitter_query_response is non-empty because of validation
+            # at the top of the outer function.
+            # In some cases, such as in the datetime splitters,
+            # a dictionary is returned our from out splitter query with the key as the parameter_name.
+            # Otherwise, a list of values is returned.
+            if isinstance(splitter_query_response[0], dict):
+                return [Row(row_dict) for row_dict in splitter_query_response]
+            return splitter_query_response
 
     return MockSqlAlchemyExecutionEngine
 
