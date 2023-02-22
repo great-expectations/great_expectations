@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import List
+from typing import List, cast
 
 import pandas as pd
 import pytest
@@ -15,6 +15,9 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
     S3DataConnector,
 )
 from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
+from great_expectations.experimental.datasources.file_path_data_asset import (
+    _FilePathDataAsset,
+)
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_file_path_datasource import (
     CSVAsset,
@@ -84,7 +87,7 @@ def _build_pandas_s3_datasource() -> PandasS3Datasource:
     )
 
 
-def _build_csv_asset() -> CSVAsset:
+def _build_csv_asset() -> _FilePathDataAsset:
     pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource()
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
@@ -98,8 +101,9 @@ def _build_bad_regex_config() -> tuple[re.Pattern, TestConnectionError]:
     regex = re.compile(
         r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
     )
+    data_connector: S3DataConnector = cast(S3DataConnector, asset._data_connector)
     test_connection_error = TestConnectionError(
-        f"""No file in bucket "{asset.datasource.bucket}" with prefix "{asset._data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using deliiter "{asset._data_connector._delimiter}" for DataAsset "{asset.name}"."""
+        f"""No file in bucket "{asset.datasource.bucket}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using deliiter "{data_connector._delimiter}" for DataAsset "{asset.name}"."""
     )
     return regex, test_connection_error
 
@@ -236,7 +240,7 @@ def test_get_batch_list_from_fully_specified_batch_request():
 @mock_s3
 def test_test_connection_failures():
     regex, test_connection_error = _build_bad_regex_config()
-    csv_asset = CSVAsset(  # type: ignore[call-arg]
+    csv_asset = CSVAsset(
         name="csv_asset",
         regex=regex,
     )

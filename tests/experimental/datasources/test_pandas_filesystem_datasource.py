@@ -233,7 +233,7 @@ class TestDynamicPandasAssets:
         This is also a proxy for testing that the dynamic pydantic model creation was successful.
         """
         with pytest.raises(pydantic.ValidationError) as exc_info:
-            asset_class(  # type: ignore[call-arg]
+            asset_class(
                 name="test",
                 base_directory=pathlib.Path(__file__),
                 regex=re.compile(r"yellow_tripdata_sample_(\d{4})-(\d{2})"),
@@ -572,7 +572,7 @@ def datasource_test_connection_error_messages(
     request,
 ) -> tuple[PandasFilesystemDatasource, TestConnectionError]:
     regex, test_connection_error = request.param(csv_path=csv_path)
-    csv_asset = CSVAsset(  # type: ignore[call-arg]
+    csv_asset = CSVAsset(
         name="csv_asset",
         regex=regex,
     )
