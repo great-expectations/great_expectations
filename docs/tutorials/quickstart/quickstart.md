@@ -56,7 +56,7 @@ result = validator.validate()
 
 result.view()
 
-context.convert_to_file_context()
+context = context.convert_to_file_context(path_to_desired_root_folder_for_file_context)
 ```
 
 That's not a lot of code, is it?  In the following steps we'll break down exactly what is happening here so that you can follow along and perform a Validation yourself.
@@ -108,6 +108,22 @@ We will get a `DataContext` object with the following code:
 context = gx.get_context()
 ```
 
+:::info Types of Data Contexts returned by the `get_context()` command
+
+There are three types of Data Contexts that you will likely see when using GX.  These are:
+- Ephemeral Data Context: A Data context that exists in memory and does not persist outside a python session.
+- Filesystem Data Context: A Data Context associated with a filesystem.  
+- Cloud Data Context: A Data Context associated with GX's Cloud product.
+
+The `get_context()` command follows the following logic if it is executed without any paramters:
+1. If the configuration for a Cloud Data Context is found, instantiate and return it. Otherwise:
+2. If the configuration for a Filesystem Data Context is found, instantiate and return it.  Otherwise:
+3. Instantiate an Ephemeral Data Context and return it.
+
+Because we have not previously initialized a Cloud or Filesystem Data Context, `get_context()` will provide us with an Ephemeral Data Context.  This means that the information stored in it will not persist outside our current python session.
+
+:::
+
 The Data Context will provide you with access to a variety of utility and convenience methods.  It is the entry point for using the GX Python API.
 
 ### 2. Connect to data
@@ -154,19 +170,25 @@ Once the `validator` object finishes executing the `validate()` command, you can
 result.view()
 ```
 
-#### 4.2 Save your Expectations for use with future data
-
 ## Next Steps 
 
 Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases.
 
-To help with this we have prepared some more detailed installation and setting up guides tailored to specific environments and resources:
-- Installing and setting up GX for local filesystem data with pip
-- Installing and setting up GX for local filesystem data with conda
-- Installing and setting up GX for PostgreSQL
-- Installing and setting up GX for Amazon S3
-- Installing and setting up GX for Azure Blob Storage
-- Installing and setting up GX for GCS
+To help with this we have prepared some more detailed installation and setting up guides tailored to specific environments and resources.  For more details on installation and setup of GX, please see:
+- [How to install Great Expectations locally](/docs/guides/setup/installation/local.md)
+- [How to install Great Expectations in a hosted environment](/docs/guides/setup/installation/hosted_environment.md)
+- How to install and set up GX for use with data in a local filesystem
+- How to install and set up GX for use with data in a SQL database
+- How to install and set up GX for use with Amazon S3
+- How to install and set up GX for use with Google Cloud Services
+- How to install and set up GX for use with an EMR Spark cluster
+- How to install and set up GX for use with Databricks
+- How to install and set up GX for use with Airflow
+
+If you wish to continue working with the GX installation used in this Quickstart guide, you will likely want to configure your Data Context to persist through future Python sessions.  For more details on how to do this, please see:
+- How to create a Filesystem Data Context from an Ephemeral Data Context
+- How to initialize a Filesystem Data Context from the CLI
+- How to initialize or instantiate a specific Filesystem Data Context with `get_context(...)`
 
 ## Additional information
 
