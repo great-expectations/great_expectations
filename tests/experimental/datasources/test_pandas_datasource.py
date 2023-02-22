@@ -136,7 +136,7 @@ class TestDynamicPandasAssets:
         }
         print(asset_class_names)
 
-        assert type_name in asset_class_names
+        assert type_name.replace("_", "") in asset_class_names
 
     @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
     def test_add_asset_method_exists_and_is_functional(
