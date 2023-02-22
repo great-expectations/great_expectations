@@ -345,7 +345,7 @@ class ExpectColumnValuesToBeBetween(ColumnMapExpectation):
     @render_evaluation_parameter_string
     def _prescriptive_renderer(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
+        configuration: ExpectationConfiguration,
         result: Optional[ExpectationValidationResult] = None,
         runtime_configuration: Optional[dict] = None,
         **kwargs,
