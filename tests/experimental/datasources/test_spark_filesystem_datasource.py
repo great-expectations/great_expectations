@@ -289,7 +289,7 @@ def test_spark_sorter(
 
     ordered_years = reversed(years) if "-year" in order_by else years
     ordered_months = reversed(months) if "-month" in order_by else months
-    if "year" in order_by[0]:  # type: ignore[arg-type]
+    if "year" in order_by[0]:  # type: ignore[operator]
         ordered = [
             TimeRange(key="year", range=ordered_years),  # type: ignore[arg-type]
             TimeRange(key="month", range=ordered_months),  # type: ignore[arg-type]
