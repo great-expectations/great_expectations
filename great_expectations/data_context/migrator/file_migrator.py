@@ -44,6 +44,12 @@ class FileMigrator:
     def migrate(self, path: PathStr = pathlib.Path.cwd()) -> FileDataContext:
         """Migrate your in-memory Data Context to a file-backed one.
 
+        Takes the following steps:
+            1. Scaffolds filesystem
+            2. Migrates primary stores (only works with default named stores)
+            3. Migrates datasource store
+            4. Migrate data docs sites (both physical files and config)
+
         Returns:
             A FileDataContext with an updated config to reflect the state of the current context.
         """
@@ -149,8 +155,11 @@ class FileMigrator:
                 f"{site_name} has never been built by the src context; skipping file copying."
             )
 
+        absolute_site_path = dst_base_directory.joinpath(site_name)
+        project_root = pathlib.Path.cwd().joinpath("great_expectations")
+        relative_site_path = absolute_site_path.relative_to(project_root)
+
         updated_config = site_config
-        site_path = dst_base_directory.joinpath(site_name)
-        updated_config["store_backend"]["base_directory"] = str(site_path)
+        updated_config["store_backend"]["base_directory"] = str(relative_site_path)
 
         return updated_config
