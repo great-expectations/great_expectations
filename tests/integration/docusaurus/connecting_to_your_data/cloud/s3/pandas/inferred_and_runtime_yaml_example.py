@@ -7,6 +7,7 @@ from great_expectations.core.batch import Batch, BatchRequest, RuntimeBatchReque
 
 context = gx.get_context()
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py datasource_yaml">
 datasource_yaml = rf"""
 name: my_s3_datasource
 class_name: Datasource
@@ -26,6 +27,7 @@ data_connectors:
             group_names:
                 - data_asset_name
 """
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
@@ -36,7 +38,9 @@ datasource_yaml = datasource_yaml.replace(
     "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
 )
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py test_yaml_config">
 context.test_yaml_config(datasource_yaml)
+# </snippet>
 
 context.add_datasource(**yaml.load(datasource_yaml))
 
