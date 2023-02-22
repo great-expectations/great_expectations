@@ -36,7 +36,7 @@ def run_grep(target_dir: str) -> List[str]:
             [
                 "grep",
                 "-Er",  # Enable regex and directory search
-                r"<\/?snippet>",
+                r"<\/?snippet",
                 target_dir,
             ],
             capture_output=True,
