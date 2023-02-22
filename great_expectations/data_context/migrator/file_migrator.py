@@ -4,7 +4,6 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, cast
 
-import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -14,7 +13,6 @@ from great_expectations.data_context.data_context.serializable_data_context impo
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
     from great_expectations.data_context.data_context_variables import (
         DataContextVariables,
     )
@@ -43,7 +41,7 @@ class FileMigrator:
         self._datasource_store = datasource_store
         self._variables = variables
 
-    def migrate(self, path: PathStr = pathlib.Path.cwd()) -> FileDataContext:
+    def migrate(self) -> FileDataContext:
         """Migrate your in-memory Data Context to a file-backed one.
 
         Takes the following steps:
@@ -55,7 +53,7 @@ class FileMigrator:
         Returns:
             A FileDataContext with an updated config to reflect the state of the current context.
         """
-        target_context = self._scaffold_filesystem(path)
+        target_context = self._scaffold_filesystem()
         self._migrate_primary_stores(
             target_stores=target_context.stores,
         )
@@ -69,16 +67,8 @@ class FileMigrator:
         print(f"Successfully migrated to {target_context.__class__.__name__}!")
         return target_context
 
-    def _scaffold_filesystem(self, path: PathStr) -> FileDataContext:
-        if isinstance(path, str):
-            path = pathlib.Path(path)
-
-        path = path.absolute()
-        if not path.exists():
-            raise gx_exceptions.MigrationError(
-                f"{path} does not exist; cannot migrate to a non-existent directory"
-            )
-
+    def _scaffold_filesystem(self) -> FileDataContext:
+        path = pathlib.Path.cwd().absolute()
         target_context = cast(
             FileDataContext, FileDataContext.create(project_root_dir=str(path))
         )
