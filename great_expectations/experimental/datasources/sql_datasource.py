@@ -290,13 +290,95 @@ class ColumnSplitterDividedInteger(_ColumnSplitter):
         return {self.column_name: options["quotient"]}
 
 
+class ColumnSplitterModInteger(_ColumnSplitter):
+    mod: int
+    method_name: Literal["split_on_mod_integer"] = "split_on_mod_integer"
+
+    @property
+    def param_names(self) -> List[str]:
+        return ["remainder"]
+
+    def splitter_method_kwargs(self) -> Dict[str, Any]:
+        return {"column_name": self.column_name, "mod": self.mod}
+
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
+        self, options: BatchRequestOptions
+    ) -> Dict[str, Any]:
+        if "remainder" not in options:
+            raise ValueError(
+                "'remainder' must be specified in the batch request options to create a batch identifier"
+            )
+        return {self.column_name: options["remainder"]}
+
+
+class ColumnSplitterHashedColumn(_ColumnSplitter):
+    # hash digits is the length of the hash. The md5 of the column is truncated to this length.
+    hash_digits: int
+    method_name: Literal["split_on_hashed_column"] = "split_on_hashed_column"
+
+    @property
+    def param_names(self) -> List[str]:
+        return ["hash"]
+
+    def splitter_method_kwargs(self) -> Dict[str, Any]:
+        return {"column_name": self.column_name, "hash_digits": self.hash_digits}
+
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
+        self, options: BatchRequestOptions
+    ) -> Dict[str, Any]:
+        if "hash" not in options:
+            raise ValueError(
+                "'hash' must be specified in the batch request options to create a batch identifier"
+            )
+        return {self.column_name: options["hash"]}
+
+
+class ColumnSplitterConvertedDateTime(_ColumnSplitter):
+    """A column splitter than can be used for sql engines that represents datetimes as strings.
+
+    The SQL engine that this currently supports is SQLite since it stores its datetimes as
+    strings.
+    The DatetimeColumnSplitter will also work for SQLite and may be more intuitive.
+    """
+
+    # date_format_strings syntax is documented here:
+    # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
+    # It allows for arbitrary strings so can't be validated until conversion time.
+    date_format_string: str
+    method_name: Literal["split_on_converted_datetime"] = "split_on_converted_datetime"
+
+    @property
+    def param_names(self) -> List[str]:
+        # The datetime parameter will be a string representing a datetime in the format
+        # given by self.date_format_string.
+        return ["datetime"]
+
+    def splitter_method_kwargs(self) -> Dict[str, Any]:
+        return {
+            "column_name": self.column_name,
+            "date_format_string": self.date_format_string,
+        }
+
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
+        self, options: BatchRequestOptions
+    ) -> Dict[str, Any]:
+        if "datetime" not in options:
+            raise ValueError(
+                "'datetime' must be specified in the batch request options to create a batch identifier"
+            )
+        return {self.column_name: options["datetime"]}
+
+
 ColumnSplitter = Union[
     ColumnSplitterColumnValue,
     ColumnSplitterDividedInteger,
+    ColumnSplitterModInteger,
+    ColumnSplitterHashedColumn,
     ColumnSplitterDatetimePart,
     ColumnSplitterYearAndMonthAndDay,
     ColumnSplitterYearAndMonth,
     ColumnSplitterYear,
+    ColumnSplitterConvertedDateTime,
 ]
 
 
@@ -399,6 +481,37 @@ class _SQLAsset(DataAsset):
                 method_name="split_on_divided_integer",
                 column_name=column_name,
                 divisor=divisor,
+            )
+        )
+
+    def add_splitter_mod_integer(self, column_name: str, mod: int) -> _SQLAsset:
+        return self._add_splitter(
+            ColumnSplitterModInteger(
+                method_name="split_on_mod_integer",
+                column_name=column_name,
+                mod=mod,
+            )
+        )
+
+    def add_splitter_hashed_column(
+        self, column_name: str, hash_digits: int
+    ) -> _SQLAsset:
+        return self._add_splitter(
+            ColumnSplitterHashedColumn(
+                method_name="split_on_hashed_column",
+                column_name=column_name,
+                hash_digits=hash_digits,
+            )
+        )
+
+    def add_splitter_converted_datetime(
+        self, column_name: str, date_format_string: str
+    ) -> _SQLAsset:
+        return self._add_splitter(
+            ColumnSplitterConvertedDateTime(
+                method_name="split_on_converted_datetime",
+                column_name=column_name,
+                date_format_string=date_format_string,
             )
         )
 

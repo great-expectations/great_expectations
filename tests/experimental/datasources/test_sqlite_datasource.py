@@ -1,10 +1,15 @@
+from __future__ import annotations
+
 import pathlib
+from contextlib import _GeneratorContextManager, contextmanager
+from typing import Any, Callable, ContextManager, Generator
 
 import pytest
 from pydantic import ValidationError
 
 from great_expectations.experimental.datasources import SqliteDatasource
 from great_expectations.experimental.datasources.sqlite_datasource import SqliteDsn
+from tests.experimental.datasources.conftest import sqlachemy_execution_engine_mock_cls
 
 
 @pytest.fixture
@@ -66,3 +71,101 @@ def test_connection_string_that_does_not_start_with_sqlite():
 def test_non_select_query_asset(sqlite_datasource):
     with pytest.raises(ValueError):
         sqlite_datasource.add_query_asset(name="query_asset", query="* from table")
+
+
+# Test double used to return canned responses for splitter queries.
+@contextmanager
+def _create_sqlite_source(
+    splitter_query_response: list[tuple[str]],
+) -> Generator[Any, Any, Any]:
+    execution_eng_cls = sqlachemy_execution_engine_mock_cls(
+        validate_batch_spec=lambda _: None,
+        dialect="sqlite",
+        splitter_query_response=splitter_query_response,
+    )
+    # These type ignores when dealing with the execution_engine_override are because
+    # it is a generic. We don't care about the exact type since we swap it out with our
+    # mock for the purpose of this test and then replace it with the original.
+    original_override = SqliteDatasource.execution_engine_override  # type: ignore[misc]
+    try:
+        SqliteDatasource.execution_engine_override = execution_eng_cls  # type: ignore[misc]
+        yield SqliteDatasource(
+            name="sqlite_datasource",
+            connection_string="sqlite://",  # type: ignore[arg-type]  # pydantic will coerce
+        )
+    finally:
+        SqliteDatasource.execution_engine_override = original_override  # type: ignore[misc]
+
+
+@pytest.fixture
+def create_sqlite_source() -> Callable[
+    [list[tuple[str]]], _GeneratorContextManager[Any]
+]:
+    return _create_sqlite_source
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    [
+        "splitter_name",
+        "splitter_kwargs",
+        "splitter_query_responses",
+        "sorter_args",
+        "all_batches_cnt",
+        "specified_batch_request",
+        "specified_batch_cnt",
+        "last_specified_batch_metadata",
+    ],
+    [
+        pytest.param(
+            "add_splitter_hashed_column",
+            {"column_name": "passenger_count", "hash_digits": 3},
+            [("abc",), ("bcd",), ("xyz",)],
+            ["hash"],
+            3,
+            {"hash": "abc"},
+            1,
+            {"hash": "abc"},
+            id="hash",
+        ),
+        pytest.param(
+            "add_splitter_converted_datetime",
+            {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
+            [("2019-02-01",), ("2019-02-23",)],
+            ["datetime"],
+            2,
+            {"datetime": "2019-02-23"},
+            1,
+            {"datetime": "2019-02-23"},
+            id="converted_datetime",
+        ),
+    ],
+)
+def test_sqlite_specific_column_splitter(
+    create_sqlite_source,
+    splitter_name,
+    splitter_kwargs,
+    splitter_query_responses,
+    sorter_args,
+    all_batches_cnt,
+    specified_batch_request,
+    specified_batch_cnt,
+    last_specified_batch_metadata,
+):
+    with create_sqlite_source(
+        splitter_query_response=[response for response in splitter_query_responses],
+    ) as source:
+        asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
+        getattr(asset, splitter_name)(**splitter_kwargs)
+        asset.add_sorters(sorter_args)
+        # Test getting all batches
+        all_batches = asset.get_batch_list_from_batch_request(
+            asset.build_batch_request()
+        )
+        assert len(all_batches) == all_batches_cnt
+        # Test getting specified batches
+        specified_batches = asset.get_batch_list_from_batch_request(
+            asset.build_batch_request(specified_batch_request)
+        )
+        assert len(specified_batches) == specified_batch_cnt
+        assert specified_batches[-1].metadata == last_specified_batch_metadata
