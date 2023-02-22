@@ -35,8 +35,6 @@ def run_grep(target_dir: str) -> List[str]:
         res = subprocess.run(
             [
                 "grep",
-                "-C",  # Add surrounding context
-                "3",
                 "-Er",  # Enable regex and directory search
                 r"<\/?snippet>",
                 target_dir,
@@ -51,14 +49,51 @@ def run_grep(target_dir: str) -> List[str]:
     return res.stdout.splitlines()
 
 
+def parse_grep(lines: list[str]) -> list[str]:
+    """Parse the grep output and exclude known issues.
+
+    We are ok with some snippet tags in explanatory text on how to write snippets.
+
+     E.g. the lines in docs/guides/miscellaneous/how_to_write_a_how_to_guide.md
+     explaining how to use snippet tags.
+
+    Args:
+        lines: lines from the grep output
+
+    Returns:
+        lines to use in processing errors, excluding known issues
+
+    """
+    example_present = False
+    only_one_closing_tag = False
+    closing_tag_count = 0
+    for line in lines:
+        if (
+            'name="tests/integration/docusaurus/template/script_example.py full"'
+            in line
+        ):
+            example_present = True
+        if "</snippet>" in line:
+            closing_tag_count += 1
+
+    if closing_tag_count == 1:
+        only_one_closing_tag = True
+
+    if len(lines) == 2 and example_present and only_one_closing_tag:
+        return []
+    else:
+        return lines
+
+
 def main() -> None:
     check_dependencies("yarn", "grep")
     with tempfile.TemporaryDirectory() as tmp_dir:
         run_docusaurus_build(tmp_dir)
         grep_output = run_grep(tmp_dir)
-        if grep_output:
+        parsed_grep_output = parse_grep(grep_output)
+        if parsed_grep_output:
             print("[ERROR] Found snippets in the docs build:")
-            for line in grep_output:
+            for line in parsed_grep_output:
                 print(line)
             sys.exit(1)
 
