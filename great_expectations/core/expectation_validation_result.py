@@ -655,7 +655,7 @@ class ExpectationSuiteValidationResultSchema(Schema):
         Utilize UUID for data validation but convert to string before usage in business logic
         """
         attr = "ge_cloud_id"
-        uuid_val = data.pop(attr, None)
+        uuid_val = data.get(attr)
         if uuid_val:
             data[attr] = str(uuid_val)
         return data
