@@ -98,6 +98,7 @@ assert "YOUR MEANINGFUL NAME" in set(
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py path">
 path = "PATH TO YOUR DATA HERE"
 # </snippet>
+
 # Please note this override is only to provide good UX for docs and tests.
 path = "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py batch_request 2">
