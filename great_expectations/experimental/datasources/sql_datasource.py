@@ -306,9 +306,6 @@ class _SQLAsset(DataAsset):
     column_splitter: Optional[ColumnSplitter] = None
     name: str
 
-    # Internal attributes
-    _datasource: SQLDatasource = pydantic.PrivateAttr()
-
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
