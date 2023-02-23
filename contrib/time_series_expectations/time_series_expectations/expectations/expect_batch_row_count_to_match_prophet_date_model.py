@@ -79,10 +79,8 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
 
     metric_dependencies = ("table.row_count",)
 
-    # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
     success_keys = ()
 
-    # This dictionary contains default values for any parameters that should have default values.
     default_kwarg_values = {}
 
     def validate_configuration(
@@ -145,7 +143,6 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
             },
         }
 
-    # This object contains metadata for display in the public Gallery
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.

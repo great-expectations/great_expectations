@@ -16,8 +16,6 @@ from time_series_expectations.expectations.prophet_model_deserializer import (
 class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
     """This Expectation is used to an aggregate statistic based on the values in a column, based on a timestamp."""
 
-    # These examples will be shown in the public gallery.
-    # They will also be executed as unit tests for your Expectation.
     # examples = []
 
     # metric_dependency
@@ -27,11 +25,8 @@ class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
     def metric_dependencies(self):
         return (self.metric_dependency,)
 
-    # This a tuple of parameter names that can affect whether the Expectation evaluates to True or False.
-    # success_keys = ("min_value", "strict_min", "max_value", "strict_max")
     success_keys = ("model", "date", "column")
 
-    # This dictionary contains default values for any parameters that should have default values.
     default_kwarg_values = {}
 
     def validate_configuration(
@@ -62,7 +57,6 @@ class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
 
-    # This method performs a validation of your metrics against your success keys, returning a dict indicating the success or failure of the Expectation.
     def _validate(
         self,
         configuration: ExpectationConfiguration,
@@ -95,7 +89,6 @@ class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
             },
         }
 
-    # This object contains metadata for display in the public Gallery
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.

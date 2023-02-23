@@ -26,10 +26,8 @@ example_data = pd.read_csv(file_relative_path(__file__, "example_data.csv"))
 
 class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
 
-    # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_pair_values.match_prophet_forecast"
 
-    # These point your metric at the provided keys to facilitate calculation
     condition_domain_keys = (
         "column_A",
         "column_B",
@@ -95,8 +93,6 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
 class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
     """This Expectation is used to compare the values in a column to a Prophet forecast, based on a timestamp in a second column."""
 
-    # These examples will be shown in the public gallery.
-    # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": example_data,
@@ -200,7 +196,6 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
         # except AssertionError as e:
         #     raise InvalidExpectationConfigurationError(str(e))
 
-    # This object contains metadata for display in the public Gallery
     library_metadata = {
         "tags": [],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
