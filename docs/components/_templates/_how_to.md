@@ -16,8 +16,6 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 
 ## Prerequisites
 
-## Prerequisites
-
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 -
