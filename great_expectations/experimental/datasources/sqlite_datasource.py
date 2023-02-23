@@ -7,7 +7,9 @@ from typing_extensions import Literal, Self
 
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
+    QueryAssetP,
     SQLDatasource,
+    TableAssetP,
     _ColumnSplitter,
     _QueryAsset,
     _SQLAsset,
@@ -150,5 +152,5 @@ class SqliteDatasource(SQLDatasource):
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
     connection_string: SqliteDsn
 
-    _TableAsset: Type = pydantic.PrivateAttr(SqliteTableAsset)
-    _QueryAsset: Type = pydantic.PrivateAttr(SqliteQueryAsset)
+    _TableAsset: Type[TableAssetP] = pydantic.PrivateAttr(SqliteTableAsset)
+    _QueryAsset: Type[QueryAssetP] = pydantic.PrivateAttr(SqliteQueryAsset)

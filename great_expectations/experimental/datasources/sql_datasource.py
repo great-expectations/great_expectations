@@ -16,7 +16,7 @@ from typing import (
 )
 
 import pydantic
-from typing_extensions import Literal, Self
+from typing_extensions import Literal, Protocol, Self
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -206,7 +206,7 @@ class ColumnSplitterDatetimePart(_ColumnSplitter):
         return v
 
 
-DatetimeColumnSplitter = Union[
+ColumnSplitterDatetime = Union[
     ColumnSplitterYear,
     ColumnSplitterYearAndMonth,
     ColumnSplitterYearAndMonthAndDay,
@@ -215,7 +215,7 @@ DatetimeColumnSplitter = Union[
 
 
 def _request_options_to_datetime_batch_spec_kwargs(
-    splitter: DatetimeColumnSplitter, options: BatchRequestOptions
+    splitter: ColumnSplitterDatetime, options: BatchRequestOptions
 ) -> Dict[str, Any]:
     identifiers: Dict = {}
     for part in splitter.param_names:
@@ -293,10 +293,7 @@ ColumnSplitter = Union[
     ColumnSplitterColumnValue,
     ColumnSplitterDividedInteger,
     ColumnSplitterModInteger,
-    ColumnSplitterDatetimePart,
-    ColumnSplitterYearAndMonthAndDay,
-    ColumnSplitterYearAndMonth,
-    ColumnSplitterYear,
+    ColumnSplitterDatetime,
 ]
 
 
@@ -718,6 +715,30 @@ class TableAsset(_TableAsset, _SQLAsset):
     type: Literal["table"] = "table"
 
 
+class TableAssetP(Protocol):
+    def __init__(
+        self,
+        name: str,
+        table_name: str,
+        schema_name: Optional[str],
+        order_by: list[BatchSorter],
+    ):
+        ...
+
+    # TODO: Add the other methods we expect on a TableAsset. We don't use need any
+    # for the current functionality so I haven't added this yet.
+
+
+class QueryAssetP(Protocol):
+    def __init__(
+        self,
+        name: str,
+        query: str,
+        order_by: list[BatchSorter],
+    ):
+        ...
+
+
 class SQLDatasource(Datasource):
     """Adds a generic SQL datasource to the data context.
 
@@ -743,8 +764,10 @@ class SQLDatasource(Datasource):
     # private attrs
     _cached_connection_string: str = pydantic.PrivateAttr("")
     _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
-    _TableAsset: Type = pydantic.PrivateAttr(TableAsset)
-    _QueryAsset: Type = pydantic.PrivateAttr(QueryAsset)
+    # These are instance var because ClassVars can't contain Type variables. See
+    # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
+    _TableAsset: Type[TableAssetP] = pydantic.PrivateAttr(TableAsset)
+    _QueryAsset: Type[QueryAssetP] = pydantic.PrivateAttr(QueryAsset)
 
     @property
     def execution_engine_type(self) -> Type[SqlAlchemyExecutionEngine]:
@@ -802,7 +825,7 @@ class SQLDatasource(Datasource):
         table_name: str,
         schema_name: Optional[str] = None,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> _SQLAsset:
+    ) -> TableAssetP:
         """Adds a table asset to this datasource.
 
         Args:
@@ -823,14 +846,19 @@ class SQLDatasource(Datasource):
             schema_name=schema_name,
             order_by=order_by_sorters,
         )
-        return self.add_asset(asset)
+        # We `return asset` instead of `return self.add_asset(asset)` which is functionally
+        # equivalent because mypy can't infer the type of the second form.
+        # That is `reveal_type(self.add_asset(asset))` is `Any` but
+        # `reveal_type(asset) is `TableAssetP`
+        self.add_asset(asset)
+        return asset
 
     def add_query_asset(
         self,
         name: str,
         query: str,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> _SQLAsset:
+    ) -> QueryAssetP:
         """Adds a query asset to this datasource.
 
         Args:
@@ -849,4 +877,6 @@ class SQLDatasource(Datasource):
             query=query,
             order_by=order_by_sorters,
         )
-        return self.add_asset(asset)
+        # See comment in add_table_asset to understand why we don't `return self.add_asset(asset)`
+        self.add_asset(asset)
+        return asset
