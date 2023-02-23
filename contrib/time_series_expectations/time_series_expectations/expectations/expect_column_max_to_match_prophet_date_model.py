@@ -91,7 +91,6 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
         }
     ]
 
-    # This is a tuple consisting of all Metrics necessary to evaluate the Expectation.
     metric_dependency = "column.max"
 
 

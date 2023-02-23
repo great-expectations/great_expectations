@@ -14,13 +14,22 @@ from time_series_expectations.expectations.prophet_model_deserializer import (
 
 
 class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
-    """This Expectation is used to an aggregate statistic based on the values in a column, based on a timestamp."""
+    """This Expectation abstract base class checks to see if an aggregate statistic calculated from a column matches the predictions of a prophet model for a given date.
 
-    # examples = []
+    To complete this Expectation, you must implement a metric_dependency. If you're referring to a metric that already exists, this can be as simple as:
 
-    # metric_dependency
+        metric_dependency = "column.max"
 
-    # Expectations of this type can only have a single metric dependency.
+    If you're referring to a new metric, you'll need to implement it. For more information, please see the documentation for [How to create a custom Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/#6-implement-your-metric-and-connect-it-to-your-expectation).
+
+    In addition to the `metric_dependency, you should implement examples, which are used to generate the documentation and gallery entry for Expectations.
+
+    Please see expect_column_max_to_match_prophet_date_model for an example of how to implement this kind of Expectation.
+    
+    Notes:
+    * Prophet is an open source forecasting library created at facebook. For more information, please see the [project github page](https://github.com/facebook/prophet).
+"""
+
     @property
     def metric_dependencies(self):
         return (self.metric_dependency,)
