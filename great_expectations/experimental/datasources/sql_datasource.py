@@ -15,7 +15,7 @@ from typing import (
 )
 
 import pydantic
-from typing_extensions import Literal, Protocol, Self
+from typing_extensions import Literal, Self
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
@@ -48,10 +48,6 @@ except ImportError:
 
 
 class SQLDatasourceError(Exception):
-    pass
-
-
-class SQLDatasourceWarning(UserWarning):
     pass
 
 
@@ -728,27 +724,6 @@ class _TableAsset(ExperimentalBaseModel):
 
 class TableAsset(_TableAsset, _SQLAsset):
     type: Literal["table"] = "table"
-
-
-class TableAssetConstructor(Protocol):
-    def __init__(
-        self,
-        name: str,
-        table_name: str,
-        schema_name: Optional[str],
-        order_by: list[BatchSorter],
-    ):
-        ...
-
-
-class QueryAssetConstructor(Protocol):
-    def __init__(
-        self,
-        name: str,
-        query: str,
-        order_by: list[BatchSorter],
-    ):
-        ...
 
 
 class SQLDatasource(Datasource):
