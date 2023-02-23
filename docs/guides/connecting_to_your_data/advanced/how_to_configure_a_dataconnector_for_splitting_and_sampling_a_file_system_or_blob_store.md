@@ -24,7 +24,7 @@ your data at various levels of granularity:
 This guide will use the <TechnicalTag tag="data_connector" text="Data Connector" /> named `configured_data_connector_name` that is part of the following
 `Datasource` configuration as an example:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L10-L48
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py datasource_yaml"
 ```
 
 ## Preliminary Steps
@@ -33,12 +33,12 @@ This guide will use the <TechnicalTag tag="data_connector" text="Data Connector"
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L1-L6
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py imports"
 ```
 
 Load your `DataContext` into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L8
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py get_context"
 ```
 
 ### 2. Configure your Datasource
@@ -46,7 +46,7 @@ Load your `DataContext` into memory using the `get_context()` method.
 Using the above example configuration, add in the path to a directory that contains your data.  Then run this code to
 test your configuration:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L56
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py test_yaml_config"
 ```
 
 Given that the `glob_directive` in the example configuration is `*.csv`, if you specified a directory containing CSV
@@ -58,7 +58,7 @@ Feel free to adjust your configuration and re-run `test_yaml_config()` as needed
 
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L58
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py add_datasource"
 ```
 
 ## Splitting and Sampling
@@ -68,7 +68,7 @@ parameters to be used by the specified `Splitting` method.
 
 To configure `Sampling`, specify the method of `Sampling` and parameters to be used by the specified `Sampling` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L158-L186
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_request"
 ```
 
 :::info
@@ -79,24 +79,24 @@ be done using `batch_spec_passthrough` as illustrated above.
 To customize the configuration for the present example, first, specify the `data_connector_query` to select the `Batch`
 at the `Partitioning` level of granularity.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L191-L194
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py batch_filter_parameters"
 ```
 
 Next, specify `Splitting` and `Sampling` directives.
 
 For the present example, we can split according to the "passenger_count" column with the focus on two-passenger rides:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L195-L199
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py split_on_column_value passenger_count"
 ```
 
 We can then obtain a random `10%` of the rows in the batch:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L200-L201
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py sample_using_random 10 pct"
 ```
 
 Finally, confirm the expected number of batches was retrieved and the reduced size of a batch (due to `Sampling`):
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py#L203-L205
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_complete.py sampling batch size"
 ```
 
 ## Additional Notes
