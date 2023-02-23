@@ -466,18 +466,18 @@ class Datasource(
         return order_by_sorters
 
     @staticmethod
-    def parse_regex_string(
-        regex: Optional[Union[re.Pattern, str]] = None
+    def parse_batching_regex_string(
+        batching_regex: Optional[Union[re.Pattern, str]] = None
     ) -> re.Pattern:
         pattern: re.Pattern
-        if not regex:
+        if not batching_regex:
             pattern = re.compile(".*")
-        elif isinstance(regex, str):
-            pattern = re.compile(regex)
-        elif isinstance(regex, re.Pattern):
-            pattern = regex
+        elif isinstance(batching_regex, str):
+            pattern = re.compile(batching_regex)
+        elif isinstance(batching_regex, re.Pattern):
+            pattern = batching_regex
         else:
-            raise ValueError('"regex" must be either re.Pattern, str, or None')
+            raise ValueError('"batching_regex" must be either re.Pattern, str, or None')
         return pattern
 
     # Abstract Methods
