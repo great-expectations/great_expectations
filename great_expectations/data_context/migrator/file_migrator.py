@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.store import Store
+    from great_expectations.experimental.datasources.config import GxConfig
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,7 @@ class FileMigrator:
         - context.stores
         - context._datasource_store
         - context.variables
+        - context.zep_config
     """
 
     def __init__(
@@ -36,10 +38,12 @@ class FileMigrator:
         primary_stores: dict[str, Store],
         datasource_store: DatasourceStore,
         variables: DataContextVariables,
+        zep_config: GxConfig,
     ) -> None:
         self._primary_stores = primary_stores
         self._datasource_store = datasource_store
         self._variables = variables
+        self._zep_config = zep_config
 
     def migrate(self) -> FileDataContext:
         """Migrate your in-memory Data Context to a file-backed one.
@@ -49,6 +53,7 @@ class FileMigrator:
             2. Migrates primary stores (only creates default named stores)
             3. Migrates datasource store
             4. Migrates data docs sites (both physical files and config)
+            5. Migrates experimental/fluent datasources
 
         Returns:
             A FileDataContext with an updated config to reflect the state of the current context.
@@ -61,6 +66,7 @@ class FileMigrator:
         self._migrate_data_docs_sites(
             target_context=target_context,
         )
+        self._migrate_experimental_datasources(target_context=target_context)
 
         # Re-init context to parse filesystem changes into config
         target_context = FileDataContext()
@@ -121,6 +127,12 @@ class FileMigrator:
             target_variables=target_variables,
         )
         target_context.build_data_docs()
+
+    def _migrate_experimental_datasources(
+        self, target_context: FileDataContext
+    ) -> None:
+        target_context.zep_config = self._zep_config
+        target_context._save_project_config()
 
     def _migrate_data_docs_site_configs(
         self,

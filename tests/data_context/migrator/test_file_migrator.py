@@ -18,20 +18,19 @@ from great_expectations.data_context.data_context.serializable_data_context impo
 )
 from great_expectations.data_context.migrator.file_migrator import FileMigrator
 from great_expectations.data_context.types.base import (
-    DataContextConfig,
     DataContextConfigDefaults,
     DatasourceConfig,
-    InMemoryStoreBackendDefaults,
 )
+from great_expectations.experimental.datasources.config import GxConfig
 from tests.test_utils import working_directory
 
 
 @pytest.fixture
-def ephemeral_context_with_defaults() -> EphemeralDataContext:
-    project_config = DataContextConfig(
-        store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
-    )
-    return EphemeralDataContext(project_config=project_config)
+def file_migrator(
+    construct_file_migrator: Callable,
+    ephemeral_context_with_defaults: EphemeralDataContext,
+) -> FileMigrator:
+    return construct_file_migrator(ephemeral_context_with_defaults)
 
 
 @pytest.fixture
@@ -41,17 +40,10 @@ def construct_file_migrator() -> Callable:
             primary_stores=context.stores,
             datasource_store=context._datasource_store,
             variables=context.variables,
+            zep_config=context.zep_config,
         )
 
     return _construct_file_migrator
-
-
-@pytest.fixture
-def file_migrator(
-    construct_file_migrator: Callable,
-    ephemeral_context_with_defaults: EphemeralDataContext,
-) -> FileMigrator:
-    return construct_file_migrator(ephemeral_context_with_defaults)
 
 
 @pytest.mark.integration
@@ -126,6 +118,38 @@ def test_migrate_transfers_datasources(
     config_dict["name"] = datasource_name
 
     context.add_datasource(**config_dict)
+
+    # Construct and run migrator
+    d = tmpdir.mkdir("tmp")
+    with working_directory(str(d)):
+        file_migrator = construct_file_migrator(context)
+        migrated_context = file_migrator.migrate()
+
+    # # Check proper config updates
+    assert datasource_name in migrated_context.datasources
+
+    # Check proper filesystem interaction
+    root = pathlib.Path(migrated_context.root_directory)
+    project_config = root.joinpath(SerializableDataContext.GX_YML)
+
+    with project_config.open() as f:
+        contents = f.read()
+
+    assert datasource_name in contents
+
+
+@pytest.mark.integration
+def test_migrate_transfers_experimental_datasources(
+    tmpdir: py.path.local,
+    construct_file_migrator: Callable,
+    ephemeral_context_with_defaults: EphemeralDataContext,
+):
+    # Test setup
+    context = ephemeral_context_with_defaults
+    datasource_name = "my_experimental_datasource_awaiting_migration"
+
+    context.sources.add_pandas(datasource_name)
+    context._synchronize_zep_datasources()
 
     # Construct and run migrator
     d = tmpdir.mkdir("tmp")

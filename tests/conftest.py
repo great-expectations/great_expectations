@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -45,9 +45,13 @@ from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
     GXCloudRESTResource,
 )
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
+)
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+from great_expectations.data_context.migrator.file_migrator import FileMigrator
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
 )
@@ -58,6 +62,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     GXCloudConfig,
+    InMemoryStoreBackendDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -7374,3 +7379,11 @@ def spark_dataframe_for_unexpected_rows_with_index(
         data=df,
     )
     return test_df
+
+
+@pytest.fixture
+def ephemeral_context_with_defaults() -> EphemeralDataContext:
+    project_config = DataContextConfig(
+        store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
+    )
+    return EphemeralDataContext(project_config=project_config)
