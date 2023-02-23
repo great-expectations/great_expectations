@@ -44,7 +44,6 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
         * Prophet is an open source forecasting library created at facebook. For more information, please see the [project github page](https://github.com/facebook/prophet).
         * I apologize for the dangling prepositions in the Arg docstrings for this Expectation.
         
-    
     """
 
     examples = [
