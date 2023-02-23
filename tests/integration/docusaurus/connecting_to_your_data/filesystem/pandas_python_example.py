@@ -5,7 +5,7 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 
 context = gx.get_context()
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py datasource_config">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py yaml">
 datasource_config = {
     "name": "taxi_datasource",
     "class_name": "Datasource",

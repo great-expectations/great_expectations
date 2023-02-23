@@ -200,12 +200,12 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml"
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml"
 ```
 </TabItem>
 <TabItem value="python">
 
-```python name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python"
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python"
 ```
 
 </TabItem>
@@ -240,13 +240,13 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml no regex"
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset yaml no regex"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python name ="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python no regex"
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py basic single asset python no regex"
 ```
 
 </TabItem>

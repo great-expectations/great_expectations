@@ -49,12 +49,12 @@ For more details on different ways to specify database files and information on 
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py#L1-L4
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py imports"
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py#L8
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py get_context"
 ```
 
 ### 5. Configure your Datasource
@@ -71,12 +71,12 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py#L10-L24
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py datasource_yaml"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py#L32
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py test_yaml_config"
 ```
 
 </TabItem>
@@ -85,12 +85,12 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py#L10-L27
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py datasource_config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py#L33
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py test_yaml_config"
 ```
 
 </TabItem>
@@ -115,14 +115,14 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py#L34
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py add_datasource"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py#L35
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py add_datasource"
 ```
 
 </TabItem>
@@ -144,7 +144,7 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py#L37-L50
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py query batch_request"
 ```
 
 </TabItem>
@@ -153,7 +153,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py#L57-L68
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py batch request table name"
 ```
 
 </TabItem>
