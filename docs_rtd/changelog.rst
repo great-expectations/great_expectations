@@ -4,6 +4,33 @@
 Changelog
 #########
 
+0.15.50
+-----------------
+* [FEATURE] Utilize DataConnector in service of new DataAsset implementations ([#7094](https://github.com/great-expectations/great_expectations/pull/7094))
+* [FEATURE] F/great 1393/add initial non datetime sql splitters ([#7183](https://github.com/great-expectations/great_expectations/pull/7183))
+* [FEATURE] Experimental `PandasDatasource` with single-batch `_PandasDataAsset`s ([#7173](https://github.com/great-expectations/great_expectations/pull/7173))
+* [FEATURE] Experimental filesystem `DataAsset`s `path` in batch request options and batch metadata ([#7129](https://github.com/great-expectations/great_expectations/pull/7129))
+* [FEATURE] Default `PandasDatasource` ([#7196](https://github.com/great-expectations/great_expectations/pull/7196))
+* [BUGFIX] : Allow CLI to work with `RuntimeDataConnector` ([#7187](https://github.com/great-expectations/great_expectations/pull/7187)) (thanks @luke321321)
+* [BUGFIX] Patch GX Cloud `validator.save_expectation_suite()` workflow ([#7189](https://github.com/great-expectations/great_expectations/pull/7189))
+* [BUGFIX] Dynamic pandas asset model field substitution ([#7212](https://github.com/great-expectations/great_expectations/pull/7212))
+* [DOCS] Use named snippets part 5 ([#7181](https://github.com/great-expectations/great_expectations/pull/7181))
+* [DOCS] Use named snippets part 4 ([#7176](https://github.com/great-expectations/great_expectations/pull/7176))
+* [DOCS] Use named snippets part 6 ([#7171](https://github.com/great-expectations/great_expectations/pull/7171))
+* [DOCS] Use named snippets part 7 ([#7192](https://github.com/great-expectations/great_expectations/pull/7192))
+* [DOCS] Use named snippets part 9 ([#7195](https://github.com/great-expectations/great_expectations/pull/7195))
+* [DOCS] Use named snippets part 11 ([#7201](https://github.com/great-expectations/great_expectations/pull/7201))
+* [DOCS] Use named snippets part 8 ([#7194](https://github.com/great-expectations/great_expectations/pull/7194))
+* [DOCS] Use named snippets part 10 ([#7199](https://github.com/great-expectations/great_expectations/pull/7199))
+* [DOCS] Fix broken link in anonymous_usage_statistics.md ([#7211](https://github.com/great-expectations/great_expectations/pull/7211)) (thanks @Erin-GX)
+* [DOCS] Use named snippets part 12 ([#7214](https://github.com/great-expectations/great_expectations/pull/7214))
+* [MAINTENANCE] Update changelog when updated release 0.15.49 ([#7179](https://github.com/great-expectations/great_expectations/pull/7179))
+* [MAINTENANCE] Raise store config `ClassInstantiationError` from original `DataContextError` ([#7174](https://github.com/great-expectations/great_expectations/pull/7174))
+* [MAINTENANCE] New Datasources: Delineate "SparkFilesystemDatasource" (instead of "SparkDatasource") -- to be congruent with "PandasFilesystemDatasource" ([#7178](https://github.com/great-expectations/great_expectations/pull/7178))
+* [MAINTENANCE] Small Refactor to Enable PandasDatsource for multiple Storage Environments ([#7190](https://github.com/great-expectations/great_expectations/pull/7190))
+* [MAINTENANCE] Replace `regex` with `batching_regex` for fluent filesystem-like datasources ([#7207](https://github.com/great-expectations/great_expectations/pull/7207))
+* [MAINTENANCE] Misc `DataContext` state management & API cleanup ([#7215](https://github.com/great-expectations/great_expectations/pull/7215))
+
 0.15.49
 -----------------
 * [FEATURE] Enable customization of candidate Regular Expression patterns when running OnboardingDataAssistant ([#7104](https://github.com/great-expectations/great_expectations/pull/7104))
