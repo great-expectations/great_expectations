@@ -596,6 +596,15 @@ class _SQLAsset(DataAsset):
 
 
 class _QueryAsset(ExperimentalBaseModel):
+    """A _SQLAsset Mixin
+
+    This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
+    that can be used by different SQL datasource subclasses.
+
+    For example see QueryAsset defined in this module and SqliteQueryAsset defined in
+    sqlite_datasource.py
+    """
+
     # Instance fields
     name: str
     query: str
@@ -630,11 +639,24 @@ class QueryAsset(_QueryAsset, _SQLAsset):
 
 
 class _TableAsset(ExperimentalBaseModel):
+    """A _SQLAsset Mixin
+
+    This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
+    that can be used by different SQL datasource subclasses.
+
+    For example see TableAsset defined in this module and SqliteTableAsset defined in
+    sqlite_datasource.py
+    """
+
     # Instance fields
     name: str
     table_name: str
     schema_name: Optional[str] = None
     column_splitter: Optional[ColumnSplitter]
+
+    @property
+    def datasource(self):
+        return super().datasource
 
     @property
     def qualified_name(self) -> str:
@@ -650,7 +672,7 @@ class _TableAsset(ExperimentalBaseModel):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        datasource: SQLDatasource = self.datasource  # type: ignore[attr-defined]  # This is a _SQLAsset mixin
+        datasource: SQLDatasource = self.datasource
         engine: sqlalchemy.engine.Engine = datasource.get_engine()
         inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
 
@@ -672,7 +694,7 @@ class _TableAsset(ExperimentalBaseModel):
 
     def test_column_splitter_connection(self) -> None:
         if self.column_splitter:
-            datasource: SQLDatasource = self.datasource  # type: ignore[attr-defined]  # This is a _SQLAsset mixin
+            datasource: SQLDatasource = self.datasource
             engine: sqlalchemy.engine.Engine = datasource.get_engine()
             inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
 
