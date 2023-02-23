@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union, cast
 
 import pydantic
 from typing_extensions import Literal, Self
 
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
-    QueryAssetP,
     SQLDatasource,
-    TableAssetP,
     _ColumnSplitter,
     _QueryAsset,
     _SQLAsset,
@@ -19,6 +17,7 @@ from great_expectations.experimental.datasources.sql_datasource import (
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import (
         BatchRequestOptions,
+        BatchSortersDefinition,
         DataAsset,
     )
 
@@ -97,7 +96,6 @@ SqliteColumnSplitter = Union[
 
 
 class _SQLiteAsset(_SQLAsset):
-
     # Instance field overrides
     column_splitter: Optional[SqliteColumnSplitter] = None  # type: ignore[assignment]  # override superclass type
 
@@ -152,5 +150,25 @@ class SqliteDatasource(SQLDatasource):
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
     connection_string: SqliteDsn
 
-    _TableAsset: Type[TableAssetP] = pydantic.PrivateAttr(SqliteTableAsset)
-    _QueryAsset: Type[QueryAssetP] = pydantic.PrivateAttr(SqliteQueryAsset)
+    _TableAsset: Type[SqliteTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)  # type: ignore[assignment]  # override superclass type
+    _QueryAsset: Type[SqliteQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)  # type: ignore[assignment]  # override superclass type
+
+    def add_table_asset(  # type: ignore[override]  # override return type
+        self,
+        name: str,
+        table_name: str,
+        schema_name: Optional[str] = None,
+        order_by: Optional[BatchSortersDefinition] = None,
+    ) -> SqliteTableAsset:
+        return cast(
+            SqliteTableAsset,
+            super().add_table_asset(name, table_name, schema_name, order_by),
+        )
+
+    def add_query_asset(  # type: ignore[override]  # override return type
+        self,
+        name: str,
+        query: str,
+        order_by: Optional[BatchSortersDefinition] = None,
+    ) -> SqliteQueryAsset:
+        return cast(SqliteQueryAsset, super().add_query_asset(name, query, order_by))

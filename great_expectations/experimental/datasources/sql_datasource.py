@@ -730,7 +730,7 @@ class TableAsset(_TableAsset, _SQLAsset):
     type: Literal["table"] = "table"
 
 
-class TableAssetP(Protocol):
+class TableAssetConstructor(Protocol):
     def __init__(
         self,
         name: str,
@@ -740,11 +740,8 @@ class TableAssetP(Protocol):
     ):
         ...
 
-    # TODO: Add the other methods we expect on a TableAsset. We don't use need any
-    # for the current functionality so I haven't added this yet.
 
-
-class QueryAssetP(Protocol):
+class QueryAssetConstructor(Protocol):
     def __init__(
         self,
         name: str,
@@ -781,8 +778,8 @@ class SQLDatasource(Datasource):
     _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
     # These are instance var because ClassVars can't contain Type variables. See
     # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
-    _TableAsset: Type[TableAssetP] = pydantic.PrivateAttr(TableAsset)
-    _QueryAsset: Type[QueryAssetP] = pydantic.PrivateAttr(QueryAsset)
+    _TableAsset: Type[TableAsset] = pydantic.PrivateAttr(TableAsset)
+    _QueryAsset: Type[QueryAsset] = pydantic.PrivateAttr(QueryAsset)
 
     @property
     def execution_engine_type(self) -> Type[SqlAlchemyExecutionEngine]:
@@ -838,7 +835,7 @@ class SQLDatasource(Datasource):
         table_name: str,
         schema_name: Optional[str] = None,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> TableAssetP:
+    ) -> TableAsset:
         """Adds a table asset to this datasource.
 
         Args:
@@ -848,30 +845,26 @@ class SQLDatasource(Datasource):
             order_by: A list of BatchSorters or BatchSorter strings.
 
         Returns:
-            The TableAsset that is added to the datasource.
+            The table asset that is added to the datasource.
+            The type of this object will match the necessary type for this datasource.
+            eg, it could be a TableAsset or a SqliteTableAsset.
         """
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-        asset = self._TableAsset(
+        return self._TableAsset(
             name=name,
             table_name=table_name,
             schema_name=schema_name,
             order_by=order_by_sorters,
         )
-        # We `return asset` instead of `return self.add_asset(asset)` which is functionally
-        # equivalent because mypy can't infer the type of the second form.
-        # That is `reveal_type(self.add_asset(asset))` is `Any` but
-        # `reveal_type(asset) is `TableAssetP`
-        self.add_asset(asset)
-        return asset
 
     def add_query_asset(
         self,
         name: str,
         query: str,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> QueryAssetP:
+    ) -> QueryAsset:
         """Adds a query asset to this datasource.
 
         Args:
@@ -880,16 +873,15 @@ class SQLDatasource(Datasource):
             order_by: A list of BatchSorters or BatchSorter strings.
 
         Returns:
-            The QueryAsset that is added to the datasource.
+            The query asset that is added to the datasource.
+            The type of this object will match the necessary type for this datasource.
+            eg, it could be a QueryAsset or a SqliteQueryAsset.
         """
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-        asset = self._QueryAsset(
+        return self._QueryAsset(
             name=name,
             query=query,
             order_by=order_by_sorters,
         )
-        # See comment in add_table_asset to understand why we don't `return self.add_asset(asset)`
-        self.add_asset(asset)
-        return asset
