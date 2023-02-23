@@ -1105,7 +1105,7 @@ class ExpectationSuiteSchema(Schema):
         return data
 
     @post_load
-    def _convert_uuids_to_str(self, data):
+    def _convert_uuids_to_str(self, data, **kwargs):
         """
         Utilize UUID for data validation but convert to string before usage in business logic
         """
