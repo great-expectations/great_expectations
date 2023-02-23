@@ -18,7 +18,11 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     PandasTableAsset,
     _PandasDataAsset,
 )
-from great_expectations.experimental.datasources.sources import _get_field_details
+from great_expectations.experimental.datasources.sources import (
+    DEFAULT_PANDAS_DATASOURCE_NAMES,
+    DefaultPandasDatasourceError,
+    _get_field_details,
+)
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -104,13 +108,7 @@ class TestDynamicPandasAssets:
             param("read_json"),
             param("read_orc"),
             param("read_parquet"),
-            param(
-                "read_pickle",
-                marks=pytest.mark.skipif(
-                    PANDAS_VERSION < 1.2,
-                    reason=f"read_pickle does not exist on {PANDAS_VERSION} ",
-                ),
-            ),
+            param("read_pickle"),
             param("read_sas"),
             param("read_spss"),
             param("read_sql"),
@@ -121,7 +119,7 @@ class TestDynamicPandasAssets:
             param(
                 "read_xml",
                 marks=pytest.mark.skipif(
-                    PANDAS_VERSION < 1.2,
+                    PANDAS_VERSION < 1.3,
                     reason=f"read_xml does not exist on {PANDAS_VERSION} ",
                 ),
             ),
@@ -283,3 +281,68 @@ class TestDynamicPandasAssets:
         print(f"keyword args:\n{pf(captured_kwargs[-1])}")
 
         assert captured_kwargs[-1] == extra_kwargs
+
+    def test_default_pandas_datasource_get_and_set(
+        self, empty_data_context: AbstractDataContext, csv_path: pathlib.Path
+    ):
+        pandas_datasource = empty_data_context.sources.pandas_default
+        assert isinstance(pandas_datasource, PandasDatasource)
+        assert pandas_datasource.name == "default_pandas_datasource"
+        assert len(pandas_datasource.assets) == 0
+
+        # TODO: Update the following 3 lines after registry namespace change to:
+        #       - pandas_csv_asset_X -> csv_asset_X
+        #       - read_pandas_csv -> read_csv
+        expected_csv_data_asset_name_1 = "pandas_csv_asset_1"
+        expected_csv_data_asset_name_2 = "pandas_csv_asset_2"
+        csv_data_asset_1 = pandas_datasource.read_pandas_csv(  # type: ignore[attr-defined]
+            filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-04.csv",
+        )
+        assert isinstance(csv_data_asset_1, _PandasDataAsset)
+        assert csv_data_asset_1.name == expected_csv_data_asset_name_1
+        assert len(pandas_datasource.assets) == 1
+
+        # ensure we get the same datasource when we call pandas_default again
+        pandas_datasource = empty_data_context.sources.pandas_default
+        assert pandas_datasource.name == "default_pandas_datasource"
+        assert len(pandas_datasource.assets) == 1
+        assert pandas_datasource.assets[expected_csv_data_asset_name_1]
+
+        csv_data_asset_2 = pandas_datasource.read_pandas_csv(  # type: ignore[attr-defined]
+            filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-03.csv"
+        )
+        assert csv_data_asset_2.name == expected_csv_data_asset_name_2
+        assert len(pandas_datasource.assets) == 2
+
+    def test_default_pandas_datasource_name_conflict(
+        self, empty_data_context: AbstractDataContext
+    ):
+        (
+            default_pandas_datasource_name_1,
+            default_pandas_datasource_name_2,
+        ) = DEFAULT_PANDAS_DATASOURCE_NAMES
+
+        # These add_datasource calls will create legacy PandasDatasources
+        empty_data_context.add_datasource(
+            name=default_pandas_datasource_name_1, class_name="PandasDatasource"
+        )
+        empty_data_context.add_datasource(
+            name=default_pandas_datasource_name_2, class_name="PandasDatasource"
+        )
+
+        # both datasource names are taken by legacy datasources
+        with pytest.raises(DefaultPandasDatasourceError):
+            pandas_datasource = empty_data_context.sources.pandas_default
+
+        # only datasource name 1 is taken by legacy datasources
+        empty_data_context.datasources.pop(default_pandas_datasource_name_2)
+        pandas_datasource = empty_data_context.sources.pandas_default
+        assert isinstance(pandas_datasource, PandasDatasource)
+        assert pandas_datasource.name == default_pandas_datasource_name_2
+
+        # both datasource names are available
+        empty_data_context.datasources.pop(default_pandas_datasource_name_1)
+        empty_data_context.datasources.pop(default_pandas_datasource_name_2)
+        pandas_datasource = empty_data_context.sources.pandas_default
+        assert isinstance(pandas_datasource, PandasDatasource)
+        assert pandas_datasource.name == default_pandas_datasource_name_1

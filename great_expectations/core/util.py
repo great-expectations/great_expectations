@@ -452,6 +452,9 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     if isinstance(data, (datetime.datetime, datetime.date)):
         return
 
+    if isinstance(data, pathlib.PurePath):
+        return
+
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
     # https://github.com/numpy/numpy/pull/9505
     if np.issubdtype(type(data), np.bool_):
