@@ -19,7 +19,7 @@ from typing import (
     Union,
 )
 
-from marshmallow import Schema, ValidationError, fields, pre_dump
+from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 import great_expectations as gx
 from great_expectations import __version__ as ge_version
@@ -1102,6 +1102,17 @@ class ExpectationSuiteSchema(Schema):
             data[key] = convert_to_json_serializable(data[key])
 
         data = self.clean_empty(data)
+        return data
+
+    @post_load
+    def _convert_uuids_to_str(self, data):
+        """
+        Utilize UUID for data validation but convert to string before usage in business logic
+        """
+        attr = "ge_cloud_id"
+        uuid_val = data.pop(attr, None)
+        if uuid_val:
+            data[attr] = str(uuid_val)
         return data
 
 
