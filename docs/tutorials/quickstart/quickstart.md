@@ -22,10 +22,7 @@ Once you have completed this guide you will have a foundation in the basics of u
 
 </Prerequisites> 
 
-
-## Steps
-
-### 1. Install GX and set up your code environment
+## Overview
 
 With GX you can get up and running with just a few lines of code.  The full process you'll be using will look like:
 
@@ -54,6 +51,11 @@ result.view()
 ```
 
 That's not a lot of code, is it?  In the following steps we'll break down exactly what is happening here so that you can follow along and perform a Validation yourself.
+
+
+## Steps
+
+### 1. Install GX and set up your code environment
 
 #### 1.1 Install GX using pip
 
