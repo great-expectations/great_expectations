@@ -15,7 +15,9 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
 )
 from great_expectations.expectations.expectation import TableExpectation
-from time_series_expectations.expectations.util import get_prophet_model_from_json
+from time_series_expectations.expectations.prophet_model_deserializer import (
+    ProphetModelDeserializer,
+)
 
 with open(file_relative_path(__file__, "example_prophet_date_model.json")) as f_:
     example_prophet_date_model_json = f_.read()
@@ -122,7 +124,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
         model_json = configuration.kwargs["model"]
         date = configuration.kwargs["date"]
 
-        model = get_prophet_model_from_json(model_json)
+        model = ProphetModelDeserializer().get_model(model_json)
         forecast = model.predict(pd.DataFrame({"ds": [date]}))
 
         forecast_value = forecast.yhat[0]

@@ -8,7 +8,9 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnExpectation
-from time_series_expectations.expectations.util import get_prophet_model_from_json
+from time_series_expectations.expectations.prophet_model_deserializer import (
+    ProphetModelDeserializer,
+)
 
 
 class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
@@ -72,7 +74,7 @@ class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
         model_json = configuration.kwargs["model"]
         date = configuration.kwargs["date"]
 
-        model = get_prophet_model_from_json(model_json)
+        model = ProphetModelDeserializer().get_model(model_json)
         forecast = model.predict(pd.DataFrame({"ds": [date]}))
 
         forecast_value = forecast.yhat[0]

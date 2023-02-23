@@ -151,10 +151,7 @@ def generate_time_series(
     return Y
 
 
-def generate_time_series_df(
-    size=365*3,
-    **kwargs
-) -> pd.DataFrame:
+def generate_time_series_df(size=365 * 3, **kwargs) -> pd.DataFrame:
     """Generate a time series as a pandas dataframe."""
 
     return pd.DataFrame(
