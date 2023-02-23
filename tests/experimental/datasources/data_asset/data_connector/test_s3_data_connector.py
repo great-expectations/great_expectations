@@ -45,7 +45,7 @@ def test_basic_instantiation():
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
-        regex=re.compile(r"alpha-(.*)\.csv"),
+        batching_regex=re.compile(r"alpha-(.*)\.csv"),
         prefix="",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -70,7 +70,7 @@ def test_basic_instantiation():
 
 @pytest.mark.integration
 @mock_s3
-def test_instantiation_regex_does_not_match_paths():
+def test_instantiation_batching_regex_does_not_match_paths():
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
@@ -93,7 +93,7 @@ def test_instantiation_regex_does_not_match_paths():
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
-        regex=re.compile(r"beta-(.*)\.csv"),
+        batching_regex=re.compile(r"beta-(.*)\.csv"),
         prefix="",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -142,7 +142,7 @@ def test_return_all_batch_definitions_unsorted():
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
-        regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         prefix="",
     )
     # with missing BatchRequest arguments
@@ -289,7 +289,7 @@ def test_return_all_batch_definitions_unsorted():
 #         datasource_name="my_dataframe_datasource",
 #         data_asset_name="my_s3_data_asset",
 #         bucket=bucket,
-#         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+#         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
 #         prefix="",
 #     )
 #     # noinspection PyProtectedMember
@@ -482,7 +482,7 @@ def test_return_only_unique_batch_definitions():
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
-        regex=re.compile(r"(?P<name>.+)/.+\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         prefix="A",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -513,7 +513,7 @@ def test_return_only_unique_batch_definitions():
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
-        regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
+        batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         prefix="B",
     )
 
@@ -555,7 +555,7 @@ def test_alpha():
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
-        regex=re.compile(r"(?P<part_1>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
         prefix="test_dir_alpha",
     )
     assert my_data_connector.get_data_reference_count() == 4
@@ -630,7 +630,7 @@ def test_foxtrot():
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="",
     )
     assert my_data_connector.get_data_reference_count() == 0
@@ -642,7 +642,7 @@ def test_foxtrot():
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="test_dir_foxtrot/A",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -658,7 +658,7 @@ def test_foxtrot():
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         prefix="test_dir_foxtrot/B",
     )
     assert my_data_connector.get_data_reference_count() == 3
@@ -674,7 +674,7 @@ def test_foxtrot():
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
         bucket=bucket,
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="test_dir_foxtrot/C",
     )
     assert my_data_connector.get_data_reference_count() == 3

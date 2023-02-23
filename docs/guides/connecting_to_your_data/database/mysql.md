@@ -49,12 +49,12 @@ mysql+pymysql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L1-L4
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py imports"
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L17
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py get_context"
 ```
 
 ### 5. Configure your Datasource
@@ -71,12 +71,12 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L19-L33
+```yaml name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L42
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py test datasource config"
 ```
 
 </TabItem>
@@ -85,12 +85,12 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py#L19-L36
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py#L42
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py test datasource config"
 ```
 
 </TabItem>
@@ -115,14 +115,14 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L44
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py add datasource config"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py#L44
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py add datasource config"
 ```
 
 </TabItem>
@@ -144,7 +144,7 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L47-L60
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py load data by query"
 ```
 
 </TabItem>
@@ -153,7 +153,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L66-L77
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py load data by table name"
 ```
 
 </TabItem>

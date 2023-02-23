@@ -35,14 +35,14 @@ To learn more about <TechnicalTag tag="datasource" text="Datasources" />, <Techn
 
 Import Great Expectations.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L5
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py imports"
 ```
 
 ### 2. Obtain DataContext
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L7
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_context"
 ```
 
 ## Configuring Inferred Asset Data Connector and Configured Asset Data Connector
@@ -62,13 +62,13 @@ Load your DataContext into memory using the `get_context()` method.
 Start with an elementary `Datasource` configuration, containing just one general `Inferred Asset Data Connector`
 component:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L9-L25
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py datasource_yaml"
 ```
 
 Using the above example configuration, add in the path to a directory that contains your data.  Then run this code to
 test your configuration:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L33
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py test_yaml_config"
 ```
 
 Given that the `glob_directive` in the example configuration is `*.csv`, if you specified a directory containing CSV
@@ -92,12 +92,12 @@ to ensure the correctness of the proposed `YAML` configuration prior to incorpor
 For instance, try the following erroneous `DataConnector` configuration as part of your `Datasource` (you can
 paste it directly underneath -- or instead of -- the `default_inferred_data_connector_name` configuration section):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L35-L44
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py buggy_data_connector_yaml"
 ```
 
 Then add in the path to a directory that contains your data, and again run this code to test your configuration:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L33
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py test_yaml_config"
 ```
 
 Notice that the output reports only one `data_asset_name`, called `DEFAULT_ASSET_NAME`, signaling a misconfiguration.
@@ -105,12 +105,12 @@ Notice that the output reports only one `data_asset_name`, called `DEFAULT_ASSET
 Now try another erroneous `DataConnector` configuration as part of your `Datasource` (you can paste it directly
 underneath -- or instead of -- your existing `DataConnector` configuration sections):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L79-L88
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py another_buggy_data_connector_yaml"
 ```
 
 where you would add in the path to a directory that does not exist; then run this code again to test your configuration:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L33
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py test_yaml_config"
 ```
 
 You will see that the list of `Data Assets` is empty.  Feel free to experiment with the arguments to
@@ -146,7 +146,7 @@ case `InferredAssetFilesystemDataConnector`) from being successfully instantiate
 Once the basic `Datasource` configuration is error-free and satisfies your requirements, save it into your `DataContext`
 by using the `add_datasource()` function.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L125
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add_datasource"
 ```
 
 ### 3. Get names of available Data Assets
@@ -154,7 +154,7 @@ by using the `add_datasource()` function.
 Getting names of available data assets using an `Inferred Asset Data Connector` affords you the visibility into types
 and naming structures of files in your filesystem or blob storage:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L126-L133
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py get_available_data_asset_names"
 ```
 
 </TabItem>
@@ -166,12 +166,12 @@ Set up the bare-bones `Configured Asset Data Connector` to gradually apply struc
 partition them according to this structure.  To begin, add the following `configured_data_connector_name` section to
 your `Datasource` configuration (please feel free to change the name as you deem appropriate for your use case):
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L147-L164
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add configureed asset data connector to datasource"
 ```
 
 Now run this code to test your configuration:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L33
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py test_yaml_config"
 ```
 
 The message `Available data_asset_names (0 of 0)`, corresponding to the `configured_data_connector_name` `Data
@@ -184,12 +184,12 @@ You can employ a data asset that reflects a relatively general file structure (e
 configuration) to represent files in a directory, which contain a certain prefix (e.g., `yellow_tripdata_sample_`) and
 whose contents are of the desired type (e.g., CSV).
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L170-L185
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml only by filename and type"
 ```
 
 Now run `test_yaml_config()` as part of evolving and testing components of Great Expectations `YAML` configuration:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L33
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py test_yaml_config"
 ```
 
 Verify that exactly one `Data Asset` is reported for the `configured_data_connector_name` `Data Connector` and that the
@@ -202,12 +202,12 @@ In recognition of a finer observed file path structure, you can refine the parti
 `taxi_data_year_month` in the following example configuration identifies three parts of a file path: `name` (as in
 "company name"), `year`, and `month`:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L224-L246
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py configured_data_connector_yaml add granular group_names"
 ```
 
 and run
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L33
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py test_yaml_config"
 ```
 
 Verify that now two `Data Assets` (`taxi_data_flat` and `taxi_data_year_month`) are reported for the
@@ -221,7 +221,7 @@ exact values of the file name structure's components to allowing Python function
 Finally, once your `Data Connector` configuration satisfies your requirements, save the enclosing `Datasource` into your
 `DataContext` using
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py#L125
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/files/yaml_example_gradual.py add_datasource"
 ```
 
 Consult the

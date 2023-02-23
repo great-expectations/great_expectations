@@ -29,7 +29,7 @@ your data at various levels of granularity:
 This guide will use the `tables` section that is part of the following `SimpleSqlalchemyDatasource` configuration as an
 example:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L9-L77
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py datasource_yaml"
 ```
 
 ## Preliminary Steps
@@ -38,12 +38,12 @@ example:
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L3
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py imports"
 ```
 
 Load your `DataContext` into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L7
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py get_context"
 ```
 
 ### 2. Configure your Datasource
@@ -51,7 +51,7 @@ Load your `DataContext` into memory using the `get_context()` method.
 Using the above example configuration, specify the connection string for your database.  Then run this code to test your
 configuration:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L86
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py test_yaml_config"
 ```
 
 Feel free to adjust your configuration and re-run `test_yaml_config()` as needed.
@@ -60,7 +60,7 @@ Feel free to adjust your configuration and re-run `test_yaml_config()` as needed
 
 Save the configuration into your `DataContext` by using the `add_datasource()` function.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L88
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py add_datasource"
 ```
 
 ## Splitting and Sampling
@@ -77,12 +77,12 @@ the rows sampled at random, which is specified by the parameter `p` (stands for 
 
 Finally, confirm the expected number of batches was retrieved and the reduced size of a batch (due to `Sampling`):
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L169-L173
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py batch_request"
 ```
 
 (set `data_asset_name` to `"taxi__yellow_tripdata_sample_2019_01__asset"` for the present example).
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py#L179-L186
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py assertions"
 ```
 
 ## Additional Notes

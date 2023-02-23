@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import dataclasses
+import functools
 import logging
+import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     ClassVar,
     Dict,
     Generic,
@@ -80,7 +83,7 @@ class BatchSorter:
     reverse: bool = False
 
 
-BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str]]
+BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str, dict]]
 
 
 def _is_batch_sorter_list(
@@ -220,15 +223,11 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         )
 
     # Sorter methods
-    @pydantic.validator("order_by", pre=True, each_item=True)
-    def _parse_order_by_sorter(
-        cls, v: Union[str, BatchSorter]
-    ) -> Union[BatchSorter, dict]:
-        if isinstance(v, str):
-            if not v:
-                raise ValueError("empty string")
-            return _batch_sorter_from_str(v)
-        return v
+    @pydantic.validator("order_by", pre=True)
+    def _parse_order_by_sorters(
+        cls, order_by: Optional[List[Union[BatchSorter, str, dict]]] = None
+    ) -> List[BatchSorter]:
+        return Datasource.parse_order_by_sorters(order_by=order_by)
 
     def add_sorters(self: _DataAssetT, sorters: BatchSortersDefinition) -> _DataAssetT:
         """Associates a sorter to this DataAsset
@@ -273,7 +272,9 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         for sorter in reversed(self.order_by):
             try:
                 batch_list.sort(
-                    key=lambda b: b.metadata[sorter.key],
+                    key=functools.cmp_to_key(
+                        _sort_batches_with_none_metadata_values(sorter.key)
+                    ),
                     reverse=sorter.reverse,
                 )
             except KeyError as e:
@@ -281,6 +282,27 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
                     f"Trying to sort {self.name} table asset batches on key {sorter.key} "
                     "which isn't available on all batches."
                 ) from e
+
+
+def _sort_batches_with_none_metadata_values(
+    key: str,
+) -> Callable[[Batch, Batch], int]:
+    def _compare_function(a: Batch, b: Batch) -> int:
+        if a.metadata[key] is not None and b.metadata[key] is not None:
+            if a.metadata[key] < b.metadata[key]:
+                return -1
+            elif a.metadata[key] > b.metadata[key]:
+                return 1
+            else:
+                return 0
+        elif a.metadata[key] is None and b.metadata[key] is None:
+            return 0
+        elif a.metadata[key] is None:  # b.metadata[key] is not None
+            return -1
+        # b.metadata[key] is None, a.metadata[key] is not None
+        return 0
+
+    return _compare_function
 
 
 # If a Datasource can have more than 1 _DataAssetT, this will need to change.
@@ -415,6 +437,49 @@ class Datasource(
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
         return asset
 
+    @staticmethod
+    def parse_order_by_sorters(
+        order_by: Optional[List[Union[BatchSorter, str, dict]]] = None
+    ) -> List[BatchSorter]:
+        order_by_sorters: list[BatchSorter] = []
+        if order_by:
+            for idx, sorter in enumerate(order_by):
+                if isinstance(sorter, str):
+                    if not sorter:
+                        raise ValueError(
+                            '"order_by" list cannot contain an empty string'
+                        )
+                    order_by_sorters.append(_batch_sorter_from_str(sorter))
+                elif isinstance(sorter, dict):
+                    key: Optional[Any] = sorter.get("key")
+                    reverse: Optional[Any] = sorter.get("reverse")
+                    if key and reverse:
+                        order_by_sorters.append(BatchSorter(key=key, reverse=reverse))
+                    elif key:
+                        order_by_sorters.append(BatchSorter(key=key))
+                    else:
+                        raise ValueError(
+                            '"order_by" list dict must have a key named "key"'
+                        )
+                else:
+                    order_by_sorters.append(sorter)
+        return order_by_sorters
+
+    @staticmethod
+    def parse_batching_regex_string(
+        batching_regex: Optional[Union[re.Pattern, str]] = None
+    ) -> re.Pattern:
+        pattern: re.Pattern
+        if not batching_regex:
+            pattern = re.compile(".*")
+        elif isinstance(batching_regex, str):
+            pattern = re.compile(batching_regex)
+        elif isinstance(batching_regex, re.Pattern):
+            pattern = batching_regex
+        else:
+            raise ValueError('"batching_regex" must be either re.Pattern, str, or None')
+        return pattern
+
     # Abstract Methods
     @property
     def execution_engine_type(self) -> Type[_ExecutionEngineT]:
@@ -482,8 +547,9 @@ class Batch(ExperimentalBaseModel):
     def _set_id(cls, values: dict) -> dict:
         # We need a unique identifier. This will likely change as we get more input.
         options_list = []
-        for k, v in values["batch_request"].options.items():
-            options_list.append(f"{k}_{v}")
+        for key, value in values["batch_request"].options.items():
+            if key != "path":
+                options_list.append(f"{key}_{value}")
 
         values["id"] = "-".join(
             [values["datasource"].name, values["data_asset"].name, *options_list]

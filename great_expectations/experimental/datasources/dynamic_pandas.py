@@ -110,6 +110,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "FilePath",  # pydantic
     # pandas
     "DtypeArg",
+    "FilePathOrBuffer",
     "CSVEngine",
     "IndexLabel",
     "CompressionOptions",
@@ -158,6 +159,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
         )
     },
     # misc
+    "filepath_or_buffer": {"filepath_or_buffer": _FieldSpec(FilePath, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
@@ -194,6 +196,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "Hashable": Hashable,
     "Iterable": Iterable,
     "FilePath": FilePath,
+    "FilePathOrBuffer": FilePath,
     "Pattern": re.Pattern,
     "CSVEngine": CSVEngine,
     "IndexLabel": IndexLabel,
@@ -307,22 +310,24 @@ def _to_pydantic_fields(
         next(all_parameters)
 
     for param_name, param in all_parameters:
-        no_annotation: bool = param.annotation is inspect._empty
-        if no_annotation:
-            logger.debug(f"`{param_name}` has no type annotation")
-            FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
-            type_ = Any
-        else:
-            type_ = _get_annotation_type(param)
-            if type_ is UNSUPPORTED_TYPE or type_ == "None":
-                logger.debug(f"`{param_name}` has no supported types. Field skipped")
-                FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
-                continue
-
         substitution = FIELD_SUBSTITUTIONS.get(param_name)
         if substitution:
             fields_dict.update(substitution)
         else:
+            no_annotation: bool = param.annotation is inspect._empty
+            if no_annotation:
+                logger.debug(f"`{param_name}` has no type annotation")
+                FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
+                type_ = Any
+            else:
+                type_ = _get_annotation_type(param)
+                if type_ is UNSUPPORTED_TYPE or type_ == "None":
+                    logger.debug(
+                        f"`{param_name}` has no supported types. Field skipped"
+                    )
+                    FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
+                    continue
+
             fields_dict[param_name] = _FieldSpec(
                 type=_replace_builtins(type_), default_value=_get_default_value(param)  # type: ignore[arg-type]
             )

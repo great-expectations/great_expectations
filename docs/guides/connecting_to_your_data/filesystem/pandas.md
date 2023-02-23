@@ -28,12 +28,12 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L1-L4
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py imports"
 ```
 
 Load your <TechnicalTag tag="data_context" text="Data Context" /> into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L6
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_context"
 ```
 
 ### 3. Configure your Datasource
@@ -50,23 +50,23 @@ Using this example configuration add in the path to a directory that contains so
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L8-L27
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py yaml"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L33
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py test_yaml_config"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py#L8-L28
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py yaml"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py#L36
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py test_yaml_config"
 ```
 
 </TabItem>
@@ -91,13 +91,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L35
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py add_datasource"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py#L38
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py add_datasource"
 ```
 
 </TabItem>
@@ -118,10 +118,12 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Add the path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L38-L44
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py runtime_batch_request"
 ```
+
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L50-L56
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py runtime_batch_request validator"
 ```
 
   </TabItem>
@@ -129,10 +131,12 @@ Then load data into the `Validator`.
 
 Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L62-L66
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request"
 ```
+
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py#L72-L78
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request validator"
 ```
 
 </TabItem>

@@ -1,3 +1,4 @@
+# <snippet name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/pandas/v2/great_expectations/checkpoints/test_v2_checkpoint.yml full">
 # in the test_v2_checkpoint.yml file
 name: test_v2_checkpoint
 config_version:
@@ -11,3 +12,4 @@ batches:
       data_asset_name: Titanic.csv
     expectation_suite_names:
       - Titanic.profiled
+# </snippet>

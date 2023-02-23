@@ -47,7 +47,7 @@ You can then execute all cells in the notebook in order to store the Checkpoint 
 
 In order to build <TechnicalTag relative="../../" tag="data_docs" text="Data Docs" /> and get your results in a nice, human-readable format, you can simply uncomment and run the last cell in the notebook. This will open Data Docs, where you can click on the latest <TechnicalTag relative="../../" tag="validation" text="Validation" /> run to see the Validation Results page for this Checkpoint run.
 
-![data_docs_failed_validation1](../../../docs/images/data_docs_taxi_failed_validation01.png)
+![data_docs_failed_validation1](../../images/data_docs_taxi_failed_validation01.png)
 
 You’ll see that the test suite failed when you ran it against the February data.
 
@@ -57,7 +57,7 @@ We ran the Checkpoint and it successfully failed! **Wait - what?** Yes, that’s
 
 Click on the highlighted row to access the Validation Results page, which will tell us specifically what is wrong with the February data.
 
-![data_docs_failed_validation2](../../../docs/images/data_docs_taxi_failed_validation02.png)
+![data_docs_failed_validation2](../../images/data_docs_taxi_failed_validation02.png)
 
 On the Validation Results page, you will see that the Validation of the staging data *failed* because the set of *Observed Values* in the `passenger_count` column contained the value `0`! This violates our Expectation, which makes the validation fail.
 

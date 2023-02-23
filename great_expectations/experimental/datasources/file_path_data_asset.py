@@ -4,6 +4,7 @@ import copy
 import dataclasses
 import logging
 import pathlib
+import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -14,6 +15,7 @@ from typing import (
     Optional,
     Pattern,
     Set,
+    Union,
 )
 
 import pydantic
@@ -27,6 +29,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
+    Datasource,
     TestConnectionError,
 )
 
@@ -47,14 +50,18 @@ logger = logging.getLogger(__name__)
 class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "name",
-        "regex",
+        "batching_regex",
         "order_by",
         "type",
         "kwargs",  # kwargs need to be unpacked and passed separately
     }
 
+    _ALWAYS_INCLUDE_IN_BATCH_REQUEST_OPTIONS_TEMPLATE: ClassVar[Set[str]] = {
+        "path",
+    }
+
     # General file-path DataAsset pertaining attributes.
-    regex: Pattern
+    batching_regex: Pattern
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -81,7 +88,7 @@ class _FilePathDataAsset(DataAsset):
         super().__init__(**data)
 
         self._regex_parser = RegExParser(
-            regex_pattern=self.regex,
+            regex_pattern=self.batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
         )
 
@@ -92,14 +99,22 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
-
         self._data_connector = None
+
+    @pydantic.validator("batching_regex", pre=True)
+    def _parse_batching_regex_string(
+        cls, batching_regex: Optional[Union[re.Pattern, str]] = None
+    ) -> re.Pattern:
+        return Datasource.parse_batching_regex_string(batching_regex=batching_regex)
 
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        idx: int
-        return {idx: None for idx in self._all_group_names}
+        options: set[str] = copy.deepcopy(
+            self._ALWAYS_INCLUDE_IN_BATCH_REQUEST_OPTIONS_TEMPLATE
+        )
+        options.update(set(self._all_group_names))
+        return {option: None for option in options}
 
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -111,7 +126,7 @@ class _FilePathDataAsset(DataAsset):
                     and not isinstance(value, str)
                 ):
                     raise gx_exceptions.InvalidBatchRequestError(
-                        f"All regex matching options must be strings. The value of '{option}' is "
+                        f"All batching_regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )
 

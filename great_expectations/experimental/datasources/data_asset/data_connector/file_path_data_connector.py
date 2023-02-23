@@ -49,7 +49,7 @@ class FilePathDataConnector(DataConnector):
     Note that `FilePathDataConnector` is not meant to be used on its own, but extended.
 
     Args:
-        regex: A regex pattern for filtering data references
+        batching_regex: A regex pattern for filtering data references
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: A list of sorters for sorting data references.
@@ -60,7 +60,7 @@ class FilePathDataConnector(DataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        regex: re.Pattern,
+        batching_regex: re.Pattern,
         unnamed_regex_group_prefix: str = "batch_request_param_",
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
@@ -73,9 +73,10 @@ class FilePathDataConnector(DataConnector):
             data_asset_name=data_asset_name,
         )
 
-        self._regex: re.Pattern = regex
+        self._batching_regex: re.Pattern = batching_regex
         self._regex_parser: RegExParser = RegExParser(
-            regex_pattern=regex, unnamed_regex_group_prefix=unnamed_regex_group_prefix
+            regex_pattern=batching_regex,
+            unnamed_regex_group_prefix=unnamed_regex_group_prefix,
         )
 
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
@@ -235,7 +236,7 @@ class FilePathDataConnector(DataConnector):
         group_names: List[str] = self._regex_parser.get_all_group_names()
         path: str = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
-            regex_pattern=self._regex,
+            regex_pattern=self._batching_regex,
             group_names=group_names,
         )
         if not path:
@@ -333,15 +334,15 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self, data_reference: str
     ) -> Optional[IDDict]:
         # noinspection PyUnresolvedReferences
-        matches: Optional[re.Match] = self._regex.match(data_reference)
+        matches: Optional[re.Match] = self._batching_regex.match(data_reference)
         if matches is None:
             return None
 
-        num_all_matched_group_values: int = self._regex.groups
+        num_all_matched_group_values: int = self._batching_regex.groups
 
         # Check for `(?P<name>)` named group syntax
         defined_group_name_to_group_index_mapping: Dict[str, int] = dict(
-            self._regex.groupindex
+            self._batching_regex.groupindex
         )
         defined_group_name_indexes: Set[int] = set(
             defined_group_name_to_group_index_mapping.values()

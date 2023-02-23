@@ -1,5 +1,5 @@
 {
-    "title": "PickleAsset",
+    "title": "PandasPickleAsset",
     "description": "Load pickled pandas object (or any object) from file.\n\n.. warning::\n\n   Loading pickled data received from untrusted sources can be\n   unsafe. See `here <https://docs.python.org/3/library/pickle.html>`__.",
     "type": "object",
     "properties": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pickle",
+            "default": "pandas_pickle",
             "enum": [
-                "pickle"
+                "pandas_pickle"
             ],
             "type": "string"
         },
@@ -22,14 +22,9 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "batching_regex": {
-            "title": "Batching Regex",
-            "type": "string",
-            "format": "regex"
-        },
-        "glob_directive": {
-            "title": "Glob Directive",
-            "default": "**/*",
+        "filepath_or_buffer": {
+            "title": "Filepath Or Buffer",
+            "format": "file-path",
             "type": "string"
         },
         "compression": {
@@ -51,7 +46,7 @@
     },
     "required": [
         "name",
-        "batching_regex"
+        "filepath_or_buffer"
     ],
     "additionalProperties": false,
     "definitions": {

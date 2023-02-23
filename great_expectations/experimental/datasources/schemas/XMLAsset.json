@@ -22,8 +22,8 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "regex": {
-            "title": "Regex",
+        "batching_regex": {
+            "title": "Batching Regex",
             "type": "string",
             "format": "regex"
         },
@@ -68,6 +68,11 @@
             "default": "lxml",
             "type": "string"
         },
+        "stylesheet": {
+            "title": "Stylesheet",
+            "format": "file-path",
+            "type": "string"
+        },
         "compression": {
             "title": "Compression",
             "default": "infer",
@@ -96,7 +101,7 @@
     },
     "required": [
         "name",
-        "regex"
+        "batching_regex"
     ],
     "additionalProperties": false,
     "definitions": {
