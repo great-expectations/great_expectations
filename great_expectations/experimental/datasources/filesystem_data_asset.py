@@ -56,10 +56,10 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
         """
         success = False
         for filepath in self.datasource.base_directory.glob("**/*.*"):
-            if self.regex.match(
+            if self.batching_regex.match(
                 str(filepath.relative_to(self.datasource.base_directory))
             ):
-                # if one file in the path matches the regex, we consider this asset valid
+                # if one file in the path matches the batching_regex, we consider this asset valid
                 success = True
                 break
         if not success:
@@ -147,7 +147,7 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
                     and not isinstance(value, str)
                 ):
                     raise ge_exceptions.InvalidBatchRequestError(
-                        f"All regex matching options must be strings. The value of '{option}' is "
+                        f"All batching_regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )
 
@@ -222,14 +222,14 @@ to use as its "include" directive for Filesystem style DataAsset processing."""
         return batch_list
 
     def _build_test_connection_error_message(self) -> str:
-        return f"""No file at base_directory path "{self.datasource.base_directory.resolve()}" matched regular expressions pattern "{self.regex.pattern}" and/or glob_directive "{self.glob_directive}" for DataAsset "{self.name}"."""
+        return f"""No file at base_directory path "{self.datasource.base_directory.resolve()}" matched regular expressions pattern "{self.batching_regex.pattern}" and/or glob_directive "{self.glob_directive}" for DataAsset "{self.name}"."""
 
     def _build_data_connector(self) -> DataConnector:
         data_connector: DataConnector = FilesystemDataConnector(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             base_directory=self.datasource.base_directory,
-            regex=self.regex,
+            batching_regex=self.batching_regex,
             glob_directive=self.glob_directive,
             data_context_root_directory=self.datasource.data_context_root_directory,
         )
