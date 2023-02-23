@@ -38,7 +38,6 @@ def run_grep(target_dir: pathlib.Path) -> List[str]:
 def main() -> None:
     check_dependencies("grep")
     docs_dir = pathlib.Path(__file__).parent.parent / "docs"
-    print(docs_dir.absolute())
     grep_output = run_grep(docs_dir)
     if grep_output:
         print(
