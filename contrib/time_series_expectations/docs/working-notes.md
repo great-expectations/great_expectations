@@ -173,3 +173,9 @@ Things like these datasets would be nifty:
     * github stars
     * stock market data
     * https://steamcharts.com/
+
+### anonymous metrics
+
+Related to "Add SQL implementation for `expect_column_pair_values_to_match_prophet_date_model` and other row-level metrics."
+
+https://github.com/great-expectations/great_expectations/pull/3485/files

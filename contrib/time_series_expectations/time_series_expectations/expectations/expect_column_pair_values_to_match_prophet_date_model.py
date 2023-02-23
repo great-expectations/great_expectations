@@ -91,7 +91,46 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
 
 
 class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
-    """This Expectation is used to compare the values in a column to a Prophet forecast, based on a timestamp in a second column."""
+    """This Expectation is used to compare the values in a column to a Prophet forecast, based on a timestamp in a second column.
+    
+    expect_column_pair_values_to_match_prophet_date_model is a \
+    [ColumnPairMapExpectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations)
+
+    Args:
+        column_A (str): \
+            The name of the timestamp column
+        column_B (str): \
+            The name of the column containing time series values
+        model_json (str): \
+            A string containing a JSON-serialized Prophet model
+
+    Keyword Args:
+        mostly (None or a float between 0 and 1): \
+            Successful if at least mostly fraction of values match the expectation. \
+            For more detail, see [mostly](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#mostly).
+
+    Other Parameters:
+        result_format (str or None): \
+            Which output mode to use: BOOLEAN_ONLY, BASIC, COMPLETE, or SUMMARY. \
+            For more detail, see [result_format](https://docs.greatexpectations.io/docs/reference/expectations/result_format).
+        include_config (boolean): \
+            If True, then include the expectation config as part of the result object.
+        catch_exceptions (boolean or None): \
+            If True, then catch exceptions and include them as part of the result object. \
+            For more detail, see [catch_exceptions](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#catch_exceptions).
+        meta (dict or None): \
+            A JSON-serializable dictionary (nesting allowed) that will be included in the output without \
+            modification. For more detail, see [meta](https://docs.greatexpectations.io/docs/reference/expectations/standard_arguments/#meta).
+
+    Returns:
+        An [ExpectationSuiteValidationResult](https://docs.greatexpectations.io/docs/terms/validation_result)
+
+        Exact fields vary depending on the values passed to result_format, include_config, catch_exceptions, and meta.
+
+    Notes:
+        * Prophet is an open source forecasting library created at facebook. For more information, please see the [project github page](https://github.com/facebook/prophet).
+    
+    """
 
     examples = [
         {
