@@ -68,7 +68,7 @@ class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
         runtime_configuration: dict = None,
         execution_engine: ExecutionEngine = None,
     ):
-        batch_volume = metrics[self.metric_dependency]
+        metric_value = metrics[self.metric_dependency]
         model_json = configuration.kwargs["model"]
         date = configuration.kwargs["date"]
 
@@ -79,14 +79,14 @@ class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
         forecast_lower_bound = forecast.yhat_lower[0]
         forecast_upper_bound = forecast.yhat_upper[0]
 
-        in_bounds = (forecast_lower_bound < batch_volume) & (
-            batch_volume < forecast_upper_bound
+        in_bounds = (forecast_lower_bound < metric_value) & (
+            metric_value < forecast_upper_bound
         )
 
         return {
             "success": in_bounds,
             "result": {
-                "observed_value": batch_volume,
+                "observed_value": metric_value,
                 "forecast_value": forecast_value,
                 "forecast_lower_bound": forecast_lower_bound,
                 "forecast_upper_bound": forecast_upper_bound,

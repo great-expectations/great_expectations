@@ -9,29 +9,24 @@ Author: Abe Gong ([abegong](https://github.com/abegong))
 This package currently contains...
 
 * Expectations for detecting trends, seasonality, outliers, etc. in time series data
-* Abstract Base Classses for creating additional time series Expectations.
+* An abstract base class for creating additional time series Expectations based on column aggregate metrics.
 * Methods for generating time series data for testing purposes.
 
 ### Expectations
 
 This package currently contains 3 new Expectations. These are examples of the primary patterns that future time series Expectations will follow.
 
-    expect_batch_volume_to_match_prophet_date_model
+    expect_batch_row_count_to_match_prophet_date_model
     expect_column_max_to_match_prophet_date_model
     expect_column_pair_values_to_match_prophet_date_model
 
-`expect_batch_volume_to_match_prophet_date_model` and `expect_column_max_to_match_prophet_date_model` are Batch-level Expectations: each Batch corresponds to a single timestamp-value pair in a time series. In typical usage, you would expect to validate a single Batch (and therefore a single timestamp-value) at a time. `expect_column_pair_values_to_match_prophet_date_model` is a row-level Expectation: a Batch will typically contain many timestamp-values, which can be evaluated together.
+`expect_batch_row_count_to_match_prophet_date_model` and `expect_column_max_to_match_prophet_date_model` are Batch-level Expectations: each Batch corresponds to a single timestamp-value pair in a time series. In typical usage, you would expect to validate a single Batch (and therefore a single timestamp-value) at a time. `expect_column_pair_values_to_match_prophet_date_model` is a row-level Expectation: a Batch will typically contain many timestamp-values, which can be evaluated together.
 
 
 Backend support:
 * All three Expectations work in pandas
 * Both batch-level Expectations work in SQL. The supporting metric for `expect_column_pair_values_to_match_prophet_date_model` is not yet implemented in SQL.
 * All three Expectations work in Spark, but `expect_column_pair_values_to_match_prophet_date_model` relies on a UDF that may be slow for large data sets.
-
-
-### Abstract Base Classes
-
-The most important ABCs are [BatchAggregateStatisticTimeSeriesExpectation](link), [ColumnAggregateTimeSeriesExpectation](link), and  [ColumnPairTimeSeriesExpectation](link). They allow time series models to be applied to data in a variety of shapes and formats. Please see the class docstrings for more detailed explanation.
 
 ### Methods for generating synthetic time series data
 
@@ -92,6 +87,10 @@ Formatting conventions for the nested hierarchy above:
 * Concrete classes are in snake_case.
 * Classes that live/will live in the core Great Expectations library are in *italics*.
 * Classes that have already been implemented are marked with :white_check_mark:
+
+About Abstract Base Classes:
+
+The most important ABCs are `BatchAggregateStatisticTimeSeriesExpectation`, [ColumnAggregateTimeSeriesExpectation](link), and  `ColumnPairTimeSeriesExpectation`. They allow time series models to be applied to data in a variety of shapes and formats. Like most ABCs, these classes won't be executable themselves, but will hold shared logic to make it easier to create and maintain Expectations that follow certain patterns.
 
 
 About `ColumnAggregateTimeSeriesExpectations`:
