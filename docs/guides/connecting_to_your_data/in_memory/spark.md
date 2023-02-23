@@ -30,7 +30,7 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L1-L9
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py import"
 ```
 
 <SparkDataContextNote />
@@ -49,24 +49,23 @@ Using this example configuration add in the path to a directory that contains so
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L32-L42
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py yaml config"
 ```
 
 Run this code to test your configuration.
-
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L44
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py test yaml_config"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py#L32-L42
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py#L44
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py test yaml_config"
 ```
 
 </TabItem>
@@ -89,13 +88,13 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L46
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py add datasource"
 ```
 
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py#L46
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py add datasource"
 ```
 
 </TabItem>
@@ -107,18 +106,16 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a `Validator` using a `BatchRequest`.
 
 Add the variable containing your dataframe (`df` in this example) to the `batch_data` key under `runtime_parameters` in your `BatchRequest`.
-
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L49-L55
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py batch request"
 ```
 
 :::note Note this guide uses a toy dataframe that looks like this.
-
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L15-L19
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py dataframe"
 ```
 :::
 
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py#L57-L63
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py validator"
 ```
 
 <Congratulations />

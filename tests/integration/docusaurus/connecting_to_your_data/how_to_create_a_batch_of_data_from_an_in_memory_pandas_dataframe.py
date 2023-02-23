@@ -118,6 +118,6 @@ my_validator: Validator = context.get_validator(
     # expectation_suite_name=suite_name
 )
 # </snippet>
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py validator_head">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py validator head">
 my_validator.head()
 # </snippet>
