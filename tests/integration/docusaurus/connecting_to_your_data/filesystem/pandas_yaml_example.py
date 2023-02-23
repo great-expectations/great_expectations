@@ -10,7 +10,7 @@ from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 context = gx.get_context()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py datasource_yaml">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py yaml">
 datasource_yaml = f"""
 name: taxi_datasource
 class_name: Datasource
@@ -46,7 +46,7 @@ context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 # Here is a RuntimeBatchRequest using a path to a single CSV file
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request path">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py runtime_batch_request">
 batch_request = RuntimeBatchRequest(
     datasource_name="taxi_datasource",
     data_connector_name="default_runtime_data_connector_name",
@@ -60,7 +60,7 @@ batch_request = RuntimeBatchRequest(
 # In normal usage you'd set your path directly in the BatchRequest above.
 batch_request.runtime_parameters["path"] = "./data/yellow_tripdata_sample_2019-01.csv"
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_validator 1">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py runtime_batch_request validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
@@ -70,7 +70,6 @@ print(validator.head())
 
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
-
 # Here is a BatchRequest naming a data_asset
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request">
 batch_request = BatchRequest(
@@ -84,7 +83,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "yellow_tripdata_sample_2019-01.csv"
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_validator 2">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"

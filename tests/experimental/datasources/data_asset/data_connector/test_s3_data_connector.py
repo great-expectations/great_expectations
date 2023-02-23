@@ -59,7 +59,7 @@ def test_basic_instantiation():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        regex=re.compile(r"alpha-(.*)\.csv"),
+        batching_regex=re.compile(r"alpha-(.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -87,7 +87,7 @@ def test_basic_instantiation():
 
 @pytest.mark.integration
 @mock_s3
-def test_instantiation_regex_does_not_match_paths():
+def test_instantiation_batching_regex_does_not_match_paths():
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
@@ -109,7 +109,7 @@ def test_instantiation_regex_does_not_match_paths():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        regex=re.compile(r"beta-(.*)\.csv"),
+        batching_regex=re.compile(r"beta-(.*)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -160,7 +160,7 @@ def test_return_all_batch_definitions_unsorted():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -359,7 +359,7 @@ def test_return_all_batch_definitions_unsorted():
 #     my_data_connector: DataConnector = S3DataConnector(
 #         datasource_name="my_dataframe_datasource",
 #         data_asset_name="my_s3_data_asset",
-#         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+#         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
 #         s3_client=client,
 #         bucket=bucket,
 #         prefix="",
@@ -554,7 +554,7 @@ def test_return_only_unique_batch_definitions():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        regex=re.compile(r"(?P<name>.+)/.+\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="A",
@@ -591,7 +591,7 @@ def test_return_only_unique_batch_definitions():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
+        batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         s3_client=client,
         bucket=bucket,
         prefix="B",
@@ -635,7 +635,7 @@ def test_alpha():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_alpha",
@@ -712,7 +712,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="",
@@ -726,7 +726,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/A",
@@ -744,7 +744,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/B",
@@ -762,7 +762,7 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         s3_client=client,
         bucket=bucket,
         prefix="test_dir_foxtrot/C",

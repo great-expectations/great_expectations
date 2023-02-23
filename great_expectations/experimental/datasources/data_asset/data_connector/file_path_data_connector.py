@@ -49,7 +49,7 @@ class FilePathDataConnector(DataConnector):
     Note that `FilePathDataConnector` is not meant to be used on its own, but extended.
 
     Args:
-        regex: A regex pattern for filtering data references
+        batching_regex: A regex pattern for partitioning data references
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: A list of sorters for sorting data references.
@@ -63,7 +63,7 @@ class FilePathDataConnector(DataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        regex: re.Pattern,
+        batching_regex: re.Pattern,
         unnamed_regex_group_prefix: str = "batch_request_param_",
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
@@ -77,11 +77,11 @@ class FilePathDataConnector(DataConnector):
         )
 
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
-        self._regex: re.Pattern = self._ensure_regex_groups_include_data_reference_key(
-            regex=regex
+        self._batching_regex: re.Pattern = (
+            self._ensure_regex_groups_include_data_reference_key(regex=batching_regex)
         )
         self._regex_parser: RegExParser = RegExParser(
-            regex_pattern=self._regex,
+            regex_pattern=self._batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
         )
 
@@ -240,7 +240,7 @@ class FilePathDataConnector(DataConnector):
         group_names: List[str] = self._regex_parser.get_all_group_names()
         path: str = map_batch_definition_to_data_reference_string_using_regex(
             batch_definition=batch_definition,
-            regex_pattern=self._regex,
+            regex_pattern=self._batching_regex,
             group_names=group_names,
         )
         if not path:

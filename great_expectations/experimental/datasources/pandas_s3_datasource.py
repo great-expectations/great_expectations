@@ -81,7 +81,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     def add_csv_asset(
         self,
         name: str,
-        regex: Union[re.Pattern, str],
+        batching_regex: Union[re.Pattern, str],
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
@@ -92,21 +92,23 @@ class PandasS3Datasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the csv asset
-            regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches csv filenames that is used to label the batches
             prefix (str): S3 prefix
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
-        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
+            batching_regex=batching_regex
+        )
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
 
         asset = CSVAsset(
             name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
@@ -114,7 +116,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         data_connector: DataConnector = S3DataConnector(
             datasource_name=self.name,
             data_asset_name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             s3_client=self._s3_client,
             bucket=self.bucket,
             prefix=prefix,
@@ -122,7 +124,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{regex_pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
@@ -132,7 +134,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     def add_excel_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        batching_regex: Union[str, re.Pattern],
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
@@ -143,21 +145,23 @@ class PandasS3Datasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the csv asset
-            regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches csv filenames that is used to label the batches
             prefix (str): S3 prefix
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
-        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
+            batching_regex=batching_regex
+        )
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
 
         asset = ExcelAsset(
             name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
@@ -165,7 +169,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         data_connector: DataConnector = S3DataConnector(
             datasource_name=self.name,
             data_asset_name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             s3_client=self._s3_client,
             bucket=self.bucket,
             prefix=prefix,
@@ -173,7 +177,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{regex_pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
@@ -183,7 +187,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     def add_json_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        batching_regex: Union[str, re.Pattern],
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
@@ -194,21 +198,23 @@ class PandasS3Datasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the csv asset
-            regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches csv filenames that is used to label the batches
             prefix (str): S3 prefix
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
-        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
+            batching_regex=batching_regex
+        )
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
 
         asset = JSONAsset(
             name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
@@ -216,7 +222,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         data_connector: DataConnector = S3DataConnector(
             datasource_name=self.name,
             data_asset_name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             s3_client=self._s3_client,
             bucket=self.bucket,
             prefix=prefix,
@@ -224,7 +230,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{regex_pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
@@ -234,7 +240,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     def add_parquet_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        batching_regex: Union[str, re.Pattern],
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
@@ -245,21 +251,23 @@ class PandasS3Datasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the csv asset
-            regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches csv filenames that is used to label the batches
             prefix (str): S3 prefix
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
-        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
+            batching_regex=batching_regex
+        )
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
 
         asset = ParquetAsset(
             name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
@@ -267,7 +275,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         data_connector: DataConnector = S3DataConnector(
             datasource_name=self.name,
             data_asset_name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             s3_client=self._s3_client,
             bucket=self.bucket,
             prefix=prefix,
@@ -275,7 +283,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{regex_pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,

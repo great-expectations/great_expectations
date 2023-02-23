@@ -30,7 +30,7 @@ def test_basic_instantiation(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"alpha-(.*)\.csv"),
+        batching_regex=re.compile(r"alpha-(.*)\.csv"),
         base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
@@ -56,10 +56,10 @@ def test_basic_instantiation(tmp_path_factory):
 
 @pytest.mark.integration
 @pytest.mark.slow  # creating small number of`file handles in temporary file system
-def test_instantiation_regex_does_not_match_paths(tmp_path_factory):
+def test_instantiation_batching_regex_does_not_match_paths(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp(
-            "test_instantiation_from_a_config_regex_does_not_match_paths"
+            "test_instantiation_from_a_config_batching_regex_does_not_match_paths"
         )
     )
     create_files_in_directory(
@@ -74,7 +74,7 @@ def test_instantiation_regex_does_not_match_paths(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"beta-(.*)\.csv"),
+        batching_regex=re.compile(r"beta-(.*)\.csv"),
         base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
@@ -117,7 +117,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         base_directory=pathlib.Path(base_directory),
         glob_directive="*.csv",
     )
@@ -308,7 +308,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #     my_data_connector: DataConnector = FilesystemDataConnector(
 #         datasource_name="my_dataframe_datasource",
 #         data_asset_name="my_filesystem_data_asset",
-#         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+#         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
 #         base_directory=pathlib.Path(base_directory),
 #         glob_directive="*.csv",
 #     )
@@ -492,7 +492,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"(?P<name>.+)/.+\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         base_directory=pathlib.Path(base_directory),
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
@@ -554,7 +554,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
+        batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         base_directory=pathlib.Path(base_directory),
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
@@ -587,7 +587,7 @@ def test_alpha(tmp_path_factory):
     my_data_connector: DataConnector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_alpha",
         glob_directive="*.csv",
     )
@@ -654,7 +654,7 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot",
         glob_directive="*.csv",
     )
@@ -666,7 +666,7 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "A",
         glob_directive="*.csv",
     )
@@ -682,7 +682,7 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "B",
         glob_directive="*.*",
     )
@@ -698,7 +698,7 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "C",
         glob_directive="*",
     )
@@ -741,7 +741,7 @@ def test_relative_base_directory_path(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"(?P<part_1>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A",
         glob_directive="*",
     )
@@ -759,7 +759,7 @@ def test_relative_base_directory_path(tmp_path_factory):
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_filesystem_data_asset",
-        regex=re.compile(r"(?P<name>.+)_(?P<number>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+)_(?P<number>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A" / "B" / "C",
         glob_directive="log*.csv",
     )

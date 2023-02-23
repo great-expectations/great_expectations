@@ -50,7 +50,7 @@ Using this example configuration add in the path to a directory that contains so
 
 <TabItem value="yaml">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py datasource_yaml"
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py yaml"
 ```
 
 Run this code to test your configuration.
@@ -61,7 +61,7 @@ Run this code to test your configuration.
 </TabItem>
 <TabItem value="python">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py datasource_config"
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_python_example.py yaml"
 ```
 
 Run this code to test your configuration.
@@ -118,10 +118,12 @@ Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading d
 
 Add the path to your CSV in the `path` key under `runtime_parameters` in your `BatchRequest`.
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request path"
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py runtime_batch_request"
 ```
+
 Then load data into the `Validator`.
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_validator 1"
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py runtime_batch_request validator"
 ```
 
   </TabItem>
@@ -131,8 +133,10 @@ Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request"
 ```
+
 Then load data into the `Validator`.
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_validator 2"
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py batch_request validator"
 ```
 
 </TabItem>

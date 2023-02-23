@@ -54,7 +54,7 @@ class _FilePathDataAsset(DataAsset):
         "type",
         "name",
         "order_by",
-        "regex",  # file_path argument
+        "batching_regex",  # file_path argument
         "base_directory",  # filesystem argument
         "glob_directive",  # filesystem argument
         "data_context_root_directory",  # filesystem argument
@@ -66,7 +66,7 @@ class _FilePathDataAsset(DataAsset):
     }
 
     # General file-path DataAsset pertaining attributes.
-    regex: Pattern
+    batching_regex: Pattern
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -94,7 +94,7 @@ class _FilePathDataAsset(DataAsset):
         super().__init__(**data)
 
         self._regex_parser = RegExParser(
-            regex_pattern=self.regex,
+            regex_pattern=self.batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
         )
 
@@ -106,11 +106,11 @@ class _FilePathDataAsset(DataAsset):
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
 
-    @pydantic.validator("regex", pre=True)
-    def _parse_regex_string(
-        cls, regex: Optional[Union[re.Pattern, str]] = None
+    @pydantic.validator("batching_regex", pre=True)
+    def _parse_batching_regex_string(
+        cls, batching_regex: Optional[Union[re.Pattern, str]] = None
     ) -> re.Pattern:
-        return Datasource.parse_regex_string(regex=regex)
+        return Datasource.parse_batching_regex_string(batching_regex=batching_regex)
 
     def batch_request_options_template(
         self,
@@ -129,7 +129,7 @@ class _FilePathDataAsset(DataAsset):
                     and not isinstance(value, str)
                 ):
                     raise gx_exceptions.InvalidBatchRequestError(
-                        f"All regex matching options must be strings. The value of '{option}' is "
+                        f"All batching_regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )
 
