@@ -101,7 +101,7 @@ path = "PATH_TO_YOUR_DATA_HERE"
 
 # Please note this override is only to provide good UX for docs and tests.
 path = "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py batch_request 2">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py batch_request example 2">
 df = pd.read_csv(path)
 
 batch_request = RuntimeBatchRequest(
@@ -113,7 +113,7 @@ batch_request = RuntimeBatchRequest(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py get_validator 2">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py get_validator example 2">
 validator = context.get_validator(
     batch_request=batch_request,
     expectation_suite_name="MY_EXPECTATION_SUITE_NAME",
