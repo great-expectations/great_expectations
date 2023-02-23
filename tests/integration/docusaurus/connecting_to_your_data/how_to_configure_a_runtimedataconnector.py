@@ -81,7 +81,7 @@ batch_request.runtime_parameters[
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py get_validator 1">
 validator = context.get_validator(
     batch_request=batch_request,
-    create_expectation_suite_with_name="MY_EXPECTATION_SUITE_NAME",
+    create_expectation_suite_with_name="<MY_EXPECTATION_SUITE_NAME>",
 )
 print(validator.head())
 # </snippet>
@@ -96,7 +96,7 @@ assert "YOUR MEANINGFUL NAME" in set(
 )
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py path">
-path = "PATH_TO_YOUR_DATA_HERE"
+path = "<PATH_TO_YOUR_DATA_HERE>"
 # </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
