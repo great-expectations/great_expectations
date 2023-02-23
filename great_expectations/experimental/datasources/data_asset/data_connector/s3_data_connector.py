@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.datasource.data_connector.util import (
@@ -13,13 +13,9 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
     FilePathDataConnector,
 )
 
-try:
-    import boto3
-except ImportError:
-    boto3 = None
-
-
 if TYPE_CHECKING:
+    from botocore.client import BaseClient
+
     from great_expectations.core.batch import BatchDefinition
 
 
@@ -33,14 +29,14 @@ class S3DataConnector(FilePathDataConnector):
     Args:
         datasource_name (str): required name for datasource
         bucket (str): bucket for S3
-        batching_regex (dict): regex configuration for filtering data_references
+        batching_regex: A regex pattern for partitioning data references
         prefix (str): S3 prefix
         delimiter (str): S3 delimiter
         max_keys (int): S3 max_keys (default is 1000)
-        boto3_options (dict): optional boto3 options
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
+        file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
         # TODO: <Alex>ALEX</Alex>
     """
 
@@ -48,31 +44,23 @@ class S3DataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        bucket: str,
         batching_regex: re.Pattern,
+        s3_client: BaseClient,
+        bucket: str,
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
-        boto3_options: Optional[dict] = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
-        self._bucket = bucket
-        self._prefix = sanitize_prefix_for_s3(prefix)
-        self._delimiter = delimiter
-        self._max_keys = max_keys
-
-        if boto3_options is None:
-            boto3_options = {}
-
-        try:
-            self._s3 = boto3.client("s3", **boto3_options)
-        except (TypeError, AttributeError):
-            raise ImportError(
-                "Unable to load boto3 (it is required for ConfiguredAssetS3DataConnector)."
-            )
+        self._s3_client: BaseClient = s3_client
+        self._bucket: str = bucket
+        self._prefix: str = sanitize_prefix_for_s3(prefix)
+        self._delimiter: str = delimiter
+        self._max_keys: int = max_keys
 
         super().__init__(
             datasource_name=datasource_name,
@@ -82,6 +70,7 @@ class S3DataConnector(FilePathDataConnector):
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn=file_path_template_map_fn,
         )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
@@ -110,7 +99,7 @@ class S3DataConnector(FilePathDataConnector):
         path_list: List[str] = [
             key
             for key in list_s3_keys(
-                s3=self._s3,
+                s3=self._s3_client,
                 query_options=query_options,
                 iterator_dict={},
                 recursive=False,
@@ -132,4 +121,4 @@ requires "file_path_template_map_fn: Callable" to be set.
             "path": path,
         }
 
-        return self._file_path_template_map_fn(template_arguments=template_arguments)
+        return self._file_path_template_map_fn(**template_arguments)
