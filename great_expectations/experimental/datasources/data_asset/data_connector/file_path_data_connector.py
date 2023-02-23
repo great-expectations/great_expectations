@@ -77,7 +77,7 @@ class FilePathDataConnector(DataConnector):
         )
 
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
-        self._regex: re.Pattern = self._insure_regex_groups_include_data_reference_key(
+        self._regex: re.Pattern = self._ensure_regex_groups_include_data_reference_key(
             regex=regex
         )
         self._regex_parser: RegExParser = RegExParser(
@@ -254,7 +254,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
 
-    def _insure_regex_groups_include_data_reference_key(
+    def _ensure_regex_groups_include_data_reference_key(
         self, regex: re.Pattern
     ) -> re.Pattern:
         """
@@ -265,7 +265,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         Returns:
             Potentially modified Regular Expression pattern (with enclosing FILE_PATH_BATCH_SPEC_KEY reserved group)
         """
-        regex_parser: RegExParser = RegExParser(
+        regex_parser = RegExParser(
             regex_pattern=regex,
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
         )
