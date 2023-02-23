@@ -175,7 +175,6 @@ my_checkpoint = context.test_yaml_config(my_checkpoint_config)
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py add checkpoint config">
 context.add_or_update_checkpoint(**yaml.load(my_checkpoint_config))
-context.add_checkpoint(**yaml.load(my_checkpoint_config))
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py run checkpoint">
