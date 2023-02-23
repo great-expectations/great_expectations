@@ -4,7 +4,6 @@ import copy
 import dataclasses
 from pprint import pformat as pf
 from typing import (
-    TYPE_CHECKING,
     Any,
     ClassVar,
     Dict,
@@ -20,6 +19,11 @@ from typing_extensions import Literal, Protocol, Self
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
+    SqlAlchemyDataSplitter,
+)
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
@@ -41,9 +45,6 @@ try:
     SQLALCHEMY_IMPORTED = True
 except ImportError:
     pass
-
-if TYPE_CHECKING:
-    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
 class SQLDatasourceError(Exception):
@@ -96,10 +97,6 @@ class _ColumnSplitter(ExperimentalBaseModel):
         raise NotImplementedError
 
     def param_defaults(self, sql_asset: _SQLAsset) -> List[Dict]:
-        from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
-            SqlAlchemyDataSplitter,
-        )
-
         execution_engine = sql_asset.datasource.get_execution_engine()
         splitter = SqlAlchemyDataSplitter(execution_engine.dialect_name)
         batch_identifier_data = splitter.get_data_for_batch_identifiers(
@@ -195,10 +192,6 @@ class ColumnSplitterDatetimePart(_ColumnSplitter):
 
     @pydantic.validator("datetime_parts", each_item=True)
     def _check_param_name_allowed(cls, v: str):
-        from great_expectations.execution_engine.split_and_sample.data_splitter import (
-            DatePart,
-        )
-
         allowed_date_parts = [part.value for part in DatePart]
         assert (
             v in allowed_date_parts
@@ -772,8 +765,6 @@ class SQLDatasource(Datasource):
     @property
     def execution_engine_type(self) -> Type[SqlAlchemyExecutionEngine]:
         """Returns the default execution engine type."""
-        from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
         return SqlAlchemyExecutionEngine
 
     def get_engine(self) -> sqlalchemy.engine.Engine:
