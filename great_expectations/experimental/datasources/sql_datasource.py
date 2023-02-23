@@ -125,28 +125,6 @@ class _ColumnSplitter(ExperimentalBaseModel):
                 )
         return params
 
-    def test_connection(self, table_asset: TableAsset) -> None:
-        """Test the connection for the ColumnSplitter.
-
-        Args:
-            table_asset: The TableAsset to which the ColumnSplitter will be applied.
-
-        Raises:
-            TestConnectionError: If the connection test fails.
-        """
-        datasource: SQLDatasource = table_asset.datasource
-        engine: sqlalchemy.engine.Engine = datasource.get_engine()
-        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
-
-        columns: list[dict[str, Any]] = inspector.get_columns(
-            table_name=table_asset.table_name, schema=table_asset.schema_name
-        )
-        column_names: list[str] = [column["name"] for column in columns]
-        if self.column_name not in column_names:
-            raise TestConnectionError(
-                f'The column "{self.column_name}" was not found in table "{table_asset.qualified_name}"'
-            )
-
 
 class ColumnSplitterYear(_ColumnSplitter):
     method_name: Literal["split_on_year"] = "split_on_year"
@@ -311,74 +289,14 @@ class ColumnSplitterModInteger(_ColumnSplitter):
         return {self.column_name: options["remainder"]}
 
 
-class ColumnSplitterHashedColumn(_ColumnSplitter):
-    # hash digits is the length of the hash. The md5 of the column is truncated to this length.
-    hash_digits: int
-    method_name: Literal["split_on_hashed_column"] = "split_on_hashed_column"
-
-    @property
-    def param_names(self) -> List[str]:
-        return ["hash"]
-
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
-        return {"column_name": self.column_name, "hash_digits": self.hash_digits}
-
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
-        if "hash" not in options:
-            raise ValueError(
-                "'hash' must be specified in the batch request options to create a batch identifier"
-            )
-        return {self.column_name: options["hash"]}
-
-
-class ColumnSplitterConvertedDateTime(_ColumnSplitter):
-    """A column splitter than can be used for sql engines that represents datetimes as strings.
-
-    The SQL engine that this currently supports is SQLite since it stores its datetimes as
-    strings.
-    The DatetimeColumnSplitter will also work for SQLite and may be more intuitive.
-    """
-
-    # date_format_strings syntax is documented here:
-    # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
-    # It allows for arbitrary strings so can't be validated until conversion time.
-    date_format_string: str
-    method_name: Literal["split_on_converted_datetime"] = "split_on_converted_datetime"
-
-    @property
-    def param_names(self) -> List[str]:
-        # The datetime parameter will be a string representing a datetime in the format
-        # given by self.date_format_string.
-        return ["datetime"]
-
-    def splitter_method_kwargs(self) -> Dict[str, Any]:
-        return {
-            "column_name": self.column_name,
-            "date_format_string": self.date_format_string,
-        }
-
-    def batch_request_options_to_batch_spec_kwarg_identifiers(
-        self, options: BatchRequestOptions
-    ) -> Dict[str, Any]:
-        if "datetime" not in options:
-            raise ValueError(
-                "'datetime' must be specified in the batch request options to create a batch identifier"
-            )
-        return {self.column_name: options["datetime"]}
-
-
 ColumnSplitter = Union[
     ColumnSplitterColumnValue,
     ColumnSplitterDividedInteger,
     ColumnSplitterModInteger,
-    ColumnSplitterHashedColumn,
     ColumnSplitterDatetimePart,
     ColumnSplitterYearAndMonthAndDay,
     ColumnSplitterYearAndMonth,
     ColumnSplitterYear,
-    ColumnSplitterConvertedDateTime,
 ]
 
 
@@ -405,7 +323,7 @@ class _SQLAsset(DataAsset):
             return template
         return {p: None for p in self.column_splitter.param_names}
 
-    def _add_splitter(self, column_splitter: ColumnSplitter):
+    def _add_splitter(self, column_splitter: ColumnSplitter) -> Self:
         self.column_splitter = column_splitter
         self.test_column_splitter_connection()
         return self
@@ -726,6 +644,7 @@ class _TableAsset(ExperimentalBaseModel):
     name: str
     table_name: str
     schema_name: Optional[str] = None
+    column_splitter: Optional[ColumnSplitter]
 
     @property
     def qualified_name(self) -> str:
@@ -741,7 +660,7 @@ class _TableAsset(ExperimentalBaseModel):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        datasource: SQLDatasource = self.datasource
+        datasource: SQLDatasource = self.datasource  # type: ignore[attr-defined]  # This is a _SQLAsset mixin
         engine: sqlalchemy.engine.Engine = datasource.get_engine()
         inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
 
@@ -763,7 +682,18 @@ class _TableAsset(ExperimentalBaseModel):
 
     def test_column_splitter_connection(self) -> None:
         if self.column_splitter:
-            self.column_splitter.test_connection(table_asset=self)
+            datasource: SQLDatasource = self.datasource  # type: ignore[attr-defined]  # This is a _SQLAsset mixin
+            engine: sqlalchemy.engine.Engine = datasource.get_engine()
+            inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+
+            columns: list[dict[str, Any]] = inspector.get_columns(
+                table_name=self.table_name, schema=self.schema_name
+            )
+            column_names: list[str] = [column["name"] for column in columns]
+            if self.column_splitter.column_name not in column_names:
+                raise TestConnectionError(
+                    f'The column "{self.column_splitter.column_name}" was not found in table "{self.qualified_name}"'
+                )
 
     def as_selectable(self) -> sqlalchemy.sql.Selectable:
         """Returns the table as a sqlalchemy Selectable.
@@ -872,7 +802,7 @@ class SQLDatasource(Datasource):
         table_name: str,
         schema_name: Optional[str] = None,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> TableAsset:
+    ) -> _SQLAsset:
         """Adds a table asset to this datasource.
 
         Args:
@@ -900,7 +830,7 @@ class SQLDatasource(Datasource):
         name: str,
         query: str,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> QueryAsset:  # BDIRKS, this can be solve via generics?
+    ) -> _SQLAsset:
         """Adds a query asset to this datasource.
 
         Args:
