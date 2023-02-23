@@ -229,3 +229,11 @@
 /docs/api_docs/classes/great_expectations-data_context-data_context-data_context-datacontext /docs/reference/api/abstract_data_context
 /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-test_yaml_config /docs/reference/api/abstract_data_context
 /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-create /docs/reference/api/great_expectations.util
+
+# Redirect the Getting Started Tutorial to Quickstart
+/docs/tutorials/getting_started/tutorial_overview /docs/tutorials/quickstart/quickstart
+/docs/tutorials/getting_started/tutorial_setup /docs/tutorials/quickstart/quickstart
+/docs/tutorials/getting_started/tutorial_connect_to_data /docs/tutorials/quickstart/quickstart
+/docs/tutorials/getting_started/tutorial_create_expectations /docs/tutorials/quickstart/quickstart
+/docs/tutorials/getting_started/tutorial_validate_data /docs/tutorials/quickstart/quickstart
+/docs/tutorials/getting_started/tutorial_review /docs/tutorials/quickstart/quickstart
