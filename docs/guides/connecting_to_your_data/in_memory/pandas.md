@@ -29,12 +29,12 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L1-L5
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py imports"
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L7
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py get_context"
 ```
 
 
@@ -52,12 +52,12 @@ Using this example configuration we configure a `RuntimeDataConnector` as part o
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L9-L21
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py datasource_yaml"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L23
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py test_yaml_config"
 ```
 
 **Note**: Since the Datasource does not have data passed-in until later, the output will show that no `data_asset_names` are currently available. This is to be expected.
@@ -65,12 +65,12 @@ Run this code to test your configuration.
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py#L9-L24
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py datasource_config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py#L26
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py test_yaml_config"
 ```
 
 **Note**: Since the Datasource does not have data passed-in until later, the output will show that no `data_asset_names` are currently available. This is to be expected.
@@ -93,14 +93,14 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L25
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py add_datasource"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py#L28
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_python_example.py add_datasource"
 ```
 
 </TabItem>
@@ -115,17 +115,17 @@ Verify your new Datasource by loading data from it into a `Validator` using a `R
 
 Please feel free to substitute your data.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L28
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py example dataframe"
 ```
 :::
 
 Add the variable containing your dataframe (`df` in this example) to the `batch_data` key under `runtime_parameters` in your `RuntimeBatchRequest`.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L31-L37
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py batch_request"
 ```
 
 Then load data into the `Validator`.
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py#L39-L45
+```python name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py get_validator"
 ```
 
 <Congratulations />
