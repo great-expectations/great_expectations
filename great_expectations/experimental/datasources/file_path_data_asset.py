@@ -55,13 +55,6 @@ class _FilePathDataAsset(DataAsset):
         "name",
         "order_by",
         "batching_regex",  # file_path argument
-        "base_directory",  # filesystem argument
-        "glob_directive",  # filesystem argument
-        "data_context_root_directory",  # filesystem argument
-        "bucket",  # s3 argument
-        "prefix",  # s3 argument
-        "delimiter",  # s3 argument
-        "max_keys",  # s3 argument
         "kwargs",  # kwargs need to be unpacked and passed separately
     }
 
