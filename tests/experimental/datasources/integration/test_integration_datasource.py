@@ -123,7 +123,7 @@ def test_sql_query_data_asset(empty_data_context):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ["base_directory", "regex", "raises_test_connection_error"],
+    ["base_directory", "batching_regex", "raises_test_connection_error"],
     [
         pytest.param(
             pathlib.Path(__file__).parent.joinpath(
@@ -173,18 +173,22 @@ def test_sql_query_data_asset(empty_data_context):
         ),
     ],
 )
-def test_filesystem_data_asset_regex(
+def test_filesystem_data_asset_batching_regex(
     filesystem_datasource: PandasFilesystemDatasource | SparkFilesystemDatasource,
     base_directory: pathlib.Path,
-    regex: str | None,
+    batching_regex: str | None,
     raises_test_connection_error: bool,
 ):
     filesystem_datasource.base_directory = base_directory
     if raises_test_connection_error:
         with pytest.raises(TestConnectionError):
-            filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)
+            filesystem_datasource.add_csv_asset(
+                name="csv_asset", batching_regex=batching_regex
+            )
     else:
-        filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)
+        filesystem_datasource.add_csv_asset(
+            name="csv_asset", batching_regex=batching_regex
+        )
 
 
 @pytest.mark.integration
