@@ -42,7 +42,7 @@ def main() -> None:
     grep_output = run_grep(docs_dir)
     if grep_output:
         print(
-            f"[ERROR] Found {len(grep_output)} snippets using file and line number syntax:"
+            f"[ERROR] Found {len(grep_output)} snippets using file and line number syntax, please use named snippet syntax:"
         )
         for line in grep_output:
             print(line)
