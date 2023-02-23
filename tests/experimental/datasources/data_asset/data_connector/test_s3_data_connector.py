@@ -1,7 +1,7 @@
 import logging
 import os
 import re
-from typing import List
+from typing import List, TYPE_CHECKING
 
 import pandas as pd
 import pytest
@@ -20,19 +20,17 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest
 
+
+if TYPE_CHECKING:
+    from botocore.client import BaseClient
+
 logger = logging.getLogger(__name__)
 
 try:
     import boto3
-    import botocore
-    from botocore.client import BaseClient
 except ImportError:
-    logger.debug(
-        "Unable to load boto3 or botocore; install optional boto3 and botocore dependencies for support."
-    )
+    logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
     boto3 = None
-    botocore = None
-    BaseClient = None
 
 
 @pytest.mark.integration
@@ -42,7 +40,7 @@ def test_basic_instantiation():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -92,7 +90,7 @@ def test_instantiation_batching_regex_does_not_match_paths():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -136,7 +134,7 @@ def test_return_all_batch_definitions_unsorted():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -335,7 +333,7 @@ def test_return_all_batch_definitions_unsorted():
 #     bucket: str = "test_bucket"
 #     conn = boto3.resource("s3", region_name=region_name)
 #     conn.create_bucket(Bucket=bucket)
-#     client = boto3.client("s3", region_name=region_name)
+#     client: BaseClient = boto3.client("s3", region_name=region_name)
 #
 #     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 #
@@ -533,7 +531,7 @@ def test_return_only_unique_batch_definitions():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -617,7 +615,7 @@ def test_alpha():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -682,7 +680,7 @@ def test_foxtrot():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -799,7 +797,7 @@ def test_foxtrot():
 #     bucket: str = "test_bucket"
 #     conn = boto3.resource("s3", region_name=region_name)
 #     conn.create_bucket(Bucket=bucket)
-#     client = boto3.client("s3", region_name=region_name)
+#     client: BaseClient = boto3.client("s3", region_name=region_name)
 #
 #     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 #
