@@ -201,6 +201,7 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
     type_prefix="pandas",
 )
 
+
 try:
     # variables only needed for type-hinting
     PandasCSVAsset = _PANDAS_ASSET_MODELS["pandas_csv"]
