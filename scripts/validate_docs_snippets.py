@@ -40,7 +40,7 @@ def run_grep(target_dir: str) -> List[str]:
                 target_dir,
             ],
             capture_output=True,
-            universal_newlines=True,
+            text=True,
         )
     except subprocess.CalledProcessError as e:
         raise RuntimeError(
@@ -94,12 +94,11 @@ def main() -> None:
         run_docusaurus_build(tmp_dir)
         grep_output = run_grep(tmp_dir)
         parsed_grep_output = parse_grep(grep_output)
-        # temporarily disabling:
-        # if parsed_grep_output:
-        #     print("[ERROR] Found snippets in the docs build:")
-        #     for line in parsed_grep_output:
-        #         print(line)
-        #     sys.exit(1)
+        if parsed_grep_output:
+            print("[ERROR] Found snippets in the docs build:")
+            for line in parsed_grep_output:
+                print(line)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
