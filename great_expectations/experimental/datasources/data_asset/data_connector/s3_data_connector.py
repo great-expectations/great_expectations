@@ -29,7 +29,7 @@ class S3DataConnector(FilePathDataConnector):
     Args:
         datasource_name (str): required name for datasource
         bucket (str): bucket for S3
-        batching_regex (dict): regex configuration for filtering data_references
+        batching_regex: A regex pattern for partitioning data references
         prefix (str): S3 prefix
         delimiter (str): S3 delimiter
         max_keys (int): S3 max_keys (default is 1000)

@@ -24,7 +24,7 @@ class FilesystemDataConnector(FilePathDataConnector):
     it requires more setup.
 
     Args:
-        batching_regex (pattern): Optional regex pattern for filtering data references
+        batching_regex: A regex pattern for partitioning data references
         glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
