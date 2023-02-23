@@ -5,7 +5,6 @@ import json
 import logging
 from copy import deepcopy
 from typing import TYPE_CHECKING, List, Optional
-from uuid import UUID
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
@@ -499,7 +498,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         evaluation_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
         meta: Optional[ExpectationSuiteValidationResult | dict] = None,
-        ge_cloud_id: Optional[UUID] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> None:
         self.success = success
         if results is None:

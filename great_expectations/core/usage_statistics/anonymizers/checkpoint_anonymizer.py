@@ -225,7 +225,7 @@ class CheckpointAnonymizer(BaseAnonymizer):
             anonymized_expectation_suite_ge_cloud_id = None
         else:
             anonymized_expectation_suite_ge_cloud_id = self._anonymize_string(
-                str(expectation_suite_ge_cloud_id)
+                expectation_suite_ge_cloud_id
             )
 
         for attribute_name in sorted(CHECKPOINT_OPTIONAL_TOP_LEVEL_KEYS):
