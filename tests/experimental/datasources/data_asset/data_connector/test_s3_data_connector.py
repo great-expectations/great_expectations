@@ -1,7 +1,7 @@
 import logging
 import os
 import re
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import pandas as pd
 import pytest
@@ -19,7 +19,6 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
     S3DataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest
-
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
