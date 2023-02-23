@@ -92,7 +92,7 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
 
 class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
     """This Expectation is used to compare the values in a column to a Prophet forecast, based on a timestamp in a second column.
-    
+
     expect_column_pair_values_to_match_prophet_date_model is a [ColumnPairMapExpectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations)
 
     Args:
@@ -128,7 +128,7 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
 
     Notes:
         * Prophet is an open source forecasting library created at facebook. For more information, please see the [project github page](https://github.com/facebook/prophet).
-    
+
     """
 
     examples = [

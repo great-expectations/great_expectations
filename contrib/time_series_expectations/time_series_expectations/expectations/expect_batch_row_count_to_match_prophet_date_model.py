@@ -49,7 +49,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
 
     Notes:
         * Prophet is an open source forecasting library created at facebook. For more information, please see the [project github page](https://github.com/facebook/prophet).
-        
+
     """
 
     examples = [
