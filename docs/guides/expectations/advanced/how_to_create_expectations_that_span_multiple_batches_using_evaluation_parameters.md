@@ -130,9 +130,9 @@ Once your <TechnicalTag tag="data_docs" text="Data Docs" /> rebuild, open them i
 
 If your Evaluation Parameter was executed successfully, you'll see something like this:
 
-![image](../../../../docs/images/evaluation_parameter_success.png)
+![image](../../../images/evaluation_parameter_success.png)
 
 If it encountered an error, you'll see something like this. The most common problem is a mis-specified URN name.
 
-![image](../../../../docs/images/evaluation_parameter_error.png)
+![image](../../../images/evaluation_parameter_error.png)
 

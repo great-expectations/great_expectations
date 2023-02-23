@@ -66,3 +66,20 @@ sitemap.xml is not in the repo since it is built and uploaded by a netlify plugi
 ## Documentation changes checklist
 
 1. For any pages you have moved or removed, update _redirects to point from the old to the new content location
+
+
+## Versioning
+
+To add a new version, follow these steps:
+
+1. Check out the version from the tag, e.g. `git checkout 0.15.50`
+2. Run `yarn install`
+3. Run `yarn build`
+4. Create the version e.g. `yarn docusaurus docs:version 0.15.50`
+5. Pull down the version file (see `docs/build_docs` for the file, currently https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip)
+6. Unzip and add your newly created versioned docs via the following:
+7. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
+8. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
+9. Add your version number to `versions.json` in the unzipped version file.
+10. Zip up `versioned_docs`, `versioned_sidebars` and `versions.json` and upload to the s3 bucket (see `docs/build_docs` for the bucket name)
+11. Once the docs are built again, this zip file will be used for the versions.
