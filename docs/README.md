@@ -61,7 +61,7 @@ The following are a few details about other files Docusaurus uses that you may w
 - `../package.json`: dependencies and scripts
 - `../yarn.lock`: dependency lock file that ensures reproducibility
 
-sitemap.xml is built and uploaded by a netlify plugin during the documentation build process. 
+sitemap.xml is not in the repo since it is built and uploaded by a netlify plugin during the documentation build process. 
 
 ## Documentation changes checklist
 
