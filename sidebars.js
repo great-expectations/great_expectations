@@ -80,71 +80,88 @@ module.exports = {
       items: [
         {
           type: 'category',
-          label: 'Core skills',
+          label: 'Filesystem Datasources',
           items: [
-            'guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use',
-            'guides/connecting_to_your_data/how_to_choose_between_working_with_a_single_or_multiple_batches_of_data',
-            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource',
-            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource',
-            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource',
-            'guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector',
-            'guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector',
-            'guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector',
-            'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
-            'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
-            'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-            'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource'
+            'README'
           ]
         },
         {
           type: 'category',
-          label: 'In memory',
+          label: 'In-memory Datasources',
           items: [
-            'guides/connecting_to_your_data/in_memory/pandas',
-            'guides/connecting_to_your_data/in_memory/spark'
+            'README'
           ]
         },
         {
           type: 'category',
-          label: 'Database',
+          label: 'Cloud Datasources',
           items: [
-            'guides/connecting_to_your_data/database/athena',
-            'guides/connecting_to_your_data/database/bigquery',
-            'guides/connecting_to_your_data/database/mssql',
-            'guides/connecting_to_your_data/database/mysql',
-            'guides/connecting_to_your_data/database/postgres',
-            'guides/connecting_to_your_data/database/redshift',
-            'guides/connecting_to_your_data/database/snowflake',
-            'guides/connecting_to_your_data/database/sqlite',
-            'guides/connecting_to_your_data/database/trino'
+            'README'
           ]
         },
         {
           type: 'category',
-          label: 'Filesystem',
+          label: 'SQL database Datasources',
           items: [
-            'guides/connecting_to_your_data/filesystem/pandas',
-            'guides/connecting_to_your_data/filesystem/spark'
+            'README'
           ]
         },
         {
           type: 'category',
-          label: 'Cloud',
+          label: 'Requesting data from a Datasource',
           items: [
-            'guides/connecting_to_your_data/cloud/s3/pandas',
-            'guides/connecting_to_your_data/cloud/s3/spark',
-            'guides/connecting_to_your_data/cloud/gcs/pandas',
-            'guides/connecting_to_your_data/cloud/gcs/spark',
-            'guides/connecting_to_your_data/cloud/azure/pandas',
-            'guides/connecting_to_your_data/cloud/azure/spark'
+            'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource',
+            'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe'
           ]
         },
         {
           type: 'category',
-          label: 'Advanced',
+          label: 'Advanced Datasource configuration',
           items: [
-            'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store',
-            'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql'
+            {
+              type: 'category',
+              label: 'Filesystem block-configuration',
+              items: [
+                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource',
+                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'In-memory block-configuration',
+              items: [
+                'guides/connecting_to_your_data/in_memory/pandas',
+                'guides/connecting_to_your_data/in_memory/spark'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Cloud block-configuration',
+              items: [
+                'guides/connecting_to_your_data/cloud/s3/pandas',
+                'guides/connecting_to_your_data/cloud/s3/spark',
+                'guides/connecting_to_your_data/cloud/gcs/pandas',
+                'guides/connecting_to_your_data/cloud/gcs/spark',
+                'guides/connecting_to_your_data/cloud/azure/pandas',
+                'guides/connecting_to_your_data/cloud/azure/spark'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'SQL database block-configuration',
+              items: [
+                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource',
+                'guides/connecting_to_your_data/database/athena',
+                'guides/connecting_to_your_data/database/bigquery',
+                'guides/connecting_to_your_data/database/mssql',
+                'guides/connecting_to_your_data/database/mysql',
+                'guides/connecting_to_your_data/database/postgres',
+                'guides/connecting_to_your_data/database/redshift',
+                'guides/connecting_to_your_data/database/snowflake',
+                'guides/connecting_to_your_data/database/sqlite',
+                'guides/connecting_to_your_data/database/trino'
+              ]
+            }
           ]
         },
         { type: 'doc', id: 'guides/connecting_to_your_data/index', label: 'Index' }
@@ -360,7 +377,22 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
             { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
+            { type: 'doc', id: 'reference/anonymous_usage_statistics' },
+            {
+              type: 'category',
+              label: 'More about Datasources',
+              items: [
+                'guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use',
+                'guides/connecting_to_your_data/how_to_choose_between_working_with_a_single_or_multiple_batches_of_data',
+                'guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector',
+                'guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector',
+                'guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector',
+                'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
+                'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
+                'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store',
+                'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql'
+              ]
+            }
           ]
         },
         {
