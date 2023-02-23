@@ -24,7 +24,7 @@ class FilesystemDataConnector(FilePathDataConnector):
     it requires more setup.
 
     Args:
-        regex (pattern): Optional regex pattern for filtering data references
+        batching_regex (pattern): Optional regex pattern for filtering data references
         glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
@@ -37,7 +37,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         datasource_name: str,
         data_asset_name: str,
         base_directory: pathlib.Path,
-        regex: re.Pattern,
+        batching_regex: re.Pattern,
         glob_directive: str = "**/*",
         data_context_root_directory: Optional[pathlib.Path] = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
@@ -55,7 +55,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            regex=regex,
+            batching_regex=batching_regex,
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,

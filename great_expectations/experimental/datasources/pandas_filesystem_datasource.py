@@ -116,7 +116,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_csv_asset(
         self,
         name: str,
-        regex: Optional[Union[re.Pattern, str]] = None,
+        batching_regex: Optional[Union[re.Pattern, str]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -125,19 +125,21 @@ class PandasFilesystemDatasource(_PandasDatasource):
 
         Args:
             name: The name of the csv asset
-            regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
-        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
+            batching_regex=batching_regex
+        )
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
 
         asset = CSVAsset(
             name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             glob_directive=glob_directive,
             order_by=order_by_sorters,
             **kwargs,
@@ -148,7 +150,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_excel_asset(
         self,
         name: str,
-        regex: Optional[Union[str, re.Pattern]] = None,
+        batching_regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -157,19 +159,21 @@ class PandasFilesystemDatasource(_PandasDatasource):
 
         Args:
             name: The name of the csv asset
-            regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
-        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
+            batching_regex=batching_regex
+        )
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
 
         asset = ExcelAsset(
             name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             glob_directive=glob_directive,
             order_by=order_by_sorters,
             **kwargs,
@@ -180,7 +184,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_json_asset(
         self,
         name: str,
-        regex: Optional[Union[str, re.Pattern]] = None,
+        batching_regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -189,19 +193,21 @@ class PandasFilesystemDatasource(_PandasDatasource):
 
         Args:
             name: The name of the csv asset
-            regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
-        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
+            batching_regex=batching_regex
+        )
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
 
         asset = JSONAsset(
             name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             glob_directive=glob_directive,
             order_by=order_by_sorters,
             **kwargs,
@@ -212,7 +218,7 @@ class PandasFilesystemDatasource(_PandasDatasource):
     def add_parquet_asset(
         self,
         name: str,
-        regex: Optional[Union[str, re.Pattern]] = None,
+        batching_regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
@@ -221,19 +227,21 @@ class PandasFilesystemDatasource(_PandasDatasource):
 
         Args:
             name: The name of the csv asset
-            regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
-        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
+            batching_regex=batching_regex
+        )
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
 
         asset = ParquetAsset(
             name=name,
-            regex=regex_pattern,
+            batching_regex=batching_regex_pattern,
             glob_directive=glob_directive,
             order_by=order_by_sorters,
             **kwargs,

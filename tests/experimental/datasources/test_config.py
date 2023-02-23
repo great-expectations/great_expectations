@@ -76,14 +76,14 @@ PG_COMPLEX_CONFIG_DICT = {
                 "my_csv_asset": {
                     "name": "my_csv_asset",
                     "type": "csv",
-                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
                 "my_json_asset": {
                     "name": "my_json_asset",
                     "type": "json",
-                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
                     "orient": "records",
                 },
             },
@@ -157,7 +157,9 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+                "batching_regex": re.compile(
+                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+                ),
             }
         )
         asset_name = asset_dict["name"]
@@ -177,7 +179,9 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+                "batching_regex": re.compile(
+                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+                ),
             }
         )
         asset_name = asset_dict["name"]
