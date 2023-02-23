@@ -1246,7 +1246,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         except gx_exceptions.StoreBackendError as e:
             raise gx_exceptions.ProfilerError(
                 f"{e.message}; could not persist profiler"
-            )
+            ) from e
 
         if isinstance(response, GXCloudResourceRef):
             new_profiler.ge_cloud_id = response.cloud_id
