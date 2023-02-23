@@ -82,7 +82,7 @@ module.exports = {
           type: 'category',
           label: 'Filesystem Datasources',
           items: [
-            'README'
+            'guides/connecting_to_your_data/connect_to_data_overview'
           ]
         },
         {
