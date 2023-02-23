@@ -11,11 +11,11 @@ from great_expectations.experimental.datasources.filesystem_data_asset import (
     _FilesystemDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
+    BatchSorter,
     BatchSortersDefinition,
     DataAsset,
     Datasource,
     TestConnectionError,
-    _batch_sorter_from_list,
 )
 
 if TYPE_CHECKING:
@@ -80,11 +80,12 @@ class _SparkDatasource(Datasource):
     # End Abstract Methods
 
 
-class SparkDatasource(_SparkDatasource):
+class SparkFilesystemDatasource(_SparkDatasource):
     # instance attributes
-    type: Literal["spark"] = "spark"
+    type: Literal["spark_filesystem"] = "spark_filesystem"
     name: str
     base_directory: pathlib.Path
+    data_context_root_directory: Optional[pathlib.Path] = None
     assets: Dict[str, CSVSparkAsset] = {}
 
     def test_connection(self, test_assets: bool = True) -> None:
@@ -98,7 +99,7 @@ class SparkDatasource(_SparkDatasource):
         """
         if not self.base_directory.exists():
             raise TestConnectionError(
-                f"Path: {self.base_directory.resolve()} does not exist."
+                f"base_directory path: {self.base_directory.resolve()} does not exist."
             )
 
         if self.assets and test_assets:
@@ -108,7 +109,8 @@ class SparkDatasource(_SparkDatasource):
     def add_csv_asset(
         self,
         name: str,
-        regex: Union[str, re.Pattern],
+        regex: Optional[Union[re.Pattern, str]] = None,
+        glob_directive: str = "**/*",
         header: bool = False,
         infer_schema: bool = False,
         order_by: Optional[BatchSortersDefinition] = None,
@@ -118,17 +120,23 @@ class SparkDatasource(_SparkDatasource):
         Args:
             name: The name of the csv asset
             regex: regex pattern that matches csv filenames that is used to label the batches
+            glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
         """
-        if isinstance(regex, str):
-            regex = re.compile(regex)
+        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
+            order_by=order_by
+        )
+
         asset = CSVSparkAsset(
             name=name,
-            regex=regex,
+            regex=regex_pattern,
+            glob_directive=glob_directive,
             header=header,
             inferSchema=infer_schema,
-            order_by=_batch_sorter_from_list(order_by or []),
+            order_by=order_by_sorters,
         )
+
         return self.add_asset(asset)

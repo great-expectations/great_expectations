@@ -27,6 +27,11 @@
             "type": "string",
             "format": "regex"
         },
+        "glob_directive": {
+            "title": "Glob Directive",
+            "default": "**/*",
+            "type": "string"
+        },
         "xpath": {
             "title": "Xpath",
             "default": "./*",
@@ -61,6 +66,11 @@
         "parser": {
             "title": "Parser",
             "default": "lxml",
+            "type": "string"
+        },
+        "stylesheet": {
+            "title": "Stylesheet",
+            "format": "file-path",
             "type": "string"
         },
         "compression": {

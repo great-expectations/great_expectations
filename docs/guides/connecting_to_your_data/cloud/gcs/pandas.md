@@ -135,22 +135,22 @@ The below configuration is highly tuned to the specific bucket and blobs relevan
 
 <TabItem value="yaml">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L10-L27
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py#L38
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py test datasource config"
 ```
 </TabItem>
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L10-L26
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py#L37
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py test datasource config"
 ```
 
 </TabItem>

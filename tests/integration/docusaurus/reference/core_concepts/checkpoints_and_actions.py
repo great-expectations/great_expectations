@@ -147,6 +147,7 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting">
 no_nesting = f"""
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py no_nesting just the yaml">
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -174,9 +175,12 @@ runtime_configuration:
   result_format:
     result_format: BASIC
     partial_unexpected_count: 20
+# </snippet>
 """
 # </snippet>
+
 context.add_or_update_checkpoint(**yaml.load(no_nesting))
+
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -196,6 +200,7 @@ assert (
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults">
 nesting_with_defaults = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py nesting_with_defaults just the yaml">
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -227,9 +232,11 @@ runtime_configuration:
   result_format:
     result_format: BASIC
     partial_unexpected_count: 20
+# </snippet>
 """
 # </snippet>
-context.add_or_update_checkpoint(**yaml.load(nesting_with_defaults))
+
+add_or_update_checkpoint(**yaml.load(nesting_with_defaults))
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>
@@ -255,6 +262,7 @@ assert second_data_asset == "yellow_tripdata_sample_2019-02"
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results">
 documentation_results = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results just the text">
 print(first_expectation_suite)
 my_expectation_suite
 
@@ -266,12 +274,13 @@ my_expectation_suite
 
 print(second_data_asset)
 yellow_tripdata_sample_2019-02
+# </snippet>
 """
 # </snippet>
 
-
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime">
 keys_passed_at_runtime = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime just the yaml">
 name: my_base_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -293,6 +302,7 @@ runtime_configuration:
   result_format:
     result_format: BASIC
     partial_unexpected_count: 20
+# </snippet>
 """
 # </snippet>
 context.add_or_update_checkpoint(**yaml.load(keys_passed_at_runtime))
@@ -342,6 +352,7 @@ assert second_data_asset == "yellow_tripdata_sample_2019-02"
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_2">
 documentation_results = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_2 just the text">
 print(first_expectation_suite)
 my_expectation_suite
 
@@ -353,6 +364,7 @@ my_other_expectation_suite
 
 print(second_data_asset)
 yellow_tripdata_sample_2019-02
+# </snippet>
 """
 # </snippet>
 
@@ -361,6 +373,7 @@ context.add_or_update_expectation_suite("my_other_expectation_suite")
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template">
 using_template = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_template just the yaml">
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -376,6 +389,7 @@ validations:
       data_connector_name: default_inferred_data_connector_name
       data_asset_name: yellow_tripdata_sample_2019-02
     expectation_suite_name: my_other_expectation_suite
+# </snippet>
 """
 # </snippet>
 context.add_or_update_checkpoint(**yaml.load(using_template))
@@ -404,6 +418,7 @@ assert second_data_asset == "yellow_tripdata_sample_2019-02"
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_3">
 documentation_results = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_3 just the text">
 print(first_expectation_suite)
 my_expectation_suite
 
@@ -415,12 +430,14 @@ my_other_expectation_suite
 
 print(second_data_asset)
 yellow_tripdata_sample_2019-02
+# </snippet>
 """
 # </snippet>
 
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint">
 using_simple_checkpoint = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint just the yaml">
 name: my_checkpoint
 config_version: 1
 class_name: SimpleCheckpoint
@@ -434,6 +451,7 @@ site_names: all
 slack_webhook: <YOUR SLACK WEBHOOK URL>
 notify_on: failure
 notify_with: all
+# </snippet>
 """
 # </snippet>
 using_simple_checkpoint = using_simple_checkpoint.replace(
@@ -463,6 +481,7 @@ my_expectation_suite
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint">
 equivalent_using_checkpoint = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint just the yaml">
 name: my_checkpoint
 config_version: 1
 class_name: Checkpoint
@@ -491,6 +510,7 @@ action_list:
       renderer:
         module_name: great_expectations.render.renderer.slack_renderer
         class_name: SlackRenderer
+# </snippet>
 """
 # </snippet>
 equivalent_using_checkpoint = equivalent_using_checkpoint.replace(
@@ -513,10 +533,12 @@ assert data_asset == "yellow_tripdata_sample_2019-01"
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_5">
 documentation_results: str = """
+# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py simple checkpoint doc results">
 print(expectation_suite)
 my_expectation_suite
 
 print(data_asset)
 yellow_tripdata_sample_2019-01"
+# </snippet>
 """
 # </snippet>

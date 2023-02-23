@@ -1,3 +1,4 @@
+# <snippet name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full">
 from datetime import timedelta
 
 import airflow
@@ -26,3 +27,4 @@ t1 = BashOperator(
     depends_on_past=False,
     priority_weight=2**31 - 1,
 )
+# </snippet>

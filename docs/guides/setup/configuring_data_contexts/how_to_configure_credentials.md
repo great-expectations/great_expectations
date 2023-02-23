@@ -39,7 +39,7 @@ In most cases, we suggest using a config variables YAML file. YAML files make va
 
 If using a YAML file, save desired credentials or config values to ``great_expectations/uncommitted/config_variables.yml`` or another YAML file of your choosing:
 
-```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L9-L15
+```yaml name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml"
 ```
 
 :::note
@@ -52,21 +52,21 @@ If using a YAML file, save desired credentials or config values to ``great_expec
 
 If using environment variables, set values by entering ``export ENV_VAR_NAME=env_var_value`` in the terminal or adding the commands to your ``~/.bashrc`` file:
 
-```bash file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L19-L25
+```bash name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
 ```
 
 ### 2. Set ``config_variables_file_path``
 
 If using a YAML file, set the ``config_variables_file_path`` key in your ``great_expectations.yml`` or leave the default.
 
-```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L29
+```yaml name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_file_path"
 ```
 
 ### 3. Replace credentials with placeholders
 
 Replace credentials or other values in your ``great_expectations.yml`` with ``${}``-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
 
-```yaml file=../../../../tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py#L33-L59
+```yaml name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py datasources_yaml"
 ```
 
 

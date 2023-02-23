@@ -496,8 +496,9 @@ def type_schema(
     """
     import pandas
 
-    from great_expectations.experimental.datasources import _PANDAS_SCHEMA_VERSION
-    from great_expectations.experimental.datasources.pandas_datasource import (
+    from great_expectations.experimental.datasources import (
+        _PANDAS_SCHEMA_VERSION,
+        PandasDatasource,
         PandasFilesystemDatasource,
         _PandasDatasource,
     )
@@ -529,6 +530,7 @@ def type_schema(
                     model,
                     (
                         _PandasDatasource,
+                        *PandasDatasource.asset_types,
                         *PandasFilesystemDatasource.asset_types,
                     ),
                 )
