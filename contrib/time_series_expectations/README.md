@@ -58,20 +58,21 @@ See [the script that creates examples](link) and [the API docs](link) for additi
 As all of those use cases are realized, we imagine the full class hiereachy for time series Expectations to evolve into this:
 
     *TableExpectation* (ABC)
-        BatchAggregateStatisticExpectation (ABC)
-            ExpectBatchAggregateStatisticToBeBetween (ABC)
-                expect_batch_update_time_to_be_between
-                expect_batch_volume_to_be_between
-
+        *BatchAggregateStatisticExpectation* (ABC)
             BatchAggregateStatisticTimeSeriesExpectation (ABC)
                 ExpectBatchAggregateStatisticToMatchProphetDateModel (ABC)
-                    expect_batch_volume_to_match_prophet_date_model (:white_check_mark:)
+                    expect_batch_row_count_to_match_prophet_date_model (:white_check_mark:)
+                    expect_batch_most_recent_update_to_match_prophet_date_model
 
                 ExpectBatchAggregateStatisticToMatchProphetTimestampModel (ABC)
-                    expect_batch_volume_to_match_prophet_timestamp_model
+                    expect_batch_row_count_to_match_prophet_timestamp_model
+                    expect_batch_most_recent_update_to_match_prophet_timestamp_model
 
                 ExpectBatchAggregateStatisticToMatchArimaModel (ABC)
-                    expect_batch_volume_to_match_arima_model
+                    expect_batch_row_count_to_match_arima_model
+                    expect_batch_most_recent_update_to_match_arima_model
+                
+                ... for other types of models
 
         *ColumnExpectation* (ABC)
             ColumnAggregateTimeSeriesExpectation (ABC, :white_check_mark:)
