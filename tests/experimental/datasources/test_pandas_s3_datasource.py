@@ -45,21 +45,26 @@ pytestmark = [
 ]
 
 
-def _get_region_name() -> str:
+@pytest.fixture()
+def aws_region_name() -> str:
     return "us-east-1"
 
 
-def _get_boto3_client() -> BaseClient:
-    client = boto3.client("s3", region_name=_get_region_name())
+@pytest.fixture()
+def aws_s3_bucket_name() -> str:
+    return "test_bucket"
+
+
+def _get_boto3_client(aws_region_name: str, aws_s3_bucket_name) -> BaseClient:
+    conn = boto3.resource("s3", region_name=aws_region_name)
+    conn.create_bucket(Bucket=aws_s3_bucket_name)
+    client = boto3.client("s3", region_name=aws_region_name)
     return client
 
 
-def _build_pandas_s3_datasource() -> PandasS3Datasource:
-    bucket: str = "test_bucket"
-    conn = boto3.resource("s3", region_name=_get_region_name())
-    conn.create_bucket(Bucket=bucket)
-    client = _get_boto3_client()
-
+def _build_pandas_s3_datasource(
+    aws_region_name: str, aws_s3_bucket_name
+) -> PandasS3Datasource:
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     keys: List[str] = [
@@ -74,19 +79,28 @@ def _build_pandas_s3_datasource() -> PandasS3Datasource:
         "james_20200810_1003.csv",
         "alex_20200819_1300.csv",
     ]
+
+    client = _get_boto3_client(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
+
     for key in keys:
         client.put_object(
-            Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
+            Bucket=aws_s3_bucket_name,
+            Body=test_df.to_csv(index=False).encode("utf-8"),
+            Key=key,
         )
 
     return PandasS3Datasource(
         name="pandas_s3_datasource",
-        bucket=bucket,
+        bucket=aws_s3_bucket_name,
     )
 
 
-def _build_csv_asset() -> _FilePathDataAsset:
-    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource()
+def _build_csv_asset(aws_region_name: str, aws_s3_bucket_name) -> _FilePathDataAsset:
+    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
@@ -94,8 +108,12 @@ def _build_csv_asset() -> _FilePathDataAsset:
     return asset
 
 
-def _build_bad_regex_config() -> tuple[re.Pattern, TestConnectionError]:
-    asset = _build_csv_asset()
+def _build_bad_regex_config(
+    aws_region_name: str, aws_s3_bucket_name
+) -> tuple[re.Pattern, TestConnectionError]:
+    asset = _build_csv_asset(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     regex = re.compile(
         r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
     )
@@ -108,15 +126,19 @@ def _build_bad_regex_config() -> tuple[re.Pattern, TestConnectionError]:
 
 @pytest.mark.integration
 @mock_s3
-def test_construct_pandas_s3_datasource():
-    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource()
+def test_construct_pandas_s3_datasource(aws_region_name: str, aws_s3_bucket_name: str):
+    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     assert pandas_s3_datasource.name == "pandas_s3_datasource"
 
 
 @pytest.mark.integration
 @mock_s3
-def test_add_csv_asset_to_datasource():
-    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource()
+def test_add_csv_asset_to_datasource(aws_region_name: str, aws_s3_bucket_name: str):
+    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
@@ -145,8 +167,12 @@ def test_construct_csv_asset_directly():
 
 @pytest.mark.integration
 @mock_s3
-def test_csv_asset_with_regex_unnamed_parameters():
-    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource()
+def test_csv_asset_with_regex_unnamed_parameters(
+    aws_region_name: str, aws_s3_bucket_name: str
+):
+    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
@@ -162,8 +188,12 @@ def test_csv_asset_with_regex_unnamed_parameters():
 
 @pytest.mark.integration
 @mock_s3
-def test_csv_asset_with_regex_named_parameters():
-    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource()
+def test_csv_asset_with_regex_named_parameters(
+    aws_region_name: str, aws_s3_bucket_name: str
+):
+    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
@@ -174,8 +204,12 @@ def test_csv_asset_with_regex_named_parameters():
 
 @pytest.mark.integration
 @mock_s3
-def test_csv_asset_with_some_regex_named_parameters():
-    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource()
+def test_csv_asset_with_some_regex_named_parameters(
+    aws_region_name: str, aws_s3_bucket_name: str
+):
+    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
@@ -191,8 +225,12 @@ def test_csv_asset_with_some_regex_named_parameters():
 
 @pytest.mark.integration
 @mock_s3
-def test_csv_asset_with_non_string_regex_named_parameters():
-    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource()
+def test_csv_asset_with_non_string_regex_named_parameters(
+    aws_region_name: str, aws_s3_bucket_name: str
+):
+    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
@@ -206,8 +244,12 @@ def test_csv_asset_with_non_string_regex_named_parameters():
 
 @pytest.mark.integration
 @mock_s3
-def test_get_batch_list_from_fully_specified_batch_request():
-    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource()
+def test_get_batch_list_from_fully_specified_batch_request(
+    aws_region_name: str, aws_s3_bucket_name: str
+):
+    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     asset = pandas_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
@@ -245,20 +287,26 @@ def test_get_batch_list_from_fully_specified_batch_request():
 
 @pytest.mark.integration
 @mock_s3
-def test_test_connection_failures():
-    regex, test_connection_error = _build_bad_regex_config()
+def test_test_connection_failures(aws_region_name: str, aws_s3_bucket_name: str):
+    regex, test_connection_error = _build_bad_regex_config(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     csv_asset = CSVAsset(
         name="csv_asset",
         batching_regex=regex,
     )
-    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource()
+    pandas_s3_datasource: PandasS3Datasource = _build_pandas_s3_datasource(
+        aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+    )
     csv_asset._datasource = pandas_s3_datasource
     pandas_s3_datasource.assets = {"csv_asset": csv_asset}
     csv_asset._data_connector = S3DataConnector(
         datasource_name=pandas_s3_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=re.compile(regex),
-        s3_client=_get_boto3_client(),
+        s3_client=_get_boto3_client(
+            aws_region_name=aws_region_name, aws_s3_bucket_name=aws_s3_bucket_name
+        ),
         bucket=pandas_s3_datasource.bucket,
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
