@@ -33,7 +33,7 @@ class S3DataConnector(FilePathDataConnector):
     Args:
         datasource_name (str): required name for datasource
         bucket (str): bucket for S3
-        regex (dict): regex configuration for filtering data_references
+        batching_regex (dict): regex configuration for filtering data_references
         prefix (str): S3 prefix
         delimiter (str): S3 delimiter
         max_keys (int): S3 max_keys (default is 1000)
@@ -49,7 +49,7 @@ class S3DataConnector(FilePathDataConnector):
         datasource_name: str,
         data_asset_name: str,
         bucket: str,
-        regex: re.Pattern,
+        batching_regex: re.Pattern,
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
@@ -77,7 +77,7 @@ class S3DataConnector(FilePathDataConnector):
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            regex=regex,
+            batching_regex=batching_regex,
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,

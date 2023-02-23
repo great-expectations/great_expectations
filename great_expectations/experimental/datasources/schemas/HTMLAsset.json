@@ -22,8 +22,8 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "regex": {
-            "title": "Regex",
+        "batching_regex": {
+            "title": "Batching Regex",
             "type": "string",
             "format": "regex"
         },
@@ -137,7 +137,7 @@
     },
     "required": [
         "name",
-        "regex"
+        "batching_regex"
     ],
     "additionalProperties": false,
     "definitions": {

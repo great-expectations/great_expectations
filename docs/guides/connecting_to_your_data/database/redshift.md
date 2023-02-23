@@ -43,12 +43,12 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L3-L6
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py imports"
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L26
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py get_context"
 ```
 
 ### 5. Configure your Datasource
@@ -69,14 +69,14 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py#L53
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py datasource_yaml"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py#L53
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py test datasource config"
 ```
 
 </TabItem>

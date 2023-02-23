@@ -88,12 +88,12 @@ The full configuration used in this guide can be found in the [`great-expectatio
 #### Add Expectations Store
 By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder. A new Expectations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
-```YAML file=../../tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml#L38-L44
+```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_GCS_store"
 ```
 
 Great Expectations can then be configured to use this new Expectations Store, `expectations_GCS_store`, by setting the `expectations_store_name` value in the `great_expectations.yml` file.
 
-```YAML file=../../tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml#L72
+```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_store_name"
 ```
 
 For additional details and example configurations, please refer to [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md).
@@ -101,12 +101,12 @@ For additional details and example configurations, please refer to [How to confi
 #### Add Validations Store
 By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `great_expectations/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
-```YAML file=../../tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml#L52-L58
+```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store"
 ```
 
 Great Expectations can then be configured to use this new Validations Store, `validations_GCS_store`, by setting the `validations_store_name` value in the `great_expectations.yml` file.
 
-```YAML file=../../tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml#L73
+```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_store_name"
 ```
 
 For additional details and example configurations, please refer to  [How to configure an Validation Result store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md).
@@ -116,7 +116,7 @@ To host and share Datadocs on GCS, we recommend using the [following guide](../g
 
 Afterwards, your `great-expectations.yml` will contain the following configuration under `data_docs_sites`,  with `project`, and `bucket` being replaced with your information.
 
-```YAML file=../../tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml#L91-L98
+```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml gs_site"
 ```
 
 

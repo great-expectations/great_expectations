@@ -5,10 +5,7 @@ the following syntax:
     ```python name="getting_started_imports"
 ```
 
-This pattern is directly inspired by remark-code-import, which references using line numbers:
-```
-    ```python file=../../tests/integration/docusaurus/tutorials/getting-started/getting_started.py#L1-L5
-```
+This pattern is directly inspired by remark-code-import, which references using line numbers.
 
 As snippets are bound by identifier and not specific line numbers, they are far less susceptible
 to breakage when docs and source code are being updated.

@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+import pathlib
+
 import pytest
 
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.experimental.datasources import (
+    PandasFilesystemDatasource,
+    SparkFilesystemDatasource,
+)
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,
+    TestConnectionError,
 )
 from tests.experimental.datasources.integration.conftest import sqlite_datasource
 from tests.experimental.datasources.integration.integration_test_utils import (
@@ -90,6 +97,7 @@ def test_batch_head(
     )
 
 
+@pytest.mark.integration
 def test_sql_query_data_asset(empty_data_context):
     context = empty_data_context
     datasource = sqlite_datasource(context, "yellow_tripdata.db")
@@ -111,6 +119,76 @@ def test_sql_query_data_asset(empty_data_context):
         result_format={"result_format": "BOOLEAN_ONLY"},
     )
     assert result.success
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ["base_directory", "batching_regex", "raises_test_connection_error"],
+    [
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path(
+                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+                )
+            ),
+            r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            False,
+            id="good filename",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path(
+                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+                )
+            ),
+            r"bad_yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            True,
+            id="bad filename",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path("..", "..", "..", "test_sets")
+            ),
+            r"taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            False,
+            id="good path",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path("..", "..", "..", "test_sets")
+            ),
+            r"bad_taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            True,
+            id="bad path",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path(
+                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+                )
+            ),
+            None,
+            False,
+            id="default regex",
+        ),
+    ],
+)
+def test_filesystem_data_asset_batching_regex(
+    filesystem_datasource: PandasFilesystemDatasource | SparkFilesystemDatasource,
+    base_directory: pathlib.Path,
+    batching_regex: str | None,
+    raises_test_connection_error: bool,
+):
+    filesystem_datasource.base_directory = base_directory
+    if raises_test_connection_error:
+        with pytest.raises(TestConnectionError):
+            filesystem_datasource.add_csv_asset(
+                name="csv_asset", batching_regex=batching_regex
+            )
+    else:
+        filesystem_datasource.add_csv_asset(
+            name="csv_asset", batching_regex=batching_regex
+        )
 
 
 @pytest.mark.integration
