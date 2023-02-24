@@ -33,7 +33,6 @@ from great_expectations.experimental.datasources.experimental_base_model import 
     ExperimentalBaseModel,
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
-from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
@@ -46,6 +45,10 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
+    from great_expectations.experimental.datasources.data_asset.data_connector import (
+        DataConnector,
+    )
+    from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 try:
     import pyspark
@@ -155,6 +158,8 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
+    _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
+    _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @property
     def datasource(self) -> _DatasourceT:
@@ -336,8 +341,17 @@ class Datasource(
         "type",
         "execution_engine",
         "assets",
-        "base_directory",
+        "base_directory",  # filesystem argument
+        "glob_directive",  # filesystem argument
+        "data_context_root_directory",  # filesystem argument
+        "bucket",  # s3 argument
+        "prefix",  # s3 argument
+        "delimiter",  # s3 argument
+        "max_keys",  # s3 argument
     }
+    _type_lookup: ClassVar[  # This attribute is set in `MetaDatasource.__new__`
+        TypeLookup
+    ]
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
     execution_engine_override: ClassVar[Optional[Type[_ExecutionEngineT]]] = None  # type: ignore[misc]  # ClassVar cannot contain type variables
@@ -364,7 +378,7 @@ class Datasource(
         """
         logger.info(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
         asset_type_name: str = data_asset.type
-        asset_type: Type[_DataAssetT] = _SourceFactories.type_lookup[asset_type_name]
+        asset_type: Type[_DataAssetT] = cls._type_lookup[asset_type_name]
 
         if asset_type is type(data_asset):
             # asset is already the intended type
@@ -421,20 +435,33 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
+    def add_asset(
+        self,
+        asset: _DataAssetT,
+        data_connector: Optional[DataConnector] = None,
+        test_connection_error_message: Optional[str] = None,
+    ) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
             asset: The DataAsset to be added to this datasource.
+            data_connector: Optional reference to "DataConnector" object for connecting Datasource and DataAsset to data
+            test_connection_error_message: Optional message for reporting connection test errors informatively
         """
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
+        asset._data_connector = data_connector
+        asset._test_connection_error_message = test_connection_error_message
+
         asset.test_connection()
+
         self.assets[asset.name] = asset
+
         # pydantic needs to know that an asset has been set so that it doesn't get excluded
         # when dumping to dict, json, yaml etc.
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
+
         return asset
 
     @staticmethod

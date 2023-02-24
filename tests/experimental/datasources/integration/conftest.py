@@ -30,7 +30,7 @@ def default_pandas_data(
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
     pandas_ds = context.sources.pandas_default
-    asset = pandas_ds.read_pandas_csv(  # type: ignore[attr-defined]
+    asset = pandas_ds.read_csv(  # type: ignore[attr-defined]
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
     )
     batch_request = asset.build_batch_request()
@@ -125,9 +125,9 @@ def spark_data(
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-        order_by=["year", "month"],
         header=True,
         infer_schema=True,
+        order_by=["year", "month"],
     )
     batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
     return context, spark_ds, asset, batch_request
@@ -189,9 +189,9 @@ def multibatch_spark_data(
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-        order_by=["year", "month"],
         header=True,
         infer_schema=True,
+        order_by=["year", "month"],
     )
     batch_request = asset.build_batch_request({"year": "2020"})
     return context, spark_ds, asset, batch_request

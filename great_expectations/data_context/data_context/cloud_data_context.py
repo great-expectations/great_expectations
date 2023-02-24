@@ -591,11 +591,7 @@ class CloudDataContext(SerializableDataContext):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        id = (
-            str(expectation_suite.ge_cloud_id)
-            if expectation_suite.ge_cloud_id
-            else None
-        )
+        id = expectation_suite.ge_cloud_id
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             cloud_id=id,
@@ -788,7 +784,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> ExpectationSuite:
         cloud_id: str | None
         if expectation_suite.ge_cloud_id:
-            cloud_id = str(expectation_suite.ge_cloud_id)
+            cloud_id = expectation_suite.ge_cloud_id
         else:
             cloud_id = None
 
