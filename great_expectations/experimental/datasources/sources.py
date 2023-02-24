@@ -234,7 +234,7 @@ class _SourceFactories:
                 asset = asset_type(name=name, **kwargs)
                 self.add_asset(asset)
                 batch_request = asset.build_batch_request()
-                return self._data_context.get_validator(batch_request=batch_request)
+                return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[attr-defined]
 
             _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
                 _read_asset_factory, asset_type, exclude={"type"}
@@ -288,7 +288,7 @@ class _SourceFactories:
         # there is no situation in which this isn't true
         # return type information must be missing for factory method add_pandas
         assert isinstance(pandas_datasource, PandasDatasource)
-        pandas_datasource._data_context = self._data_context  # type: ignore[attr-defined]
+        pandas_datasource._data_context = self._data_context
         return pandas_datasource
 
     @property
