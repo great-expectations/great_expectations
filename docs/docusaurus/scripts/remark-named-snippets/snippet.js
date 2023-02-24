@@ -163,7 +163,9 @@ function sanitizeText (text) {
  */
 function main () {
   const snippets = parseSourceDirectories(['../../great_expectations', '../../tests'])
+  console.log('--------------- SNIPPETS ----------------')
   console.log(snippets.length)
+  console.log('--------------- SNIPPETS ----------------')
   const targetFiles = process.argv.slice(2)
 
   const out = {}

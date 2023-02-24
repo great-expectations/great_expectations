@@ -34,7 +34,10 @@ then
 fi
 
 echo "Copying previous versions"
-curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "docusaurus/docs/oss_docs_versions.zip"
+echo "------------------- PWD --------------------"
+pwd
+echo "------------------- PWD --------------------"
+curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
 
 echo "Building docusaurus docs."
