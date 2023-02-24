@@ -216,9 +216,7 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
     try:
         # Trino
         # noinspection PyUnresolvedReferences
-        if hasattr(dialect, "TrinoDialect") or isinstance(
-            dialect, trino.sqlalchemy.dialect.TrinoDialect
-        ):
+        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
             if positive:
                 return sa.func.regexp_like(column, literal(regex))
             else:
