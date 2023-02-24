@@ -23,6 +23,7 @@ from great_expectations.experimental.datasources.sources import (
     DefaultPandasDatasourceError,
     _get_field_details,
 )
+from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -130,11 +131,13 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            t.__name__.lower()[6:-5] for t in PandasDatasource.asset_types
+            camel_to_snake(t.__name__).split("_asset")[0]
+            for t in PandasDatasource.asset_types
         }
         print(asset_class_names)
 
-        assert type_name.replace("_", "") in asset_class_names
+        assert type_name in PandasDatasource._type_lookup
+        assert type_name in asset_class_names
 
     @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
     def test_add_asset_method_exists_and_is_functional(
@@ -267,7 +270,7 @@ class TestDynamicPandasAssets:
             empty_data_context.sources.add_pandas(
                 "my_pandas",
             )
-            .add_pandas_csv_asset(
+            .add_csv_asset(
                 "my_csv",
                 **extra_kwargs,
             )
@@ -290,12 +293,9 @@ class TestDynamicPandasAssets:
         assert pandas_datasource.name == "default_pandas_datasource"
         assert len(pandas_datasource.assets) == 0
 
-        # TODO: Update the following 3 lines after registry namespace change to:
-        #       - pandas_csv_asset_X -> csv_asset_X
-        #       - read_pandas_csv -> read_csv
-        expected_csv_data_asset_name_1 = "pandas_csv_asset_1"
-        expected_csv_data_asset_name_2 = "pandas_csv_asset_2"
-        csv_data_asset_1 = pandas_datasource.read_pandas_csv(  # type: ignore[attr-defined]
+        expected_csv_data_asset_name_1 = "csv_asset_1"
+        expected_csv_data_asset_name_2 = "csv_asset_2"
+        csv_data_asset_1 = pandas_datasource.read_csv(  # type: ignore[attr-defined]
             filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-04.csv",
         )
         assert isinstance(csv_data_asset_1, _PandasDataAsset)
@@ -308,7 +308,7 @@ class TestDynamicPandasAssets:
         assert len(pandas_datasource.assets) == 1
         assert pandas_datasource.assets[expected_csv_data_asset_name_1]
 
-        csv_data_asset_2 = pandas_datasource.read_pandas_csv(  # type: ignore[attr-defined]
+        csv_data_asset_2 = pandas_datasource.read_csv(  # type: ignore[attr-defined]
             filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-03.csv"
         )
         assert csv_data_asset_2.name == expected_csv_data_asset_name_2

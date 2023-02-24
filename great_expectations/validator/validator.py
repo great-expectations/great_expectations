@@ -1547,7 +1547,7 @@ class Validator:
             )
             if self.cloud_mode:
                 updated_suite = self._data_context.get_expectation_suite(
-                    ge_cloud_id=str(expectation_suite.ge_cloud_id)
+                    ge_cloud_id=expectation_suite.ge_cloud_id
                 )
                 self._initialize_expectations(expectation_suite=updated_suite)
         elif filepath is not None:
