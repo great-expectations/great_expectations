@@ -34,7 +34,8 @@ echo -e "${ORANGE}Building sphinx API docs.${NC}"
 echo -e "${ORANGE}DIAGNOSTICS${NC}"
 pwd
 ls
-tree
+ls docs/reference/api
+tree docs/reference/api
 echo -e "${ORANGE}DIAGNOSTICS END${NC}"
 
 if [ "$PULL_REQUEST" == "false" ]
