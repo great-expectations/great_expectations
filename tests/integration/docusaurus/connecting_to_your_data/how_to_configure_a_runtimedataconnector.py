@@ -89,7 +89,7 @@ print(validator.head())
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
 assert [ds["name"] for ds in context.list_datasources()] == ["taxi_datasource"]
-assert "YOUR MEANINGFUL NAME" in set(
+assert "YOUR_MEANINGFUL_NAME" in set(
     context.get_available_data_asset_names()["taxi_datasource"][
         "default_runtime_data_connector_name"
     ]
