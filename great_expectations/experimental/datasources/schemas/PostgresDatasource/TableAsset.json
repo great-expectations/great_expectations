@@ -1,46 +1,65 @@
 {
-    "title": "PostgresDatasource",
-    "description": "Adds a postgres datasource to the data context.\n\nArgs:\n    name: The name of this postgres datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the postgres database.\n        For example: \"postgresql+psycopg2://postgres:@localhost/test_database\"\n    assets: An optional dictionary whose keys are TableAsset or QueryAsset names and whose values\n        are TableAsset or QueryAsset objects.",
+    "title": "TableAsset",
+    "description": "A _SQLAsset Mixin\n\nThis is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality\nthat can be used by different SQL datasource subclasses.\n\nFor example see TableAsset defined in this module and SqliteTableAsset defined in\nsqlite_datasource.py",
     "type": "object",
     "properties": {
-        "type": {
-            "title": "Type",
-            "default": "postgres",
-            "enum": [
-                "postgres"
-            ],
-            "type": "string"
-        },
         "name": {
             "title": "Name",
             "type": "string"
         },
-        "assets": {
-            "title": "Assets",
-            "default": {},
-            "type": "object",
-            "additionalProperties": {
-                "anyOf": [
-                    {
-                        "$ref": "#/definitions/TableAsset"
-                    },
-                    {
-                        "$ref": "#/definitions/QueryAsset"
-                    }
-                ]
+        "type": {
+            "title": "Type",
+            "default": "table",
+            "enum": [
+                "table"
+            ],
+            "type": "string"
+        },
+        "order_by": {
+            "title": "Order By",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/BatchSorter"
             }
         },
-        "connection_string": {
-            "title": "Connection String",
-            "minLength": 1,
-            "maxLength": 65536,
-            "format": "uri",
+        "column_splitter": {
+            "title": "Column Splitter",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/ColumnSplitterColumnValue"
+                },
+                {
+                    "$ref": "#/definitions/ColumnSplitterDividedInteger"
+                },
+                {
+                    "$ref": "#/definitions/ColumnSplitterModInteger"
+                },
+                {
+                    "$ref": "#/definitions/ColumnSplitterYear"
+                },
+                {
+                    "$ref": "#/definitions/ColumnSplitterYearAndMonth"
+                },
+                {
+                    "$ref": "#/definitions/ColumnSplitterYearAndMonthAndDay"
+                },
+                {
+                    "$ref": "#/definitions/ColumnSplitterDatetimePart"
+                }
+            ]
+        },
+        "table_name": {
+            "title": "Table Name",
+            "type": "string"
+        },
+        "schema_name": {
+            "title": "Schema Name",
             "type": "string"
         }
     },
     "required": [
         "name",
-        "connection_string"
+        "table_name"
     ],
     "additionalProperties": false,
     "definitions": {
@@ -238,132 +257,6 @@
             "required": [
                 "column_name",
                 "datetime_parts"
-            ],
-            "additionalProperties": false
-        },
-        "TableAsset": {
-            "title": "TableAsset",
-            "description": "A _SQLAsset Mixin\n\nThis is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality\nthat can be used by different SQL datasource subclasses.\n\nFor example see TableAsset defined in this module and SqliteTableAsset defined in\nsqlite_datasource.py",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "title": "Name",
-                    "type": "string"
-                },
-                "type": {
-                    "title": "Type",
-                    "default": "table",
-                    "enum": [
-                        "table"
-                    ],
-                    "type": "string"
-                },
-                "order_by": {
-                    "title": "Order By",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/BatchSorter"
-                    }
-                },
-                "column_splitter": {
-                    "title": "Column Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/ColumnSplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterDatetimePart"
-                        }
-                    ]
-                },
-                "table_name": {
-                    "title": "Table Name",
-                    "type": "string"
-                },
-                "schema_name": {
-                    "title": "Schema Name",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "name",
-                "table_name"
-            ],
-            "additionalProperties": false
-        },
-        "QueryAsset": {
-            "title": "QueryAsset",
-            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "title": "Name",
-                    "type": "string"
-                },
-                "type": {
-                    "title": "Type",
-                    "default": "query",
-                    "enum": [
-                        "query"
-                    ],
-                    "type": "string"
-                },
-                "order_by": {
-                    "title": "Order By",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/BatchSorter"
-                    }
-                },
-                "column_splitter": {
-                    "title": "Column Splitter",
-                    "anyOf": [
-                        {
-                            "$ref": "#/definitions/ColumnSplitterColumnValue"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterDividedInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterModInteger"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterYear"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterYearAndMonth"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterYearAndMonthAndDay"
-                        },
-                        {
-                            "$ref": "#/definitions/ColumnSplitterDatetimePart"
-                        }
-                    ]
-                },
-                "query": {
-                    "title": "Query",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "name",
-                "query"
             ],
             "additionalProperties": false
         }

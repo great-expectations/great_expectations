@@ -1,6 +1,6 @@
 {
-    "title": "PandasParquetAsset",
-    "description": "Load a parquet object from the file path, returning a DataFrame.",
+    "title": "FeatherAsset",
+    "description": "Load a feather-format object from the file path.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pandas_parquet",
+            "default": "feather",
             "enum": [
-                "pandas_parquet"
+                "feather"
             ],
             "type": "string"
         },
@@ -22,35 +22,27 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "path": {
-            "title": "Path"
-        },
-        "engine": {
-            "title": "Engine",
-            "default": "auto",
-            "type": "string"
+        "batching_regex": {
+            "title": "Batching Regex",
+            "type": "string",
+            "format": "regex"
         },
         "columns": {
             "title": "Columns"
         },
-        "storage_options": {
-            "title": "Storage Options",
-            "type": "object"
-        },
-        "use_nullable_dtypes": {
-            "title": "Use Nullable Dtypes",
-            "default": false,
+        "use_threads": {
+            "title": "Use Threads",
+            "default": true,
             "type": "boolean"
         },
-        "kwargs": {
-            "title": "Kwargs",
-            "description": "Extra keyword arguments that will be passed to the reader method",
+        "storage_options": {
+            "title": "Storage Options",
             "type": "object"
         }
     },
     "required": [
         "name",
-        "path"
+        "batching_regex"
     ],
     "additionalProperties": false,
     "definitions": {

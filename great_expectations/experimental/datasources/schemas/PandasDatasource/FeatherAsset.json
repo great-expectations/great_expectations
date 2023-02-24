@@ -1,6 +1,6 @@
 {
-    "title": "PandasClipboardAsset",
-    "description": "Read text from clipboard and pass to read_csv.\n\nParameters\n----------\nsep : str, default '\\s+'\n    A string or regex delimiter. The default of '\\s+' denotes\n    one or more whitespace characters.\n\n**kwargs\n    See read_csv for the full argument list.\n\nReturns\n-------\nDataFrame\n    A parsed DataFrame object.",
+    "title": "FeatherAsset",
+    "description": "Load a feather-format object from the file path.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pandas_clipboard",
+            "default": "feather",
             "enum": [
-                "pandas_clipboard"
+                "feather"
             ],
             "type": "string"
         },
@@ -22,18 +22,25 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "sep": {
-            "title": "Sep",
-            "default": "\\s+"
+        "path": {
+            "title": "Path"
         },
-        "kwargs": {
-            "title": "Kwargs",
-            "description": "Extra keyword arguments that will be passed to the reader method",
+        "columns": {
+            "title": "Columns"
+        },
+        "use_threads": {
+            "title": "Use Threads",
+            "default": true,
+            "type": "boolean"
+        },
+        "storage_options": {
+            "title": "Storage Options",
             "type": "object"
         }
     },
     "required": [
-        "name"
+        "name",
+        "path"
     ],
     "additionalProperties": false,
     "definitions": {
