@@ -9,9 +9,12 @@ from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
     SQLDatasource,
     _ColumnSplitter,
-    _QueryAsset,
-    _SQLAsset,
-    _TableAsset,
+)
+from great_expectations.experimental.datasources.sql_datasource import (
+    QueryAsset as SqlQueryAsset,
+)
+from great_expectations.experimental.datasources.sql_datasource import (
+    TableAsset as SqlTableAsset,
 )
 
 if TYPE_CHECKING:
@@ -21,8 +24,22 @@ if TYPE_CHECKING:
         DataAsset,
     )
 
+# This module serves as an example of how to extend _SQLAssets for specific backends. The steps are:
+# 1. Create a plain class with the extensions necessary for the specific backend.
+# 2. Make 2 classes TableAsset and QueryAsset by mixing in the class created in step 1 with
+#    sql_datasource.TableAsset and sql_datasource.QueryAsset.
+#
+# See SqliteDatasource, TableAsset, and QueryAsset below.
+
 
 class ColumnSplitterHashedColumn(_ColumnSplitter):
+    """Splite on hash value of a column.
+
+    Args:
+        hash_digits: The number of digits to truncate the hash to.
+        method_name: Literal["split_on_hashed_column"]
+    """
+
     # hash digits is the length of the hash. The md5 of the column is truncated to this length.
     hash_digits: int
     method_name: Literal["split_on_hashed_column"] = "split_on_hashed_column"
@@ -95,15 +112,12 @@ SqliteColumnSplitter = Union[
 ]
 
 
-class _SQLiteAsset(_SQLAsset):
-    # Instance field overrides
-    column_splitter: Optional[SqliteColumnSplitter] = None  # type: ignore[assignment]  # override superclass type
-
+class _SQLiteAssetMixin:
     def add_splitter_hashed_column(
         self: Self, column_name: str, hash_digits: int
     ) -> Self:
-        return self._add_splitter(
-            ColumnSplitterHashedColumn(  # type: ignore[arg-type]  # ColumnSplitterHashedColumn implements the ColumnSplitter interface
+        return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
+            ColumnSplitterHashedColumn(
                 method_name="split_on_hashed_column",
                 column_name=column_name,
                 hash_digits=hash_digits,
@@ -113,8 +127,8 @@ class _SQLiteAsset(_SQLAsset):
     def add_splitter_converted_datetime(
         self: Self, column_name: str, date_format_string: str
     ) -> Self:
-        return self._add_splitter(
-            ColumnSplitterConvertedDateTime(  # type: ignore[arg-type]  # ColumnSplitterHashedColumn implements the ColumnSplitter interface
+        return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
+            ColumnSplitterConvertedDateTime(
                 method_name="split_on_converted_datetime",
                 column_name=column_name,
                 date_format_string=date_format_string,
@@ -122,12 +136,14 @@ class _SQLiteAsset(_SQLAsset):
         )
 
 
-class SqliteTableAsset(_TableAsset, _SQLiteAsset):
-    type: Literal["sqlite_table"] = "sqlite_table"
+class TableAsset(_SQLiteAssetMixin, SqlTableAsset):
+    type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]  # override superclass value
+    column_splitter: Optional[SqliteColumnSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
-class SqliteQueryAsset(_QueryAsset, _SQLiteAsset):
-    type: Literal["sqlite_query"] = "sqlite_query"
+class QueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
+    type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]  # override superclass value
+    column_splitter: Optional[SqliteColumnSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteDatasource(SQLDatasource):
@@ -142,7 +158,7 @@ class SqliteDatasource(SQLDatasource):
     """
 
     # class var definitions
-    asset_types: ClassVar[List[Type[DataAsset]]] = [SqliteTableAsset, SqliteQueryAsset]
+    asset_types: ClassVar[List[Type[DataAsset]]] = [TableAsset, QueryAsset]
 
     # Subclass instance var overrides
     # right side of the operator determines the type name
@@ -150,8 +166,8 @@ class SqliteDatasource(SQLDatasource):
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
     connection_string: SqliteDsn
 
-    _TableAsset: Type[SqliteTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)  # type: ignore[assignment]  # override superclass type
-    _QueryAsset: Type[SqliteQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)  # type: ignore[assignment]  # override superclass type
+    _TableAsset: Type[TableAsset] = pydantic.PrivateAttr(TableAsset)  # type: ignore[assignment]  # override superclass type
+    _QueryAsset: Type[QueryAsset] = pydantic.PrivateAttr(QueryAsset)  # type: ignore[assignment]  # override superclass type
 
     def add_table_asset(  # type: ignore[override]  # override return type
         self,
@@ -159,9 +175,9 @@ class SqliteDatasource(SQLDatasource):
         table_name: str,
         schema_name: Optional[str] = None,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> SqliteTableAsset:
+    ) -> TableAsset:
         return cast(
-            SqliteTableAsset,
+            TableAsset,
             super().add_table_asset(name, table_name, schema_name, order_by),
         )
 
@@ -170,5 +186,5 @@ class SqliteDatasource(SQLDatasource):
         name: str,
         query: str,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> SqliteQueryAsset:
-        return cast(SqliteQueryAsset, super().add_query_asset(name, query, order_by))
+    ) -> QueryAsset:
+        return cast(QueryAsset, super().add_query_asset(name, query, order_by))

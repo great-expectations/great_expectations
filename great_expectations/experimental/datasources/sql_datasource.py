@@ -591,18 +591,9 @@ class _SQLAsset(DataAsset):
         raise NotImplementedError
 
 
-class _QueryAsset(ExperimentalBaseModel):
-    """A _SQLAsset Mixin
-
-    This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
-    that can be used by different SQL datasource subclasses.
-
-    For example see QueryAsset defined in this module and SqliteQueryAsset defined in
-    sqlite_datasource.py
-    """
-
+class QueryAsset(_SQLAsset):
     # Instance fields
-    name: str
+    type: Literal["query"] = "query"
     query: str
 
     @pydantic.validator("query")
@@ -617,9 +608,7 @@ class _QueryAsset(ExperimentalBaseModel):
 
         This can be used in a subselect FROM clause for queries against this data.
         """
-        import sqlalchemy as sa
-
-        return sa.select(sa.text(self.query.lstrip()[6:])).subquery()
+        return sqlalchemy.select(sqlalchemy.text(self.query.lstrip()[6:])).subquery()
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
@@ -630,11 +619,7 @@ class _QueryAsset(ExperimentalBaseModel):
         }
 
 
-class QueryAsset(_QueryAsset, _SQLAsset):
-    type: Literal["query"] = "query"
-
-
-class _TableAsset(ExperimentalBaseModel):
+class TableAsset(_SQLAsset):
     """A _SQLAsset Mixin
 
     This is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality
@@ -645,14 +630,9 @@ class _TableAsset(ExperimentalBaseModel):
     """
 
     # Instance fields
-    name: str
+    type: Literal["table"] = "table"
     table_name: str
     schema_name: Optional[str] = None
-    column_splitter: Optional[ColumnSplitter]
-
-    @property
-    def datasource(self):
-        return super().datasource
 
     @property
     def qualified_name(self) -> str:
@@ -720,10 +700,6 @@ class _TableAsset(ExperimentalBaseModel):
             "schema_name": self.schema_name,
             "batch_identifiers": {},
         }
-
-
-class TableAsset(_TableAsset, _SQLAsset):
-    type: Literal["table"] = "table"
 
 
 class SQLDatasource(Datasource):
@@ -827,12 +803,13 @@ class SQLDatasource(Datasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-        return self._TableAsset(
+        asset = self._TableAsset(
             name=name,
             table_name=table_name,
             schema_name=schema_name,
             order_by=order_by_sorters,
         )
+        return self.add_asset(asset)
 
     def add_query_asset(
         self,
@@ -855,8 +832,9 @@ class SQLDatasource(Datasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-        return self._QueryAsset(
+        asset = self._QueryAsset(
             name=name,
             query=query,
             order_by=order_by_sorters,
         )
+        return self.add_asset(asset)
