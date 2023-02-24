@@ -106,3 +106,14 @@ def test_vcs_schemas_match(
     assert (
         schema_as_dict == zep_ds_or_asset_model_as_dict
     ), "Schemas are out of sync. Run `invoke schema --sync`. Also check your pandas version."
+
+
+def test_no_orphaned_schemas():
+    """Ensure that there are no schemas that have no corresponding type."""
+    # NOTE: this is a very low fidelity check
+    all_schemas: set[str] = {t[1].__name__ for t in _iter_all_registered_types()}
+
+    for schema in _SCHEMAS_DIR.glob("**/*.json"):
+        assert (
+            schema.stem in all_schemas
+        ), f"{schema} appears to be orphaned and should be removed. Run `invoke schema --sync --clean`"
