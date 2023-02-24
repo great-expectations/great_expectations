@@ -521,7 +521,7 @@ def type_schema(
             print("  ", end="")
 
         if not sync:
-            print(f"{name} - {model.__name__}")
+            print(f"{name} - {model.__name__}.json")
             continue
 
         if (
