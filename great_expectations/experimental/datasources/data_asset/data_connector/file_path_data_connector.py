@@ -49,12 +49,15 @@ class FilePathDataConnector(DataConnector):
     Note that `FilePathDataConnector` is not meant to be used on its own, but extended.
 
     Args:
-        batching_regex: A regex pattern for filtering data references
+        batching_regex: A regex pattern for partitioning data references
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: A list of sorters for sorting data references.
+        file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
         # TODO: <Alex>ALEX</Alex>
     """
+
+    FILE_PATH_BATCH_SPEC_KEY = "path"
 
     def __init__(
         self,
@@ -73,13 +76,14 @@ class FilePathDataConnector(DataConnector):
             data_asset_name=data_asset_name,
         )
 
-        self._batching_regex: re.Pattern = batching_regex
-        self._regex_parser: RegExParser = RegExParser(
-            regex_pattern=batching_regex,
-            unnamed_regex_group_prefix=unnamed_regex_group_prefix,
-        )
-
         self._unnamed_regex_group_prefix: str = unnamed_regex_group_prefix
+        self._batching_regex: re.Pattern = (
+            self._ensure_regex_groups_include_data_reference_key(regex=batching_regex)
+        )
+        self._regex_parser: RegExParser = RegExParser(
+            regex_pattern=self._batching_regex,
+            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
+        )
 
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
 
@@ -248,7 +252,30 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
         path = self._get_full_file_path(path=path)
 
-        return {"path": path}
+        return {FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY: path}
+
+    def _ensure_regex_groups_include_data_reference_key(
+        self, regex: re.Pattern
+    ) -> re.Pattern:
+        """
+        Args:
+            regex: regex pattern for filtering data references; if reserved group name "path" (FILE_PATH_BATCH_SPEC_KEY)
+            is absent, then it is added to enclose original regex pattern, supplied on input.
+
+        Returns:
+            Potentially modified Regular Expression pattern (with enclosing FILE_PATH_BATCH_SPEC_KEY reserved group)
+        """
+        regex_parser = RegExParser(
+            regex_pattern=regex,
+            unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
+        )
+        group_names: List[str] = regex_parser.get_all_group_names()
+        if FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY not in group_names:
+            pattern: str = regex.pattern
+            pattern = f"(?P<{FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY}>{pattern})"
+            regex = re.compile(pattern)
+
+        return regex
 
     def _get_data_references_cache(self) -> Dict[str, List[BatchDefinition] | None]:
         """
@@ -334,16 +361,20 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         self, data_reference: str
     ) -> Optional[IDDict]:
         # noinspection PyUnresolvedReferences
-        matches: Optional[re.Match] = self._batching_regex.match(data_reference)
+        matches: Optional[re.Match] = self._regex_parser.get_matches(
+            target=data_reference
+        )
         if matches is None:
             return None
 
-        num_all_matched_group_values: int = self._batching_regex.groups
+        num_all_matched_group_values: int = (
+            self._regex_parser.get_num_all_matched_group_values()
+        )
 
         # Check for `(?P<name>)` named group syntax
-        defined_group_name_to_group_index_mapping: Dict[str, int] = dict(
-            self._batching_regex.groupindex
-        )
+        defined_group_name_to_group_index_mapping: Dict[
+            str, int
+        ] = self._regex_parser.get_named_group_name_to_group_index_mapping()
         defined_group_name_indexes: Set[int] = set(
             defined_group_name_to_group_index_mapping.values()
         )
