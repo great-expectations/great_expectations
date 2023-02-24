@@ -12,14 +12,14 @@ plt.rcParams["figure.figsize"] = (20, 3)
 
 
 def generate_time_series_data_and_plot(
-    grain:str,
-    size:int,
-    intercept:float,
+    grain: str,
+    size: int,
+    intercept: float,
     # noise,
-    trend:float,
-    weekly_seasonality:float,
+    trend: float,
+    weekly_seasonality: float,
     # annual_seasonality,
-    outlier_alpha:float,
+    outlier_alpha: float,
 ):
     filename = f"{grain}__size_{size}__trend_{trend}__weekly_seasonality_{weekly_seasonality}__outliers_{outlier_alpha}"
     print(filename)
@@ -95,4 +95,3 @@ generate_time_series_data_and_plot(
     weekly_seasonality=1,
     outlier_alpha=2,
 )
-
