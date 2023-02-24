@@ -1,6 +1,6 @@
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 
-const remarkNamedSnippets = require('./docs/scripts/remark-named-snippets/index')
+const remarkNamedSnippets = require('./scripts/remark-named-snippets/index')
 
 module.exports = {
   title: 'Great Expectations',
