@@ -76,12 +76,12 @@ Run this code to test your configuration.
 
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py#L23-L42
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py datasource config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py#L53
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py test datasource config"
 ```
 
 </TabItem>
@@ -113,7 +113,7 @@ Save the configuration into your `DataContext` by using the `add_datasource()` f
 
 <TabItem value="python">
 
-```python file=../../../../../tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py#L55
+```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py add datasource config"
 ```
 
 </TabItem>

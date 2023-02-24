@@ -173,6 +173,7 @@ module.exports = {
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
+            { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' }
           ]
         },
@@ -208,6 +209,7 @@ module.exports = {
             'guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_query_expectations',
             'guides/expectations/creating_custom_expectations/how_to_create_custom_parameterized_expectations',
+            'guides/expectations/creating_custom_expectations/how_to_add_support_for_the_auto_initializing_framework_to_a_custom_expectation',
             'guides/expectations/creating_custom_expectations/how_to_use_custom_expectations',
             {
               type: 'category',
@@ -281,7 +283,10 @@ module.exports = {
           label: 'Using Great Expectations with AWS',
           items: [
             'deployment_patterns/how_to_use_great_expectations_in_aws_glue',
-            { label: 'How to use Great Expectations with AWS using S3 and Pandas', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas' }
+            { label: 'How to use Great Expectations with AWS using S3 and Pandas', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_cloud_storage_and_pandas' },
+            { label: 'How to use Great Expectations with AWS using S3 and Spark', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_s3_and_spark' },
+            { label: 'How to use Great Expectations with AWS using Athena', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_athena' },
+            { label: 'How to use Great Expectations with AWS using Redshift', type: 'doc', id: 'deployment_patterns/how_to_use_gx_with_aws/how_to_use_gx_with_aws_using_redshift' }
           ]
         },
         'deployment_patterns/how_to_instantiate_a_data_context_hosted_environments',

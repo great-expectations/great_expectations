@@ -64,7 +64,7 @@ Datasource configurations can be written as YAML files or Python dictionaries.  
 <TabItem value="yaml">
 
 ```python
-datasource_yaml = fr"""
+datasource_yaml = f"""
 name: <name_of_your_datasource>
 class_name: Datasource
 execution_engine:
@@ -196,7 +196,7 @@ from ruamel import yaml
 
 After that, the following code snippet will unpack your yaml string and save your Datasource configuration to the Data Context:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py#L44
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py add datasource config"
 ```
 
 </TabItem>
@@ -204,7 +204,7 @@ After that, the following code snippet will unpack your yaml string and save you
 
 The function `add_datasource()` takes in a series of named arguments corresponding to the keys in your `datasource_config` dictionary.  Fortunately, python provides a convenient way to unpack dictionaries into named arguements, so you don't have to. The following code snippet will unpack the dictionary and save your Datasource configuration to the Data Context.
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py#L44
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_python_example.py add datasource config"
 ```
 
 </TabItem>

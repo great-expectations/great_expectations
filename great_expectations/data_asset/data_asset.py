@@ -176,9 +176,9 @@ class DataAsset:
                     modification. For more detail, see :ref:`meta`.
         """
 
-        def outer_wrapper(func):
+        def outer_wrapper(func):  # noqa: C901 - 22
             @wraps(func)
-            def wrapper(self, *args, **kwargs):
+            def wrapper(self, *args, **kwargs):  # noqa: C901 - 21
 
                 # Get the name of the method
                 method_name = func.__name__
@@ -699,7 +699,9 @@ class DataAsset:
             suppress_warnings,
         )
         if filepath is None and self._data_context is not None:
-            self._data_context.save_expectation_suite(expectation_suite)
+            self._data_context.add_or_update_expectation_suite(
+                expectation_suite=expectation_suite
+            )
         elif filepath is not None:
             with open(filepath, "w") as outfile:
                 json.dump(

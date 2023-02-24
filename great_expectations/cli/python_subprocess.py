@@ -40,9 +40,8 @@ def execute_shell_command(command: str) -> int:
             check=True,
             encoding=None,
             errors=None,
-            text=None,
             env=env,
-            universal_newlines=True,
+            text=True,
         )
         sh_out: str = res.stdout.strip()
         logger.info(sh_out)

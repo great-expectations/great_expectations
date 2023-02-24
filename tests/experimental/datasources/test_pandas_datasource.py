@@ -1,239 +1,348 @@
-import os
-from dataclasses import dataclass
-from pathlib import Path
-from typing import List
+from __future__ import annotations
 
+import inspect
+import logging
+import pathlib
+from pprint import pformat as pf
+from typing import TYPE_CHECKING, Any, Type
+
+import pydantic
 import pytest
+from pytest import MonkeyPatch, param
 
-from great_expectations.data_context.util import file_relative_path
+import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.experimental.datasources import PandasDatasource
-from great_expectations.experimental.datasources.interfaces import BatchRequestError
-from great_expectations.experimental.datasources.pandas_datasource import CSVAsset
+from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
+from great_expectations.experimental.datasources.pandas_datasource import (
+    PandasCSVAsset,
+    PandasTableAsset,
+    _PandasDataAsset,
+)
+from great_expectations.experimental.datasources.sources import (
+    DEFAULT_PANDAS_DATASOURCE_NAMES,
+    DefaultPandasDatasourceError,
+    _get_field_details,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+
+
+logger = logging.getLogger(__file__)
+
+# apply markers to entire test module
+pytestmark = [
+    pytest.mark.skipif(
+        PANDAS_VERSION < 1.2, reason=f"ZEP pandas not supported on {PANDAS_VERSION}"
+    )
+]
 
 
 @pytest.fixture
 def pandas_datasource() -> PandasDatasource:
-    return PandasDatasource(name="pandas_datasource")
+    return PandasDatasource(
+        name="pandas_datasource",
+    )
 
 
 @pytest.fixture
-def csv_path() -> Path:
-    return Path(
-        file_relative_path(__file__, "../../test_sets/taxi_yellow_tripdata_samples")
+def csv_path() -> pathlib.Path:
+    relative_path = pathlib.Path(
+        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path
+
+
+class SpyInterrupt(RuntimeError):
+    """
+    Exception that may be raised to interrupt the control flow of the program
+    when a spy has already captured everything needed.
+    """
+
+
+@pytest.fixture
+def capture_reader_fn_params(monkeypatch: MonkeyPatch):
+    """
+    Capture the `reader_options` arguments being passed to the `PandasExecutionEngine`.
+
+    Note this fixture is heavily reliant on the implementation details of `PandasExecutionEngine`,
+    should this change this fixture will need to change.
+    """
+    captured_args: list[list] = []
+    captured_kwargs: list[dict[str, Any]] = []
+
+    def reader_fn_spy(*args, **kwargs):
+        logging.info(f"reader_fn_spy() called with...\n{args}\n{kwargs}")
+        captured_args.append(args)
+        captured_kwargs.append(kwargs)
+        raise SpyInterrupt("Reader options have been captured")
+
+    monkeypatch.setattr(
+        great_expectations.execution_engine.pandas_execution_engine.PandasExecutionEngine,
+        "_get_reader_fn",
+        lambda *_: reader_fn_spy,
+        raising=True,
+    )
+
+    yield captured_args, captured_kwargs
 
 
 @pytest.mark.unit
-def test_construct_pandas_datasource(pandas_datasource):
-    assert pandas_datasource.name == "pandas_datasource"
-
-
-@pytest.mark.unit
-def test_add_csv_asset_to_datasource(pandas_datasource, csv_path):
-    asset = pandas_datasource.add_csv_asset(
-        name="csv_asset",
-        data_path=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
+class TestDynamicPandasAssets:
+    @pytest.mark.parametrize(
+        "method_name",
+        [
+            param("read_clipboard"),
+            param("read_csv"),
+            param("read_excel"),
+            param("read_feather"),
+            param(
+                "read_fwf", marks=pytest.mark.xfail(reason="unhandled type annotation")
+            ),
+            param("read_gbq"),
+            param("read_hdf"),
+            param("read_html"),
+            param("read_json"),
+            param("read_orc"),
+            param("read_parquet"),
+            param("read_pickle"),
+            param("read_sas"),
+            param("read_spss"),
+            param("read_sql"),
+            param("read_sql_query"),
+            param("read_sql_table"),
+            param("read_stata"),
+            param("read_table"),
+            param(
+                "read_xml",
+                marks=pytest.mark.skipif(
+                    PANDAS_VERSION < 1.3,
+                    reason=f"read_xml does not exist on {PANDAS_VERSION} ",
+                ),
+            ),
+        ],
     )
-    assert asset.name == "csv_asset"
-    assert asset.path == csv_path
-    assert asset.regex.match("random string") is None
-    assert asset.regex.match("yellow_tripdata_sample_11D1-22.csv") is None
-    m1 = asset.regex.match("yellow_tripdata_sample_1111-22.csv")
-    assert m1 is not None
+    def test_data_asset_defined_for_io_read_method(self, method_name: str):
+        _, type_name = method_name.split("read_")
+        assert type_name
 
+        asset_class_names: set[str] = {
+            t.__name__.lower()[6:-5] for t in PandasDatasource.asset_types
+        }
+        print(asset_class_names)
 
-@pytest.mark.unit
-def test_construct_csv_asset_directly(csv_path):
-    asset = CSVAsset(
-        name="csv_asset",
-        path=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
-    )
-    assert asset.name == "csv_asset"
-    assert asset.path == csv_path
-    assert asset.regex.match("random string") is None
-    assert asset.regex.match("yellow_tripdata_sample_11D1-22.csv") is None
-    m1 = asset.regex.match("yellow_tripdata_sample_1111-22.csv")
-    assert m1 is not None
+        assert type_name.replace("_", "") in asset_class_names
 
+    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    def test_add_asset_method_exists_and_is_functional(
+        self, asset_class: Type[_PandasDataAsset]
+    ):
+        type_name: str = _get_field_details(asset_class, "type").default_value
+        method_name: str = f"add_{type_name}_asset"
 
-@pytest.mark.unit
-def test_csv_asset_with_regex_unnamed_parameters(pandas_datasource, csv_path):
-    asset = pandas_datasource.add_csv_asset(
-        name="csv_asset",
-        data_path=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(\d{2}).csv",
-    )
-    options = asset.batch_request_options_template()
-    assert options == {"batch_request_param_1": None, "batch_request_param_2": None}
+        print(f"{method_name}() -> {asset_class.__name__}")
 
+        assert method_name in PandasDatasource.__dict__
 
-@pytest.mark.unit
-def test_csv_asset_with_regex_named_parameters(pandas_datasource, csv_path):
-    asset = pandas_datasource.add_csv_asset(
-        name="csv_asset",
-        data_path=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
-    )
-    options = asset.batch_request_options_template()
-    assert options == {"year": None, "month": None}
+        ds = PandasDatasource(
+            name="ds_for_testing_add_asset_methods",
+        )
+        method = getattr(ds, method_name)
 
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            method(
+                f"{asset_class.__name__}_add_asset_test",
+                regex="great_expectations",
+                _invalid_key="foobar",
+            )
+        # importantly check that the method creates (or attempts to create) the intended asset
+        assert exc_info.value.model == asset_class
 
-@pytest.mark.unit
-def test_csv_asset_with_some_regex_named_parameters(pandas_datasource, csv_path):
-    asset = pandas_datasource.add_csv_asset(
-        name="csv_asset",
-        data_path=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
-    )
-    options = asset.batch_request_options_template()
-    assert options == {"batch_request_param_1": None, "month": None}
+    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    def test_add_asset_method_signature(self, asset_class: Type[_PandasDataAsset]):
+        type_name: str = _get_field_details(asset_class, "type").default_value
+        method_name: str = f"add_{type_name}_asset"
 
+        ds = PandasDatasource(
+            name="ds_for_testing_add_asset_methods",
+        )
+        method = getattr(ds, method_name)
 
-@pytest.mark.unit
-def test_csv_asset_with_non_string_regex_named_parameters(pandas_datasource, csv_path):
-    asset = pandas_datasource.add_csv_asset(
-        name="csv_asset",
-        data_path=csv_path,
-        regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2}).csv",
-    )
-    with pytest.raises(BatchRequestError):
-        # year is an int which will raise an error
-        asset.get_batch_request({"year": 2018, "month": "04"})
+        add_asset_method_sig: inspect.Signature = inspect.signature(method)
+        print(f"\t{method_name}()\n{add_asset_method_sig}\n")
 
+        asset_class_init_sig: inspect.Signature = inspect.signature(asset_class)
+        print(f"\t{asset_class.__name__}\n{asset_class_init_sig}\n")
 
-@pytest.mark.unit
-def test_get_batch_list_from_fully_specified_batch_request(pandas_datasource, csv_path):
-    asset = pandas_datasource.add_csv_asset(
-        name="csv_asset",
-        data_path=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
-    )
-    request = asset.get_batch_request({"year": "2018", "month": "04"})
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert len(batches) == 1
-    batch = batches[0]
-    assert batch.batch_request.datasource_name == pandas_datasource.name
-    assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {"year": "2018", "month": "04"}
-    assert batch.metadata == {
-        "year": "2018",
-        "month": "04",
-        "path": asset.path / "yellow_tripdata_sample_2018-04.csv",
-    }
-    assert batch.id == "pandas_datasource-csv_asset-year_2018-month_04"
+        for i, param_name in enumerate(asset_class_init_sig.parameters):
+            print(f"{i} {param_name} ", end="")
 
+            if param_name == "type":
+                assert (
+                    param_name not in add_asset_method_sig.parameters
+                ), "type should not be part of the `add_<TYPE>_asset` method"
+                print("⏩")
+                continue
 
-@pytest.mark.unit
-def test_get_batch_list_from_partially_specified_batch_request(
-    pandas_datasource, csv_path
-):
-    # Verify test directory has files that don't match what we will query for
-    all_files = os.listdir(csv_path)
-    # assert there are files that are not csv files
-    assert any([not file.endswith("csv") for file in all_files])
-    # assert there are 12 files from 2018
-    files_for_2018 = [file for file in all_files if file.find("2018") >= 0]
-    assert len(files_for_2018) == 12
+            assert param_name in add_asset_method_sig.parameters
+            print("✅")
 
-    asset = pandas_datasource.add_csv_asset(
-        name="csv_asset",
-        data_path=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
-    )
-    request = asset.get_batch_request({"year": "2018"})
-    batches = asset.get_batch_list_from_batch_request(request)
-    assert (len(batches)) == 12
-    batch_filenames = [os.path.basename(batch.metadata["path"]) for batch in batches]
-    assert set(files_for_2018) == set(batch_filenames)
+    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    def test_minimal_validation(self, asset_class: Type[_PandasDataAsset]):
+        """
+        These parametrized tests ensures that every `PandasDatasource` asset model does some minimal
+        validation, and doesn't accept arbitrary keyword arguments.
+        This is also a proxy for testing that the dynamic pydantic model creation was successful.
+        """
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            asset_class(  # type: ignore[call-arg]
+                name="test",
+                invalid_keyword_arg="bad",
+            )
 
-    @dataclass(frozen=True)
-    class YearMonth:
-        year: str
-        month: str
-
-    expected_year_month = {
-        YearMonth(year="2018", month=format(m, "02d")) for m in range(1, 13)
-    }
-    batch_year_month = {
-        YearMonth(year=batch.metadata["year"], month=batch.metadata["month"])
-        for batch in batches
-    }
-    assert expected_year_month == batch_year_month
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "order_by",
-    [
-        ["+year", "month"],
-        ["+year", "+month"],
-        ["+year", "-month"],
-        ["year", "month"],
-        ["year", "+month"],
-        ["year", "-month"],
-        ["-year", "month"],
-        ["-year", "+month"],
-        ["-year", "-month"],
-        ["month", "+year"],
-        ["+month", "+year"],
-        ["-month", "+year"],
-        ["month", "year"],
-        ["+month", "year"],
-        ["-month", "year"],
-        ["month", "-year"],
-        ["+month", "-year"],
-        ["-month", "-year"],
-    ],
-)
-def test_pandas_sorter(pandas_datasource, csv_path, order_by):
-    # Verify test directory has files we expect
-    years = ["2018", "2019", "2020"]
-    months = [format(m, "02d") for m in range(1, 13)]
-    all_files = os.listdir(csv_path)
-    # assert there are 12 files for each year
-    for year in years:
-        files_for_year = [
-            file
-            for file in all_files
-            if file.find(f"yellow_tripdata_sample_{year}") == 0
-        ]
-        assert len(files_for_year) == 12
-
-    asset = pandas_datasource.add_csv_asset(
-        name="csv_asset",
-        data_path=csv_path,
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
-        order_by=order_by,
-    )
-    batches = asset.get_batch_list_from_batch_request(asset.get_batch_request())
-    assert (len(batches)) == 36
-
-    @dataclass(frozen=True)
-    class TimeRange:
-        key: str
-        range: List[int]
-
-    ordered_years = reversed(years) if "-year" in order_by else years
-    ordered_months = reversed(months) if "-month" in order_by else months
-    if "year" in order_by[0]:
-        ordered = [
-            TimeRange(key="year", range=ordered_years),
-            TimeRange(key="month", range=ordered_months),
-        ]
-    else:
-        ordered = [
-            TimeRange(key="month", range=ordered_months),
-            TimeRange(key="year", range=ordered_years),
+        errors_dict = exc_info.value.errors()
+        assert {
+            "loc": ("invalid_keyword_arg",),
+            "msg": "extra fields not permitted",
+            "type": "value_error.extra",
+        } == errors_dict[  # the extra keyword error will always be the last error
+            -1  # we don't care about any other errors for this test
         ]
 
-    batch_index = -1
-    for range1 in ordered[0].range:
-        key1 = ordered[0].key
-        for range2 in ordered[1].range:
-            key2 = ordered[1].key
-            batch_index += 1
-            metadata = batches[batch_index].metadata
-            assert metadata[key1] == range1
-            assert metadata[key2] == range2
+    @pytest.mark.parametrize(
+        ["asset_model", "extra_kwargs"],
+        [
+            (PandasCSVAsset, {"sep": "|", "names": ["col1", "col2", "col3"]}),
+            (
+                PandasTableAsset,
+                {
+                    "sep": "|",
+                    "names": ["col1", "col2", "col3", "col4"],
+                    "skiprows": [2, 4, 5],
+                },
+            ),
+        ],
+    )
+    def test_data_asset_defaults(
+        self,
+        csv_path: pathlib.Path,
+        asset_model: Type[_PandasDataAsset],
+        extra_kwargs: dict,
+    ):
+        """
+        Test that an asset dictionary can be dumped with only the original passed keys
+        present.
+        """
+        kwargs: dict[str, Any] = {
+            "name": "test",
+            "filepath_or_buffer": csv_path / "yellow_tripdata_sample_2018-04.csv",
+        }
+        kwargs.update(extra_kwargs)
+        print(f"extra_kwargs\n{pf(extra_kwargs)}")
+        asset_instance = asset_model(**kwargs)
+        assert asset_instance.dict(exclude={"type"}) == kwargs
+
+    @pytest.mark.parametrize(
+        "extra_kwargs",
+        [
+            {"sep": "|", "decimal": ","},
+            {"usecols": [0, 1, 2], "names": ["foo", "bar"]},
+            {"dtype": {"col_1": "Int64"}},
+        ],
+    )
+    def test_data_asset_reader_options_passthrough(
+        self,
+        empty_data_context: AbstractDataContext,
+        csv_path: pathlib.Path,
+        capture_reader_fn_params: tuple[list[list], list[dict]],
+        extra_kwargs: dict,
+    ):
+        extra_kwargs.update(
+            {"filepath_or_buffer": csv_path / "yellow_tripdata_sample_2018-04.csv"}
+        )
+        batch_request = (
+            empty_data_context.sources.add_pandas(
+                "my_pandas",
+            )
+            .add_pandas_csv_asset(
+                "my_csv",
+                **extra_kwargs,
+            )
+            .build_batch_request()
+        )
+        with pytest.raises(SpyInterrupt):
+            empty_data_context.get_validator(batch_request=batch_request)
+
+        captured_args, captured_kwargs = capture_reader_fn_params
+        print(f"positional args:\n{pf(captured_args[-1])}\n")
+        print(f"keyword args:\n{pf(captured_kwargs[-1])}")
+
+        assert captured_kwargs[-1] == extra_kwargs
+
+    def test_default_pandas_datasource_get_and_set(
+        self, empty_data_context: AbstractDataContext, csv_path: pathlib.Path
+    ):
+        pandas_datasource = empty_data_context.sources.pandas_default
+        assert isinstance(pandas_datasource, PandasDatasource)
+        assert pandas_datasource.name == "default_pandas_datasource"
+        assert len(pandas_datasource.assets) == 0
+
+        # TODO: Update the following 3 lines after registry namespace change to:
+        #       - pandas_csv_asset_X -> csv_asset_X
+        #       - read_pandas_csv -> read_csv
+        expected_csv_data_asset_name_1 = "pandas_csv_asset_1"
+        expected_csv_data_asset_name_2 = "pandas_csv_asset_2"
+        csv_data_asset_1 = pandas_datasource.read_pandas_csv(  # type: ignore[attr-defined]
+            filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-04.csv",
+        )
+        assert isinstance(csv_data_asset_1, _PandasDataAsset)
+        assert csv_data_asset_1.name == expected_csv_data_asset_name_1
+        assert len(pandas_datasource.assets) == 1
+
+        # ensure we get the same datasource when we call pandas_default again
+        pandas_datasource = empty_data_context.sources.pandas_default
+        assert pandas_datasource.name == "default_pandas_datasource"
+        assert len(pandas_datasource.assets) == 1
+        assert pandas_datasource.assets[expected_csv_data_asset_name_1]
+
+        csv_data_asset_2 = pandas_datasource.read_pandas_csv(  # type: ignore[attr-defined]
+            filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-03.csv"
+        )
+        assert csv_data_asset_2.name == expected_csv_data_asset_name_2
+        assert len(pandas_datasource.assets) == 2
+
+    def test_default_pandas_datasource_name_conflict(
+        self, empty_data_context: AbstractDataContext
+    ):
+        (
+            default_pandas_datasource_name_1,
+            default_pandas_datasource_name_2,
+        ) = DEFAULT_PANDAS_DATASOURCE_NAMES
+
+        # These add_datasource calls will create legacy PandasDatasources
+        empty_data_context.add_datasource(
+            name=default_pandas_datasource_name_1, class_name="PandasDatasource"
+        )
+        empty_data_context.add_datasource(
+            name=default_pandas_datasource_name_2, class_name="PandasDatasource"
+        )
+
+        # both datasource names are taken by legacy datasources
+        with pytest.raises(DefaultPandasDatasourceError):
+            pandas_datasource = empty_data_context.sources.pandas_default
+
+        # only datasource name 1 is taken by legacy datasources
+        empty_data_context.datasources.pop(default_pandas_datasource_name_2)
+        pandas_datasource = empty_data_context.sources.pandas_default
+        assert isinstance(pandas_datasource, PandasDatasource)
+        assert pandas_datasource.name == default_pandas_datasource_name_2
+
+        # both datasource names are available
+        empty_data_context.datasources.pop(default_pandas_datasource_name_1)
+        empty_data_context.datasources.pop(default_pandas_datasource_name_2)
+        pandas_datasource = empty_data_context.sources.pandas_default
+        assert isinstance(pandas_datasource, PandasDatasource)
+        assert pandas_datasource.name == default_pandas_datasource_name_1

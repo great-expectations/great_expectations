@@ -41,14 +41,14 @@ Import these necessary packages and modules:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L1-L4
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports yaml"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L3-L4
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports python"
 ```
 
 </TabItem>
@@ -137,14 +137,14 @@ The simplest approach would be to consider each file to be its own Data Asset. I
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L9-L24
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml each file own data asset"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L35-L53
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config each file own data asset"
 ```
 
 </TabItem>
@@ -170,14 +170,14 @@ We could treat `yellow_tripdata_*.csv` files as <TechnicalTag tag="batch" text="
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L77-L94
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml each file own data asset"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L105-L123
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config each file own data asset"
 ```
 
 </TabItem>
@@ -198,14 +198,14 @@ A corresponding configuration for `InferredAssetS3DataConnector` would look simi
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L147-L166
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml add an InferredAssetDataConnector to a Datasource configuration"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L178-L197
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config add an InferredAssetDataConnector to a Datasource configuration"
 ```
 
 </TabItem>
@@ -237,14 +237,14 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L224-L241
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml basic configuration with more than one Data Asset"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L252-L270
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config basic configuration with more than one Data Asset"
 ```
 
 </TabItem>
@@ -262,7 +262,7 @@ Unmatched data_references (0 of 0):[]
 
 Once configured, you can get <TechnicalTag tag="validator" text="Validators" /> from the <TechnicalTag tag="data_context" text="Data Context" /> as follows:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L293-L302
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py get_validator"
 ```
 
 Since this `BatchRequest` does not specify which data_reference to load, the `ActiveBatch` for the validator will be the last data_reference that was loaded. In this case, `yellow_tripdata_2019-03.csv` is what is being used by `validator`. We can verfiy this with:
@@ -286,7 +286,7 @@ which prints:
 
 Notice that the `batch_identifiers` for this `batch_definition` specify `"year": "2019", "month": "03"`. The parameter `batch_identifiers` can be used in our `BatchRequest` to return the data_reference CSV of our choosing using the `group_names` defined in our `DataConnector`:
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L307-L317
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py batch_request 2019-02"
 ```
 
 ```python
@@ -337,14 +337,14 @@ The same configuration as Example 1:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L224-L241
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml basic configuration with more than one Data Asset"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L252-L270
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config basic configuration with more than one Data Asset"
 ```
 
 </TabItem>
@@ -393,14 +393,14 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L327-L345
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml nested directory structure with the data_asset_name on the inside"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L356-L375
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config nested directory structure with the data_asset_name on the inside"
 ```
 
 </TabItem>
@@ -444,14 +444,14 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L405-L424
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml nested directory structure with the data_asset_name on the outside"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L435-L459
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_config nested directory structure with the data_asset_name on the outside"
 ```
 
 </TabItem>
@@ -493,14 +493,14 @@ Then this configuration:
 
 <TabItem value="yaml">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L489-L507
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py datasource_yaml redundant information in the naming convention"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py#L518-L541
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py python datasource_config redundant information in the naming convention"
 ```
 
 </TabItem>

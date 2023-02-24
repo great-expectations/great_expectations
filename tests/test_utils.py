@@ -18,16 +18,14 @@ from great_expectations.data_context.store import (
     CheckpointStore,
     ConfigurationStore,
     ProfilerStore,
+    Store,
     StoreBackend,
 )
 from great_expectations.data_context.types.base import BaseYamlConfig, CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
 )
-from great_expectations.data_context.util import (
-    build_store_from_config,
-    instantiate_class_from_config,
-)
+from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -193,7 +191,7 @@ def build_tuple_filesystem_store_backend(
         "base_directory": base_directory,
     }
     store_backend_config.update(**kwargs)
-    return build_store_from_config(
+    return Store.build_store_from_config(
         store_config=store_backend_config,
         module_name=module_name,
         runtime_environment=None,
@@ -321,7 +319,7 @@ def build_configuration_store(
         "overwrite_existing": overwrite_existing,
         "store_backend": store_backend,
     }
-    configuration_store: ConfigurationStore = build_store_from_config(  # type: ignore[assignment]
+    configuration_store: ConfigurationStore = Store.build_store_from_config(  # type: ignore[assignment]
         store_config=store_config,
         module_name=module_name,
         runtime_environment=None,

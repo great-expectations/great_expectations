@@ -654,7 +654,7 @@ def test_site_builder_usage_statistics_enabled(
         },
     )
     site_builder_return_obj = site_builder.build()
-    index_page_path = site_builder_return_obj[0]
+    index_page_path = site_builder_return_obj[0][7:]  # strip prefix "file:///"
     links_dict = site_builder_return_obj[1]
     expectation_suite_pages = [
         file_relative_path(index_page_path, expectation_suite_link_dict["filepath"])
@@ -672,7 +672,7 @@ def test_site_builder_usage_statistics_enabled(
     expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z&dataContextId=f43d4897-385f-4366-82b0-1a8eda2bf79c"
 
     for page_path in page_paths_to_check:
-        with open(page_path[7:]) as f:
+        with open(page_path) as f:
             page_contents = f.read()
             assert expected_logo_url in page_contents
 
@@ -705,7 +705,7 @@ def test_site_builder_usage_statistics_disabled(
         },
     )
     site_builder_return_obj = site_builder.build()
-    index_page_path = site_builder_return_obj[0]
+    index_page_path = site_builder_return_obj[0][7:]  # strip prefix "file:///"
     links_dict = site_builder_return_obj[1]
     expectation_suite_pages = [
         file_relative_path(index_page_path, expectation_suite_link_dict["filepath"])
@@ -723,7 +723,7 @@ def test_site_builder_usage_statistics_disabled(
     expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z"
 
     for page_path in page_paths_to_check:
-        with open(page_path[7:]) as f:
+        with open(page_path) as f:
             page_contents = f.read()
             assert expected_logo_url in page_contents
             assert data_context_id not in page_contents

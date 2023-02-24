@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING, Dict, List, Optional
 import pandas as pd
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     InvalidExpectationConfigurationError,
@@ -101,7 +101,18 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
+        """Validates the configuration for the Expectation.
+
+        For `expect_column_distinct_values_to_contain_set`
+        we require that the `configuraton.kwargs` contain a `value_set` key that is either a `list`, `set`,
+        or `dict`.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:

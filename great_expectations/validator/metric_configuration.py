@@ -1,13 +1,31 @@
 import json
 from typing import Optional, Tuple
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.domain import Domain
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
 
 
+@public_api
 class MetricConfiguration:
+    """An interface for configuring Metrics.
+
+    MetricConfiguration allows the configuration of domain information, dependencies and additional metric-specific
+    configurations.  Metrics are computed attributes of data, and are derived from one or more Batches that can then
+    be used to evaluate Expectations or to summarize the result of the Validation.
+
+    Args:
+        metric_name (str): name of the Metric defined by the current MetricConfiguration.
+        metric_domain_kwargs (dict): provides information on where the Metric can be calculated. For instance, a
+            MapCondition metric can include the name of the column that the Metric is going to be run on.
+        metric_value_kwargs (optional[dict]): Optional kwargs that define values specific to each Metric.  For instance,
+            a Metric that partitions a column can define the method of partitioning (`uniform` bins) and the number of
+            bins (`n_bins`) as `metric_value_kwargs`.
+        metric_dependencies (optional[dict]): This is a dict consisting of all Metrics necessary to evaluate the Expectation.
+    """
+
     def __init__(
         self,
         metric_name: str,
@@ -137,7 +155,14 @@ class MetricConfiguration:
             self.metric_value_kwargs_id,
         )
 
+    @public_api
     def to_json_dict(self) -> dict:
+        """Returns a JSON-serializable dict representation of this MetricConfiguration.
+
+        Returns:
+            A JSON-serializable dict representation of this MetricConfiguration.
+
+        """
         json_dict: dict = convert_to_json_serializable(
             data={
                 "metric_name": self.metric_name,

@@ -16,6 +16,7 @@ from ruamel.yaml.comments import CommentedMap
 # To support python 3.7 we must import Protocol from typing_extensions instead of typing
 from typing_extensions import Protocol
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -989,7 +990,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
-    with pytest.raises(AssertionError) as e:
+    with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
         # noinspection PyUnusedLocal
         result = validator.expect_column_values_to_be_between(
             column=column_name,
@@ -1169,7 +1170,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
         }
 
-        with pytest.raises(AssertionError) as e:
+        with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
             # noinspection PyUnusedLocal
             result = validator.expect_column_values_to_be_between(
                 column=column_name,
@@ -1422,7 +1423,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
         }
 
-        with pytest.raises(AssertionError) as e:
+        with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
             # noinspection PyUnusedLocal
             result = validator.expect_column_values_to_be_between(
                 column=column_name,

@@ -7,7 +7,10 @@ from string import Template as pTemplate
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from marshmallow import Schema, fields, post_dump, post_load
+from typing_extensions import Final
 
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
 
@@ -131,7 +134,13 @@ class LegacyDescriptiveRendererType(str, Enum):
 
 
 class RenderedContent:
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedContent.
+        """
         return {}
 
     def __eq__(self, other):
@@ -184,7 +193,13 @@ class RenderedComponentContent(RenderedContent):
             styling = {}
         self.styling = styling
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedComponentContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedComponentContent.
+        """
         d = super().to_json_dict()
         d["content_block_type"] = self.content_block_type
         if len(self.styling) > 0:
@@ -206,7 +221,13 @@ class RenderedHeaderContent(RenderedComponentContent):
         self.header_row = header_row
         self.subheader = subheader
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedHeaderContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedHeaderContent.
+        """
         d = super().to_json_dict()
         if isinstance(self.header, RenderedContent):
             d["header"] = self.header.to_json_dict()
@@ -236,7 +257,13 @@ class RenderedGraphContent(RenderedComponentContent):
         self.header = header
         self.subheader = subheader
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedGraphContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedGraphContent.
+        """
         d = super().to_json_dict()
         d["graph"] = self.graph
         if self.header is not None:
@@ -252,17 +279,38 @@ class RenderedGraphContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedTableContent(RenderedComponentContent):
+    """RenderedTableContent is RenderedComponentContent that is a table.
+
+    Args:
+        table: The table to be rendered.
+        header: The header for this content block.
+        subheader: The subheader for this content block.
+        header_row: The header row for the table.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+        table_options: The options that can be set for the table.
+
+            search: A boolean indicating whether to include search with the table.
+
+            icon-size: The size of the icons in the table. One of "sm", "md", or "lg".
+        header_row_options: The options that can be set for the header_row. A dictionary with the keys being the column
+            name and the values being a dictionary with the following form:
+
+            sortable: A boolean indicating whether the column is sortable.
+    """
+
     def __init__(
         self,
-        table,
-        header=None,
-        subheader=None,
-        header_row=None,
-        styling=None,
-        content_block_type="table",
-        table_options=None,
-        header_row_options=None,
+        table: list[RenderedContent],
+        header: Optional[Union[RenderedContent, dict]] = None,
+        subheader: Optional[Union[RenderedContent, dict]] = None,
+        header_row: Optional[list[RenderedContent]] = None,
+        styling: Optional[dict] = None,
+        content_block_type: str = "table",
+        table_options: Optional[dict] = None,
+        header_row_options: Optional[dict] = None,
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
@@ -272,7 +320,13 @@ class RenderedTableContent(RenderedComponentContent):
         self.header_row = header_row
         self.header_row_options = header_row_options
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedTableContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedTableContent.
+        """
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -305,7 +359,13 @@ class RenderedTabsContent(RenderedComponentContent):
         self.header = header
         self.subheader = subheader
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedTabsContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedTabsContent.
+        """
         d = super().to_json_dict()
         d["tabs"] = RenderedContent.rendered_content_list_to_json(
             self.tabs, check_dicts=True
@@ -343,7 +403,13 @@ class RenderedBootstrapTableContent(RenderedComponentContent):
         self.header = header
         self.subheader = subheader
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedBootstrapTableContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedBootstrapTableContent.
+        """
         d = super().to_json_dict()
         d["table_data"] = RenderedContent.rendered_content_list_to_json(
             self.table_data, check_dicts=True
@@ -378,7 +444,13 @@ class RenderedContentBlockContainer(RenderedComponentContent):
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.content_blocks = content_blocks
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedContentBlockContainer.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedContentBlockContainer.
+        """
         d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
@@ -391,20 +463,50 @@ class RenderedMarkdownContent(RenderedComponentContent):
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.markdown = markdown
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedMarkdownContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedMarkdownContent.
+        """
         d = super().to_json_dict()
         d["markdown"] = self.markdown
         return d
 
 
+@public_api
 class RenderedStringTemplateContent(RenderedComponentContent):
+    """RenderedStringTemplateContent is RenderedComponentContent that represents a templated string.
+
+    Args:
+        string_template: A dictionary containing:
+
+            template: The string to perform substitution on. Variables are denoted with a preceeding $.
+
+            params: A dictionary with keys that match variable names and values which will be substituted.
+
+            styling: A dictionary containing styling information.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+    """
+
     def __init__(
-        self, string_template, styling=None, content_block_type="string_template"
+        self,
+        string_template: dict,
+        styling: Optional[dict] = None,
+        content_block_type: str = "string_template",
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.string_template = string_template
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedStringTemplateContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedStringTemplateContent.
+        """
         d = super().to_json_dict()
         d["string_template"] = self.string_template
         return d
@@ -433,7 +535,13 @@ class RenderedBulletListContent(RenderedComponentContent):
         self.subheader = subheader
         self.bullet_list = bullet_list
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedBulletListContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedBulletListContent.
+        """
         d = super().to_json_dict()
         d["bullet_list"] = RenderedContent.rendered_content_list_to_json(
             self.bullet_list
@@ -465,7 +573,13 @@ class ValueListContent(RenderedComponentContent):
         self.subheader = subheader
         self.value_list = value_list
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this ValueListContent.
+
+        Returns:
+            A JSON-serializable dict representation of this ValueListContent.
+        """
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -490,7 +604,13 @@ class TextContent(RenderedComponentContent):
         self.header = header
         self.subheader = subheader
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this TextContent.
+
+        Returns:
+            A JSON-serializable dict representation of this TextContent.
+        """
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -507,16 +627,29 @@ class TextContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class CollapseContent(RenderedComponentContent):
+    """CollapseContent is RenderedComponentContent that can be collapsed.
+
+    Args:
+        collapse: The content to be collapsed. If a list is provided, it can recursively contain RenderedContent.
+        collpase_toggle_link: The toggle link for this CollapseContent.
+        header: The header for this content block.
+        subheader: The subheader for this content block.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+        inline_link: Whether to include a link inline.
+    """
+
     def __init__(
         self,
-        collapse,
-        collapse_toggle_link=None,
-        header=None,
-        subheader=None,
-        styling=None,
-        content_block_type="collapse",
-        inline_link=False,
+        collapse: Union[RenderedContent, list],
+        collapse_toggle_link: Optional[Union[RenderedContent, dict]] = None,
+        header: Optional[Union[RenderedContent, dict]] = None,
+        subheader: Optional[Union[RenderedContent, dict]] = None,
+        styling: Optional[dict] = None,
+        content_block_type: str = "collapse",
+        inline_link: bool = False,
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.collapse_toggle_link = collapse_toggle_link
@@ -525,7 +658,13 @@ class CollapseContent(RenderedComponentContent):
         self.collapse = collapse
         self.inline_link = inline_link
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this CollapseContent.
+
+        Returns:
+            A JSON-serializable dict representation of this CollapseContent.
+        """
         d = super().to_json_dict()
         if self.header is not None:
             if isinstance(self.header, RenderedContent):
@@ -583,7 +722,13 @@ class RenderedDocumentContent(RenderedContent):
         self.batch_spec = batch_spec
         self.ge_cloud_id = ge_cloud_id
 
-    def to_json_dict(self):
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedDocumentContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedDocumentContent.
+        """
         d = super().to_json_dict()
         d["sections"] = RenderedContent.rendered_content_list_to_json(self.sections)
         d["data_asset_name"] = self.data_asset_name
@@ -614,7 +759,13 @@ class RenderedSectionContent(RenderedContent):
         self.content_blocks = content_blocks
         self.section_name = section_name
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedSectionContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedSectionContent.
+        """
         d = super().to_json_dict()
         d["content_blocks"] = RenderedContent.rendered_content_list_to_json(
             self.content_blocks
@@ -657,8 +808,13 @@ class RenderedAtomicValue(DictDot):
     def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def to_json_dict(self) -> dict:
-        """Returns RenderedAtomicValue as a json dictionary."""
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedAtomicValue.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedAtomicValue.
+        """
         d = renderedAtomicValueSchema.dump(self)
         json_dict: dict = {}
         for key in d:
@@ -682,8 +838,13 @@ class RenderedAtomicValueGraph(DictDot):
     def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def to_json_dict(self) -> Optional[dict]:
-        """Returns RenderedAtomicValueGraph as a json dictionary."""
+    @public_api
+    def to_json_dict(self) -> Optional[dict[str, JSONValues]]:
+        """Returns a JSON-serializable dict representation of this RenderedAtomicValueGraph.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedAtomicValueGraph.
+        """
         return self.graph
 
 
@@ -708,7 +869,7 @@ class RenderedAtomicValueSchema(Schema):
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
 
-    REMOVE_KEYS_IF_NONE = [
+    REMOVE_KEYS_IF_NONE: Final[tuple[str, ...]] = (
         "header",
         "template",
         "table",
@@ -717,7 +878,7 @@ class RenderedAtomicValueSchema(Schema):
         "table",
         "graph",
         "meta_notes",
-    ]
+    )
 
     @post_dump
     def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
@@ -742,11 +903,13 @@ class RenderedAtomicContent(RenderedContent):
         name: Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType],
         value: RenderedAtomicValue,
         value_type: Optional[str] = None,
+        exception: Optional[str] = None,
     ) -> None:
         # str conversion is performed to ensure Enum value is what is serialized
         self.name = str(name)
         self.value = value
         self.value_type = value_type
+        self.exception = exception
 
     def __repr__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
@@ -754,12 +917,16 @@ class RenderedAtomicContent(RenderedContent):
     def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def to_json_dict(self) -> dict:
+    @public_api
+    def to_json_dict(self) -> dict[str, JSONValues]:
+        """Returns a JSON-serializable dict representation of this RenderedAtomicContent.
+
+        Returns:
+            A JSON-serializable dict representation of this RenderedAtomicContent.
+        """
         """Returns RenderedAtomicContent as a json dictionary."""
-        d = super().to_json_dict()
-        d["name"] = self.name
+        d = renderedAtomicContentSchema.dump(self)
         d["value"] = self.value.to_json_dict()
-        d["value_type"] = self.value_type
         return d
 
 
@@ -767,10 +934,24 @@ class RenderedAtomicContentSchema(Schema):
     name = fields.String(required=False, allow_none=True)
     value = fields.Nested(RenderedAtomicValueSchema(), required=True, allow_none=False)
     value_type = fields.String(required=True, allow_none=False)
+    exception = fields.String(required=False, allow_none=True)
+
+    REMOVE_KEYS_IF_NONE: Final[tuple[str, ...]] = ("exception",)
 
     @post_load
     def make_rendered_atomic_content(self, data, **kwargs):
         return RenderedAtomicContent(**data)
 
+    @post_dump
+    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
+        """Removes the attributes in RenderedAtomicContentSchema.REMOVE_KEYS_IF_NONE during serialization if
+        their values are None."""
+        data = deepcopy(data)
+        for key in RenderedAtomicContentSchema.REMOVE_KEYS_IF_NONE:
+            if key in data and data[key] is None:
+                data.pop(key)
+        return data
 
+
+renderedAtomicContentSchema = RenderedAtomicContentSchema()
 renderedAtomicValueSchema = RenderedAtomicValueSchema()

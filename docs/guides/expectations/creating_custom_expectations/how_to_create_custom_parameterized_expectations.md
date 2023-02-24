@@ -29,40 +29,17 @@ As can be seen in the implementation below, we have chosen to keep our default m
 
 Notice that we do not need to set `default_kwarg_values` for all kwargs: it is sufficient to set them only for ones for which we would like to set a default value. To keep our implementation simple, we do not override the `metric_dependencies` or `success_keys`.
 
-````python
-class ExpectColumnMeanToBePositive(ExpectColumnMeanToBeBetween):
-   default_kwarg_values = {
-       "min_value": 0,
-       "strict_min": True,
-   }
+````python name="tests/expectations/core/test_expect_column_mean_to_be_positive.py ExpectColumnMeanToBePositive_class_def"
 ````
 
-### 3. Contribution (Optional)
-
-If you plan to contribute your Expectation to the public open source project, you should include a `library_metadata` object. For example:
-
-```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L26
-```
-
-This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
-
-Additionally, you will need to implement some basic examples and test cases before your contribution can be accepted. For guidance on examples and testing, see our [guide on implementing examples and test cases](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
-
-:::note
-For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
-:::
-
-## Additional Notes
-
-```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L13-L19
-```
-
+:::info
 We could also explicitly override our parent methods to modify the behavior of our new Expectation, for example by updating the configuration validation to require the values we set as defaults not be altered.
 
-```python file=../../../../tests/expectations/core/test_expect_column_mean_to_be_positive.py#L21-L26
+```python name="tests/expectations/core/test_expect_column_mean_to_be_positive.py validate_config"
 ```
+:::
 
-Now for `expect_column_values_to_be_in_set`.
+For another example, let's take a look at `expect_column_values_to_be_in_set`.
 
 In this case, we will only be changing our `value_set`:
 
@@ -77,3 +54,17 @@ Congratulations!<br/>&#127881; You've just built your first Parameterized Custom
 </b></p>
 </div>
 
+### 3. Contribution (Optional)
+
+If you plan to contribute your Expectation to the public open source project, you should include a `library_metadata` object. For example:
+
+```python name="tests/expectations/core/test_expect_column_mean_to_be_positive.py library_metadata"
+```
+
+This is particularly important because ***we*** want to make sure that ***you*** get credit for all your hard work!
+
+Additionally, you will need to implement some basic examples and test cases before your contribution can be accepted. For guidance on examples and testing, see our [guide on implementing examples and test cases](../features_custom_expectations/how_to_add_example_cases_for_an_expectation.md).
+
+:::note
+For more information on our code standards and contribution, see our guide on [Levels of Maturity](../../../contributing/contributing_maturity.md#contributing-expectations) for Expectations.
+:::

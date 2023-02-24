@@ -240,10 +240,21 @@ local_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
     IntegrationTestFixture(
+        name="auto_initializing_expect_column_mean_to_be_between",
+        user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+    ),
+    IntegrationTestFixture(
         name="how_to_create_an_expectation_suite_with_the_onboarding_data_assistant",
         user_flow_script="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+    ),
+    IntegrationTestFixture(
+        name="is_expectation_auto_initializing",
+        user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
     IntegrationTestFixture(
         name="how_to_configure_credentials",
@@ -1789,9 +1800,16 @@ pandas_integration_tests = [
 ]
 aws_integration_tests = [
     IntegrationTestFixture(
-        name="awsathena_test",
+        name="awsathena_test_yaml",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         user_flow_script="tests/integration/db/awsathena.py",
+        extra_backend_dependencies=BackendDependencies.AWS,
+        util_script="tests/test_utils.py",
+    ),
+    IntegrationTestFixture(
+        name="awsathena_test_python",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py",
         extra_backend_dependencies=BackendDependencies.AWS,
         util_script="tests/test_utils.py",
     ),

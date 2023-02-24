@@ -4,7 +4,6 @@ import dataprofiler as dp
 import pandas as pd
 
 # noinspection PyUnresolvedReferences
-import contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics
 from great_expectations.self_check.util import build_pandas_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric

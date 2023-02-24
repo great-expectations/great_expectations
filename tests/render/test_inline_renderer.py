@@ -30,7 +30,9 @@ def clean_serialized_rendered_atomic_content_graphs(
 
 
 @pytest.mark.unit
-def test_inline_renderer_error_message(basic_expectation_suite: ExpectationSuite):
+def test_inline_renderer_instantiation_error_message(
+    basic_expectation_suite: ExpectationSuite,
+):
     expectation_suite: ExpectationSuite = basic_expectation_suite
     with pytest.raises(InlineRendererError) as e:
         InlineRenderer(render_object=expectation_suite)  # type: ignore

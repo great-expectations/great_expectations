@@ -54,12 +54,12 @@ Please note `application=great_expectations_oss` connection string parameter abo
 
 Import these necessary packages and modules.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L3-L6
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py imports"
 ```
 
 Load your DataContext into memory using the `get_context()` method.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L17
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py get_context"
 ```
 
 ### 5. Configure your Datasource
@@ -76,12 +76,12 @@ Load your DataContext into memory using the `get_context()` method.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L19-L33
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py datasource_yaml"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L42
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py test_yaml_config"
 ```
 
 </TabItem>
@@ -90,12 +90,12 @@ Run this code to test your configuration.
 
 Put your connection string in this template:
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L19-L36
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py datasource_config"
 ```
 
 Run this code to test your configuration.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L42
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py test_yaml_config"
 ```
 
 </TabItem>
@@ -120,14 +120,14 @@ Save the configuration for your <TechnicalTag tag="datasource" text="Datasource"
 
 <TabItem value="yaml">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L44
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py add_datasource"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L44
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py add_datasource"
 ```
 
 </TabItem>
@@ -149,7 +149,7 @@ Verify your new Datasource by loading data from it into a <TechnicalTag tag="val
 
 Here is an example of loading data by specifying a SQL query.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py#L47-L61
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py batch_request with query"
 ```
 
 </TabItem>
@@ -158,7 +158,7 @@ Here is an example of loading data by specifying a SQL query.
 
 Here is an example of loading data by specifying an existing table name.
 
-```python file=../../../../tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py#L67-L78
+```python name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py python batch_request name table"
 ```
 
 </TabItem>

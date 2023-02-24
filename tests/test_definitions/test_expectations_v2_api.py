@@ -111,6 +111,8 @@ def pytest_generate_tests(metafunc):  # noqa: C901 - 38
 
                             if isinstance(data_asset, SqlAlchemyDataset):
                                 # Call out supported dialects
+                                if "pandas_v2_api" in only_for:
+                                    generate_test = True
                                 if "sqlalchemy" in only_for:
                                     generate_test = True
                                 elif (
@@ -262,6 +264,10 @@ def pytest_generate_tests(metafunc):  # noqa: C901 - 38
                                 )
                                 or (
                                     "pandas" in suppress_test_for
+                                    and isinstance(data_asset, PandasDataset)
+                                )
+                                or (
+                                    "pandas_v2_api" in suppress_test_for
                                     and isinstance(data_asset, PandasDataset)
                                 )
                                 or (

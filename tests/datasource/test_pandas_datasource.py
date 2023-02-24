@@ -165,7 +165,7 @@ def test_pandas_datasource_custom_data_asset(
     )
 
     # We should be able to get a dataset of the correct type from the datasource.
-    data_context_parameterized_expectation_suite.create_expectation_suite(
+    data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="test"
     )
     with pytest.deprecated_call():  # "name being deprecated as a batch_parameter. Please use data_asset_name instead.
@@ -198,7 +198,7 @@ def test_pandas_source_read_csv(
         },
     )
 
-    data_context_parameterized_expectation_suite.create_expectation_suite(
+    data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="unicode"
     )
     batch = data_context_parameterized_expectation_suite.get_batch(
@@ -324,7 +324,7 @@ def test_s3_pandas_source_read_parquet(
         },
     )
 
-    data_context_parameterized_expectation_suite.create_expectation_suite(
+    data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="test_parquet"
     )
     with pytest.deprecated_call():  # "Direct GX Support for the s3 BatchKwarg will be removed in v0.16.

@@ -2,22 +2,23 @@ import os
 
 import pytest
 
-import great_expectations.exceptions as gee
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.util import (
     PasswordMasker,
     parse_substitution_variable,
 )
+from great_expectations.exceptions.exceptions import StoreConfigurationError
 from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class
 
 
 def test_load_class_raises_error_when_module_not_found():
-    with pytest.raises(gee.PluginModuleNotFoundError):
+    with pytest.raises(gx_exceptions.PluginModuleNotFoundError):
         load_class("foo", "bar")
 
 
 def test_load_class_raises_error_when_class_not_found():
-    with pytest.raises(gee.PluginClassNotFoundError):
+    with pytest.raises(gx_exceptions.PluginClassNotFoundError):
         load_class("TotallyNotARealClass", "great_expectations.datasource")
 
 
@@ -281,6 +282,22 @@ def test_password_masker_mask_db_url(monkeypatch, tmp_path):
     # in-memory
     assert PasswordMasker.mask_db_url("sqlite://") == "sqlite://"
     assert PasswordMasker.mask_db_url("sqlite://", use_urlparse=True) == "sqlite://"
+
+
+def test_sanitize_config_azure_blob_store():
+    azure_url: str = "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    assert (
+        PasswordMasker.mask_db_url(azure_url)
+        == "DefaultEndpointsProtocol=https;AccountName=iamname;AccountKey=***;EndpointSuffix=core.windows.net"
+    )
+
+    azure_wrong_url: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;AccountKey=i_am_account_key;EndpointSuffix=core.windows.net"
+    with pytest.raises(StoreConfigurationError):
+        PasswordMasker.mask_db_url(azure_wrong_url)
+
+    azure_missing_fields: str = "DefaultEndpointsProtocol=i_dont_work;AccountName=iamname;EndpointSuffix=core.windows.net"
+    with pytest.raises(StoreConfigurationError):
+        PasswordMasker.mask_db_url(azure_missing_fields)
 
 
 def test_sanitize_config_raises_exception_with_bad_input(

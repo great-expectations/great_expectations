@@ -51,6 +51,51 @@ snapshots[
 }
 
 snapshots[
+    "test_atomic_diagnostic_observed_value_with_boolean_columun_expect_column_kl_divergence_to_be_less_than 1"
+] = {
+    "name": "atomic.diagnostic.observed_value",
+    "value": {
+        "graph": {
+            "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json",
+            "autosize": "fit",
+            "config": {"view": {"continuousHeight": 300, "continuousWidth": 400}},
+            "data": {"name": "data-d8f1a1ab1f79e142d9ca399157673554"},
+            "datasets": {
+                "data-d8f1a1ab1f79e142d9ca399157673554": [
+                    {"fraction": 0.5, "values": "True"},
+                    {"fraction": 0.5, "values": "False"},
+                ]
+            },
+            "encoding": {
+                "tooltip": [
+                    {"field": "values", "type": "nominal"},
+                    {"field": "fraction", "type": "quantitative"},
+                ],
+                "x": {"field": "values", "type": "nominal"},
+                "y": {"field": "fraction", "type": "quantitative"},
+            },
+            "height": 400,
+            "mark": "bar",
+            "width": 250,
+        },
+        "header": {
+            "schema": {"type": "StringValueType"},
+            "value": {
+                "params": {
+                    "observed_value": {
+                        "schema": {"type": "string"},
+                        "value": "None (-infinity, infinity, or NaN)",
+                    }
+                },
+                "template": "KL Divergence: $observed_value",
+            },
+        },
+        "schema": {"type": "GraphType"},
+    },
+    "value_type": "GraphType",
+}
+
+snapshots[
     "test_atomic_diagnostic_observed_value_expect_column_quantile_values_to_be_between 1"
 ] = {
     "name": "atomic.diagnostic.observed_value",

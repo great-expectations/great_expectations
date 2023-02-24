@@ -29,7 +29,7 @@ class StubUsageStats:
 
 
 class StubCheckpointStore:
-    def get_checkpoint(self, name: str, ge_cloud_id: Optional[str]) -> CheckpointConfig:
+    def get_checkpoint(self, name: str, id: Optional[str]) -> CheckpointConfig:
         return CheckpointConfig(name=name, class_name="Checkpoint")
 
 
@@ -200,7 +200,7 @@ def empty_serialized_configuration_bundle() -> dict:
             },
             "notebooks": None,
             "plugins_directory": None,
-            "stores": None,
+            "stores": {},
             "validations_store_name": None,
         },
         "datasources": [],
@@ -235,7 +235,7 @@ def serialized_configuration_bundle() -> dict:
             },
             "notebooks": None,
             "plugins_directory": None,
-            "stores": None,
+            "stores": {},
             "validations_store_name": None,
         },
         "datasources": [

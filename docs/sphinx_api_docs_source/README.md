@@ -43,3 +43,18 @@ info.
 Our API docs styling is based on `pydata-sphinx-theme` with some modifications. 
 You can find the stylesheets linked from the docusaurus custom CSS `custom.scss`
 Typically you will not need to modify the styling.
+
+Code blocks in docstrings are supported, use markdown triple backticks to add a code snippet:
+
+````
+```yaml
+my_yaml:
+  - code_snippet
+```
+````
+
+Note:
+1. There must be an opening and closing set of triple backticks.
+2. The opening backticks can have an optional language (see docusaurus for supported languages).
+
+Tables are also supported, using [Sphinx table style](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#tables).

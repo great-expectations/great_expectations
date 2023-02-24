@@ -1,6 +1,7 @@
 import warnings
 from typing import List, Optional, Union
 
+from great_expectations.core._docs_decorators import deprecated_method_or_class
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -53,7 +54,7 @@ from great_expectations.render import RenderedTabsContent as RenderedTabsContent
 from great_expectations.render import TextContent as TextContentRender
 from great_expectations.render import ValueListContent as ValueListContentRender
 from great_expectations.render.renderer_configuration import (
-    RendererTableValue as RendererTableValueRender,
+    RendererTableValue as RendererTableValueRender,  # noqa: TCH001
 )
 
 
@@ -65,17 +66,36 @@ def _get_deprecation_warning_message(classname: str) -> str:
     )
 
 
+@deprecated_method_or_class(
+    version="0.15.32",
+    message="Importing the class CollapseContent from "
+    "great_expectations.render.types is deprecated as of v0.15.32 "
+    "in v0.18. Please import class CollapseContent "
+    "from great_expectations.render.",
+)
 class CollapseContent(CollapseContentRender):
     # deprecated-v0.15.32
+    """CollapseContent is RenderedComponentContent that can be collapsed.
+
+    Args:
+        collapse: The content to be collapsed. If a list is provided, it can recursively contain RenderedContent.
+        collpase_toggle_link: The toggle link for this CollapseContent.
+        header: The header for this content block.
+        subheader: The subheader for this content block.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+        inline_link: Whether to include a link inline.
+    """
+
     def __init__(
         self,
-        collapse,
-        collapse_toggle_link=None,
-        header=None,
-        subheader=None,
-        styling=None,
-        content_block_type="collapse",
-        inline_link=False,
+        collapse: Union[RenderedContentRender, list],
+        collapse_toggle_link: Optional[Union[RenderedContentRender, dict]] = None,
+        header: Optional[Union[RenderedContentRender, dict]] = None,
+        subheader: Optional[Union[RenderedContentRender, dict]] = None,
+        styling: Optional[dict] = None,
+        content_block_type: str = "collapse",
+        inline_link: bool = False,
     ):
         warnings.warn(
             _get_deprecation_warning_message(classname=self.__class__.__name__),
@@ -369,10 +389,31 @@ class RenderedSectionContent(RenderedSectionContentRender):
         )
 
 
+@deprecated_method_or_class(
+    version="0.15.32",
+    message="Importing the class RenderedStringTemplateContent from "
+    "great_expectations.render.types is deprecated as of v0.15.32 "
+    "in v0.18. Please import class RenderedStringTemplateContent "
+    "from great_expectations.render.",
+)
 class RenderedStringTemplateContent(RenderedStringTemplateContentRender):
     # deprecated-v0.15.32
+    """RenderedStringTemplateContent is RenderedComponentContent that represents a templated string.
+
+    Args:
+        string_template: A dictionary containing:
+
+            template: The string to perform substitution on. Variables are denoted with a preceeding $.
+
+            params: A dictionary with keys that match variable names and values which will be substituted.
+
+            styling: A dictionary containing styling information.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+    """
+
     def __init__(
-        self, string_template, styling=None, content_block_type="string_template"
+        self, string_template: dict, styling=None, content_block_type="string_template"
     ):
         warnings.warn(
             _get_deprecation_warning_message(classname=self.__class__.__name__),
@@ -385,8 +426,35 @@ class RenderedStringTemplateContent(RenderedStringTemplateContentRender):
         )
 
 
+@deprecated_method_or_class(
+    version="0.15.32",
+    message="Importing the class RenderedTableContent from "
+    "great_expectations.render.types is deprecated as of v0.15.32 "
+    "in v0.18. Please import class RenderedTableContent "
+    "from great_expectations.render.",
+)
 class RenderedTableContent(RenderedTableContentRender):
     # deprecated-v0.15.32
+    """RenderedTableContent is RenderedComponentContent that is a table.
+
+    Args:
+        table: The table to be rendered.
+        header: The header for this content block.
+        subheader: The subheader for this content block.
+        header_row: The header row for the table.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+        table_options: The options that can be set for the table.
+
+            search: A boolean indicating whether to include search with the table.
+
+            icon-size: The size of the icons in the table. One of "sm", "md", or "lg".
+        header_row_options: The options that can be set for the header_row. A dictionary with the keys being the column
+            name and the values being a dictionary with the following form:
+
+            sortable: A boolean indicating whether the column is sortable.
+    """
+
     def __init__(
         self,
         table,

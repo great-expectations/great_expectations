@@ -50,11 +50,10 @@ stages:
             displayName: 'Use Python $(python.version)'
 
           - script: |
-              pip install $(grep -E '^(black|invoke|isort|flake8|pyupgrade)' reqs/requirements-dev-contrib.txt)
+              pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
               EXIT_STATUS=0
               invoke fmt --check || EXIT_STATUS=$?
               invoke lint || EXIT_STATUS=$?
-              pyupgrade --py3-plus || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
       - job: test

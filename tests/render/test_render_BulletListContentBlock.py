@@ -145,7 +145,9 @@ def test_all_expectations_using_test_definitions():
 
     with open(
         file_relative_path(
-            __file__, "./output/test_render_bullet_list_content_block.json"
+            __file__,
+            "./output/test_render_bullet_list_content_block.json",
+            strict=False,
         ),
         "w",
     ) as f:
