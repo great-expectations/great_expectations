@@ -170,7 +170,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             )
 
 
-_PANDAS_BLACK_LIST = (
+_PANDAS_READER_METHOD_UNSUPPORTED_LIST = (
     # "read_csv",
     # "read_json",
     # "read_excel",
@@ -195,7 +195,7 @@ _PANDAS_BLACK_LIST = (
 
 _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
     _PandasDataAsset,
-    blacklist=_PANDAS_BLACK_LIST,
+    blacklist=_PANDAS_READER_METHOD_UNSUPPORTED_LIST,
     use_docstring_from_method=True,
     skip_first_param=False,
     type_prefix="pandas",
