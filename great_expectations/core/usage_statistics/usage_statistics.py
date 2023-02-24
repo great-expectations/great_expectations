@@ -681,9 +681,10 @@ def _handle_expectation_suite_usage_statistics(
     else:
         payload = copy.deepcopy(interactive_mode.value)
 
-    assert (
-        expectation_suite or expectation_suite_name
+    assert not (
+        expectation_suite_name is None and expectation_suite is None
     ), "Guaranteed to have at least one of these values from context CRUD"
+
     if expectation_suite_name is None:
         if isinstance(expectation_suite, ExpectationSuite):
             expectation_suite_name = expectation_suite.expectation_suite_name
