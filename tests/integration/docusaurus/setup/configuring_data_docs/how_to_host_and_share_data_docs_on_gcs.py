@@ -224,7 +224,6 @@ great_expectations docs build --site-name gs_site
 # </snippet>
 """
 # Overwrite the version with the snippet tags
-# does docs build in gs_site
 build_data_docs_command = """
 great_expectations docs build --site-name gs_site
 """
