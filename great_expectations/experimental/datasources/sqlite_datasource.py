@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 
 class ColumnSplitterHashedColumn(_ColumnSplitter):
-    """Splite on hash value of a column.
+    """Split on hash value of a column.
 
     Args:
         hash_digits: The number of digits to truncate the hash to.

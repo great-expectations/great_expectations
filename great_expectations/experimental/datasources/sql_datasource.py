@@ -273,7 +273,7 @@ class ColumnSplitterModInteger(_ColumnSplitter):
     ) -> Dict[str, Any]:
         if "remainder" not in options:
             raise ValueError(
-                "'remainder' must be specified in the batch request options to create a batch identifier"
+                "'remainder' must be specified in the batch request options"
             )
         return {self.column_name: options["remainder"]}
 

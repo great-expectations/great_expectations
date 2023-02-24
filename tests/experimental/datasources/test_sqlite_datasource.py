@@ -107,7 +107,7 @@ def create_sqlite_source() -> Callable[
 @pytest.mark.unit
 @pytest.mark.parametrize(
     [
-        "splitter_name",
+        "add_splitter_method_name",
         "splitter_kwargs",
         "splitter_query_responses",
         "sorter_args",
@@ -143,7 +143,7 @@ def create_sqlite_source() -> Callable[
 )
 def test_sqlite_specific_column_splitter(
     create_sqlite_source,
-    splitter_name,
+    add_splitter_method_name,
     splitter_kwargs,
     splitter_query_responses,
     sorter_args,
@@ -156,7 +156,7 @@ def test_sqlite_specific_column_splitter(
         splitter_query_response=[response for response in splitter_query_responses],
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
-        getattr(asset, splitter_name)(**splitter_kwargs)
+        getattr(asset, add_splitter_method_name)(**splitter_kwargs)
         asset.add_sorters(sorter_args)
         # Test getting all batches
         all_batches = asset.get_batch_list_from_batch_request(
