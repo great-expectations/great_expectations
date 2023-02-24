@@ -248,6 +248,7 @@ Done building Data Docs
 # </snippet>
 """
 
+print(f"this is output: {stdout}")
 assert (
     "https://storage.googleapis.com/superconductive-integration-tests-data-docs/index.html"
     in stdout
