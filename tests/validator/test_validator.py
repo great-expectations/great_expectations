@@ -2,7 +2,6 @@ import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
-from uuid import UUID
 
 import pandas as pd
 import pytest
@@ -292,7 +291,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
                     "result_format": "BASIC",
                 },
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
+                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             )
         ],
         data_context=context,

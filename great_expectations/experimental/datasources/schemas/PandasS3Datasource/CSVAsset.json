@@ -1,6 +1,6 @@
 {
-    "title": "PandasTableAsset",
-    "description": "Read general delimited file into DataFrame.\n\nAlso supports optionally iterating or breaking of the file\ninto chunks.\n\nAdditional help can be found in the online docs for\n`IO Tools <https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html>`_.",
+    "title": "CSVAsset",
+    "description": "Read a comma-separated values (csv) file into DataFrame.\n\nAlso supports optionally iterating or breaking of the file\ninto chunks.\n\nAdditional help can be found in the online docs for\n`IO Tools <https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html>`_.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pandas_table",
+            "default": "csv",
             "enum": [
-                "pandas_table"
+                "csv"
             ],
             "type": "string"
         },
@@ -22,10 +22,10 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "filepath_or_buffer": {
-            "title": "Filepath Or Buffer",
-            "format": "file-path",
-            "type": "string"
+        "batching_regex": {
+            "title": "Batching Regex",
+            "type": "string",
+            "format": "regex"
         },
         "sep": {
             "title": "Sep",
@@ -200,6 +200,11 @@
         "encoding": {
             "title": "Encoding"
         },
+        "encoding_errors": {
+            "title": "Encoding Errors",
+            "default": "strict",
+            "type": "string"
+        },
         "dialect": {
             "title": "Dialect",
             "type": "string"
@@ -212,11 +217,6 @@
         },
         "on_bad_lines": {
             "title": "On Bad Lines"
-        },
-        "encoding_errors": {
-            "title": "Encoding Errors",
-            "default": "strict",
-            "type": "string"
         },
         "delim_whitespace": {
             "title": "Delim Whitespace",
@@ -232,11 +232,15 @@
         },
         "float_precision": {
             "title": "Float Precision"
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
         }
     },
     "required": [
         "name",
-        "filepath_or_buffer"
+        "batching_regex"
     ],
     "additionalProperties": false,
     "definitions": {

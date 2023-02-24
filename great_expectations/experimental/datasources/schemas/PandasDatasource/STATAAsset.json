@@ -1,6 +1,6 @@
 {
-    "title": "PandasPickleAsset",
-    "description": "Load pickled pandas object (or any object) from file.\n\n.. warning::\n\n   Loading pickled data received from untrusted sources can be\n   unsafe. See `here <https://docs.python.org/3/library/pickle.html>`__.",
+    "title": "STATAAsset",
+    "description": "Read Stata file into DataFrame.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pandas_pickle",
+            "default": "stata",
             "enum": [
-                "pandas_pickle"
+                "stata"
             ],
             "type": "string"
         },
@@ -27,11 +27,65 @@
             "format": "file-path",
             "type": "string"
         },
+        "convert_dates": {
+            "title": "Convert Dates",
+            "default": true,
+            "type": "boolean"
+        },
+        "convert_categoricals": {
+            "title": "Convert Categoricals",
+            "default": true,
+            "type": "boolean"
+        },
+        "index_col": {
+            "title": "Index Col",
+            "type": "string"
+        },
+        "convert_missing": {
+            "title": "Convert Missing",
+            "default": false,
+            "type": "boolean"
+        },
+        "preserve_dtypes": {
+            "title": "Preserve Dtypes",
+            "default": true,
+            "type": "boolean"
+        },
+        "columns": {
+            "title": "Columns",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "order_categoricals": {
+            "title": "Order Categoricals",
+            "default": true,
+            "type": "boolean"
+        },
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
+        },
+        "iterator": {
+            "title": "Iterator",
+            "default": false,
+            "type": "boolean"
+        },
         "compression": {
             "title": "Compression",
             "default": "infer",
             "anyOf": [
                 {
+                    "enum": [
+                        "infer",
+                        "gzip",
+                        "bz2",
+                        "zip",
+                        "xz",
+                        "zstd",
+                        "tar"
+                    ],
                     "type": "string"
                 },
                 {
