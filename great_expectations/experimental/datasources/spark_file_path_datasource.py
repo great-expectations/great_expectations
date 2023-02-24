@@ -22,7 +22,7 @@ class CSVAsset(_FilePathDataAsset):
     type: Literal["csv"] = "csv"
 
     def _get_reader_method(self) -> str:
-        return f"{self.type[0:-6]}"
+        return self.type
 
     def _get_reader_options_include(self) -> set[str] | None:
         return {"header", "inferSchema"}
