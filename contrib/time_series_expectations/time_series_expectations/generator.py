@@ -83,7 +83,7 @@ def generate_component_time_series(
 
 
 def generate_daily_time_series(
-    size=365*3,
+    size=365 * 3,
     trend_params=None,
     weekday_dummy_params=None,
     annual_seasonality_params=None,
@@ -152,9 +152,7 @@ def generate_daily_time_series(
 
 
 def generate_daily_time_series_df(
-    size:int = 365*3,
-    start_date:str = "2018-01-01",
-    **kwargs
+    size: int = 365 * 3, start_date: str = "2018-01-01", **kwargs
 ) -> pd.DataFrame:
     """Generate a time series as a pandas dataframe."""
 
