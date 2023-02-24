@@ -22,7 +22,7 @@ class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
 
     If you're referring to a new metric, you'll need to implement it. For more information, please see the documentation for [How to create a custom Column Aggregate Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/#6-implement-your-metric-and-connect-it-to-your-expectation).
 
-    In addition to the `metric_dependency, you should implement examples, which are used to generate the documentation and gallery entry for Expectations.
+    In addition to the `metric_dependency`, you should implement examples, which are used to generate the documentation and gallery entry for Expectations.
 
     Please see expect_column_max_to_match_prophet_date_model for an example of how to implement this kind of Expectation.
 
