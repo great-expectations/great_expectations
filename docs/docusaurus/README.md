@@ -72,14 +72,20 @@ sitemap.xml is not in the repo since it is built and uploaded by a netlify plugi
 
 To add a new version, follow these steps:
 
-1. Check out the version from the tag, e.g. `git checkout 0.15.50`
-2. Run `yarn install`
-3. Run `yarn build`
-4. Create the version e.g. `yarn docusaurus docs:version 0.15.50`
-5. Pull down the version file (see `docs/build_docs` for the file, currently https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip)
-6. Unzip and add your newly created versioned docs via the following:
-7. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
-8. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
-9. Add your version number to `versions.json` in the unzipped version file.
-10. Zip up `versioned_docs`, `versioned_sidebars` and `versions.json` and upload to the s3 bucket (see `docs/build_docs` for the bucket name)
-11. Once the docs are built again, this zip file will be used for the versions.
+(Note: yarn commands should be run from the repo root prior to PR 7227, and from docs/docusaurus/ afterward)
+
+1. It may help to start with a fresh virtualenv and clone of gx.
+2. Check out the version from the tag, e.g. `git checkout 0.15.50`
+3. Make sure dev dependencies are installed `pip install -c constraints-dev.txt -e ".[test]"`
+4. Install API docs dependencies `pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt`
+5. Build API docs `cd docs/sphinx_api_docs_source; invoke docs`
+6. Run `yarn install`
+7. Run `yarn build`
+8. Create the version e.g. `yarn docusaurus docs:version 0.15.50`
+9. Pull down the version file (see `docs/build_docs` for the file, currently https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip)
+10. Unzip and add your newly created versioned docs via the following:
+11. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
+12. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
+13. Add your version number to `versions.json` in the unzipped version file.
+14. Zip up `versioned_docs`, `versioned_sidebars` and `versions.json` and upload to the s3 bucket (see `docs/build_docs` for the bucket name)
+15. Once the docs are built again, this zip file will be used for the versions.
