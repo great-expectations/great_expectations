@@ -82,7 +82,8 @@ module.exports = {
           type: 'category',
           label: 'Filesystem Datasources',
           items: [
-            'guides/connecting_to_your_data/connect_to_data_overview'
+            'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas',
+            'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark'
           ]
         },
         {

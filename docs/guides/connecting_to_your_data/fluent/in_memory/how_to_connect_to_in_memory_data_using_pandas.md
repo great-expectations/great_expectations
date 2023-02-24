@@ -1,8 +1,8 @@
 ---
-title: How to connect to one or more files using Spark
+title: How to connect to one or more files using Pandas
 tag: [how-to, connect to data]
 description: A brief how-to guide covering ...
-keywords: [Great Expectations, Spark, Filesystem]
+keywords: [Great Expectations, Pandas, Filesystem]
 ---
 
 <!-- Import statements start here. -->
@@ -10,7 +10,7 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 
 ## Introduction
 
-In this guide we will demonstrate how to use Spark to connect to data stored in a filesystem.  In our examples, we will specifically be connecting to `.csv` files.  However, Great Expectations supports most types of files that Spark has read methods for.  There will be instructions for connecting to different types of files in the [Additional information](#additional-information) portion of this guide.
+In this guide we will demonstrate how to use Pandas to connect to data stored in a filesystem.  In our examples, we will specifically be connecting to `.csv` files.  However, Great Expectations supports most types of files that Pandas has read methods for.  There will be instructions for connecting to different types of files in the [Additional information](#additional-information) portion of this guide.
 
 ## Prerequisites
 
@@ -37,17 +37,32 @@ context = gx.get_context
 
 ### 3. Create a Datasource
 
-```python
-path_to_folder_containing_csv_files="https://raw.githubusercontent.com/great_expectations/"
-datasource_name = "MyNewDatasource"
-datasource = context.datasources.add_spark_filesystem(name=datasource_name, base_path=path_to_folder_containing_csv_files)
+:::note Example Data
+
+For this example, we are using a Pandas Dataframe as our source data.
+
+The Pandas Dataframe we are using in this step's examples is defined with:
+
+```python title="Python code"
+df = pd.DataFrame(
+  {
+    "a": [1, 2, 3],
+    "b": [4, 5, 6]
+  }
+)
+```
+
+:::
+
+```python title="Python code"
+datasource = context.datasources.pandas_default.read_dataframe(dataframe=df)
 ```
 
 ### 4. Add a Data Asset to the Datasource
 
 ```python
 csv_file_name = "taxi_data.csv"
-data_asset = datasource.add_csv_asset(asset_name="MyTaxiDataAsset", file_or_buffer_path=path_to_a_csv_file, regex=csv_file_name)
+data_asset = datasource.add_csv_asset(asset_name="MyTaxiDataAsset", regex=csv_file_name)
 ```
 
 Your Data Asset will connect to all files that match the regex that you provide.  Each matched file will become a Batch inside your Data Asset.
@@ -59,19 +74,19 @@ Let's say that you have a filesystem Datasource pointing to a base folder that c
 - "taxi_data_2020.csv"
 - "taxi_data.2021.csv"
 
-If you define a Data Asset using the full file name with no regex groups, such as "taxi_data_2019.csv" your Data Asset will contain only one Batch, which will correspond to that file.
+If you define a Data Asset using the full file name with no regex groups, such as `"taxi_data_2019.csv"` your Data Asset will contain only one Batch, which will correspond to that file.
 
-However, if you define a partial file name with a regex group, such as "taxi_data_{year}.csv" your Data Asset will contain 3 Batches, one corresponding to each matched file.
+However, if you define a partial file name with a regex group, such as `"taxi_data_{?<year>\d{{4}}}.csv"` your Data Asset will contain 3 Batches, one corresponding to each matched file.
 
-:::tip Using Spark to connect to different file types
+:::tip Using Pandas to connect to different file types
 
-In this example, we are connecting to a `.csv` file.  However, Great Expectations supports connecting to most types of files that Spark has `read_*` methods for.  
+In this example, we are connecting to a `.csv` file.  However, Great Expectations supports connecting to most types of files that Pandas has `read_*` methods for.  
 
-Because you will be using Spark to connect to these files, the specific `read_*` methods that will be available to you will be determined by your currently installed version of Spark.  
+Because you will be using Pandas to connect to these files, the specific `read_*` methods that will be available to you will be determined by your currently installed version of Pandas.  
 
-For more information on which Spark `read_*` methods are available to you, please reference [the official Spark Input/Output documentation](https://spark.pydata.org/docs/reference/io.html) for the version of Spark that you have installed.
+For more information on which Pandas `read_*` methods are available to you, please reference [the official Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html) for the version of Pandas that you have installed.
 
-In the GX Python API, `read_*` methods will require the same parameters as the corresponding Spark `read_*` method, with one caveat: In Great Expectations, you will also be required to provide a value for an `asset_name` parameter.
+In the GX Python API, `read_*` methods will require the same parameters as the corresponding Pandas `read_*` method, with one caveat: In Great Expectations, you will also be required to provide a value for an `asset_name` parameter.
 
 :::
 
@@ -105,7 +120,7 @@ For more information on the GX Python objects and APIs used in this guide, pleas
 
 ### External APIs
 
-For more information on Spark `read_*` methods, please reference [the official Spark Input/Output documentation](https://spark.pydata.org/docs/reference/io.html).
+For more information on Pandas `read_*` methods, please reference [the official Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html).
 
 <!-- TODO: Enable this and update links after the conceptual guides are revised
 ### Related reading
