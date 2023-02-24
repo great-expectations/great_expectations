@@ -1,20 +1,18 @@
 from __future__ import annotations
 
 import json
-import sys
 import pathlib
-from typing import Any, Type, Generator
-
+import sys
+from typing import Any, Generator, Type
 
 import pandas
-import pydantic
 import pytest
 
 from great_expectations.experimental.datasources import (
     _PANDAS_SCHEMA_VERSION,  # this is the version we run in the standard test pipeline. Update as needed
     _SCHEMAS_DIR,
-    Datasource,
     DataAsset,
+    Datasource,
 )
 from great_expectations.experimental.datasources.sources import (
     _iter_all_registered_types,
