@@ -290,12 +290,9 @@ class TestDynamicPandasAssets:
         assert pandas_datasource.name == "default_pandas_datasource"
         assert len(pandas_datasource.assets) == 0
 
-        # TODO: Update the following 3 lines after registry namespace change to:
-        #       - pandas_csv_asset_X -> csv_asset_X
-        #       - read_pandas_csv -> read_csv
-        expected_csv_data_asset_name_1 = "pandas_csv_asset_1"
-        expected_csv_data_asset_name_2 = "pandas_csv_asset_2"
-        csv_data_asset_1 = pandas_datasource.read_pandas_csv(  # type: ignore[attr-defined]
+        expected_csv_data_asset_name_1 = "csv_asset_1"
+        expected_csv_data_asset_name_2 = "csv_asset_2"
+        csv_data_asset_1 = pandas_datasource.read_csv(  # type: ignore[attr-defined]
             filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-04.csv",
         )
         assert isinstance(csv_data_asset_1, _PandasDataAsset)
@@ -308,7 +305,7 @@ class TestDynamicPandasAssets:
         assert len(pandas_datasource.assets) == 1
         assert pandas_datasource.assets[expected_csv_data_asset_name_1]
 
-        csv_data_asset_2 = pandas_datasource.read_pandas_csv(  # type: ignore[attr-defined]
+        csv_data_asset_2 = pandas_datasource.read_csv(  # type: ignore[attr-defined]
             filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-03.csv"
         )
         assert csv_data_asset_2.name == expected_csv_data_asset_name_2
