@@ -92,7 +92,6 @@ assert (
 )
 assert expectation_result["expectation_config"]["kwargs"]["column"] == "trip_distance"
 assert expectation_result["expectation_config"]["kwargs"]["auto"] is True
-breakpoint()
 assert (
     expectation_result["expectation_config"]["kwargs"]["min_value"]
     == 2.8342089999999995
