@@ -11,7 +11,7 @@ from time_series_expectations.generator import generate_daily_time_series_df
 plt.rcParams["figure.figsize"] = (20, 3)
 
 
-def def_generate_time_series_data_and_plot(
+def generate_time_series_data_and_plot(
     grain,
     size,
     intercept,
@@ -58,7 +58,7 @@ def def_generate_time_series_data_and_plot(
 
 np.random.seed(7)
 
-def_generate_time_series_data_and_plot(
+generate_time_series_data_and_plot(
     grain="daily",
     size=180,
     intercept=100,
@@ -67,7 +67,7 @@ def_generate_time_series_data_and_plot(
     outlier_alpha=1000,
 )
 
-def_generate_time_series_data_and_plot(
+generate_time_series_data_and_plot(
     grain="daily",
     size=180,
     intercept=100,
@@ -76,7 +76,7 @@ def_generate_time_series_data_and_plot(
     outlier_alpha=1000,
 )
 
-def_generate_time_series_data_and_plot(
+generate_time_series_data_and_plot(
     grain="daily",
     size=180,
     intercept=100,
@@ -87,7 +87,7 @@ def_generate_time_series_data_and_plot(
 
 np.random.seed(7)
 
-def_generate_time_series_data_and_plot(
+generate_time_series_data_and_plot(
     grain="daily",
     size=180,
     intercept=100,
