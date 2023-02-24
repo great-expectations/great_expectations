@@ -1,6 +1,6 @@
 {
-    "title": "PandasXMLAsset",
-    "description": "Read XML document into a ``DataFrame`` object.\n\n.. versionadded:: 1.3.0",
+    "title": "STATAAsset",
+    "description": "Read Stata file into DataFrame.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pandas_xml",
+            "default": "stata",
             "enum": [
-                "pandas_xml"
+                "stata"
             ],
             "type": "string"
         },
@@ -22,51 +22,55 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "path_or_buffer": {
-            "title": "Path Or Buffer",
-            "format": "file-path",
+        "batching_regex": {
+            "title": "Batching Regex",
+            "type": "string",
+            "format": "regex"
+        },
+        "convert_dates": {
+            "title": "Convert Dates",
+            "default": true,
+            "type": "boolean"
+        },
+        "convert_categoricals": {
+            "title": "Convert Categoricals",
+            "default": true,
+            "type": "boolean"
+        },
+        "index_col": {
+            "title": "Index Col",
             "type": "string"
         },
-        "xpath": {
-            "title": "Xpath",
-            "default": "./*",
-            "type": "string"
-        },
-        "namespaces": {
-            "title": "Namespaces",
-            "type": "object"
-        },
-        "elems_only": {
-            "title": "Elems Only",
+        "convert_missing": {
+            "title": "Convert Missing",
             "default": false,
             "type": "boolean"
         },
-        "attrs_only": {
-            "title": "Attrs Only",
-            "default": false,
+        "preserve_dtypes": {
+            "title": "Preserve Dtypes",
+            "default": true,
             "type": "boolean"
         },
-        "names": {
-            "title": "Names",
+        "columns": {
+            "title": "Columns",
             "type": "array",
             "items": {
                 "type": "string"
             }
         },
-        "encoding": {
-            "title": "Encoding",
-            "default": "utf-8",
-            "type": "string"
+        "order_categoricals": {
+            "title": "Order Categoricals",
+            "default": true,
+            "type": "boolean"
         },
-        "parser": {
-            "title": "Parser",
-            "default": "lxml",
-            "type": "string"
+        "chunksize": {
+            "title": "Chunksize",
+            "type": "integer"
         },
-        "stylesheet": {
-            "title": "Stylesheet",
-            "format": "file-path",
-            "type": "string"
+        "iterator": {
+            "title": "Iterator",
+            "default": false,
+            "type": "boolean"
         },
         "compression": {
             "title": "Compression",
@@ -96,7 +100,7 @@
     },
     "required": [
         "name",
-        "path_or_buffer"
+        "batching_regex"
     ],
     "additionalProperties": false,
     "definitions": {

@@ -1,5 +1,5 @@
 {
-    "title": "PandasCSVAsset",
+    "title": "CSVAsset",
     "description": "Read a comma-separated values (csv) file into DataFrame.\n\nAlso supports optionally iterating or breaking of the file\ninto chunks.\n\nAdditional help can be found in the online docs for\n`IO Tools <https://pandas.pydata.org/pandas-docs/stable/user_guide/io.html>`_.",
     "type": "object",
     "properties": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pandas_csv",
+            "default": "csv",
             "enum": [
-                "pandas_csv"
+                "csv"
             ],
             "type": "string"
         },
