@@ -33,7 +33,6 @@ logger = logging.getLogger(__name__)
 class PandasFilesystemDatasource(_PandasFilePathDatasource):
     # instance attributes
     type: Literal["pandas_filesystem"] = "pandas_filesystem"
-    name: str
 
     # Filesystem specific attributes
     base_directory: pathlib.Path

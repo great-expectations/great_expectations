@@ -23,7 +23,6 @@ from typing import (
     TypeVar,
     Union,
 )
-from uuid import UUID
 
 from marshmallow import (
     INCLUDE,
@@ -2806,13 +2805,13 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
-        ge_cloud_id: Optional[Union[UUID, str]] = None,
+        ge_cloud_id: Optional[str] = None,
         # the following four args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[Union[UUID, str]] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> None:
         self._name = name
         self._config_version = config_version
@@ -2872,19 +2871,19 @@ class CheckpointConfig(BaseYamlConfig):
         self._batches = value  # type: ignore[has-type]
 
     @property
-    def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
+    def ge_cloud_id(self) -> Optional[str]:
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
-    def ge_cloud_id(self, value: Union[UUID, str]) -> None:
+    def ge_cloud_id(self, value: str) -> None:
         self._ge_cloud_id = value
 
     @property
-    def expectation_suite_ge_cloud_id(self) -> Optional[Union[UUID, str]]:
+    def expectation_suite_ge_cloud_id(self) -> Optional[str]:
         return self._expectation_suite_ge_cloud_id
 
     @expectation_suite_ge_cloud_id.setter
-    def expectation_suite_ge_cloud_id(self, value: Union[UUID, str]) -> None:
+    def expectation_suite_ge_cloud_id(self, value: str) -> None:
         self._expectation_suite_ge_cloud_id = value
 
     @property

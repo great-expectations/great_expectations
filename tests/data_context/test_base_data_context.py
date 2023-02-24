@@ -330,7 +330,7 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     suite_on_context = context.get_expectation_suite(
         ge_cloud_id=expectation_suite_ge_cloud_id
     )
-    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert expectation_suite_ge_cloud_id == suite_on_context.ge_cloud_id
 
     validator.save_expectation_suite()
     assert len(validator.expectation_suite.expectations) == 5
@@ -340,5 +340,5 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     suite_on_context = context.get_expectation_suite(
         ge_cloud_id=expectation_suite_ge_cloud_id
     )
-    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert expectation_suite_ge_cloud_id == suite_on_context.ge_cloud_id
     assert len(suite_on_context.expectations) == 5

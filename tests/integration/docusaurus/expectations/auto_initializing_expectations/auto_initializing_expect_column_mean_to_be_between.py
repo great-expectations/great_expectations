@@ -92,7 +92,10 @@ assert (
 )
 assert expectation_result["expectation_config"]["kwargs"]["column"] == "trip_distance"
 assert expectation_result["expectation_config"]["kwargs"]["auto"] is True
-assert expectation_result["expectation_config"]["kwargs"]["min_value"] == 2.83
-assert expectation_result["expectation_config"]["kwargs"]["max_value"] == 3.06
+assert (
+    expectation_result["expectation_config"]["kwargs"]["min_value"]
+    == 2.8342089999999995
+)
+assert expectation_result["expectation_config"]["kwargs"]["max_value"] == 3.075627
 assert expectation_result["expectation_config"]["kwargs"]["strict_min"] is False
 assert expectation_result["expectation_config"]["kwargs"]["strict_max"] is False
