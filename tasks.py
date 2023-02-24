@@ -10,13 +10,12 @@ To show task help page `invoke <NAME> --help`
 """
 from __future__ import annotations
 
-import io
 import json
 import os
 import pathlib
 import shutil
 import sys
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING
 
 import invoke
 from typing_extensions import Final
@@ -33,9 +32,6 @@ except ModuleNotFoundError:
 if TYPE_CHECKING:
     from invoke.context import Context
 
-    from great_expectations.experimental.datasources.experimental_base_model import (
-        ExperimentalBaseModel,
-    )
 
 GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
 
@@ -471,19 +467,12 @@ def docker(
 @invoke.task(
     aliases=("schema", "schemas"),
     help={
-        "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class.",
         "sync": "Update the json schemas at `great_expectations/experimental/datasources/schemas`",
         "indent": "Indent size for nested json objects. Default: 4",
-        "save_path": (
-            "Filepath to write the schema to. Will overwrite or create the file if it does not exist."
-            " If not provided the schema will be sent to the console."
-        ),
     },
 )
 def type_schema(
     ctx: Context,
-    type_: str | None = None,
-    save_path: str | pathlib.Path | None = None,
     sync: bool = False,
     indent: int = 4,
 ):
@@ -498,72 +487,65 @@ def type_schema(
 
     from great_expectations.experimental.datasources import (
         _PANDAS_SCHEMA_VERSION,
+        Datasource,
         PandasDatasource,
         PandasFilesystemDatasource,
         _PandasDatasource,
     )
-    from great_expectations.experimental.datasources.sources import _SourceFactories
+    from great_expectations.experimental.datasources.sources import (
+        _iter_all_registered_types,
+    )
 
-    buffer = io.StringIO()
+    if not sync:
+        print("--------------------\nRegistered ZEP types\n--------------------\n")
 
-    if not type_:
-        buffer.write(
-            "--------------------\nRegistered ZEP types\n--------------------\n"
-        )
-        buffer.write("\t" + "\n\t".join(_SourceFactories.type_lookup.type_names()))
-    else:
-        try:
-            model: Type[ExperimentalBaseModel] = _SourceFactories.type_lookup[type_]
-            buffer.write(model.schema_json(indent=indent))
-        except KeyError:
-            raise invoke.Exit(
-                f"No '{type_}' type found. Try 'invoke schema --list' to see available types",
-                code=1,
+    schema_dir = GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
+    datasource_dir: pathlib.Path = schema_dir
+    for name, model in _iter_all_registered_types():
+
+        if issubclass(model, Datasource):
+            datasource_dir = schema_dir.joinpath(model.__name__)
+            datasource_dir.mkdir(exist_ok=True)
+            schema_path = schema_dir.joinpath(f"{model.__name__}.json")
+        else:
+            schema_path = datasource_dir.joinpath(f"{model.__name__}.json")
+            print("  ", end="")
+
+        if not sync:
+            print(f"{name} - {model.__name__}")
+            continue
+
+        if (
+            issubclass(
+                model,
+                (
+                    _PandasDatasource,
+                    *PandasDatasource.asset_types,
+                    *PandasFilesystemDatasource.asset_types,
+                ),
             )
-    if sync:
-        schema_dir = GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
-        for name in _SourceFactories.type_lookup.type_names():
-            model = _SourceFactories.type_lookup[name]
+            and _PANDAS_SCHEMA_VERSION != pandas.__version__
+        ):
+            print(
+                f"🙈  {name} - was generated with pandas"
+                f" {_PANDAS_SCHEMA_VERSION} but you have {pandas.__version__}; skipping"
+            )
+            continue
 
-            if (
-                issubclass(
-                    model,
-                    (
-                        _PandasDatasource,
-                        *PandasDatasource.asset_types,
-                        *PandasFilesystemDatasource.asset_types,
-                    ),
-                )
-                and _PANDAS_SCHEMA_VERSION != pandas.__version__
-            ):
-                print(
-                    f"🙈  {name} - was generated with pandas"
-                    f" {_PANDAS_SCHEMA_VERSION} but you have {pandas.__version__}; skipping"
-                )
-                continue
+        try:
+            schema_path = schema_dir.joinpath(f"{model.__name__}.json")
+            json_str: str = model.schema_json(indent=indent) + "\n"
 
-            try:
-                schema_path = schema_dir.joinpath(f"{model.__name__}.json")
-                json_str: str = model.schema_json(indent=indent) + "\n"
+            if schema_path.exists():
+                if json_str == schema_path.read_text():
+                    print(f"✅  {name} - {schema_path.name} unchanged")
+                    continue
 
-                if schema_path.exists():
-                    if json_str == schema_path.read_text():
-                        print(f"✅  {name} - {schema_path.name} unchanged")
-                        continue
-
-                schema_path.write_text(json_str)
-                print(f"🔃  {name} - {schema_path.name} schema updated")
-            except TypeError as err:
-                print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
-        raise invoke.Exit(code=0)
-
-    text: str = buffer.getvalue()
-    if save_path:
-        save_path = pathlib.Path(save_path).resolve()
-        save_path.write_text(text)
-        print(f"'{type}' schema written to {save_path}")
-    else:
-        print(text)
+            schema_path.write_text(json_str)
+            print(f"🔃  {name} - {schema_path.name} schema updated")
+        except TypeError as err:
+            print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
+    raise invoke.Exit(code=0)
 
 
 def _exit_with_error_if_not_in_repo_root(task_name: str):
