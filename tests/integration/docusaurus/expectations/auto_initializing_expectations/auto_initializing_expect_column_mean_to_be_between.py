@@ -13,7 +13,6 @@ the snippets that are specified for use in documentation are maintained.  These 
 """
 
 from ruamel import yaml
-from pytest import approx
 
 import great_expectations as ge
 from great_expectations.core.batch import BatchRequest
@@ -93,11 +92,11 @@ assert (
 )
 assert expectation_result["expectation_config"]["kwargs"]["column"] == "trip_distance"
 assert expectation_result["expectation_config"]["kwargs"]["auto"] is True
-assert 2.83 == approx(
-    expectation_result["expectation_config"]["kwargs"]["min_value"], 0.01
+breakpoint()
+assert (
+    expectation_result["expectation_config"]["kwargs"]["min_value"]
+    == 2.8342089999999995
 )
-assert 3.06 == approx(
-    expectation_result["expectation_config"]["kwargs"]["max_value"], 0.01
-)
+assert expectation_result["expectation_config"]["kwargs"]["max_value"] == 3.075627
 assert expectation_result["expectation_config"]["kwargs"]["strict_min"] is False
 assert expectation_result["expectation_config"]["kwargs"]["strict_max"] is False
