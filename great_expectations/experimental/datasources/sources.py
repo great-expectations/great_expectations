@@ -288,7 +288,7 @@ class _SourceFactories:
         # there is no situation in which this isn't true
         # return type information must be missing for factory method add_pandas
         assert isinstance(pandas_datasource, PandasDatasource)
-        pandas_datasource._data_context = self._data_context
+        pandas_datasource._data_context = self._data_context  # type: ignore[attr-defined]
         return pandas_datasource
 
     @property
