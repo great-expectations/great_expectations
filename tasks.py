@@ -469,19 +469,20 @@ def docker(
     help={
         "sync": "Update the json schemas at `great_expectations/experimental/datasources/schemas`",
         "indent": "Indent size for nested json objects. Default: 4",
+        "clean": "Delete all schema files and sub directories."
+        " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
     },
 )
 def type_schema(
     ctx: Context,
     sync: bool = False,
+    clean: bool = False,
     indent: int = 4,
 ):
     """
-    Show the jsonschema for a given ZEP `type`
+    Show all the json schemas for Fluent Datasources & DataAssets
 
-    Example: invoke schema sqlite
-
-    --list to show all available types
+    Generate json schema for each Datasource & DataAsset with `--sync`.
     """
     import pandas
 
@@ -493,15 +494,20 @@ def type_schema(
         _iter_all_registered_types,
     )
 
-    if not sync:
-        print("--------------------\nRegistered ZEP types\n--------------------\n")
-
     schema_dir_root: Final[pathlib.Path] = (
         GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
     )
+    if clean:
+        file_count = len(list(schema_dir_root.glob("**/*.json")))
+        print(f"🗑️ removing schema directory and contents - {file_count} .json files")
+        shutil.rmtree(schema_dir_root)
+
     schema_dir_root.mkdir(exist_ok=True)
 
     datasource_dir: pathlib.Path = schema_dir_root
+
+    if not sync:
+        print("--------------------\nRegistered ZEP types\n--------------------\n")
 
     for name, model in _iter_all_registered_types():
 
