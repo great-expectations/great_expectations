@@ -27,11 +27,6 @@
             "type": "string",
             "format": "regex"
         },
-        "glob_directive": {
-            "title": "Glob Directive",
-            "default": "**/*",
-            "type": "string"
-        },
         "sep": {
             "title": "Sep",
             "default": "NO_DEFAULT"
