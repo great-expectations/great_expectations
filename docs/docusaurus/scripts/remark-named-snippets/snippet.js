@@ -162,7 +162,8 @@ function sanitizeText (text) {
  * An alias `yarn snippet-check` is defined in `package.json` for convenience.
  */
 function main () {
-  const snippets = parseSourceDirectories(['great_expectations', 'tests'])
+  const snippets = parseSourceDirectories(['../../great_expectations', '../../tests'])
+  console.log(snippets.length)
   const targetFiles = process.argv.slice(2)
 
   const out = {}
