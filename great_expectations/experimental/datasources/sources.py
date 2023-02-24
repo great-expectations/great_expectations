@@ -112,16 +112,15 @@ class _SourceFactories:
             )
 
         # rollback type registrations if exception occurs
-        with cls.type_lookup.transaction() as type_lookup:
+        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:
 
-            # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
-            cls._register_assets(ds_type, asset_type_lookup=type_lookup)
+            cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
             cls._register_datasource_and_factory_method(
                 ds_type,
                 factory_fn=factory_fn,
                 ds_type_name=ds_type_name,
-                datasource_type_lookup=type_lookup,
+                datasource_type_lookup=ds_type_lookup,
             )
 
     @classmethod
@@ -174,7 +173,7 @@ class _SourceFactories:
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
                 logger.debug(
-                    f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
+                    f"2b. Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"
                 )
                 asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
@@ -310,3 +309,19 @@ class _SourceFactories:
     def __dir__(self) -> List[str]:
         """Preserves autocompletion for dynamic attributes."""
         return [*self.factories, *super().__dir__()]
+
+
+def _iter_all_registered_types() -> Generator[
+    tuple[str, Type[Datasource] | Type[DataAsset]], None, None
+]:
+    """
+    Iterate through all registered Datasource and DataAsset types.
+    Returns tuples of the registered type name and the actual type/class.
+    """
+    for ds_name in _SourceFactories.type_lookup.type_names():
+        ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_name]
+        yield ds_name, ds_type
+
+        for asset_name in ds_type._type_lookup.type_names():
+            asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
+            yield asset_name, asset_type
