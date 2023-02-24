@@ -72,7 +72,15 @@ sitemap.xml is not in the repo since it is built and uploaded by a netlify plugi
 
 To add a new version, follow these steps:
 
-1. Check out the version from the tag, e.g. `git checkout 0.15.50`
+1. It may help to start with a fresh virtualenv and clone of gx.
+2. Check out the version from the tag, e.g. `git checkout 0.15.50`
+3. Make sure dev dependencies are installed `pip install -c constraints-dev.txt -e ".[test]"`
+4. Install API docs dependencies `pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt`
+
+
+build api docs
+
+
 2. Run `yarn install`
 3. Run `yarn build`
 4. Create the version e.g. `yarn docusaurus docs:version 0.15.50`
