@@ -1,5 +1,5 @@
 {
-    "title": "PandasFeatherAsset",
+    "title": "FeatherAsset",
     "description": "Load a feather-format object from the file path.",
     "type": "object",
     "properties": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pandas_feather",
+            "default": "feather",
             "enum": [
-                "pandas_feather"
+                "feather"
             ],
             "type": "string"
         },

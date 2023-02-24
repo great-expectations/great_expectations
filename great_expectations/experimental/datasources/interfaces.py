@@ -33,7 +33,6 @@ from great_expectations.experimental.datasources.experimental_base_model import 
     ExperimentalBaseModel,
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
-from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
@@ -49,6 +48,7 @@ if TYPE_CHECKING:
     from great_expectations.experimental.datasources.data_asset.data_connector import (
         DataConnector,
     )
+    from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 try:
     import pyspark
@@ -349,6 +349,9 @@ class Datasource(
         "delimiter",  # s3 argument
         "max_keys",  # s3 argument
     }
+    _type_lookup: ClassVar[  # This attribute is set in `MetaDatasource.__new__`
+        TypeLookup
+    ]
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
     execution_engine_override: ClassVar[Optional[Type[_ExecutionEngineT]]] = None  # type: ignore[misc]  # ClassVar cannot contain type variables
@@ -375,7 +378,7 @@ class Datasource(
         """
         logger.info(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
         asset_type_name: str = data_asset.type
-        asset_type: Type[_DataAssetT] = _SourceFactories.type_lookup[asset_type_name]
+        asset_type: Type[_DataAssetT] = cls._type_lookup[asset_type_name]
 
         if asset_type is type(data_asset):
             # asset is already the intended type

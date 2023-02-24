@@ -1,6 +1,6 @@
 {
-    "title": "PandasSTATAAsset",
-    "description": "Read Stata file into DataFrame.",
+    "title": "JSONAsset",
+    "description": "Convert a JSON string to pandas object.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pandas_stata",
+            "default": "json",
             "enum": [
-                "pandas_stata"
+                "json"
             ],
             "type": "string"
         },
@@ -22,55 +22,63 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "filepath_or_buffer": {
-            "title": "Filepath Or Buffer",
-            "format": "file-path",
-            "type": "string"
+        "batching_regex": {
+            "title": "Batching Regex",
+            "type": "string",
+            "format": "regex"
+        },
+        "orient": {
+            "title": "Orient"
+        },
+        "typ": {
+            "title": "Typ",
+            "default": "frame"
+        },
+        "dtype": {
+            "title": "Dtype",
+            "type": "object"
+        },
+        "convert_axes": {
+            "title": "Convert Axes"
         },
         "convert_dates": {
             "title": "Convert Dates",
+            "default": true
+        },
+        "keep_default_dates": {
+            "title": "Keep Default Dates",
             "default": true,
             "type": "boolean"
         },
-        "convert_categoricals": {
-            "title": "Convert Categoricals",
-            "default": true,
-            "type": "boolean"
-        },
-        "index_col": {
-            "title": "Index Col",
-            "type": "string"
-        },
-        "convert_missing": {
-            "title": "Convert Missing",
+        "numpy": {
+            "title": "Numpy",
             "default": false,
             "type": "boolean"
         },
-        "preserve_dtypes": {
-            "title": "Preserve Dtypes",
-            "default": true,
+        "precise_float": {
+            "title": "Precise Float",
+            "default": false,
             "type": "boolean"
         },
-        "columns": {
-            "title": "Columns",
-            "type": "array",
-            "items": {
-                "type": "string"
-            }
+        "date_unit": {
+            "title": "Date Unit"
         },
-        "order_categoricals": {
-            "title": "Order Categoricals",
-            "default": true,
+        "encoding": {
+            "title": "Encoding"
+        },
+        "encoding_errors": {
+            "title": "Encoding Errors",
+            "default": "strict",
+            "type": "string"
+        },
+        "lines": {
+            "title": "Lines",
+            "default": false,
             "type": "boolean"
         },
         "chunksize": {
             "title": "Chunksize",
             "type": "integer"
-        },
-        "iterator": {
-            "title": "Iterator",
-            "default": false,
-            "type": "boolean"
         },
         "compression": {
             "title": "Compression",
@@ -93,6 +101,10 @@
                 }
             ]
         },
+        "nrows": {
+            "title": "Nrows",
+            "type": "integer"
+        },
         "storage_options": {
             "title": "Storage Options",
             "type": "object"
@@ -100,7 +112,7 @@
     },
     "required": [
         "name",
-        "filepath_or_buffer"
+        "batching_regex"
     ],
     "additionalProperties": false,
     "definitions": {

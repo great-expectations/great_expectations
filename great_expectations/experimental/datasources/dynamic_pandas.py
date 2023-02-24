@@ -375,7 +375,6 @@ def _generate_pandas_data_asset_models(
     blacklist: Optional[Sequence[str]] = None,
     use_docstring_from_method: bool = False,
     skip_first_param: bool = False,
-    type_prefix: Optional[str] = None,
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(blacklist)
     io_method_sigs = _extract_io_signatures(io_methods)
@@ -391,11 +390,6 @@ def _generate_pandas_data_asset_models(
         model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
             type_name, f"{type_name.capitalize()}Asset"
         )
-
-        # TODO: remove this special case once we have namespace type-lookups
-        if type_prefix:
-            type_name = "_".join((type_prefix, type_name))
-            model_name = type_prefix.capitalize() + model_name
 
         try:
             asset_model = _create_pandas_asset_model(
