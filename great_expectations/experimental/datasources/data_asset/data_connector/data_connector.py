@@ -158,8 +158,7 @@ class DataConnector(ABC):
 
     @staticmethod
     def _batch_definition_matches_batch_request(
-        batch_definition: BatchDefinition,
-        batch_request: BatchRequest,
+        batch_definition: BatchDefinition, batch_request: BatchRequest
     ) -> bool:
         if not (
             batch_request.datasource_name == batch_definition.datasource_name
@@ -170,9 +169,11 @@ class DataConnector(ABC):
         if batch_request.options:
             for key in batch_request.options.keys():
                 if not (
-                    key in batch_definition.batch_identifiers
-                    and batch_definition.batch_identifiers[key]
-                    == batch_request.options[key]
+                    (key in batch_definition.batch_identifiers)
+                    and (
+                        batch_definition.batch_identifiers[key]
+                        == batch_request.options[key]
+                    )
                 ):
                     return False
 
