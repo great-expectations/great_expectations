@@ -25,10 +25,6 @@ fi
 echo -e "${ORANGE}Installing dev dependencies.${NC}"
 (cd ../../; pip install -c constraints-dev.txt -e ".[test]")
 
-echo -e "${ORANGE}pip freeze output =====================================${NC}"
-pip freeze
-echo -e "${ORANGE}pip freeze output =====================================${NC}"
-
 echo -e "${ORANGE}Installing dev dependencies.${NC}"
 (cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
