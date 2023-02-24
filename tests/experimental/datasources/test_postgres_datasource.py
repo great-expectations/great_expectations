@@ -1117,6 +1117,17 @@ def test_splitter_year_and_month_and_day(
             {"quotient": 2},
             id="divisor",
         ),
+        pytest.param(
+            "add_splitter_mod_integer",
+            {"column_name": "passenger_count", "mod": 3},
+            [(1,), (2,)],
+            ["remainder"],
+            2,
+            {"remainder": 2},
+            1,
+            {"remainder": 2},
+            id="mod_integer",
+        ),
     ],
 )
 def test_column_splitter(
