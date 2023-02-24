@@ -23,6 +23,7 @@ from great_expectations.experimental.datasources.sources import (
     DefaultPandasDatasourceError,
     _get_field_details,
 )
+from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -130,10 +131,12 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            t.__name__.lower().split("asset")[0] for t in PandasDatasource.asset_types
+            camel_to_snake(t.__name__).split("_asset")[0]
+            for t in PandasDatasource.asset_types
         }
         print(asset_class_names)
 
+        assert type_name in PandasDatasource._type_lookup
         assert type_name in asset_class_names
 
     @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
