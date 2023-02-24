@@ -334,7 +334,7 @@ def bad_batching_regex_config(
         r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     )
     test_connection_error = TestConnectionError(
-        f"""No file at base_directory path "{csv_path.resolve()}" matched regular expressions pattern "{batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_spark_asset"."""
+        f"""No file at base_directory path "{csv_path.resolve()}" matched regular expressions pattern "{batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_asset"."""
     )
     return batching_regex, test_connection_error
 

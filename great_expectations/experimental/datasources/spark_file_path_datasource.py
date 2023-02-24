@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 class CSVAsset(_FilePathDataAsset):
     # Overridden inherited instance fields
-    type: Literal["csv_spark"] = "csv_spark"
+    type: Literal["csv"] = "csv"
 
     def _get_reader_method(self) -> str:
         return f"{self.type[0:-6]}"
