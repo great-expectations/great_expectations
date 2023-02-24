@@ -172,5 +172,7 @@ data_assistant_result.show_expectations_by_domain_type(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py show_expectations_by_expectation_type">
-data_assistant_result.show_expectations_by_expectation_type()
+data_assistant_result.show_expectations_by_expectation_type(
+    expectation_suite_name=expectation_suite_name
+)
 # </snippet>
