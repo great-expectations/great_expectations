@@ -46,6 +46,9 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
+    from great_expectations.experimental.datasources.data_asset.data_connector import (
+        DataConnector,
+    )
 
 try:
     import pyspark
@@ -155,6 +158,8 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
+    _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
+    _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @property
     def datasource(self) -> _DatasourceT:
@@ -336,7 +341,13 @@ class Datasource(
         "type",
         "execution_engine",
         "assets",
-        "base_directory",
+        "base_directory",  # filesystem argument
+        "glob_directive",  # filesystem argument
+        "data_context_root_directory",  # filesystem argument
+        "bucket",  # s3 argument
+        "prefix",  # s3 argument
+        "delimiter",  # s3 argument
+        "max_keys",  # s3 argument
     }
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
@@ -421,20 +432,33 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
+    def add_asset(
+        self,
+        asset: _DataAssetT,
+        data_connector: Optional[DataConnector] = None,
+        test_connection_error_message: Optional[str] = None,
+    ) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
             asset: The DataAsset to be added to this datasource.
+            data_connector: Optional reference to "DataConnector" object for connecting Datasource and DataAsset to data
+            test_connection_error_message: Optional message for reporting connection test errors informatively
         """
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
+        asset._data_connector = data_connector
+        asset._test_connection_error_message = test_connection_error_message
+
         asset.test_connection()
+
         self.assets[asset.name] = asset
+
         # pydantic needs to know that an asset has been set so that it doesn't get excluded
         # when dumping to dict, json, yaml etc.
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
+
         return asset
 
     @staticmethod
@@ -466,18 +490,18 @@ class Datasource(
         return order_by_sorters
 
     @staticmethod
-    def parse_regex_string(
-        regex: Optional[Union[re.Pattern, str]] = None
+    def parse_batching_regex_string(
+        batching_regex: Optional[Union[re.Pattern, str]] = None
     ) -> re.Pattern:
         pattern: re.Pattern
-        if not regex:
+        if not batching_regex:
             pattern = re.compile(".*")
-        elif isinstance(regex, str):
-            pattern = re.compile(regex)
-        elif isinstance(regex, re.Pattern):
-            pattern = regex
+        elif isinstance(batching_regex, str):
+            pattern = re.compile(batching_regex)
+        elif isinstance(batching_regex, re.Pattern):
+            pattern = batching_regex
         else:
-            raise ValueError('"regex" must be either re.Pattern, str, or None')
+            raise ValueError('"batching_regex" must be either re.Pattern, str, or None')
         return pattern
 
     # Abstract Methods

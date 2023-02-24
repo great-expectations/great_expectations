@@ -7,8 +7,12 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 from typing_extensions import Literal
 
-from great_expectations.experimental.datasources.filesystem_data_asset import (
-    _FilesystemDataAsset,
+from great_expectations.experimental.datasources.data_asset.data_connector import (
+    DataConnector,
+    FilesystemDataConnector,
+)
+from great_expectations.experimental.datasources.file_path_data_asset import (
+    _FilePathDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import (
     BatchSorter,
@@ -28,13 +32,9 @@ class SparkDatasourceError(Exception):
     pass
 
 
-class CSVSparkAsset(_FilesystemDataAsset):
+class CSVSparkAsset(_FilePathDataAsset):
     # Overridden inherited instance fields
     type: Literal["csv_spark"] = "csv_spark"
-
-    # Spark Filesystem specific attributes
-    header: bool = False
-    inferSchema: bool = False
 
     def _get_reader_method(self) -> str:
         return f"{self.type[0:-6]}"
@@ -109,7 +109,7 @@ class SparkFilesystemDatasource(_SparkDatasource):
     def add_csv_asset(
         self,
         name: str,
-        regex: Optional[Union[re.Pattern, str]] = None,
+        batching_regex: Optional[Union[re.Pattern, str]] = None,
         glob_directive: str = "**/*",
         header: bool = False,
         infer_schema: bool = False,
@@ -119,24 +119,38 @@ class SparkFilesystemDatasource(_SparkDatasource):
 
         Args:
             name: The name of the csv asset
-            regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
         """
-        regex_pattern: re.Pattern = self.parse_regex_string(regex=regex)
+        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
+            batching_regex=batching_regex
+        )
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
 
         asset = CSVSparkAsset(
             name=name,
-            regex=regex_pattern,
-            glob_directive=glob_directive,
+            batching_regex=batching_regex_pattern,
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
         )
 
-        return self.add_asset(asset)
+        data_connector: DataConnector = FilesystemDataConnector(
+            datasource_name=self.name,
+            data_asset_name=name,
+            batching_regex=batching_regex_pattern,
+            base_directory=self.base_directory,
+            glob_directive=glob_directive,
+            data_context_root_directory=self.data_context_root_directory,
+        )
+        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{batching_regex_pattern.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
+        return self.add_asset(
+            asset=asset,
+            data_connector=data_connector,
+            test_connection_error_message=test_connection_error_message,
+        )

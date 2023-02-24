@@ -82,30 +82,15 @@
                         "$ref": "#/definitions/BatchSorter"
                     }
                 },
-                "regex": {
-                    "title": "Regex",
+                "batching_regex": {
+                    "title": "Batching Regex",
                     "type": "string",
                     "format": "regex"
-                },
-                "glob_directive": {
-                    "title": "Glob Directive",
-                    "default": "**/*",
-                    "type": "string"
-                },
-                "header": {
-                    "title": "Header",
-                    "default": false,
-                    "type": "boolean"
-                },
-                "inferSchema": {
-                    "title": "Inferschema",
-                    "default": false,
-                    "type": "boolean"
                 }
             },
             "required": [
                 "name",
-                "regex"
+                "batching_regex"
             ]
         }
     }

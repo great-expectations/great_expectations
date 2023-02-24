@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import dataclasses
 import logging
-import pathlib
 import re
 from pprint import pformat as pf
 from typing import (
@@ -21,6 +20,9 @@ from typing import (
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.experimental.datasources.data_asset.data_connector import (
+    FILE_PATH_BATCH_SPEC_KEY,
+)
 from great_expectations.experimental.datasources.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
@@ -49,19 +51,15 @@ logger = logging.getLogger(__name__)
 
 class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
-        "name",
-        "regex",
-        "order_by",
         "type",
+        "name",
+        "order_by",
+        "batching_regex",  # file_path argument
         "kwargs",  # kwargs need to be unpacked and passed separately
     }
 
-    _ALWAYS_INCLUDE_IN_BATCH_REQUEST_OPTIONS_TEMPLATE: ClassVar[Set[str]] = {
-        "path",
-    }
-
     # General file-path DataAsset pertaining attributes.
-    regex: Pattern
+    batching_regex: Pattern
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -72,12 +70,13 @@ class _FilePathDataAsset(DataAsset):
     _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
     _all_group_names: List[str] = pydantic.PrivateAttr()
 
-    _data_connector: DataConnector | None = pydantic.PrivateAttr()
+    _data_connector: DataConnector = pydantic.PrivateAttr()
+    _test_connection_error_message: str = pydantic.PrivateAttr()
 
     class Config:
         """
         Need to allow extra fields for the base type because pydantic will first create
-        an instance of `_FilesystemDataAsset` before we select and create the more specific
+        an instance of `_FilePathDataAsset` before we select and create the more specific
         asset subtype.
         Each specific subtype should `forbid` extra fields.
         """
@@ -88,7 +87,7 @@ class _FilePathDataAsset(DataAsset):
         super().__init__(**data)
 
         self._regex_parser = RegExParser(
-            regex_pattern=self.regex,
+            regex_pattern=self.batching_regex,
             unnamed_regex_group_prefix=self._unnamed_regex_param_prefix,
         )
 
@@ -99,20 +98,17 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
-        self._data_connector = None
 
-    @pydantic.validator("regex", pre=True)
-    def _parse_regex_string(
-        cls, regex: Optional[Union[re.Pattern, str]] = None
+    @pydantic.validator("batching_regex", pre=True)
+    def _parse_batching_regex_string(
+        cls, batching_regex: Optional[Union[re.Pattern, str]] = None
     ) -> re.Pattern:
-        return Datasource.parse_regex_string(regex=regex)
+        return Datasource.parse_batching_regex_string(batching_regex=batching_regex)
 
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        options: set[str] = copy.deepcopy(
-            self._ALWAYS_INCLUDE_IN_BATCH_REQUEST_OPTIONS_TEMPLATE
-        )
+        options: set[str] = {FILE_PATH_BATCH_SPEC_KEY}
         options.update(set(self._all_group_names))
         return {option: None for option in options}
 
@@ -126,7 +122,7 @@ class _FilePathDataAsset(DataAsset):
                     and not isinstance(value, str)
                 ):
                     raise gx_exceptions.InvalidBatchRequestError(
-                        f"All regex matching options must be strings. The value of '{option}' is "
+                        f"All batching_regex matching options must be strings. The value of '{option}' is "
                         f"not a string: {value}"
                     )
 
@@ -138,6 +134,7 @@ class _FilePathDataAsset(DataAsset):
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -175,11 +172,9 @@ class _FilePathDataAsset(DataAsset):
             self.datasource.get_execution_engine()
         )
 
-        data_connector: DataConnector = self._get_data_connector()
-
         batch_definition_list: List[
             BatchDefinition
-        ] = data_connector.get_batch_definition_list(batch_request=batch_request)
+        ] = self._data_connector.get_batch_definition_list(batch_request=batch_request)
 
         batch_list: List[Batch] = []
 
@@ -190,7 +185,7 @@ class _FilePathDataAsset(DataAsset):
         batch_metadata: BatchRequestOptions
         batch: Batch
         for batch_definition in batch_definition_list:
-            batch_spec = data_connector.build_batch_spec(
+            batch_spec = self._data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
             batch_spec_options = {
@@ -208,15 +203,11 @@ class _FilePathDataAsset(DataAsset):
                 batch_spec=batch_spec
             )
 
-            batch_metadata = copy.deepcopy(batch_request.options)
-            # TODO: <Alex>ALEX-FIX_TO_INSURE_BASE_DIRECTORY_TYPE_IS_PATHLIB.PATH-CONSISTENTLY</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX-FIX_TO_INSURE_PROPERTY_NAME_CORRESPONDDS_TO_ITS_MEANING</Alex>
-            batch_metadata["base_directory"] = pathlib.Path(batch_spec["path"])
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            batch_metadata.update(batch_definition.batch_identifiers)
             batch_request.options.update(batch_definition.batch_identifiers)
+
+            batch_metadata = copy.deepcopy(batch_request.options)
+            # TODO: <Alex>ALEX</Alex>
+            # batch_metadata.update(batch_spec)
             # TODO: <Alex>ALEX</Alex>
 
             # Some pydantic annotations are postponed due to circular imports.
@@ -242,31 +233,14 @@ class _FilePathDataAsset(DataAsset):
 
         return batch_list
 
-    def _get_data_connector(self) -> DataConnector:
-        """This private method ensures that exactly one instance of "DataConnector" class is available."""
-        data_connector: DataConnector = (
-            self._data_connector or self._build_data_connector()
-        )
-        return data_connector
-
     def test_connection(self) -> None:
         """Test the connection for the DataAsset.
 
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        data_connector: DataConnector = self._get_data_connector()
-        if not data_connector.test_connection():
-            raise TestConnectionError(self._build_test_connection_error_message())
-
-    def _build_data_connector(self) -> DataConnector:
-        """DataAsset implementations must instantiate appropriate DataConnector class."""
-        raise NotImplementedError
-
-    def _build_test_connection_error_message(self) -> str:
-        raise NotImplementedError(
-            """One needs to explicitly provide "TestConnectionError" instance, containing parametrized error message."""
-        )
+        if not self._data_connector.test_connection():
+            raise TestConnectionError(self._test_connection_error_message)
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(

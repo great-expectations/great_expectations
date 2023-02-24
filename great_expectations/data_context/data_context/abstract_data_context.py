@@ -1761,7 +1761,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
-        return self.checkpoint_store.add_checkpoint(checkpoint)
+        try:
+            return self.checkpoint_store.add_checkpoint(checkpoint)
+        except gx_exceptions.CheckpointError as e:
+            # deprecated-v0.15.50
+            warnings.warn(
+                f"{e.message}; using add_checkpoint to overwrite an existing value is deprecated as of v0.15.50 "
+                "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
+                DeprecationWarning,
+            )
+            return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
 
     @public_api
     @new_method_or_class(version="0.15.48")
@@ -1783,6 +1792,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_checkpoint(
         self,
         name: str = ...,
+        id: str | None = ...,
         config_version: int | float | None = ...,
         template_name: str | None = ...,
         module_name: str | None = ...,
@@ -1795,19 +1805,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = ...,
-        batches: list[dict] | None = ...,
-        # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = ...,
         slack_webhook: str | None = ...,
         notify_on: str | None = ...,
         notify_with: str | list[str] | None = ...,
-        ge_cloud_id: str | None = ...,
-        expectation_suite_ge_cloud_id: str | None = ...,
-        default_validation_id: str | None = ...,
-        id: str | None = ...,
         expectation_suite_id: str | None = ...,
+        default_validation_id: str | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1820,6 +1823,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_checkpoint(
         self,
         name: None = ...,
+        id: None = ...,
         config_version: None = ...,
         template_name: None = ...,
         module_name: None = ...,
@@ -1832,17 +1836,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        validation_operator_name: None = ...,
-        batches: None = ...,
         site_names: None = ...,
         slack_webhook: None = ...,
         notify_on: None = ...,
         notify_with: None = ...,
-        ge_cloud_id: None = ...,
-        expectation_suite_ge_cloud_id: None = ...,
-        default_validation_id: None = ...,
-        id: None = ...,
         expectation_suite_id: None = ...,
+        default_validation_id: None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -3125,15 +3124,32 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted Profiler constructed by the input arguments.
         """
-        return RuleBasedProfiler.add_profiler(
-            data_context=self,
-            profiler_store=self.profiler_store,
-            name=name,
-            config_version=config_version,
-            rules=rules,
-            variables=variables,
-            profiler=profiler,
-        )
+        try:
+            return RuleBasedProfiler.add_profiler(
+                data_context=self,
+                profiler_store=self.profiler_store,
+                name=name,
+                config_version=config_version,
+                rules=rules,
+                variables=variables,
+                profiler=profiler,
+            )
+        except gx_exceptions.ProfilerError as e:
+            # deprecated-v0.15.50
+            warnings.warn(
+                f"{e.message}; using add_profiler to overwrite an existing value is deprecated as of v0.15.50 "
+                "and will be removed in v0.18. Please use add_or_update_profiler instead.",
+                DeprecationWarning,
+            )
+            return RuleBasedProfiler.add_or_update_profiler(
+                data_context=self,
+                profiler_store=self.profiler_store,
+                name=name,
+                config_version=config_version,
+                rules=rules,
+                variables=variables,
+                profiler=profiler,
+            )
 
     @public_api
     @new_argument(

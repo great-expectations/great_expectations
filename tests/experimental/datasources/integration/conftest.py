@@ -59,7 +59,7 @@ def pandas_data(
     pandas_ds = pandas_datasource(context=context)
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
     batch_request = asset.build_batch_request({"year": "2019", "month": "01"})  # type: ignore[attr-defined]
@@ -124,10 +124,10 @@ def spark_data(
     spark_ds = spark_datasource(context=context)
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-        order_by=["year", "month"],
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
+        order_by=["year", "month"],
     )
     batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
     return context, spark_ds, asset, batch_request
@@ -148,7 +148,7 @@ def multibatch_pandas_data(
     )
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
     batch_request = asset.build_batch_request({"year": "2020"})
@@ -188,10 +188,10 @@ def multibatch_spark_data(
     )
     asset = spark_ds.add_csv_asset(
         name="csv_asset",
-        regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
-        order_by=["year", "month"],
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
+        order_by=["year", "month"],
     )
     batch_request = asset.build_batch_request({"year": "2020"})
     return context, spark_ds, asset, batch_request

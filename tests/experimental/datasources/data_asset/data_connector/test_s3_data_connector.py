@@ -1,14 +1,15 @@
+import logging
 import os
 import re
-from typing import List
+from typing import TYPE_CHECKING, List
 
-import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.util import S3Url
 from great_expectations.datasource.data_connector.util import (
     sanitize_prefix,
     sanitize_prefix_for_s3,
@@ -19,6 +20,17 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest
 
+if TYPE_CHECKING:
+    from botocore.client import BaseClient
+
+logger = logging.getLogger(__name__)
+
+try:
+    import boto3
+except ImportError:
+    logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
+    boto3 = None
+
 
 @pytest.mark.integration
 @mock_s3
@@ -27,7 +39,7 @@ def test_basic_instantiation():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -44,9 +56,11 @@ def test_basic_instantiation():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
+        batching_regex=re.compile(r"alpha-(.*)\.csv"),
+        s3_client=client,
         bucket=bucket,
-        regex=re.compile(r"alpha-(.*)\.csv"),
         prefix="",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -70,12 +84,12 @@ def test_basic_instantiation():
 
 @pytest.mark.integration
 @mock_s3
-def test_instantiation_regex_does_not_match_paths():
+def test_instantiation_batching_regex_does_not_match_paths():
     region_name: str = "us-east-1"
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -92,9 +106,11 @@ def test_instantiation_regex_does_not_match_paths():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
+        batching_regex=re.compile(r"beta-(.*)\.csv"),
+        s3_client=client,
         bucket=bucket,
-        regex=re.compile(r"beta-(.*)\.csv"),
         prefix="",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -117,7 +133,7 @@ def test_return_all_batch_definitions_unsorted():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -141,9 +157,11 @@ def test_return_all_batch_definitions_unsorted():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
+        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+        s3_client=client,
         bucket=bucket,
-        regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         prefix="",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     # with missing BatchRequest arguments
     with pytest.raises(TypeError):
@@ -166,7 +184,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "abe", "timestamp": "20200809", "price": "1040"}
+                {
+                    "path": "abe_20200809_1040.csv",
+                    "name": "abe",
+                    "timestamp": "20200809",
+                    "price": "1040",
+                }
             ),
         ),
         BatchDefinition(
@@ -174,7 +197,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200809", "price": "1000"}
+                {
+                    "path": "alex_20200809_1000.csv",
+                    "name": "alex",
+                    "timestamp": "20200809",
+                    "price": "1000",
+                }
             ),
         ),
         BatchDefinition(
@@ -182,7 +210,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "alex", "timestamp": "20200819", "price": "1300"}
+                {
+                    "path": "alex_20200819_1300.csv",
+                    "name": "alex",
+                    "timestamp": "20200819",
+                    "price": "1300",
+                }
             ),
         ),
         BatchDefinition(
@@ -190,7 +223,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20200809", "price": "1500"}
+                {
+                    "path": "eugene_20200809_1500.csv",
+                    "name": "eugene",
+                    "timestamp": "20200809",
+                    "price": "1500",
+                }
             ),
         ),
         BatchDefinition(
@@ -198,7 +236,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "eugene", "timestamp": "20201129", "price": "1900"}
+                {
+                    "path": "eugene_20201129_1900.csv",
+                    "name": "eugene",
+                    "timestamp": "20201129",
+                    "price": "1900",
+                }
             ),
         ),
         BatchDefinition(
@@ -206,7 +249,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200713", "price": "1567"}
+                {
+                    "path": "james_20200713_1567.csv",
+                    "name": "james",
+                    "timestamp": "20200713",
+                    "price": "1567",
+                }
             ),
         ),
         BatchDefinition(
@@ -214,7 +262,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200810", "price": "1003"}
+                {
+                    "path": "james_20200810_1003.csv",
+                    "name": "james",
+                    "timestamp": "20200810",
+                    "price": "1003",
+                }
             ),
         ),
         BatchDefinition(
@@ -222,7 +275,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "james", "timestamp": "20200811", "price": "1009"}
+                {
+                    "path": "james_20200811_1009.csv",
+                    "name": "james",
+                    "timestamp": "20200811",
+                    "price": "1009",
+                }
             ),
         ),
         BatchDefinition(
@@ -230,7 +288,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200809", "price": "1002"}
+                {
+                    "path": "will_20200809_1002.csv",
+                    "name": "will",
+                    "timestamp": "20200809",
+                    "price": "1002",
+                }
             ),
         ),
         BatchDefinition(
@@ -238,7 +301,12 @@ def test_return_all_batch_definitions_unsorted():
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
             batch_identifiers=IDDict(
-                {"name": "will", "timestamp": "20200810", "price": "1001"}
+                {
+                    "path": "will_20200810_1001.csv",
+                    "name": "will",
+                    "timestamp": "20200810",
+                    "price": "1001",
+                }
             ),
         ),
     ]
@@ -264,7 +332,7 @@ def test_return_all_batch_definitions_unsorted():
 #     bucket: str = "test_bucket"
 #     conn = boto3.resource("s3", region_name=region_name)
 #     conn.create_bucket(Bucket=bucket)
-#     client = boto3.client("s3", region_name=region_name)
+#     client: BaseClient = boto3.client("s3", region_name=region_name)
 #
 #     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 #
@@ -288,9 +356,11 @@ def test_return_all_batch_definitions_unsorted():
 #     my_data_connector: DataConnector = S3DataConnector(
 #         datasource_name="my_dataframe_datasource",
 #         data_asset_name="my_s3_data_asset",
+#         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+#         s3_client=client,
 #         bucket=bucket,
-#         regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
 #         prefix="",
+#         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
 #     )
 #     # noinspection PyProtectedMember
 #     my_data_connector._get_data_references_cache()
@@ -460,7 +530,7 @@ def test_return_only_unique_batch_definitions():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -481,9 +551,11 @@ def test_return_only_unique_batch_definitions():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
+        batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
+        s3_client=client,
         bucket=bucket,
-        regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         prefix="A",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -499,22 +571,28 @@ def test_return_only_unique_batch_definitions():
             datasource_name="my_dataframe_datasource",
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict({"directory": "B", "filename": "file_1.csv"}),
+            batch_identifiers=IDDict(
+                {"path": "B/file_1.csv", "directory": "B", "filename": "file_1.csv"}
+            ),
         ),
         BatchDefinition(
             datasource_name="my_dataframe_datasource",
             data_connector_name="experimental",
             data_asset_name="my_s3_data_asset",
-            batch_identifiers=IDDict({"directory": "B", "filename": "file_2.csv"}),
+            batch_identifiers=IDDict(
+                {"path": "B/file_2.csv", "directory": "B", "filename": "file_2.csv"}
+            ),
         ),
     ]
 
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
+        batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
+        s3_client=client,
         bucket=bucket,
-        regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         prefix="B",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
 
     unsorted_batch_definition_list: List[
@@ -536,7 +614,7 @@ def test_alpha():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -554,9 +632,11 @@ def test_alpha():
     my_data_connector: DataConnector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
+        batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
+        s3_client=client,
         bucket=bucket,
-        regex=re.compile(r"(?P<part_1>.+)\.csv"),
         prefix="test_dir_alpha",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 4
     assert my_data_connector.get_data_references()[:3] == [
@@ -599,7 +679,7 @@ def test_foxtrot():
     bucket: str = "test_bucket"
     conn = boto3.resource("s3", region_name=region_name)
     conn.create_bucket(Bucket=bucket)
-    client = boto3.client("s3", region_name=region_name)
+    client: BaseClient = boto3.client("s3", region_name=region_name)
 
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
@@ -629,9 +709,11 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        s3_client=client,
         bucket=bucket,
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 0
     assert my_data_connector.get_data_references()[:3] == []
@@ -641,9 +723,11 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        s3_client=client,
         bucket=bucket,
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="test_dir_foxtrot/A",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -657,9 +741,11 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
+        s3_client=client,
         bucket=bucket,
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         prefix="test_dir_foxtrot/B",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -673,9 +759,11 @@ def test_foxtrot():
     my_data_connector = S3DataConnector(
         datasource_name="my_dataframe_datasource",
         data_asset_name="my_s3_data_asset",
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        s3_client=client,
         bucket=bucket,
-        regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         prefix="test_dir_foxtrot/C",
+        file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
     assert my_data_connector.get_data_reference_count() == 3
     assert my_data_connector.get_data_references()[:3] == [
@@ -708,7 +796,7 @@ def test_foxtrot():
 #     bucket: str = "test_bucket"
 #     conn = boto3.resource("s3", region_name=region_name)
 #     conn.create_bucket(Bucket=bucket)
-#     client = boto3.client("s3", region_name=region_name)
+#     client: BaseClient = boto3.client("s3", region_name=region_name)
 #
 #     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 #

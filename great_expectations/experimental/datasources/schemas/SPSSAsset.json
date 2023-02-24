@@ -22,15 +22,10 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "regex": {
-            "title": "Regex",
+        "batching_regex": {
+            "title": "Batching Regex",
             "type": "string",
             "format": "regex"
-        },
-        "glob_directive": {
-            "title": "Glob Directive",
-            "default": "**/*",
-            "type": "string"
         },
         "usecols": {
             "title": "Usecols",
@@ -57,7 +52,7 @@
     },
     "required": [
         "name",
-        "regex"
+        "batching_regex"
     ],
     "additionalProperties": false,
     "definitions": {
