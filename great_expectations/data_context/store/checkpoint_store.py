@@ -240,7 +240,7 @@ class CheckpointStore(ConfigurationStore):
         name = checkpoint.name
         id = checkpoint.ge_cloud_id
         if id:
-            return self.determine_key(ge_cloud_id=str(id))
+            return self.determine_key(ge_cloud_id=id)
         return self.determine_key(name=name)
 
     def _persist_checkpoint(
@@ -252,7 +252,7 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
             cloud_id = checkpoint_ref.cloud_id
-            checkpoint.config.ge_cloud_id = uuid.UUID(cloud_id)
+            checkpoint.config.ge_cloud_id = cloud_id
         return checkpoint
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
