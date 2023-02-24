@@ -28,6 +28,7 @@ if TYPE_CHECKING:
         DataAsset,
         Datasource,
     )
+    from great_expectations.validator.validator import Validator
 
 SourceFactoryFn = Callable[..., "Datasource"]
 
@@ -212,7 +213,7 @@ class _SourceFactories:
             )
             setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
 
-            def _read_asset_factory(self: Datasource, **kwargs) -> pydantic.BaseModel:
+            def _read_asset_factory(self: Datasource, **kwargs) -> Validator:
                 existing_asset_names: Generator[str, None, None] = (
                     asset_name for asset_name in self.assets.keys()
                 )
@@ -232,7 +233,9 @@ class _SourceFactories:
 
                 name = asset_name_prefix + str(max_asset_number + 1)
                 asset = asset_type(name=name, **kwargs)
-                return self.add_asset(asset)
+                self.add_asset(asset)
+                batch_request = asset.build_batch_request()
+                return self._data_context.get_validator(batch_request=batch_request)
 
             _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
                 _read_asset_factory, asset_type, exclude={"type"}
@@ -286,6 +289,7 @@ class _SourceFactories:
         # there is no situation in which this isn't true
         # return type information must be missing for factory method add_pandas
         assert isinstance(pandas_datasource, PandasDatasource)
+        pandas_datasource._data_context = self._data_context
         return pandas_datasource
 
     @property

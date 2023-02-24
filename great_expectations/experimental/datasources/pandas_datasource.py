@@ -261,6 +261,9 @@ class PandasDatasource(_PandasDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_PANDAS_ASSET_MODELS.values())
 
+    # private attributes
+    _data_context = pydantic.PrivateAttr()
+
     # instance attributes
     type: Literal["pandas"] = "pandas"
     name: str
