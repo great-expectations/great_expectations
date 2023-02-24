@@ -79,7 +79,9 @@ class SphinxInvokeDocsBuilder:
         self.gx_path = self.repo_root / "great_expectations"
 
         self.temp_sphinx_html_dir = self.repo_root / "temp_sphinx_api_docs_build_dir"
-        self.docusaurus_api_docs_path = self.docs_path / pathlib.Path("reference/api")
+        self.docusaurus_api_docs_path = self.docs_path / pathlib.Path(
+            "docusaurus/docs/reference/api"
+        )
         self.definitions: Dict[str, Definition] = {}
         self.sidebar_entries: Dict[str, SidebarEntry] = {}
         self.written_class_md_stubs: dict[

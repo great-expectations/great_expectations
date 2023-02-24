@@ -420,7 +420,7 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
             params={"name": suite_1.name},
         )
 
-    assert str(suite.ge_cloud_id) == str(suite_id)
+    assert suite.ge_cloud_id == suite_id
 
 
 @pytest.mark.unit

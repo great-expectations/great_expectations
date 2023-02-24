@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Set, Type
 import pydantic
 
 from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import Datasource
@@ -61,6 +62,8 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
             logger.warning(
                 f"Datasource `{cls_name}` should not be defined as part of __main__ this may cause typing lookup collisions"
             )
+        # instantiate new TypeLookup to prevent child classes conflicts with parent class asset types
+        cls._type_lookup = TypeLookup()
         _SourceFactories.register_types_and_ds_factory(cls, _datasource_factory)
 
         return cls

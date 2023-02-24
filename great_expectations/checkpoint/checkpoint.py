@@ -5,7 +5,6 @@ import datetime
 import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union, cast
-from uuid import UUID
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
@@ -268,7 +267,7 @@ class BaseCheckpoint(ConfigPeer):
                     validation_result = run_result.get("validation_result")
                     if validation_result:
                         meta = validation_result.meta
-                        id = str(self.ge_cloud_id) if self.ge_cloud_id else None
+                        id = self.ge_cloud_id
                         meta["checkpoint_id"] = id
 
                 checkpoint_run_results.update(run_results)
@@ -439,7 +438,7 @@ class BaseCheckpoint(ConfigPeer):
             if self._using_cloud_context:
                 checkpoint_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.CHECKPOINT,
-                    cloud_id=str(self.ge_cloud_id),
+                    cloud_id=self.ge_cloud_id,
                 )
 
             operator_run_kwargs = {}
@@ -583,7 +582,7 @@ is run), with each validation having its own defined "action_list" attribute.
             return []
 
     @property
-    def ge_cloud_id(self) -> Optional[UUID]:
+    def ge_cloud_id(self) -> Optional[str]:
         try:
             return self.config.ge_cloud_id
         except AttributeError:
@@ -690,8 +689,8 @@ class Checkpoint(BaseCheckpoint):
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[UUID] = None,
-        expectation_suite_ge_cloud_id: Optional[UUID] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> None:
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
@@ -1271,7 +1270,7 @@ class SimpleCheckpoint(Checkpoint):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[UUID] = None,
+        ge_cloud_id: Optional[str] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
         site_names: Union[str, List[str]] = "all",
         slack_webhook: Optional[str] = None,
