@@ -82,8 +82,8 @@ def generate_component_time_series(
     }
 
 
-def generate_time_series(
-    size=365 * 3,
+def generate_daily_time_series(
+    size=365*3,
     trend_params=None,
     weekday_dummy_params=None,
     annual_seasonality_params=None,
@@ -151,13 +151,17 @@ def generate_time_series(
     return Y
 
 
-def generate_time_series_df(size=365 * 3, **kwargs) -> pd.DataFrame:
+def generate_daily_time_series_df(
+    size:int = 365*3,
+    start_date:str = "2018-01-01",
+    **kwargs
+) -> pd.DataFrame:
     """Generate a time series as a pandas dataframe."""
 
     return pd.DataFrame(
         {
-            "ds": pd.date_range("2018-01-01", periods=size, freq="D"),
-            "y": generate_time_series(size, **kwargs),
+            "ds": pd.date_range(start_date, periods=size, freq="D"),
+            "y": generate_daily_time_series(size, **kwargs),
         }
     )
 
@@ -165,7 +169,7 @@ def generate_time_series_df(size=365 * 3, **kwargs) -> pd.DataFrame:
 if __name__ == "__main__":
     output = StringIO()
 
-    df = generate_time_series_df()
+    df = generate_daily_time_series_df()
     df.to_csv(output, index=False)
 
     print(output.getvalue())

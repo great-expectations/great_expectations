@@ -12,6 +12,8 @@ from time_series_expectations.expectations.expect_column_pair_values_to_match_pr
 def test_ExpectColumnPairValuesToMatchProphetDateModel():
     ExpectColumnPairValuesToMatchProphetDateModel().run_diagnostics()
 
+    assert False
+
 
 def test_ExpectBatchRowCountToMatchProphetDateModel():
     ExpectBatchRowCountToMatchProphetDateModel().run_diagnostics()

@@ -49,8 +49,8 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
     examples = [
         {
             "data": {
-                "x": [1, 2, 3, 4],
-                "y": [1, 2, 3, 40],
+                "x": [100, 102, 101, 100],
+                "y": [100, 100, 100, 500],
             },
             "tests": [
                 {
@@ -64,7 +64,7 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
                     },
                     "out": {
                         "success": True,
-                        "observed_value": 4,
+                        "observed_value": 102,
                     },
                 },
                 {
@@ -78,7 +78,7 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
                     },
                     "out": {
                         "success": False,
-                        "observed_value": 40,
+                        "observed_value": 500,
                     },
                 },
             ],

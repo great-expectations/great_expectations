@@ -54,7 +54,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
 
     examples = [
         {
-            "data": {"foo": [1, 2, 3, 4]},
+            "data": {"foo": range(100)},
             "tests": [
                 {
                     "title": "positive_test",
@@ -66,7 +66,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
                     },
                     "out": {
                         "success": True,
-                        "observed_value": 4,
+                        "observed_value": 100,
                     },
                 }
             ],
@@ -78,7 +78,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
             ],
         },
         {
-            "data": {"foo": range(100)},
+            "data": {"foo": range(50)},
             "tests": [
                 {
                     "title": "negative_test",
@@ -90,7 +90,7 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
                     },
                     "out": {
                         "success": False,
-                        "observed_value": 100,
+                        "observed_value": 50,
                     },
                 }
             ],
