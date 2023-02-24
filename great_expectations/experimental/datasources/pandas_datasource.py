@@ -263,7 +263,6 @@ class PandasDatasource(_PandasDatasource):
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
-    name: str
     assets: Dict[
         str,
         _PandasDataAsset,
