@@ -499,16 +499,22 @@ def type_schema(
     if not sync:
         print("--------------------\nRegistered ZEP types\n--------------------\n")
 
-    schema_dir = GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
-    datasource_dir: pathlib.Path = schema_dir
+    schema_dir_root: Final[pathlib.Path] = (
+        GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
+    )
+    schema_dir_root.mkdir(exist_ok=True)
+
+    datasource_dir: pathlib.Path = schema_dir_root
+
     for name, model in _iter_all_registered_types():
 
         if issubclass(model, Datasource):
-            datasource_dir = schema_dir.joinpath(model.__name__)
+            datasource_dir = schema_dir_root.joinpath(model.__name__)
             datasource_dir.mkdir(exist_ok=True)
-            schema_path = schema_dir.joinpath(f"{model.__name__}.json")
+            schema_dir = schema_dir_root
+            print("-" * shutil.get_terminal_size()[0])
         else:
-            schema_path = datasource_dir.joinpath(f"{model.__name__}.json")
+            schema_dir = datasource_dir
             print("  ", end="")
 
         if not sync:
