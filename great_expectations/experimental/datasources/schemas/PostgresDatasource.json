@@ -62,8 +62,111 @@
                 "key"
             ]
         },
-        "SqlYearMonthSplitter": {
-            "title": "SqlYearMonthSplitter",
+        "ColumnSplitterColumnValue": {
+            "title": "ColumnSplitterColumnValue",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_column_value",
+                    "enum": [
+                        "split_on_column_value"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "ColumnSplitterDividedInteger": {
+            "title": "ColumnSplitterDividedInteger",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_divided_integer",
+                    "enum": [
+                        "split_on_divided_integer"
+                    ],
+                    "type": "string"
+                },
+                "divisor": {
+                    "title": "Divisor",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "column_name",
+                "divisor"
+            ],
+            "additionalProperties": false
+        },
+        "ColumnSplitterModInteger": {
+            "title": "ColumnSplitterModInteger",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_mod_integer",
+                    "enum": [
+                        "split_on_mod_integer"
+                    ],
+                    "type": "string"
+                },
+                "mod": {
+                    "title": "Mod",
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "column_name",
+                "mod"
+            ],
+            "additionalProperties": false
+        },
+        "ColumnSplitterYear": {
+            "title": "ColumnSplitterYear",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year",
+                    "enum": [
+                        "split_on_year"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "ColumnSplitterYearAndMonth": {
+            "title": "ColumnSplitterYearAndMonth",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
                 "column_name": {
@@ -77,26 +180,70 @@
                         "split_on_year_and_month"
                     ],
                     "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "ColumnSplitterYearAndMonthAndDay": {
+            "title": "ColumnSplitterYearAndMonthAndDay",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
                 },
-                "param_names": {
-                    "title": "Param Names",
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_year_and_month_and_day",
+                    "enum": [
+                        "split_on_year_and_month_and_day"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "ColumnSplitterDatetimePart": {
+            "title": "ColumnSplitterDatetimePart",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_name": {
+                    "title": "Column Name",
+                    "type": "string"
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_date_parts",
+                    "enum": [
+                        "split_on_date_parts"
+                    ],
+                    "type": "string"
+                },
+                "datetime_parts": {
+                    "title": "Datetime Parts",
                     "type": "array",
                     "items": {
-                        "enum": [
-                            "year",
-                            "month"
-                        ],
                         "type": "string"
                     }
                 }
             },
             "required": [
-                "column_name"
-            ]
+                "column_name",
+                "datetime_parts"
+            ],
+            "additionalProperties": false
         },
         "TableAsset": {
             "title": "TableAsset",
-            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "description": "A _SQLAsset Mixin\n\nThis is used as a mixin for _SQLAsset subclasses to give them the TableAsset functionality\nthat can be used by different SQL datasource subclasses.\n\nFor example see TableAsset defined in this module and SqliteTableAsset defined in\nsqlite_datasource.py",
             "type": "object",
             "properties": {
                 "name": {
@@ -119,7 +266,30 @@
                     }
                 },
                 "column_splitter": {
-                    "$ref": "#/definitions/SqlYearMonthSplitter"
+                    "title": "Column Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ColumnSplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterDatetimePart"
+                        }
+                    ]
                 },
                 "table_name": {
                     "title": "Table Name",
@@ -161,7 +331,30 @@
                     }
                 },
                 "column_splitter": {
-                    "$ref": "#/definitions/SqlYearMonthSplitter"
+                    "title": "Column Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/ColumnSplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/ColumnSplitterDatetimePart"
+                        }
+                    ]
                 },
                 "query": {
                     "title": "Query",

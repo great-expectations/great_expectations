@@ -1,137 +1,100 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union, cast
 
 import pydantic
-from pydantic import dataclasses as pydantic_dc
-
-if TYPE_CHECKING:
-    import sqlalchemy
-
-    from great_expectations.experimental.datasources.interfaces import DataAsset
-
-from typing_extensions import Literal
+from typing_extensions import Literal, Self
 
 from great_expectations.experimental.datasources.sql_datasource import (
-    BatchSortersDefinition,
-    DatetimeRange,
-    QueryAsset,
+    ColumnSplitter,
     SQLDatasource,
-    SQLDatasourceError,
-    SqlYearMonthSplitter,
-    TableAsset,
-    _batch_sorter_from_list,
-    _query_for_year_and_month,
-    _SQLAsset,
+    _ColumnSplitter,
+)
+from great_expectations.experimental.datasources.sql_datasource import (
+    QueryAsset as SqlQueryAsset,
+)
+from great_expectations.experimental.datasources.sql_datasource import (
+    TableAsset as SqlTableAsset,
 )
 
-
-class SqliteTableAsset(TableAsset):
-    # Subclass overrides
-    type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]
-    column_splitter: Optional[SqliteYearMonthSplitter] = None
-
-    def add_year_and_month_splitter(
-        self,
-        column_name: str,
-    ) -> SqliteTableAsset:
-        """Associates a year month splitter with this SqliteTableAsset
-
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-
-        Returns:
-            This SqliteTableAsset so we can use this method fluently.
-        """
-        column_splitter = SqliteYearMonthSplitter(
-            column_name=column_name,
-        )
-        column_splitter.test_connection(table_asset=self)
-        self.column_splitter = column_splitter
-        return self
-
-
-class SqliteQueryAsset(QueryAsset):
-    # Subclass overrides
-    type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]
-    column_splitter: Optional[SqliteYearMonthSplitter] = None
-
-    def add_year_and_month_splitter(
-        self,
-        column_name: str,
-    ) -> SqliteQueryAsset:
-        """Associates a year month splitter with this SqliteQueryAsset
-
-        Args:
-            column_name: A column name of the date column where year and month will be parsed out.
-
-        Returns:
-            This SqliteQueryAsset so we can use this method fluently.
-        """
-        self.column_splitter = SqliteYearMonthSplitter(
-            column_name=column_name,
-        )
-        return self
-
-
-@pydantic_dc.dataclass(frozen=True)
-class SqliteYearMonthSplitter(SqlYearMonthSplitter):
-    method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
-    # noinspection Pydantic
-    param_names: List[Literal["year", "month"]] = pydantic.Field(
-        default_factory=lambda: ["year", "month"]
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.interfaces import (
+        BatchRequestOptions,
+        BatchSortersDefinition,
+        DataAsset,
     )
 
-    def param_defaults(self, sql_asset: _SQLAsset) -> Dict[str, List]:
-        """Query sqlite database to get the years and months to split over.
+# This module serves as an example of how to extend _SQLAssets for specific backends. The steps are:
+# 1. Create a plain class with the extensions necessary for the specific backend.
+# 2. Make 2 classes XTableAsset and XQueryAsset by mixing in the class created in step 1 with
+#    sql_datasource.TableAsset and sql_datasource.QueryAsset.
+#
+# See SqliteDatasource, SqliteTableAsset, and SqliteQueryAsset below.
 
-        Args:
-            sql_asset: A Sqlite*Asset over which we want to split the data.
-        """
-        if not isinstance(sql_asset, tuple(_SqliteAssets)):
-            raise SQLDatasourceError(
-                "SQL asset passed to SqliteYearMonthSplitter is not a Sqlite*Asset. It is "
-                f"{sql_asset}"
+
+class ColumnSplitterHashedColumn(_ColumnSplitter):
+    """Split on hash value of a column.
+
+    Args:
+        hash_digits: The number of digits to truncate the hash to.
+        method_name: Literal["split_on_hashed_column"]
+    """
+
+    # hash digits is the length of the hash. The md5 of the column is truncated to this length.
+    hash_digits: int
+    method_name: Literal["split_on_hashed_column"] = "split_on_hashed_column"
+
+    @property
+    def param_names(self) -> List[str]:
+        return ["hash"]
+
+    def splitter_method_kwargs(self) -> Dict[str, Any]:
+        return {"column_name": self.column_name, "hash_digits": self.hash_digits}
+
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
+        self, options: BatchRequestOptions
+    ) -> Dict[str, Any]:
+        if "hash" not in options:
+            raise ValueError(
+                "'hash' must be specified in the batch request options to create a batch identifier"
             )
-
-        return _query_for_year_and_month(
-            sql_asset, self.column_name, _get_sqlite_datetime_range
-        )
+        return {self.column_name: options["hash"]}
 
 
-def _get_sqlite_datetime_range(
-    conn: sqlalchemy.engine.base.Connection,
-    selectable: sqlalchemy.sql.Selectable,
-    col_name: str,
-) -> DatetimeRange:
-    import sqlalchemy as sa
+class ColumnSplitterConvertedDateTime(_ColumnSplitter):
+    """A column splitter than can be used for sql engines that represents datetimes as strings.
 
-    column = sa.column(col_name)
-    query = sa.select(
-        [
-            sa.func.strftime("%Y%m%d", sa.func.min(column)),
-            sa.func.strftime("%Y%m%d", sa.func.max(column)),
-        ]
-    ).select_from(selectable)
-    min_max_dt = [
-        datetime.strptime(dt, "%Y%m%d")
-        for dt in list(
-            conn.execute(query.compile(compile_kwargs={"literal_binds": True}))
-        )[0]
-    ]
-    if min_max_dt[0] is None or min_max_dt[1] is None:
-        raise SQLDatasourceError(
-            f"Data date range can not be determined for the query: {query}. The returned range was {min_max_dt}."
-        )
-    return DatetimeRange(min=min_max_dt[0], max=min_max_dt[1])
+    The SQL engine that this currently supports is SQLite since it stores its datetimes as
+    strings.
+    The DatetimeColumnSplitter will also work for SQLite and may be more intuitive.
+    """
 
+    # date_format_strings syntax is documented here:
+    # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
+    # It allows for arbitrary strings so can't be validated until conversion time.
+    date_format_string: str
+    method_name: Literal["split_on_converted_datetime"] = "split_on_converted_datetime"
 
-_SqliteAssets: List[Type[DataAsset]] = [SqliteTableAsset, SqliteQueryAsset]
-# Unfortunately the following types can't be derived from _SqliteAssets above because mypy doesn't
-# support programmatically unrolling this list, eg Union[*_SqliteAssets] is not supported.
-SqliteAssetTypes = Union[SqliteTableAsset, SqliteQueryAsset]
-SqliteAssetType = TypeVar("SqliteAssetType", SqliteTableAsset, SqliteQueryAsset)
+    @property
+    def param_names(self) -> List[str]:
+        # The datetime parameter will be a string representing a datetime in the format
+        # given by self.date_format_string.
+        return ["datetime"]
+
+    def splitter_method_kwargs(self) -> Dict[str, Any]:
+        return {
+            "column_name": self.column_name,
+            "date_format_string": self.date_format_string,
+        }
+
+    def batch_request_options_to_batch_spec_kwarg_identifiers(
+        self, options: BatchRequestOptions
+    ) -> Dict[str, Any]:
+        if "datetime" not in options:
+            raise ValueError(
+                "'datetime' must be specified in the batch request options to create a batch identifier"
+            )
+        return {self.column_name: options["datetime"]}
 
 
 class SqliteDsn(pydantic.AnyUrl):
@@ -142,6 +105,45 @@ class SqliteDsn(pydantic.AnyUrl):
         "sqlite+pysqlcipher",
     }
     host_required = False
+
+
+SqliteColumnSplitter = Union[
+    ColumnSplitter, ColumnSplitterHashedColumn, ColumnSplitterConvertedDateTime
+]
+
+
+class _SQLiteAssetMixin:
+    def add_splitter_hashed_column(
+        self: Self, column_name: str, hash_digits: int
+    ) -> Self:
+        return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
+            ColumnSplitterHashedColumn(
+                method_name="split_on_hashed_column",
+                column_name=column_name,
+                hash_digits=hash_digits,
+            )
+        )
+
+    def add_splitter_converted_datetime(
+        self: Self, column_name: str, date_format_string: str
+    ) -> Self:
+        return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
+            ColumnSplitterConvertedDateTime(
+                method_name="split_on_converted_datetime",
+                column_name=column_name,
+                date_format_string=date_format_string,
+            )
+        )
+
+
+class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
+    type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]  # override superclass value
+    column_splitter: Optional[SqliteColumnSplitter] = None  # type: ignore[assignment]  # override superclass type
+
+
+class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
+    type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]  # override superclass value
+    column_splitter: Optional[SqliteColumnSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteDatasource(SQLDatasource):
@@ -156,14 +158,16 @@ class SqliteDatasource(SQLDatasource):
     """
 
     # class var definitions
-    asset_types: ClassVar[List[Type[DataAsset]]] = _SqliteAssets
+    asset_types: ClassVar[List[Type[DataAsset]]] = [SqliteTableAsset, SqliteQueryAsset]
 
     # Subclass instance var overrides
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
     connection_string: SqliteDsn
-    assets: Dict[str, SqliteAssetTypes] = {}  # type: ignore[assignment]
+
+    _TableAsset: Type[SqliteTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)
+    _QueryAsset: Type[SqliteQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
 
     def add_table_asset(
         self,
@@ -172,27 +176,10 @@ class SqliteDatasource(SQLDatasource):
         schema_name: Optional[str] = None,
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> SqliteTableAsset:
-        """Adds a sqlite table asset to this sqlite datasource.
-
-        Args:
-            name: The name of this table asset.
-            table_name: The table where the data resides.
-            schema_name: The schema that holds the table.
-            order_by: A list of BatchSorters or BatchSorter strings.
-
-        Returns:
-            The SqliteTableAsset that is added to the datasource.
-        """
-        asset = SqliteTableAsset(
-            name=name,
-            table_name=table_name,
-            schema_name=schema_name,
-            order_by=_batch_sorter_from_list(order_by or []),
-            # see TableAsset._parse_order_by_sorter()
+        return cast(
+            SqliteTableAsset,
+            super().add_table_asset(name, table_name, schema_name, order_by),
         )
-        asset._datasource = self
-        self.assets[name] = asset
-        return asset
 
     def add_query_asset(
         self,
@@ -200,22 +187,10 @@ class SqliteDatasource(SQLDatasource):
         query: str,
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> SqliteQueryAsset:
-        """Adds a sqlite query asset to this sqlite datasource.
+        return cast(SqliteQueryAsset, super().add_query_asset(name, query, order_by))
 
-        Args:
-            name: The name of this table asset.
-            query: The SELECT query to selects the data to validate. It must begin with the "SELECT".
-            order_by: A list of BatchSorters or BatchSorter strings.
 
-        Returns:
-            The SqliteTableAsset that is added to the datasource.
-        """
-        asset = SqliteQueryAsset(
-            name=name,
-            query=query,
-            order_by=_batch_sorter_from_list(order_by or []),
-            # see TableAsset._parse_order_by_sorter()
-        )
-        asset._datasource = self
-        self.assets[name] = asset
-        return asset
+# Removed automatically added add_*_asset methods we don't want.
+# TODO: Prevent these from being created.
+delattr(SqliteDatasource, "add_sqlite_table_asset")
+delattr(SqliteDatasource, "add_sqlite_query_asset")

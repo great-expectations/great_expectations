@@ -28,6 +28,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
+from packaging.version import Version
 from pydantic import Field, FilePath
 
 # from pydantic.typing import resolve_annotations
@@ -63,7 +64,9 @@ except ImportError:
 
 logger = logging.getLogger(__file__)
 
-PANDAS_VERSION: float = float(pd.__version__.rsplit(".", maxsplit=1)[0])
+PANDAS_VERSION: float = float(
+    f"{Version(pd.__version__).major}.{Version(pd.__version__).minor}"
+)
 
 DataFrameFactoryFn: TypeAlias = Callable[..., pd.DataFrame]
 
@@ -107,6 +110,7 @@ CAN_HANDLE: Final[Set[str]] = {
     "FilePath",  # pydantic
     # pandas
     "DtypeArg",
+    "FilePathOrBuffer",
     "CSVEngine",
     "IndexLabel",
     "CompressionOptions",
@@ -116,6 +120,10 @@ CAN_HANDLE: Final[Set[str]] = {
 NEED_SPECIAL_HANDLING: Dict[str, Set[str]] = defaultdict(set)
 FIELD_SKIPPED_UNSUPPORTED_TYPE: Set[str] = set()
 FIELD_SKIPPED_NO_ANNOTATION: Set[str] = set()
+
+
+class DynamicAssetError(Exception):
+    pass
 
 
 class _SignatureTuple(NamedTuple):
@@ -151,6 +159,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
         )
     },
     # misc
+    "filepath_or_buffer": {"filepath_or_buffer": _FieldSpec(FilePath, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]
@@ -187,6 +196,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "Hashable": Hashable,
     "Iterable": Iterable,
     "FilePath": FilePath,
+    "FilePathOrBuffer": FilePath,
     "Pattern": re.Pattern,
     "CSVEngine": CSVEngine,
     "IndexLabel": IndexLabel,
@@ -300,22 +310,24 @@ def _to_pydantic_fields(
         next(all_parameters)
 
     for param_name, param in all_parameters:
-        no_annotation: bool = param.annotation is inspect._empty
-        if no_annotation:
-            logger.debug(f"`{param_name}` has no type annotation")
-            FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
-            type_ = Any
-        else:
-            type_ = _get_annotation_type(param)
-            if type_ is UNSUPPORTED_TYPE or type_ == "None":
-                logger.debug(f"`{param_name}` has no supported types. Field skipped")
-                FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
-                continue
-
         substitution = FIELD_SUBSTITUTIONS.get(param_name)
         if substitution:
             fields_dict.update(substitution)
         else:
+            no_annotation: bool = param.annotation is inspect._empty
+            if no_annotation:
+                logger.debug(f"`{param_name}` has no type annotation")
+                FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
+                type_ = Any
+            else:
+                type_ = _get_annotation_type(param)
+                if type_ is UNSUPPORTED_TYPE or type_ == "None":
+                    logger.debug(
+                        f"`{param_name}` has no supported types. Field skipped"
+                    )
+                    FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
+                    continue
+
             fields_dict[param_name] = _FieldSpec(
                 type=_replace_builtins(type_), default_value=_get_default_value(param)  # type: ignore[arg-type]
             )
@@ -362,6 +374,8 @@ def _generate_pandas_data_asset_models(
     base_model_class: M,
     blacklist: Optional[Sequence[str]] = None,
     use_docstring_from_method: bool = False,
+    skip_first_param: bool = False,
+    type_prefix: Optional[str] = None,
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(blacklist)
     io_method_sigs = _extract_io_signatures(io_methods)
@@ -371,12 +385,17 @@ def _generate_pandas_data_asset_models(
 
         # skip the first parameter as this corresponds to the path/buffer/io field
         # paths to specific files are provided by the batch building logic
-        fields = _to_pydantic_fields(signature_tuple, skip_first_param=True)
+        fields = _to_pydantic_fields(signature_tuple, skip_first_param=skip_first_param)
 
         type_name = signature_tuple.name.split("read_")[1]
         model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
             type_name, f"{type_name.capitalize()}Asset"
         )
+
+        # TODO: remove this special case once we have namespace type-lookups
+        if type_prefix:
+            type_name = "_".join((type_prefix, type_name))
+            model_name = type_prefix.capitalize() + model_name
 
         try:
             asset_model = _create_pandas_asset_model(
@@ -403,7 +422,12 @@ def _generate_pandas_data_asset_models(
             continue
 
         data_asset_models[type_name] = asset_model
-        asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
+        try:
+            asset_model.update_forward_refs(**_TYPE_REF_LOCALS)
+        except TypeError as e:
+            raise DynamicAssetError(
+                f"Updating forward references for asset model {asset_model.__name__} raised TypeError: {e}"
+            ) from e
 
     logger.debug(f"Needs extra handling\n{pf(dict(NEED_SPECIAL_HANDLING))}")
     logger.debug(f"No Annotation\n{FIELD_SKIPPED_NO_ANNOTATION}")

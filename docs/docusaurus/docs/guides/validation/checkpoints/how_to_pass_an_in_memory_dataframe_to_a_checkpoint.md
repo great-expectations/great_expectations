@@ -61,7 +61,7 @@ In order to pass in a DataFrame at runtime, your `great_expectations.yml` should
 </TabItem>
 <TabItem value="cli">
 
-```python file=../../../../tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py#L59
+```python name=""tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py datasource_new_cli"
 ```
 
 After running the <TechnicalTag tag="cli" text="CLI" /> command above, choose option 1 for "Files on a filesystem..." and then select whether you will be passing a Pandas or Spark DataFrame. Once the Jupyter Notebook opens, change the `datasource_name` to "taxi_datasource" and run all cells to save your Datasource configuration.
@@ -76,7 +76,7 @@ You will need an <TechnicalTag tag="expectation_suite" text="Expectation Suite" 
 
 For the purposes of this guide, we have created an empty suite named `my_expectation_suite` by running:
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py create_expectation_suite"
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py add_expectation_suite"
 ```
 
 We will now walk through two examples for configuring a `Checkpoint` and passing it an in-memory DataFrame at runtime.

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import dataclasses
+import functools
 import logging
+import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     ClassVar,
     Dict,
     Generic,
@@ -31,7 +34,7 @@ from great_expectations.experimental.datasources.experimental_base_model import 
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +45,9 @@ if TYPE_CHECKING:
         BatchData,
         BatchDefinition,
         BatchMarkers,
+    )
+    from great_expectations.experimental.datasources.data_asset.data_connector import (
+        DataConnector,
     )
 
 try:
@@ -80,7 +86,7 @@ class BatchSorter:
     reverse: bool = False
 
 
-BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str]]
+BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str, dict]]
 
 
 def _is_batch_sorter_list(
@@ -127,10 +133,11 @@ def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
     """
     if sort_key[0] == "-":
         return BatchSorter(key=sort_key[1:], reverse=True)
-    elif sort_key[0] == "+":
+
+    if sort_key[0] == "+":
         return BatchSorter(key=sort_key[1:], reverse=False)
-    else:
-        return BatchSorter(key=sort_key, reverse=False)
+
+    return BatchSorter(key=sort_key, reverse=False)
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
@@ -151,6 +158,8 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
+    _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
+    _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @property
     def datasource(self) -> _DatasourceT:
@@ -219,15 +228,11 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         )
 
     # Sorter methods
-    @pydantic.validator("order_by", pre=True, each_item=True)
-    def _parse_order_by_sorter(
-        cls, v: Union[str, BatchSorter]
-    ) -> Union[BatchSorter, dict]:
-        if isinstance(v, str):
-            if not v:
-                raise ValueError("empty string")
-            return _batch_sorter_from_str(v)
-        return v
+    @pydantic.validator("order_by", pre=True)
+    def _parse_order_by_sorters(
+        cls, order_by: Optional[List[Union[BatchSorter, str, dict]]] = None
+    ) -> List[BatchSorter]:
+        return Datasource.parse_order_by_sorters(order_by=order_by)
 
     def add_sorters(self: _DataAssetT, sorters: BatchSortersDefinition) -> _DataAssetT:
         """Associates a sorter to this DataAsset
@@ -272,7 +277,9 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         for sorter in reversed(self.order_by):
             try:
                 batch_list.sort(
-                    key=lambda b: b.metadata[sorter.key],
+                    key=functools.cmp_to_key(
+                        _sort_batches_with_none_metadata_values(sorter.key)
+                    ),
                     reverse=sorter.reverse,
                 )
             except KeyError as e:
@@ -280,6 +287,27 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
                     f"Trying to sort {self.name} table asset batches on key {sorter.key} "
                     "which isn't available on all batches."
                 ) from e
+
+
+def _sort_batches_with_none_metadata_values(
+    key: str,
+) -> Callable[[Batch, Batch], int]:
+    def _compare_function(a: Batch, b: Batch) -> int:
+        if a.metadata[key] is not None and b.metadata[key] is not None:
+            if a.metadata[key] < b.metadata[key]:
+                return -1
+            elif a.metadata[key] > b.metadata[key]:
+                return 1
+            else:
+                return 0
+        elif a.metadata[key] is None and b.metadata[key] is None:
+            return 0
+        elif a.metadata[key] is None:  # b.metadata[key] is not None
+            return -1
+        # b.metadata[key] is None, a.metadata[key] is not None
+        return 0
+
+    return _compare_function
 
 
 # If a Datasource can have more than 1 _DataAssetT, this will need to change.
@@ -313,7 +341,13 @@ class Datasource(
         "type",
         "execution_engine",
         "assets",
-        "base_directory",
+        "base_directory",  # filesystem argument
+        "glob_directive",  # filesystem argument
+        "data_context_root_directory",  # filesystem argument
+        "bucket",  # s3 argument
+        "prefix",  # s3 argument
+        "delimiter",  # s3 argument
+        "max_keys",  # s3 argument
     }
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
@@ -398,21 +432,77 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
+    def add_asset(
+        self,
+        asset: _DataAssetT,
+        data_connector: Optional[DataConnector] = None,
+        test_connection_error_message: Optional[str] = None,
+    ) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
             asset: The DataAsset to be added to this datasource.
+            data_connector: Optional reference to "DataConnector" object for connecting Datasource and DataAsset to data
+            test_connection_error_message: Optional message for reporting connection test errors informatively
         """
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
+        asset._data_connector = data_connector
+        asset._test_connection_error_message = test_connection_error_message
+
         asset.test_connection()
+
         self.assets[asset.name] = asset
+
         # pydantic needs to know that an asset has been set so that it doesn't get excluded
         # when dumping to dict, json, yaml etc.
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
+
         return asset
+
+    @staticmethod
+    def parse_order_by_sorters(
+        order_by: Optional[List[Union[BatchSorter, str, dict]]] = None
+    ) -> List[BatchSorter]:
+        order_by_sorters: list[BatchSorter] = []
+        if order_by:
+            for idx, sorter in enumerate(order_by):
+                if isinstance(sorter, str):
+                    if not sorter:
+                        raise ValueError(
+                            '"order_by" list cannot contain an empty string'
+                        )
+                    order_by_sorters.append(_batch_sorter_from_str(sorter))
+                elif isinstance(sorter, dict):
+                    key: Optional[Any] = sorter.get("key")
+                    reverse: Optional[Any] = sorter.get("reverse")
+                    if key and reverse:
+                        order_by_sorters.append(BatchSorter(key=key, reverse=reverse))
+                    elif key:
+                        order_by_sorters.append(BatchSorter(key=key))
+                    else:
+                        raise ValueError(
+                            '"order_by" list dict must have a key named "key"'
+                        )
+                else:
+                    order_by_sorters.append(sorter)
+        return order_by_sorters
+
+    @staticmethod
+    def parse_batching_regex_string(
+        batching_regex: Optional[Union[re.Pattern, str]] = None
+    ) -> re.Pattern:
+        pattern: re.Pattern
+        if not batching_regex:
+            pattern = re.compile(".*")
+        elif isinstance(batching_regex, str):
+            pattern = re.compile(batching_regex)
+        elif isinstance(batching_regex, re.Pattern):
+            pattern = batching_regex
+        else:
+            raise ValueError('"batching_regex" must be either re.Pattern, str, or None')
+        return pattern
 
     # Abstract Methods
     @property
@@ -461,7 +551,7 @@ class Batch(ExperimentalBaseModel):
     datasource: Datasource
     data_asset: DataAsset
     batch_request: BatchRequest
-    data: "BatchData"
+    data: BatchData
     id: str = ""
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
@@ -469,9 +559,9 @@ class Batch(ExperimentalBaseModel):
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    batch_markers: "BatchMarkers" = Field(..., alias="legacy_batch_markers")
+    batch_markers: BatchMarkers = Field(..., alias="legacy_batch_markers")
     batch_spec: BatchSpec = Field(..., alias="legacy_batch_spec")
-    batch_definition: "BatchDefinition" = Field(..., alias="legacy_batch_definition")
+    batch_definition: BatchDefinition = Field(..., alias="legacy_batch_definition")
 
     class Config:
         allow_mutation = False
@@ -481,11 +571,14 @@ class Batch(ExperimentalBaseModel):
     def _set_id(cls, values: dict) -> dict:
         # We need a unique identifier. This will likely change as we get more input.
         options_list = []
-        for k, v in values["batch_request"].options.items():
-            options_list.append(f"{k}_{v}")
+        for key, value in values["batch_request"].options.items():
+            if key != "path":
+                options_list.append(f"{key}_{value}")
+
         values["id"] = "-".join(
             [values["datasource"].name, values["data_asset"].name, *options_list]
         )
+
         return values
 
     @classmethod
@@ -505,7 +598,7 @@ class Batch(ExperimentalBaseModel):
     @validate_arguments
     def head(
         self,
-        n_rows: Optional[StrictInt] = None,
+        n_rows: StrictInt = 5,
         fetch_all: StrictBool = False,
     ) -> HeadData:
         """Return the first n rows of this Batch.
@@ -524,29 +617,13 @@ class Batch(ExperimentalBaseModel):
             HeadData
         """
         self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
-        metric = MetricConfiguration(
-            metric_name="table.head",
-            metric_domain_kwargs={"batch_id": self.id},
-            metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
+        metrics_calculator = MetricsCalculator(
+            execution_engine=self.data.execution_engine,
+            show_progress_bars=True,
         )
-        table_head_metric_value: pd.DataFrame | list[
-            pyspark_sql_Row
-        ] | pyspark_sql_Row = self.data.execution_engine.resolve_metrics(
-            metrics_to_resolve=(metric,)
-        )[
-            metric.id
-        ]
-        table_head_df: pd.DataFrame
-        if isinstance(table_head_metric_value, pd.DataFrame):
-            # table_head_metric_value is a pd.DataFrame already
-            table_head_df = table_head_metric_value
-        elif isinstance(table_head_metric_value, list):
-            # convert list of pyspark.sql.Row to pd.DataFrame
-            table_head_df = pd.DataFrame(
-                [row.asDict() for row in table_head_metric_value]
-            )
-        else:
-            # otherwise convert pyspark.sql.Row to pd.DataFrame
-            table_head_df = pd.DataFrame(table_head_metric_value.asDict())
-
+        table_head_df: pd.DataFrame = metrics_calculator.head(
+            n_rows=n_rows,
+            domain_kwargs={"batch_id": self.id},
+            fetch_all=fetch_all,
+        )
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))

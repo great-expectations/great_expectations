@@ -60,9 +60,26 @@ The following are a few details about other files Docusaurus uses that you may w
 - `../babel.config.js`: Babel config file used when building
 - `../package.json`: dependencies and scripts
 - `../yarn.lock`: dependency lock file that ensures reproducibility
-- `sitemap.xml`: After any changes to sidebars.js are made, use https://www.xml-sitemaps.com/ with the temporary netlify url and then download the resulting sitemap.xml to update the existing sitemap.xml file. Make sure to change the temporary netlify url to the real docs url https://docs.greatexpectations.io/docs/ in the sitemap.xml file.
+
+sitemap.xml is not in the repo since it is built and uploaded by a netlify plugin during the documentation build process. 
 
 ## Documentation changes checklist
 
-1. If you have made changes to sidebar.js, regenerate and update sitemap.xml per the above instructions
-2. For any pages you have moved or removed, update _redirects to point from the old to the new content location
+1. For any pages you have moved or removed, update _redirects to point from the old to the new content location
+
+
+## Versioning
+
+To add a new version, follow these steps:
+
+1. Check out the version from the tag, e.g. `git checkout 0.15.50`
+2. Run `yarn install`
+3. Run `yarn build`
+4. Create the version e.g. `yarn docusaurus docs:version 0.15.50`
+5. Pull down the version file (see `docs/build_docs` for the file, currently https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip)
+6. Unzip and add your newly created versioned docs via the following:
+7. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
+8. Copy the version you built in step 4 from inside `versioned_sidebars` in your repo to the `versioned_sidebars` from the unzipped version file.
+9. Add your version number to `versions.json` in the unzipped version file.
+10. Zip up `versioned_docs`, `versioned_sidebars` and `versions.json` and upload to the s3 bucket (see `docs/build_docs` for the bucket name)
+11. Once the docs are built again, this zip file will be used for the versions.

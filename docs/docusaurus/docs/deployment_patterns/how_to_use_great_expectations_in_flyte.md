@@ -110,7 +110,7 @@ In the code, we define a `file_task_object` that encapsulates the Great Expectat
 
 `CSVFile`—a variant of FlyteFile, accepts remote dataset and downloads it to the user-given `local_file_path`. The plugin then fetches the file from that specific path and does validation. If the validation fails, the plugin shows the data columns and the associated expectations. 
 
-![Figure: Validation failure message on the Flyte console](../../docs/images/flyte-screenshot.png)
+![Figure: Validation failure message on the Flyte console](../images/flyte-screenshot.png)
 
 <small>Figure: Validation failure message on the Flyte console</small>
 

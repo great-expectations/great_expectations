@@ -325,7 +325,7 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
     context: DataContext = deterministic_asset_dataconnector_context
 
     assert context.list_checkpoints() == []
-    context.save_expectation_suite(titanic_expectation_suite)
+    context.add_expectation_suite(expectation_suite=titanic_expectation_suite)
     assert context.list_expectation_suite_names() == ["Titanic.warning"]
 
     checkpoint_new_notebook_renderer = CheckpointNewNotebookRenderer(

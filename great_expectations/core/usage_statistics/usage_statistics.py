@@ -39,9 +39,7 @@ if TYPE_CHECKING:
     from great_expectations.core.usage_statistics.anonymizers.types.base import (
         CLISuiteInteractiveFlagCombinations,
     )
-    from great_expectations.core.usage_statistics.events import (
-        UsageStatsEvents,
-    )
+    from great_expectations.core.usage_statistics.events import UsageStatsEvents
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.new_datasource import BaseDatasource
@@ -398,8 +396,8 @@ def run_validation_operator_usage_statistics(
 # noinspection PyUnusedLocal
 def save_expectation_suite_usage_statistics(
     data_context: AbstractDataContext,
-    expectation_suite: ExpectationSuite,
-    expectation_suite_name: Optional[str] = None,
+    expectation_suite: ExpectationSuite | None = None,
+    expectation_suite_name: str | None = None,
     **kwargs: dict,
 ) -> dict:
     """
@@ -657,9 +655,9 @@ def send_usage_message_from_handler(
 def _handle_expectation_suite_usage_statistics(
     data_context: AbstractDataContext,
     event_arguments_payload_handler_name: str,
-    expectation_suite: Optional[ExpectationSuite] = None,
-    expectation_suite_name: Optional[str] = None,
-    interactive_mode: Optional[CLISuiteInteractiveFlagCombinations] = None,
+    expectation_suite: ExpectationSuite | None = None,
+    expectation_suite_name: str | None = None,
+    interactive_mode: CLISuiteInteractiveFlagCombinations | None = None,
     **kwargs,
 ) -> dict:
     """
@@ -683,6 +681,9 @@ def _handle_expectation_suite_usage_statistics(
     else:
         payload = copy.deepcopy(interactive_mode.value)
 
+    assert (
+        expectation_suite or expectation_suite_name
+    ), "Guaranteed to have at least one of these values from context CRUD"
     if expectation_suite_name is None:
         if isinstance(expectation_suite, ExpectationSuite):
             expectation_suite_name = expectation_suite.expectation_suite_name

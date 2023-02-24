@@ -13,8 +13,7 @@ from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
-    ColumnSplitter,
-    SqlYearMonthSplitter,
+    ColumnSplitterYearAndMonth,
     TableAsset,
 )
 
@@ -47,8 +46,6 @@ PG_COMPLEX_CONFIG_DICT = {
                     "column_splitter": {
                         "column_name": "my_column",
                         "method_name": "split_on_year_and_month",
-                        "name": "y_m_splitter",
-                        "param_names": ["year", "month"],
                     },
                     "name": "with_splitter",
                     "table_name": "another_table",
@@ -79,14 +76,14 @@ PG_COMPLEX_CONFIG_DICT = {
                 "my_csv_asset": {
                     "name": "my_csv_asset",
                     "type": "csv",
-                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
                 "my_json_asset": {
                     "name": "my_json_asset",
                     "type": "json",
-                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
                     "orient": "records",
                 },
             },
@@ -160,7 +157,9 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+                "batching_regex": re.compile(
+                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+                ),
             }
         )
         asset_name = asset_dict["name"]
@@ -180,7 +179,9 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+                "batching_regex": re.compile(
+                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+                ),
             }
         )
         asset_name = asset_dict["name"]
@@ -291,30 +292,8 @@ def test_catch_bad_top_level_config(
                 "column_splitter",
                 "method_name",
             ),
-            "unexpected value; permitted: 'split_on_year_and_month'",
+            "unexpected value; permitted:",
             id="unknown splitter method",
-        ),
-        p(
-            {
-                "name": "bad splitter param",
-                "type": "table",
-                "table_name": "pool",
-                "column_splitter": {
-                    "method_name": "split_on_year_and_month",
-                    "column_name": "foo",
-                    "param_names": ["year", "month", "INVALID"],
-                },
-            },
-            (
-                "xdatasources",
-                "assets",
-                "bad splitter param",
-                "column_splitter",
-                "param_names",
-                2,
-            ),
-            "unexpected value; permitted: 'year', 'month'",
-            id="invalid splitter param_name",
         ),
     ],
 )
@@ -346,7 +325,7 @@ def test_catch_bad_asset_configs(
         if expected_error_loc == all_errors[0]["loc"]:
             test_msg = error["msg"]
             break
-    assert expected_msg == test_msg
+    assert test_msg.startswith(expected_msg)
 
 
 @pytest.mark.unit
@@ -357,9 +336,8 @@ def test_catch_bad_asset_configs(
             {
                 "column_name": "flavor",
                 "method_name": "NOT_VALID",
-                "param_names": ["cherry", "strawberry"],
             },
-            "value_error",
+            "value_error.const",
             "unexpected value; permitted:",
         )
     ],
@@ -370,9 +348,8 @@ def test_general_column_splitter_errors(
     expected_error_type: str,
     expected_msg: str,
 ):
-
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        ColumnSplitter(**bad_column_kwargs)
+        ColumnSplitterYearAndMonth(**bad_column_kwargs)
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -471,7 +448,7 @@ def test_splitters_deserialization(
     table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
-    assert isinstance(table_asset.column_splitter, SqlYearMonthSplitter)
+    assert isinstance(table_asset.column_splitter, ColumnSplitterYearAndMonth)
     assert table_asset.column_splitter.method_name == "split_on_year_and_month"
 
 

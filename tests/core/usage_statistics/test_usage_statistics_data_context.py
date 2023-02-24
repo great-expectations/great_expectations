@@ -35,6 +35,7 @@ def test_enabled_methods_map_to_appropriate_usage_stats_events():
 
     assert filtered == {
         "add_datasource": UsageStatsEvents.DATA_CONTEXT_ADD_DATASOURCE,
+        "add_or_update_expectation_suite": UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
         "build_data_docs": UsageStatsEvents.DATA_CONTEXT_BUILD_DATA_DOCS,
         "get_batch_list": UsageStatsEvents.DATA_CONTEXT_GET_BATCH_LIST,
         "open_data_docs": UsageStatsEvents.DATA_CONTEXT_OPEN_DATA_DOCS,
@@ -43,6 +44,7 @@ def test_enabled_methods_map_to_appropriate_usage_stats_events():
         "run_profiler_with_dynamic_arguments": UsageStatsEvents.DATA_CONTEXT_RUN_RULE_BASED_PROFILER_WITH_DYNAMIC_ARGUMENTS,
         "run_validation_operator": UsageStatsEvents.DATA_CONTEXT_RUN_VALIDATION_OPERATOR,
         "save_expectation_suite": UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        "update_expectation_suite": UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
     }
 
 

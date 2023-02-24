@@ -620,7 +620,7 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
     context: DataContext = (
         data_context_with_runtime_sql_datasource_for_testing_get_batch
     )
-    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+    my_expectation_suite: ExpectationSuite = context.add_expectation_suite(
         "my_expectations"
     )
 
@@ -728,7 +728,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     data_asset_path = os.path.join(
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
-    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+    my_expectation_suite: ExpectationSuite = context.add_expectation_suite(
         "my_expectations"
     )
 

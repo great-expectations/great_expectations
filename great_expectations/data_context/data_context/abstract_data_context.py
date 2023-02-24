@@ -71,6 +71,7 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
     _YamlConfigValidator,
 )
 from great_expectations.data_context.store import Store, TupleStoreBackend
+from great_expectations.data_context.store.profiler_store import ProfilerStore
 from great_expectations.data_context.templates import CONFIG_VARIABLES_TEMPLATE
 from great_expectations.data_context.types.base import (
     CURRENT_GX_CONFIG_VERSION,
@@ -155,7 +156,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
-    from great_expectations.data_context.store.profiler_store import ProfilerStore
+    from great_expectations.data_context.store.store import StoreConfigTypedDict
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
@@ -1467,7 +1468,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return masked_config
 
     @public_api
-    def add_store(self, store_name: str, store_config: dict) -> Store:
+    def add_store(self, store_name: str, store_config: StoreConfigTypedDict) -> Store:
         """Add a new Store to the DataContext.
 
         Args:
@@ -1760,7 +1761,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
-        return self.checkpoint_store.add_checkpoint(checkpoint)
+        try:
+            return self.checkpoint_store.add_checkpoint(checkpoint)
+        except gx_exceptions.CheckpointError as e:
+            # deprecated-v0.15.50
+            warnings.warn(
+                f"{e.message}; using add_checkpoint to overwrite an existing value is deprecated as of v0.15.50 "
+                "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
+                DeprecationWarning,
+            )
+            return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
 
     @public_api
     @new_method_or_class(version="0.15.48")
@@ -1782,6 +1792,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_checkpoint(
         self,
         name: str = ...,
+        id: str | None = ...,
         config_version: int | float | None = ...,
         template_name: str | None = ...,
         module_name: str | None = ...,
@@ -1794,19 +1805,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = ...,
-        batches: list[dict] | None = ...,
-        # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = ...,
         slack_webhook: str | None = ...,
         notify_on: str | None = ...,
         notify_with: str | list[str] | None = ...,
-        ge_cloud_id: str | None = ...,
-        expectation_suite_ge_cloud_id: str | None = ...,
-        default_validation_id: str | None = ...,
-        id: str | None = ...,
         expectation_suite_id: str | None = ...,
+        default_validation_id: str | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1819,6 +1823,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_checkpoint(
         self,
         name: None = ...,
+        id: None = ...,
         config_version: None = ...,
         template_name: None = ...,
         module_name: None = ...,
@@ -1831,17 +1836,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        validation_operator_name: None = ...,
-        batches: None = ...,
         site_names: None = ...,
         slack_webhook: None = ...,
         notify_on: None = ...,
         notify_with: None = ...,
-        ge_cloud_id: None = ...,
-        expectation_suite_ge_cloud_id: None = ...,
-        default_validation_id: None = ...,
-        id: None = ...,
         expectation_suite_id: None = ...,
+        default_validation_id: None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -2374,7 +2374,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 include_rendered_content=include_rendered_content,
             )
         if create_expectation_suite_with_name is not None:
-            expectation_suite = self.create_expectation_suite(
+            expectation_suite = self.add_expectation_suite(
                 expectation_suite_name=create_expectation_suite_with_name,
             )
 
@@ -2847,8 +2847,21 @@ class AbstractDataContext(ConfigPeer, ABC):
                 meta=meta,
             )
 
-        expectation_suite_name = expectation_suite.expectation_suite_name
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        return self._persist_suite_with_store(
+            expectation_suite=expectation_suite,
+            overwrite_existing=overwrite_existing,
+            **kwargs,
+        )
+
+    def _persist_suite_with_store(
+        self,
+        expectation_suite: ExpectationSuite,
+        overwrite_existing: bool,
+        **kwargs,
+    ) -> ExpectationSuite:
+        key = ExpectationSuiteIdentifier(
+            expectation_suite_name=expectation_suite.expectation_suite_name
+        )
 
         persistence_fn: Callable
         if overwrite_existing:
@@ -2861,6 +2874,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
+    # 20230216 - Chetan - Decorating with save to ensure no gaps in usage stats collection
+    # A future effort will add more granular event names
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        args_payload_fn=save_expectation_suite_usage_statistics,
+    )
     def update_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
@@ -2918,6 +2937,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @public_api
     @new_method_or_class(version="0.15.48")
+    # 20230216 - Chetan - Decorating with save to ensure no gaps in usage stats collection
+    # A future effort will add more granular event names
+    @usage_statistics_enabled_method(
+        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
+        args_payload_fn=save_expectation_suite_usage_statistics,
+    )
     def add_or_update_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
@@ -3099,15 +3124,32 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted Profiler constructed by the input arguments.
         """
-        return RuleBasedProfiler.add_profiler(
-            data_context=self,
-            profiler_store=self.profiler_store,
-            name=name,
-            config_version=config_version,
-            rules=rules,
-            variables=variables,
-            profiler=profiler,
-        )
+        try:
+            return RuleBasedProfiler.add_profiler(
+                data_context=self,
+                profiler_store=self.profiler_store,
+                name=name,
+                config_version=config_version,
+                rules=rules,
+                variables=variables,
+                profiler=profiler,
+            )
+        except gx_exceptions.ProfilerError as e:
+            # deprecated-v0.15.50
+            warnings.warn(
+                f"{e.message}; using add_profiler to overwrite an existing value is deprecated as of v0.15.50 "
+                "and will be removed in v0.18. Please use add_or_update_profiler instead.",
+                DeprecationWarning,
+            )
+            return RuleBasedProfiler.add_or_update_profiler(
+                data_context=self,
+                profiler_store=self.profiler_store,
+                name=name,
+                config_version=config_version,
+                rules=rules,
+                variables=variables,
+                profiler=profiler,
+            )
 
     @public_api
     @new_argument(
@@ -3648,8 +3690,8 @@ class AbstractDataContext(ConfigPeer, ABC):
                     + profiler.__name__
                 )
 
-        self.create_expectation_suite(
-            expectation_suite_name=expectation_suite_name, overwrite_existing=True
+        self.add_or_update_expectation_suite(
+            expectation_suite_name=expectation_suite_name
         )
 
         # TODO: Add batch_parameters
@@ -4332,7 +4374,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             conf_file_option="usage_statistics_url",
         )
 
-    def _build_store_from_config(self, store_name: str, store_config: dict) -> Store:
+    def _build_store_from_config(
+        self, store_name: str, store_config: dict | StoreConfigTypedDict
+    ) -> Store:
         module_name = "great_expectations.data_context.store"
         # Set expectations_store.store_backend_id to the data_context_id from the project_config if
         # the expectations_store does not yet exist by:
@@ -4411,7 +4455,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def data_context_id(self) -> str:
         return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _init_stores(self, store_configs: Dict[str, dict]) -> None:
+    def _init_stores(self, store_configs: Dict[str, StoreConfigTypedDict]) -> None:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:

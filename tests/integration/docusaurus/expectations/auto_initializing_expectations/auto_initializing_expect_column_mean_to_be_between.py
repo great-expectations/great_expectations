@@ -65,8 +65,8 @@ batch_request_2018_data: BatchRequest = BatchRequest(
     data_asset_name="yellow_tripdata_sample_2018",
 )
 
-suite = data_context.create_expectation_suite(
-    expectation_suite_name="new_expectation_suite", overwrite_existing=True
+suite = data_context.add_or_update_expectation_suite(
+    expectation_suite_name="new_expectation_suite"
 )
 validator = data_context.get_validator(
     expectation_suite=suite, batch_request=batch_request_2018_data
@@ -75,13 +75,13 @@ validator = data_context.get_validator(
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert len(validator.batches) == 12
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py run expectation">
 expectation_result = validator.expect_column_mean_to_be_between(
     column="trip_distance", auto=True
 )
 # </snippet>
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py save suite">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 

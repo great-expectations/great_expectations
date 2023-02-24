@@ -21,13 +21,13 @@ This guide will help you integrate Great Expectations (GX) with [Google Cloud Pl
 
 :::caution Note on Installing Great Expectations in Google Cloud Composer
 
-  Currently, Great Expectations will only install in Composer 1 and Composer 2 environments with the following packages pinned. 
+  Currently, Great Expectations will only install in Composer 1 and Composer 2 environments with the following packages pinned.
 
   `[tornado]==6.2`
   `[nbconvert]==6.4.5`
   `[mistune]==0.8.4`
 
-  We are currently investigating ways to provide a smoother deployment experience in Google Composer, and will have more updates soon. 
+  We are currently investigating ways to provide a smoother deployment experience in Google Composer, and will have more updates soon.
 
 :::
 
@@ -88,12 +88,12 @@ The full configuration used in this guide can be found in the [`great-expectatio
 #### Add Expectations Store
 By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder. A new Expectations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
-```YAML file=../../tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml#L38-L44
+```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_GCS_store"
 ```
 
 Great Expectations can then be configured to use this new Expectations Store, `expectations_GCS_store`, by setting the `expectations_store_name` value in the `great_expectations.yml` file.
 
-```YAML file=../../tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml#L72
+```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml expectations_store_name"
 ```
 
 For additional details and example configurations, please refer to [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md).
@@ -101,12 +101,12 @@ For additional details and example configurations, please refer to [How to confi
 #### Add Validations Store
 By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `great_expectations/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
-```YAML file=../../tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml#L52-L58
+```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_GCS_store"
 ```
 
 Great Expectations can then be configured to use this new Validations Store, `validations_GCS_store`, by setting the `validations_store_name` value in the `great_expectations.yml` file.
 
-```YAML file=../../tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml#L73
+```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml validations_store_name"
 ```
 
 For additional details and example configurations, please refer to  [How to configure an Validation Result store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md).
@@ -116,7 +116,7 @@ To host and share Datadocs on GCS, we recommend using the [following guide](../g
 
 Afterwards, your `great-expectations.yml` will contain the following configuration under `data_docs_sites`,  with `project`, and `bucket` being replaced with your information.
 
-```YAML file=../../tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml#L91-L98
+```YAML name="tests/integration/fixtures/gcp_deployment/great_expectations/great_expectations.yml gs_site"
 ```
 
 
@@ -219,7 +219,7 @@ First, load a batch of data by specifying a `data_asset_name` in a `BatchRequest
 
 Next, create an ExpectationSuite (`test_gcs_suite` in our example), and use it to get a `Validator`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py create_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_expectation_suite"
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
@@ -246,7 +246,7 @@ First, load a batch of data by specifying an SQL query in a `RuntimeBatchRequest
 
 Next, create an ExpectationSuite (`test_bigquery_suite` in our example), and use it to get a `Validator`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py create_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_or_update_expectation_suite"
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
@@ -409,7 +409,7 @@ Once the `great_expectations/` folder is uploaded to the Cloud Storage bucket, i
 
 We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named: [`ge_checkpoint_gcs.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py).
 
-```python file=../../tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py
+```python name=tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full
 ```
 
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.
@@ -430,7 +430,7 @@ For more details, please consult the [official documentation for Cloud Composer]
 
 We will create a simple DAG with a single node (`t1`) that runs a `BashOperator`, which we will store in a file named:  [`ge_checkpoint_bigquery.py`](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py).
 
-```python file=../../tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py
+```python name=tests/integration/fixtures/gcp_deployment/ge_checkpoint_bigquery.py full
 ```
 
 The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great_expectations`, where we have uploaded our local configuration.

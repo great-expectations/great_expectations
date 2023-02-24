@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List
 
 import pandas as pd
 import pytest
@@ -10,7 +12,11 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context.data_context.data_context import (
+    DataContext,
+    FileDataContext,
+    AbstractDataContext,
+)
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.exceptions import CheckpointError
 from great_expectations.util import filter_properties_dict
@@ -273,7 +279,7 @@ def batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum(
 
 
 @pytest.fixture
-def expected_unexpected_indices_output() -> List[Dict[str, Union[str, int]]]:
+def expected_unexpected_indices_output() -> list[dict[str, str | int]]:
     return [
         {"animals": "giraffe", "pk_1": 3},
         {"animals": "lion", "pk_1": 4},
@@ -294,11 +300,11 @@ def expected_spark_query_output() -> str:
 
 
 def _add_expectations_and_checkpoint(
-    data_context: DataContext,
+    data_context: DataContext | EphemeralDataContext | FileDataContext,
     checkpoint_config: dict,
     expectations_list: List[ExpectationConfiguration],
-    dict_to_update_checkpoint: Union[dict, None] = None,
-) -> DataContext:
+    dict_to_update_checkpoint: dict | None = None,
+) -> DataContext | EphemeralDataContext | FileDataContext:
     """
     Helper method for adding Checkpoint and Expectations to DataContext.
 
@@ -314,14 +320,13 @@ def _add_expectations_and_checkpoint(
         checkpoint_config["runtime_configuration"] = dict_to_update_checkpoint
 
     context: DataContext = data_context
-    context.create_expectation_suite(expectation_suite_name="metrics_exp")
+    context.add_expectation_suite(expectation_suite_name="metrics_exp")
     animals_suite = context.get_expectation_suite(expectation_suite_name="metrics_exp")
     for expectation in expectations_list:
         animals_suite.add_expectation(expectation_configuration=expectation)
-    context.save_expectation_suite(
+    animals_suite.expectation_suite_name = "metrics_exp"
+    context.add_or_update_expectation_suite(
         expectation_suite=animals_suite,
-        expectation_suite_name="metrics_exp",
-        overwriting_existing=True,
     )
     checkpoint_config = CheckpointConfig(**checkpoint_config)
     context.add_checkpoint(
@@ -337,11 +342,11 @@ def _add_expectations_and_checkpoint(
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_animal_names_table,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
-    expected_sql_query_output,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+    expected_sql_query_output: str,
 ):
     """
     What does this test?
@@ -391,11 +396,11 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_with_query(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_animal_names_table,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
-    expected_sql_query_output,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+    expected_sql_query_output: str,
 ):
     """
     What does this test?
@@ -447,9 +452,9 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_complete_output_with_query(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_column_pairs_table,
-    expectation_config_expect_column_pair_values_to_be_equal,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_column_pairs_table: dict,
+    expectation_config_expect_column_pair_values_to_be_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -501,9 +506,9 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_comp
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summary_output(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_column_pairs_table,
-    expectation_config_expect_column_pair_values_to_be_equal,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_column_pairs_table: dict,
+    expectation_config_expect_column_pair_values_to_be_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -548,9 +553,9 @@ def test_sql_result_format_in_checkpoint_pk_defined_column_pair_expectation_summ
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_complete_output_with_query(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_multi_column_sum_table,
-    expectation_config_expect_multicolumn_sum_to_equal,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_multi_column_sum_table: dict,
+    expectation_config_expect_multicolumn_sum_to_equal: ExpectationConfiguration,
 ):
     """
     What does this test?
@@ -617,9 +622,9 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation_summary_output(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_multi_column_sum_table,
-    expectation_config_expect_multicolumn_sum_to_equal,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_multi_column_sum_table: dict,
+    expectation_config_expect_multicolumn_sum_to_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -667,10 +672,10 @@ def test_sql_result_format_in_checkpoint_pk_defined_multi_column_sum_expectation
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_no_query(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_animal_names_table,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -719,11 +724,11 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_out
 
 @pytest.mark.integration
 def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_animal_names_table,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
-    expected_sql_query_output,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+    expected_sql_query_output: str,
 ):
     """
     What does this test?
@@ -769,10 +774,10 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 @pytest.mark.integration
 def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_limit_1(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_animal_names_table,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_sql_query_output,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_sql_query_output: str,
 ):
     """
     What does this test?
@@ -815,9 +820,9 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 @pytest.mark.integration
 def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_animal_names_table,
-    expectation_config_expect_column_values_to_be_in_set,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     """
     What does this test?
@@ -850,12 +855,12 @@ def test_sql_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expe
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_animal_names_table,
-    expectation_config_expect_column_values_to_be_in_set,
-    expectation_config_expect_column_values_to_not_be_in_set,
-    expected_unexpected_indices_output,
-    expected_sql_query_output,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expectation_config_expect_column_values_to_not_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+    expected_sql_query_output: str,
 ):
     """
     What does this test?
@@ -913,10 +918,10 @@ def test_sql_result_format_in_checkpoint_pk_defined_two_expectation_complete_out
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_animal_names_table,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -959,9 +964,9 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_summary_outp
 
 @pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
-    data_context_with_connection_to_metrics_db,
-    reference_sql_checkpoint_config_for_animal_names_table,
-    expectation_config_expect_column_values_to_be_in_set,
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     """
     What does this test?
@@ -1004,14 +1009,60 @@ def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_basic_output
     assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
 
 
+@pytest.mark.integration
+def test_sql_complete_output_no_id_pk_fallback(
+    data_context_with_connection_to_metrics_db: FileDataContext,
+    reference_sql_checkpoint_config_for_animal_names_table: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=data_context_with_connection_to_metrics_db,
+        checkpoint_config=reference_sql_checkpoint_config_for_animal_names_table,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    index_column_names: List[str] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_column_names"
+    )
+    assert not index_column_names
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list = evrs[0]["results"][0]["result"].get(
+        "partial_unexpected_index_list"
+    )
+    assert not first_result_partial_list
+
+    unexpected_index_query = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_query"
+    )
+    # query does not contain id_pk column
+    assert (
+        unexpected_index_query
+        == "SELECT animals \nFROM animal_names \nWHERE animals IS NOT NULL AND (animals NOT IN ('cat', 'fish', 'dog'));"
+    )
+
+
 # pandas
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """ """
     dict_to_update_checkpoint: dict = {
@@ -1056,11 +1107,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_with_query(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """ """
     dict_to_update_checkpoint: dict = {
@@ -1106,11 +1157,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_no_query(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """ """
     dict_to_update_checkpoint: dict = {
@@ -1153,11 +1204,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """ """
     dict_to_update_checkpoint: dict = {
@@ -1204,11 +1255,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 @pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1249,10 +1300,10 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 @pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1287,10 +1338,10 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 @pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -1320,12 +1371,12 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expectation_config_expect_column_values_to_not_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expectation_config_expect_column_values_to_not_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -1384,12 +1435,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
-    unexpected_index_query_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -1434,11 +1484,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
 
 @pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1471,10 +1521,10 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 @pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     context: DataContext = _add_expectations_and_checkpoint(
         data_context=in_memory_runtime_context,
@@ -1503,10 +1553,10 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 @pytest.mark.integration
 def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -1536,12 +1586,12 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expectation_config_expect_column_values_to_not_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expectation_config_expect_column_values_to_not_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -1592,11 +1642,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -1631,10 +1681,10 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -1670,12 +1720,12 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_basic_out
 # spark
 @pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
-    expected_spark_query_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+    expected_spark_query_output: str,
 ):
     """
     What does this test?
@@ -1718,12 +1768,12 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_complete_o
 
 @pytest.mark.integration
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
-    expected_spark_query_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+    expected_spark_query_output: str,
 ):
     """
     What does this test?
@@ -1772,12 +1822,12 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 @pytest.mark.integration
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_with_query(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
-    expected_spark_query_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+    expected_spark_query_output: str,
 ):
     """
     What does this test?
@@ -1829,11 +1879,11 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 @pytest.mark.integration
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_no_query(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -1881,10 +1931,10 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 @pytest.mark.integration
 def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     """
     What does this test?
@@ -1919,13 +1969,13 @@ def test_spark_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_ex
 
 @pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expectation_config_expect_column_values_to_not_be_in_set,
-    expected_unexpected_indices_output,
-    expected_spark_query_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expectation_config_expect_column_values_to_not_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+    expected_spark_query_output: str,
 ):
     """
     What does this test?
@@ -1987,11 +2037,11 @@ def test_spark_result_format_in_checkpoint_pk_defined_two_expectation_complete_o
 
 @pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -2037,10 +2087,10 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
 
 @pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
 ):
     """
     What does this test?
@@ -2086,10 +2136,10 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_outp
 
 @pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_column_pair_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index_column_pair,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_pair_values_to_be_equal,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index_column_pair: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_pair_values_to_be_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -2141,10 +2191,10 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_complete_
 
 @pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index_column_pair,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_pair_values_to_be_equal,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index_column_pair: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_pair_values_to_be_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -2189,10 +2239,10 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_summary_o
 
 @pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_column_pair_expectation_basic_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index_column_pair,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_pair_values_to_be_equal,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index_column_pair: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_pair_values_to_be_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -2235,10 +2285,10 @@ def test_spark_result_format_in_checkpoint_one_column_pair_expectation_basic_out
 
 @pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_multicolumn_sum_to_equal,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_multicolumn_sum_to_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -2296,10 +2346,10 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_compl
 
 @pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_summary_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_multicolumn_sum_to_equal,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_multicolumn_sum_to_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -2343,10 +2393,10 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_summa
 
 @pytest.mark.integration
 def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic_output(
-    in_memory_runtime_context,
-    batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_multicolumn_sum_to_equal,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index_multicolumn_sum: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_multicolumn_sum_to_equal: ExpectationConfiguration,
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -2387,12 +2437,59 @@ def test_spark_result_format_in_checkpoint_one_multicolumn_map_expectation_basic
 
 
 @pytest.mark.integration
+def test_spark_complete_output_no_id_pk_fallback(
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+):
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="metrics_exp",
+        batch_request=batch_request_for_spark_unexpected_rows_and_index,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_column_names"
+    )
+    assert not index_column_names
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0][
+        "result"
+    ].get("partial_unexpected_index_list")
+    assert not first_result_partial_list
+    unexpected_index_query: List[int] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_query"
+    )
+    assert (
+        unexpected_index_query
+        == "df.filter(F.expr((animals IS NOT NULL) AND (NOT (animals IN (cat, fish, dog)))))"
+    )
+
+
+@pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """ """
     dict_to_update_checkpoint: dict = {
@@ -2434,11 +2531,11 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_one_index_column(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -2506,11 +2603,11 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column(
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_column(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -2560,11 +2657,11 @@ def test_pandas_result_format_in_checkpoint_named_index_one_index_column_wrong_c
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_two_index_column(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -2633,11 +2730,11 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column(
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -2696,11 +2793,11 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -2766,11 +2863,11 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_different_column_specified_in_result_format(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -2823,11 +2920,11 @@ def test_pandas_result_format_in_checkpoint_named_index_different_column_specifi
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_named_index_two_index_column_set(
-    in_memory_runtime_context,
-    pandas_animals_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """
     What does this test?
@@ -2894,11 +2991,11 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_set(
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_values_to_be_in_set,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     """ """
     dict_to_update_checkpoint: dict = {
@@ -2932,11 +3029,11 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output(
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index_column_pair,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_pair_values_to_be_equal,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index_column_pair: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_pair_values_to_be_equal: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -2985,11 +3082,11 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete_output_one_index_column(
-    in_memory_runtime_context,
-    pandas_column_pairs_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_pair_values_to_be_equal,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_column_pairs_dataframe_for_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_pair_values_to_be_equal: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -3056,11 +3153,11 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete_output_two_index_column(
-    in_memory_runtime_context,
-    pandas_column_pairs_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_column_pair_values_to_be_equal,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_column_pairs_dataframe_for_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_pair_values_to_be_equal: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -3128,11 +3225,11 @@ def test_pandas_result_format_in_checkpoint_one_column_pair_expectation_complete
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output(
-    in_memory_runtime_context,
-    batch_request_for_pandas_unexpected_rows_and_index_multicolumn_sum,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_multicolumn_sum_to_equal,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_pandas_unexpected_rows_and_index_multicolumn_sum: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_multicolumn_sum_to_equal: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -3187,11 +3284,11 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output_one_index_column(
-    in_memory_runtime_context,
-    pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_multicolumn_sum_to_equal,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_multicolumn_sum_to_equal: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
@@ -3263,11 +3360,11 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_complete_output_two_index_column(
-    in_memory_runtime_context,
-    pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index,
-    reference_checkpoint_config_for_unexpected_column_names,
-    expectation_config_expect_multicolumn_sum_to_equal,
-    expected_unexpected_indices_output,
+    in_memory_runtime_context: AbstractDataContext,
+    pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_multicolumn_sum_to_equal: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
 ):
     dict_to_update_checkpoint: dict = {
         "result_format": {
