@@ -1,6 +1,6 @@
 {
-    "title": "PandasSPSSAsset",
-    "description": "Load an SPSS file from the file path, returning a DataFrame.\n\n.. versionadded:: 0.25.0\n\nParameters\n----------\npath : str or Path\n    File path.\nusecols : list-like, optional\n    Return a subset of the columns. If None, return all columns.\nconvert_categoricals : bool, default is True\n    Convert categorical columns into pd.Categorical.\n\nReturns\n-------\nDataFrame",
+    "title": "PickleAsset",
+    "description": "Load pickled pandas object (or any object) from file.\n\n.. warning::\n\n   Loading pickled data received from untrusted sources can be\n   unsafe. See `here <https://docs.python.org/3/library/pickle.html>`__.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pandas_spss",
+            "default": "pickle",
             "enum": [
-                "pandas_spss"
+                "pickle"
             ],
             "type": "string"
         },
@@ -22,44 +22,31 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "path": {
-            "title": "Path",
+        "filepath_or_buffer": {
+            "title": "Filepath Or Buffer",
+            "format": "file-path",
+            "type": "string"
+        },
+        "compression": {
+            "title": "Compression",
+            "default": "infer",
             "anyOf": [
                 {
                     "type": "string"
                 },
                 {
-                    "type": "string",
-                    "format": "path"
+                    "type": "object"
                 }
             ]
         },
-        "usecols": {
-            "title": "Usecols",
-            "anyOf": [
-                {
-                    "type": "integer"
-                },
-                {
-                    "type": "string"
-                },
-                {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                }
-            ]
-        },
-        "convert_categoricals": {
-            "title": "Convert Categoricals",
-            "default": true,
-            "type": "boolean"
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
         }
     },
     "required": [
         "name",
-        "path"
+        "filepath_or_buffer"
     ],
     "additionalProperties": false,
     "definitions": {
