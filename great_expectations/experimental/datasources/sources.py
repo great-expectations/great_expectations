@@ -173,7 +173,7 @@ class _SourceFactories:
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
                 logger.debug(
-                    f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
+                    f"2b. Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"
                 )
                 asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
