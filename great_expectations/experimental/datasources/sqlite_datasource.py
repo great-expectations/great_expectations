@@ -166,10 +166,10 @@ class SqliteDatasource(SQLDatasource):
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
     connection_string: SqliteDsn
 
-    _TableAsset: Type[SqliteTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)  # type: ignore[assignment]  # override superclass type
-    _QueryAsset: Type[SqliteQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)  # type: ignore[assignment]  # override superclass type
+    _TableAsset: Type[SqliteTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)
+    _QueryAsset: Type[SqliteQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
 
-    def add_table_asset(  # type: ignore[override]  # override return type
+    def add_table_asset(
         self,
         name: str,
         table_name: str,
@@ -181,10 +181,16 @@ class SqliteDatasource(SQLDatasource):
             super().add_table_asset(name, table_name, schema_name, order_by),
         )
 
-    def add_query_asset(  # type: ignore[override]  # override return type
+    def add_query_asset(
         self,
         name: str,
         query: str,
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> SqliteQueryAsset:
         return cast(SqliteQueryAsset, super().add_query_asset(name, query, order_by))
+
+
+# Removed automatically added add_*_asset methods we don't want.
+# TODO: Prevent these from being created.
+delattr(SqliteDatasource, "add_sqlite_table_asset")
+delattr(SqliteDatasource, "add_sqlite_query_asset")
