@@ -236,7 +236,7 @@ runtime_configuration:
 """
 # </snippet>
 
-add_or_update_checkpoint(**yaml.load(nesting_with_defaults))
+context.add_or_update_checkpoint(**yaml.load(nesting_with_defaults))
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py run_checkpoint_2">
 results = context.run_checkpoint(checkpoint_name="my_checkpoint")
 # </snippet>

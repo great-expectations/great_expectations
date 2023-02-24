@@ -1,6 +1,6 @@
 {
-    "title": "CSVSparkAsset",
-    "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+    "title": "FeatherAsset",
+    "description": "Load a feather-format object from the file path.",
     "type": "object",
     "properties": {
         "name": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "csv_spark",
+            "default": "feather",
             "enum": [
-                "csv_spark"
+                "feather"
             ],
             "type": "string"
         },
@@ -26,12 +26,25 @@
             "title": "Batching Regex",
             "type": "string",
             "format": "regex"
+        },
+        "columns": {
+            "title": "Columns"
+        },
+        "use_threads": {
+            "title": "Use Threads",
+            "default": true,
+            "type": "boolean"
+        },
+        "storage_options": {
+            "title": "Storage Options",
+            "type": "object"
         }
     },
     "required": [
         "name",
         "batching_regex"
     ],
+    "additionalProperties": false,
     "definitions": {
         "BatchSorter": {
             "title": "BatchSorter",

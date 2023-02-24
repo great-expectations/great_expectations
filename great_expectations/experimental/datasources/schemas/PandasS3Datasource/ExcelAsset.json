@@ -1,5 +1,5 @@
 {
-    "title": "PandasExcelAsset",
+    "title": "ExcelAsset",
     "description": "Read an Excel file into a pandas DataFrame.\n\nSupports `xls`, `xlsx`, `xlsm`, `xlsb`, `odf`, `ods` and `odt` file extensions\nread from a local filesystem or URL. Supports an option to read\na single sheet or a list of sheets.",
     "type": "object",
     "properties": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "pandas_excel",
+            "default": "excel",
             "enum": [
-                "pandas_excel"
+                "excel"
             ],
             "type": "string"
         },
@@ -22,8 +22,10 @@
                 "$ref": "#/definitions/BatchSorter"
             }
         },
-        "io": {
-            "title": "Io"
+        "batching_regex": {
+            "title": "Batching Regex",
+            "type": "string",
+            "format": "regex"
         },
         "sheet_name": {
             "title": "Sheet Name",
@@ -139,7 +141,7 @@
     },
     "required": [
         "name",
-        "io"
+        "batching_regex"
     ],
     "additionalProperties": false,
     "definitions": {
