@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "sqlite_table",
+            "default": "table",
             "enum": [
-                "sqlite_table"
+                "table"
             ],
             "type": "string"
         },
@@ -45,12 +45,6 @@
                 },
                 {
                     "$ref": "#/definitions/ColumnSplitterDatetimePart"
-                },
-                {
-                    "$ref": "#/definitions/ColumnSplitterHashedColumn"
-                },
-                {
-                    "$ref": "#/definitions/ColumnSplitterConvertedDateTime"
                 }
             ]
         },
@@ -263,62 +257,6 @@
             "required": [
                 "column_name",
                 "datetime_parts"
-            ],
-            "additionalProperties": false
-        },
-        "ColumnSplitterHashedColumn": {
-            "title": "ColumnSplitterHashedColumn",
-            "description": "Splite on hash value of a column.\n\nArgs:\n    hash_digits: The number of digits to truncate the hash to.\n    method_name: Literal[\"split_on_hashed_column\"]",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "split_on_hashed_column",
-                    "enum": [
-                        "split_on_hashed_column"
-                    ],
-                    "type": "string"
-                },
-                "hash_digits": {
-                    "title": "Hash Digits",
-                    "type": "integer"
-                }
-            },
-            "required": [
-                "column_name",
-                "hash_digits"
-            ],
-            "additionalProperties": false
-        },
-        "ColumnSplitterConvertedDateTime": {
-            "title": "ColumnSplitterConvertedDateTime",
-            "description": "A column splitter than can be used for sql engines that represents datetimes as strings.\n\nThe SQL engine that this currently supports is SQLite since it stores its datetimes as\nstrings.\nThe DatetimeColumnSplitter will also work for SQLite and may be more intuitive.",
-            "type": "object",
-            "properties": {
-                "column_name": {
-                    "title": "Column Name",
-                    "type": "string"
-                },
-                "method_name": {
-                    "title": "Method Name",
-                    "default": "split_on_converted_datetime",
-                    "enum": [
-                        "split_on_converted_datetime"
-                    ],
-                    "type": "string"
-                },
-                "date_format_string": {
-                    "title": "Date Format String",
-                    "type": "string"
-                }
-            },
-            "required": [
-                "column_name",
-                "date_format_string"
             ],
             "additionalProperties": false
         }
