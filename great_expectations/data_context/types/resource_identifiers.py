@@ -525,8 +525,6 @@ class SiteSectionIdentifier(DataContextKey):
 class ConfigurationIdentifier(DataContextKey):
     def __init__(self, configuration_key: str) -> None:
         super().__init__()
-        # if isinstance(configuration_key, UUID):
-        #     configuration_key = str(configuration_key)
         if not isinstance(configuration_key, str):
             raise gx_exceptions.InvalidDataContextKeyError(
                 f"configuration_key must be a string, not {type(configuration_key).__name__}"
