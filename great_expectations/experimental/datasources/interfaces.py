@@ -345,6 +345,7 @@ class Datasource(
         "glob_directive",  # filesystem argument
         "data_context_root_directory",  # filesystem argument
         "bucket",  # s3 argument
+        "boto3_options",  # s3 argument
         "prefix",  # s3 argument
         "delimiter",  # s3 argument
         "max_keys",  # s3 argument
