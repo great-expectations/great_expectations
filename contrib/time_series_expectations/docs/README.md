@@ -102,7 +102,7 @@ time_series_expectation_suite = context.assistants.time_series_by_row.profile_da
 
 This module introduces several new Expectations, inheriting from some new abstract base classes.
 
-You can learn more about the Expectations in the Expectation gallery, [here](link).
+You can learn more about the Expectations in the Expectation gallery, [here](https://greatexpectations.io/expectations).
 
 
 ### Abstract Base Classes
