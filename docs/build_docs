@@ -31,6 +31,12 @@ echo -e "${ORANGE}Installing dev dependencies.${NC}"
 echo -e "${ORANGE}Building sphinx API docs.${NC}"
 (cd ../sphinx_api_docs_source; invoke docs)
 
+echo -e "${ORANGE}DIAGNOSTICS${NC}"
+pwd
+ls
+tree
+echo -e "${ORANGE}DIAGNOSTICS END${NC}"
+
 if [ "$PULL_REQUEST" == "false" ]
 then
   echo -e "${ORANGE}Not in a pull request. Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs.${NC}"
