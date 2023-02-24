@@ -488,9 +488,6 @@ def type_schema(
     from great_expectations.experimental.datasources import (
         _PANDAS_SCHEMA_VERSION,
         Datasource,
-        PandasDatasource,
-        PandasFilesystemDatasource,
-        _PandasDatasource,
     )
     from great_expectations.experimental.datasources.sources import (
         _iter_all_registered_types,
@@ -522,14 +519,7 @@ def type_schema(
             continue
 
         if (
-            issubclass(
-                model,
-                (
-                    _PandasDatasource,
-                    *PandasDatasource.asset_types,
-                    *PandasFilesystemDatasource.asset_types,
-                ),
-            )
+            datasource_dir.name.startswith("Pandas")
             and _PANDAS_SCHEMA_VERSION != pandas.__version__
         ):
             print(
