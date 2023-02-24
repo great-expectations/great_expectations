@@ -17,8 +17,10 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     TestConnectionError,
 )
+from great_expectations.experimental.datasources.spark_file_path_datasource import (
+    CSVAsset,
+)
 from great_expectations.experimental.datasources.spark_filesystem_datasource import (
-    CSVSparkAsset,
     SparkFilesystemDatasource,
 )
 
@@ -96,7 +98,7 @@ def test_add_csv_asset_with_batching_regex_to_datasource(
 @pytest.mark.unit
 def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
-    asset = CSVSparkAsset(
+    asset = CSVAsset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",  # Ignoring IDE warning (type declarations are consistent).
     )
@@ -332,7 +334,7 @@ def bad_batching_regex_config(
         r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     )
     test_connection_error = TestConnectionError(
-        f"""No file at base_directory path "{csv_path.resolve()}" matched regular expressions pattern "{batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_spark_asset"."""
+        f"""No file at base_directory path "{csv_path.resolve()}" matched regular expressions pattern "{batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_asset"."""
     )
     return batching_regex, test_connection_error
 
@@ -344,7 +346,7 @@ def datasource_test_connection_error_messages(
     request,
 ) -> tuple[SparkFilesystemDatasource, TestConnectionError]:
     batching_regex, test_connection_error = request.param(csv_path=csv_path)
-    csv_asset = CSVSparkAsset(
+    csv_asset = CSVAsset(
         name="csv_asset",
         batching_regex=batching_regex,
     )
