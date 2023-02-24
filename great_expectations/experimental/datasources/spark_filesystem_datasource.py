@@ -3,90 +3,33 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
+from typing import Optional, Union
 
 from typing_extensions import Literal
 
+from great_expectations.experimental.datasources import _SparkFilePathDatasource
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     DataConnector,
     FilesystemDataConnector,
 )
-from great_expectations.experimental.datasources.file_path_data_asset import (
-    _FilePathDataAsset,
-)
 from great_expectations.experimental.datasources.interfaces import (
     BatchSorter,
     BatchSortersDefinition,
-    DataAsset,
-    Datasource,
     TestConnectionError,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.execution_engine import SparkDFExecutionEngine
+from great_expectations.experimental.datasources.spark_file_path_datasource import (
+    CSVAsset,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class SparkDatasourceError(Exception):
-    pass
-
-
-class CSVSparkAsset(_FilePathDataAsset):
-    # Overridden inherited instance fields
-    type: Literal["csv_spark"] = "csv_spark"
-
-    def _get_reader_method(self) -> str:
-        return f"{self.type[0:-6]}"
-
-    def _get_reader_options_include(self) -> set[str] | None:
-        return {"header", "inferSchema"}
-
-
-class _SparkDatasource(Datasource):
-    # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVSparkAsset]
-
-    # instance attributes
-    assets: Dict[
-        str,
-        CSVSparkAsset,
-    ] = {}
-
-    # Abstract Methods
-    @property
-    def execution_engine_type(self) -> Type[SparkDFExecutionEngine]:
-        """Return the SparkDFExecutionEngine unless the override is set"""
-        from great_expectations.execution_engine.sparkdf_execution_engine import (
-            SparkDFExecutionEngine,
-        )
-
-        return SparkDFExecutionEngine
-
-    def test_connection(self, test_assets: bool = True) -> None:
-        """Test the connection for the _SparkDatasource.
-
-        Args:
-            test_assets: If assets have been passed to the _SparkDatasource,
-                         an attempt can be made to test them as well.
-
-        Raises:
-            TestConnectionError: If the connection test fails.
-        """
-        raise NotImplementedError(
-            """One needs to implement "test_connection" on a _SparkDatasource subclass."""
-        )
-
-    # End Abstract Methods
-
-
-class SparkFilesystemDatasource(_SparkDatasource):
+class SparkFilesystemDatasource(_SparkFilePathDatasource):
     # instance attributes
     type: Literal["spark_filesystem"] = "spark_filesystem"
-    name: str
+
     base_directory: pathlib.Path
     data_context_root_directory: Optional[pathlib.Path] = None
-    assets: Dict[str, CSVSparkAsset] = {}
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SparkDatasource.
@@ -114,7 +57,7 @@ class SparkFilesystemDatasource(_SparkDatasource):
         header: bool = False,
         infer_schema: bool = False,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> CSVSparkAsset:
+    ) -> CSVAsset:
         """Adds a csv asset to this Spark datasource
 
         Args:
@@ -132,7 +75,7 @@ class SparkFilesystemDatasource(_SparkDatasource):
             order_by=order_by
         )
 
-        asset = CSVSparkAsset(
+        asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             header=header,
