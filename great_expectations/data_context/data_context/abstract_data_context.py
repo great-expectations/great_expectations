@@ -4461,7 +4461,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def data_context_id(self) -> str:
         return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _init_primary_stores(self, store_configs: Dict[str, dict]) -> None:
+    def _init_primary_stores(
+        self, store_configs: Dict[str, StoreConfigTypedDict]
+    ) -> None:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
