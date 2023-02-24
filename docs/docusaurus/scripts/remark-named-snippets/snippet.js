@@ -9,6 +9,7 @@ const htmlparser2 = require('htmlparser2')
  * @returns {object} The "snippet map", which is an object with name, snippet key-value pairs.
  */
 function constructSnippetMap (dirs) {
+  console.log('inside constructSnippetMap')
   const snippets = parseSourceDirectories(dirs)
 
   const snippetMap = {}
@@ -162,8 +163,8 @@ function sanitizeText (text) {
  * An alias `yarn snippet-check` is defined in `package.json` for convenience.
  */
 function main () {
-  const snippets = parseSourceDirectories(['../../great_expectations', '../../tests'])
   console.log('--------------- SNIPPETS ----------------')
+  const snippets = parseSourceDirectories(['../../great_expectations', '../../tests'])
   console.log(snippets.length)
   console.log('--------------- SNIPPETS ----------------')
   const targetFiles = process.argv.slice(2)

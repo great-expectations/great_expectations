@@ -21,10 +21,10 @@ echo "Installing dev dependencies"
 pip install -c constraints-dev.txt -e ".[test]"
 
 echo "Installing dev dependencies"
-(cd docs/sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
+(cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
 echo "Building sphinx API docs."
-(cd docs/sphinx_api_docs_source; invoke docs)
+(cd ../sphinx_api_docs_source; invoke docs)
 
 if [ "$PULL_REQUEST" == "false" ]
 then
