@@ -84,7 +84,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         max_keys: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,  # TODO: update signature to have specific keys & types
-    ) -> CSVAsset:  # type: ignore[valid-type]
+    ) -> CSVAsset:
         """Adds a CSV DataAsst to the present "SparkS3Datasource" object.
 
         Args:
