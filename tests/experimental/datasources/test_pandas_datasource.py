@@ -267,7 +267,7 @@ class TestDynamicPandasAssets:
             empty_data_context.sources.add_pandas(
                 "my_pandas",
             )
-            .add_pandas_csv_asset(
+            .add_csv_asset(
                 "my_csv",
                 **extra_kwargs,
             )
