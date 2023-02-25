@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from great_expectations.data_context.util import file_relative_path
-from time_series_expectations.generator import generate_daily_time_series_df
+# from time_series_expectations.generator import generate_daily_time_series_df
+from time_series_expectations.generator.daily_time_series_expectations import DailyTimeSeriesGenerator
 
 plt.rcParams["figure.figsize"] = (20, 3)
 
@@ -24,7 +25,8 @@ def generate_time_series_data_and_plot(
     filename = f"{grain}__size_{size}__trend_{trend}__weekly_seasonality_{weekly_seasonality}__outliers_{outlier_alpha}"
     print(filename)
 
-    df = generate_daily_time_series_df(
+    generator = DailyTimeSeriesGenerator()
+    df = generator.generator_df(
         size=size,
         trend_params=[
             {

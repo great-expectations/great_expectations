@@ -40,6 +40,7 @@ See [the script that creates examples](link) and [the API docs](link) for additi
 
 * Add better documentation and better testing for synthetic time series generation
 * Add support for additional time series grains (not just daily)
+* Define `requirements` and documentation for installation
 * Add SQL implementation for `expect_column_pair_values_to_match_prophet_date_model` and other row-level metrics.
 * Add Data Assistants for creating time series Expectations
 * Add better renderers for time series Expectations, including graphs produced by `altair`
