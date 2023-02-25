@@ -1,2 +1,3 @@
 --requirement requirements.txt
 --requirement reqs/requirements-dev-contrib.txt
+pyspark-stubs
