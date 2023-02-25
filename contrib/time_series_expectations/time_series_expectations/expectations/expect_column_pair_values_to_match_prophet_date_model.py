@@ -125,7 +125,7 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
         * Prophet is an open source forecasting library created at facebook. For more information, please see the [project github page](https://github.com/facebook/prophet).
 
     """
-    
+
     with open(file_relative_path(__file__, "example_prophet_date_model.json")) as f_:
         model_json = f_.read()
 
