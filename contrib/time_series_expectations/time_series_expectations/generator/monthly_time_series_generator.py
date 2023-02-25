@@ -7,7 +7,7 @@ from time_series_expectations.generator.time_series_generator import TrendParams
 from time_series_expectations.generator.daily_time_series_generator import DailyTimeSeriesGenerator
 
 class MonthlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
-    """Generate a daily time series with trend, seasonality, and outliers."""
+    """Generate a monthly time series with trend, seasonality, and outliers."""
 
     def generate_df(
         self,

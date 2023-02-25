@@ -13,40 +13,40 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
 
     def _generate_trend(
         self,
-        time:int,
+        date_range:np.ndarray,
         trend_params:List[TrendParams],
     ) -> np.ndarray:
         """Generate a trend component for a time series."""
 
-        X = time * 0
+        X = date_range * 0
         prev_cutpoint = 0
         for param_set in trend_params:
             X[prev_cutpoint : param_set["cutpoint"]] = param_set["alpha"] + param_set[
                 "beta"
-            ] * (time[prev_cutpoint : param_set["cutpoint"]] - prev_cutpoint)
+            ] * (date_range[prev_cutpoint : param_set["cutpoint"]] - prev_cutpoint)
             prev_cutpoint = param_set["cutpoint"]
         return X
 
     def _generate_weekday_seasonality(
         self,
-        time:int,
+        date_range:np.ndarray,
         weekday_dummy_params:List[float],
     ) -> np.ndarray:
         """Generate a weekday seasonality component for a time series."""
 
-        return np.array([weekday_dummy_params[t % 7] for t in time])
+        return np.array([weekday_dummy_params[t % 7] for t in date_range])
 
     def _generate_annual_seasonality(
         self,
-        time:int,
+        date_range:np.ndarray,
         annual_seasonality_params:List[Tuple[float, float]],
     ) -> np.ndarray:
         """Generate an annual seasonality component for a time series."""
 
         return sum(
             [
-                alpha * np.cos(2 * np.pi * (i + 1) * time / 365)
-                + beta * np.sin(2 * np.pi * (i + 1) * time / 365)
+                alpha * np.cos(2 * np.pi * (i + 1) * date_range / 365)
+                + beta * np.sin(2 * np.pi * (i + 1) * date_range / 365)
                 for i, (alpha, beta) in enumerate(annual_seasonality_params)
             ]
         )
@@ -78,11 +78,11 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
     ):
         """Generate the components of a time series."""
 
-        time = np.arange(size)
+        date_range = np.arange(size)
 
-        trend = self._generate_trend(time, trend_params)
-        weekly_seasonality = self._generate_weekday_seasonality(time, weekday_dummy_params)
-        annual_seasonality = self._generate_annual_seasonality(time, annual_seasonality_params)
+        trend = self._generate_trend(date_range, trend_params)
+        weekly_seasonality = self._generate_weekday_seasonality(date_range, weekday_dummy_params)
+        annual_seasonality = self._generate_annual_seasonality(date_range, annual_seasonality_params)
         holidays = self._generate_posneg_pareto(holiday_alpha, size)
         outliers = self._generate_posneg_pareto(outlier_alpha, size)
         noise = np.random.normal(scale=noise_scale, size=size)

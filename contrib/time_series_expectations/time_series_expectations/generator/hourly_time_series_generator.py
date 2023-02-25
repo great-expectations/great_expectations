@@ -3,19 +3,73 @@ from typing import List, Optional, Tuple, TypedDict
 import pandas as pd
 import numpy as np
 
-from time_series_expectations.generator.time_series_generator import (
-    TimeSeriesGenerator,
-    TrendParams,
-)
+from time_series_expectations.generator.time_series_generator import TrendParams
 from time_series_expectations.generator.daily_time_series_generator import DailyTimeSeriesGenerator
 
-class HourlyTimeSeriesGenerator(TimeSeriesGenerator):
+class HourlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
     """Generate an hourly time series with trend, seasonality, and outliers."""
+
+    def _generate_hourly_seasonality(
+        self,
+        time_range:np.ndarray,
+        hourly_seasonality_params:List[Tuple[float, float]],
+    ) -> np.ndarray:
+        """Generate an annual seasonality component for a time series."""
+
+        return sum(
+            [
+                alpha * np.cos(2 * np.pi * (i + 1) * time_range / 24)
+                + beta * np.sin(2 * np.pi * (i + 1) * time_range / 24)
+                for i, (alpha, beta) in enumerate(hourly_seasonality_params)
+            ]
+        )
+
+    
+    def _generate_hourly_time_series(
+        self,
+        size:int,
+        hourly_seasonality_params:Optional[List[Tuple[float, float]]]=None,
+        trend_params:Optional[List[TrendParams]]=None,
+        weekday_dummy_params:Optional[List[float]]=None,
+        annual_seasonality_params:Optional[List[Tuple[float, float]]]=None,
+        holiday_alpha:float=3.5,
+        outlier_alpha:float=2.5,
+        noise_scale:float=1.0,
+    ):
+        """Generate an hourly time series."""
+        if hourly_seasonality_params is None:
+            #Create 10 random hourly seasonality parameters
+            hourly_seasonality_params = [
+                (
+                    np.random.normal()/100,
+                    np.random.normal()/100,
+                )
+                for i in range(4)
+            ]
+
+        time_range = np.arange(size)
+
+        hourly_seasonality = self._generate_hourly_seasonality(
+            time_range=time_range,
+            hourly_seasonality_params=hourly_seasonality_params,
+        )
+
+        daily_time_series = self._generate_daily_time_series(
+            int(size/24),
+            trend_params,
+            weekday_dummy_params,
+            annual_seasonality_params,
+            holiday_alpha,
+            outlier_alpha,
+            noise_scale
+        )
+        return np.exp(hourly_seasonality) * np.repeat(daily_time_series,24)
 
     def generate_df(
         self,
-        size:Optional[int] = 365 * 3,
+        size:Optional[int] = 90 * 24, # 90 days worth of data
         start_date:Optional[str] = "2018-01-01",
+        hourly_seasonality_params:Optional[List[Tuple[float, float]]]=None,
         trend_params:Optional[List[TrendParams]]=None,
         weekday_dummy_params:Optional[List[float]]=None,
         annual_seasonality_params:Optional[List[Tuple[float, float]]]=None,
@@ -46,15 +100,16 @@ class HourlyTimeSeriesGenerator(TimeSeriesGenerator):
 
         return pd.DataFrame(
             {
-                "ds": pd.date_range(start_date, periods=size, freq="D"),
-                "y": self._generate_daily_time_series(
-                    size,
-                    trend_params,
-                    weekday_dummy_params,
-                    annual_seasonality_params,
-                    holiday_alpha,
-                    outlier_alpha,
-                    noise_scale,
+                "ds": pd.date_range(start_date, periods=size, freq="60min"),
+                "y": self._generate_hourly_time_series(
+                    size=size,
+                    hourly_seasonality_params=hourly_seasonality_params,
+                    trend_params=trend_params,
+                    weekday_dummy_params=weekday_dummy_params,
+                    annual_seasonality_params=annual_seasonality_params,
+                    holiday_alpha=holiday_alpha,
+                    outlier_alpha=outlier_alpha,
+                    noise_scale=noise_scale,
                 ),
             }
         )

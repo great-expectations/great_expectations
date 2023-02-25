@@ -25,6 +25,7 @@ class WeeklyTimeSeriesGenerator(DailyTimeSeriesGenerator):
         
         Keyword Args:
             size: The number of days in the time series.
+            day_of_week: The day of the week to generate the time series for
             start_date: The start date of the time series.
             trend_params: A list of trend parameters corresponding to cutpoints in the time series.
             weekday_dummy_params: A list of weekday dummy parameters. Should be a list of length 7, with each day corresponding to the average difference in the time series on that day.

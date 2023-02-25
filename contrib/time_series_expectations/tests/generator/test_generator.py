@@ -1,3 +1,6 @@
+from time_series_expectations.generator.hourly_time_series_generator import (
+    HourlyTimeSeriesGenerator,
+)
 from time_series_expectations.generator.daily_time_series_generator import (
     DailyTimeSeriesGenerator,
 )
@@ -10,6 +13,7 @@ from time_series_expectations.generator.monthly_time_series_generator import (
 
 def test__imports():
     from time_series_expectations.generator import (
+        HourlyTimeSeriesGenerator,
         DailyTimeSeriesGenerator,
         WeeklyTimeSeriesGenerator,
         MonthlyTimeSeriesGenerator,
@@ -68,3 +72,14 @@ def test__generate_monthly_time_series_df():
         size=20,
     )
     assert df.shape == (20, 2)
+
+def test__generate_hourly_time_series_df():
+    generator = HourlyTimeSeriesGenerator()
+
+    df = generator.generate_df()
+    assert df.shape == (90*24, 2)
+
+    df = generator.generate_df(
+        hourly_seasonality_params=[(1.0, 0.0)]
+    )
+    assert df.shape == (90*24, 2)
