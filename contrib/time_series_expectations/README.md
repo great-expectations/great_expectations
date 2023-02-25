@@ -31,23 +31,32 @@ Backend support:
 ### Methods for generating synthetic time series data
 
 ```
-generate_time_series_df()
+from time_series_expectations.generator import DailyTimeSeriesGenerator
+
+generator = DailyTimeSeriesGenerator()
+df = generator.generate_df()
+
+df = generator.generate_df(
+    size=180,
+    noise=5.0,
+    start_date="2022-01-01",
+    weekday_dummy_params=[0.0, 1.0, 4.0, 3.0, 2.0, -3.0, -4.5],
+)
+
+# etc.
 ```
 
-See [the script that creates examples](link) and [the API docs](link) for additional examples
+See the script that creates examples (`assets/generate_test_time_series_data.py`) and tests(link) for additional examples
 
 ### Future work
 
-* Add better documentation and better testing for synthetic time series generation
 * Add support for additional time series grains (not just daily)
+* Add more options for time series models, other than `prophet` (e.g. `statsmodels.tst.arima`, `pdarima`, `NeuralProphet`)
+* Add methods for pulling illustrative time series data from real-world sources
 * Define `requirements` and documentation for installation
 * Add SQL implementation for `expect_column_pair_values_to_match_prophet_date_model` and other row-level metrics.
 * Add Data Assistants for creating time series Expectations
 * Add better renderers for time series Expectations, including graphs produced by `altair`
-* Add methods for pulling illustrative time series data from real-world sources
-* Add more options for time series models, other than `prophet` (e.g. `statsmodels.tst.arima`, `pdarima`, `NeuralProphet`)
-
-
 
 ### Design notes on future class hierarchy
 

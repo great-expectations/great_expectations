@@ -2,6 +2,9 @@ from time_series_expectations.generator.daily_time_series_generator import (
     DailyTimeSeriesGenerator,
 )
 
+def test__imports():
+    from time_series_expectations.generator import DailyTimeSeriesGenerator
+
 def test__generate_daily_time_series_df():
     generator = DailyTimeSeriesGenerator()
 
