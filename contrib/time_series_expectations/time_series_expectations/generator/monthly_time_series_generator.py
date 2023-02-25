@@ -1,27 +1,29 @@
-from typing import List, Optional, Tuple, TypedDict
+from typing import List, Optional, Tuple
 
 import pandas as pd
-import numpy as np
 
+from time_series_expectations.generator.daily_time_series_generator import (
+    DailyTimeSeriesGenerator,
+)
 from time_series_expectations.generator.time_series_generator import TrendParams
-from time_series_expectations.generator.daily_time_series_generator import DailyTimeSeriesGenerator
+
 
 class MonthlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
     """Generate a monthly time series with trend, seasonality, and outliers."""
 
     def generate_df(
         self,
-        size:Optional[int] = 365 * 3,
-        start_date:Optional[str] = "2018-01-01",
-        trend_params:Optional[List[TrendParams]]=None,
-        weekday_dummy_params:Optional[List[float]]=None,
-        annual_seasonality_params:Optional[List[Tuple[float, float]]]=None,
-        holiday_alpha:float=3.5,
-        outlier_alpha:float=2.5,
-        noise_scale:float=1.0,
+        size: Optional[int] = 365 * 3,
+        start_date: Optional[str] = "2018-01-01",
+        trend_params: Optional[List[TrendParams]] = None,
+        weekday_dummy_params: Optional[List[float]] = None,
+        annual_seasonality_params: Optional[List[Tuple[float, float]]] = None,
+        holiday_alpha: float = 3.5,
+        outlier_alpha: float = 2.5,
+        noise_scale: float = 1.0,
     ) -> pd.DataFrame:
         """Generate a time series as a pandas dataframe.
-        
+
         Keyword Args:
             size: The number of days in the time series.
             start_date: The start date of the time series.
@@ -44,9 +46,9 @@ class MonthlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
         # Start with a daily time series that includes all dates in the target range
         df = pd.DataFrame(
             {
-                "ds": pd.date_range(start_date, periods=size*31, freq="D"),
+                "ds": pd.date_range(start_date, periods=size * 31, freq="D"),
                 "y": self._generate_daily_time_series(
-                    size*31,
+                    size * 31,
                     trend_params,
                     weekday_dummy_params,
                     annual_seasonality_params,
@@ -57,7 +59,7 @@ class MonthlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
             }
         )
 
-        #Limit to the first of each month
+        # Limit to the first of each month
         df_sub = df[df.ds.map(lambda x: x.day == 1)]
 
         return df_sub[:size]

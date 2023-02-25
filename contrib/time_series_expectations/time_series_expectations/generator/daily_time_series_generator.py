@@ -1,20 +1,21 @@
 from typing import List, Optional, Tuple
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from time_series_expectations.generator.time_series_generator import (
     TimeSeriesGenerator,
     TrendParams,
 )
 
+
 class DailyTimeSeriesGenerator(TimeSeriesGenerator):
     """Generate a daily time series with trend, seasonality, and outliers."""
 
     def _generate_trend(
         self,
-        date_range:np.ndarray,
-        trend_params:List[TrendParams],
+        date_range: np.ndarray,
+        trend_params: List[TrendParams],
     ) -> np.ndarray:
         """Generate a trend component for a time series."""
 
@@ -29,8 +30,8 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
 
     def _generate_weekday_seasonality(
         self,
-        date_range:np.ndarray,
-        weekday_dummy_params:List[float],
+        date_range: np.ndarray,
+        weekday_dummy_params: List[float],
     ) -> np.ndarray:
         """Generate a weekday seasonality component for a time series."""
 
@@ -38,8 +39,8 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
 
     def _generate_annual_seasonality(
         self,
-        date_range:np.ndarray,
-        annual_seasonality_params:List[Tuple[float, float]],
+        date_range: np.ndarray,
+        annual_seasonality_params: List[Tuple[float, float]],
     ) -> np.ndarray:
         """Generate an annual seasonality component for a time series."""
 
@@ -53,8 +54,8 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
 
     def _generate_posneg_pareto(
         self,
-        alpha:float,
-        size:int,
+        alpha: float,
+        size: int,
     ):
         """Generate a positive or negative pareto distribution."""
 
@@ -65,24 +66,27 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
         else:
             return 0
 
-
     def _generate_component_time_series(
         self,
-        size:int,
-        trend_params:List[TrendParams],
-        weekday_dummy_params:List[float],
-        annual_seasonality_params:List[Tuple[float, float]],
-        holiday_alpha:float,
-        outlier_alpha:float,
-        noise_scale:float,
+        size: int,
+        trend_params: List[TrendParams],
+        weekday_dummy_params: List[float],
+        annual_seasonality_params: List[Tuple[float, float]],
+        holiday_alpha: float,
+        outlier_alpha: float,
+        noise_scale: float,
     ):
         """Generate the components of a time series."""
 
         date_range = np.arange(size)
 
         trend = self._generate_trend(date_range, trend_params)
-        weekly_seasonality = self._generate_weekday_seasonality(date_range, weekday_dummy_params)
-        annual_seasonality = self._generate_annual_seasonality(date_range, annual_seasonality_params)
+        weekly_seasonality = self._generate_weekday_seasonality(
+            date_range, weekday_dummy_params
+        )
+        annual_seasonality = self._generate_annual_seasonality(
+            date_range, annual_seasonality_params
+        )
         holidays = self._generate_posneg_pareto(holiday_alpha, size)
         outliers = self._generate_posneg_pareto(outlier_alpha, size)
         noise = np.random.normal(scale=noise_scale, size=size)
@@ -96,16 +100,15 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
             "noise": noise,
         }
 
-
     def _generate_daily_time_series(
         self,
-        size:int=365 * 3,
-        trend_params:Optional[List[TrendParams]]=None,
-        weekday_dummy_params:Optional[List[float]]=None,
-        annual_seasonality_params:Optional[List[Tuple[float, float]]]=None,
-        holiday_alpha:float=3.5,
-        outlier_alpha:float=2.5,
-        noise_scale:float=1.0,
+        size: int = 365 * 3,
+        trend_params: Optional[List[TrendParams]] = None,
+        weekday_dummy_params: Optional[List[float]] = None,
+        annual_seasonality_params: Optional[List[Tuple[float, float]]] = None,
+        holiday_alpha: float = 3.5,
+        outlier_alpha: float = 2.5,
+        noise_scale: float = 1.0,
     ) -> np.ndarray:
         """Generate a time series."""
 
@@ -135,11 +138,11 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
             ]
 
         if weekday_dummy_params is None:
-            #Create 7 random weekday dummies
+            # Create 7 random weekday dummies
             weekday_dummy_params = [np.random.normal() for i in range(7)]
 
         if annual_seasonality_params is None:
-            #Create 10 random annual seasonality parameters
+            # Create 10 random annual seasonality parameters
             annual_seasonality_params = [
                 (
                     np.random.normal(),
@@ -171,17 +174,17 @@ class DailyTimeSeriesGenerator(TimeSeriesGenerator):
 
     def generate_df(
         self,
-        size:Optional[int] = 365 * 3,
-        start_date:Optional[str] = "2018-01-01",
-        trend_params:Optional[List[TrendParams]]=None,
-        weekday_dummy_params:Optional[List[float]]=None,
-        annual_seasonality_params:Optional[List[Tuple[float, float]]]=None,
-        holiday_alpha:float=3.5,
-        outlier_alpha:float=2.5,
-        noise_scale:float=1.0,
+        size: Optional[int] = 365 * 3,
+        start_date: Optional[str] = "2018-01-01",
+        trend_params: Optional[List[TrendParams]] = None,
+        weekday_dummy_params: Optional[List[float]] = None,
+        annual_seasonality_params: Optional[List[Tuple[float, float]]] = None,
+        holiday_alpha: float = 3.5,
+        outlier_alpha: float = 2.5,
+        noise_scale: float = 1.0,
     ) -> pd.DataFrame:
         """Generate a time series as a pandas dataframe.
-        
+
         Keyword Args:
             size: The number of days in the time series.
             start_date: The start date of the time series.

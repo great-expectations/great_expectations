@@ -1,18 +1,21 @@
-from typing import List, Optional, Tuple, TypedDict
+from typing import List, Optional, Tuple
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
+from time_series_expectations.generator.daily_time_series_generator import (
+    DailyTimeSeriesGenerator,
+)
 from time_series_expectations.generator.time_series_generator import TrendParams
-from time_series_expectations.generator.daily_time_series_generator import DailyTimeSeriesGenerator
+
 
 class HourlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
     """Generate an hourly time series with trend, seasonality, and outliers."""
 
     def _generate_hourly_seasonality(
         self,
-        time_range:np.ndarray,
-        hourly_seasonality_params:List[Tuple[float, float]],
+        time_range: np.ndarray,
+        hourly_seasonality_params: List[Tuple[float, float]],
     ) -> np.ndarray:
         """Generate an annual seasonality component for a time series."""
 
@@ -24,25 +27,24 @@ class HourlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
             ]
         )
 
-    
     def _generate_hourly_time_series(
         self,
-        size:int,
-        hourly_seasonality_params:Optional[List[Tuple[float, float]]]=None,
-        trend_params:Optional[List[TrendParams]]=None,
-        weekday_dummy_params:Optional[List[float]]=None,
-        annual_seasonality_params:Optional[List[Tuple[float, float]]]=None,
-        holiday_alpha:float=3.5,
-        outlier_alpha:float=2.5,
-        noise_scale:float=1.0,
+        size: int,
+        hourly_seasonality_params: Optional[List[Tuple[float, float]]] = None,
+        trend_params: Optional[List[TrendParams]] = None,
+        weekday_dummy_params: Optional[List[float]] = None,
+        annual_seasonality_params: Optional[List[Tuple[float, float]]] = None,
+        holiday_alpha: float = 3.5,
+        outlier_alpha: float = 2.5,
+        noise_scale: float = 1.0,
     ):
         """Generate an hourly time series."""
         if hourly_seasonality_params is None:
-            #Create 10 random hourly seasonality parameters
+            # Create 10 random hourly seasonality parameters
             hourly_seasonality_params = [
                 (
-                    np.random.normal()/100,
-                    np.random.normal()/100,
+                    np.random.normal() / 100,
+                    np.random.normal() / 100,
                 )
                 for i in range(4)
             ]
@@ -55,30 +57,30 @@ class HourlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
         )
 
         daily_time_series = self._generate_daily_time_series(
-            int(size/24),
+            int(size / 24),
             trend_params,
             weekday_dummy_params,
             annual_seasonality_params,
             holiday_alpha,
             outlier_alpha,
-            noise_scale
+            noise_scale,
         )
-        return np.exp(hourly_seasonality) * np.repeat(daily_time_series,24)
+        return np.exp(hourly_seasonality) * np.repeat(daily_time_series, 24)
 
     def generate_df(
         self,
-        size:Optional[int] = 90 * 24, # 90 days worth of data
-        start_date:Optional[str] = "2018-01-01",
-        hourly_seasonality_params:Optional[List[Tuple[float, float]]]=None,
-        trend_params:Optional[List[TrendParams]]=None,
-        weekday_dummy_params:Optional[List[float]]=None,
-        annual_seasonality_params:Optional[List[Tuple[float, float]]]=None,
-        holiday_alpha:float=3.5,
-        outlier_alpha:float=2.5,
-        noise_scale:float=1.0,
+        size: Optional[int] = 90 * 24,  # 90 days worth of data
+        start_date: Optional[str] = "2018-01-01",
+        hourly_seasonality_params: Optional[List[Tuple[float, float]]] = None,
+        trend_params: Optional[List[TrendParams]] = None,
+        weekday_dummy_params: Optional[List[float]] = None,
+        annual_seasonality_params: Optional[List[Tuple[float, float]]] = None,
+        holiday_alpha: float = 3.5,
+        outlier_alpha: float = 2.5,
+        noise_scale: float = 1.0,
     ) -> pd.DataFrame:
         """Generate a time series as a pandas dataframe.
-        
+
         Keyword Args:
             size: The number of days in the time series.
             start_date: The start date of the time series.

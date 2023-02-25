@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from great_expectations.data_context.util import file_relative_path
-from time_series_expectations.generator.daily_time_series_expectations import DailyTimeSeriesGenerator
+from time_series_expectations.generator.daily_time_series_expectations import (
+    DailyTimeSeriesGenerator,
+)
 
 plt.rcParams["figure.figsize"] = (20, 3)
 
