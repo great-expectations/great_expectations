@@ -12,9 +12,6 @@ from time_series_expectations.expectations.prophet_model_deserializer import (
     ProphetModelDeserializer,
 )
 
-with open(file_relative_path(__file__, "example_prophet_date_model.json")) as f_:
-    example_prophet_date_model_json = f_.read()
-
 
 class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
     """This Expectation checks to see if the number of rows in a Batch matches the predictions of a prophet model for a given date.
@@ -51,6 +48,9 @@ class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
         * Prophet is an open source forecasting library created at facebook. For more information, please see the [project github page](https://github.com/facebook/prophet).
 
     """
+
+    with open(file_relative_path(__file__, "example_prophet_date_model.json")) as f_:
+        example_prophet_date_model_json = f_.read()
 
     examples = [
         {

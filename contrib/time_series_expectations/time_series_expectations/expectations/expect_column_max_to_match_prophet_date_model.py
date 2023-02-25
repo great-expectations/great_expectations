@@ -3,10 +3,6 @@ from time_series_expectations.expectations.column_aggregate_time_series_expectat
     ColumnAggregateTimeSeriesExpectation,
 )
 
-with open(file_relative_path(__file__, "example_prophet_date_model.json")) as f_:
-    example_prophet_date_model_json = f_.read()
-
-
 class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectation):
     """This Expectation checks to see if the max of a column matches the predictions of a prophet model for a given date.
 
@@ -45,6 +41,9 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
         * I apologize for the dangling prepositions in the Arg docstrings for this Expectation.
 
     """
+
+    with open(file_relative_path(__file__, "example_prophet_date_model.json")) as f_:
+        example_prophet_date_model_json = f_.read()
 
     examples = [
         {
