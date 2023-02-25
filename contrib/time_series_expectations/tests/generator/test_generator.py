@@ -1,9 +1,19 @@
 from time_series_expectations.generator.daily_time_series_generator import (
     DailyTimeSeriesGenerator,
 )
+from time_series_expectations.generator.weekly_time_series_generator import (
+    WeeklyTimeSeriesGenerator,
+)
+from time_series_expectations.generator.monthly_time_series_generator import (
+    MonthlyTimeSeriesGenerator,
+)
 
 def test__imports():
-    from time_series_expectations.generator import DailyTimeSeriesGenerator
+    from time_series_expectations.generator import (
+        DailyTimeSeriesGenerator,
+        WeeklyTimeSeriesGenerator,
+        MonthlyTimeSeriesGenerator,
+    )
 
 def test__generate_daily_time_series_df():
     generator = DailyTimeSeriesGenerator()
@@ -44,3 +54,17 @@ def test__generate_daily_time_series_df():
         outlier_alpha=2.5,
         noise_scale=1.0,
     )
+
+def test__generate_weekly_time_series_df():
+    generator = WeeklyTimeSeriesGenerator()
+
+    df = generator.generate_df()
+    assert df.shape == (52 * 3, 2)
+
+def test__generate_monthly_time_series_df():
+    generator = MonthlyTimeSeriesGenerator()
+
+    df = generator.generate_df(
+        size=20,
+    )
+    assert df.shape == (20, 2)

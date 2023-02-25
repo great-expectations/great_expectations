@@ -1,7 +1,20 @@
+from typing import TypedDict
+
 import pandas as pd
 import numpy as np
 
 from abc import ABC
+
+class TrendParams(TypedDict):
+    """Parameters for a trend segment of a time series.
+    
+    Each segment of a time series has a different alpha and beta value, corresponding to a different slope and intercept.
+
+    Boundaries between segments are called "cutpoints."
+    """
+    alpha:float
+    beta:float
+    cutpoint:int
 
 class TimeSeriesGenerator(ABC):
     """Base class for time series generators."""
