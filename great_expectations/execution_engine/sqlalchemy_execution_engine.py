@@ -202,6 +202,13 @@ except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
 
+try:
+    import trino.sqlalchemy.datatype as trinotypes
+    import trino.sqlalchemy.dialect
+except ImportError:
+    trino = None
+    trinotypes = None
+
 if TYPE_CHECKING:
     import sqlalchemy as sa  # noqa: TCH004
     from sqlalchemy.engine import Engine as SaEngine
@@ -246,6 +253,19 @@ def _get_dialect_type_module(dialect):
             and teradatatypes is not None
         ):
             return teradatatypes
+    except (TypeError, AttributeError):
+        pass
+
+    # Trino types module
+    try:
+        if (
+            isinstance(
+                dialect,
+                trino.sqlalchemy.dialect.TrinoDialect,
+            )
+            and trinotypes is not None
+        ):
+            return trinotypes
     except (TypeError, AttributeError):
         pass
 
@@ -376,6 +396,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
+            )
+        elif self.dialect_name == GXSqlDialect.TRINO:
+            # WARNING: Trino Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="trino.sqlalchemy.dialect"
             )
         else:
             self.dialect_module = None
