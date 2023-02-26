@@ -92,6 +92,7 @@ stages:
         displayName: 'Use Python 3.7'
       - script: |
           time pip install --requirement requirements-types.txt
+          pip list
           time invoke type-check --ci --pretty
         name: StaticTypeCheck
 
