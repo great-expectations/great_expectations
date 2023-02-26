@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import TypedDict
 
 import pandas as pd
@@ -20,6 +20,7 @@ class TrendParams(TypedDict):
 class TimeSeriesGenerator(ABC):
     """Base class for time series generators."""
 
+    @abstractmethod
     def generate_df(
         self,
         *args,
@@ -37,4 +38,4 @@ class TimeSeriesGenerator(ABC):
             pd.DataFrame: A two-column pandas DataFrame with a datetime index and a column for the time series values
 
         """
-        raise NotImplementedError()
+        pass
