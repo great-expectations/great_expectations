@@ -86,7 +86,7 @@ except ImportError:
     Row = None  # type: ignore[assignment,misc]
     DataFrame = None  # type: ignore[assignment,misc]
     DataFrameReader = None  # type: ignore[assignment,misc]
-    F = None  # type: ignore[assignment,misc]
+    F = None  # type: ignore[assignment]
     # noinspection SpellCheckingInspection
     sparktypes = None  # type: ignore[assignment]
 
