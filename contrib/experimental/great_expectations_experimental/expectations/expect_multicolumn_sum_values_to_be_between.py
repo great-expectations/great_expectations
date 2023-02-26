@@ -22,9 +22,9 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 # This class defines a Metric to support your Expectation.
 # For most MulticolumnMapExpectations, the main business logic for calculation will live in this class.
-class ExpectMulticolumnValuesToBeBetween(MulticolumnMapMetricProvider):
+class ExpectMulticolumnSumValuesToBeBetween(MulticolumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
-    condition_metric_name = "multicolumn_values.value_between"
+    condition_metric_name = "multicolumn_values.sum_values_to_be_between_max_and_min"
     # These point your metric at the provided keys to facilitate calculation
     condition_domain_keys = (
         "batch_id",
@@ -65,8 +65,19 @@ class ExpectMulticolumnValuesToBeBetween(MulticolumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectMulticolumnValuesToBeBetween(MulticolumnMapExpectation):
-    """Expect a row of multiple column to be in between given value"""
+class ExpectMulticolumnSumValuesToBeBetween(MulticolumnMapExpectation):
+    """Expect a sum of values over the columns to be between max and min values
+    
+    min_value <= SUM(col_a, cob_b, cob_c, ...) <= max_value
+
+    Args:
+    column_list (list of str): \
+        A list of 2 or more integer columns 
+    min_value (int): \
+        A value that the sum of values over the column must be equal to or more than the given value
+    max_value (int): \
+        A value that the sum of values over the column must be equal to or less than the given value
+    """
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
@@ -146,7 +157,7 @@ class ExpectMulticolumnValuesToBeBetween(MulticolumnMapExpectation):
 
     # This is the id string of the Metric used by this Expectation.
     # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "multicolumn_values.value_between"
+    map_metric = "multicolumn_values.sum_values_to_be_between_max_and_min"
 
     # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
     success_keys = (
@@ -196,4 +207,4 @@ class ExpectMulticolumnValuesToBeBetween(MulticolumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectMulticolumnValuesToBeBetween().print_diagnostic_checklist()
+    ExpectMulticolumnSumValuesToBeBetween().print_diagnostic_checklist()
