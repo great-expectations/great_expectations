@@ -92,7 +92,6 @@ stages:
         displayName: 'Use Python 3.7'
       - script: |
           time pip install --requirement requirements-types.txt
-          time pip install --no-deps pyspark
           time invoke type-check --ci --pretty
         name: StaticTypeCheck
 
