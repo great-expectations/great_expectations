@@ -232,9 +232,9 @@ class ColumnValuesBetweenCount(MetricProvider):
 
         if min_value is None:
             if strict_max:
-                condition = column < max_value
+                condition = column < max_value  # type: ignore[operator]
             else:
-                condition = column <= max_value
+                condition = column <= max_value  # type: ignore[operator]
 
         elif max_value is None:
             if strict_min:
