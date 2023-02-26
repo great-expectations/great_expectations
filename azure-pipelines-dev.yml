@@ -122,8 +122,9 @@ stages:
           versionSpec: 3.7
         displayName: 'Use Python 3.7'
       - script: |
-          pip install --requirement requirements-types.txt
-          invoke type-check --ci --pretty
+          time pip install --requirement requirements-types.txt
+          time pip install --no-deps pyspark-stubs
+          time invoke type-check --ci --pretty
         name: StaticTypeCheck
 
     - job: docstring_linter
