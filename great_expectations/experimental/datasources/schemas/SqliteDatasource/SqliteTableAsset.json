@@ -29,6 +29,9 @@
                     "$ref": "#/definitions/ColumnSplitterColumnValue"
                 },
                 {
+                    "$ref": "#/definitions/ColumnSplitterMultiColumnValue"
+                },
+                {
                     "$ref": "#/definitions/ColumnSplitterDividedInteger"
                 },
                 {
@@ -107,6 +110,32 @@
             },
             "required": [
                 "column_name"
+            ],
+            "additionalProperties": false
+        },
+        "ColumnSplitterMultiColumnValue": {
+            "title": "ColumnSplitterMultiColumnValue",
+            "description": "Base model for most ZEP pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "column_names": {
+                    "title": "Column Names",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "method_name": {
+                    "title": "Method Name",
+                    "default": "split_on_multi_column_values",
+                    "enum": [
+                        "split_on_multi_column_values"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "column_names"
             ],
             "additionalProperties": false
         },
