@@ -101,8 +101,8 @@ SCHEMAS = {
 
 if TYPE_CHECKING:
     import numpy.typing as npt
+    from pyspark.sql import SparkSession  # noqa: TCH004 # try imported above
     from ruamel.yaml.comments import CommentedMap
-
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
@@ -803,7 +803,7 @@ def get_or_create_spark_application(
         raise ValueError("SparkContext could not be started.")
 
     # noinspection PyUnresolvedReferences
-    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
+    sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()  # type: ignore[attr-defined]
     if not force_reuse_spark_context and spark_restart_required(
         current_spark_config=spark_session.sparkContext.getConf().getAll(),
         desired_spark_config=spark_config,
@@ -821,7 +821,7 @@ def get_or_create_spark_application(
         if spark_session is None:
             raise ValueError("SparkContext could not be started.")
         # noinspection PyProtectedMember,PyUnresolvedReferences
-        sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
+        sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()  # type: ignore[attr-defined]
 
     if sc_stopped:
         raise ValueError("SparkContext stopped unexpectedly.")
@@ -832,7 +832,7 @@ def get_or_create_spark_application(
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
     spark_config: Optional[Dict[str, str]] = None,
-) -> SparkSession:
+) -> SparkSession | None:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
@@ -866,7 +866,7 @@ def get_or_create_spark_session(
 
         spark_session = builder.getOrCreate()
         # noinspection PyProtectedMember,PyUnresolvedReferences
-        if spark_session.sparkContext._jsc.sc().isStopped():
+        if spark_session.sparkContext._jsc.sc().isStopped():  # type: ignore[attr-defined]
             raise ValueError("SparkContext stopped unexpectedly.")
 
     except AttributeError:
