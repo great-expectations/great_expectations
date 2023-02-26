@@ -18,7 +18,12 @@ from great_expectations.expectations.regex_based_column_map_expectation import (
 
 # This class defines the Expectation itself
 class ExpectColumnValuesToMatchThai(RegexBasedColumnMapExpectation):
-    """Values in this column should only contain Thai Language"""
+    """Expect a value of column to contain Thai Language
+    
+    Args:
+        column (str): \
+            A integer column that consist of Thai language.
+    """
 
     # These values will be used to configure the metric created by your expectation
     regex_camel_name = "RegexName"
