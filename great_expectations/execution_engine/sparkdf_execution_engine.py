@@ -6,6 +6,7 @@ import logging
 import warnings
 from functools import reduce
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -92,6 +93,9 @@ except ImportError:
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
+
+if TYPE_CHECKING:
+    from pyspark.sql import DataFrame  # noqa: TCH004 # try imported above
 
 
 # noinspection SpellCheckingInspection
@@ -255,7 +259,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
-    def load_batch_data(
+    def load_batch_data(  # type: ignore[override]
         self, batch_id: str, batch_data: Union[SparkDFBatchData, DataFrame]
     ) -> None:
         if isinstance(batch_data, DataFrame):
