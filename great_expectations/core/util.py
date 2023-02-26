@@ -50,8 +50,8 @@ try:
     import pyspark
     from pyspark.sql import SparkSession  # noqa: F401
 except ImportError:
-    pyspark = None
-    SparkSession = None
+    pyspark = None  # type: ignore[assignment]
+    SparkSession = None  # type: ignore[assignment,misc]
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
@@ -59,7 +59,7 @@ except ImportError:
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None
+    StructType = None  # type: ignore[assignment,misc]
 
 
 try:

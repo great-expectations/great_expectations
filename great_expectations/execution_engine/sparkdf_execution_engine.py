@@ -79,15 +79,15 @@ try:
     from pyspark.sql import DataFrame, Row, SparkSession
     from pyspark.sql.readwriter import DataFrameReader
 except ImportError:
-    pyspark = None
-    SparkContext = None
-    SparkSession = None
-    Row = None
-    DataFrame = None
-    DataFrameReader = None
-    F = None
+    pyspark = None  # type: ignore[assignment]
+    SparkContext = None  # type: ignore[assignment,misc]
+    SparkSession = None  # type: ignore[assignment,misc]
+    Row = None  # type: ignore[assignment,misc]
+    DataFrame = None  # type: ignore[assignment,misc]
+    DataFrameReader = None  # type: ignore[assignment,misc]
+    F = None  # type: ignore[assignment,misc]
     # noinspection SpellCheckingInspection
-    sparktypes = None
+    sparktypes = None  # type: ignore[assignment]
 
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
