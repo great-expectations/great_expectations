@@ -9,7 +9,7 @@ from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import AzureUrl
 from great_expectations.experimental.datasources.data_asset.data_connector import (
-    ABSDataConnector,
+    AzureBlobStorageDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest
 
@@ -54,7 +54,7 @@ def test_basic_instantiation(mock_list_keys):
     ]
 
     azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
-    my_data_connector: DataConnector = ABSDataConnector(
+    my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"alpha-(.*)\.csv"),
@@ -96,7 +96,7 @@ def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
     ]
 
     azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
-    my_data_connector: DataConnector = ABSDataConnector(
+    my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
@@ -139,7 +139,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
     ]
 
     azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
-    my_data_connector: DataConnector = ABSDataConnector(
+    my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
@@ -332,7 +332,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #     ]
 #
 #     azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
-#     my_data_connector: DataConnector = ABSDataConnector(
+#     my_data_connector: DataConnector = AzureBlobStorageDataConnector(
 #         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_abs_data_asset",
 #         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
@@ -468,7 +468,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
 
     my_data_connector: DataConnector
 
-    my_data_connector = ABSDataConnector(
+    my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
@@ -511,7 +511,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
         ),
     ]
 
-    my_data_connector = ABSDataConnector(
+    my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
@@ -547,7 +547,7 @@ def test_alpha(mock_list_keys):
     ]
 
     azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
-    my_data_connector: DataConnector = ABSDataConnector(
+    my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
@@ -602,7 +602,7 @@ def test_foxtrot(mock_list_keys):
 
     my_data_connector: DataConnector
 
-    my_data_connector = ABSDataConnector(
+    my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
@@ -623,7 +623,7 @@ def test_foxtrot(mock_list_keys):
         "test_dir_foxtrot/A/A-3.csv",
     ]
 
-    my_data_connector = ABSDataConnector(
+    my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
@@ -649,7 +649,7 @@ def test_foxtrot(mock_list_keys):
         "test_dir_foxtrot/B/B-3.txt",
     ]
 
-    my_data_connector = ABSDataConnector(
+    my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
@@ -675,7 +675,7 @@ def test_foxtrot(mock_list_keys):
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
-    my_data_connector = ABSDataConnector(
+    my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),

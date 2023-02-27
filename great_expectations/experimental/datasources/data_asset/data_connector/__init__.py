@@ -13,7 +13,7 @@ from great_expectations.experimental.datasources.data_asset.data_connector.s3_da
     S3DataConnector,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector import (
-    ABSDataConnector,
+    AzureBlobStorageDataConnector,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector.gcs_data_connector import (
     GCSDataConnector,

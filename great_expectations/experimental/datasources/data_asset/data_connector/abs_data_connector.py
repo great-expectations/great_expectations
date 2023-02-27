@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class ABSDataConnector(FilePathDataConnector):
+class AzureBlobStorageDataConnector(FilePathDataConnector):
     """Extension of FilePathDataConnector used to connect to Microsoft Azure Blob Storage (ABS).
 
     Args:
