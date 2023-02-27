@@ -1,4 +1,9 @@
+import os
+import sys
+
 from great_expectations.self_check.util import build_test_backends_list
+
+sys.path.insert(0, os.path.abspath("../.."))
 
 
 def pytest_addoption(parser):

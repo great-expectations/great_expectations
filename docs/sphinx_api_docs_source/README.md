@@ -56,3 +56,5 @@ my_yaml:
 Note:
 1. There must be an opening and closing set of triple backticks.
 2. The opening backticks can have an optional language (see docusaurus for supported languages).
+
+Tables are also supported, using [Sphinx table style](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#tables).

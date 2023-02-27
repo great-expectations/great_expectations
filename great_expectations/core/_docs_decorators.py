@@ -13,7 +13,7 @@ WHITELISTED_TAG = "--Public API--"
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def public_api(func) -> Callable:
+def public_api(func: F) -> F:
     """Add the public API tag for processing by the auto documentation generator.
 
     Used as a decorator:
@@ -265,9 +265,13 @@ def _add_text_below_string_docstring_argument(
     Returns:
         Modified docstring.
     """
-    parsed_docstring = docstring_parser.parse(docstring)
+    parsed_docstring = docstring_parser.parse(
+        text=docstring,
+        style=DocstringStyle.GOOGLE,
+    )
 
-    if argument_name not in (param.arg_name for param in parsed_docstring.params):
+    arg_list = list(param.arg_name for param in parsed_docstring.params)
+    if argument_name not in arg_list:
         raise ValueError(
             f"Please specify an existing argument, you specified {argument_name}."
         )

@@ -1,18 +1,11 @@
-import json
 from typing import Optional
 
 import geopandas
 import numpy as np
-import rtree
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import Point, Polygon
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,

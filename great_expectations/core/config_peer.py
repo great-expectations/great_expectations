@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, overload
 
 from typing_extensions import Literal
 
+from great_expectations.data_context.types.base import BaseYamlConfig  # noqa: TCH001
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:

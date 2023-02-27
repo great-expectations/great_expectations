@@ -8,6 +8,7 @@ Typical usage example:
 """
 from __future__ import annotations
 
+import datetime
 import logging
 import pathlib
 import re
@@ -50,57 +51,39 @@ class DocstringError:
         return self.raw_error
 
 
-def parse_pydocstyle_errors(raw_errors: List[str]) -> List[DocstringError]:
-    """Parse raw string output of pydocstyle to DocstringError."""
+def parse_ruff_errors(raw_errors: List[str]) -> List[DocstringError]:
+    """Parse raw string output of ruff to DocstringError."""
 
     docstring_errors: List[DocstringError] = []
-    for idx, raw_error in enumerate(raw_errors):
-        if not raw_error:
-            break
-        if raw_error.startswith("/"):
-            raw_error_path = raw_error
-            raw_error_error = raw_errors[idx + 1]
-
-            docstring_errors.append(
-                DocstringError(
-                    name=_parse_name(raw_error_path=raw_error_path),
-                    filepath_relative_to_repo_root=_repo_relative_filepath(
-                        pathlib.Path(_parse_filepath(raw_error_path=raw_error_path))
-                    ),
-                    error=raw_error_error.strip(),
-                    raw_error="\n".join([raw_error_path, raw_error_error]),
-                    line_number=_parse_line_number(raw_error_path),
-                )
-            )
-
-    return docstring_errors
-
-
-def parse_darglint_errors(raw_errors: List[str]) -> List[DocstringError]:
-    """Parse raw string output of darglint to DocstringError."""
-
-    docstring_errors: List[DocstringError] = []
+    pattern = re.compile(r"^D\d{3}")
     for raw_error in raw_errors:
         if not raw_error:
             continue
 
         split_error = raw_error.split(":")
-        path = split_error[0]
-        name = split_error[1]
-        line_number = int(split_error[2])
-        error_code = split_error[3]
+        if len(split_error) >= 4:
+            path = split_error[0]
+            line_number = int(split_error[1])
+            error_code_and_error = split_error[3].strip()
 
-        docstring_errors.append(
-            DocstringError(
-                name=name,
-                filepath_relative_to_repo_root=_repo_relative_filepath(
-                    pathlib.Path(path)
-                ),
-                error=error_code,
-                raw_error=raw_error,
-                line_number=line_number,
+            error_code_match = re.search(pattern, error_code_and_error)
+            if error_code_match:
+                error_code = error_code_match.group()
+            else:
+                error_code = ""
+            name = re.sub(pattern, "", error_code_and_error).strip()
+
+            docstring_errors.append(
+                DocstringError(
+                    name=name,
+                    filepath_relative_to_repo_root=_repo_relative_filepath(
+                        pathlib.Path(path)
+                    ),
+                    error=error_code,
+                    raw_error=raw_error,
+                    line_number=line_number,
+                )
             )
-        )
 
     return docstring_errors
 
@@ -116,40 +99,13 @@ def _repo_relative_filepath(filepath: pathlib.Path) -> pathlib.Path:
         return filepath
 
 
-def _parse_filepath(raw_error_path: str) -> str:
-    """Parse the filepath from the first part of an error pair."""
-    match = re.search(r"(?:/[^/]+)+?/\w+\.\w+", raw_error_path)
-    if match:
-        filepath: str = match.group(0)
-    else:
-        raise ValueError(f"No filepath found in error: {raw_error_path}.")
-    return filepath
+def run_ruff(paths: List[pathlib.Path]) -> List[str]:
+    """Run ruff to identify issues with docstrings."""
 
-
-def _parse_line_number(raw_error_path: str) -> int:
-    """Parse the line number from the first part of an error pair."""
-    raw_line_num = raw_error_path.split(":")[1]
-    match = re.search(r"\d+", raw_line_num)
-    if match:
-        line_num = int(match.group(0))
-    else:
-        raise ValueError(f"No line number found in error: {raw_error_path}.")
-    return line_num
-
-
-def _parse_name(raw_error_path: str) -> str:
-    match = re.search(r"`(.*?)`", raw_error_path)
-    name = ""
-    if match:
-        name = match.group(0).replace("`", "")
-    return name
-
-
-def run_pydocstyle(paths: List[pathlib.Path]) -> List[str]:
-    """Run pydocstyle to identify issues with docstrings."""
-
-    logger.debug("Running pydocstyle")
-    cmds = ["pydocstyle"] + [str(p) for p in paths]
+    _log_with_timestamp("Running ruff")
+    # --select D option to enable pydocstyle errors in ruff
+    # https://github.com/charliermarsh/ruff#pydocstyle-d
+    cmds = ["ruff", "--select", "D"] + [str(p) for p in paths]
     raw_results: subprocess.CompletedProcess = subprocess.run(
         cmds,
         stdout=subprocess.PIPE,
@@ -157,13 +113,20 @@ def run_pydocstyle(paths: List[pathlib.Path]) -> List[str]:
         universal_newlines=True,
     )
 
-    # Check to make sure `pydocstyle` actually ran
+    # Check to make sure `ruff` actually ran
     err: str = raw_results.stderr
     if err:
         raise ValueError(err)
 
-    logger.debug("Finished running pydocstyle")
+    _log_with_timestamp("Finished running ruff")
     return raw_results.stdout.split("\n")
+
+
+def _log_with_timestamp(content: str) -> None:
+    """Log content with timestamp appended."""
+    timestamp = datetime.datetime.now()
+    timestamp_str = timestamp.strftime("%H:%M:%S")
+    logger.debug(f"{content} Timestamp: {timestamp_str}")
 
 
 def _get_docstring_errors(
@@ -176,15 +139,10 @@ def _get_docstring_errors(
         filepaths_containing_public_api_entities = [
             pathlib.Path(d.filepath).resolve() for d in get_public_api_definitions()
         ]
-    pydocstyle_raw_errors = run_pydocstyle(
-        paths=filepaths_containing_public_api_entities
-    )
-    darglint_raw_errors = run_darglint(paths=filepaths_containing_public_api_entities)
 
-    parsed_pydocstyle_errors = parse_pydocstyle_errors(raw_errors=pydocstyle_raw_errors)
-    parsed_darglint_errors = parse_darglint_errors(raw_errors=darglint_raw_errors)
-
-    return parsed_pydocstyle_errors + parsed_darglint_errors
+    ruff_raw_errors = run_ruff(paths=filepaths_containing_public_api_entities)
+    parsed_ruff_errors = parse_ruff_errors(ruff_raw_errors)
+    return parsed_ruff_errors
 
 
 def get_public_api_definitions() -> Set[Definition]:
@@ -218,18 +176,18 @@ def _public_api_docstring_errors(
 ) -> Set[DocstringError]:
     """Get all docstring errors for entities marked with the @public_api decorator."""
 
-    logger.debug("Getting public api definitions.")
+    _log_with_timestamp("Getting public api definitions.")
     public_api_definitions = get_public_api_definitions()
     public_api_definition_tuples: Set[Tuple[str, str]] = {
         (str(_repo_relative_filepath(d.filepath)), d.name)
         for d in public_api_definitions
     }
 
-    logger.debug("Getting docstring errors.")
+    _log_with_timestamp("Getting docstring errors.")
     public_api_docstring_errors: List[DocstringError] = []
     docstring_errors = _get_docstring_errors(select_paths=select_paths)
 
-    logger.debug("Getting docstring errors applicable to public api.")
+    _log_with_timestamp("Getting docstring errors applicable to public api.")
     for docstring_error in docstring_errors:
         docstring_error_tuple: Tuple[str, str] = (
             str(docstring_error.filepath_relative_to_repo_root),
@@ -241,35 +199,15 @@ def _public_api_docstring_errors(
     return set(public_api_docstring_errors)
 
 
-def run_darglint(paths: List[pathlib.Path]) -> List[str]:
-    """Run darglint to identify issues with docstrings."""
-
-    logger.debug("Running darglint")
-    cmds = ["darglint"] + [str(p) for p in paths]
-    raw_results: subprocess.CompletedProcess = subprocess.run(
-        cmds,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        universal_newlines=True,
-    )
-
-    # Check to make sure `darglint` actually ran
-    err: str = raw_results.stderr
-    if err:
-        raise ValueError(err)
-
-    logger.debug("Finished running darglint")
-
-    return raw_results.stdout.split("\n")
-
-
 def main(
     select_paths: list[pathlib.Path] | None = None,
 ):
     logger.info(
-        "Generating list of public API docstring errors. This may take a few minutes."
+        "Generating list of public API docstring errors. This may take a minute."
     )
     errors = _public_api_docstring_errors(select_paths=select_paths)
+
+    _log_with_timestamp("Finished evaluating public docstrings.")
 
     if not errors:
         logger.info("There are no public API docstring errors.")

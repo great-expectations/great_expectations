@@ -29,7 +29,7 @@ class StubUsageStats:
 
 
 class StubCheckpointStore:
-    def get_checkpoint(self, name: str, ge_cloud_id: Optional[str]) -> CheckpointConfig:
+    def get_checkpoint(self, name: str, id: Optional[str]) -> CheckpointConfig:
         return CheckpointConfig(name=name, class_name="Checkpoint")
 
 

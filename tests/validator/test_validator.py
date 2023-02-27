@@ -2,7 +2,6 @@ import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
-from uuid import UUID
 
 import pandas as pd
 import pytest
@@ -257,7 +256,7 @@ def multi_batch_taxi_validator(
 ) -> Validator:
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     multi_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -292,7 +291,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
                     "result_format": "BASIC",
                 },
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
+                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             )
         ],
         data_context=context,
@@ -407,7 +406,7 @@ def test_validator_with_bad_batchrequest(
 ):
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     multi_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -570,7 +569,7 @@ def test_validator_load_additional_batch_to_validator(
 ):
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     jan_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -618,7 +617,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     yellow_trip_pandas_data_context,
 ):
     context = yellow_trip_pandas_data_context
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     jan_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -950,7 +949,7 @@ def test_validator_include_rendered_content(
         data_connector_name="monthly",
         data_asset_name="my_reports",
     )
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     column: str = "fare_amount"
     partition_object: Dict[str, List[float]] = {
@@ -1195,11 +1194,9 @@ def _context_to_validator_and_expectation_sql(
     batch_request = BatchRequest(
         datasource_name="my_datasource",
         data_connector_name="my_sql_data_connector",
-        data_asset_name="my_asset",  # this is the name of the table you want to retrieve
+        data_asset_name="animals_names_asset",  # this is the name of the table you want to retrieve
     )
-    context.create_expectation_suite(
-        expectation_suite_name="test_suite", overwrite_existing=True
-    )
+    context.add_expectation_suite(expectation_suite_name="test_suite")
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite_name="test_suite"
     )
@@ -1208,14 +1205,14 @@ def _context_to_validator_and_expectation_sql(
 
 @pytest.mark.integration
 def test_validator_result_format_config_from_validator(
-    data_context_with_connection_to_animal_names_db,
+    data_context_with_connection_to_metrics_db,
 ):
     result_format_config: dict = {
         "result_format": "COMPLETE",
         "unexpected_index_column_names": ["pk_1"],
     }
     (validator, _) = _context_to_validator_and_expectation_sql(
-        context=data_context_with_connection_to_animal_names_db,
+        context=data_context_with_connection_to_metrics_db,
     )
 
     with pytest.warns(UserWarning) as config_warning:
@@ -1233,7 +1230,7 @@ def test_validator_result_format_config_from_validator(
 
 @pytest.mark.integration
 def test_validator_result_format_config_from_expectation(
-    data_context_with_connection_to_animal_names_db,
+    data_context_with_connection_to_metrics_db,
 ):
     runtime_configuration: dict = {
         "result_format": {
@@ -1242,7 +1239,7 @@ def test_validator_result_format_config_from_expectation(
         }
     }
     (validator, expectation) = _context_to_validator_and_expectation_sql(
-        context=data_context_with_connection_to_animal_names_db,
+        context=data_context_with_connection_to_metrics_db,
     )
     with pytest.warns(UserWarning) as config_warning:
         _: ExpectationValidationResult = expectation.validate(

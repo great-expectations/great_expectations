@@ -171,7 +171,7 @@ except ImportError:
     trino = None
 
 try:
-    import sqla_vertica_python.vertica_python
+    import sqla_vertica_python.vertica_python  # noqa: F401 # needed for registry
 
     registry.register("vertica", "sqla_vertica_python.vertica_python", "dialect")
 except ImportError:

@@ -6,6 +6,7 @@ from .actions import (
     OpsgenieAlertAction,
     PagerdutyAlertAction,
     SlackNotificationAction,
+    SNSNotificationAction,
     StoreEvaluationParametersAction,
     StoreMetricsAction,
     StoreValidationResultAction,

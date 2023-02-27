@@ -112,9 +112,8 @@ profiler = UserConfigurableProfiler(
 # <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py build_suite">
 expectation_suite_name = "compare_two_tables"
 suite = profiler.build_suite()
-context.save_expectation_suite(
-    expectation_suite=suite, expectation_suite_name=expectation_suite_name
-)
+suite.expectation_suite_name = expectation_suite_name
+context.add_expectation_suite(expectation_suite=suite)
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py checkpoint_config">
 my_checkpoint_name = "comparison_checkpoint"
@@ -127,7 +126,7 @@ run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
 expectation_suite_name: {expectation_suite_name}
 """
 
-context.add_checkpoint(**yaml.load(yaml_config))
+context.add_or_update_checkpoint(**yaml.load(yaml_config))
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison_from_query.py run_checkpoint">
 results = context.run_checkpoint(

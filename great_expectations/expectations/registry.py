@@ -15,13 +15,14 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.id_dict import IDDict
 from great_expectations.render import (
-    AtomicDiagnosticRendererType,
-    AtomicPrescriptiveRendererType,
-    AtomicRendererType,
+    AtomicDiagnosticRendererType,  # noqa: TCH001
+    AtomicPrescriptiveRendererType,  # noqa: TCH001
+    AtomicRendererType,  # noqa: TCH001
 )
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationConfiguration
@@ -175,6 +176,7 @@ def _add_response_key(res, key, value):
     return res
 
 
+@public_api
 def register_metric(
     metric_name: str,
     metric_domain_keys: Tuple[str, ...],
@@ -186,6 +188,21 @@ def register_metric(
         Union[MetricFunctionTypes, MetricPartialFunctionTypes]
     ] = None,
 ) -> dict:
+    """Register a Metric class for use as a callable metric within Expectations.
+
+    Args:
+        metric_name: A name identifying the metric. Metric Name must be globally unique in
+            a great_expectations installation.
+        metric_domain_keys: A tuple of the keys used to determine the domain of the metric.
+        metric_value_keys: A tuple of the keys used to determine the domain of the metric.
+        execution_engine: The execution_engine used to execute the metric.
+        metric_class: A valid Metric class containing logic to compute attributes of data.
+        metric_provider: The MetricProvider class from which the metric_class inherits.
+        metric_fn_type: The MetricFunctionType or MetricPartialFunctionType used to define the Metric class.
+
+    Returns:
+        A dictionary containing warnings thrown during registration if applicable, and the success status of registration.
+    """
     res: dict = {}
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")

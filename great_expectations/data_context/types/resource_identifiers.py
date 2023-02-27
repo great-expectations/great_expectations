@@ -3,12 +3,12 @@ from __future__ import annotations
 import logging
 import warnings
 from typing import TYPE_CHECKING, Optional, Union
-from uuid import UUID
 
 from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
@@ -100,10 +100,9 @@ class BatchIdentifierSchema(Schema):
         return BatchIdentifier(**data)
 
 
+@public_api
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier
-    and run_id.
-    """
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier and run_id."""
 
     def __init__(self, expectation_suite_identifier, run_id, batch_identifier) -> None:
         """Constructs a ValidationResultIdentifier
@@ -524,10 +523,8 @@ class SiteSectionIdentifier(DataContextKey):
 
 
 class ConfigurationIdentifier(DataContextKey):
-    def __init__(self, configuration_key: Union[str, UUID]) -> None:
+    def __init__(self, configuration_key: str) -> None:
         super().__init__()
-        if isinstance(configuration_key, UUID):
-            configuration_key = str(configuration_key)
         if not isinstance(configuration_key, str):
             raise gx_exceptions.InvalidDataContextKeyError(
                 f"configuration_key must be a string, not {type(configuration_key).__name__}"

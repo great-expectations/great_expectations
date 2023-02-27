@@ -1,16 +1,10 @@
-import json
 from typing import Optional
 
 import pandas as pd
 import pygeos as geos
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -53,7 +47,7 @@ class ColumnValuesGeometryNearShape(ColumnMapMetricProvider):
                     raise NotImplementedError(
                         "Shape constructor method not implemented. Must be in WKT, WKB, or GeoJSON format."
                     )
-            except:
+            except Exception:
                 raise Exception("A valid reference shape was not given.")
         else:
             raise Exception("A shape must be provided for this method.")

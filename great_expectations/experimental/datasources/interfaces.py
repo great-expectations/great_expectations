@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 import dataclasses
+import functools
 import logging
+import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
+    ClassVar,
     Dict,
     Generic,
     List,
@@ -19,38 +23,51 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt
+from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
 from pydantic import dataclasses as pydantic_dc
-from pydantic import root_validator, validate_arguments
-from typing_extensions import ClassVar, TypeAlias, TypeGuard
+from typing_extensions import TypeAlias, TypeGuard
 
-from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.experimental.datasources.constants import _FIELDS_ALWAYS_SET
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
-from great_expectations.experimental.datasources.sources import _SourceFactories
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metrics_calculator import MetricsCalculator
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     # TODO: When the Batch class is moved out of the experimental directory, we should try to import the annotations
     #       from core.batch so we no longer need to call Batch.update_forward_refs() before instantiation.
-    from great_expectations.core.batch import BatchData, BatchDefinition, BatchMarkers
-    from great_expectations.execution_engine import ExecutionEngine
+    from great_expectations.core.batch import (
+        BatchData,
+        BatchDefinition,
+        BatchMarkers,
+    )
+    from great_expectations.experimental.datasources.data_asset.data_connector import (
+        DataConnector,
+    )
+    from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 try:
+    import pyspark
     from pyspark.sql import Row as pyspark_sql_Row
 except ImportError:
-    LOGGER.debug("No spark sql dataframe module available.")
+    pyspark = None
     pyspark_sql_Row = None
+    logger.debug("No spark sql dataframe module available.")
+
+
+class TestConnectionError(Exception):
+    pass
+
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
-# Batches one wants returned. The keys represent dimensions one can slice the data along
+# Batches one wants as returned. The keys represent dimensions one can slice the data along
 # and the values are the realized. If a value is None or unspecified, the batch_request
 # will capture all data along this dimension. For example, if we have a year and month
-# splitter and we want to query all months in the year 2020, the batch request options
+# splitter, and we want to query all months in the year 2020, the batch request options
 # would look like:
 #   options = { "year": 2020 }
 BatchRequestOptions: TypeAlias = Dict[str, Any]
@@ -63,17 +80,13 @@ class BatchRequest:
     options: BatchRequestOptions
 
 
-class BatchRequestError(Exception):
-    pass
-
-
 @pydantic_dc.dataclass(frozen=True)
 class BatchSorter:
     key: str
     reverse: bool = False
 
 
-BatchSortersDefinition: TypeAlias = Union[List[BatchSorter], List[str]]
+BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str, dict]]
 
 
 def _is_batch_sorter_list(
@@ -90,13 +103,19 @@ def _is_str_sorter_list(sorters: BatchSortersDefinition) -> TypeGuard[list[str]]
     return False
 
 
-def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> List[BatchSorter]:
+def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> list[BatchSorter]:
     if _is_batch_sorter_list(sorters):
         return sorters
-    # mypy doesn't successfully type-narrow sorters to a List[str] here so we use
+
+    # mypy doesn't successfully type-narrow sorters to a list[str] here, so we use
     # another TypeGuard. We could cast instead which may be slightly faster.
+    sring_valued_sorter: str
     if _is_str_sorter_list(sorters):
-        return [_batch_sorter_from_str(sorter) for sorter in sorters]
+        return [
+            _batch_sorter_from_str(sring_valued_sorter)
+            for sring_valued_sorter in sorters
+        ]
+
     # This should never be reached because of static typing but is necessary because
     # mypy doesn't know of the if conditions must evaluate to True.
     raise ValueError(
@@ -110,17 +129,22 @@ def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
     Args:
         sort_key: A batch metadata key which will be used to sort batches on a data asset.
                   This can be prefixed with a + or - to indicate increasing or decreasing
-                  sorting. If not specified, defaults to increasing order.
+                  sorting.  If not specified, defaults to increasing order.
     """
     if sort_key[0] == "-":
         return BatchSorter(key=sort_key[1:], reverse=True)
-    elif sort_key[0] == "+":
+
+    if sort_key[0] == "+":
         return BatchSorter(key=sort_key[1:], reverse=False)
-    else:
-        return BatchSorter(key=sort_key, reverse=False)
+
+    return BatchSorter(key=sort_key, reverse=False)
 
 
-class DataAsset(ExperimentalBaseModel):
+# It would be best to bind this to Datasource, but we can't now due to circular dependencies
+_DatasourceT = TypeVar("_DatasourceT")
+
+
+class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -129,31 +153,36 @@ class DataAsset(ExperimentalBaseModel):
     # * type: Literal["csv"] = "csv"
     name: str
     type: str
+
     order_by: List[BatchSorter] = Field(default_factory=list)
 
-    # non-field private attrs
-    _datasource: Datasource = pydantic.PrivateAttr()
+    # non-field private attributes
+    _datasource: _DatasourceT = pydantic.PrivateAttr()
+    _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
+    _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @property
-    def datasource(self) -> Datasource:
+    def datasource(self) -> _DatasourceT:
         return self._datasource
 
-    # TODO (kilo): remove setter and add custom init for DataAsset to inject datasource in constructor??
-    # This setter is non-functional: https://github.com/pydantic/pydantic/issues/3395
-    # There is some related discussion linked from that ticket which may be a workaround.
-    @datasource.setter
-    def datasource(self, ds: Datasource):
-        assert isinstance(ds, Datasource)
-        self._datasource = ds
+    def test_connection(self) -> None:
+        """Test the connection for the DataAsset.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        raise NotImplementedError(
+            """One needs to implement "test_connection" on a DataAsset subclass."""
+        )
 
     # Abstract Methods
     def batch_request_options_template(
         self,
     ) -> BatchRequestOptions:
-        """A BatchRequestOptions template for get_batch_request.
+        """A BatchRequestOptions template for build_batch_request.
 
         Returns:
-            A BatchRequestOptions dictionary with the correct shape that get_batch_request
+            A BatchRequestOptions dictionary with the correct shape that build_batch_request
             will understand. All the option values are defaulted to None.
         """
         raise NotImplementedError
@@ -165,7 +194,7 @@ class DataAsset(ExperimentalBaseModel):
 
     # End Abstract Methods
 
-    def get_batch_request(
+    def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
@@ -179,18 +208,8 @@ class DataAsset(ExperimentalBaseModel):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        if options is not None and not self._valid_batch_request_options(options):
-            allowed_keys = set(self.batch_request_options_template().keys())
-            actual_keys = set(options.keys())
-            raise BatchRequestError(
-                "Batch request options should only contain keys from the following set:\n"
-                f"{allowed_keys}\nbut your specified keys contain\n"
-                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
-            )
-        return BatchRequest(
-            datasource_name=self._datasource.name,
-            data_asset_name=self.name,
-            options=options or {},
+        raise NotImplementedError(
+            """One must implement "build_batch_request" on a DataAsset subclass."""
         )
 
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
@@ -204,36 +223,18 @@ class DataAsset(ExperimentalBaseModel):
         Args:
             batch_request: A batch request object to be validated.
         """
-        if not (
-            batch_request.datasource_name == self.datasource.name
-            and batch_request.data_asset_name == self.name
-            and self._valid_batch_request_options(batch_request.options)
-        ):
-            expect_batch_request_form = BatchRequest(
-                datasource_name=self.datasource.name,
-                data_asset_name=self.name,
-                options=self.batch_request_options_template(),
-            )
-            raise BatchRequestError(
-                "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
-            )
+        raise NotImplementedError(
+            """One must implement "_validate_batch_request" on a DataAsset subclass."""
+        )
 
     # Sorter methods
-    @pydantic.validator("order_by", pre=True, each_item=True)
-    def _parse_order_by_sorter(
-        cls, v: Union[str, BatchSorter]
-    ) -> Union[BatchSorter, dict]:
-        if isinstance(v, str):
-            if not v:
-                raise ValueError("empty string")
-            return _batch_sorter_from_str(v)
-        return v
+    @pydantic.validator("order_by", pre=True)
+    def _parse_order_by_sorters(
+        cls, order_by: Optional[List[Union[BatchSorter, str, dict]]] = None
+    ) -> List[BatchSorter]:
+        return Datasource.parse_order_by_sorters(order_by=order_by)
 
-    def add_sorters(
-        self: DataAssetType, sorters: BatchSortersDefinition
-    ) -> DataAssetType:
+    def add_sorters(self: _DataAssetT, sorters: BatchSortersDefinition) -> _DataAssetT:
         """Associates a sorter to this DataAsset
 
         The passed in sorters will replace any previously associated sorters.
@@ -276,7 +277,9 @@ class DataAsset(ExperimentalBaseModel):
         for sorter in reversed(self.order_by):
             try:
                 batch_list.sort(
-                    key=lambda b: b.metadata[sorter.key],
+                    key=functools.cmp_to_key(
+                        _sort_batches_with_none_metadata_values(sorter.key)
+                    ),
                     reverse=sorter.reverse,
                 )
             except KeyError as e:
@@ -286,12 +289,39 @@ class DataAsset(ExperimentalBaseModel):
                 ) from e
 
 
-# If a Datasource can have more than 1 DataAssetType, this will need to change.
-DataAssetType = TypeVar("DataAssetType", bound=DataAsset)
+def _sort_batches_with_none_metadata_values(
+    key: str,
+) -> Callable[[Batch, Batch], int]:
+    def _compare_function(a: Batch, b: Batch) -> int:
+        if a.metadata[key] is not None and b.metadata[key] is not None:
+            if a.metadata[key] < b.metadata[key]:
+                return -1
+            elif a.metadata[key] > b.metadata[key]:
+                return 1
+            else:
+                return 0
+        elif a.metadata[key] is None and b.metadata[key] is None:
+            return 0
+        elif a.metadata[key] is None:  # b.metadata[key] is not None
+            return -1
+        # b.metadata[key] is None, a.metadata[key] is not None
+        return 0
+
+    return _compare_function
+
+
+# If a Datasource can have more than 1 _DataAssetT, this will need to change.
+_DataAssetT = TypeVar("_DataAssetT", bound=DataAsset)
+
+
+# It would be best to bind this to ExecutionEngine, but we can't now due to circular imports
+_ExecutionEngineT = TypeVar("_ExecutionEngineT")
 
 
 class Datasource(
-    ExperimentalBaseModel, Generic[DataAssetType], metaclass=MetaDatasource
+    ExperimentalBaseModel,
+    Generic[_DataAssetT, _ExecutionEngineT],
+    metaclass=MetaDatasource,
 ):
     # To subclass Datasource one needs to define:
     # asset_types
@@ -306,59 +336,79 @@ class Datasource(
     # class attrs
     asset_types: ClassVar[List[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
-    _excluded_eng_args: ClassVar[Set[str]] = {
+    _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
         "type",
         "execution_engine",
         "assets",
+        "base_directory",  # filesystem argument
+        "glob_directive",  # filesystem argument
+        "data_context_root_directory",  # filesystem argument
+        "bucket",  # s3 argument
+        "prefix",  # s3 argument
+        "delimiter",  # s3 argument
+        "max_keys",  # s3 argument
     }
+    _type_lookup: ClassVar[  # This attribute is set in `MetaDatasource.__new__`
+        TypeLookup
+    ]
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
-    execution_engine_override: ClassVar[Optional[Type[ExecutionEngine]]] = None
+    execution_engine_override: ClassVar[Optional[Type[_ExecutionEngineT]]] = None  # type: ignore[misc]  # ClassVar cannot contain type variables
 
     # instance attrs
     type: str
     name: str
-    assets: MutableMapping[str, DataAssetType] = {}
-    _execution_engine: ExecutionEngine = pydantic.PrivateAttr()
+    assets: MutableMapping[str, _DataAssetT] = {}
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        engine_kwargs = {
-            k: v for (k, v) in kwargs.items() if k not in self._excluded_eng_args
-        }
-        self._execution_engine = self._execution_engine_type()(**engine_kwargs)
+    # private attrs
+    _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
+    _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
 
-    @property
-    def execution_engine(self) -> ExecutionEngine:
-        return self._execution_engine
-
-    class Config:
-        # TODO: revisit this (1 option - define __get_validator__ on ExecutionEngine)
-        # https://pydantic-docs.helpmanual.io/usage/types/#custom-data-types
-        arbitrary_types_allowed = True
-
-    @pydantic.validator("assets", pre=True)
+    @pydantic.validator("assets", each_item=True)
     @classmethod
-    def _load_asset_subtype(cls, v: Dict[str, dict]):
-        LOGGER.info(f"Loading 'assets' ->\n{pf(v, depth=3)}")
-        loaded_assets: Dict[str, DataAssetType] = {}
+    def _load_asset_subtype(
+        cls: Type[Datasource[_DataAssetT, _ExecutionEngineT]], data_asset: DataAsset
+    ) -> _DataAssetT:
+        """
+        Some `data_asset` may be loaded as a less specific asset subtype different than
+        what was intended.
+        If a more specific subtype is needed the `data_asset` will be converted to a
+        more specific `DataAsset`.
+        """
+        logger.info(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
+        asset_type_name: str = data_asset.type
+        asset_type: Type[_DataAssetT] = cls._type_lookup[asset_type_name]
 
-        # TODO (kilo59): catch key errors
-        for asset_name, config in v.items():
-            asset_type_name: str = config["type"]
-            asset_type: Type[DataAssetType] = _SourceFactories.type_lookup[
-                asset_type_name
-            ]
-            LOGGER.debug(f"Instantiating '{asset_type_name}' as {asset_type}")
-            loaded_assets[asset_name] = asset_type(**config)
+        if asset_type is type(data_asset):
+            # asset is already the intended type
+            return data_asset
 
-        LOGGER.debug(f"Loaded 'assets' ->\n{repr(loaded_assets)}")
-        return loaded_assets
+        # strip out asset default kwargs
+        kwargs = data_asset.dict(exclude_unset=True)
+        logger.debug(f"{asset_type_name} - kwargs\n{pf(kwargs)}")
 
-    def _execution_engine_type(self) -> Type[ExecutionEngine]:
+        asset_of_intended_type = asset_type(**kwargs)
+        logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
+        return asset_of_intended_type
+
+    def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Returns the execution engine to be used"""
         return self.execution_engine_override or self.execution_engine_type
+
+    def get_execution_engine(self) -> _ExecutionEngineT:
+        current_execution_engine_kwargs = self.dict(
+            exclude=self._EXCLUDED_EXEC_ENG_ARGS
+        )
+        if (
+            current_execution_engine_kwargs != self._cached_execution_engine_kwargs
+            or not self._execution_engine
+        ):
+            self._execution_engine = self._execution_engine_type()(
+                **current_execution_engine_kwargs
+            )
+            self._cached_execution_engine_kwargs = current_execution_engine_kwargs
+        return self._execution_engine
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -367,7 +417,7 @@ class Datasource(
 
         Args:
             batch_request: A batch request for this asset. Usually obtained by calling
-                get_batch_request on the asset.
+                build_batch_request on the asset.
 
         Returns:
             A list of batches that match the options specified in the batch request.
@@ -375,7 +425,7 @@ class Datasource(
         data_asset = self.get_asset(batch_request.data_asset_name)
         return data_asset.get_batch_list_from_batch_request(batch_request)
 
-    def get_asset(self, asset_name: str) -> DataAssetType:
+    def get_asset(self, asset_name: str) -> _DataAssetT:
         """Returns the DataAsset referred to by name"""
         # This default implementation will be used if protocol is inherited
         try:
@@ -385,24 +435,97 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(self, asset: DataAssetType) -> DataAssetType:
+    def add_asset(
+        self,
+        asset: _DataAssetT,
+        data_connector: Optional[DataConnector] = None,
+        test_connection_error_message: Optional[str] = None,
+    ) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
             asset: The DataAsset to be added to this datasource.
+            data_connector: Optional reference to "DataConnector" object for connecting Datasource and DataAsset to data
+            test_connection_error_message: Optional message for reporting connection test errors informatively
         """
-        # The setter for datasource is non-functional so we access _datasource directly.
+        # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
+        asset._data_connector = data_connector
+        asset._test_connection_error_message = test_connection_error_message
+
+        asset.test_connection()
+
         self.assets[asset.name] = asset
+
+        # pydantic needs to know that an asset has been set so that it doesn't get excluded
+        # when dumping to dict, json, yaml etc.
+        self.__fields_set__.update(_FIELDS_ALWAYS_SET)
+
         return asset
+
+    @staticmethod
+    def parse_order_by_sorters(
+        order_by: Optional[List[Union[BatchSorter, str, dict]]] = None
+    ) -> List[BatchSorter]:
+        order_by_sorters: list[BatchSorter] = []
+        if order_by:
+            for idx, sorter in enumerate(order_by):
+                if isinstance(sorter, str):
+                    if not sorter:
+                        raise ValueError(
+                            '"order_by" list cannot contain an empty string'
+                        )
+                    order_by_sorters.append(_batch_sorter_from_str(sorter))
+                elif isinstance(sorter, dict):
+                    key: Optional[Any] = sorter.get("key")
+                    reverse: Optional[Any] = sorter.get("reverse")
+                    if key and reverse:
+                        order_by_sorters.append(BatchSorter(key=key, reverse=reverse))
+                    elif key:
+                        order_by_sorters.append(BatchSorter(key=key))
+                    else:
+                        raise ValueError(
+                            '"order_by" list dict must have a key named "key"'
+                        )
+                else:
+                    order_by_sorters.append(sorter)
+        return order_by_sorters
+
+    @staticmethod
+    def parse_batching_regex_string(
+        batching_regex: Optional[Union[re.Pattern, str]] = None
+    ) -> re.Pattern:
+        pattern: re.Pattern
+        if not batching_regex:
+            pattern = re.compile(".*")
+        elif isinstance(batching_regex, str):
+            pattern = re.compile(batching_regex)
+        elif isinstance(batching_regex, re.Pattern):
+            pattern = batching_regex
+        else:
+            raise ValueError('"batching_regex" must be either re.Pattern, str, or None')
+        return pattern
 
     # Abstract Methods
     @property
-    def execution_engine_type(self) -> Type[ExecutionEngine]:
+    def execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Return the ExecutionEngine type use for this Datasource"""
         raise NotImplementedError(
-            "One needs to implement 'execution_engine_type' on a Datasource subclass"
+            """One needs to implement "execution_engine_type" on a Datasource subclass."""
+        )
+
+    def test_connection(self, test_assets: bool = True) -> None:
+        """Test the connection for the Datasource.
+
+        Args:
+            test_assets: If assets have been passed to the Datasource, an attempt can be made to test them as well.
+
+        Raises:
+            TestConnectionError: If the connection test fails.
+        """
+        raise NotImplementedError(
+            """One needs to implement "test_connection" on a Datasource subclass."""
         )
 
     # End Abstract Methods
@@ -431,7 +554,7 @@ class Batch(ExperimentalBaseModel):
     datasource: Datasource
     data_asset: DataAsset
     batch_request: BatchRequest
-    data: "BatchData"
+    data: BatchData
     id: str = ""
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
@@ -439,9 +562,9 @@ class Batch(ExperimentalBaseModel):
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
-    batch_markers: "BatchMarkers" = Field(..., alias="legacy_batch_markers")
+    batch_markers: BatchMarkers = Field(..., alias="legacy_batch_markers")
     batch_spec: BatchSpec = Field(..., alias="legacy_batch_spec")
-    batch_definition: "BatchDefinition" = Field(..., alias="legacy_batch_definition")
+    batch_definition: BatchDefinition = Field(..., alias="legacy_batch_definition")
 
     class Config:
         allow_mutation = False
@@ -451,11 +574,14 @@ class Batch(ExperimentalBaseModel):
     def _set_id(cls, values: dict) -> dict:
         # We need a unique identifier. This will likely change as we get more input.
         options_list = []
-        for k, v in values["batch_request"].options.items():
-            options_list.append(f"{k}_{v}")
+        for key, value in values["batch_request"].options.items():
+            if key != "path":
+                options_list.append(f"{key}_{value}")
+
         values["id"] = "-".join(
             [values["datasource"].name, values["data_asset"].name, *options_list]
         )
+
         return values
 
     @classmethod
@@ -475,7 +601,7 @@ class Batch(ExperimentalBaseModel):
     @validate_arguments
     def head(
         self,
-        n_rows: Optional[StrictInt] = None,
+        n_rows: StrictInt = 5,
         fetch_all: StrictBool = False,
     ) -> HeadData:
         """Return the first n rows of this Batch.
@@ -494,29 +620,13 @@ class Batch(ExperimentalBaseModel):
             HeadData
         """
         self.data.execution_engine.batch_manager.load_batch_list(batch_list=[self])
-        metric = MetricConfiguration(
-            metric_name="table.head",
-            metric_domain_kwargs={"batch_id": self.id},
-            metric_value_kwargs={"n_rows": n_rows, "fetch_all": fetch_all},
+        metrics_calculator = MetricsCalculator(
+            execution_engine=self.data.execution_engine,
+            show_progress_bars=True,
         )
-        table_head_metric_value: pd.DataFrame | list[
-            pyspark_sql_Row
-        ] | pyspark_sql_Row = self.data.execution_engine.resolve_metrics(
-            metrics_to_resolve=(metric,)
-        )[
-            metric.id
-        ]
-        table_head_df: pd.DataFrame
-        if isinstance(table_head_metric_value, pd.DataFrame):
-            # table_head_metric_value is a pd.DataFrame already
-            table_head_df = table_head_metric_value
-        elif isinstance(table_head_metric_value, list):
-            # convert list of pyspark.sql.Row to pd.DataFrame
-            table_head_df = pd.DataFrame(
-                [row.asDict() for row in table_head_metric_value]
-            )
-        else:
-            # otherwise convert pyspark.sql.Row to pd.DataFrame
-            table_head_df = pd.DataFrame(table_head_metric_value.asDict())
-
+        table_head_df: pd.DataFrame = metrics_calculator.head(
+            n_rows=n_rows,
+            domain_kwargs={"batch_id": self.id},
+            fetch_all=fetch_all,
+        )
         return HeadData(data=table_head_df.reset_index(drop=True, inplace=False))

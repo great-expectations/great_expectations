@@ -5,7 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
-    ConfiguredAssetSqlDataConnector,
+    ConfiguredAssetSqlDataConnector,  # noqa: TCH001
 )
 from great_expectations.datasource.new_datasource import BaseDatasource
 

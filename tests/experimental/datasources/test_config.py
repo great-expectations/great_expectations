@@ -1,6 +1,7 @@
 import functools
 import json
 import pathlib
+import re
 from pprint import pformat as pf
 from typing import Callable, List
 
@@ -10,16 +11,16 @@ import pytest
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
+from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.sql_datasource import (
-    ColumnSplitter,
-    SqlYearMonthSplitter,
+    ColumnSplitterYearAndMonth,
     TableAsset,
 )
 
 try:
     from devtools import debug as pp
-except ImportError:  # type: ignore[assignment]
-    from pprint import pprint as pp  # type: ignore[assignment]
+except ImportError:
+    from pprint import pprint as pp
 
 p = pytest.param
 
@@ -45,8 +46,6 @@ PG_COMPLEX_CONFIG_DICT = {
                     "column_splitter": {
                         "column_name": "my_column",
                         "method_name": "split_on_year_and_month",
-                        "name": "y_m_splitter",
-                        "param_names": ["year", "month"],
                     },
                     "name": "with_splitter",
                     "table_name": "another_table",
@@ -68,7 +67,27 @@ PG_COMPLEX_CONFIG_DICT = {
                     "type": "table",
                 },
             },
-        }
+        },
+        "my_pandas_ds": {
+            "type": "pandas_filesystem",
+            "name": "my_pandas_ds",
+            "base_directory": __file__,
+            "assets": {
+                "my_csv_asset": {
+                    "name": "my_csv_asset",
+                    "type": "csv",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                    "sep": "|",
+                    "names": ["col1", "col2"],
+                },
+                "my_json_asset": {
+                    "name": "my_json_asset",
+                    "type": "json",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                    "orient": "records",
+                },
+            },
+        },
     }
 }
 PG_COMPLEX_CONFIG_JSON = json.dumps(PG_COMPLEX_CONFIG_DICT)
@@ -115,6 +134,70 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
         },
     },
 }
+
+
+@pytest.mark.parametrize(
+    "asset_dict", [{"type": "json", "orient": "records"}, {"type": "csv", "sep": "|"}]
+)
+class TestExcludeUnsetAssetFields:
+    """
+    Ensure that DataAsset fields are excluded from serialization if they have not be explicitly set.
+
+    We are trying to ensure that our configs aren't filled with default values from DataAssets that
+    users never set.
+    """
+
+    def test_from_datasource(self, asset_dict: dict):
+        ds_mapping = {"csv": "pandas_filesystem", "json": "pandas_filesystem"}
+
+        ds_type_: str = ds_mapping[asset_dict["type"]]
+        ds_class = _SourceFactories.type_lookup[ds_type_]
+
+        # fill in required args
+        asset_dict.update(
+            {
+                "name": "my_asset",
+                "batching_regex": re.compile(
+                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+                ),
+            }
+        )
+        asset_name = asset_dict["name"]
+        ds_dict = {
+            "name": "my_ds",
+            "base_directory": pathlib.Path(__file__),
+            "assets": {asset_name: asset_dict},
+        }
+        datasource: Datasource = ds_class.parse_obj(ds_dict)
+        assert asset_dict == datasource.dict()["assets"][asset_name]
+
+    def test_from_gx_config(self, asset_dict: dict):
+        """
+        Ensure that unset fields are excluded even when being parsed by the the top-level `GxConfig` class.
+        """
+        # fill in required args
+        asset_dict.update(
+            {
+                "name": "my_asset",
+                "batching_regex": re.compile(
+                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+                ),
+            }
+        )
+        asset_name = asset_dict["name"]
+        ds_dict = {
+            "name": "my_ds",
+            "type": "pandas_filesystem",
+            "base_directory": pathlib.Path(__file__),
+            "assets": {asset_name: asset_dict},
+        }
+        gx_config = GxConfig.parse_obj({"xdatasources": {"my_ds": ds_dict}})
+
+        gx_config_dict = gx_config.dict()
+        print(f"gx_config_dict\n{pf(gx_config_dict)}")
+        assert (
+            asset_dict == gx_config_dict["xdatasources"]["my_ds"]["assets"][asset_name]
+        )
 
 
 @pytest.mark.parametrize(
@@ -188,7 +271,7 @@ def test_catch_bad_top_level_config(
     [
         p(
             {"name": "missing `table_name`", "type": "table"},
-            ("xdatasources", "assets", "table_name"),
+            ("xdatasources", "assets", "missing `table_name`", "table_name"),
             "field required",
             id="missing `table_name`",
         ),
@@ -202,24 +285,15 @@ def test_catch_bad_top_level_config(
                     "column_name": "foo",
                 },
             },
-            ("xdatasources", "assets", "column_splitter", "method_name"),
-            "unexpected value; permitted: 'split_on_year_and_month'",
+            (
+                "xdatasources",
+                "assets",
+                "unknown splitter",
+                "column_splitter",
+                "method_name",
+            ),
+            "unexpected value; permitted:",
             id="unknown splitter method",
-        ),
-        p(
-            {
-                "name": "bad splitter param",
-                "type": "table",
-                "table_name": "pool",
-                "column_splitter": {
-                    "method_name": "split_on_year_and_month",
-                    "column_name": "foo",
-                    "param_names": ["year", "month", "INVALID"],
-                },
-            },
-            ("xdatasources", "assets", "column_splitter", "param_names", 2),
-            "unexpected value; permitted: 'year', 'month'",
-            id="invalid splitter param_name",
         ),
     ],
 )
@@ -245,9 +319,13 @@ def test_catch_bad_asset_configs(
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
     all_errors = exc_info.value.errors()
-    assert len(all_errors) == 1, "Expected 1 error"
-    assert expected_error_loc == all_errors[0]["loc"]
-    assert expected_msg == all_errors[0]["msg"]
+    assert len(all_errors) >= 1, "Expected at least 1 error"
+    test_msg = ""
+    for error in all_errors:
+        if expected_error_loc == all_errors[0]["loc"]:
+            test_msg = error["msg"]
+            break
+    assert test_msg.startswith(expected_msg)
 
 
 @pytest.mark.unit
@@ -258,9 +336,8 @@ def test_catch_bad_asset_configs(
             {
                 "column_name": "flavor",
                 "method_name": "NOT_VALID",
-                "param_names": ["cherry", "strawberry"],
             },
-            "value_error",
+            "value_error.const",
             "unexpected value; permitted:",
         )
     ],
@@ -271,9 +348,8 @@ def test_general_column_splitter_errors(
     expected_error_type: str,
     expected_msg: str,
 ):
-
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        ColumnSplitter(**bad_column_kwargs)
+        ColumnSplitterYearAndMonth(**bad_column_kwargs)
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -330,7 +406,7 @@ def test_json_config_round_trip(
     pp(re_loaded)
     assert re_loaded
 
-    assert from_json_gx_config == re_loaded
+    assert from_json_gx_config.dict() == re_loaded.dict()
 
 
 def test_yaml_config_round_trip(
@@ -343,7 +419,8 @@ def test_yaml_config_round_trip(
     pp(re_loaded)
     assert re_loaded
 
-    assert from_yaml_gx_config == re_loaded
+    assert from_yaml_gx_config.dict() == re_loaded.dict()
+    assert dumped == re_loaded.yaml()
 
 
 def test_yaml_file_config_round_trip(
@@ -371,7 +448,7 @@ def test_splitters_deserialization(
     table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
-    assert isinstance(table_asset.column_splitter, SqlYearMonthSplitter)
+    assert isinstance(table_asset.column_splitter, ColumnSplitterYearAndMonth)
     assert table_asset.column_splitter.method_name == "split_on_year_and_month"
 
 
@@ -396,9 +473,15 @@ def test_custom_sorter_serialization(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["xdatasources"][
+    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["xdatasources"][  # type: ignore[index]
         "my_pg_ds"
-    ]["assets"]["with_dslish_sorters"]["order_by"]
+    ][
+        "assets"
+    ][
+        "with_dslish_sorters"
+    ][
+        "order_by"
+    ]
 
     assert '"reverse": True' not in dumped
     assert '{"key":' not in dumped

@@ -1,24 +1,25 @@
-# Utility methods for dealing with DataConnector objects
+from __future__ import annotations
 
 import copy
 import logging
 import os
+import pathlib
 import re
 import sre_constants
 import sre_parse
 import warnings
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.datasource.data_connector.asset import Asset
-from great_expectations.datasource.data_connector.sorter import Sorter
+from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
+from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.datasource import DataConnector
 
 logger = logging.getLogger(__name__)
@@ -65,11 +66,13 @@ def batch_definition_matches_batch_request(
         and batch_request.datasource_name != batch_definition.datasource_name
     ):
         return False
+
     if (
         batch_request.data_connector_name
         and batch_request.data_connector_name != batch_definition.data_connector_name
     ):
         return False
+
     if (
         batch_request.data_asset_name
         and batch_request.data_asset_name != batch_definition.data_asset_name
@@ -122,8 +125,10 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
         regex_pattern=regex_pattern,
         group_names=group_names,
     )
+
     if processed_data_reference is None:
         return None
+
     data_asset_name_from_batch_identifiers: str = processed_data_reference[0]
     batch_identifiers: IDDict = processed_data_reference[1]
     if data_asset_name is None:
@@ -165,6 +170,7 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     data_asset_name: str = batch_identifiers.pop(
         "data_asset_name", DEFAULT_DATA_ASSET_NAME
     )
+
     return data_asset_name, batch_identifiers
 
 
@@ -179,12 +185,13 @@ def _determine_batch_identifiers_using_named_groups(
             logger.warning(
                 f"The named group '{key}' must explicitly be stated in group_names to be parsed"
             )
+
     return batch_identifiers
 
 
 def map_batch_definition_to_data_reference_string_using_regex(
     batch_definition: BatchDefinition,
-    regex_pattern: str,
+    regex_pattern: re.Pattern,
     group_names: List[str],
 ) -> str:
     if not isinstance(batch_definition, BatchDefinition):
@@ -208,7 +215,7 @@ def map_batch_definition_to_data_reference_string_using_regex(
 # TODO: <Alex>How are we able to recover the full file path, including the file extension?  Relying on file extension being part of the regex_pattern does not work when multiple file extensions are specified as part of the regex_pattern.</Alex>
 def convert_batch_identifiers_to_data_reference_string_using_regex(
     batch_identifiers: IDDict,
-    regex_pattern: str,
+    regex_pattern: re.Pattern,
     group_names: List[str],
     data_asset_name: Optional[str] = None,
 ) -> str:
@@ -231,7 +238,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
 
 # noinspection PyUnresolvedReferences
 def _invert_regex_to_data_reference_template(
-    regex_pattern: str,
+    regex_pattern: re.Pattern | str,
     group_names: List[str],
 ) -> str:
     r"""Create a string template based on a regex and corresponding list of group names.
@@ -262,20 +269,21 @@ def _invert_regex_to_data_reference_template(
 
     num_groups = len(group_names)
 
+    if isinstance(regex_pattern, re.Pattern):
+        regex_pattern = regex_pattern.pattern
+
     # print("-"*80)
-    parsed_sre = sre_parse.parse(regex_pattern)
+    parsed_sre = sre_parse.parse(str(regex_pattern))
     for token, value in parsed_sre:  # type: ignore[attr-defined]
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
             data_reference_template += chr(value)
-
         elif token == sre_constants.SUBPATTERN:
             if not (group_name_index < num_groups):
                 break
             # Replace the captured group with "{next_group_name}" in the template
             data_reference_template += f"{{{group_names[group_name_index]}}}"
             group_name_index += 1
-
         elif token in [
             sre_constants.MAX_REPEAT,
             sre_constants.IN,
@@ -284,7 +292,6 @@ def _invert_regex_to_data_reference_template(
         ]:
             # Replace the uncaptured group a wildcard in the template
             data_reference_template += "*"
-
         elif token in [
             sre_constants.AT,
             sre_constants.ASSERT_NOT,
@@ -298,21 +305,63 @@ def _invert_regex_to_data_reference_template(
 
     # Collapse adjacent wildcards into a single wildcard
     data_reference_template: str = re.sub("\\*+", "*", data_reference_template)  # type: ignore[no-redef]
+
     return data_reference_template
 
 
+def sanitize_prefix(text: str) -> str:
+    """
+    Takes in a given user-prefix and cleans it to work with file-system traversal methods
+    (i.e. add '/' to the end of a string meant to represent a directory)
+    """
+    _, ext = os.path.splitext(text)
+    if ext:
+        # Provided prefix is a filename so no adjustment is necessary
+        return text
+
+    # Provided prefix is a directory (so we want to ensure we append it with '/')
+    return os.path.join(text, "")
+
+
+def sanitize_prefix_for_s3(text: str) -> str:
+    """
+    Takes in a given user-prefix and cleans it to work with file-system traversal methods
+    (i.e. add '/' to the end of a string meant to represent a directory)
+
+    Customized for S3 paths, ignoring the path separator used by the host OS
+    """
+    text = text.strip()
+    if not text:
+        return text
+
+    path_parts = text.split("/")
+    if not path_parts:  # Empty prefix
+        return text
+
+    if "." in path_parts[-1]:  # File, not folder
+        return text
+
+    # Folder, should have trailing /
+    return f"{text.rstrip('/')}/"
+
+
 def normalize_directory_path(
-    dir_path: str, root_directory_path: Optional[str] = None
-) -> str:
+    dir_path: Union[PathStr],
+    root_directory_path: Optional[PathStr] = None,
+) -> pathlib.Path:
+    dir_path = pathlib.Path(dir_path)
+
     # If directory is a relative path, interpret it as relative to the root directory.
-    if Path(dir_path).is_absolute() or root_directory_path is None:
+    if dir_path.is_absolute() or root_directory_path is None:
         return dir_path
-    else:
-        return str(Path(root_directory_path).joinpath(dir_path))
+
+    root_directory_path = pathlib.Path(root_directory_path)
+
+    return root_directory_path.joinpath(dir_path)
 
 
 def get_filesystem_one_level_directory_glob_path_list(
-    base_directory_path: str, glob_directive: str
+    base_directory_path: Union[PathStr], glob_directive: str
 ) -> List[str]:
     """
     List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
@@ -320,11 +369,16 @@ def get_filesystem_one_level_directory_glob_path_list(
     :param glob_directive -- glob expansion directive
     :returns -- list of relative file paths
     """
-    globbed_paths = Path(base_directory_path).glob(glob_directive)
+    if isinstance(base_directory_path, str):
+        base_directory_path = pathlib.Path(base_directory_path)
+
+    globbed_paths = base_directory_path.glob(glob_directive)
+
     path_list: List[str] = [
         os.path.relpath(str(posix_path), base_directory_path)
         for posix_path in globbed_paths
     ]
+
     return path_list
 
 
@@ -362,6 +416,7 @@ def list_azure_keys(
             if isinstance(item, BlobPrefix):
                 if recursive:
                     _walk_blob_hierarchy(name_starts_with=item.name)
+
             else:
                 path_list.append(item.name)
 
@@ -427,6 +482,7 @@ def list_gcs_keys(
         name: str = blob.name
         if name.endswith("/"):  # GCS includes directories in blob output
             continue
+
         keys.append(name)
 
     return keys
@@ -466,6 +522,7 @@ def list_s3_keys(
             item["Key"] for item in s3_objects_info["Contents"] if item["Size"] > 0
         ]
         yield from keys
+
     if recursive and "CommonPrefixes" in s3_objects_info:
         common_prefixes: List[Dict[str, Any]] = s3_objects_info["CommonPrefixes"]
         for prefix_info in common_prefixes:
@@ -478,6 +535,7 @@ def list_s3_keys(
                 iterator_dict={},
                 recursive=recursive,
             )
+
     if s3_objects_info["IsTruncated"]:
         iterator_dict["continuation_token"] = s3_objects_info["NextContinuationToken"]
         # Recursively fetch more
@@ -504,11 +562,14 @@ def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dic
             # if sorters were not configured
             if sorter_config is None:
                 return None
+
             if "name" not in sorter_config:
                 raise ValueError("Sorter config should have a name")
+
             sorter_name: str = sorter_config["name"]
             new_sorter: Sorter = _build_sorter_from_config(sorter_config=sorter_config)
             sorter_dict[sorter_name] = new_sorter
+
     return sorter_dict
 
 
@@ -525,11 +586,9 @@ def _build_sorter_from_config(sorter_config: Dict[str, Any]) -> Sorter:
     return sorter
 
 
-def _build_asset_from_config(
-    runtime_environment: "DataConnector", config: dict
-) -> Asset:
+def _build_asset_from_config(runtime_environment: DataConnector, config: dict) -> Asset:
     """Build Asset from configuration and return asset. Used by both ConfiguredAssetDataConnector and RuntimeDataConnector"""
-    runtime_environment_dict: Dict[str, "DataConnector"] = {
+    runtime_environment_dict: Dict[str, DataConnector] = {
         "data_connector": runtime_environment
     }
     config = assetConfigSchema.load(config)
@@ -545,4 +604,5 @@ def _build_asset_from_config(
             package_name=None,
             class_name=config["class_name"],
         )
+
     return asset

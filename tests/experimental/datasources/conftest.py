@@ -1,31 +1,36 @@
+from __future__ import annotations
+
 import logging
-from datetime import datetime
-from typing import Callable, Dict, Tuple
+from contextlib import contextmanager
+from typing import Any, Callable, Dict, Generator, List, Type, Union
 
 import pytest
 from pytest import MonkeyPatch
-
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.experimental.datasources.metadatasource import MetaDatasource
-
-LOGGER = logging.getLogger(__name__)
-
-from contextlib import contextmanager
 
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
     BatchMarkers,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.execution_engine import (
+    ExecutionEngine,
+    SqlAlchemyExecutionEngine,
+)
+from great_expectations.experimental.datasources.interfaces import Datasource
 from great_expectations.experimental.datasources.sources import _SourceFactories
 
-# This is the default min/max time that we are using in our mocks.
-# They are made global so our tests can reference them directly.
-DEFAULT_MIN_DT = datetime(2021, 1, 1, 0, 0, 0)
-DEFAULT_MAX_DT = datetime(2022, 12, 31, 0, 0, 0)
+logger = logging.getLogger(__name__)
+
+
+class MockSaInspector:
+    def get_columns(self) -> list[dict[str, Any]]:  # type: ignore[empty-body]
+        ...
+
+    def get_schema_names(self) -> list[str]:  # type: ignore[empty-body]
+        ...
+
+    def has_table(self, table_name: str, schema: str) -> bool:  # type: ignore[empty-body]
+        ...
 
 
 class Dialect:
@@ -37,21 +42,8 @@ class _MockConnection:
     def __init__(self, dialect: Dialect):
         self.dialect = dialect
 
-    def execute(self, query):
-        """Execute a query over a sqlalchemy engine connection.
 
-        Currently this mock assumes the query is always of the form:
-        "select min(col), max(col) from table"
-        where col is a datetime column since that's all that's necessary.
-        This can be generalized if needed.
-
-        Args:
-            query: The SQL query to execute.
-        """
-        return [(DEFAULT_MIN_DT, DEFAULT_MAX_DT)]
-
-
-class _MockSaEngine:
+class MockSaEngine:
     def __init__(self, dialect: Dialect):
         self.dialect = dialect
 
@@ -62,7 +54,9 @@ class _MockSaEngine:
 
 
 def sqlachemy_execution_engine_mock_cls(
-    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None], dialect: str
+    validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
+    dialect: str,
+    splitter_query_response: Union[List[Dict[str, Any]], List[Any]],
 ):
     """Creates a mock gx sql alchemy engine class
 
@@ -70,42 +64,65 @@ def sqlachemy_execution_engine_mock_cls(
         validate_batch_spec: A hook that can be used to validate the generated the batch spec
             passed into get_batch_data_and_markers
         dialect: A string representing the SQL Engine dialect. Examples include: postgresql, sqlite
+        splitter_query_response: A list of dictionaries. Each dictionary is a row returned back from
+            the splitter query. The keys are the column names and the value is the column values, eg:
+            [{'year': 2021, 'month': 1}, {'year': 2021, 'month': 2}]
     """
+
+    if not splitter_query_response:
+        raise ValueError("splitter_query_response must be a non-empty list.")
 
     class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
         def __init__(self, *args, **kwargs):
             # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
-            self.engine = _MockSaEngine(dialect=Dialect(dialect))
+            self.engine = MockSaEngine(dialect=Dialect(dialect))
 
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec
-        ) -> Tuple[BatchData, BatchMarkers]:
+        ) -> tuple[BatchData, BatchMarkers]:
             validate_batch_spec(batch_spec)
             return BatchData(self), BatchMarkers(ge_load_time=None)
+
+        def execute_split_query(self, split_query):
+            class Row:
+                def __init__(self, attributes):
+                    for k, v in attributes.items():
+                        setattr(self, k, v)
+
+            # We know that splitter_query_response is non-empty because of validation
+            # at the top of the outer function.
+            # In some cases, such as in the datetime splitters,
+            # a dictionary is returned our from out splitter query with the key as the parameter_name.
+            # Otherwise, a list of values is returned.
+            if isinstance(splitter_query_response[0], dict):
+                return [Row(row_dict) for row_dict in splitter_query_response]
+            return splitter_query_response
 
     return MockSqlAlchemyExecutionEngine
 
 
-class ExecutionEngineDouble:
+class ExecutionEngineDouble(ExecutionEngine):
     def __init__(self, *args, **kwargs):
         pass
 
-    def get_batch_data_and_markers(self, batch_spec) -> Tuple[BatchData, BatchMarkers]:
+    def get_batch_data_and_markers(self, batch_spec) -> tuple[BatchData, BatchMarkers]:  # type: ignore[override]
         return BatchData(self), BatchMarkers(ge_load_time=None)
 
 
 @pytest.fixture
-def inject_engine_lookup_double(monkeypatch: MonkeyPatch) -> ExecutionEngineDouble:  # type: ignore[misc]
+def inject_engine_lookup_double(
+    monkeypatch: MonkeyPatch,
+) -> Generator[Type[ExecutionEngineDouble], None, None]:
     """
     Inject an execution engine test double into the _SourcesFactory.engine_lookup
     so that all Datasources use the execution engine double.
     Dynamically create a new subclass so that runtime type validation does not fail.
     """
-    original_engine_override: Dict[MetaDatasource, ExecutionEngine] = {}
+    original_engine_override: dict[Type[Datasource], Type[ExecutionEngine]] = {}
     for key in _SourceFactories.type_lookup.keys():
-        if issubclass(type(key), MetaDatasource):
+        if issubclass(type(key), Datasource):
             original_engine_override[key] = key.execution_engine_override
 
     try:
