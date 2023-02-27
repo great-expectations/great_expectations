@@ -1,6 +1,5 @@
-from great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector import (
-    ABSDataConnector,
-)
+# isort:skip_file
+
 from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
     DataConnector,
 )
@@ -12,6 +11,9 @@ from great_expectations.experimental.datasources.data_asset.data_connector.files
 )
 from great_expectations.experimental.datasources.data_asset.data_connector.s3_data_connector import (
     S3DataConnector,
+)
+from great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector import (
+    ABSDataConnector,
 )
 
 FILE_PATH_BATCH_SPEC_KEY = FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY
