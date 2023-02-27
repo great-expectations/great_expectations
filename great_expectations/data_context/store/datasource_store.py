@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import (
@@ -9,7 +9,6 @@ from great_expectations.core.data_context_key import (
     DataContextVariableKey,
 )
 from great_expectations.data_context.store.store import Store
-from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
@@ -56,18 +55,6 @@ class DatasourceStore(Store):
             "class_name": self.__class__.__name__,
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
-
-    def list_keys(self) -> List[str]:  # type: ignore[override]
-        """
-        See parent 'Store.list_keys()' for more information
-        """
-        keys_without_store_backend_id: List[str] = list(
-            filter(
-                lambda k: k != StoreBackend.STORE_BACKEND_ID_KEY,
-                self._store_backend.list_keys(),
-            )
-        )
-        return keys_without_store_backend_id
 
     def remove_key(self, key: Union[DataContextVariableKey, GXCloudIdentifier]) -> None:
         """
