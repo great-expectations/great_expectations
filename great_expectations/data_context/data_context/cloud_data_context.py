@@ -11,6 +11,7 @@ from typing import (
     Mapping,
     Optional,
     Tuple,
+    Type,
     Union,
     cast,
 )
@@ -51,13 +52,17 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions.exceptions import DataContextError
-from great_expectations.render.renderer.site_builder import SiteBuilder  # noqa: TCH001
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
+    )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.execution_engine.execution_engine import ExecutionEngine
+    from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -720,6 +725,129 @@ class CloudDataContext(SerializableDataContext):
             profiler_store=self.profiler_store,
             ge_cloud_mode=True,
         )
+
+    def add_or_update_expectation_suite(
+        self,
+        expectation_suite_name: str | None = None,
+        id: str | None = None,
+        expectations: list[dict | ExpectationConfiguration] | None = None,
+        evaluation_parameters: dict | None = None,
+        data_asset_type: str | None = None,
+        execution_engine_type: Type[ExecutionEngine] | None = None,
+        meta: dict | None = None,
+        expectation_suite: ExpectationSuite | None = None,
+    ) -> ExpectationSuite:
+        id = self._determine_id_for_add_or_update_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            id=id,
+            expectation_suite=expectation_suite,
+        )
+        return super().add_or_update_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            id=id,
+            expectations=expectations,
+            evaluation_parameters=evaluation_parameters,
+            data_asset_type=data_asset_type,
+            execution_engine_type=execution_engine_type,
+            meta=meta,
+            expectation_suite=expectation_suite,
+        )
+
+    def _determine_id_for_add_or_update_expectation_suite(
+        self,
+        expectation_suite_name: str | None = None,
+        id: str | None = None,
+        expectation_suite: ExpectationSuite | None = None,
+    ) -> str | None:
+        if id:
+            return id
+        if expectation_suite and expectation_suite.ge_cloud_id:
+            return expectation_suite.ge_cloud_id
+
+        if not expectation_suite_name and expectation_suite:
+            expectation_suite_name = expectation_suite.expectation_suite_name
+
+        suite_keys = cast(List[GXCloudIdentifier], self.list_expectation_suites() or [])
+        for key in suite_keys:
+            if key.resource_name == expectation_suite_name:
+                return key.cloud_id
+
+        return None
+
+    def add_or_update_checkpoint(  # noqa: C901 - Complexity 23
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: str | list[str] | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | list[str] | None = None,
+        expectation_suite_id: str | None = None,
+        default_validation_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
+    ) -> Checkpoint:
+        id = self._determine_id_for_add_or_update_checkpoint(
+            name=name,
+            id=id,
+            checkpoint=checkpoint,
+        )
+        return super().add_or_update_checkpoint(
+            name=name,
+            id=id,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+            expectation_suite_id=expectation_suite_id,
+            default_validation_id=default_validation_id,
+            checkpoint=checkpoint,
+        )
+
+    def _determine_id_for_add_or_update_checkpoint(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        checkpoint: Checkpoint | None = None,
+    ) -> str | None:
+        if id:
+            return id
+        if checkpoint and checkpoint.ge_cloud_id:
+            return checkpoint.ge_cloud_id
+
+        if not name and checkpoint:
+            name = checkpoint.name
+
+        suite_keys = cast(List[GXCloudIdentifier], self.list_checkpoints() or [])
+        for key in suite_keys:
+            if key.resource_name == name:
+                return key.cloud_id
+
+        return None
 
     def _init_site_builder_for_data_docs_site_creation(
         self, site_name: str, site_config: dict

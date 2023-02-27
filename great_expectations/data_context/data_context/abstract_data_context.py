@@ -1968,7 +1968,17 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
             )
 
-        if not checkpoint:
+        if checkpoint:
+            config = checkpoint.config
+            if id and not config.ge_cloud_id:
+                config.ge_cloud_id = id
+            config_dict = config.to_dict()
+            checkpoint = Checkpoint.construct_from_config_args(
+                data_context=self,
+                checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
+                **config_dict,
+            )
+        else:
             assert (
                 name
             ), "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
