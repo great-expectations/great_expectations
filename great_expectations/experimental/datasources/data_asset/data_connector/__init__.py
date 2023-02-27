@@ -1,3 +1,6 @@
+from great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector import (
+    ABSDataConnector,
+)
 from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
     DataConnector,
 )
