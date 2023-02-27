@@ -1,4 +1,4 @@
-import py
+import pathlib
 import pytest
 
 from great_expectations.data_context.data_context.ephemeral_data_context import (
@@ -12,7 +12,7 @@ from tests.test_utils import working_directory
 
 @pytest.mark.integration
 def test_convert_to_file_context(
-    tmpdir: py.path.local,
+    tmp_path: pathlib.Path,
     ephemeral_context_with_defaults: EphemeralDataContext,
 ):
     context = ephemeral_context_with_defaults
@@ -20,8 +20,8 @@ def test_convert_to_file_context(
     datasource_name = "my_pandas"
     context.sources.add_pandas(datasource_name)
 
-    d = tmpdir.mkdir("tmp")
-    with working_directory(str(d)):
+    tmp_path.mkdir(exist_ok=True)
+    with working_directory(str(tmp_path)):
         migrated_context = context.convert_to_file_context()
 
     assert isinstance(migrated_context, FileDataContext)

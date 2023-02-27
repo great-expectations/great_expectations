@@ -1,7 +1,6 @@
 import pathlib
 from typing import Callable
 
-import py
 import pytest
 
 from great_expectations.data_context.data_context.abstract_data_context import (
@@ -21,7 +20,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfigDefaults,
     DatasourceConfig,
 )
-from great_expectations.experimental.datasources.config import GxConfig
 from tests.test_utils import working_directory
 
 
@@ -48,11 +46,11 @@ def construct_file_migrator() -> Callable:
 
 @pytest.mark.integration
 def test_migrate_scaffolds_filesystem(
-    tmpdir: py.path.local, file_migrator: FileMigrator
+    tmp_path: pathlib.Path, file_migrator: FileMigrator
 ):
     # Construct and run migrator
-    d = tmpdir.mkdir("tmp")
-    with working_directory(str(d)):
+    tmp_path.mkdir(exist_ok=True)
+    with working_directory(str(tmp_path)):
         migrated_context = file_migrator.migrate()
 
     assert isinstance(migrated_context, FileDataContext)
@@ -71,7 +69,7 @@ def test_migrate_scaffolds_filesystem(
 
 @pytest.mark.integration
 def test_migrate_transfers_store_contents(
-    tmpdir: py.path.local,
+    tmp_path: pathlib.Path,
     construct_file_migrator: Callable,
     ephemeral_context_with_defaults: EphemeralDataContext,
 ):
@@ -83,8 +81,8 @@ def test_migrate_transfers_store_contents(
         context.add_expectation_suite(expectation_suite_name=name)
 
     # Construct and run migrator
-    d = tmpdir.mkdir("tmp")
-    with working_directory(str(d)):
+    tmp_path.mkdir(exist_ok=True)
+    with working_directory(str(tmp_path)):
         file_migrator = construct_file_migrator(context)
         migrated_context = file_migrator.migrate()
 
@@ -103,7 +101,7 @@ def test_migrate_transfers_store_contents(
 
 @pytest.mark.integration
 def test_migrate_transfers_datasources(
-    tmpdir: py.path.local,
+    tmp_path: pathlib.Path,
     construct_file_migrator: Callable,
     ephemeral_context_with_defaults: EphemeralDataContext,
     datasource_config: DatasourceConfig,
@@ -120,8 +118,8 @@ def test_migrate_transfers_datasources(
     context.add_datasource(**config_dict)
 
     # Construct and run migrator
-    d = tmpdir.mkdir("tmp")
-    with working_directory(str(d)):
+    tmp_path.mkdir(exist_ok=True)
+    with working_directory(str(tmp_path)):
         file_migrator = construct_file_migrator(context)
         migrated_context = file_migrator.migrate()
 
@@ -140,7 +138,7 @@ def test_migrate_transfers_datasources(
 
 @pytest.mark.integration
 def test_migrate_transfers_experimental_datasources(
-    tmpdir: py.path.local,
+    tmp_path: pathlib.Path,
     construct_file_migrator: Callable,
     ephemeral_context_with_defaults: EphemeralDataContext,
 ):
@@ -152,8 +150,8 @@ def test_migrate_transfers_experimental_datasources(
     context._synchronize_zep_datasources()
 
     # Construct and run migrator
-    d = tmpdir.mkdir("tmp")
-    with working_directory(str(d)):
+    tmp_path.mkdir(exist_ok=True)
+    with working_directory(str(tmp_path)):
         file_migrator = construct_file_migrator(context)
         migrated_context = file_migrator.migrate()
 
@@ -172,7 +170,7 @@ def test_migrate_transfers_experimental_datasources(
 
 @pytest.mark.integration
 def test_migrate_transfers_doc_sites(
-    tmpdir: py.path.local,
+    tmp_path: pathlib.Path,
     construct_file_migrator: Callable,
     ephemeral_context_with_defaults: EphemeralDataContext,
 ):
@@ -191,8 +189,8 @@ def test_migrate_transfers_doc_sites(
     context.build_data_docs()
 
     # Construct and run migrator
-    d = tmpdir.mkdir("tmp")
-    with working_directory(str(d)):
+    tmp_path.mkdir(exist_ok=True)
+    with working_directory(str(tmp_path)):
         file_migrator = construct_file_migrator(context)
         migrated_context = file_migrator.migrate()
 
