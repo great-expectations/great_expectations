@@ -80,7 +80,7 @@ class MetricComputationConfiguration(DictDot):
     """
 
     metric_configuration: MetricConfiguration
-    metric_fn: sa.func | F
+    metric_fn: sa.func | F  # type: ignore[valid-type]
     metric_provider_kwargs: dict
     compute_domain_kwargs: Optional[dict] = None
     accessor_domain_kwargs: Optional[dict] = None
@@ -428,7 +428,7 @@ class ExecutionEngine(ABC):
         ]
         metric_class: MetricProvider
         metric_fn: Union[Callable, None]
-        metric_aggregate_fn: sa.func | F
+        metric_aggregate_fn: sa.func | F  # type: ignore[valid-type]
         metric_provider_kwargs: dict
         compute_domain_kwargs: dict
         accessor_domain_kwargs: dict
@@ -552,7 +552,7 @@ class ExecutionEngine(ABC):
             try:
                 resolved_metrics[
                     metric_computation_configuration.metric_configuration.id
-                ] = metric_computation_configuration.metric_fn(
+                ] = metric_computation_configuration.metric_fn(  # type: ignore[misc] # F not callable
                     **metric_computation_configuration.metric_provider_kwargs
                 )
             except Exception as e:

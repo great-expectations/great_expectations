@@ -54,8 +54,8 @@ try:
     import pyspark
     from pyspark.sql import Row as pyspark_sql_Row
 except ImportError:
-    pyspark = None
-    pyspark_sql_Row = None
+    pyspark = None  # type: ignore[assignment]
+    pyspark_sql_Row = None  # type: ignore[assignment,misc]
     logger.debug("No spark sql dataframe module available.")
 
 

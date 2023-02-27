@@ -20,11 +20,11 @@ try:
     import pyspark.sql.types as sparktypes
     from pyspark.sql import DataFrame
 except ImportError:
-    pyspark = None
-    F = None
-    DataFrame = None
+    pyspark = None  # type: ignore[assignment]
+    F = None  # type: ignore[assignment]
+    DataFrame = None  # type: ignore[assignment,misc]
     # noinspection SpellCheckingInspection
-    sparktypes = None
+    sparktypes = None  # type: ignore[assignment]
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
