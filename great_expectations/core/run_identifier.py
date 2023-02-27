@@ -54,9 +54,7 @@ class RunIdentifier(DataContextKey):
         if not run_time.tzinfo:
             # this takes the given time and just adds timezone (no conversion)
             run_time = run_time.replace(tzinfo=datetime.timezone.utc)
-        else:
-            # this takes given time and converts to utc
-            run_time = run_time.astimezone(tz=datetime.timezone.utc)
+
         self._run_time = run_time
 
     @property

@@ -3136,7 +3136,7 @@ class CheckpointConfig(BaseYamlConfig):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
 
-        run_time = run_time or datetime.datetime.now()
+        run_time = run_time or datetime.datetime.now().astimezone()
         runtime_configuration = runtime_configuration or {}
 
         from great_expectations.checkpoint.util import (

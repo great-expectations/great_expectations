@@ -170,7 +170,7 @@ class BaseCheckpoint(ConfigPeer):
         # and action_list are considered the "default" validation.
         using_default_validation = not self.validations and not validations
 
-        run_time = run_time or datetime.datetime.now()
+        run_time = run_time or datetime.datetime.now().astimezone()
         runtime_configuration = runtime_configuration or {}
         result_format = result_format or runtime_configuration.get("result_format")
 
