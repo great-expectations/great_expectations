@@ -1970,8 +1970,11 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         if checkpoint:
             config = checkpoint.config
+
+            # If attempting to override an existing value, ensure that the id persists
             if id and not config.ge_cloud_id:
                 config.ge_cloud_id = id
+
             config_dict = config.to_dict()
             checkpoint = Checkpoint.construct_from_config_args(
                 data_context=self,

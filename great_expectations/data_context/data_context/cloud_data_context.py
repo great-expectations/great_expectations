@@ -737,6 +737,7 @@ class CloudDataContext(SerializableDataContext):
         meta: dict | None = None,
         expectation_suite: ExpectationSuite | None = None,
     ) -> ExpectationSuite:
+        # If attempting to override an existing value, ensure that the id persists
         id = self._determine_id_for_add_or_update_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             id=id,
@@ -799,6 +800,7 @@ class CloudDataContext(SerializableDataContext):
         default_validation_id: str | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
+        # If attempting to override an existing value, ensure that the id persists
         id = self._determine_id_for_add_or_update_checkpoint(
             name=name,
             id=id,
