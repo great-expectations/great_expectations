@@ -851,13 +851,17 @@ class RenderedAtomicValue(DictDot):
             )
         json_dict: dict = {}
         for key in serialized_dict:
+            value = getattr(self, key)
             if key == "graph":
-                json_dict[key] = getattr(self, key).to_json_dict()
+                json_dict[key] = value.to_json_dict()
             elif key == "params":
-                for param in key:
-                    param["schema"]["type"] = str(param["schema"]["type"])
+                json_dict[key] = deepcopy(value)
+                for param_name, param in value.items():
+                    json_dict[key][param_name]["schema"]["type"] = param["schema"][
+                        "type"
+                    ].value
             else:
-                json_dict[key] = getattr(self, key)
+                json_dict[key] = deepcopy(value)
         return json_dict
 
 
