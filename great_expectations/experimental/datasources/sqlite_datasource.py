@@ -8,7 +8,7 @@ from typing_extensions import Literal, Self
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitter,
     SQLDatasource,
-    _ColumnSplitter,
+    _ColumnSplitterOneColumnOneParam,
 )
 from great_expectations.experimental.datasources.sql_datasource import (
     QueryAsset as SqlQueryAsset,
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 # See SqliteDatasource, SqliteTableAsset, and SqliteQueryAsset below.
 
 
-class ColumnSplitterHashedColumn(_ColumnSplitter):
+class ColumnSplitterHashedColumn(_ColumnSplitterOneColumnOneParam):
     """Split on hash value of a column.
 
     Args:
@@ -42,6 +42,7 @@ class ColumnSplitterHashedColumn(_ColumnSplitter):
 
     # hash digits is the length of the hash. The md5 of the column is truncated to this length.
     hash_digits: int
+    column_name: str
     method_name: Literal["split_on_hashed_column"] = "split_on_hashed_column"
 
     @property
@@ -61,7 +62,7 @@ class ColumnSplitterHashedColumn(_ColumnSplitter):
         return {self.column_name: options["hash"]}
 
 
-class ColumnSplitterConvertedDateTime(_ColumnSplitter):
+class ColumnSplitterConvertedDateTime(_ColumnSplitterOneColumnOneParam):
     """A column splitter than can be used for sql engines that represents datetimes as strings.
 
     The SQL engine that this currently supports is SQLite since it stores its datetimes as
@@ -73,6 +74,7 @@ class ColumnSplitterConvertedDateTime(_ColumnSplitter):
     # https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
     # It allows for arbitrary strings so can't be validated until conversion time.
     date_format_string: str
+    column_name: str
     method_name: Literal["split_on_converted_datetime"] = "split_on_converted_datetime"
 
     @property
@@ -166,8 +168,8 @@ class SqliteDatasource(SQLDatasource):
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
     connection_string: SqliteDsn
 
-    _TableAsset: Type[SqliteTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)
-    _QueryAsset: Type[SqliteQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
+    _TableAsset: Type[SqlTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)
+    _QueryAsset: Type[SqlQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
 
     def add_table_asset(
         self,
