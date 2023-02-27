@@ -44,8 +44,8 @@ try:
     import pyspark
     import pyspark.sql as pyspark_sql
 except ImportError:
-    pyspark = None
-    pyspark_sql = None
+    pyspark = None  # type: ignore[assignment]
+    pyspark_sql = None  # type: ignore[assignment]
     logger.debug(
         "Unable to load pyspark and pyspark.sql; install optional Spark dependency for support."
     )
