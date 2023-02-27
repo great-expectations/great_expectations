@@ -1383,22 +1383,26 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
     assert ret == new_config_version
 
     # test .list_keys
+    inline_store_backend = InlineStoreBackend(
+        data_context=empty_data_context,
+        resource_type=DataContextVariableSchema.ALL_VARIABLES,
+    )
     assert sorted(inline_store_backend.list_keys()) == [
-        "anonymous_usage_statistics",
-        "checkpoint_store_name",
-        "concurrency",
-        "config_variables_file_path",
-        "config_version",
-        "data_docs_sites",
-        "datasources",
-        "evaluation_parameter_store_name",
-        "expectations_store_name",
-        "include_rendered_content",
-        "notebooks",
-        "plugins_directory",
-        "progress_bars",
-        "stores",
-        "validations_store_name",
+        ("anonymous_usage_statistics",),
+        ("checkpoint_store_name",),
+        ("concurrency",),
+        ("config_variables_file_path",),
+        ("config_version",),
+        ("data_docs_sites",),
+        ("datasources",),
+        ("evaluation_parameter_store_name",),
+        ("expectations_store_name",),
+        ("include_rendered_content",),
+        ("notebooks",),
+        ("plugins_directory",),
+        ("progress_bars",),
+        ("stores",),
+        ("validations_store_name",),
     ]
 
     # test .move

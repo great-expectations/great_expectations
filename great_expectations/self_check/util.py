@@ -106,14 +106,14 @@ try:
     from pyspark.sql import SparkSession
     from pyspark.sql.types import StructType
 except ImportError:
-    SparkDataFrame = type(None)
-    SparkSession = None
-    StructType = None
+    SparkDataFrame = type(None)  # type: ignore[assignment,misc]
+    SparkSession = None  # type: ignore[assignment,misc]
+    StructType = None  # type: ignore[assignment,misc]
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
 except ImportError:
-    spark_DataFrame = type(None)
+    spark_DataFrame = type(None)  # type: ignore[assignment,misc]
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
