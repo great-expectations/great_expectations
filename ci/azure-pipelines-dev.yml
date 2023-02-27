@@ -83,7 +83,7 @@ stages:
                 /*.yml
                 requirements*
                 reqs/*.txt
-                azure/**/*.yml
+                ci/**/*.yml
                 assets/scripts/**
                 scripts/*.py
                 scripts/*.sh
