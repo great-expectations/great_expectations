@@ -23,8 +23,8 @@ from great_expectations.experimental.datasources.sources import (
     DefaultPandasDatasourceError,
     _get_field_details,
 )
-from great_expectations.validator.validator import Validator
 from great_expectations.util import camel_to_snake
+from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
