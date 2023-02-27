@@ -123,7 +123,7 @@ class UserConfigurableProfiler:
         if isinstance(self.profile_dataset, Batch):
             context = self.profile_dataset.data_context
             self.profile_dataset = Validator(
-                execution_engine=self.profile_dataset.data.execution_engine,
+                execution_engine=self.profile_dataset.data.execution_engine,  # type: ignore[arg-type]
                 batches=[self.profile_dataset],
             )
             self.all_table_columns = self.profile_dataset.get_metric(
