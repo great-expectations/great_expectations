@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 import pathlib
 import sys
-from typing import Any, Generator, Type
 from pprint import pformat as pf
+from typing import Any, Generator, Type
 
 import pandas
 import pytest
