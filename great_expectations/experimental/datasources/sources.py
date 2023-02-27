@@ -212,25 +212,10 @@ class _SourceFactories:
             )
             setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
 
-            def _read_asset_factory(self: Datasource, **kwargs) -> Validator:
-                existing_asset_names: Generator[str, None, None] = (
-                    asset_name for asset_name in self.assets.keys()
-                )
-                asset_name_prefix = f"{asset_type_name}_asset_"
-                max_asset_number = 0
-                for asset_name in existing_asset_names:
-                    try:
-                        # this can fail for an asset named like csv_asset_foo
-                        asset_number = int(asset_name.split("_")[-1])
-                    except ValueError:
-                        asset_number = 1
-                    if (
-                        asset_name.startswith(asset_name_prefix)
-                        and asset_number > max_asset_number
-                    ):
-                        max_asset_number = asset_number
-
-                name = asset_name_prefix + str(max_asset_number + 1)
+            def _read_asset_factory(
+                self: Datasource, asset_name: str | None = None, **kwargs
+            ) -> Validator:
+                name = asset_name or "$ephemeral_data_asset"
                 asset = asset_type(name=name, **kwargs)
                 self.add_asset(asset)
                 batch_request = asset.build_batch_request()

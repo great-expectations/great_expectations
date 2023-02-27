@@ -294,11 +294,11 @@ class TestDynamicPandasAssets:
         assert pandas_datasource.name == "default_pandas_datasource"
         assert len(pandas_datasource.assets) == 0
 
-        expected_csv_data_asset_name_1 = "csv_asset_1"
         validator = pandas_datasource.read_csv(  # type: ignore[attr-defined]
             filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-04.csv",
         )
         assert isinstance(validator, Validator)
+        expected_csv_data_asset_name_1 = "$ephemeral_data_asset"
         csv_data_asset_1 = pandas_datasource.assets[expected_csv_data_asset_name_1]
         assert isinstance(csv_data_asset_1, _PandasDataAsset)
         assert csv_data_asset_1.name == expected_csv_data_asset_name_1
@@ -310,9 +310,19 @@ class TestDynamicPandasAssets:
         assert len(pandas_datasource.assets) == 1
         assert pandas_datasource.assets[expected_csv_data_asset_name_1]
 
-        expected_csv_data_asset_name_2 = "csv_asset_2"
+        # ensure we overwrite the ephemeral data asset if no name is passed
         validator = pandas_datasource.read_csv(  # type: ignore[attr-defined]
             filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-03.csv"
+        )
+        assert isinstance(validator, Validator)
+        assert csv_data_asset_1.name == expected_csv_data_asset_name_1
+        assert len(pandas_datasource.assets) == 1
+
+        # ensure we get an additional named asset when one is passed
+        expected_csv_data_asset_name_2 = "my_csv_asset"
+        validator = pandas_datasource.read_csv(  # type: ignore[attr-defined]
+            asset_name=expected_csv_data_asset_name_2,
+            filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-03.csv",
         )
         assert isinstance(validator, Validator)
         csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name_2]
