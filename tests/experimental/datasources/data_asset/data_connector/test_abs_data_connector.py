@@ -1,17 +1,17 @@
 import logging
 import re
 from typing import TYPE_CHECKING, List, cast
+from unittest import mock
 
 import pytest
-from unittest import mock
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
-from great_expectations.core.util import S3Url, AzureUrl
-from great_expectations.experimental.datasources.interfaces import BatchRequest
+from great_expectations.core.util import AzureUrl
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     ABSDataConnector,
 )
+from great_expectations.experimental.datasources.interfaces import BatchRequest
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.data_asset.data_connector import (

@@ -21,6 +21,7 @@ from great_expectations.experimental.datasources.interfaces import BatchRequest
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
+
     from great_expectations.experimental.datasources.data_asset.data_connector import (
         DataConnector,
     )
