@@ -83,7 +83,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         batch_list: List[Batch] = []
 
         batch_spec = PandasBatchSpec(
-            reader_method=self._get_reader_method().replace("pandas_", ""),
+            reader_method=self._get_reader_method(),
             reader_options=self.dict(
                 exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                 exclude_unset=True,
