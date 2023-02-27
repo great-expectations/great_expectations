@@ -24,6 +24,8 @@ class FilesystemDataConnector(FilePathDataConnector):
     it requires more setup.
 
     Args:
+        datasource_name: The name of the Datasource associated with this DataConnector instance
+        data_asset_name: The name of the DataAsset using this DataConnector instance
         batching_regex: A regex pattern for partitioning data references
         glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>

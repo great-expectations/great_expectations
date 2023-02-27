@@ -4,36 +4,43 @@ import logging
 import re
 from typing import TYPE_CHECKING, Callable, List, Optional
 
-from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
+from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
     list_s3_keys,
-    sanitize_prefix_for_s3,
+    sanitize_prefix,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     FilePathDataConnector,
 )
 
 if TYPE_CHECKING:
-    from botocore.client import BaseClient
-
     from great_expectations.core.batch import BatchDefinition
 
 
 logger = logging.getLogger(__name__)
 
 
-class S3DataConnector(FilePathDataConnector):
-    """Extension of FilePathDataConnector used to connect to S3.
+try:
+    from azure.storage.blob import BlobServiceClient
+except ImportError:
+    BlobServiceClient = None
+    logger.debug(
+        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
+    )
+
+
+class ABSDataConnector(FilePathDataConnector):
+    """Extension of FilePathDataConnector used to connect to Azure Blob Storage (ABS).
 
 
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        bucket (str): bucket for S3
+        container (str): container name for Azure Blob Storage
         batching_regex: A regex pattern for partitioning data references
-        prefix (str): S3 prefix
-        delimiter (str): S3 delimiter
-        max_keys (int): S3 max_keys (default is 1000)
+        name_starts_with (str): Azure Blob Storage prefix
+        delimiter (str): Azure Blob Storage delimiter
+        azure_options (dict): wrapper object for **kwargs
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
@@ -45,23 +52,50 @@ class S3DataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
+        container: str,
         batching_regex: re.Pattern,
-        s3_client: BaseClient,
-        bucket: str,
-        prefix: str = "",
+        name_starts_with: str = "",
         delimiter: str = "/",
-        max_keys: int = 1000,
+        azure_options: Optional[dict] = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
-        self._s3_client: BaseClient = s3_client
-        self._bucket: str = bucket
-        self._prefix: str = sanitize_prefix_for_s3(prefix)
-        self._delimiter: str = delimiter
-        self._max_keys: int = max_keys
+        self._container = container
+        self._name_starts_with = sanitize_prefix(name_starts_with)
+        self._delimiter = delimiter
+
+        # TODO: <Alex>ALEX-PUT_SOME_OF_THIS_INTO_ABS_DATASOURCE_WITH_GET_ABS_CLIENT_LIKE_S3</Alex>
+        if azure_options is None:
+            azure_options = {}
+
+        # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
+        # use in authentication (but not both). If the format or content of the provided keys is invalid,
+        # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
+        conn_str: Optional[str] = azure_options.get("conn_str")
+        account_url: Optional[str] = azure_options.get("account_url")
+        assert bool(conn_str) ^ bool(
+            account_url
+        ), "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
+
+        try:
+            if conn_str is not None:
+                self._account_name = re.search(  # type: ignore[union-attr]
+                    r".*?AccountName=(.+?);.*?", conn_str
+                ).group(1)
+                self._azure = BlobServiceClient.from_connection_string(**azure_options)
+            elif account_url is not None:
+                self._account_name = re.search(  # type: ignore[union-attr]
+                    r"(?:https?://)?(.+?).blob.core.windows.net", account_url
+                ).group(1)
+                self._azure = BlobServiceClient(**azure_options)
+        except (TypeError, AttributeError):
+            raise ImportError(
+                "Unable to load Azure BlobServiceClient (it is required for ConfiguredAssetAzureDataConnector). \
+                Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
+            )
 
         super().__init__(
             datasource_name=datasource_name,
@@ -74,7 +108,7 @@ class S3DataConnector(FilePathDataConnector):
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
@@ -87,7 +121,7 @@ class S3DataConnector(FilePathDataConnector):
         batch_spec: PathBatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-        return S3BatchSpec(batch_spec)
+        return AzureBatchSpec(batch_spec)
 
     # Interface Method
     def get_data_references(self) -> List[str]:
