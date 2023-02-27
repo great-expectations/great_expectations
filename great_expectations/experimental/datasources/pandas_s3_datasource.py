@@ -13,10 +13,7 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
     DataConnector,
     S3DataConnector,
 )
-from great_expectations.experimental.datasources.interfaces import (
-    BatchSortersDefinition,
-    TestConnectionError,
-)
+from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_file_path_datasource import (
     CSVAsset,
     ExcelAsset,
@@ -28,7 +25,10 @@ from great_expectations.experimental.datasources.signatures import _merge_signat
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
-    from great_expectations.experimental.datasources.interfaces import BatchSorter
+    from great_expectations.experimental.datasources.interfaces import (
+        BatchSorter,
+        BatchSortersDefinition,
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,6 @@ except ImportError:
 class PandasS3Datasource(_PandasFilePathDatasource):
     # instance attributes
     type: Literal["pandas_s3"] = "pandas_s3"
-    name: str
 
     # S3 specific attributes
     bucket: str
