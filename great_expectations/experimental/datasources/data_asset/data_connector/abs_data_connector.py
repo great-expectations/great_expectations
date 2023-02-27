@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Callable, List, Optional
 
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
-    list_s3_keys,
+    list_azure_keys,
     sanitize_prefix,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector import (
@@ -14,33 +14,26 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
 )
 
 if TYPE_CHECKING:
+    from azure.storage.blob import BlobServiceClient
     from great_expectations.core.batch import BatchDefinition
 
 
 logger = logging.getLogger(__name__)
 
 
-try:
-    from azure.storage.blob import BlobServiceClient
-except ImportError:
-    BlobServiceClient = None
-    logger.debug(
-        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
-    )
-
-
 class ABSDataConnector(FilePathDataConnector):
-    """Extension of FilePathDataConnector used to connect to Azure Blob Storage (ABS).
+    """Extension of FilePathDataConnector used to connect to Microsoft Azure Blob Storage (ABS).
 
 
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
-        container (str): container name for Azure Blob Storage
         batching_regex: A regex pattern for partitioning data references
-        name_starts_with (str): Azure Blob Storage prefix
-        delimiter (str): Azure Blob Storage delimiter
-        azure_options (dict): wrapper object for **kwargs
+        azure_client: Reference to instantiated Microsoft Azure Blob Storage  client handle
+        account_name (str): account name for Microsoft Azure Blob Storage
+        container (str): container name for Microsoft Azure Blob Storage
+        name_starts_with (str): Microsoft Azure Blob Storage prefix
+        delimiter (str): Microsoft Azure Blob Storage delimiter
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
@@ -52,50 +45,24 @@ class ABSDataConnector(FilePathDataConnector):
         self,
         datasource_name: str,
         data_asset_name: str,
-        container: str,
         batching_regex: re.Pattern,
+        azure_client: BlobServiceClient,
+        account_name: str,
+        container: str,
         name_starts_with: str = "",
         delimiter: str = "/",
-        azure_options: Optional[dict] = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
+        self._azure_client: BlobServiceClient = azure_client
+
+        self._account_name = account_name
         self._container = container
         self._name_starts_with = sanitize_prefix(name_starts_with)
         self._delimiter = delimiter
-
-        # TODO: <Alex>ALEX-PUT_SOME_OF_THIS_INTO_ABS_DATASOURCE_WITH_GET_ABS_CLIENT_LIKE_S3</Alex>
-        if azure_options is None:
-            azure_options = {}
-
-        # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
-        # use in authentication (but not both). If the format or content of the provided keys is invalid,
-        # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
-        conn_str: Optional[str] = azure_options.get("conn_str")
-        account_url: Optional[str] = azure_options.get("account_url")
-        assert bool(conn_str) ^ bool(
-            account_url
-        ), "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
-
-        try:
-            if conn_str is not None:
-                self._account_name = re.search(  # type: ignore[union-attr]
-                    r".*?AccountName=(.+?);.*?", conn_str
-                ).group(1)
-                self._azure = BlobServiceClient.from_connection_string(**azure_options)
-            elif account_url is not None:
-                self._account_name = re.search(  # type: ignore[union-attr]
-                    r"(?:https?://)?(.+?).blob.core.windows.net", account_url
-                ).group(1)
-                self._azure = BlobServiceClient(**azure_options)
-        except (TypeError, AttributeError):
-            raise ImportError(
-                "Unable to load Azure BlobServiceClient (it is required for ConfiguredAssetAzureDataConnector). \
-                Please ensure that you have provided the appropriate keys to `azure_options` for authentication."
-            )
 
         super().__init__(
             datasource_name=datasource_name,
@@ -126,20 +93,15 @@ class ABSDataConnector(FilePathDataConnector):
     # Interface Method
     def get_data_references(self) -> List[str]:
         query_options: dict = {
-            "Bucket": self._bucket,
-            "Prefix": self._prefix,
-            "Delimiter": self._delimiter,
-            "MaxKeys": self._max_keys,
+            "container": self._container,
+            "name_starts_with": self._name_starts_with,
+            "delimiter": self._delimiter,
         }
-        path_list: List[str] = [
-            key
-            for key in list_s3_keys(
-                s3=self._s3_client,
-                query_options=query_options,
-                iterator_dict={},
-                recursive=False,
-            )
-        ]
+        path_list: List[str] = list_azure_keys(
+            azure=self._azure_client,
+            query_options=query_options,
+            recursive=False,
+        )
         return path_list
 
     # Interface Method
@@ -152,7 +114,8 @@ requires "file_path_template_map_fn: Callable" to be set.
             )
 
         template_arguments: dict = {
-            "bucket": self._bucket,
+            "account_name": self._account_name,
+            "container": self._container,
             "path": path,
         }
 
