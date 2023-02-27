@@ -857,9 +857,10 @@ class RenderedAtomicValue(DictDot):
             elif key == "params":
                 json_dict[key] = deepcopy(value)
                 for param_name, param in value.items():
-                    json_dict[key][param_name]["schema"]["type"] = param["schema"][
-                        "type"
-                    ].value
+                    if not isinstance(param["schema"]["type"], str):
+                        json_dict[key][param_name]["schema"]["type"] = param["schema"][
+                            "type"
+                        ].value
             else:
                 json_dict[key] = deepcopy(value)
         return json_dict
