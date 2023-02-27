@@ -50,13 +50,15 @@ from great_expectations.data_context.types.resource_identifiers import (
     GXCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
+from great_expectations.datasource.new_datasource import BaseDatasource
 from great_expectations.exceptions.exceptions import DataContextError
-from great_expectations.render.renderer.site_builder import SiteBuilder  # noqa: TCH001
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.datasource.datasource import LegacyDatasource
+    from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -719,6 +721,35 @@ class CloudDataContext(SerializableDataContext):
         return Checkpoint.instantiate_from_config_with_runtime_args(
             checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
+
+    def add_or_update_datasource(
+        self,
+        name: str | None = None,
+        datasource: LegacyDatasource | BaseDatasource | None = None,
+        **kwargs,
+    ) -> LegacyDatasource | BaseDatasource:
+        id = self._determine_id_for_add_or_update_datasource(
+            name=name, datasource=datasource, kwargs=kwargs
+        )
+        return super().add_or_update_datasource(
+            name=name, datasource=datasource, id=id, **kwargs
+        )
+
+    def _determine_id_for_add_or_update_datasource(
+        self,
+        name: str | None,
+        datasource: LegacyDatasource | BaseDatasource | None,
+        kwargs: dict,
+    ) -> str | None:
+        id = kwargs.pop("id", None) or kwargs.pop("ge_cloud_id", None)
+        if not name and datasource:
+            name = datasource.name
+        if not id and name:
+            cached_datasource = self.datasources.get(name)
+            if cached_datasource and isinstance(cached_datasource, BaseDatasource):
+                id = cached_datasource.id
+
+        return id
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)

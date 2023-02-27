@@ -986,22 +986,8 @@ class AbstractDataContext(ConfigPeer, ABC):
             The Datasource added or updated by the input `kwargs`.
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
-
-        if not name:
-            assert (
-                datasource
-            ), "If no name, guaranteed to have a datasource (see `self._validate_add_datasource_args`)"
-            name = datasource.name
-
-        id = kwargs.pop("id", None)
-        if not id:
-            cached_datasource = self.datasources.get(name)
-            if cached_datasource and isinstance(cached_datasource, BaseDatasource):
-                id = cached_datasource.id
-
         datasource = self._add_datasource(
             name=name,
-            id=id,
             datasource=datasource,
             **kwargs,
         )
