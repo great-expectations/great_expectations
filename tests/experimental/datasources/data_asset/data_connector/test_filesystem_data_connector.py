@@ -28,7 +28,7 @@ def test_basic_instantiation(tmp_path_factory):
     )
 
     my_data_connector: DataConnector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"alpha-(.*)\.csv"),
         base_directory=pathlib.Path(base_directory),
@@ -72,7 +72,7 @@ def test_instantiation_batching_regex_does_not_match_paths(tmp_path_factory):
     )
 
     my_data_connector: DataConnector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"beta-(.*)\.csv"),
         base_directory=pathlib.Path(base_directory),
@@ -115,7 +115,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     )
 
     my_data_connector: DataConnector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         base_directory=pathlib.Path(base_directory),
@@ -131,14 +131,14 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         BatchDefinition
     ] = my_data_connector.get_batch_definition_list(
         BatchRequest(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
             options={},
         )
     )
     expected: List[BatchDefinition] = [
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -151,7 +151,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -164,7 +164,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -177,7 +177,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -190,7 +190,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -203,7 +203,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -216,7 +216,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -229,7 +229,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -242,7 +242,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -255,7 +255,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -273,7 +273,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     # with specified Batch query options
     unsorted_batch_definition_list = my_data_connector.get_batch_definition_list(
         BatchRequest(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
             options={"name": "alex", "timestamp": "20200819", "price": "1300"},
         )
@@ -306,7 +306,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #     )
 #
 #     my_data_connector: DataConnector = FilesystemDataConnector(
-#         datasource_name="my_dataframe_datasource",
+#         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_filesystem_data_asset",
 #         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
 #         base_directory=pathlib.Path(base_directory),
@@ -328,7 +328,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #     sorted_batch_definition_list: List[BatchDefinition] = (
 #         my_data_connector.get_batch_definition_list(
 #             BatchRequest(
-#                 datasource_name="my_dataframe_datasource",
+#                 datasource_name="my_file_path_datasource",
 #                 data_asset_name="my_filesystem_data_asset",
 #                 options={},
 #             )
@@ -337,7 +337,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #
 #     expected: List[BatchDefinition] = [
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
@@ -345,7 +345,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
@@ -353,7 +353,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
@@ -361,7 +361,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
@@ -369,7 +369,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
@@ -377,7 +377,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
@@ -385,7 +385,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
@@ -393,7 +393,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
@@ -401,7 +401,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
@@ -409,7 +409,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
@@ -422,7 +422,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #     assert expected == sorted_batch_definition_list
 #
 #     my_batch_request: BatchRequest = BatchRequest(
-#         datasource_name="my_dataframe_datasource",
+#         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_filesystem_data_asset",
 #         options={
 #             "name": "james",
@@ -444,7 +444,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #     my_batch_definition = my_batch_definition_list[0]
 #
 #     expected_batch_definition = BatchDefinition(
-#         datasource_name="my_dataframe_datasource",
+#         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_filesystem_data_asset",
 #         batch_identifiers={
 #             "name": "james",
@@ -456,7 +456,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #
 #     # TEST 3: Without BatchRequest (query) options, should return all 10
 #     my_batch_request: BatchRequest = BatchRequest(
-#         datasource_name="my_dataframe_datasource",
+#         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_filesystem_data_asset",
 #         options={},
 #     )
@@ -490,7 +490,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     my_data_connector: DataConnector
 
     my_data_connector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         base_directory=pathlib.Path(base_directory),
@@ -510,7 +510,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
 
     expected: List[BatchDefinition] = [
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -518,7 +518,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -526,7 +526,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -534,7 +534,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -542,7 +542,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
@@ -552,7 +552,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     ]
 
     my_data_connector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         base_directory=pathlib.Path(base_directory),
@@ -562,7 +562,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         BatchDefinition
     ] = my_data_connector.get_batch_definition_list(
         BatchRequest(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_asset_name="my_filesystem_data_asset",
             options={},
         )
@@ -585,7 +585,7 @@ def test_alpha(tmp_path_factory):
     )
 
     my_data_connector: DataConnector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_alpha",
@@ -615,7 +615,7 @@ def test_alpha(tmp_path_factory):
     assert len(my_batch_definition_list) == 0
 
     my_batch_request = BatchRequest(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         options={"part_1": "B"},
     )
@@ -652,7 +652,7 @@ def test_foxtrot(tmp_path_factory):
     my_data_connector: DataConnector
 
     my_data_connector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot",
@@ -664,7 +664,7 @@ def test_foxtrot(tmp_path_factory):
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_data_connector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "A",
@@ -680,7 +680,7 @@ def test_foxtrot(tmp_path_factory):
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_data_connector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "B",
@@ -696,7 +696,7 @@ def test_foxtrot(tmp_path_factory):
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_data_connector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_foxtrot" / "C",
@@ -712,7 +712,7 @@ def test_foxtrot(tmp_path_factory):
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_batch_request = BatchRequest(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         options={},
     )
@@ -739,7 +739,7 @@ def test_relative_base_directory_path(tmp_path_factory):
     )
 
     my_data_connector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A",
@@ -757,7 +757,7 @@ def test_relative_base_directory_path(tmp_path_factory):
     assert len(my_data_connector.get_unmatched_data_references()) == 1
 
     my_data_connector = FilesystemDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)_(?P<number>.+)\.csv"),
         base_directory=pathlib.Path(base_directory) / "test_dir_0" / "A" / "B" / "C",
@@ -772,7 +772,7 @@ def test_relative_base_directory_path(tmp_path_factory):
     )
 
     my_batch_request: BatchRequest = BatchRequest(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_filesystem_data_asset",
         options={},
     )

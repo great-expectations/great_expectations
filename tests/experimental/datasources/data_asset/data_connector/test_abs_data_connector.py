@@ -44,8 +44,23 @@ def test_basic_instantiation():
             Bucket=bucket, Body=test_df.to_csv(index=False).encode("utf-8"), Key=key
         )
 
+    """
+        datasource_name: str,
+        data_asset_name: str,
+        batching_regex: re.Pattern,
+        azure_client: BlobServiceClient,
+        account_name: str,
+        container: str,
+        name_starts_with: str = "",
+        delimiter: str = "/",
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # sorters: Optional[list] = None,
+        # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Optional[Callable] = None,
+    """
     my_data_connector: DataConnector = ABSDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"alpha-(.*)\.csv"),
         abs_client=client,
@@ -94,7 +109,7 @@ def test_instantiation_batching_regex_does_not_match_paths():
         )
 
     my_data_connector: DataConnector = ABSDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"beta-(.*)\.csv"),
         abs_client=client,
@@ -144,7 +159,7 @@ def test_return_all_batch_definitions_unsorted():
         )
 
     my_data_connector: DataConnector = ABSDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         abs_client=client,
@@ -162,14 +177,14 @@ def test_return_all_batch_definitions_unsorted():
         BatchDefinition
     ] = my_data_connector.get_batch_definition_list(
         BatchRequest(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_asset_name="my_abs_data_asset",
             options={},
         )
     )
     expected: List[BatchDefinition] = [
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -182,7 +197,7 @@ def test_return_all_batch_definitions_unsorted():
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -195,7 +210,7 @@ def test_return_all_batch_definitions_unsorted():
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -208,7 +223,7 @@ def test_return_all_batch_definitions_unsorted():
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -221,7 +236,7 @@ def test_return_all_batch_definitions_unsorted():
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -234,7 +249,7 @@ def test_return_all_batch_definitions_unsorted():
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -247,7 +262,7 @@ def test_return_all_batch_definitions_unsorted():
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -260,7 +275,7 @@ def test_return_all_batch_definitions_unsorted():
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -273,7 +288,7 @@ def test_return_all_batch_definitions_unsorted():
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -286,7 +301,7 @@ def test_return_all_batch_definitions_unsorted():
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -304,7 +319,7 @@ def test_return_all_batch_definitions_unsorted():
     # with specified Batch query options
     unsorted_batch_definition_list = my_data_connector.get_batch_definition_list(
         BatchRequest(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_asset_name="my_abs_data_asset",
             options={"name": "alex", "timestamp": "20200819", "price": "1300"},
         )
@@ -342,7 +357,7 @@ def test_return_all_batch_definitions_unsorted():
 #         )
 #
 #     my_data_connector: DataConnector = ABSDataConnector(
-#         datasource_name="my_dataframe_datasource",
+#         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_abs_data_asset",
 #         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
 #         abs_client=client,
@@ -369,7 +384,7 @@ def test_return_all_batch_definitions_unsorted():
 #     sorted_batch_definition_list: List[BatchDefinition] = (
 #         my_data_connector.get_batch_definition_list(
 #             BatchRequest(
-#                 datasource_name="my_dataframe_datasource",
+#                 datasource_name="my_file_path_datasource",
 #                 data_asset_name="my_abs_data_asset",
 #                 options={},
 #             )
@@ -378,7 +393,7 @@ def test_return_all_batch_definitions_unsorted():
 #
 #     expected: List[BatchDefinition] = [
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_abs_data_asset",
 #             batch_identifiers=IDDict(
@@ -386,7 +401,7 @@ def test_return_all_batch_definitions_unsorted():
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_abs_data_asset",
 #             batch_identifiers=IDDict(
@@ -394,7 +409,7 @@ def test_return_all_batch_definitions_unsorted():
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_abs_data_asset",
 #             batch_identifiers=IDDict(
@@ -402,7 +417,7 @@ def test_return_all_batch_definitions_unsorted():
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_abs_data_asset",
 #             batch_identifiers=IDDict(
@@ -410,7 +425,7 @@ def test_return_all_batch_definitions_unsorted():
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_abs_data_asset",
 #             batch_identifiers=IDDict(
@@ -418,7 +433,7 @@ def test_return_all_batch_definitions_unsorted():
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_abs_data_asset",
 #             batch_identifiers=IDDict(
@@ -426,7 +441,7 @@ def test_return_all_batch_definitions_unsorted():
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_abs_data_asset",
 #             batch_identifiers=IDDict(
@@ -434,7 +449,7 @@ def test_return_all_batch_definitions_unsorted():
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_abs_data_asset",
 #             batch_identifiers=IDDict(
@@ -442,7 +457,7 @@ def test_return_all_batch_definitions_unsorted():
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_abs_data_asset",
 #             batch_identifiers=IDDict(
@@ -450,7 +465,7 @@ def test_return_all_batch_definitions_unsorted():
 #             ),
 #         ),
 #         BatchDefinition(
-#             datasource_name="my_dataframe_datasource",
+#             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
 #             data_asset_name="my_abs_data_asset",
 #             batch_identifiers=IDDict(
@@ -463,7 +478,7 @@ def test_return_all_batch_definitions_unsorted():
 #     assert expected == sorted_batch_definition_list
 #
 #     my_batch_request: BatchRequest = BatchRequest(
-#         datasource_name="my_dataframe_datasource",
+#         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_abs_data_asset",
 #         options={
 #             "name": "james",
@@ -485,7 +500,7 @@ def test_return_all_batch_definitions_unsorted():
 #     my_batch_definition = my_batch_definition_list[0]
 #
 #     expected_batch_definition = BatchDefinition(
-#         datasource_name="my_dataframe_datasource",
+#         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_abs_data_asset",
 #         batch_identifiers={
 #             "name": "james",
@@ -497,7 +512,7 @@ def test_return_all_batch_definitions_unsorted():
 #
 #     # TEST 3: Without BatchRequest (query) options, should return all 10
 #     my_batch_request: BatchRequest = BatchRequest(
-#         datasource_name="my_dataframe_datasource",
+#         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_abs_data_asset",
 #         options={},
 #     )
@@ -536,7 +551,7 @@ def test_return_only_unique_batch_definitions():
     my_data_connector: DataConnector
 
     my_data_connector = ABSDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         abs_client=client,
@@ -555,7 +570,7 @@ def test_return_only_unique_batch_definitions():
 
     expected: List[BatchDefinition] = [
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -563,7 +578,7 @@ def test_return_only_unique_batch_definitions():
             ),
         ),
         BatchDefinition(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
             data_asset_name="my_abs_data_asset",
             batch_identifiers=IDDict(
@@ -573,7 +588,7 @@ def test_return_only_unique_batch_definitions():
     ]
 
     my_data_connector = ABSDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         abs_client=client,
@@ -586,7 +601,7 @@ def test_return_only_unique_batch_definitions():
         BatchDefinition
     ] = my_data_connector.get_batch_definition_list(
         BatchRequest(
-            datasource_name="my_dataframe_datasource",
+            datasource_name="my_file_path_datasource",
             data_asset_name="my_abs_data_asset",
             options={},
         )
@@ -616,7 +631,7 @@ def test_alpha():
         )
 
     my_data_connector: DataConnector = ABSDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
         abs_client=client,
@@ -648,7 +663,7 @@ def test_alpha():
     assert len(my_batch_definition_list) == 0
 
     my_batch_request = BatchRequest(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         options={"part_1": "test_dir_alpha/B"},
     )
@@ -692,7 +707,7 @@ def test_foxtrot():
     my_data_connector: DataConnector
 
     my_data_connector = ABSDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         abs_client=client,
@@ -706,7 +721,7 @@ def test_foxtrot():
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_data_connector = ABSDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         abs_client=client,
@@ -724,7 +739,7 @@ def test_foxtrot():
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_data_connector = ABSDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         abs_client=client,
@@ -742,7 +757,7 @@ def test_foxtrot():
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_data_connector = ABSDataConnector(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         abs_client=client,
@@ -760,7 +775,7 @@ def test_foxtrot():
     assert len(my_data_connector.get_unmatched_data_references()) == 0
 
     my_batch_request = BatchRequest(
-        datasource_name="my_dataframe_datasource",
+        datasource_name="my_file_path_datasource",
         data_asset_name="my_abs_data_asset",
         options={},
     )
