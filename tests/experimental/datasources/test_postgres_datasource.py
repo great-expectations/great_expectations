@@ -1032,7 +1032,7 @@ def test_splitter_year_and_month_and_day(
 @pytest.mark.unit
 @pytest.mark.parametrize(
     [
-        "splitter_name",
+        "add_splitter_method",
         "splitter_kwargs",
         "splitter_query_responses",
         "sorter_args",
@@ -1128,11 +1128,24 @@ def test_splitter_year_and_month_and_day(
             {"remainder": 2},
             id="mod_integer",
         ),
+        pytest.param(
+            "add_splitter_multi_column_values",
+            {"column_names": ["passenger_count", "payment_type"]},
+            # These types are (passenger_count, payment_type), that is in column_names order.
+            # datetime splitters return dicts while all other splitters return tuples.
+            [(3, 1), (1, 1), (1, 2)],
+            ["passenger_count", "payment_type"],
+            3,
+            {"passenger_count": 1},
+            2,
+            {"passenger_count": 1, "payment_type": 2},
+            id="multi_column_values",
+        ),
     ],
 )
 def test_column_splitter(
     create_source: CreateSourceFixture,
-    splitter_name,
+    add_splitter_method,
     splitter_kwargs,
     splitter_query_responses,
     sorter_args,
@@ -1147,7 +1160,7 @@ def test_column_splitter(
         splitter_query_response=[response for response in splitter_query_responses],
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
-        getattr(asset, splitter_name)(**splitter_kwargs)
+        getattr(asset, add_splitter_method)(**splitter_kwargs)
         asset.add_sorters(sorter_args)
         # Test getting all batches
         all_batches = asset.get_batch_list_from_batch_request(
