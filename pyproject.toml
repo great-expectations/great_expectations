@@ -213,6 +213,8 @@ select = [
     "I", # isort
     # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
     "TCH", # flake8-type-checking-tch
+    # https://beta.ruff.rs/docs/rules/#flake8-pyi-pyi
+    "PYI", # flake8-pyi - type stub files
 ]
 ignore = [
     # https://github.com/charliermarsh/ruff#pyflakes-f
