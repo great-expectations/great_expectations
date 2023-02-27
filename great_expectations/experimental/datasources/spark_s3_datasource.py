@@ -51,7 +51,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     bucket: str
     boto3_options: Dict[str, Any] = {}
 
-    _s3_client: Union[BaseClient, None] = pydantic.PrivateAttr()
+    _s3_client: Union[BaseClient, None] = pydantic.PrivateAttr(default=None)
 
     def _get_s3_client(self) -> BaseClient:
         s3_client: Union[BaseClient, None] = self._s3_client
