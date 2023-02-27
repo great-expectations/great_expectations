@@ -44,7 +44,7 @@ class MockBlobServiceClient:
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector.list_azure_keys"
+    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_basic_instantiation(mock_list_keys):
     mock_list_keys.return_value = [
@@ -56,7 +56,7 @@ def test_basic_instantiation(mock_list_keys):
     azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
     my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         batching_regex=re.compile(r"alpha-(.*)\.csv"),
         azure_client=azure_client,
         account_name="my_account",
@@ -86,7 +86,7 @@ def test_basic_instantiation(mock_list_keys):
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector.list_azure_keys"
+    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
     mock_list_keys.return_value = [
@@ -98,7 +98,7 @@ def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
     azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
     my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         azure_client=azure_client,
         account_name="my_account",
@@ -122,7 +122,7 @@ def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector.list_azure_keys"
+    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_return_all_batch_definitions_unsorted(mock_list_keys):
     mock_list_keys.return_value = [
@@ -141,7 +141,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
     azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
     my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
         azure_client=azure_client,
         account_name="my_account",
@@ -160,7 +160,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
     ] = my_data_connector.get_batch_definition_list(
         BatchRequest(
             datasource_name="my_file_path_datasource",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             options={},
         )
     )
@@ -168,7 +168,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {
                     "path": "abe_20200809_1040.csv",
@@ -181,7 +181,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {
                     "path": "alex_20200809_1000.csv",
@@ -194,7 +194,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {
                     "path": "alex_20200819_1300.csv",
@@ -207,7 +207,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {
                     "path": "eugene_20200809_1500.csv",
@@ -220,7 +220,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {
                     "path": "eugene_20201129_1900.csv",
@@ -233,7 +233,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {
                     "path": "james_20200713_1567.csv",
@@ -246,7 +246,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {
                     "path": "james_20200810_1003.csv",
@@ -259,7 +259,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {
                     "path": "james_20200811_1009.csv",
@@ -272,7 +272,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {
                     "path": "will_20200809_1002.csv",
@@ -285,7 +285,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {
                     "path": "will_20200810_1001.csv",
@@ -302,7 +302,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
     unsorted_batch_definition_list = my_data_connector.get_batch_definition_list(
         BatchRequest(
             datasource_name="my_file_path_datasource",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             options={"name": "alex", "timestamp": "20200819", "price": "1300"},
         )
     )
@@ -312,7 +312,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # @pytest.mark.integration
 # @mock.patch(
-#     "great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector.list_azure_keys"
+#     "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 # )
 # def test_return_all_batch_definitions_sorted(
 #     mock_list_keys,
@@ -334,7 +334,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #     azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
 #     my_data_connector: DataConnector = AzureBlobStorageDataConnector(
 #         datasource_name="my_file_path_datasource",
-#         data_asset_name="my_abs_data_asset",
+#         data_asset_name="my_azure_blob_storage_data_asset",
 #         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
 #         azure_client=azure_client,
 #         account_name="my_account",
@@ -353,7 +353,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #     ] = my_data_connector.get_batch_definition_list(
 #         BatchRequest(
 #             datasource_name="my_file_path_datasource",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             options={},
 #         )
 #     )
@@ -361,7 +361,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"path": "alex_20200809_1000.csv", "name": "alex", "timestamp": "20200809", "price": "1000"}
 #             ),
@@ -369,7 +369,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"path": "eugene_20200809_1500.csv", "name": "eugene", "timestamp": "20200809", "price": "1500"}
 #             ),
@@ -377,7 +377,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"path": "james_20200811_1009.csv", "name": "james", "timestamp": "20200811", "price": "1009"}
 #             ),
@@ -385,7 +385,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"path": "abe_20200809_1040.csv", "name": "abe", "timestamp": "20200809", "price": "1040"}
 #             ),
@@ -393,7 +393,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"path": "will_20200809_1002.csv", "name": "will", "timestamp": "20200809", "price": "1002"}
 #             ),
@@ -401,7 +401,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"path": "james_20200713_1567.csv", "name": "james", "timestamp": "20200713", "price": "1567"}
 #             ),
@@ -409,7 +409,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"path": "eugene_20201129_1900.csv", "name": "eugene", "timestamp": "20201129", "price": "1900"}
 #             ),
@@ -417,7 +417,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"path": "will_20200810_1001.csv", "name": "will", "timestamp": "20200810", "price": "1001"}
 #             ),
@@ -425,7 +425,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"path": "james_20200810_1003.csv", "name": "james", "timestamp": "20200810", "price": "1003"}
 #             ),
@@ -433,7 +433,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
 #             data_connector_name="experimental",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"path": "alex_20200819_1300.csv", "name": "alex", "timestamp": "20200819", "price": "1300"}
 #             ),
@@ -445,7 +445,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #     sorted_batch_definition_list = my_data_connector.get_batch_definition_list(
 #         BatchRequest(
 #             datasource_name="my_file_path_datasource",
-#             data_asset_name="my_abs_data_asset",
+#             data_asset_name="my_azure_blob_storage_data_asset",
 #             options={"name": "alex", "timestamp": "20200819", "price": "1300"},
 #         )
 #     )
@@ -455,7 +455,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector.list_azure_keys"
+    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_return_only_unique_batch_definitions(mock_list_keys):
     mock_list_keys.return_value = [
@@ -470,7 +470,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
 
     my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
         azure_client=azure_client,
         account_name="my_account",
@@ -496,7 +496,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {"path": "B/file_1.csv", "directory": "B", "filename": "file_1.csv"}
             ),
@@ -504,7 +504,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="experimental",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             batch_identifiers=IDDict(
                 {"path": "B/file_2.csv", "directory": "B", "filename": "file_2.csv"}
             ),
@@ -513,7 +513,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
 
     my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
         azure_client=azure_client,
         account_name="my_account",
@@ -527,7 +527,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
     ] = my_data_connector.get_batch_definition_list(
         BatchRequest(
             datasource_name="my_file_path_datasource",
-            data_asset_name="my_abs_data_asset",
+            data_asset_name="my_azure_blob_storage_data_asset",
             options={},
         )
     )
@@ -536,7 +536,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector.list_azure_keys"
+    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_alpha(mock_list_keys):
     mock_list_keys.return_value = [
@@ -549,7 +549,7 @@ def test_alpha(mock_list_keys):
     azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
     my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
         azure_client=azure_client,
         account_name="my_account",
@@ -582,7 +582,7 @@ def test_alpha(mock_list_keys):
 
     my_batch_request = BatchRequest(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         options={"part_1": "test_dir_alpha/B"},
     )
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
@@ -593,7 +593,7 @@ def test_alpha(mock_list_keys):
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector.list_azure_keys"
+    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_foxtrot(mock_list_keys):
     mock_list_keys.return_value = []
@@ -604,7 +604,7 @@ def test_foxtrot(mock_list_keys):
 
     my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         azure_client=azure_client,
         account_name="my_account",
@@ -625,7 +625,7 @@ def test_foxtrot(mock_list_keys):
 
     my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         azure_client=azure_client,
         account_name="my_account",
@@ -651,7 +651,7 @@ def test_foxtrot(mock_list_keys):
 
     my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
         azure_client=azure_client,
         account_name="my_account",
@@ -677,7 +677,7 @@ def test_foxtrot(mock_list_keys):
 
     my_data_connector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
         azure_client=azure_client,
         account_name="my_account",
@@ -703,7 +703,7 @@ def test_foxtrot(mock_list_keys):
 
     my_batch_request = BatchRequest(
         datasource_name="my_file_path_datasource",
-        data_asset_name="my_abs_data_asset",
+        data_asset_name="my_azure_blob_storage_data_asset",
         options={},
     )
     my_batch_definition_list: List[

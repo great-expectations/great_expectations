@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class GCSDataConnector(FilePathDataConnector):
+class GoogleCloudStorageDataConnector(FilePathDataConnector):
     """Extension of FilePathDataConnector used to connect to Google Cloud Storage (GCS).
 
     Args:
