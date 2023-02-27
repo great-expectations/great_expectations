@@ -39,7 +39,7 @@ try:
 
     BOTO3_IMPORTED = True
 except ImportError:
-    pass
+    boto3 = None
 
 
 class SparkS3DatasourceError(SparkDatasourceError):
