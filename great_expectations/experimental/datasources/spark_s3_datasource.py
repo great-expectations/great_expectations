@@ -66,11 +66,11 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 except Exception as e:
                     # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.
                     raise SparkS3DatasourceError(
-                        f"""Due to exception: "{str(e)}", "s3_client" could not be created."""
+                        f'Due to exception: "{str(e)}", "s3_client" could not be created.'
                     ) from e
             else:
                 raise SparkS3DatasourceError(
-                    """Unable to create "SparkS3Datasource" due to missing boto3 dependency."""
+                    'Unable to create "SparkS3Datasource" due to missing boto3 dependency.'
                 )
 
             self._s3_client = s3_client
@@ -116,9 +116,9 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
-            prefix (str): S3 prefix
-            delimiter (str): S3 delimiter
-            max_keys (int): S3 max_keys (default is 1000)
+            prefix: S3 prefix
+            delimiter: S3 delimiter
+            max_keys: S3 max_keys (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
