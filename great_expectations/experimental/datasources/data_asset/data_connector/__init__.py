@@ -15,5 +15,8 @@ from great_expectations.experimental.datasources.data_asset.data_connector.s3_da
 from great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector import (
     ABSDataConnector,
 )
+from great_expectations.experimental.datasources.data_asset.data_connector.gcs_data_connector import (
+    GCSDataConnector,
+)
 
 FILE_PATH_BATCH_SPEC_KEY = FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY

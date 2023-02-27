@@ -431,7 +431,7 @@ def list_azure_keys(
 
 
 def list_gcs_keys(
-    gcs,
+    gcs_client,
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
@@ -456,7 +456,7 @@ def list_gcs_keys(
     we deem it appropriate to manually override the value of the delimiter only in cases where it is absolutely necessary.
 
     Args:
-        gcs (storage.Client): GCS connnection object responsible for accessing bucket
+        gcs_client (storage.Client): GCS connnection object responsible for accessing bucket
         query_options (dict): GCS query attributes ("bucket_or_name", "prefix", "delimiter", "max_results")
         recursive (bool): True for InferredAssetGCSDataConnector and False for ConfiguredAssetGCSDataConnector (see above)
 
@@ -482,7 +482,7 @@ def list_gcs_keys(
         query_options["delimiter"] = None
 
     keys: List[str] = []
-    for blob in gcs.list_blobs(**query_options):
+    for blob in gcs_client.list_blobs(**query_options):
         name: str = blob.name
         if name.endswith("/"):  # GCS includes directories in blob output
             continue
