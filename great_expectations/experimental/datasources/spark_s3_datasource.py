@@ -64,7 +64,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 try:
                     s3_client = boto3.client("s3", **self.boto3_options)
                 except Exception as e:
-                    # Failure to create "s3_client" is most likely due to inability to import "boto3" libarary.
+                    # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.
                     raise SparkS3DatasourceError(
                         f"""Due to exception: "{str(e)}", "s3_client" could not be created."""
                     ) from e
