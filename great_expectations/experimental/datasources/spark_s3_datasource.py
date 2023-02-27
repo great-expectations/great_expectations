@@ -14,6 +14,9 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
     S3DataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
+from great_expectations.experimental.datasources.spark_datasource import (
+    SparkDatasourceError,
+)
 from great_expectations.experimental.datasources.spark_file_path_datasource import (
     CSVAsset,
 )
@@ -39,7 +42,7 @@ except ImportError:
     pass
 
 
-class SparkS3DatasourceError(Exception):
+class SparkS3DatasourceError(SparkDatasourceError):
     pass
 
 
