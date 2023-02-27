@@ -55,21 +55,21 @@ def aws_credentials() -> None:
 
 
 @pytest.fixture
-def s3(aws_credentials, aws_region_name: str) -> BaseClient:
+def s3_mock(aws_credentials, aws_region_name: str) -> BaseClient:
     with mock_s3():
         client = boto3.client("s3", region_name=aws_region_name)
         yield client
 
 
 @pytest.fixture
-def s3_bucket(s3: BaseClient, aws_s3_bucket_name: str) -> str:
+def s3_bucket(s3_mock: BaseClient, aws_s3_bucket_name: str) -> str:
     bucket_name: str = aws_s3_bucket_name
-    s3.create_bucket(Bucket=bucket_name)
+    s3_mock.create_bucket(Bucket=bucket_name)
     return bucket_name
 
 
 @pytest.fixture
-def spark_s3_datasource(s3, s3_bucket: str) -> SparkS3Datasource:
+def spark_s3_datasource(s3_mock, s3_bucket: str) -> SparkS3Datasource:
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     keys: List[str] = [
@@ -86,7 +86,7 @@ def spark_s3_datasource(s3, s3_bucket: str) -> SparkS3Datasource:
     ]
 
     for key in keys:
-        s3.put_object(
+        s3_mock.put_object(
             Bucket=s3_bucket,
             Body=test_df.to_csv(index=False).encode("utf-8"),
             Key=key,
@@ -266,7 +266,9 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
 @pytest.mark.integration
 def test_test_connection_failures(
-    s3, spark_s3_datasource: SparkS3Datasource, bad_regex_config: tuple[re.Pattern, str]
+    s3_mock,
+    spark_s3_datasource: SparkS3Datasource,
+    bad_regex_config: tuple[re.Pattern, str],
 ):
     regex, test_connection_error_message = bad_regex_config
     csv_asset = CSVAsset(
@@ -279,7 +281,7 @@ def test_test_connection_failures(
         datasource_name=spark_s3_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=re.compile(regex),
-        s3_client=s3,
+        s3_client=s3_mock,
         bucket=spark_s3_datasource.bucket,
         file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
     )
