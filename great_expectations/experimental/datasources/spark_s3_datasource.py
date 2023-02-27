@@ -30,11 +30,17 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+BOTO3_IMPORTED = False
 try:
     import boto3
+
+    BOTO3_IMPORTED = True
 except ImportError:
-    logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
-    boto3 = None
+    pass
+
+
+class SparkS3DatasourceError(Exception):
+    pass
 
 
 class SparkS3Datasource(_SparkFilePathDatasource):
@@ -45,15 +51,28 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     bucket: str
     boto3_options: Dict[str, Any] = {}
 
-    _s3_client: Optional[BaseClient] = pydantic.PrivateAttr()
+    _s3_client: Union[BaseClient, None] = pydantic.PrivateAttr()
 
-    def __init__(self, **data):
-        super().__init__(**data)
+    def _get_s3_client(self) -> BaseClient:
+        s3_client: Union[BaseClient, None] = self._s3_client
+        if not s3_client:
+            # Validate that "boto3" libarary was successfully imported and attempt to create "s3_client" handle.
+            if BOTO3_IMPORTED:
+                try:
+                    s3_client = boto3.client("s3", **self.boto3_options)
+                except Exception as e:
+                    # Failure to create "s3_client" is most likely due to inability to import "boto3" libarary.
+                    raise SparkS3DatasourceError(
+                        f"""Due to exception: "{str(e)}", "s3_client" could not be created."""
+                    ) from e
+            else:
+                raise SparkS3DatasourceError(
+                    """Unable to create "SparkS3Datasource" due to missing boto3 dependency."""
+                )
 
-        try:
-            self._s3_client = boto3.client("s3", **self.boto3_options)
-        except (TypeError, AttributeError):
-            self._s3_client = None
+            self._s3_client = s3_client
+
+        return s3_client
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SparkS3Datasource.
@@ -64,10 +83,13 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if self._s3_client is None:
+        try:
+            _ = self._get_s3_client()
+        except Exception as e:
             raise TestConnectionError(
-                "Unable to load boto3 (it is required for SparkS3Datasource)."
-            )
+                "Attempt to connect to datasource failed with the following error message: "
+                f"{str(e)}"
+            ) from e
 
         if self.assets and test_assets:
             for asset in self.assets.values():
@@ -76,7 +98,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     def add_csv_asset(
         self,
         name: str,
-        batching_regex: Union[re.Pattern, str],
+        batching_regex: Optional[Union[str, re.Pattern]] = None,
         header: bool = False,
         infer_schema: bool = False,
         prefix: str = "",
@@ -118,7 +140,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            s3_client=self._s3_client,
+            s3_client=self._get_s3_client(),
             bucket=self.bucket,
             prefix=prefix,
             delimiter=delimiter,
