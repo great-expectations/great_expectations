@@ -98,7 +98,7 @@ class ABSDataConnector(FilePathDataConnector):
             "delimiter": self._delimiter,
         }
         path_list: List[str] = list_azure_keys(
-            azure=self._azure_client,
+            azure_client=self._azure_client,
             query_options=query_options,
             recursive=False,
         )

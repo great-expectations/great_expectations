@@ -1,17 +1,21 @@
 import pathlib
 import re
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import pytest
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.experimental.datasources.data_asset.data_connector import (
-    DataConnector,
     FilesystemDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest
 from tests.test_utils import create_files_in_directory
+
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.data_asset.data_connector import (
+        DataConnector,
+    )
 
 
 @pytest.mark.integration

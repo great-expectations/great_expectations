@@ -15,13 +15,15 @@ from great_expectations.datasource.data_connector.util import (
     sanitize_prefix_for_s3,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector import (
-    DataConnector,
     S3DataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import BatchRequest
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
+    from great_expectations.experimental.datasources.data_asset.data_connector import (
+        DataConnector,
+    )
 
 logger = logging.getLogger(__name__)
 
