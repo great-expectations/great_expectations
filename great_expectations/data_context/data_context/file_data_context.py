@@ -27,6 +27,9 @@ from great_expectations.experimental.datasources.config import GxConfig
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.data_context.store.datasource_store import (
+        DatasourceStore,
+    )
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -88,7 +91,7 @@ class FileDataContext(SerializableDataContext):
             )
         return self._apply_global_config_overrides(config=project_config)
 
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
@@ -114,17 +117,7 @@ class FileDataContext(SerializableDataContext):
                 schema=datasourceConfigSchema
             ),
         )
-        self._datasource_store = datasource_store
-
-    @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        """
-        return self._context_root_directory
+        return datasource_store
 
     def _init_variables(self) -> FileDataContextVariables:
         variables = FileDataContextVariables(

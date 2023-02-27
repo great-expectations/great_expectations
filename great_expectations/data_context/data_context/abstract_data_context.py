@@ -153,6 +153,9 @@ if TYPE_CHECKING:
         CheckpointStore,
         EvaluationParameterStore,
     )
+    from great_expectations.data_context.store.datasource_store import (
+        DatasourceStore,
+    )
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
@@ -278,7 +281,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         # Init stores
         self._stores: dict = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
+        self._init_primary_stores(self.project_config_with_variables_substituted.stores)
+        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
+        # As such, it must be instantiated separately.
+        self._datasource_store = self._init_datasource_store()
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -743,8 +749,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config = datasourceConfigSchema.load(datasource_config_dict)
         datasource_name: str = datasource.name
 
-        updated_datasource_config_from_store: DatasourceConfig = self._datasource_store.set(  # type: ignore[attr-defined]
-            key=None, value=datasource_config
+        updated_datasource_config_from_store: DatasourceConfig = (
+            self._datasource_store.set(key=None, value=datasource_config)
         )
         # Use the updated datasource config, since the store may populate additional info on update.
         self.config.datasources[datasource_name] = updated_datasource_config_from_store  # type: ignore[index,assignment]
@@ -923,7 +929,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config = DatasourceConfig(**datasource_config_dict)
 
         if save_changes:
-            self._datasource_store.update_by_name(  # type: ignore[attr-defined]
+            self._datasource_store.update_by_name(
                 datasource_name=name, datasource_config=datasource_config
             )
 
@@ -1428,7 +1434,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if datasource_name in self._cached_datasources:
             return self._cached_datasources[datasource_name]
 
-        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(  # type: ignore[attr-defined]
+        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
             datasource_name=datasource_name
         )
 
@@ -1568,7 +1574,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         if save_changes and isinstance(datasource, (LegacyDatasource, BaseDatasource)):
             datasource_config = datasourceConfigSchema.load(datasource.config)
-            self._datasource_store.delete(datasource_config)  # type: ignore[attr-defined]
+            self._datasource_store.delete(datasource_config)
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
@@ -4455,7 +4461,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def data_context_id(self) -> str:
         return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _init_stores(self, store_configs: Dict[str, StoreConfigTypedDict]) -> None:
+    def _init_primary_stores(
+        self, store_configs: Dict[str, StoreConfigTypedDict]
+    ) -> None:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
@@ -4467,12 +4475,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
-        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
-        # As such, it must be instantiated separately.
-        self._init_datasource_store()
-
     @abstractmethod
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
 
         Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default
@@ -4656,7 +4660,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
         if save_changes:
-            config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
+            config = self._datasource_store.set(key=None, value=config)
 
         datasource: Optional[Datasource] = None
         if initialize:
@@ -4670,7 +4674,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 self._cached_datasources[config.name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 if save_changes:
-                    self._datasource_store.delete(config)  # type: ignore[attr-defined]
+                    self._datasource_store.delete(config)
                 raise e
 
         self.config.datasources[config.name] = config  # type: ignore[index,assignment]
