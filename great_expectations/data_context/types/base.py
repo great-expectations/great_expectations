@@ -54,7 +54,7 @@ from great_expectations.util import deep_filter_properties_iterable
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None
+    StructType = None  # type: ignore[assignment,misc]
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
