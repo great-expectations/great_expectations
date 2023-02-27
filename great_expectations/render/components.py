@@ -775,6 +775,17 @@ class RenderedSectionContent(RenderedContent):
 
 
 class RenderedAtomicValue(DictDot):
+    REMOVE_KEYS_IF_NONE: Final[tuple[str, ...]] = (
+        "header",
+        "template",
+        "table",
+        "params",
+        "header_row",
+        "table",
+        "graph",
+        "meta_notes",
+    )
+
     def __init__(
         self,
         schema: Optional[dict] = None,
@@ -808,16 +819,38 @@ class RenderedAtomicValue(DictDot):
     def __str__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
 
+    @staticmethod
+    def remove_null_attrs(serialized_dict: dict) -> dict:
+        """Removes the attributes in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE during serialization if
+        their values are None."""
+        cleaned_serialized_dict = deepcopy(serialized_dict)
+        for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
+            if (
+                key == "graph"
+                and key in cleaned_serialized_dict
+                and cleaned_serialized_dict.get(key, {}).get("graph") is None
+            ):
+                cleaned_serialized_dict.pop(key)
+            elif (
+                key in cleaned_serialized_dict and cleaned_serialized_dict[key] is None
+            ):
+                cleaned_serialized_dict.pop(key)
+        return cleaned_serialized_dict
+
     @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
+    def to_json_dict(self, remove_null_attrs: bool = True) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this RenderedAtomicValue.
 
         Returns:
             A JSON-serializable dict representation of this RenderedAtomicValue.
         """
-        d = renderedAtomicValueSchema.dump(self)
+        serialized_dict = renderedAtomicValueSchema.dump(self)
+        if remove_null_attrs:
+            serialized_dict = RenderedAtomicValue.remove_null_attrs(
+                serialized_dict=serialized_dict
+            )
         json_dict: dict = {}
-        for key in d:
+        for key in serialized_dict:
             if key == "graph":
                 json_dict[key] = getattr(self, key).to_json_dict()
             else:
@@ -869,33 +902,6 @@ class RenderedAtomicValueSchema(Schema):
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
 
-    REMOVE_KEYS_IF_NONE: Final[tuple[str, ...]] = (
-        "header",
-        "template",
-        "table",
-        "params",
-        "header_row",
-        "table",
-        "graph",
-        "meta_notes",
-    )
-
-    @post_dump
-    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
-        """Removes the attributes in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE during serialization if
-        their values are None."""
-        data = deepcopy(data)
-        for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
-            if (
-                key == "graph"
-                and key in data
-                and data.get(key, {}).get("graph") is None
-            ):
-                data.pop(key)
-            elif key in data and data[key] is None:
-                data.pop(key)
-        return data
-
 
 class RenderedAtomicContent(RenderedContent):
     def __init__(
@@ -918,7 +924,7 @@ class RenderedAtomicContent(RenderedContent):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
+    def to_json_dict(self, remove_null_attrs: bool = True) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this RenderedAtomicContent.
 
         Returns:
@@ -926,7 +932,7 @@ class RenderedAtomicContent(RenderedContent):
         """
         """Returns RenderedAtomicContent as a json dictionary."""
         d = renderedAtomicContentSchema.dump(self)
-        d["value"] = self.value.to_json_dict()
+        d["value"] = self.value.to_json_dict(remove_null_attrs=remove_null_attrs)
         return d
 
 
