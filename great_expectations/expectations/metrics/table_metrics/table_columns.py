@@ -16,7 +16,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 try:
     import pyspark.sql.types as sparktypes
 except ImportError:
-    sparktypes = None
+    sparktypes = None  # type: ignore[assignment]
 
 
 class TableColumns(TableMetricProvider):
