@@ -149,6 +149,13 @@ stages:
           python scripts/validate_docs_snippets.py
         name: DocsSnippetChecker
 
+    - job: line_number_snippet_checker
+      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+      steps:
+        - script: |
+            python scripts/check_no_line_number_snippets.py
+          name: LineNumberSnippetChecker
+
   - stage: import_ge
     dependsOn: scope_check
     pool:
@@ -508,7 +515,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[test, postgresql, spark]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test, postgresql, spark, athena]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |

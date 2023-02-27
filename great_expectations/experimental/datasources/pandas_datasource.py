@@ -170,7 +170,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             )
 
 
-_PANDAS_BLACK_LIST = (
+_PANDAS_READER_METHOD_UNSUPPORTED_LIST = (
     # "read_csv",
     # "read_json",
     # "read_excel",
@@ -195,21 +195,20 @@ _PANDAS_BLACK_LIST = (
 
 _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
     _PandasDataAsset,
-    blacklist=_PANDAS_BLACK_LIST,
+    blacklist=_PANDAS_READER_METHOD_UNSUPPORTED_LIST,
     use_docstring_from_method=True,
     skip_first_param=False,
-    type_prefix="pandas",
 )
 
 
 try:
     # variables only needed for type-hinting
-    PandasCSVAsset = _PANDAS_ASSET_MODELS["pandas_csv"]
-    PandasExcelAsset = _PANDAS_ASSET_MODELS["pandas_excel"]
-    PandasJSONAsset = _PANDAS_ASSET_MODELS["pandas_json"]
-    PandasORCAsset = _PANDAS_ASSET_MODELS["pandas_orc"]
-    PandasParquetAsset = _PANDAS_ASSET_MODELS["pandas_parquet"]
-    PandasTableAsset = _PANDAS_ASSET_MODELS["pandas_table"]
+    PandasCSVAsset = _PANDAS_ASSET_MODELS["csv"]
+    PandasExcelAsset = _PANDAS_ASSET_MODELS["excel"]
+    PandasJSONAsset = _PANDAS_ASSET_MODELS["json"]
+    PandasORCAsset = _PANDAS_ASSET_MODELS["orc"]
+    PandasParquetAsset = _PANDAS_ASSET_MODELS["parquet"]
+    PandasTableAsset = _PANDAS_ASSET_MODELS["table"]
 except KeyError as key_err:
     logger.info(f"zep - {key_err} asset model could not be generated")
     PandasCSVAsset = _PandasDataAsset
@@ -263,7 +262,6 @@ class PandasDatasource(_PandasDatasource):
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
-    name: str
     assets: Dict[
         str,
         _PandasDataAsset,

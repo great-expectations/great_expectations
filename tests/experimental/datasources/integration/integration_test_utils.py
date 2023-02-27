@@ -10,6 +10,7 @@ from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.experimental.datasources import PandasDatasource
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
@@ -42,13 +43,14 @@ def run_checkpoint_and_data_doc(
     include_rendered_content: bool,
 ):
     # context, datasource, asset, batch_request
-    context, _, _, batch_request = datasource_test_data
+    context, datasource, asset, batch_request = datasource_test_data
     if include_rendered_content:
         context.variables.include_rendered_content.globally = True
 
     # Define an expectation suite
     suite_name = "my_suite"
     context.add_expectation_suite(expectation_suite_name=suite_name)
+    # noinspection PyTypeChecker
     validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=suite_name,
@@ -70,8 +72,14 @@ def run_checkpoint_and_data_doc(
         ],
     }
     metadata = validator.active_batch.metadata
+    if isinstance(datasource, PandasDatasource):
+        checkpoint_name = f"batch_at_{asset.filepath_or_buffer}"
+    else:
+        checkpoint_name = (
+            f"batch_with_year_{metadata['year']}_month_{metadata['month']}_{suite_name}"
+        )
     checkpoint = SimpleCheckpoint(
-        f"batch_with_year_{metadata['year']}_month_{metadata['month']}_{suite_name}",
+        checkpoint_name,
         context,
         **checkpoint_config,
     )

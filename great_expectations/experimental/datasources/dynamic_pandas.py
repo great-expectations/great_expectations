@@ -310,22 +310,24 @@ def _to_pydantic_fields(
         next(all_parameters)
 
     for param_name, param in all_parameters:
-        no_annotation: bool = param.annotation is inspect._empty
-        if no_annotation:
-            logger.debug(f"`{param_name}` has no type annotation")
-            FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
-            type_ = Any
-        else:
-            type_ = _get_annotation_type(param)
-            if type_ is UNSUPPORTED_TYPE or type_ == "None":
-                logger.debug(f"`{param_name}` has no supported types. Field skipped")
-                FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
-                continue
-
         substitution = FIELD_SUBSTITUTIONS.get(param_name)
         if substitution:
             fields_dict.update(substitution)
         else:
+            no_annotation: bool = param.annotation is inspect._empty
+            if no_annotation:
+                logger.debug(f"`{param_name}` has no type annotation")
+                FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
+                type_ = Any
+            else:
+                type_ = _get_annotation_type(param)
+                if type_ is UNSUPPORTED_TYPE or type_ == "None":
+                    logger.debug(
+                        f"`{param_name}` has no supported types. Field skipped"
+                    )
+                    FIELD_SKIPPED_UNSUPPORTED_TYPE.add(param_name)
+                    continue
+
             fields_dict[param_name] = _FieldSpec(
                 type=_replace_builtins(type_), default_value=_get_default_value(param)  # type: ignore[arg-type]
             )
@@ -373,7 +375,6 @@ def _generate_pandas_data_asset_models(
     blacklist: Optional[Sequence[str]] = None,
     use_docstring_from_method: bool = False,
     skip_first_param: bool = False,
-    type_prefix: Optional[str] = None,
 ) -> Dict[str, M]:
     io_methods = _extract_io_methods(blacklist)
     io_method_sigs = _extract_io_signatures(io_methods)
@@ -389,11 +390,6 @@ def _generate_pandas_data_asset_models(
         model_name = _METHOD_TO_CLASS_NAME_MAPPINGS.get(
             type_name, f"{type_name.capitalize()}Asset"
         )
-
-        # TODO: remove this special case once we have namespace type-lookups
-        if type_prefix:
-            type_name = "_".join((type_prefix, type_name))
-            model_name = type_prefix.capitalize() + model_name
 
         try:
             asset_model = _create_pandas_asset_model(

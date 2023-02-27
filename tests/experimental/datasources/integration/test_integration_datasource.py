@@ -123,7 +123,7 @@ def test_sql_query_data_asset(empty_data_context):
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    ["base_directory", "regex", "raises_test_connection_error"],
+    ["base_directory", "batching_regex", "raises_test_connection_error"],
     [
         pytest.param(
             pathlib.Path(__file__).parent.joinpath(
@@ -173,18 +173,22 @@ def test_sql_query_data_asset(empty_data_context):
         ),
     ],
 )
-def test_filesystem_data_asset_regex(
+def test_filesystem_data_asset_batching_regex(
     filesystem_datasource: PandasFilesystemDatasource | SparkFilesystemDatasource,
     base_directory: pathlib.Path,
-    regex: str | None,
+    batching_regex: str | None,
     raises_test_connection_error: bool,
 ):
     filesystem_datasource.base_directory = base_directory
     if raises_test_connection_error:
         with pytest.raises(TestConnectionError):
-            filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)
+            filesystem_datasource.add_csv_asset(
+                name="csv_asset", batching_regex=batching_regex
+            )
     else:
-        filesystem_datasource.add_csv_asset(name="csv_asset", regex=regex)
+        filesystem_datasource.add_csv_asset(
+            name="csv_asset", batching_regex=batching_regex
+        )
 
 
 @pytest.mark.integration
@@ -275,6 +279,54 @@ def test_filesystem_data_asset_regex(
             1,
             {"quotient": 2},
             id="divisor",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_mod_integer",
+            {"column_name": "passenger_count", "mod": 3},
+            ["remainder"],
+            3,
+            {"remainder": 2},
+            1,
+            {"remainder": 2},
+            id="mod_integer",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_hashed_column",
+            {"column_name": "passenger_count", "hash_digits": 3},
+            ["hash"],
+            7,
+            {"hash": "af3"},
+            1,
+            {"hash": "af3"},
+            id="hash",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_converted_datetime",
+            {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
+            ["datetime"],
+            28,
+            {"datetime": "2019-02-23"},
+            1,
+            {"datetime": "2019-02-23"},
+            id="converted_datetime",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_multi_column_values",
+            {"column_names": ["passenger_count", "payment_type"]},
+            ["passenger_count", "payment_type"],
+            23,
+            {"passenger_count": 1, "payment_type": 1},
+            1,
+            {"passenger_count": 1, "payment_type": 1},
+            id="multi_column_values",
         ),
     ],
 )
