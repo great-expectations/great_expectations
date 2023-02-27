@@ -910,6 +910,10 @@ class RenderedAtomicValueSchema(Schema):
     def create_value_obj(self, data, **kwargs):
         return RenderedAtomicValue(**data)
 
+    @post_dump
+    def remove_null_attrs(self, data, **kwargs: dict):
+        return RenderedAtomicValue.remove_null_attrs(serialized_dict=data)
+
 
 class RenderedAtomicContent(RenderedContent):
     def __init__(
