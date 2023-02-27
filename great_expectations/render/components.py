@@ -824,7 +824,7 @@ class RenderedAtomicValue(DictDot):
         """Removes the attributes in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE during serialization if
         their values are None."""
         cleaned_serialized_dict = deepcopy(serialized_dict)
-        for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
+        for key in RenderedAtomicValue.REMOVE_KEYS_IF_NONE:
             if (
                 key == "graph"
                 and key in cleaned_serialized_dict
@@ -853,6 +853,9 @@ class RenderedAtomicValue(DictDot):
         for key in serialized_dict:
             if key == "graph":
                 json_dict[key] = getattr(self, key).to_json_dict()
+            elif key == "params":
+                for param in key:
+                    param["schema"]["type"] = str(param["schema"]["type"])
             else:
                 json_dict[key] = getattr(self, key)
         return json_dict
