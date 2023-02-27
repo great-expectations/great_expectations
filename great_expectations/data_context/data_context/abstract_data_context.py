@@ -4665,13 +4665,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         datasource: Optional[Datasource] = None
         if initialize:
             try:
+                name = config.name
+                if name in self._cached_datasources:
+                    existing_datasource = self._cached_datasources[name]
+                    config.id = existing_datasource.id
+
                 substituted_config = self._perform_substitutions_on_datasource_config(
                     config
                 )
+
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
-                self._cached_datasources[config.name] = datasource
+                self._cached_datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 if save_changes:
                     self._datasource_store.delete(config)
