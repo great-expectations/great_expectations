@@ -108,7 +108,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         delimiter: str = "/",
         max_keys: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
     ) -> CSVAsset:
         """Adds a CSV DataAsst to the present "SparkS3Datasource" object.
 
@@ -121,7 +120,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             delimiter (str): S3 delimiter
             max_keys (int): S3 max_keys (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
-            kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
@@ -136,7 +134,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
-            **kwargs,
         )
 
         data_connector: DataConnector = S3DataConnector(
