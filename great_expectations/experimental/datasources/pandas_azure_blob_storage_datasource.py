@@ -159,7 +159,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
             azure_client=self._azure_client,
-            account_name=self._account_name,  # type: ignore[arg-type]
+            account_name=self._account_name,
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
