@@ -147,7 +147,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using deliiter "{delimiter}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
