@@ -41,7 +41,7 @@ class MockGCSClient:
         delimiter=None,
         **kwargs,
     ) -> Iterator:
-        return []
+        return iter([])
 
 
 @pytest.mark.integration
