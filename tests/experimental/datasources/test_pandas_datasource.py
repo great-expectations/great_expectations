@@ -19,8 +19,8 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     _PandasDataAsset,
 )
 from great_expectations.experimental.datasources.sources import (
-    DEFAULT_PANDAS_DATASOURCE_NAME,
     DEFAULT_PANDAS_DATA_ASSET_NAME,
+    DEFAULT_PANDAS_DATASOURCE_NAME,
     DefaultPandasDatasourceError,
     _get_field_details,
 )
