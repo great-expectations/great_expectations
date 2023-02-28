@@ -1,9 +1,9 @@
 import logging
 import re
-from typing import TYPE_CHECKING, List, cast, Iterator
+from typing import TYPE_CHECKING, Iterator, List, cast
+from unittest import mock
 
 import pytest
-from unittest import mock
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
