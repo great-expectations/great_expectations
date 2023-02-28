@@ -14,6 +14,8 @@ from typing import (
     Union,
 )
 
+from typing_extensions import Final
+
 from great_expectations.experimental.datasources.signatures import _merge_signatures
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
@@ -34,10 +36,9 @@ SourceFactoryFn = Callable[..., "Datasource"]
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_PANDAS_DATASOURCE_NAMES: tuple[str, str] = (
-    "default_pandas_datasource",
-    "default_pandas_fluent_datasource",
-)
+DEFAULT_PANDAS_DATASOURCE_NAME: Final[str] = "default_pandas_datasource"
+
+DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str] = "#ephemeral_data_asset"
 
 
 class DefaultPandasDatasourceError(Exception):
@@ -215,7 +216,7 @@ class _SourceFactories:
             def _read_asset_factory(
                 self: Datasource, asset_name: str | None = None, **kwargs
             ) -> Validator:
-                name = asset_name or "#ephemeral_data_asset"
+                name = asset_name or DEFAULT_PANDAS_DATA_ASSET_NAME
                 asset = asset_type(name=name, **kwargs)
                 self.add_asset(asset)
                 batch_request = asset.build_batch_request()
@@ -240,34 +241,24 @@ class _SourceFactories:
             str, LegacyDatasource | BaseDatasource | Datasource
         ] = self._data_context.datasources  # type: ignore[union-attr]  # typing information is being lost in DataContext factory
 
+        # if a legacy datasource with this name already exists, we try a different name
         existing_datasource: LegacyDatasource | BaseDatasource | Datasource | None = (
-            None
+            datasources.get(DEFAULT_PANDAS_DATASOURCE_NAME)
         )
-        # datasource names will be attempted in the order they are listed
-        for default_pandas_datasource_name in DEFAULT_PANDAS_DATASOURCE_NAMES:
-            # if a legacy datasource with this name already exists, we try a different name
-            existing_datasource = datasources.get(default_pandas_datasource_name)
-            if not existing_datasource or isinstance(
-                existing_datasource, PandasDatasource
-            ):
-                break
 
         # if a legacy datasource exists for all possible_default_datasource_names, raise an error
         if existing_datasource and not isinstance(
             existing_datasource, PandasDatasource
         ):
-            quoted_datasource_names = [
-                f'"{name}"' for name in DEFAULT_PANDAS_DATASOURCE_NAMES
-            ]
             raise DefaultPandasDatasourceError(
-                f"Datasources with a legacy type already exist with the names: {', '.join(quoted_datasource_names)}. "
+                f'Datasources with a legacy type already exist with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
                 "Please rename these datasources if you wish to use the pandas_default PandasDatasource."
             )
 
         pandas_datasource = (
             existing_datasource
             or self._data_context.sources.add_pandas(
-                name=default_pandas_datasource_name
+                name=DEFAULT_PANDAS_DATASOURCE_NAME
             )
         )
         # there is no situation in which this isn't true
