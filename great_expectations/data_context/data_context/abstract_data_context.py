@@ -2864,6 +2864,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 meta=meta,
             )
 
+        # If attempting to override an existing value, ensure that the id persists
         if id and not expectation_suite.ge_cloud_id:
             expectation_suite.ge_cloud_id = id
 
@@ -4673,9 +4674,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         # If attempting to override an existing value, ensure that the id persists
         name = config.name
-        if not config.id and name in self._cached_datasources:
-            existing_datasource = self._cached_datasources[name]
-            config.id = existing_datasource.id
+        if name in self._cached_datasources and not config.id:
+            config.id = self._cached_datasources[name].id
 
         # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream

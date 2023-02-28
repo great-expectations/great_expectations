@@ -760,6 +760,21 @@ class CloudDataContext(SerializableDataContext):
         id: str | None = None,
         expectation_suite: ExpectationSuite | None = None,
     ) -> str | None:
+        """
+        Ensures that `add_or_update_expectation_suite` is aware of an existing id -
+        this is necessary to conditionally update (as opposed to add).
+
+        Example:
+            ```
+            context.add_or_update_expectation_suite(
+                name="my_checkpoint",
+                ...
+            ) # "my_checkpoint" already exists in Cloud
+
+            # Without the id, this will attempt to add and will raise an error.
+            # With the id, we'll update the existing checkpoint.
+            ```
+        """
         if id:
             return id
         if expectation_suite and expectation_suite.ge_cloud_id:
@@ -836,6 +851,18 @@ class CloudDataContext(SerializableDataContext):
         id: str | None = None,
         checkpoint: Checkpoint | None = None,
     ) -> str | None:
+        """
+        Ensures that `add_or_update_checkpoint` is aware of an existing id -
+        this is necessary to conditionally update (as opposed to add).
+
+        Example:
+            ```
+            context.add_or_update_checkpoint("temp") # "temp" already exists in Cloud
+
+            # Without the id, this will attempt to add and will raise an error.
+            # With the id, we'll update the existing checkpoint.
+            ```
+        """
         if id:
             return id
         if checkpoint and checkpoint.ge_cloud_id:
@@ -928,5 +955,7 @@ class CloudDataContext(SerializableDataContext):
         else:
             id = expectation_suite.ge_cloud_id
 
-        name = expectation_suite.expectation_suite_name
-        return self.get_expectation_suite(expectation_suite_name=name, ge_cloud_id=id)
+        return self.get_expectation_suite(
+            expectation_suite_name=expectation_suite.expectation_suite_name,
+            ge_cloud_id=id,
+        )
