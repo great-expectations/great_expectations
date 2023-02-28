@@ -31,13 +31,7 @@ p = pytest.param
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR = pathlib.Path(__file__).parent
 CSV_PATH = EXPERIMENTAL_DATASOURCE_TEST_DIR.joinpath(
-    pathlib.Path(
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "yellow_tripdata_sample_2018-04.csv",
-    )
+    pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
 )
 
 PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
@@ -158,14 +152,16 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
                 DEFAULT_PANDAS_DATA_ASSET_NAME: {
                     "name": DEFAULT_PANDAS_DATA_ASSET_NAME,
                     "type": "csv",
-                    "filepath_or_buffer": CSV_PATH,
+                    "filepath_or_buffer": CSV_PATH
+                    / "yellow_tripdata_sample_2018-04.csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
                 "my_csv_asset": {
                     "name": "my_csv_asset",
                     "type": "csv",
-                    "filepath_or_buffer": CSV_PATH,
+                    "filepath_or_buffer": CSV_PATH
+                    / "yellow_tripdata_sample_2018-04.csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },

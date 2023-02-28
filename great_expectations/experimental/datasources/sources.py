@@ -251,8 +251,8 @@ class _SourceFactories:
             existing_datasource, PandasDatasource
         ):
             raise DefaultPandasDatasourceError(
-                f'Datasources with a legacy type already exist with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
-                "Please rename these datasources if you wish to use the pandas_default PandasDatasource."
+                f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
+                "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."
             )
 
         pandas_datasource = (
