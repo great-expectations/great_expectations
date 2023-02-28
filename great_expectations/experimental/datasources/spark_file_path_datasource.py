@@ -30,7 +30,7 @@ class CSVAsset(_FilePathDataAsset):
 
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = [_FilePathDataAsset]
+    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset]
 
     # instance attributes
     assets: Dict[str, _FilePathDataAsset] = {}  # type: ignore[assignment]
