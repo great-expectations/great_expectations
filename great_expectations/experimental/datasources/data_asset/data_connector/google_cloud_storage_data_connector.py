@@ -4,17 +4,16 @@ import logging
 import re
 from typing import TYPE_CHECKING, Callable, List, Optional
 
-from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
+from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
-    list_azure_keys,
-    sanitize_prefix,
+    list_gcs_keys,
 )
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     FilePathDataConnector,
 )
 
 if TYPE_CHECKING:
-    from azure.storage.blob import BlobServiceClient
+    from google.cloud.storage.client import Client as GCSClient
 
     from great_expectations.core.batch import BatchDefinition
 
@@ -22,19 +21,19 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class ABSDataConnector(FilePathDataConnector):
-    """Extension of FilePathDataConnector used to connect to Microsoft Azure Blob Storage (ABS).
-
+class GoogleCloudStorageDataConnector(FilePathDataConnector):
+    """Extension of FilePathDataConnector used to connect to Google Cloud Storage (GCS).
 
     Args:
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
         batching_regex: A regex pattern for partitioning data references
-        azure_client: Reference to instantiated Microsoft Azure Blob Storage  client handle
-        account_name (str): account name for Microsoft Azure Blob Storage
-        container (str): container name for Microsoft Azure Blob Storage
-        name_starts_with (str): Microsoft Azure Blob Storage prefix
-        delimiter (str): Microsoft Azure Blob Storage delimiter
+        gcs_client: Reference to instantiated Google Cloud Storage client handle
+        bucket_or_name (str): bucket name for Google Cloud Storage
+        prefix (str): GCS prefix
+        delimiter (str): GCS delimiter
+        max_results (int): max blob filepaths to return
+        gcs_options (dict): wrapper object for optional GCS `**kwargs`
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
@@ -47,23 +46,28 @@ class ABSDataConnector(FilePathDataConnector):
         datasource_name: str,
         data_asset_name: str,
         batching_regex: re.Pattern,
-        azure_client: BlobServiceClient,
-        account_name: str,
-        container: str,
-        name_starts_with: str = "",
+        # TODO: <Alex>ALEX</Alex>
+        gcs_client: GCSClient,
+        bucket_or_name: str,
+        prefix: str = "",
         delimiter: str = "/",
+        max_results: Optional[int] = None,
+        gcs_options: Optional[dict] = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
-        self._azure_client: BlobServiceClient = azure_client
+        self._gcs_client: GCSClient = gcs_client
 
-        self._account_name = account_name
-        self._container = container
-        self._name_starts_with = sanitize_prefix(name_starts_with)
+        self._bucket_or_name = bucket_or_name
+        self._prefix = prefix
         self._delimiter = delimiter
+        self._max_results = max_results
+
+        if gcs_options is None:
+            gcs_options = {}
 
         super().__init__(
             datasource_name=datasource_name,
@@ -76,7 +80,7 @@ class ABSDataConnector(FilePathDataConnector):
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
-    def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
+    def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
 
@@ -89,17 +93,18 @@ class ABSDataConnector(FilePathDataConnector):
         batch_spec: PathBatchSpec = super().build_batch_spec(
             batch_definition=batch_definition
         )
-        return AzureBatchSpec(batch_spec)
+        return GCSBatchSpec(batch_spec)
 
     # Interface Method
     def get_data_references(self) -> List[str]:
         query_options: dict = {
-            "container": self._container,
-            "name_starts_with": self._name_starts_with,
+            "bucket_or_name": self._bucket_or_name,
+            "prefix": self._prefix,
             "delimiter": self._delimiter,
+            "max_results": self._max_results,
         }
-        path_list: List[str] = list_azure_keys(
-            azure_client=self._azure_client,
+        path_list: List[str] = list_gcs_keys(
+            gcs_client=self._gcs_client,
             query_options=query_options,
             recursive=False,
         )
@@ -115,8 +120,7 @@ requires "file_path_template_map_fn: Callable" to be set.
             )
 
         template_arguments: dict = {
-            "account_name": self._account_name,
-            "container": self._container,
+            "bucket_or_name": self._bucket_or_name,
             "path": path,
         }
 
