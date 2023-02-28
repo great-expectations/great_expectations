@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_PANDAS_DATASOURCE_NAME: Final[str] = "default_pandas_datasource"
 
-DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str] = "#ephemeral_data_asset"
+DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str] = "#ephemeral_pandas_asset"
 
 
 class DefaultPandasDatasourceError(Exception):
