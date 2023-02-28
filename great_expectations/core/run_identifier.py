@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import datetime
 import json
 import warnings
+from copy import deepcopy
 from typing import Dict, Optional, Union
 
 from dateutil.parser import parse
-from marshmallow import Schema, fields, post_load
+from marshmallow import Schema, fields, post_load, pre_dump
 
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
@@ -93,6 +96,14 @@ class RunIdentifier(DataContextKey):
         myself = runIdentifierSchema.dump(self)
         return myself
 
+    def set_run_time_tz(self, tz: datetime.timezone | None):
+        """Localize the run_time to the given timezone, or default to system local tz.
+
+        Args:
+            tz: The timezone to localize to.
+        """
+        self._run_time = self._run_time.astimezone(tz=tz)
+
     @classmethod
     def from_tuple(cls, tuple_):
         return cls(tuple_[0], tuple_[1])
@@ -104,7 +115,15 @@ class RunIdentifier(DataContextKey):
 
 class RunIdentifierSchema(Schema):
     run_name = fields.Str()
-    run_time = fields.DateTime(format="iso")
+    run_time = fields.AwareDateTime(
+        format="iso", default_timezone=datetime.timezone.utc
+    )
+
+    @pre_dump
+    def prepare_dump(self, data, **kwargs):
+        data = deepcopy(data)
+        data.set_run_time_tz(tz=None)  # sets to system local tz
+        return data
 
     @post_load
     def make_run_identifier(self, data, **kwargs):
