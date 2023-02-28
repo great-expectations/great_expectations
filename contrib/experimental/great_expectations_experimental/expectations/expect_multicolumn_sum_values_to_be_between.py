@@ -22,7 +22,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 
 # This class defines a Metric to support your Expectation.
 # For most MulticolumnMapExpectations, the main business logic for calculation will live in this class.
-class ExpectMulticolumnSumValuesToBeBetween(MulticolumnMapMetricProvider):
+class MulticolumnValuesSumValuesToBeBetweenMaxAndMin(MulticolumnMapMetricProvider):
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "multicolumn_values.sum_values_to_be_between_max_and_min"
     # These point your metric at the provided keys to facilitate calculation
