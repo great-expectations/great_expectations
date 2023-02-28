@@ -30,7 +30,7 @@ logger = logging.getLogger(__file__)
 
 try:
     from google.cloud import storage
-    from google.cloud.storage.client import Client as GCSClient
+    from google.cloud.storage import Client as GCSClient
 except ImportError:
     storage = None
     GCSClient = None
@@ -134,16 +134,14 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:  # type: ig
 @pytest.mark.skipif(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
-@mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
-)
-@mock.patch("google.cloud.storage.client.Client")
-def test_construct_pandas_gcs_datasource_without_gcs_options(
-    mock_gcs_client, mock_list_keys
-):
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        _build_pandas_gcs_datasource()
+def test_construct_pandas_gcs_datasource_without_gcs_options():
+    pandas_gcs_datasource = PandasGoogleCloudStorageDatasource(
+        name="pandas_gcs_datasource",
+        bucket_or_name="test_bucket",
+        gcs_options={},
     )
+    gcs_client: GCSClient = pandas_gcs_datasource._get_gcs_client()
+    assert gcs_client is not None
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
 
@@ -154,17 +152,20 @@ def test_construct_pandas_gcs_datasource_without_gcs_options(
 @mock.patch(
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
-@mock.patch("google.cloud.storage.client.Client")
+@mock.patch("google.oauth2.service_account.Credentials.from_service_account_file")
+@mock.patch("google.cloud.storage.Client")
 def test_construct_pandas_gcs_datasource_with_filename_in_gcs_options(
-    mock_gcs_client, mock_list_keys
+    mock_gcs_client, mock_gcs_service_account_credentials, mock_list_keys
 ):
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        _build_pandas_gcs_datasource(
-            gcs_options={
-                "filename": "my_filename.csv",
-            },
-        )
+    pandas_gcs_datasource = PandasGoogleCloudStorageDatasource(
+        name="pandas_gcs_datasource",
+        bucket_or_name="test_bucket",
+        gcs_options={
+            "filename": "my_filename.csv",
+        },
     )
+    gcs_client: GCSClient = pandas_gcs_datasource._get_gcs_client()
+    assert gcs_client is not None
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
 
@@ -175,17 +176,20 @@ def test_construct_pandas_gcs_datasource_with_filename_in_gcs_options(
 @mock.patch(
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
-@mock.patch("google.cloud.storage.client.Client")
+@mock.patch("google.oauth2.service_account.Credentials.from_service_account_info")
+@mock.patch("google.cloud.storage.Client")
 def test_construct_pandas_gcs_datasource_with_info_in_gcs_options(
-    mock_gcs_client, mock_list_keys
+    mock_gcs_client, mock_gcs_service_account_credentials, mock_list_keys
 ):
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        _build_pandas_gcs_datasource(
-            gcs_options={
-                "info": "{my_csv: my_content,}",
-            },
-        )
+    pandas_gcs_datasource = PandasGoogleCloudStorageDatasource(
+        name="pandas_gcs_datasource",
+        bucket_or_name="test_bucket",
+        gcs_options={
+            "info": "{my_csv: my_content,}",
+        },
     )
+    gcs_client: GCSClient = pandas_gcs_datasource._get_gcs_client()
+    assert gcs_client is not None
     assert pandas_gcs_datasource.name == "pandas_gcs_datasource"
 
 
@@ -196,7 +200,7 @@ def test_construct_pandas_gcs_datasource_with_info_in_gcs_options(
 @mock.patch(
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
-@mock.patch("google.cloud.storage.client.Client")
+@mock.patch("google.cloud.storage.Client")
 def test_add_csv_asset_to_datasource(
     mock_gcs_client,
     mock_list_keys,
@@ -222,7 +226,7 @@ def test_add_csv_asset_to_datasource(
 @mock.patch(
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
-@mock.patch("google.cloud.storage.client.Client")
+@mock.patch("google.cloud.storage.Client")
 def test_construct_csv_asset_directly(
     mock_gcs_client, mock_list_keys, object_keys: List[str]
 ):
@@ -245,7 +249,7 @@ def test_construct_csv_asset_directly(
 @mock.patch(
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
-@mock.patch("google.cloud.storage.client.Client")
+@mock.patch("google.cloud.storage.Client")
 def test_csv_asset_with_regex_unnamed_parameters(
     mock_gcs_client,
     mock_list_keys,
@@ -273,7 +277,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
 @mock.patch(
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
-@mock.patch("google.cloud.storage.client.Client")
+@mock.patch("google.cloud.storage.Client")
 def test_csv_asset_with_regex_named_parameters(
     mock_gcs_client,
     mock_list_keys,
@@ -296,7 +300,7 @@ def test_csv_asset_with_regex_named_parameters(
 @mock.patch(
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
-@mock.patch("google.cloud.storage.client.Client")
+@mock.patch("google.cloud.storage.Client")
 def test_csv_asset_with_some_regex_named_parameters(
     mock_gcs_client,
     mock_list_keys,
@@ -324,7 +328,7 @@ def test_csv_asset_with_some_regex_named_parameters(
 @mock.patch(
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
-@mock.patch("google.cloud.storage.client.Client")
+@mock.patch("google.cloud.storage.Client")
 def test_csv_asset_with_non_string_regex_named_parameters(
     mock_gcs_client,
     mock_list_keys,

@@ -67,7 +67,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         """Adds a CSV DataAsst to the present "PandasFilesystemDatasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the CSV asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
@@ -113,7 +113,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         """Adds an Excel DataAsst to the present "PandasFilesystemDatasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the Excel asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
@@ -159,7 +159,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         """Adds a JSON DataAsst to the present "PandasFilesystemDatasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the JSON asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
@@ -205,7 +205,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         """Adds a Parquet DataAsst to the present "PandasFilesystemDatasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the Parquet asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default

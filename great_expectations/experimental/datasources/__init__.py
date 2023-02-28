@@ -1,6 +1,9 @@
 import pathlib
 
 from great_expectations.experimental.datasources.interfaces import DataAsset, Datasource
+from great_expectations.experimental.datasources.pandas_azure_blob_storage_datasource import (
+    PandasAzureBlobStorageDatasource,
+)
 from great_expectations.experimental.datasources.pandas_datasource import (
     PandasDatasource,
     _PandasDatasource,
