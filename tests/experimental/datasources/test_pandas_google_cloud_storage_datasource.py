@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import cast, Dict, Any, Iterator
-
-import pytest
+from typing import Any, Dict, Iterator, cast
 from unittest import mock
 
-import great_expectations.execution_engine.pandas_execution_engine
+import pytest
+
 import great_expectations.exceptions as ge_exceptions
+import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.core.util import GCSUrl
 from great_expectations.experimental.datasources import (
     PandasGoogleCloudStorageDatasource,
@@ -24,7 +24,6 @@ from great_expectations.experimental.datasources.interfaces import TestConnectio
 from great_expectations.experimental.datasources.pandas_file_path_datasource import (
     CSVAsset,
 )
-
 
 logger = logging.getLogger(__file__)
 
