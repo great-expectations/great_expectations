@@ -114,7 +114,7 @@ class DataConnectorStorageDataReferenceResolver:
 class FilePathDataConnector(DataConnector):
     """The base class for Data Connectors designed to access filesystem-like data.
 
-    This can include traditional, disk-based filesystems or object stores such as S3, GCS, or Azure Blob Store.
+    This can include traditional, disk-based filesystems or object stores such as S3, GCS, or Azure Blob Storage (ABS).
     This class supports the configuration of a default regular expression and sorters for filtering and sorting
     Data Assets.
 
