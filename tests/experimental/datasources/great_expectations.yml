@@ -30,3 +30,13 @@ xdatasources:
         order_by:
           - year
           - -month
+  my_pandas_ds_w_cfg_subs:
+    type: pandas_filesystem
+    name: my_pandas_ds_w_cfg_subs
+    base_directory: ${MY_PANDAS_BASE_DIR}
+    assets:
+      my_csv_asset:
+        type: csv
+        name: my_csv_asset
+        sep: ${MY_SEP}
+        batching_regex: ".*"

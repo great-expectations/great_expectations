@@ -4,7 +4,7 @@ import json
 import pathlib
 import re
 from pprint import pformat as pf
-from typing import Callable, List
+from typing import Callable, List, Dict
 
 import pydantic
 import pytest
@@ -20,6 +20,10 @@ from great_expectations.experimental.datasources.sources import (
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitterYearAndMonth,
     TableAsset,
+)
+from great_expectations.core.config_provider import (
+    _ConfigurationProvider,
+    _EnvironmentConfigurationProvider,
 )
 
 try:
@@ -567,3 +571,36 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
         only_default_pandas_datasource_and_data_asset_config_dict
     )
     assert from_dict_only_default_pandas_config.xdatasources == {}
+
+
+@pytest.fixture
+def inject_config_env_vars(monkeypatch: pytest.MonkeyPatch) -> Dict[str, str]:
+    # TODO: make this return a callable rather than hardcoding the values to be injected.
+    sub_dict = {
+        "MY_PANDAS_BASE_DIR": str(pathlib.Path(__file__).parent),
+        "MY_SEP": ",",
+    }
+    for name, value in sub_dict.items():
+        monkeypatch.setenv(name, value)
+    return sub_dict
+
+
+def test_config_provider_substitution(
+    inject_engine_lookup_double,
+    from_yaml_gx_config: GxConfig,
+    inject_config_env_vars: Dict[str, str],
+):
+    config_provider = _ConfigurationProvider()
+    config_provider.register_provider(_EnvironmentConfigurationProvider())
+    subbed = config_provider.substitute_config(from_yaml_gx_config.dict())
+
+    original_ds = from_yaml_gx_config.xdatasources["my_pandas_ds_w_cfg_subs"]
+    subbed_ds = subbed["xdatasources"]["my_pandas_ds_w_cfg_subs"]
+
+    print(original_ds)
+    print(subbed_ds)
+
+    assert original_ds.get_asset("my_csv_asset").sep == r"${MY_SEP}"
+    assert subbed_ds["assets"]["my_csv_asset"]["sep"] == ","
+
+    assert from_yaml_gx_config != subbed
