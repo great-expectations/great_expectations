@@ -31,11 +31,9 @@ logger = logging.getLogger(__file__)
 try:
     from google.cloud import storage
     from google.cloud.storage.client import Client as GCSClient
-    from google.oauth2 import service_account
 except ImportError:
     storage = None
     GCSClient = None
-    service_account = None
     logger.debug(
         "Unable to load GoogleCloudStorage connection object; install optional Google dependency for support"
     )
