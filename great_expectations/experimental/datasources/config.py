@@ -17,6 +17,7 @@ from great_expectations.experimental.datasources.interfaces import (
 )
 from great_expectations.experimental.datasources.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
+    DEFAULT_PANDAS_DATASOURCE_NAME,
     _SourceFactories,
 )
 
@@ -77,17 +78,22 @@ class GxConfig(ExperimentalBaseModel):
             if DEFAULT_PANDAS_DATA_ASSET_NAME in datasource.assets:
                 datasource.assets.pop(DEFAULT_PANDAS_DATA_ASSET_NAME)
 
-            loaded_datasources[datasource.name] = datasource
+            # if the default pandas datasource has no assets, it should not be serialized
+            if (
+                datasource.name != DEFAULT_PANDAS_DATASOURCE_NAME
+                or len(datasource.assets) > 0
+            ):
+                loaded_datasources[datasource.name] = datasource
 
-            # TODO: move this to a different 'validator' method
-            # attach the datasource to the nested assets, avoiding recursion errors
-            for asset in datasource.assets.values():
-                asset._datasource = datasource
+                # TODO: move this to a different 'validator' method
+                # attach the datasource to the nested assets, avoiding recursion errors
+                for asset in datasource.assets.values():
+                    asset._datasource = datasource
 
         logger.info(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
 
         if v and not loaded_datasources:
-            raise ValueError(f"Of {len(v)} entries, no 'datasources' could be loaded")
+            logger.info(f"Of {len(v)} entries, no 'datasources' could be loaded")
         return loaded_datasources
 
     @classmethod
