@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import pathlib
 import sys
+from pprint import pformat as pf
 from typing import Any, Generator, Type
 
 import pandas
@@ -106,12 +107,24 @@ def test_vcs_schemas_match(
     ), "Schemas are out of sync. Run `invoke schema --sync`. Also check your pandas version."
 
 
+@pytest.mark.skipif(
+    _PANDAS_SCHEMA_VERSION != PANDAS_VERSION,
+    reason=f"schemas generated with pandas {_PANDAS_SCHEMA_VERSION}",
+)
 def test_no_orphaned_schemas():
     """Ensure that there are no schemas that have no corresponding type."""
+    print(f"python version: {sys.version.split()[0]}")
+    print(f"pandas version: {PANDAS_VERSION}\n")
+
     # NOTE: this is a very low fidelity check
     all_schemas: set[str] = {t[1].__name__ for t in _iter_all_registered_types()}
 
+    orphans: list[pathlib.Path] = []
+
     for schema in _SCHEMAS_DIR.glob("**/*.json"):
-        assert (
-            schema.stem in all_schemas
-        ), f"{schema} appears to be orphaned and should be removed. Run `invoke schema --sync --clean`"
+        if schema.stem not in all_schemas:
+            orphans.append(schema)
+
+    assert (
+        not orphans
+    ), f"The following schemas appear to be orphaned and should be removed. Run `invoke schema --sync --clean`\n{pf(orphans)}"

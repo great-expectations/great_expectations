@@ -25,9 +25,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    from azure.storage.blob import BlobPrefix
+    from azure.storage.blob import BlobPrefix, BlobServiceClient, ContainerClient
 except ImportError:
     BlobPrefix = None
+    BlobServiceClient = None
+    ContainerClient = None
     logger.debug(
         "Unable to load azure types; install optional Azure dependency for support."
     )
@@ -44,8 +46,8 @@ try:
     import pyspark
     import pyspark.sql as pyspark_sql
 except ImportError:
-    pyspark = None
-    pyspark_sql = None
+    pyspark = None  # type: ignore[assignment]
+    pyspark_sql = None  # type: ignore[assignment]
     logger.debug(
         "Unable to load pyspark and pyspark.sql; install optional Spark dependency for support."
     )
@@ -383,7 +385,7 @@ def get_filesystem_one_level_directory_glob_path_list(
 
 
 def list_azure_keys(
-    azure,
+    azure_client: BlobServiceClient,
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
@@ -399,7 +401,7 @@ def list_azure_keys(
     share levels of a directory tree, matching files to data assets will not be possible, due to the path ambiguity.
 
     Args:
-        azure (BlobServiceClient): Azure connnection object responsible for accessing container
+        azure_client (BlobServiceClient): Azure connnection object responsible for accessing container
         query_options (dict): Azure query attributes ("container", "name_starts_with", "delimiter")
         recursive (bool): True for InferredAssetAzureDataConnector and False for ConfiguredAssetAzureDataConnector (see above)
 
@@ -407,7 +409,9 @@ def list_azure_keys(
         List of keys representing Azure file paths (as filtered by the query_options dict)
     """
     container: str = query_options["container"]
-    container_client = azure.get_container_client(container)
+    container_client: ContainerClient = azure_client.get_container_client(
+        container=container
+    )
 
     path_list: List[str] = []
 

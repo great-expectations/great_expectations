@@ -26,6 +26,9 @@ from great_expectations.experimental.datasources.spark_file_path_datasource impo
 from great_expectations.experimental.datasources.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
 )
+from great_expectations.experimental.datasources.spark_s3_datasource import (
+    SparkS3Datasource,
+)
 from great_expectations.experimental.datasources.sqlite_datasource import (
     SqliteDatasource,
 )
