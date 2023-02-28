@@ -1,3 +1,4 @@
+import copy
 import functools
 import json
 import pathlib
@@ -11,7 +12,11 @@ import pytest
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
-from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.experimental.datasources.sources import (
+    DEFAULT_PANDAS_DATASOURCE_NAME,
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+    _SourceFactories,
+)
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitterYearAndMonth,
     TableAsset,
@@ -101,13 +106,6 @@ COMPLEX_CONFIG_DICT = {
             "type": "pandas",
             "name": "my_pandas_ds",
             "assets": {
-                "#ephemeral_data_asset": {
-                    "name": "#ephemeral_data_asset",
-                    "type": "csv",
-                    "filepath_or_buffer": str(CSV_PATH),
-                    "sep": "|",
-                    "names": ["col1", "col2"],
-                },
                 "my_csv_asset": {
                     "name": "my_csv_asset",
                     "type": "csv",
@@ -162,6 +160,24 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
             },
         },
     },
+}
+
+DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
+    "xdatasources": {
+        DEFAULT_PANDAS_DATASOURCE_NAME: {
+            "type": "pandas",
+            "name": DEFAULT_PANDAS_DATASOURCE_NAME,
+            "assets": {
+                DEFAULT_PANDAS_DATA_ASSET_NAME: {
+                    "name": DEFAULT_PANDAS_DATA_ASSET_NAME,
+                    "type": "csv",
+                    "filepath_or_buffer": str(CSV_PATH),
+                    "sep": "|",
+                    "names": ["col1", "col2"],
+                },
+            },
+        },
+    }
 }
 
 
@@ -517,3 +533,32 @@ def test_custom_sorter_serialization(
 
     for sorter_str in expected_sorter_strings:
         assert sorter_str in dumped, f"`{sorter_str}` not found in dumped json"
+
+
+@pytest.fixture
+@functools.lru_cache(maxsize=1)
+def from_dict_default_pandas_config() -> GxConfig:
+    gx_config = GxConfig.parse_obj(DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT)
+    assert gx_config
+    return gx_config
+
+
+def test_dict_default_pandas_config_round_trip(
+    inject_engine_lookup_double, from_dict_default_pandas_config: GxConfig
+):
+    dumped: dict = from_dict_default_pandas_config.dict()
+    print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
+
+    datasource_without_default_pandas_data_asset = copy.deepcopy(
+        DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
+    )
+    datasource_without_default_pandas_data_asset["xdatasources"][
+        DEFAULT_PANDAS_DATASOURCE_NAME
+    ]["assets"].pop(DEFAULT_PANDAS_DATA_ASSET_NAME)
+    assert datasource_without_default_pandas_data_asset == dumped
+
+    re_loaded: GxConfig = GxConfig.parse_obj(dumped)
+    pp(re_loaded)
+    assert re_loaded
+
+    assert from_dict_default_pandas_config == re_loaded

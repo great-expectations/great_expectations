@@ -15,7 +15,10 @@ from great_expectations.experimental.datasources.experimental_base_model import 
 from great_expectations.experimental.datasources.interfaces import (
     Datasource,  # noqa: TCH001
 )
-from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.experimental.datasources.sources import (
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+    _SourceFactories,
+)
 
 if TYPE_CHECKING:
     from pydantic.error_wrappers import ErrorDict as PydanticErrorDict
@@ -69,6 +72,11 @@ class GxConfig(ExperimentalBaseModel):
                 ) from type_lookup_err
 
             datasource = ds_type(**config)
+
+            # the ephemeral asset should never be serialized
+            if DEFAULT_PANDAS_DATA_ASSET_NAME in datasource.assets:
+                datasource.assets.pop(DEFAULT_PANDAS_DATA_ASSET_NAME)
+
             loaded_datasources[datasource.name] = datasource
 
             # TODO: move this to a different 'validator' method
