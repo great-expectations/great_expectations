@@ -56,7 +56,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     # Azure Blob Storage specific attributes
     azure_options: Dict[str, Any] = {}
 
-    _account_name: Union[str, None] = pydantic.PrivateAttr(default=None)
+    _account_name: Union[str, None] = pydantic.PrivateAttr(default="")
     _azure_client: Union[BlobServiceClient, None] = pydantic.PrivateAttr(default=None)
 
     def _get_azure_client(self) -> BlobServiceClient:
@@ -99,7 +99,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
 
             self._azure_client = azure_client
 
-        return azure_client  # type: ignore[return-value]
+        return azure_client
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the PandasAzureBlobStorageDatasource.
@@ -158,7 +158,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            azure_client=self._azure_client,  # type: ignore[arg-type]
+            azure_client=self._azure_client,
             account_name=self._account_name,  # type: ignore[arg-type]
             container=container,
             name_starts_with=name_starts_with,
@@ -211,8 +211,8 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            azure_client=self._azure_client,  # type: ignore[arg-type]
-            account_name=self._account_name,  # type: ignore[arg-type]
+            azure_client=self._azure_client,
+            account_name=self._account_name,
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
@@ -264,8 +264,8 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            azure_client=self._azure_client,  # type: ignore[arg-type]
-            account_name=self._account_name,  # type: ignore[arg-type]
+            azure_client=self._azure_client,
+            account_name=self._account_name,
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
@@ -317,8 +317,8 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            azure_client=self._azure_client,  # type: ignore[arg-type]
-            account_name=self._account_name,  # type: ignore[arg-type]
+            azure_client=self._azure_client,
+            account_name=self._account_name,
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
