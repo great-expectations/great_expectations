@@ -2864,6 +2864,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                 meta=meta,
             )
 
+        if id and not expectation_suite.ge_cloud_id:
+            expectation_suite.ge_cloud_id = id
+
         return self._persist_suite_with_store(
             expectation_suite=expectation_suite,
             overwrite_existing=overwrite_existing,

@@ -924,6 +924,9 @@ class CloudDataContext(SerializableDataContext):
 
         response = persistence_fn(key=key, value=expectation_suite, **kwargs)
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.cloud_id
+            id = response.cloud_id
+        else:
+            id = expectation_suite.ge_cloud_id
 
-        return expectation_suite
+        name = expectation_suite.expectation_suite_name
+        return self.get_expectation_suite(expectation_suite_name=name, ge_cloud_id=id)
