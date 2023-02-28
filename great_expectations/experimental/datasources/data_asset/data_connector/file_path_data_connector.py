@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 class FilePathDataConnector(DataConnector):
     """The base class for Data Connectors designed to access filesystem-like data.
 
-    This can include traditional, disk-based filesystems or object stores such as S3, GCS, or Azure Blob Store.
+    This can include traditional, disk-based filesystems or object stores such as S3, GCS, or ABS.
     # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
     # TODO: <Alex>ALEX</Alex>
     # This class supports a regular expression and sorters for filtering and sorting data references.

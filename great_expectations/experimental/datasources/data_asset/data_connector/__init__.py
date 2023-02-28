@@ -12,8 +12,11 @@ from great_expectations.experimental.datasources.data_asset.data_connector.files
 from great_expectations.experimental.datasources.data_asset.data_connector.s3_data_connector import (
     S3DataConnector,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector.abs_data_connector import (
-    ABSDataConnector,
+from great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector import (
+    AzureBlobStorageDataConnector,
+)
+from great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector import (
+    GoogleCloudStorageDataConnector,
 )
 
 FILE_PATH_BATCH_SPEC_KEY = FilePathDataConnector.FILE_PATH_BATCH_SPEC_KEY
