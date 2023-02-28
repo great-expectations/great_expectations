@@ -1,15 +1,19 @@
 import copy
 import functools
 import json
+import logging
 import pathlib
 import re
-import logging
 from pprint import pformat as pf
-from typing import Callable, List, Dict
+from typing import Callable, Dict, List
 
 import pydantic
 import pytest
 
+from great_expectations.core.config_provider import (
+    _ConfigurationProvider,
+    _EnvironmentConfigurationProvider,
+)
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
@@ -21,10 +25,6 @@ from great_expectations.experimental.datasources.sources import (
 from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitterYearAndMonth,
     TableAsset,
-)
-from great_expectations.core.config_provider import (
-    _ConfigurationProvider,
-    _EnvironmentConfigurationProvider,
 )
 
 try:

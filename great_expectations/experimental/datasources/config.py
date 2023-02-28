@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Dict, List, Type, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Type, Union
 
 from pydantic import Extra, Field, ValidationError, validator
 from typing_extensions import Final
@@ -24,6 +24,7 @@ from great_expectations.experimental.datasources.sources import (
 if TYPE_CHECKING:
     from pydantic.error_wrappers import ErrorDict as PydanticErrorDict
 
+    from great_expectations.core.config_provider import _ConfigurationProvider
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,9 @@ _MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 class GxConfig(ExperimentalBaseModel):
     """Represents the full new-style/experimental configuration file."""
 
+    # FIXME: this is terrible... don't do this
+    _cfg_prvdr_global: ClassVar[_ConfigurationProvider | None] = None
+
     xdatasources: Dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
 
     @property
@@ -50,6 +54,17 @@ class GxConfig(ExperimentalBaseModel):
 
     class Config:
         extra = Extra.ignore  # ignore any old style config keys
+
+    @validator("xdatasources", pre=True)
+    @classmethod
+    def _config_substitution(cls, v: Dict[str, dict], **kwargs):
+        """Perform config substitution on the raw dictionary values."""
+        print("_config_substitution")
+        print(pf(v), end="\n\n")
+        print(pf(kwargs), end="\n\n")
+        if cls._cfg_prvdr_global:
+            return cls._cfg_prvdr_global.substitute_config(v)
+        return v
 
     @validator("xdatasources", pre=True)
     @classmethod

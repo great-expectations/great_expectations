@@ -258,8 +258,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override those set in config_variables.yml and the environment
         """
-        self.zep_config = self._load_zep_config()
-
         if runtime_environment is None:
             runtime_environment = {}
         self.runtime_environment = runtime_environment
@@ -267,6 +265,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._config_provider = self._init_config_provider()
         self._config_variables = self._load_config_variables()
         self._variables = self._init_variables()
+
+        self.zep_config = self._load_zep_config()
 
         # Init plugin support
         if self.plugins_directory is not None and os.path.exists(
@@ -5420,11 +5420,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             yaml.dump(config_variables, config_variables_file)
 
     def _load_zep_config(self) -> GxConfig:
-        """Called at beginning of DataContext __init__"""
+        """Called at beginning of DataContext __init__ after config_providers init."""
         logger.info(
             f"{self.__class__.__name__} has not implemented `_load_zep_config()` returning empty `GxConfig`"
         )
-        return GxConfig(xdatasources={})
+        return GxConfig(xdatasources={}, _config_provider=self.config_provider)
 
     def _attach_zep_config_datasources(self, config: GxConfig):
         """Called at end of __init__"""
