@@ -50,7 +50,7 @@ class RunIdentifier(DataContextKey):
             except (ValueError, TypeError):
                 run_time = None
 
-        run_time = run_time or datetime.datetime.now(datetime.timezone.utc)
+        run_time = run_time or datetime.datetime.now(tz=datetime.timezone.utc)
         if not run_time.tzinfo:
             # this takes the given time and just adds timezone (no conversion)
             run_time = run_time.replace(tzinfo=datetime.timezone.utc)
