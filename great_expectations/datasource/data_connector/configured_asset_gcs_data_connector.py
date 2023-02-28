@@ -144,7 +144,7 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
         path_list: List[str] = [
             key
             for key in list_gcs_keys(
-                gcs=self._gcs,
+                gcs_client=self._gcs,
                 query_options=query_options,
                 recursive=False,
             )
