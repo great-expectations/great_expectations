@@ -138,7 +138,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                 query_options["delimiter"] = asset.delimiter
 
         path_list: List[str] = list_azure_keys(
-            azure=self._azure,
+            azure_client=self._azure,
             query_options=query_options,
             recursive=False,
         )
