@@ -64,12 +64,13 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         if not azure_client:
             # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
             # use in authentication (but not both). If the format or content of the provided keys is invalid,
-            # the assignment of `self._account_name` and `self._azure` will fail and an error will be raised.
+            # the assignment of `self._account_name` and `self._azure_client` will fail and an error will be raised.
             conn_str: str | None = self.azure_options.get("conn_str")
             account_url: str | None = self.azure_options.get("account_url")
-            assert bool(conn_str) ^ bool(
-                account_url
-            ), "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
+            if not bool(conn_str) ^ bool(account_url):
+                raise PandasAzureBlobStorageDatasourceError(
+                    "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
+                )
 
             # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
             if ABS_IMPORTED:
@@ -98,7 +99,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
 
             self._azure_client = azure_client
 
-        return azure_client
+        return azure_client  # type: ignore[return-value]
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the PandasAzureBlobStorageDatasource.
@@ -157,8 +158,8 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            azure_client=self._azure_client,
-            account_name=self._account_name,
+            azure_client=self._azure_client,  # type: ignore[arg-type]
+            account_name=self._account_name,  # type: ignore[arg-type]
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
@@ -210,8 +211,8 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            azure_client=self._azure_client,
-            account_name=self._account_name,
+            azure_client=self._azure_client,  # type: ignore[arg-type]
+            account_name=self._account_name,  # type: ignore[arg-type]
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
@@ -263,8 +264,8 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            azure_client=self._azure_client,
-            account_name=self._account_name,
+            azure_client=self._azure_client,  # type: ignore[arg-type]
+            account_name=self._account_name,  # type: ignore[arg-type]
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
@@ -316,8 +317,8 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            azure_client=self._azure_client,
-            account_name=self._account_name,
+            azure_client=self._azure_client,  # type: ignore[arg-type]
+            account_name=self._account_name,  # type: ignore[arg-type]
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,

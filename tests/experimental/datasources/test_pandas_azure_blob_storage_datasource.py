@@ -469,7 +469,7 @@ def test_test_connection_failures(
         datasource_name=pandas_abs_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=re.compile(regex),
-        azure_client=pandas_abs_datasource._azure_client,
+        azure_client=pandas_abs_datasource._azure_client,  # type: ignore[arg-type]
         account_name=csv_asset.datasource._account_name,
         container="my_container",
         file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
