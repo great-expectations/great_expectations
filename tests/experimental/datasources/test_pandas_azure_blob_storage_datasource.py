@@ -19,6 +19,9 @@ from great_expectations.experimental.datasources.file_path_data_asset import (
     _FilePathDataAsset,
 )
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
+from great_expectations.experimental.datasources.pandas_azure_blob_storage_datasource import (
+    PandasAzureBlobStorageDatasourceError,
+)
 from great_expectations.experimental.datasources.pandas_file_path_datasource import (
     CSVAsset,
 )
@@ -213,7 +216,7 @@ def test_construct_pandas_abs_datasource_with_valid_conn_str_assigns_account_nam
 )
 def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error():
     # Raises error in DataContext's schema validation due to having both `account_url` and `conn_str`
-    with pytest.raises(AssertionError):
+    with pytest.raises(PandasAzureBlobStorageDatasourceError):
         pandas_abs_datasource = PandasAzureBlobStorageDatasource(
             name="pandas_abs_datasource",
             azure_options={
