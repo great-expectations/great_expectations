@@ -3,6 +3,7 @@ import functools
 import json
 import pathlib
 import re
+import logging
 from pprint import pformat as pf
 from typing import Callable, List, Dict
 
@@ -31,6 +32,7 @@ try:
 except ImportError:
     from pprint import pprint as pp
 
+LOGGER = logging.getLogger(__file__)
 p = pytest.param
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR = pathlib.Path(__file__).parent
@@ -604,3 +606,50 @@ def test_config_provider_substitution(
     assert subbed_ds["assets"]["my_csv_asset"]["sep"] == ","
 
     assert from_yaml_gx_config != subbed
+
+
+@pytest.fixture
+def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
+    """
+    Initialize an regular/old-style FileDataContext project config directory.
+    Removed on teardown.
+    """
+    gx_yml = tmp_path / FileDataContext.GX_DIR / FileDataContext.GX_YML
+    assert gx_yml.exists() is False
+    FileDataContext.create(tmp_path)
+    assert gx_yml.exists()
+
+    tmp_gx_dir = gx_yml.parent.absolute()
+    LOGGER.info(f"tmp_gx_dir -> {tmp_gx_dir}")
+    return tmp_gx_dir
+
+
+@pytest.fixture
+def file_dc_config_file_with_substitutions(
+    file_dc_config_dir_init: pathlib.Path,
+) -> pathlib.Path:
+    config_file = file_dc_config_dir_init / FileDataContext.GX_YML
+    assert config_file.exists()
+    with open(config_file, mode="a") as file_append:
+        file_append.write(PG_CONFIG_YAML_STR)
+
+    print(config_file.read_text())
+    return config_file
+
+
+def test_zep_config_substitution_on_dc_init(
+    inject_config_env_vars, file_dc_config_file_with_substitutions: pathlib.Path
+):
+    from great_expectations import get_context
+
+    context = get_context(
+        context_root_dir=file_dc_config_file_with_substitutions.parent
+    )
+
+    print(context.zep_config)
+
+    # TODO: improve the fixtures or do all the setup in the test
+    subbed_ds = context.zep_config.datasources["my_pandas_ds_w_cfg_subs"]
+    assert subbed_ds.get_asset("my_csv_asset").sep == ","
+
+    assert subbed_ds.base_directory == pathlib.Path(__file__).parent
