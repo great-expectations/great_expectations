@@ -25,12 +25,21 @@ except ImportError:
 p = pytest.param
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR = pathlib.Path(__file__).parent
+CSV_PATH = EXPERIMENTAL_DATASOURCE_TEST_DIR.joinpath(
+    pathlib.Path(
+        "..",
+        "..",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+        "yellow_tripdata_sample_2018-04.csv",
+    )
+).resolve(strict=True)
 
 PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
-PG_COMPLEX_CONFIG_DICT = {
+COMPLEX_CONFIG_DICT = {
     "xdatasources": {
         "my_pg_ds": {
             "connection_string": "postgresql://userName:@hostname/dbName",
@@ -68,9 +77,9 @@ PG_COMPLEX_CONFIG_DICT = {
                 },
             },
         },
-        "my_pandas_ds": {
+        "my_pandas_filesystem_ds": {
             "type": "pandas_filesystem",
-            "name": "my_pandas_ds",
+            "name": "my_pandas_filesystem_ds",
             "base_directory": __file__,
             "assets": {
                 "my_csv_asset": {
@@ -88,9 +97,29 @@ PG_COMPLEX_CONFIG_DICT = {
                 },
             },
         },
+        "my_pandas_ds": {
+            "type": "pandas",
+            "name": "my_pandas_ds",
+            "assets": {
+                "#ephemeral_data_asset": {
+                    "name": "#ephemeral_data_asset",
+                    "type": "csv",
+                    "filepath_or_buffer": str(CSV_PATH),
+                    "sep": "|",
+                    "names": ["col1", "col2"],
+                },
+                "my_csv_asset": {
+                    "name": "my_csv_asset",
+                    "type": "csv",
+                    "filepath_or_buffer": str(CSV_PATH),
+                    "sep": "|",
+                    "names": ["col1", "col2"],
+                },
+            },
+        },
     }
 }
-PG_COMPLEX_CONFIG_JSON = json.dumps(PG_COMPLEX_CONFIG_DICT)
+COMPLEX_CONFIG_JSON = json.dumps(COMPLEX_CONFIG_DICT)
 
 SIMPLE_DS_DICT = {
     "xdatasources": {
@@ -210,8 +239,8 @@ class TestExcludeUnsetAssetFields:
             id="zep + old style config",
         ),
         p(GxConfig.parse_raw, json.dumps(SIMPLE_DS_DICT), id="simple pg json"),
-        p(GxConfig.parse_obj, PG_COMPLEX_CONFIG_DICT, id="pg complex dict"),
-        p(GxConfig.parse_raw, PG_COMPLEX_CONFIG_JSON, id="pg complex json"),
+        p(GxConfig.parse_obj, COMPLEX_CONFIG_DICT, id="complex dict"),
+        p(GxConfig.parse_raw, COMPLEX_CONFIG_JSON, id="complex json"),
         p(GxConfig.parse_yaml, PG_CONFIG_YAML_FILE, id="pg_config.yaml file"),
         p(GxConfig.parse_yaml, PG_CONFIG_YAML_STR, id="pg_config yaml string"),
     ],
@@ -362,7 +391,7 @@ def test_general_column_splitter_errors(
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_dict_gx_config() -> GxConfig:
-    gx_config = GxConfig.parse_obj(PG_COMPLEX_CONFIG_DICT)
+    gx_config = GxConfig.parse_obj(COMPLEX_CONFIG_DICT)
     assert gx_config
     return gx_config
 
@@ -370,7 +399,7 @@ def from_dict_gx_config() -> GxConfig:
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_json_gx_config() -> GxConfig:
-    gx_config = GxConfig.parse_raw(PG_COMPLEX_CONFIG_JSON)
+    gx_config = GxConfig.parse_raw(COMPLEX_CONFIG_JSON)
     assert gx_config
     return gx_config
 
