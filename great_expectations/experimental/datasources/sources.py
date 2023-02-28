@@ -215,7 +215,7 @@ class _SourceFactories:
             def _read_asset_factory(
                 self: Datasource, asset_name: str | None = None, **kwargs
             ) -> Validator:
-                name = asset_name or "$ephemeral_data_asset"
+                name = asset_name or "#ephemeral_data_asset"
                 asset = asset_type(name=name, **kwargs)
                 self.add_asset(asset)
                 batch_request = asset.build_batch_request()

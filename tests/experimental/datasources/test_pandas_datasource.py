@@ -298,7 +298,7 @@ class TestDynamicPandasAssets:
             filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-04.csv",
         )
         assert isinstance(validator, Validator)
-        expected_csv_data_asset_name_1 = "$ephemeral_data_asset"
+        expected_csv_data_asset_name_1 = "#ephemeral_data_asset"
         csv_data_asset_1 = pandas_datasource.assets[expected_csv_data_asset_name_1]
         assert isinstance(csv_data_asset_1, _PandasDataAsset)
         assert csv_data_asset_1.name == expected_csv_data_asset_name_1

@@ -33,7 +33,7 @@ def default_pandas_data(
     pandas_ds.read_csv(  # type: ignore[attr-defined]
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
     )
-    asset = pandas_ds.assets["csv_asset_1"]
+    asset = pandas_ds.assets["#ephemeral_data_asset"]
     batch_request = asset.build_batch_request()
     return context, pandas_ds, asset, batch_request
 
