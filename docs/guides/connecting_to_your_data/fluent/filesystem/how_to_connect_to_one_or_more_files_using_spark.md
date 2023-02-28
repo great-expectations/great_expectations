@@ -8,6 +8,8 @@ keywords: [Great Expectations, Spark, Filesystem]
 <!-- Import statements start here. -->
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
+import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
+
 ## Introduction
 
 In this guide we will demonstrate how to use Spark to connect to data stored in a filesystem.  In our examples, we will specifically be connecting to `.csv` files.  However, Great Expectations supports most types of files that Spark has read methods for.  There will be instructions for connecting to different types of files in the [Additional information](#additional-information) portion of this guide.
@@ -80,10 +82,7 @@ In the GX Python API, `read_*` methods will require the same parameters as the c
 
 ## Next steps
 
-Now that you have a Datasource with one or more files defined as Data Assets, you may want to look into:
-- How to request a Batch of data from a Datasource
-- How to create Expectations while interactively evaluating a set of data
-- How to use a Data Assistant to evaluate data
+<AfterCreateNonSqlDatasource />
 
 ## Additional information
 

@@ -44,6 +44,8 @@ For this example, we are using a Pandas Dataframe as our source data.
 The Pandas Dataframe we are using in this step's examples is defined with:
 
 ```python title="Python code"
+import Pandas as pd
+
 df = pd.DataFrame(
   {
     "a": [1, 2, 3],
@@ -95,7 +97,7 @@ In the GX Python API, `read_*` methods will require the same parameters as the c
 
 ## Next steps
 
-Now that you have a Datasource with one or more files defined as Data Assets, you may want to look into:
+Now that you have connected to your data, you may want to look into:
 - How to request a Batch of data from a Datasource
 - How to create Expectations while interactively evaluating a set of data
 - How to use a Data Assistant to evaluate data

@@ -1,0 +1,6 @@
+Now that you have connected to your data, you may want to look into:
+- [How to configure a non-SQL Data Asset to include multiple files as Batches](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_include_multiple_files_in_a_non_sql_data_asset.md)
+- [How to configure a non-SQL Data Asset to return a sampling of its full data](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_configure_a_non_sql_data_asset_to_return_sample_data.md)
+- [How to request a Batch of data from a Data Asset in a Datasource](docs/guides/connecting_to_your_data/fluent/data_assets/how_to_include_multiple_files_in_a_non_sql_data_asset.md)
+- [How to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [How to use the Onboarding Data Assistant to evaluate data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)

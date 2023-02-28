@@ -90,14 +90,15 @@ module.exports = {
           type: 'category',
           label: 'In-memory Datasources',
           items: [
-            'README'
+            'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas'
           ]
         },
         {
           type: 'category',
           label: 'Cloud Datasources',
           items: [
-            'README'
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas'
           ]
         },
         {
