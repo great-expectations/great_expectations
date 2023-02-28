@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, List, cast, Iterator
+from typing import Any, Dict, Iterator, List, cast
 from unittest import mock
 
 import pytest
