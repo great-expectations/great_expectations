@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, Iterator, cast
+from typing import Any, Dict, List, Iterator, cast
 from unittest import mock
 
 import pytest
@@ -66,35 +66,64 @@ def _build_pandas_gcs_datasource(
     gcs_options: Dict[str, Any] | None = None
 ) -> PandasGoogleCloudStorageDatasource:
     gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        PandasGoogleCloudStorageDatasource(
-            name="pandas_gcs_datasource",
-            bucket_or_name="test_bucket",
-            gcs_options=gcs_options or {},
-        )
+    pandas_gcs_datasource = PandasGoogleCloudStorageDatasource(
+        name="pandas_gcs_datasource",
+        bucket_or_name="test_bucket",
+        gcs_options=gcs_options or {},
     )
     pandas_gcs_datasource._gcs_client = gcs_client
     return pandas_gcs_datasource
 
 
-def _build_csv_asset(
+@pytest.fixture
+@pytest.mark.skipif(
+    storage is None, reason='Could not import "storage" from google.cloud'
+)
+def pandas_gcs_datasource() -> PandasGoogleCloudStorageDatasource:
+    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
+        _build_pandas_gcs_datasource()
+    )
+    return pandas_gcs_datasource
+
+
+@pytest.fixture
+def object_keys() -> List[str]:
+    return [
+        "alex_20200809_1000.csv",
+        "eugene_20200809_1500.csv",
+        "james_20200811_1009.csv",
+        "abe_20200809_1040.csv",
+        "will_20200809_1002.csv",
+        "james_20200713_1567.csv",
+        "eugene_20201129_1900.csv",
+        "will_20200810_1001.csv",
+        "james_20200810_1003.csv",
+        "alex_20200819_1300.csv",
+    ]
+
+
+@pytest.fixture
+@mock.patch(
+    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+)
+def csv_asset(
+    mock_list_keys,
+    object_keys: List[str],
     pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
-    name: str,
-    batching_regex: str,
 ) -> _FilePathDataAsset:
+    mock_list_keys.return_value = object_keys
     asset = pandas_gcs_datasource.add_csv_asset(
-        name=name,
-        batching_regex=batching_regex,
+        name="csv_asset",
+        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
     return asset
 
 
-def _build_bad_regex_config(pandas_gcs_datasource: PandasGoogleCloudStorageDatasource) -> tuple[re.Pattern, str]:  # type: ignore[valid-type]
-    csv_asset: CSVAsset = _build_csv_asset(  # type: ignore[valid-type]
-        pandas_gcs_datasource=pandas_gcs_datasource,
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-    )
+@pytest.fixture
+@pytest.mark.skipif(
+    storage is None, reason='Could not import "storage" from google.cloud'
+)
+def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:  # type: ignore[valid-type]
     regex = re.compile(
         r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
     )
@@ -170,22 +199,13 @@ def test_construct_pandas_gcs_datasource_with_info_in_gcs_options(
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.client.Client")
-def test_add_csv_asset_to_datasource(mock_gcs_client, mock_list_keys):
-    mock_list_keys.return_value = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ]
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        _build_pandas_gcs_datasource()
-    )
+def test_add_csv_asset_to_datasource(
+    mock_gcs_client,
+    mock_list_keys,
+    object_keys: List[str],
+    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
+):
+    mock_list_keys.return_value = object_keys
     asset = pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
@@ -205,20 +225,10 @@ def test_add_csv_asset_to_datasource(mock_gcs_client, mock_list_keys):
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.client.Client")
-def test_construct_csv_asset_directly(mock_gcs_client, mock_list_keys):
-    mock_list_keys.return_value = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ]
-    # noinspection PyTypeChecker
+def test_construct_csv_asset_directly(
+    mock_gcs_client, mock_list_keys, object_keys: List[str]
+):
+    mock_list_keys.return_value = object_keys
     asset = CSVAsset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
@@ -238,22 +248,13 @@ def test_construct_csv_asset_directly(mock_gcs_client, mock_list_keys):
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.client.Client")
-def test_csv_asset_with_regex_unnamed_parameters(mock_gcs_client, mock_list_keys):
-    mock_list_keys.return_value = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ]
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        _build_pandas_gcs_datasource()
-    )
+def test_csv_asset_with_regex_unnamed_parameters(
+    mock_gcs_client,
+    mock_list_keys,
+    object_keys: List[str],
+    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
+):
+    mock_list_keys.return_value = object_keys
     asset = pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
@@ -275,22 +276,13 @@ def test_csv_asset_with_regex_unnamed_parameters(mock_gcs_client, mock_list_keys
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.client.Client")
-def test_csv_asset_with_regex_named_parameters(mock_gcs_client, mock_list_keys):
-    mock_list_keys.return_value = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ]
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        _build_pandas_gcs_datasource()
-    )
+def test_csv_asset_with_regex_named_parameters(
+    mock_gcs_client,
+    mock_list_keys,
+    object_keys: List[str],
+    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
+):
+    mock_list_keys.return_value = object_keys
     asset = pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
@@ -307,22 +299,13 @@ def test_csv_asset_with_regex_named_parameters(mock_gcs_client, mock_list_keys):
     "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.client.Client")
-def test_csv_asset_with_some_regex_named_parameters(mock_gcs_client, mock_list_keys):
-    mock_list_keys.return_value = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ]
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        _build_pandas_gcs_datasource()
-    )
+def test_csv_asset_with_some_regex_named_parameters(
+    mock_gcs_client,
+    mock_list_keys,
+    object_keys: List[str],
+    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
+):
+    mock_list_keys.return_value = object_keys
     asset = pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
@@ -345,23 +328,12 @@ def test_csv_asset_with_some_regex_named_parameters(mock_gcs_client, mock_list_k
 )
 @mock.patch("google.cloud.storage.client.Client")
 def test_csv_asset_with_non_string_regex_named_parameters(
-    mock_gcs_client, mock_list_keys
+    mock_gcs_client,
+    mock_list_keys,
+    object_keys: List[str],
+    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
 ):
-    mock_list_keys.return_value = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ]
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        _build_pandas_gcs_datasource()
-    )
+    mock_list_keys.return_value = object_keys
     asset = pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
@@ -380,25 +352,10 @@ def test_csv_asset_with_non_string_regex_named_parameters(
 @pytest.mark.skipif(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
-@mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
-)
 def test_get_batch_list_from_fully_specified_batch_request(
-    mock_list_keys, monkeypatch: pytest.MonkeyPatch
+    monkeypatch: pytest.MonkeyPatch,
+    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
 ):
-    mock_list_keys.return_value = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ]
-
     gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
 
     def instantiate_gcs_client_spy(self) -> None:
@@ -409,9 +366,6 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "_instantiate_s3_client",
         instantiate_gcs_client_spy,
         raising=True,
-    )
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        _build_pandas_gcs_datasource()
     )
     asset = pandas_gcs_datasource.add_csv_asset(
         name="csv_asset",
@@ -452,28 +406,11 @@ def test_get_batch_list_from_fully_specified_batch_request(
 @pytest.mark.skipif(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
-@mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
-)
-def test_test_connection_failures(mock_list_keys):
-    mock_list_keys.return_value = [
-        "alex_20200809_1000.csv",
-        "eugene_20200809_1500.csv",
-        "james_20200811_1009.csv",
-        "abe_20200809_1040.csv",
-        "will_20200809_1002.csv",
-        "james_20200713_1567.csv",
-        "eugene_20201129_1900.csv",
-        "will_20200810_1001.csv",
-        "james_20200810_1003.csv",
-        "alex_20200819_1300.csv",
-    ]
-    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource = (
-        _build_pandas_gcs_datasource()
-    )
-    regex, test_connection_error_message = _build_bad_regex_config(
-        pandas_gcs_datasource=pandas_gcs_datasource
-    )
+def test_test_connection_failures(
+    pandas_gcs_datasource: PandasGoogleCloudStorageDatasource,
+    bad_regex_config: tuple[re.Pattern, str],
+):
+    regex, test_connection_error_message = bad_regex_config
     csv_asset = CSVAsset(
         name="csv_asset",
         batching_regex=regex,
