@@ -508,7 +508,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
         ),
     ]
 
-    my_data_connector = GCSDataConnector(
+    my_data_connector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
         batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
