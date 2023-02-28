@@ -33,7 +33,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         prefix (str): GCS prefix
         delimiter (str): GCS delimiter
         max_results (int): max blob filepaths to return
-        gcs_options (dict): wrapper object for optional GCS `**kwargs`
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
@@ -52,7 +51,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         prefix: str = "",
         delimiter: str = "/",
         max_results: Optional[int] = None,
-        gcs_options: Optional[dict] = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
@@ -65,9 +63,6 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         self._prefix = prefix
         self._delimiter = delimiter
         self._max_results = max_results
-
-        if gcs_options is None:
-            gcs_options = {}
 
         super().__init__(
             datasource_name=datasource_name,

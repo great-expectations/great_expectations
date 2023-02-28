@@ -11,6 +11,9 @@ from great_expectations.experimental.datasources.pandas_file_path_datasource imp
 from great_expectations.experimental.datasources.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
 )
+from great_expectations.experimental.datasources.pandas_google_cloud_storage_datasource import (
+    PandasGoogleCloudStorageDatasource,
+)
 from great_expectations.experimental.datasources.pandas_s3_datasource import (
     PandasS3Datasource,
 )
