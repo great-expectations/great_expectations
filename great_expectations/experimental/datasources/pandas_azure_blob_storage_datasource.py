@@ -56,7 +56,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     # Azure Blob Storage specific attributes
     azure_options: Dict[str, Any] = {}
 
-    _account_name: Union[str, None] = pydantic.PrivateAttr(default="")
+    _account_name: str = pydantic.PrivateAttr(default="")
     _azure_client: Union[BlobServiceClient, None] = pydantic.PrivateAttr(default=None)
 
     def _get_azure_client(self) -> BlobServiceClient:
