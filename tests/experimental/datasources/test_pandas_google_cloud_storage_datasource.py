@@ -90,7 +90,7 @@ def _build_csv_asset(
 
 
 def _build_bad_regex_config(pandas_gcs_datasource: PandasGoogleCloudStorageDatasource) -> tuple[re.Pattern, str]:  # type: ignore[valid-type]
-    csv_asset: CSVAsset = _build_csv_asset(
+    csv_asset: CSVAsset = _build_csv_asset(  # type: ignore[valid-type]
         pandas_gcs_datasource=pandas_gcs_datasource,
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
