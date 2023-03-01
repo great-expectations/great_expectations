@@ -31,6 +31,9 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
     _DataAssetT,
 )
+from great_expectations.experimental.datasources.sources import (
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+)
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import PandasExecutionEngine
@@ -274,6 +277,10 @@ class PandasDatasource(_PandasDatasource):
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
+    def _get_validator(self, asset: _PandasDataAsset) -> Validator:
+        batch_request = asset.build_batch_request()
+        return self._data_context.get_validator(batch_request=batch_request)
+
     def add_csv_asset(
         self, filepath_or_buffer: pydantic.FilePath, name: str, **kwargs
     ) -> CSVAsset:
@@ -290,8 +297,11 @@ class PandasDatasource(_PandasDatasource):
         name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        kwargs["filepath_or_buffer"] = filepath_or_buffer
-        CSVAsset(
+        if not name:
+            name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: CSVAsset = self.add_csv_asset(
+            filepath_or_buffer=filepath_or_buffer,
             name=name,
             **kwargs,
         )
+        return self._get_validator(asset=asset)

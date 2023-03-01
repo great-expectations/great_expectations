@@ -357,11 +357,11 @@ class TestDynamicPandasAssets:
         )
         assert csv_asset.filepath_or_buffer == filepath_or_buffer
 
-        # _ = empty_data_context.sources.pandas_default.read_csv(filepath_or_buffer)
-        # # read_csv returns a validator, but we just want to inspect the asset
-        # assert (
-        #     empty_data_context.sources.pandas_default.assets[
-        #         DEFAULT_PANDAS_DATA_ASSET_NAME
-        #     ].filepath_or_buffer
-        #     == filepath_or_buffer
-        # )
+        _ = empty_data_context.sources.pandas_default.read_csv(filepath_or_buffer)
+        # read_csv returns a validator, but we just want to inspect the asset
+        assert (
+            empty_data_context.sources.pandas_default.assets[
+                DEFAULT_PANDAS_DATA_ASSET_NAME
+            ].filepath_or_buffer
+            == filepath_or_buffer
+        )
