@@ -732,4 +732,4 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     )["xdatasources"]
 
     assert round_tripped_datasources["my_sqlite"]
-    assert round_tripped_datasources["my_pandas_ds_w_cfg_subs"]["new_asset"]
+    assert round_tripped_datasources["my_pandas_ds_w_cfg_subs"]["assets"]["new_asset"]
