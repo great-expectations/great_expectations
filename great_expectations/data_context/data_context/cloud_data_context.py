@@ -737,14 +737,17 @@ class CloudDataContext(SerializableDataContext):
         meta: dict | None = None,
         expectation_suite: ExpectationSuite | None = None,
     ) -> ExpectationSuite:
-        existing_id = self._determine_existing_id_from_expectation_suite_name(
+        existing_id = self._determine_existing_id_from_suite_name(
             expectation_suite_name=expectation_suite_name,
             expectation_suite=expectation_suite,
         )
+
+        # If a suite with the input name already exists, make sure our args are updated
+        # such that downstream logic knows to update the persisted value.
         if existing_id:
             if expectation_suite_name and not id:
                 id = existing_id
-            elif expectation_suite and not expectation_suite.ge_cloud_id:
+            if expectation_suite and not expectation_suite.ge_cloud_id:
                 expectation_suite.ge_cloud_id = existing_id
 
         return super().add_or_update_expectation_suite(
@@ -758,11 +761,22 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite=expectation_suite,
         )
 
-    def _determine_existing_id_from_expectation_suite_name(
+    def _determine_existing_id_from_suite_name(
         self,
         expectation_suite_name: str | None,
         expectation_suite: ExpectationSuite | None,
     ) -> str | None:
+        """
+        Checks to see if an ExpectationSuite with the given name is already persisted by Cloud.
+
+        If so, we want to return the persisted id to ensure that our `add_or_update` call
+        updates that existing object. Failing to do so will result in a namespace collision.
+
+        Example:
+            ```
+            context.add_or_update_expectation_suite("temp") # 'temp' already exists
+            # We should grab the id associated with 'temp' so we PUT instead of POST
+        """
         if expectation_suite and not expectation_suite_name:
             expectation_suite_name = expectation_suite.expectation_suite_name
 
@@ -953,11 +967,9 @@ class CloudDataContext(SerializableDataContext):
         overwrite_existing: bool,
         **kwargs,
     ) -> ExpectationSuite:
-        cloud_id: str | None
+        cloud_id: str | None = None
         if expectation_suite.ge_cloud_id:
             cloud_id = expectation_suite.ge_cloud_id
-        else:
-            cloud_id = None
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
@@ -972,11 +984,15 @@ class CloudDataContext(SerializableDataContext):
             persistence_fn = self.expectations_store.add
 
         response = persistence_fn(key=key, value=expectation_suite, **kwargs)
+
+        id: str | None
         if isinstance(response, GXCloudResourceRef):
             id = response.cloud_id
         else:
             id = expectation_suite.ge_cloud_id
 
+        # Want to make a subsequent call to Cloud to ensure we recognize any nested expectations
+        # that are newly persisted and now contain ids.
         return self.get_expectation_suite(
             expectation_suite_name=expectation_suite.expectation_suite_name,
             ge_cloud_id=id,
