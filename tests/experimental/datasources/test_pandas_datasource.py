@@ -59,6 +59,11 @@ def csv_path() -> pathlib.Path:
     return abs_csv_path
 
 
+@pytest.fixture
+def valid_file_path(csv_path: pathlib.Path) -> pathlib.Path:
+    return csv_path / "yellow_tripdata_sample_2018-03.csv"
+
+
 class SpyInterrupt(RuntimeError):
     """
     Exception that may be raised to interrupt the control flow of the program
@@ -288,7 +293,7 @@ class TestDynamicPandasAssets:
         assert captured_kwargs[-1] == extra_kwargs
 
     def test_default_pandas_datasource_get_and_set(
-        self, empty_data_context: AbstractDataContext, csv_path: pathlib.Path
+        self, empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
     ):
         pandas_datasource = empty_data_context.sources.pandas_default
         assert isinstance(pandas_datasource, PandasDatasource)
@@ -296,7 +301,7 @@ class TestDynamicPandasAssets:
         assert len(pandas_datasource.assets) == 0
 
         validator = pandas_datasource.read_csv(
-            filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-04.csv",
+            filepath_or_buffer=valid_file_path,
         )
         assert isinstance(validator, Validator)
         expected_csv_data_asset_name_1 = DEFAULT_PANDAS_DATA_ASSET_NAME
@@ -312,9 +317,7 @@ class TestDynamicPandasAssets:
         assert pandas_datasource.assets[expected_csv_data_asset_name_1]
 
         # ensure we overwrite the ephemeral data asset if no name is passed
-        validator = pandas_datasource.read_csv(
-            filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-03.csv"
-        )
+        validator = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
         assert isinstance(validator, Validator)
         assert csv_data_asset_1.name == expected_csv_data_asset_name_1
         assert len(pandas_datasource.assets) == 1
@@ -323,7 +326,7 @@ class TestDynamicPandasAssets:
         expected_csv_data_asset_name_2 = "my_csv_asset"
         validator = pandas_datasource.read_csv(
             asset_name=expected_csv_data_asset_name_2,
-            filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-03.csv",
+            filepath_or_buffer=valid_file_path,
         )
         assert isinstance(validator, Validator)
         csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name_2]
@@ -350,8 +353,8 @@ class TestDynamicPandasAssets:
         "read_method_name,positional_args",
         [
             param("read_clipboard", {}),
-            param("read_csv", {"filepath_or_buffer": "csv_path"}),
-            param("read_excel", {"io": "csv_path"}),
+            param("read_csv", {"filepath_or_buffer": "valid_file_path"}),
+            param("read_excel", {"io": "valid_file_path"}),
             # param("read_feather", {}),
             # param(
             #     "read_fwf", {}, marks=pytest.mark.xfail(reason="unhandled type annotation")
@@ -387,15 +390,11 @@ class TestDynamicPandasAssets:
         positional_args: dict[str, Any],
         request,
     ):
-        if "csv_path" in positional_args.values():
-            csv_path = (
-                request.getfixturevalue("csv_path")
-                / "yellow_tripdata_sample_2018-03.csv"
-            )
+        if "valid_file_path" in positional_args.values():
             positional_args = {
-                positional_arg_name: csv_path
+                positional_arg_name: request.getfixturevalue("valid_file_path")
                 for positional_arg_name, positional_arg in positional_args.items()
-                if positional_arg == "csv_path"
+                if positional_arg == "valid_file_path"
             }
 
         add_method_name = "add_" + read_method_name.split("read_")[1] + "_asset"

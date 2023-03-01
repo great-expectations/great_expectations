@@ -308,7 +308,7 @@ class PandasDatasource(_PandasDatasource):
         return self._data_context.get_validator(batch_request=batch_request)
 
     def add_clipboard_asset(self, name: str, **kwargs) -> ClipboardAsset:  # type: ignore[valid-type]
-        asset = ClipboardAsset(  # type: ignore[valid-type]
+        asset = ClipboardAsset(
             name=name,
             **kwargs,
         )
@@ -321,10 +321,10 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_csv_asset(
-        self, filepath_or_buffer: str, name: str, **kwargs
+        self, filepath_or_buffer: pydantic.FilePath, name: str, **kwargs
     ) -> CSVAsset:  # type: ignore[valid-type]
         kwargs["filepath_or_buffer"] = filepath_or_buffer
-        asset = CSVAsset(  # type: ignore[valid-type]
+        asset = CSVAsset(
             name=name,
             **kwargs,
         )
@@ -332,7 +332,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_csv(
         self,
-        filepath_or_buffer: str,
+        filepath_or_buffer: pydantic.FilePath,
         name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -349,7 +349,7 @@ class PandasDatasource(_PandasDatasource):
         self, io: str, name: str, **kwargs
     ) -> ExcelAsset:  # type: ignore[valid-type]
         kwargs["io"] = io
-        asset = ExcelAsset(  # type: ignore[valid-type]
+        asset = ExcelAsset(
             name=name,
             **kwargs,
         )
