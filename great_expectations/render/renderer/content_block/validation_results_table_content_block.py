@@ -1,14 +1,11 @@
+from __future__ import annotations
+
 import logging
 import traceback
 import warnings
 from copy import deepcopy
+from typing import TYPE_CHECKING
 
-from great_expectations.core.expectation_configuration import (
-    ExpectationConfiguration,  # noqa: TCH001
-)
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (  # noqa: F401
-    ExpectColumnKlDivergenceToBeLessThan,
-)
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
     LegacyDiagnosticRendererType,
@@ -18,6 +15,11 @@ from great_expectations.render import (
 from great_expectations.render.renderer.content_block.expectation_string import (
     ExpectationStringRenderer,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.expectation_configuration import (
+        ExpectationConfiguration,
+    )
 
 logger = logging.getLogger(__name__)
 
