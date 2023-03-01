@@ -7,6 +7,8 @@ import shutil
 import warnings
 from typing import TYPE_CHECKING, ClassVar, Optional, Union
 
+# from pprint import pformat as pf
+from pydantic.utils import deep_update
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
@@ -103,10 +105,16 @@ class SerializableDataContext(AbstractDataContext):
                     zep_json_dict: dict[str, JSONValues] = self.zep_config._json_dict()
                     # re-combine the original raw config to preserve the original config ${FOO} placeholders
                     # NOTE: this could cause issues depending on what values have the placeholders
-                    # TODO: Only update fields that had config placeholders
-                    zep_json_dict["xdatasources"].update(
-                        self.zep_config._xdatasources_raw_config
+                    # TODO: Only update fields that had config placeholders?
+                    # TODO: cleanup
+                    updated_xdatasources = deep_update(
+                        zep_json_dict["xdatasources"],
+                        self.zep_config._xdatasources_raw_config,
                     )
+                    zep_json_dict["xdatasources"] = updated_xdatasources
+                    # print(
+                    #     f"original\n{pf(zep_json_dict['xdatasources'])}\n\n\nupdated\n{pf(updated_xdatasources)}"
+                    # )
                     self.config._commented_map.update(zep_json_dict)
 
                 self.config.to_yaml(outfile)
