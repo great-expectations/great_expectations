@@ -14,8 +14,8 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.experimental.datasources import PandasDatasource
 from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
 from great_expectations.experimental.datasources.pandas_datasource import (
-    PandasCSVAsset,
-    PandasTableAsset,
+    CSVAsset,
+    TableAsset,
     _PandasDataAsset,
 )
 from great_expectations.experimental.datasources.sources import (
@@ -220,9 +220,9 @@ class TestDynamicPandasAssets:
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],
         [
-            (PandasCSVAsset, {"sep": "|", "names": ["col1", "col2", "col3"]}),
+            (CSVAsset, {"sep": "|", "names": ["col1", "col2", "col3"]}),
             (
-                PandasTableAsset,
+                TableAsset,
                 {
                     "sep": "|",
                     "names": ["col1", "col2", "col3", "col4"],
@@ -345,3 +345,23 @@ class TestDynamicPandasAssets:
         pandas_datasource = empty_data_context.sources.pandas_default
         assert isinstance(pandas_datasource, PandasDatasource)
         assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
+
+    def test_pandas_datasource_positional_arguments(
+        self, empty_data_context: AbstractDataContext, csv_path: pathlib.Path
+    ):
+        filepath_or_buffer = csv_path / "yellow_tripdata_sample_2018-03.csv"
+
+        csv_asset = empty_data_context.sources.pandas_default.add_csv_asset(
+            filepath_or_buffer,
+            name="my_csv_asset",
+        )
+        assert csv_asset.filepath_or_buffer == filepath_or_buffer
+
+        # _ = empty_data_context.sources.pandas_default.read_csv(filepath_or_buffer)
+        # # read_csv returns a validator, but we just want to inspect the asset
+        # assert (
+        #     empty_data_context.sources.pandas_default.assets[
+        #         DEFAULT_PANDAS_DATA_ASSET_NAME
+        #     ].filepath_or_buffer
+        #     == filepath_or_buffer
+        # )

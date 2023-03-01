@@ -37,6 +37,7 @@ if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import (
         BatchRequestOptions,
     )
+    from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -203,20 +204,20 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
 
 try:
     # variables only needed for type-hinting
-    PandasCSVAsset = _PANDAS_ASSET_MODELS["csv"]
-    PandasExcelAsset = _PANDAS_ASSET_MODELS["excel"]
-    PandasJSONAsset = _PANDAS_ASSET_MODELS["json"]
-    PandasORCAsset = _PANDAS_ASSET_MODELS["orc"]
-    PandasParquetAsset = _PANDAS_ASSET_MODELS["parquet"]
-    PandasTableAsset = _PANDAS_ASSET_MODELS["table"]
+    CSVAsset = _PANDAS_ASSET_MODELS["csv"]
+    ExcelAsset = _PANDAS_ASSET_MODELS["excel"]
+    JSONAsset = _PANDAS_ASSET_MODELS["json"]
+    ORCAsset = _PANDAS_ASSET_MODELS["orc"]
+    ParquetAsset = _PANDAS_ASSET_MODELS["parquet"]
+    TableAsset = _PANDAS_ASSET_MODELS["table"]
 except KeyError as key_err:
     logger.info(f"zep - {key_err} asset model could not be generated")
-    PandasCSVAsset = _PandasDataAsset
-    PandasExcelAsset = _PandasDataAsset
-    PandasJSONAsset = _PandasDataAsset
-    PandasORCAsset = _PandasDataAsset
-    PandasParquetAsset = _PandasDataAsset
-    PandasTableAsset = _PandasDataAsset
+    CSVAsset = _PandasDataAsset
+    ExcelAsset = _PandasDataAsset
+    JSONAsset = _PandasDataAsset
+    ORCAsset = _PandasDataAsset
+    ParquetAsset = _PandasDataAsset
+    TableAsset = _PandasDataAsset
 
 
 class _PandasDatasource(Datasource, Generic[_DataAssetT]):
@@ -272,3 +273,25 @@ class PandasDatasource(_PandasDatasource):
 
     def test_connection(self, test_assets: bool = True) -> None:
         ...
+
+    def add_csv_asset(
+        self, filepath_or_buffer: pydantic.FilePath, name: str, **kwargs
+    ) -> CSVAsset:
+        kwargs["filepath_or_buffer"] = filepath_or_buffer
+        asset = CSVAsset(
+            name=name,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_csv(
+        self,
+        filepath_or_buffer: pydantic.FilePath,
+        name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        kwargs["filepath_or_buffer"] = filepath_or_buffer
+        CSVAsset(
+            name=name,
+            **kwargs,
+        )
