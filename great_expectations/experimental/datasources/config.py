@@ -4,9 +4,10 @@ from __future__ import annotations
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, NamedTuple, Type, Union
 
-from pydantic import Extra, Field, ValidationError, validator
+from pydantic import Extra, Field, PrivateAttr, ValidationError, validator
+from ruamel.yaml import YAML
 from typing_extensions import Final
 
 from great_expectations.experimental.datasources.experimental_base_model import (
@@ -29,6 +30,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+yaml = YAML(typ="safe")
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
+
 _ZEP_STYLE_DESCRIPTION: Final[str] = "ZEP Experimental Datasources"
 
 _MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
@@ -40,13 +45,18 @@ _MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 ]
 
 
+class _ConfigsTuple(NamedTuple):
+    substituted: Dict[str, Any]
+    raw: Dict[str, Any]
+
+
 class GxConfig(ExperimentalBaseModel):
     """Represents the full new-style/experimental configuration file."""
 
-    # FIXME: this is terrible... don't do this
-    _cfg_prvdr_global: ClassVar[_ConfigurationProvider | None] = None
-
     xdatasources: Dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
+
+    # private non-field attributes
+    _raw_config: Union[Dict[str, Any], None] = PrivateAttr(default=None)
 
     @property
     def datasources(self) -> Dict[str, Datasource]:
@@ -54,17 +64,6 @@ class GxConfig(ExperimentalBaseModel):
 
     class Config:
         extra = Extra.ignore  # ignore any old style config keys
-
-    @validator("xdatasources", pre=True)
-    @classmethod
-    def _config_substitution(cls, v: Dict[str, dict], **kwargs):
-        """Perform config substitution on the raw dictionary values."""
-        print("_config_substitution")
-        print(pf(v), end="\n\n")
-        print(pf(kwargs), end="\n\n")
-        if cls._cfg_prvdr_global:
-            return cls._cfg_prvdr_global.substitute_config(v)
-        return v
 
     @validator("xdatasources", pre=True)
     @classmethod
@@ -113,7 +112,10 @@ class GxConfig(ExperimentalBaseModel):
 
     @classmethod
     def parse_yaml(
-        cls: Type[GxConfig], f: Union[pathlib.Path, str], _allow_empty: bool = False
+        cls: Type[GxConfig],
+        f: Union[pathlib.Path, str],
+        _allow_empty: bool = False,
+        _config_provider: _ConfigurationProvider | None = None,
     ) -> GxConfig:
         """
         Overriding base method to allow an empty/missing `xdatasources` field.
@@ -122,9 +124,18 @@ class GxConfig(ExperimentalBaseModel):
         TODO (kilo59) 122822: remove this as soon as it's no longer needed. Such as when
         we use a new `config_version` instead of `xdatasources` key.
         """
+        config: dict[str, Any]
+        raw_config: dict[str, Any] | None = None
+        if _config_provider:
+            config_tuple = cls._load_yaml_with_config_substitutions(f, _config_provider)
+            config = config_tuple.substituted
+            raw_config = config_tuple.raw
+        else:
+            config = yaml.load(f)
+
         if _allow_empty:
             try:
-                super().parse_yaml(f)
+                cls(**config)
             except ValidationError as validation_err:
                 errors_list: List[PydanticErrorDict] = validation_err.errors()
                 logger.info(
@@ -136,8 +147,23 @@ class GxConfig(ExperimentalBaseModel):
                     )
                     return cls(xdatasources={})
                 else:
-                    logger.warning(
+                    logger.info(
                         "`_allow_empty` does not prevent unrelated validation errors"
                     )
                     raise
-        return super().parse_yaml(f)
+        instance = cls(**config)
+        if raw_config:
+            instance._raw_config = raw_config
+        return instance
+
+    @classmethod
+    def _load_yaml_with_config_substitutions(
+        cls: Type[GxConfig],
+        f: Union[pathlib.Path, str],
+        _config_provider: _ConfigurationProvider,
+    ) -> _ConfigsTuple:
+        raw_config = yaml.load(f)
+        logger.debug(f"Substituting config with {_config_provider.__class__.__name__}")
+        return _ConfigsTuple(
+            _config_provider.substitute_config(raw_config), raw=raw_config
+        )
