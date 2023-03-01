@@ -698,6 +698,13 @@ def test_config_substitution_retains_original_value_on_save(
 def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     inject_config_env_vars, file_dc_config_file_with_substitutions: pathlib.Path
 ):
+    original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
+        "xdatasources"
+    ]
+    assert original.get("my_pandas_ds_w_cfg_subs")  # will be modified
+    assert original.get("my_pg_ds")  # will be deleted
+    assert not original.get("my_sqlite")  # will be added
+
     from great_expectations import get_context
 
     context = get_context(
@@ -725,6 +732,9 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     )
     pandas_ds_w_cfg_sub.add_csv_asset("new_asset")
 
+    # delete a datasource
+    context.delete_datasource("my_pg_ds")
+
     context._save_project_config()
 
     round_tripped_datasources = yaml.load(
@@ -733,3 +743,4 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
 
     assert round_tripped_datasources["my_sqlite"]
     assert round_tripped_datasources["my_pandas_ds_w_cfg_subs"]["assets"]["new_asset"]
+    assert not round_tripped_datasources.get("my_pg_ds")
