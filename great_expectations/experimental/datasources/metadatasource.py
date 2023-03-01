@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Set, Type
 
 import pydantic
 
+from great_expectations.experimental.datasources.signatures import _merge_signatures
 from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
@@ -66,4 +67,7 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
         cls._type_lookup = TypeLookup()
         _SourceFactories.register_types_and_ds_factory(cls, _datasource_factory)
 
+        _datasource_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+            _datasource_factory, cls, exclude={"type", "assets"}, return_type=cls
+        )
         return cls
