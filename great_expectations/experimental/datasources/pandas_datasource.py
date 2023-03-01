@@ -83,7 +83,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         batch_list: List[Batch] = []
 
         batch_spec = PandasBatchSpec(
-            reader_method=self._get_reader_method().replace("pandas_", ""),
+            reader_method=self._get_reader_method(),
             reader_options=self.dict(
                 exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                 exclude_unset=True,
@@ -259,6 +259,9 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 class PandasDatasource(_PandasDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_PANDAS_ASSET_MODELS.values())
+
+    # private attributes
+    _data_context = pydantic.PrivateAttr()
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
