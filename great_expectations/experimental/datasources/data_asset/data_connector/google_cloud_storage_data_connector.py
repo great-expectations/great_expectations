@@ -75,6 +75,49 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
+    @classmethod
+    def build_data_connector(
+        cls,
+        datasource_name: str,
+        data_asset_name: str,
+        client: GCSClient = None,
+        **kwargs,
+    ) -> GoogleCloudStorageDataConnector:
+        """Builds "GoogleCloudStorageDataConnector", which links named DataAsset to Google Cloud Storage.
+
+        Args:
+            datasource_name: The name of the Datasource associated with this "GoogleCloudStorageDataConnector" instance
+            data_asset_name: The name of the DataAsset using this "GoogleCloudStorageDataConnector" instance
+            client: Google Cloud Storage Client reference handle
+            kwargs: Extra keyword arguments allow specification of arguments used by given "GoogleCloudStorageDataConnector" constructor
+        """
+        return GoogleCloudStorageDataConnector(
+            datasource_name=datasource_name,
+            data_asset_name=data_asset_name,
+            gcs_client=client,
+            bucket_or_name=kwargs.pop("bucket_or_name"),
+            **kwargs,
+        )
+
+    @classmethod
+    def build_test_connection_error_message(cls, data_asset_name: str, **kwargs) -> str:
+        """Builds helpful error message for reporting issues when linking named DataAsset to Google Cloud Storage.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this "GoogleCloudStorageDataConnector" instance
+            kwargs: Extra keyword arguments allow specification of arguments used by given "GoogleCloudStorageDataConnector" constructor
+        """
+        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        return test_connection_error_message_template.format(
+            **(
+                {
+                    "bucket_or_name": kwargs.pop("bucket_or_name"),
+                    "data_asset_name": data_asset_name,
+                }
+                | kwargs
+            )
+        )
+
     def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.

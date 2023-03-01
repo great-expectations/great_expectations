@@ -101,43 +101,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
-    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
-        """Builds "S3DataConnector", which links this Datasource and its DataAsset members to AWS S3.
-
-        Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
-            kwargs: Extra keyword arguments allow specification of arguments used by "S3DataConnector"
-        """
-        self._data_connector = S3DataConnector(
-            datasource_name=self.name,
-            data_asset_name=data_asset_name,
-            s3_client=self._get_s3_client(),
-            bucket=self.bucket,
-            **kwargs,
-        )
-
-    def _build_test_connection_error_message(
-        self, data_asset_name: str, **kwargs
-    ) -> None:
-        """Builds helpful error message for Datasource and its DataAsset members when connecting to AWS S3.
-
-        Args:
-            data_asset_name: The name of the DataAsset using this error message
-            kwargs: Extra keyword arguments allow specification of arguments used by this error message's template
-        """
-        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
-        self._test_connection_error_message = (
-            test_connection_error_message_template.format(
-                **(
-                    {
-                        "bucket": self.bucket,
-                        "data_asset_name": data_asset_name,
-                    }
-                    | kwargs
-                )
-            )
-        )
-
     def add_csv_asset(
         self,
         name: str,
@@ -173,20 +136,26 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._build_data_connector(
+        self._data_connector = S3DataConnector.build_data_connector(
+            datasource_name=self.name,
             data_asset_name=name,
+            client=self._get_s3_client(),
             batching_regex=batching_regex_pattern,
+            bucket=self.bucket,
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_keys=max_keys,
+        self._test_connection_error_message = (
+            S3DataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket=self.bucket,
+                prefix=prefix,
+                delimiter=delimiter,
+                max_keys=max_keys,
+            )
         )
         return self.add_asset(asset=asset)
 
@@ -225,20 +194,26 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._build_data_connector(
+        self._data_connector = S3DataConnector.build_data_connector(
+            datasource_name=self.name,
             data_asset_name=name,
+            client=self._get_s3_client(),
             batching_regex=batching_regex_pattern,
+            bucket=self.bucket,
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_keys=max_keys,
+        self._test_connection_error_message = (
+            S3DataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket=self.bucket,
+                prefix=prefix,
+                delimiter=delimiter,
+                max_keys=max_keys,
+            )
         )
         return self.add_asset(asset=asset)
 
@@ -277,20 +252,26 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._build_data_connector(
+        self._data_connector = S3DataConnector.build_data_connector(
+            datasource_name=self.name,
             data_asset_name=name,
+            client=self._get_s3_client(),
             batching_regex=batching_regex_pattern,
+            bucket=self.bucket,
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_keys=max_keys,
+        self._test_connection_error_message = (
+            S3DataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket=self.bucket,
+                prefix=prefix,
+                delimiter=delimiter,
+                max_keys=max_keys,
+            )
         )
         return self.add_asset(asset=asset)
 
@@ -329,20 +310,26 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._build_data_connector(
+        self._data_connector = S3DataConnector.build_data_connector(
+            datasource_name=self.name,
             data_asset_name=name,
+            client=self._get_s3_client(),
             batching_regex=batching_regex_pattern,
+            bucket=self.bucket,
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_keys=max_keys,
+        self._test_connection_error_message = (
+            S3DataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket=self.bucket,
+                prefix=prefix,
+                delimiter=delimiter,
+                max_keys=max_keys,
+            )
         )
         return self.add_asset(asset=asset)
 

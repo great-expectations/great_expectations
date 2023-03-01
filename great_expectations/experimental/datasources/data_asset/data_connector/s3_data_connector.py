@@ -76,6 +76,49 @@ class S3DataConnector(FilePathDataConnector):
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
+    @classmethod
+    def build_data_connector(
+        cls,
+        datasource_name: str,
+        data_asset_name: str,
+        client: BaseClient = None,
+        **kwargs,
+    ) -> S3DataConnector:
+        """Builds "S3DataConnector", which links named DataAsset to AWS S3.
+
+        Args:
+            datasource_name: The name of the Datasource associated with this "S3DataConnector" instance
+            data_asset_name: The name of the DataAsset using this "S3DataConnector" instance
+            client: S3 Client reference handle
+            kwargs: Extra keyword arguments allow specification of arguments used by given "S3DataConnector" constructor
+        """
+        return S3DataConnector(
+            datasource_name=datasource_name,
+            data_asset_name=data_asset_name,
+            s3_client=client,
+            bucket=kwargs.pop("bucket"),
+            **kwargs,
+        )
+
+    @classmethod
+    def build_test_connection_error_message(cls, data_asset_name: str, **kwargs) -> str:
+        """Builds helpful error message for reporting issues when linking named DataAsset to AWS S3.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this "S3DataConnector" instance
+            kwargs: Extra keyword arguments allow specification of arguments used by given "S3DataConnector" constructor
+        """
+        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        return test_connection_error_message_template.format(
+            **(
+                {
+                    "bucket": kwargs.pop("bucket"),
+                    "data_asset_name": data_asset_name,
+                }
+                | kwargs
+            )
+        )
+
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.

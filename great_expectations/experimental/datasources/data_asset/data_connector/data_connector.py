@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any, List, Optional
 
 from great_expectations.core.id_dict import BatchSpec
 
@@ -55,6 +55,36 @@ class DataConnector(ABC):
     @property
     def datasource_name(self) -> str:
         return self._datasource_name
+
+    @classmethod
+    @abstractmethod
+    def build_data_connector(
+        cls,
+        datasource_name: str,
+        data_asset_name: str,
+        client: Optional[Any] = None,
+        **kwargs,
+    ) -> DataConnector:
+        """Builds "DataConnector", which links named DataAsset to data storage environment.
+
+        Args:
+            datasource_name: The name of the Datasource associated with this "DataConnector" instance
+            data_asset_name: The name of the DataAsset using this "DataConnector" instance
+            client: Client reference handle to data storage environment (if applicable)
+            kwargs: Extra keyword arguments allow specification of arguments used by given "DataConnector" constructor
+        """
+        pass
+
+    @classmethod
+    @abstractmethod
+    def build_test_connection_error_message(cls, data_asset_name: str, **kwargs) -> str:
+        """Builds helpful error message for reporting issues when linking named DataAsset to data storage environment.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this "DataConnector" instance
+            kwargs: Extra keyword arguments allow specification of arguments used by given "DataConnector" constructor
+        """
+        pass
 
     @abstractmethod
     def get_batch_definition_list(

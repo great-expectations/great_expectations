@@ -55,43 +55,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
-    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
-        """Builds "FilesystemDataConnector", which links this Datasource and its DataAsset members to local filesystem.
-
-        Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
-            kwargs: Extra keyword arguments allow specification of arguments used by "FilesystemDataConnector"
-        """
-        self._data_connector = FilesystemDataConnector(
-            datasource_name=self.name,
-            data_asset_name=data_asset_name,
-            base_directory=self.base_directory,
-            data_context_root_directory=self.data_context_root_directory,
-            **kwargs,
-        )
-
-    def _build_test_connection_error_message(
-        self, data_asset_name: str, **kwargs
-    ) -> None:
-        """Builds helpful error message for Datasource and its DataAsset members when connecting to local filesystem.
-
-        Args:
-            data_asset_name: The name of the DataAsset using this error message
-            kwargs: Extra keyword arguments allow specification of arguments used by this error message's template
-        """
-        test_connection_error_message_template: str = 'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex}" and/or glob_directive "{glob_directive}" for DataAsset "{data_asset_name}".'
-        self._test_connection_error_message = (
-            test_connection_error_message_template.format(
-                **(
-                    {
-                        "base_directory": self.base_directory.resolve(),
-                        "data_asset_name": data_asset_name,
-                    }
-                    | kwargs
-                )
-            )
-        )
-
     def add_csv_asset(
         self,
         name: str,
@@ -123,15 +86,21 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._build_data_connector(
+        self._data_connector = FilesystemDataConnector.build_data_connector(
+            datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
+            base_directory=self.base_directory,
             glob_directive=glob_directive,
+            data_context_root_directory=self.data_context_root_directory,
         )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            glob_directive=glob_directive,
+        self._test_connection_error_message = (
+            FilesystemDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                glob_directive=glob_directive,
+                base_directory=self.base_directory,
+            )
         )
         return self.add_asset(asset=asset)
 
@@ -166,15 +135,21 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._build_data_connector(
+        self._data_connector = FilesystemDataConnector.build_data_connector(
+            datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
+            base_directory=self.base_directory,
             glob_directive=glob_directive,
+            data_context_root_directory=self.data_context_root_directory,
         )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            glob_directive=glob_directive,
+        self._test_connection_error_message = (
+            FilesystemDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                glob_directive=glob_directive,
+                base_directory=self.base_directory,
+            )
         )
         return self.add_asset(asset=asset)
 
@@ -209,15 +184,21 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._build_data_connector(
+        self._data_connector = FilesystemDataConnector.build_data_connector(
+            datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
+            base_directory=self.base_directory,
             glob_directive=glob_directive,
+            data_context_root_directory=self.data_context_root_directory,
         )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            glob_directive=glob_directive,
+        self._test_connection_error_message = (
+            FilesystemDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                glob_directive=glob_directive,
+                base_directory=self.base_directory,
+            )
         )
         return self.add_asset(asset=asset)
 
@@ -252,15 +233,21 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._build_data_connector(
+        self._data_connector = FilesystemDataConnector.build_data_connector(
+            datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
+            base_directory=self.base_directory,
             glob_directive=glob_directive,
+            data_context_root_directory=self.data_context_root_directory,
         )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            glob_directive=glob_directive,
+        self._test_connection_error_message = (
+            FilesystemDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                glob_directive=glob_directive,
+                base_directory=self.base_directory,
+            )
         )
         return self.add_asset(asset=asset)
 

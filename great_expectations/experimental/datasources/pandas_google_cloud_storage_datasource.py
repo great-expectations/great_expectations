@@ -124,43 +124,6 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
-    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
-        """Builds "GoogleCloudStorageDataConnector", which links this Datasource and its DataAsset members to Google Cloud Storage.
-
-        Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
-            kwargs: Extra keyword arguments allow specification of arguments used by "GoogleCloudStorageDataConnector"
-        """
-        self._data_connector = GoogleCloudStorageDataConnector(
-            datasource_name=self.name,
-            data_asset_name=data_asset_name,
-            gcs_client=self._get_gcs_client(),
-            bucket_or_name=self.bucket_or_name,
-            **kwargs,
-        )
-
-    def _build_test_connection_error_message(
-        self, data_asset_name: str, **kwargs
-    ) -> None:
-        """Builds helpful error message for Datasource and its DataAsset members when connecting to AWS Google Cloud Storage
-
-        Args:
-            data_asset_name: The name of the DataAsset using this error message
-            kwargs: Extra keyword arguments allow specification of arguments used by this error message's template
-        """
-        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
-        self._test_connection_error_message = (
-            test_connection_error_message_template.format(
-                **(
-                    {
-                        "bucket_or_name": self.bucket_or_name,
-                        "data_asset_name": data_asset_name,
-                    }
-                    | kwargs
-                )
-            )
-        )
-
     def add_csv_asset(
         self,
         name: str,
@@ -196,20 +159,26 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._build_data_connector(
+        self._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
+            datasource_name=self.name,
             data_asset_name=name,
+            client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
+            bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
             file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_results=max_results,
+        self._test_connection_error_message = (
+            GoogleCloudStorageDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket_or_name=self.bucket_or_name,
+                prefix=prefix,
+                delimiter=delimiter,
+                max_results=max_results,
+            )
         )
         return self.add_asset(asset=asset)
 
@@ -248,6 +217,25 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
+        self._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
+            datasource_name=self.name,
+            data_asset_name=name,
+            client=self._get_gcs_client(),
+            batching_regex=batching_regex_pattern,
+            prefix=prefix,
+            delimiter=delimiter,
+            max_results=max_results,
+            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
+        )
+        self._test_connection_error_message = (
+            GoogleCloudStorageDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                prefix=prefix,
+                delimiter=delimiter,
+                max_results=max_results,
+            )
+        )
         self._build_data_connector(
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
@@ -300,6 +288,25 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
+        self._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
+            datasource_name=self.name,
+            data_asset_name=name,
+            client=self._get_gcs_client(),
+            batching_regex=batching_regex_pattern,
+            prefix=prefix,
+            delimiter=delimiter,
+            max_results=max_results,
+            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
+        )
+        self._test_connection_error_message = (
+            GoogleCloudStorageDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                prefix=prefix,
+                delimiter=delimiter,
+                max_results=max_results,
+            )
+        )
         self._build_data_connector(
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
@@ -352,6 +359,25 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
+        self._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
+            datasource_name=self.name,
+            data_asset_name=name,
+            client=self._get_gcs_client(),
+            batching_regex=batching_regex_pattern,
+            prefix=prefix,
+            delimiter=delimiter,
+            max_results=max_results,
+            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
+        )
+        self._test_connection_error_message = (
+            GoogleCloudStorageDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                prefix=prefix,
+                delimiter=delimiter,
+                max_results=max_results,
+            )
+        )
         self._build_data_connector(
             data_asset_name=name,
             batching_regex=batching_regex_pattern,

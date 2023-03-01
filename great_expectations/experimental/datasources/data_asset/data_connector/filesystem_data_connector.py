@@ -75,6 +75,44 @@ class FilesystemDataConnector(FilePathDataConnector):
             root_directory_path=self._data_context_root_directory,
         )
 
+    @classmethod
+    def build_data_connector(
+        cls, datasource_name: str, data_asset_name: str, **kwargs
+    ) -> FilesystemDataConnector:
+        """Builds "FilesystemDataConnector", which links named DataAsset to local filesystem.
+
+        Args:
+            datasource_name: The name of the Datasource associated with this "FilesystemDataConnector" instance
+            data_asset_name: The name of the DataAsset using this "FilesystemDataConnector" instance
+            kwargs: Extra keyword arguments allow specification of arguments used by given "FilesystemDataConnector" constructor
+        """
+        return FilesystemDataConnector(
+            datasource_name=datasource_name,
+            data_asset_name=data_asset_name,
+            base_directory=kwargs.pop("base_directory"),
+            data_context_root_directory=kwargs.pop("data_context_root_directory"),
+            **kwargs,
+        )
+
+    @classmethod
+    def build_test_connection_error_message(cls, data_asset_name: str, **kwargs) -> str:
+        """Builds helpful error message for reporting issues when linking named DataAsset to local filesystem.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this "FilesystemDataConnector" instance
+            kwargs: Extra keyword arguments allow specification of arguments used by given "FilesystemDataConnector" constructor
+        """
+        test_connection_error_message_template: str = 'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex}" and/or glob_directive "{glob_directive}" for DataAsset "{data_asset_name}".'
+        return test_connection_error_message_template.format(
+            **(
+                {
+                    "base_directory": kwargs.pop("base_directory"),
+                    "data_asset_name": data_asset_name,
+                }
+                | kwargs
+            )
+        )
+
     # Interface Method
     def get_data_references(self) -> List[str]:
         base_directory: pathlib.Path = self.base_directory
