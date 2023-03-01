@@ -782,10 +782,7 @@ class CloudDataContext(SerializableDataContext):
 
         suite_keys = cast(List[GXCloudIdentifier], self.list_expectation_suites() or [])
         for key in suite_keys:
-            if (
-                isinstance(key, GXCloudIdentifier)
-                and key.resource_name == expectation_suite_name
-            ):
+            if key.resource_name == expectation_suite_name:
                 return key.cloud_id
 
         return None
