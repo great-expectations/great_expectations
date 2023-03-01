@@ -693,3 +693,47 @@ def test_config_substitution_retains_original_value_on_save(
         "xdatasources"
     ]["my_pandas_ds_w_cfg_subs"]
     assert round_tripped == original
+
+
+def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
+    inject_config_env_vars, file_dc_config_file_with_substitutions: pathlib.Path
+):
+    original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
+        "xdatasources"
+    ]
+
+    from great_expectations import get_context
+
+    context = get_context(
+        context_root_dir=file_dc_config_file_with_substitutions.parent
+    )
+
+    # TODO: improve the fixtures or do all the setup in the test
+    subbed_datasources = context.xdatasources
+    assert (
+        subbed_datasources["my_pandas_ds_w_cfg_subs"].get_asset("my_csv_asset").sep
+        == ","
+    )
+
+    assert (
+        subbed_datasources["my_pandas_ds_w_cfg_subs"].base_directory
+        == pathlib.Path(__file__).parent
+    )
+
+    # add a new datasource
+    context.sources.add_sqlite("my_sqlite", connection_string="sqlite://")
+
+    # add a new asset to an existing data
+    pandas_ds_w_cfg_sub: PandasFilesystemDatasource = context.get_datasource(
+        "my_pandas_ds_w_cfg_subs"
+    )
+    pandas_ds_w_cfg_sub.add_csv_asset("new_asset")
+
+    context._save_project_config()
+
+    round_tripped_datasources = yaml.load(
+        file_dc_config_file_with_substitutions.read_text()
+    )["xdatasources"]
+
+    assert round_tripped_datasources["my_sqlite"]
+    assert round_tripped_datasources["my_pandas_ds_w_cfg_subs"]["new_asset"]

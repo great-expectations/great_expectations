@@ -101,12 +101,13 @@ class SerializableDataContext(AbstractDataContext):
                         f"Saving {len(self.zep_config.datasources)} ZEP Datasources to {config_filepath}"
                     )
                     zep_json_dict: dict[str, JSONValues] = self.zep_config._json_dict()
-                    self.config._commented_map.update(
-                        # re-combine the original raw config to preserve the original config ${FOO} place holders
-                        # NOTE: this could cause issues depending on what values have config
-                        # TODO: Only update fields that had config placeholders
-                        {**zep_json_dict, **self.zep_config._raw_config}
+                    # re-combine the original raw config to preserve the original config ${FOO} placeholders
+                    # NOTE: this could cause issues depending on what values have the placeholders
+                    # TODO: Only update fields that had config placeholders
+                    zep_json_dict["xdatasources"].update(
+                        self.zep_config._xdatasources_raw_config
                     )
+                    self.config._commented_map.update(zep_json_dict)
 
                 self.config.to_yaml(outfile)
         except PermissionError as e:
