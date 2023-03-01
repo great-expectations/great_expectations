@@ -37,6 +37,12 @@ from great_expectations.experimental.datasources.spark_filesystem_datasource imp
 from great_expectations.experimental.datasources.spark_s3_datasource import (
     SparkS3Datasource,
 )
+from great_expectations.experimental.datasources.spark_google_cloud_storage_datasource import (
+    SparkGoogleCloudStorageDatasource,
+)
+from great_expectations.experimental.datasources.spark_azure_blob_storage_datasource import (
+    SparkAzureBlobStorageDatasource,
+)
 from great_expectations.experimental.datasources.sqlite_datasource import (
     SqliteDatasource,
 )

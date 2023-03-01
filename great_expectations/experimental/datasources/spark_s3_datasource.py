@@ -35,11 +35,11 @@ logger = logging.getLogger(__name__)
 
 BOTO3_IMPORTED = False
 try:
-    import boto3
+    import boto3  # noqa: disable=E0602
 
     BOTO3_IMPORTED = True
 except ImportError:
-    boto3 = None
+    pass
 
 
 class SparkS3DatasourceError(SparkDatasourceError):

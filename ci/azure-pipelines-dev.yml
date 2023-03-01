@@ -141,6 +141,11 @@ stages:
           ruff --select F401 great_expectations tests
         name: UnusedImportChecker
 
+    - job: check_repo_root_size
+      steps:
+        - script: ./scripts/check_repo_root_size.sh
+          name: CheckRepoRootSize
+
     - job: docs_snippet_checker
       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
       steps:
@@ -155,6 +160,12 @@ stages:
         - script: |
             python scripts/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
+
+    - job: public_api_report
+      steps:
+        - script: |
+            python scripts/public_api_report.py
+          name: PublicAPIReport
 
   - stage: import_ge
     dependsOn: scope_check
