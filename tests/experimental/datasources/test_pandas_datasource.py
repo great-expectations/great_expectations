@@ -325,7 +325,7 @@ class TestDynamicPandasAssets:
             # ),
         ],
     )
-    def test_positional_arguments(
+    def test_read_method_positional_arguments(
         self,
         mocker,
         empty_data_context: AbstractDataContext,
@@ -339,18 +339,6 @@ class TestDynamicPandasAssets:
                 for positional_arg_name, positional_arg in positional_args.items()
                 if positional_arg == "valid_file_path"
             }
-
-        add_method_name = "add_" + read_method_name.split("read_")[1] + "_asset"
-        add_method: Callable = getattr(
-            empty_data_context.sources.pandas_default, add_method_name
-        )
-
-        asset: _PandasDataAsset = add_method(
-            *positional_args.values(),
-            name="my_asset",
-        )
-        for positional_arg_name, positional_arg in positional_args.items():
-            assert getattr(asset, positional_arg_name) == positional_arg
 
         read_method: Callable = getattr(
             empty_data_context.sources.pandas_default, read_method_name

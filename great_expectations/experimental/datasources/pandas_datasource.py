@@ -321,9 +321,8 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_csv_asset(
-        self, filepath_or_buffer: pydantic.FilePath, name: str, **kwargs
+        self, name: str, **kwargs
     ) -> CSVAsset:  # type: ignore[valid-type]
-        kwargs["filepath_or_buffer"] = filepath_or_buffer
         asset = CSVAsset(
             name=name,
             **kwargs,
@@ -338,17 +337,16 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator:
         if not name:
             name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        kwargs["filepath_or_buffer"] = filepath_or_buffer
         asset: CSVAsset = self.add_csv_asset(  # type: ignore[valid-type]
-            filepath_or_buffer=filepath_or_buffer,
             name=name,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_excel_asset(
-        self, io: str, name: str, **kwargs
+        self, name: str, **kwargs
     ) -> ExcelAsset:  # type: ignore[valid-type]
-        kwargs["io"] = io
         asset = ExcelAsset(
             name=name,
             **kwargs,
@@ -363,8 +361,8 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator:
         if not name:
             name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        kwargs["io"] = io
         asset: CSVAsset = self.add_excel_asset(  # type: ignore[valid-type]
-            io=io,
             name=name,
             **kwargs,
         )
