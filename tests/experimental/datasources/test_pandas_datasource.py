@@ -318,8 +318,8 @@ class TestDynamicPandasAssets:
                 "read_sql_query", {"sql": "SELECT * FROM my_table", "con": "sqlite://"}
             ),
             param("read_sql_table", {"table_name": "my_table", "con": "sqlite://"}),
-            # param("read_stata", {}),
-            # param("read_table", {}),
+            param("read_stata", {"filepath_or_buffer": "valid_file_path"}),
+            param("read_table", {"filepath_or_buffer": "valid_file_path"}),
             # param(
             #     "read_xml", {},
             #     marks=pytest.mark.skipif(

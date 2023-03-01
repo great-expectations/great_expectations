@@ -705,6 +705,56 @@ class PandasDatasource(_PandasDatasource):
         )
         return self._get_validator(asset=asset)
 
+    def add_stata_asset(
+        self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
+    ) -> StataAsset:  # type: ignore[valid-type]
+        asset = StataAsset(
+            name=name,
+            filepath_or_buffer=filepath_or_buffer,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_stata(
+        self,
+        filepath_or_buffer: pydantic.FilePath,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: StataAsset = self.add_stata_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            filepath_or_buffer=filepath_or_buffer,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    def add_table_asset(
+        self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
+    ) -> TableAsset:  # type: ignore[valid-type]
+        asset = TableAsset(
+            name=name,
+            filepath_or_buffer=filepath_or_buffer,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_table(
+        self,
+        filepath_or_buffer: pydantic.FilePath,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: TableAsset = self.add_table_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            filepath_or_buffer=filepath_or_buffer,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
     add_clipboard_asset.__signature__ = _merge_signatures(add_clipboard_asset, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
@@ -744,4 +794,10 @@ class PandasDatasource(_PandasDatasource):
     )
     add_sql_table_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_sql_table_asset, SQLTableAsset, exclude={"type"}
+    )
+    add_stata_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_stata_asset, StataAsset, exclude={"type"}
+    )
+    add_table_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_table_asset, TableAsset, exclude={"type"}
     )
