@@ -5,11 +5,11 @@ import logging
 import pathlib
 import re
 from pprint import pformat as pf
-from typing import Callable, Dict, List
-from ruamel.yaml import YAML
+from typing import TYPE_CHECKING, Callable, Dict, List
 
 import pydantic
 import pytest
+from ruamel.yaml import YAML
 
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,
@@ -32,6 +32,11 @@ try:
     from devtools import debug as pp
 except ImportError:
     from pprint import pprint as pp
+
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources import (
+        PandasFilesystemDatasource,
+    )
 
 yaml = YAML(typ="safe")
 LOGGER = logging.getLogger(__file__)
@@ -651,7 +656,9 @@ def test_config_substitution_on_dc_init(
     print(context.zep_config)
 
     # TODO: improve the fixtures or do all the setup in the test
-    subbed_ds = context.zep_config.datasources["my_pandas_ds_w_cfg_subs"]
+    subbed_ds: PandasFilesystemDatasource = context.zep_config.datasources[  # type: ignore[assignment]
+        "my_pandas_ds_w_cfg_subs"
+    ]
     assert subbed_ds.get_asset("my_csv_asset").sep == ","
 
     assert subbed_ds.base_directory == pathlib.Path(__file__).parent
@@ -673,7 +680,9 @@ def test_config_substitution_retains_original_value_on_save(
     print(context.zep_config)
 
     # TODO: improve the fixtures or do all the setup in the test
-    subbed_ds = context.zep_config.datasources["my_pandas_ds_w_cfg_subs"]
+    subbed_ds: PandasFilesystemDatasource = context.zep_config.datasources[  # type: ignore[assignment]
+        "my_pandas_ds_w_cfg_subs"
+    ]
     assert subbed_ds.get_asset("my_csv_asset").sep == ","
 
     assert subbed_ds.base_directory == pathlib.Path(__file__).parent
