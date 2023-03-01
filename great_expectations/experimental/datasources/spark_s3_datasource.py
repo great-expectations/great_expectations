@@ -126,7 +126,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,

@@ -320,14 +320,12 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = ParquetAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
-
         asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
