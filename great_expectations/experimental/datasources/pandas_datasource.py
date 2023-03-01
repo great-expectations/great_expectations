@@ -192,6 +192,7 @@ _PANDAS_READER_METHOD_UNSUPPORTED_LIST = (
     # "read_sql",
     # "read_sql_query",
     # "read_sql_table",
+    # "read_stata",
     # "read_table",
     # "read_xml",
 )
@@ -206,21 +207,46 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
 
 
 try:
-    # variables only needed for type-hinting
+    ClipboardAsset = _PANDAS_ASSET_MODELS["clipboard"]
     CSVAsset = _PANDAS_ASSET_MODELS["csv"]
     ExcelAsset = _PANDAS_ASSET_MODELS["excel"]
+    FeatherAsset = _PANDAS_ASSET_MODELS["feather"]
+    GBQAsset = _PANDAS_ASSET_MODELS["gbq"]
+    HDFAsset = _PANDAS_ASSET_MODELS["hdf"]
+    HTMLAsset = _PANDAS_ASSET_MODELS["html"]
     JSONAsset = _PANDAS_ASSET_MODELS["json"]
     ORCAsset = _PANDAS_ASSET_MODELS["orc"]
     ParquetAsset = _PANDAS_ASSET_MODELS["parquet"]
+    PickleAsset = _PANDAS_ASSET_MODELS["pickle"]
+    SQLAsset = _PANDAS_ASSET_MODELS["sql"]
+    SQLQueryAsset = _PANDAS_ASSET_MODELS["sql_query"]
+    SQLTableAsset = _PANDAS_ASSET_MODELS["sql_table"]
+    SASAsset = _PANDAS_ASSET_MODELS["sas"]
+    SPSSAsset = _PANDAS_ASSET_MODELS["spss"]
+    StataAsset = _PANDAS_ASSET_MODELS["stata"]
     TableAsset = _PANDAS_ASSET_MODELS["table"]
+    XMLAsset = _PANDAS_ASSET_MODELS["xml"]
 except KeyError as key_err:
     logger.info(f"zep - {key_err} asset model could not be generated")
+    ClipboardAsset = _PandasDataAsset
     CSVAsset = _PandasDataAsset
     ExcelAsset = _PandasDataAsset
+    FeatherAsset = _PandasDataAsset
+    GBQAsset = _PandasDataAsset
+    HDFAsset = _PandasDataAsset
+    HTMLAsset = _PandasDataAsset
     JSONAsset = _PandasDataAsset
     ORCAsset = _PandasDataAsset
     ParquetAsset = _PandasDataAsset
+    PickleAsset = _PandasDataAsset
+    SQLAsset = _PandasDataAsset
+    SQLQueryAsset = _PandasDataAsset
+    SQLTableAsset = _PandasDataAsset
+    SASAsset = _PandasDataAsset
+    SPSSAsset = _PandasDataAsset
+    StataAsset = _PandasDataAsset
     TableAsset = _PandasDataAsset
+    XMLAsset = _PandasDataAsset
 
 
 class _PandasDatasource(Datasource, Generic[_DataAssetT]):
