@@ -313,7 +313,7 @@ class TestDynamicPandasAssets:
             param("read_pickle", {"filepath_or_buffer": "valid_file_path"}),
             param("read_sas", {"filepath_or_buffer": "valid_file_path"}),
             param("read_spss", {"path": "valid_file_path"}),
-            # param("read_sql", {}),
+            param("read_sql", {"sql": "SELECT * FROM my_table", "con": "sqlite://"}),
             # param("read_sql_query", {}),
             # param("read_sql_table", {}),
             # param("read_stata", {}),

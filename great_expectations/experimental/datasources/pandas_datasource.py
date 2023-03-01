@@ -621,6 +621,34 @@ class PandasDatasource(_PandasDatasource):
         )
         return self._get_validator(asset=asset)
 
+    def add_sql_asset(
+        self, name: str, sql: str, con: str, **kwargs
+    ) -> SQLAsset:  # type: ignore[valid-type]
+        asset = SQLAsset(
+            name=name,
+            sql=sql,
+            con=con,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_sql(
+        self,
+        sql: str,
+        con: str,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: SQLAsset = self.add_sql_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            sql=sql,
+            con=con,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
     add_clipboard_asset.__signature__ = _merge_signatures(add_clipboard_asset, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
@@ -651,4 +679,7 @@ class PandasDatasource(_PandasDatasource):
     )
     add_spss_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_spss_asset, SPSSAsset, exclude={"type"}
+    )
+    add_sql_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_sql_asset, SQLAsset, exclude={"type"}
     )
