@@ -170,7 +170,7 @@ class DocsExampleParser:
         import_names = self._get_non_private_gx_import_names(imports=gx_imports)
         logger.debug(f"import_names: {import_names}")
 
-        pattern = r"class_name: (\w+)"
+        pattern = re.compile(r"class_name: (\w+)")
         matches = re.finditer(pattern, file_contents.contents)
         yaml_names = {m.group(1) for m in matches}
 
@@ -404,7 +404,7 @@ def parse_docs_contents_for_class_names(file_contents: Set[FileContents]) -> Set
     """
 
     all_usages = set()
-    pattern = r"class_name: (\w+)"
+    pattern = re.compile(r"class_name: (\w+)")
 
     for single_file_contents in file_contents:
 
