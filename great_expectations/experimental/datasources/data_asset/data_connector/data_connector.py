@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, TypeVar
 
 from great_expectations.core.id_dict import BatchSpec
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition
     from great_expectations.experimental.datasources.interfaces import BatchRequest
+
+
+_ClientT = TypeVar("_ClientT")
 
 
 logger = logging.getLogger(__name__)
@@ -62,7 +65,7 @@ class DataConnector(ABC):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        client: Optional[Any] = None,
+        client: Optional[_ClientT] = None,
         **kwargs,
     ) -> DataConnector:
         """Builds "DataConnector", which links named DataAsset to data storage environment.

@@ -17,6 +17,9 @@ if TYPE_CHECKING:
     from botocore.client import BaseClient
 
     from great_expectations.core.batch import BatchDefinition
+    from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
+        _ClientT,
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -81,7 +84,7 @@ class S3DataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        client: BaseClient = None,
+        client: Optional[_ClientT] = None,
         **kwargs,
     ) -> S3DataConnector:
         """Builds "S3DataConnector", which links named DataAsset to AWS S3.
@@ -111,7 +114,7 @@ class S3DataConnector(FilePathDataConnector):
         test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
             **(
-                {
+                {  # type: ignore[operator]
                     "bucket": kwargs.pop("bucket"),
                     "data_asset_name": data_asset_name,
                 }

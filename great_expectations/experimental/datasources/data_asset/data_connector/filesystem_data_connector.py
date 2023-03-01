@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
@@ -12,6 +12,11 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     FilePathDataConnector,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
+        _ClientT,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -77,13 +82,18 @@ class FilesystemDataConnector(FilePathDataConnector):
 
     @classmethod
     def build_data_connector(
-        cls, datasource_name: str, data_asset_name: str, **kwargs
+        cls,
+        datasource_name: str,
+        data_asset_name: str,
+        client: Optional[_ClientT] = None,
+        **kwargs,
     ) -> FilesystemDataConnector:
         """Builds "FilesystemDataConnector", which links named DataAsset to local filesystem.
 
         Args:
             datasource_name: The name of the Datasource associated with this "FilesystemDataConnector" instance
             data_asset_name: The name of the DataAsset using this "FilesystemDataConnector" instance
+            client: No client is needed for accessing local filesystem (included for interface compatibility purposes)
             kwargs: Extra keyword arguments allow specification of arguments used by given "FilesystemDataConnector" constructor
         """
         return FilesystemDataConnector(
@@ -105,7 +115,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         test_connection_error_message_template: str = 'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex}" and/or glob_directive "{glob_directive}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
             **(
-                {
+                {  # type: ignore[operator]
                     "base_directory": kwargs.pop("base_directory"),
                     "data_asset_name": data_asset_name,
                 }

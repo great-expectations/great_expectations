@@ -16,6 +16,9 @@ if TYPE_CHECKING:
     from google.cloud.storage.client import Client as GCSClient
 
     from great_expectations.core.batch import BatchDefinition
+    from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
+        _ClientT,
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -80,7 +83,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        client: GCSClient = None,
+        client: Optional[_ClientT] = None,
         **kwargs,
     ) -> GoogleCloudStorageDataConnector:
         """Builds "GoogleCloudStorageDataConnector", which links named DataAsset to Google Cloud Storage.
@@ -110,7 +113,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
             **(
-                {
+                {  # type: ignore[operator]
                     "bucket_or_name": kwargs.pop("bucket_or_name"),
                     "data_asset_name": data_asset_name,
                 }

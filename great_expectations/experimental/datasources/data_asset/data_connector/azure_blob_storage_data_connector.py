@@ -17,6 +17,9 @@ if TYPE_CHECKING:
     from azure.storage.blob import BlobServiceClient
 
     from great_expectations.core.batch import BatchDefinition
+    from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
+        _ClientT,
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -80,7 +83,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        client: BlobServiceClient = None,
+        client: Optional[_ClientT] = None,
         **kwargs,
     ) -> AzureBlobStorageDataConnector:
         """Builds "AzureBlobStorageDataConnector", which links named DataAsset to Microsoft Azure Blob Storage.
@@ -110,7 +113,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
             **(
-                {
+                {  # type: ignore[operator]
                     "account_name": kwargs.pop("account_name"),
                     "data_asset_name": data_asset_name,
                 }

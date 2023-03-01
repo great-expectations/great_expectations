@@ -29,10 +29,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    import boto3
+    import boto3  # noqa: disable=E0602
 except ImportError:
     logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
-    boto3 = None
 
 
 @pytest.mark.integration
