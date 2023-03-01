@@ -83,7 +83,7 @@ stages:
                 /*.yml
                 requirements*
                 reqs/*.txt
-                azure/**/*.yml
+                ci/**/*.yml
                 assets/scripts/**
                 scripts/*.py
                 scripts/*.sh
@@ -140,6 +140,11 @@ stages:
           # https://www.flake8rules.com/rules/F401.html
           ruff --select F401 great_expectations tests
         name: UnusedImportChecker
+
+    - job: check_repo_root_size
+      steps:
+        - script: ./scripts/check_repo_root_size.sh
+          name: CheckRepoRootSize
 
     - job: docs_snippet_checker
       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)

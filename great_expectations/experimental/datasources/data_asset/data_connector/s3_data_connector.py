@@ -27,7 +27,9 @@ class S3DataConnector(FilePathDataConnector):
 
 
     Args:
-        datasource_name (str): required name for datasource
+        datasource_name: The name of the Datasource associated with this DataConnector instance
+        data_asset_name: The name of the DataAsset using this DataConnector instance
+        s3_client: Reference to instantiated AWS S3 client handle
         bucket (str): bucket for S3
         batching_regex: A regex pattern for partitioning data references
         prefix (str): S3 prefix
@@ -57,6 +59,7 @@ class S3DataConnector(FilePathDataConnector):
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
         self._s3_client: BaseClient = s3_client
+
         self._bucket: str = bucket
         self._prefix: str = sanitize_prefix_for_s3(prefix)
         self._delimiter: str = delimiter
@@ -96,15 +99,14 @@ class S3DataConnector(FilePathDataConnector):
             "Delimiter": self._delimiter,
             "MaxKeys": self._max_keys,
         }
-        path_list: List[str] = [
-            key
-            for key in list_s3_keys(
+        path_list: List[str] = list(
+            list_s3_keys(
                 s3=self._s3_client,
                 query_options=query_options,
                 iterator_dict={},
                 recursive=False,
             )
-        ]
+        )
         return path_list
 
     # Interface Method
