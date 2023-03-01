@@ -164,7 +164,7 @@ class TestDynamicPandasAssets:
 
         with pytest.raises(pydantic.ValidationError) as exc_info:
             positional_arg_string = "foo"
-            positional_args = []
+            positional_args: list[str] = []
             while len(positional_args) < 3:
                 try:
                     method(
