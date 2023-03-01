@@ -125,6 +125,13 @@ stages:
         - script: ./scripts/check_repo_root_size.sh
           name: CheckRepoRootSize
 
+    - job: public_api_report
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+        - script: |
+            python scripts/public_api_report.py
+          name: PublicAPIReport
+
   - stage: docker_tests
     dependsOn: [lint, custom_checks]
     condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
