@@ -1,5 +1,5 @@
 ---
-title: Changelog
+[title](title): Changelog
 ---
 
 ### 0.15.50
@@ -32,9 +32,9 @@ title: Changelog
 * [FEATURE] Enable customization of candidate Regular Expression patterns when running OnboardingDataAssistant ([#7104](https://github.com/great-expectations/great_expectations/pull/7104))
 * [FEATURE] Enable `gx.get_context()` to work without any inputs ([#7074](https://github.com/great-expectations/great_expectations/pull/7074))
 * [FEATURE] Add `datasource` arg to `DataContext` `Datasource` CRUD ([#7070](https://github.com/great-expectations/great_expectations/pull/7070))
-* [FEATURE] Update zep to use sqlalchemy_data_splitter.py (#7151)(https://github.com/great-expectations/great_expectations/pull/7151))
-* [FEATURE] ZEP - Dynamically define `add_<ASSET_TYPE>_asset()` methods if needed (#7121)(https://github.com/great-expectations/great_expectations/pull/7121))
-* [FEATURE] add expectation_column_values_to_be_continuous (#5861)(https://github.com/great-expectations/great_expectations/pull/5861)) (thanks @jmoskovc)
+* [FEATURE] Update zep to use sqlalchemy_data_splitter.py ([#7151](https://github.com/great-expectations/great_expectations/pull/7151))
+* [FEATURE] ZEP - Dynamically define `add_<ASSET_TYPE>_asset()` methods if needed ([#7121](https://github.com/great-expectations/great_expectations/pull/7121))
+* [FEATURE] add expectation_column_values_to_be_continuous ([#5861](https://github.com/great-expectations/great_expectations/pull/5861)) (thanks @jmoskovc)
 * [BUGFIX] Rename experimental `get_batch_request` to `build_batch_request` ([#7107](https://github.com/great-expectations/great_expectations/pull/7107))
 * [BUGFIX] Remove version from versions.json ([#7109](https://github.com/great-expectations/great_expectations/pull/7109))
 * [BUGFIX] Properly Enable/Disable Spark Integration Tests Depending on pyspark Installation for New Datasources ([#7132](https://github.com/great-expectations/great_expectations/pull/7132))
@@ -45,7 +45,7 @@ title: Changelog
 * [BUGFIX] Patch broken rendered content Cloud tests ([#7155](https://github.com/great-expectations/great_expectations/pull/7155))
 * [BUGFIX] pydantic>=1.10.4 - ImportError: cannot import name dataclass_transform ([#7163](https://github.com/great-expectations/great_expectations/pull/7163))
 * [BUGFIX] ID/PK Spark and Sql fall back when `unexpected_index_column_names` have not been defined ([#7150](https://github.com/great-expectations/great_expectations/pull/7150))
-* [BUGFIX] Patch broken Cloud test blocking 0.15.49 release (#7177)(https://github.com/great-expectations/great_expectations/pull/7177))
+* [BUGFIX] Patch broken Cloud test blocking 0.15.49 release ([#7177](https://github.com/great-expectations/great_expectations/pull/7177))
 * [DOCS] Add CRUD API matrix to `AbstractDataContext` docstring ([#7079](https://github.com/great-expectations/great_expectations/pull/7079))
 * [DOCS] Build API docs using latest released version ([#7067](https://github.com/great-expectations/great_expectations/pull/7067))
 * [DOCS] Add displayHTML method to view Data Docs ([#7125](https://github.com/great-expectations/great_expectations/pull/7125)) (thanks @swittchawa)
@@ -53,8 +53,8 @@ title: Changelog
 * [DOCS] : fix capitalization of Slack ([#7136](https://github.com/great-expectations/great_expectations/pull/7136)) (thanks @JoelGritter)
 * [DOCS] Remove sitemap.xml ([#7141](https://github.com/great-expectations/great_expectations/pull/7141))
 * [DOCS] doc-464 consolidating and standardizing snippets ([#7154](https://github.com/great-expectations/great_expectations/pull/7154))
-* [DOCS] Use named snippets part 2 (#7143)(https://github.com/great-expectations/great_expectations/pull/7143))
-* [DOCS] Use named snippets part 3 (#7169)(https://github.com/great-expectations/great_expectations/pull/7169)) (thanks @jmoskovc)
+* [DOCS] Use named snippets part 2 ([#7143](https://github.com/great-expectations/great_expectations/pull/7143))
+* [DOCS] Use named snippets part 3 ([#7169](https://github.com/great-expectations/great_expectations/pull/7169)) (thanks @jmoskovc)
 * [MAINTENANCE] Remove Extra Character from ID/PK Example README ([#7098](https://github.com/great-expectations/great_expectations/pull/7098))
 * [MAINTENANCE] Rename experimental `get_batch_request` to `build_batch_request` ([#7095](https://github.com/great-expectations/great_expectations/pull/7095))
 * [MAINTENANCE] Fix incorrect label on "How to configure a SQL Datasource" docs page ([#7106](https://github.com/great-expectations/great_expectations/pull/7106))
@@ -77,8 +77,8 @@ title: Changelog
 * [MAINTENANCE] ZEP - update asset factories method signatures from asset models ([#7096](https://github.com/great-expectations/great_expectations/pull/7096))
 * [MAINTENANCE] Bump minimum version of `pytest` ([#7164](https://github.com/great-expectations/great_expectations/pull/7164))
 * [MAINTENANCE] Clean up additional deprecation warnings from outdated CRUD API ([#7156](https://github.com/great-expectations/great_expectations/pull/7156))
-* [MAINTENANCE] Experimental `PandasDatasource`, single-batch `_PandasDataAsset`s, related schemas (#7158)(https://github.com/great-expectations/great_expectations/pull/7158))
-* [MAINTENANCE] Removing path for `--v2-api upgrade` and informative message (#7170)(https://github.com/great-expectations/great_expectations/pull/7170))
+* [MAINTENANCE] Experimental `PandasDatasource`, single-batch `_PandasDataAsset`s, related schemas ([#7158](https://github.com/great-expectations/great_expectations/pull/7158))
+* [MAINTENANCE] Removing path for `--v2-api upgrade` and informative message ([#7170](https://github.com/great-expectations/great_expectations/pull/7170))
 * [CONTRIB] Add experimental expectation to check column values after split ([#7120](https://github.com/great-expectations/great_expectations/pull/7120)) (thanks @ace-racer)
 * [CONTRIB] added new Expectations  - India_zip_code expectation and not_to_be_future_date expectation ([#6086](https://github.com/great-expectations/great_expectations/pull/6086)) (thanks @prachijain136)
 * [CONTRIB] Update the rendered text for min and max values to be clearer. ([#7166](https://github.com/great-expectations/great_expectations/pull/7166))
