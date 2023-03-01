@@ -44,7 +44,6 @@ try:
     GCS_IMPORTED = True
 except ImportError:
     storage = None
-    service_account = None
 
 
 class SparkGoogleCloudStorageDatasourceError(SparkDatasourceError):
