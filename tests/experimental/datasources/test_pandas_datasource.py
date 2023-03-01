@@ -292,63 +292,6 @@ class TestDynamicPandasAssets:
 
         assert captured_kwargs[-1] == extra_kwargs
 
-    def test_default_pandas_datasource_get_and_set(
-        self, empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
-    ):
-        pandas_datasource = empty_data_context.sources.pandas_default
-        assert isinstance(pandas_datasource, PandasDatasource)
-        assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
-        assert len(pandas_datasource.assets) == 0
-
-        validator = pandas_datasource.read_csv(
-            filepath_or_buffer=valid_file_path,
-        )
-        assert isinstance(validator, Validator)
-        expected_csv_data_asset_name_1 = DEFAULT_PANDAS_DATA_ASSET_NAME
-        csv_data_asset_1 = pandas_datasource.assets[expected_csv_data_asset_name_1]
-        assert isinstance(csv_data_asset_1, _PandasDataAsset)
-        assert csv_data_asset_1.name == expected_csv_data_asset_name_1
-        assert len(pandas_datasource.assets) == 1
-
-        # ensure we get the same datasource when we call pandas_default again
-        pandas_datasource = empty_data_context.sources.pandas_default
-        assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
-        assert len(pandas_datasource.assets) == 1
-        assert pandas_datasource.assets[expected_csv_data_asset_name_1]
-
-        # ensure we overwrite the ephemeral data asset if no name is passed
-        validator = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
-        assert isinstance(validator, Validator)
-        assert csv_data_asset_1.name == expected_csv_data_asset_name_1
-        assert len(pandas_datasource.assets) == 1
-
-        # ensure we get an additional named asset when one is passed
-        expected_csv_data_asset_name_2 = "my_csv_asset"
-        validator = pandas_datasource.read_csv(
-            asset_name=expected_csv_data_asset_name_2,
-            filepath_or_buffer=valid_file_path,
-        )
-        assert isinstance(validator, Validator)
-        csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name_2]
-        assert csv_data_asset_2.name == expected_csv_data_asset_name_2
-        assert len(pandas_datasource.assets) == 2
-
-    def test_default_pandas_datasource_name_conflict(
-        self, empty_data_context: AbstractDataContext
-    ):
-        # the datasource name is taken by legacy
-        empty_data_context.add_datasource(
-            name=DEFAULT_PANDAS_DATASOURCE_NAME, class_name="PandasDatasource"
-        )
-        with pytest.raises(DefaultPandasDatasourceError):
-            pandas_datasource = empty_data_context.sources.pandas_default
-
-        # the datasource name is available
-        empty_data_context.datasources.pop(DEFAULT_PANDAS_DATASOURCE_NAME)
-        pandas_datasource = empty_data_context.sources.pandas_default
-        assert isinstance(pandas_datasource, PandasDatasource)
-        assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
-
     @pytest.mark.parametrize(
         "read_method_name,positional_args",
         [
@@ -382,7 +325,7 @@ class TestDynamicPandasAssets:
             # ),
         ],
     )
-    def test_pandas_datasource_positional_arguments(
+    def test_positional_arguments(
         self,
         mocker,
         empty_data_context: AbstractDataContext,
@@ -422,3 +365,62 @@ class TestDynamicPandasAssets:
         ]
         for positional_arg_name, positional_arg in positional_args.items():
             assert getattr(asset, positional_arg_name) == positional_arg
+
+
+def test_default_pandas_datasource_get_and_set(
+    empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
+):
+    pandas_datasource = empty_data_context.sources.pandas_default
+    assert isinstance(pandas_datasource, PandasDatasource)
+    assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
+    assert len(pandas_datasource.assets) == 0
+
+    validator = pandas_datasource.read_csv(
+        filepath_or_buffer=valid_file_path,
+    )
+    assert isinstance(validator, Validator)
+    expected_csv_data_asset_name_1 = DEFAULT_PANDAS_DATA_ASSET_NAME
+    csv_data_asset_1 = pandas_datasource.assets[expected_csv_data_asset_name_1]
+    assert isinstance(csv_data_asset_1, _PandasDataAsset)
+    assert csv_data_asset_1.name == expected_csv_data_asset_name_1
+    assert len(pandas_datasource.assets) == 1
+
+    # ensure we get the same datasource when we call pandas_default again
+    pandas_datasource = empty_data_context.sources.pandas_default
+    assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
+    assert len(pandas_datasource.assets) == 1
+    assert pandas_datasource.assets[expected_csv_data_asset_name_1]
+
+    # ensure we overwrite the ephemeral data asset if no name is passed
+    validator = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
+    assert isinstance(validator, Validator)
+    assert csv_data_asset_1.name == expected_csv_data_asset_name_1
+    assert len(pandas_datasource.assets) == 1
+
+    # ensure we get an additional named asset when one is passed
+    expected_csv_data_asset_name_2 = "my_csv_asset"
+    validator = pandas_datasource.read_csv(
+        asset_name=expected_csv_data_asset_name_2,
+        filepath_or_buffer=valid_file_path,
+    )
+    assert isinstance(validator, Validator)
+    csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name_2]
+    assert csv_data_asset_2.name == expected_csv_data_asset_name_2
+    assert len(pandas_datasource.assets) == 2
+
+
+def test_default_pandas_datasource_name_conflict(
+    empty_data_context: AbstractDataContext,
+):
+    # the datasource name is taken by legacy
+    empty_data_context.add_datasource(
+        name=DEFAULT_PANDAS_DATASOURCE_NAME, class_name="PandasDatasource"
+    )
+    with pytest.raises(DefaultPandasDatasourceError):
+        pandas_datasource = empty_data_context.sources.pandas_default
+
+    # the datasource name is available
+    empty_data_context.datasources.pop(DEFAULT_PANDAS_DATASOURCE_NAME)
+    pandas_datasource = empty_data_context.sources.pandas_default
+    assert isinstance(pandas_datasource, PandasDatasource)
+    assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
