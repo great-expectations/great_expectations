@@ -1,5 +1,5 @@
 ---
-[title](title): Changelog
+title: Changelog
 ---
 
 ### 0.15.50
