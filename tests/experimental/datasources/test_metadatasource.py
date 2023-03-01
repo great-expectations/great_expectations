@@ -1,7 +1,7 @@
 import copy
+import inspect
 from pprint import pformat as pf
 from typing import ClassVar, List, Optional, Type
-import inspect
 
 import pytest
 
