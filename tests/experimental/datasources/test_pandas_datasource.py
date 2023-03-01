@@ -307,7 +307,7 @@ class TestDynamicPandasAssets:
             param("read_gbq", {"query": "SELECT * FROM my_table"}),
             param("read_hdf", {"path_or_buf": "valid_file_path"}),
             param("read_html", {"io": "valid_file_path"}),
-            # param("read_json", {}),
+            param("read_json", {"path_or_buf": "valid_file_path"}),
             # param("read_orc", {}),
             # param("read_parquet", {}),
             # param("read_pickle", {}),
