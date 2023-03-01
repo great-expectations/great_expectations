@@ -113,12 +113,14 @@ def csv_asset(
 @pytest.mark.skipif(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
-def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:  # type: ignore[valid-type]
+def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     regex = re.compile(
         r"(?P<name>.+)_(?P<ssn>\d{9})_(?P<timestamp>.+)_(?P<price>\d{4})\.csv"
     )
-    data_connector: GoogleCloudStorageDataConnector = cast(GoogleCloudStorageDataConnector, csv_asset._data_connector)  # type: ignore[attr-defined]
-    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket_or_name}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""  # type: ignore[attr-defined]
+    data_connector: GoogleCloudStorageDataConnector = cast(
+        GoogleCloudStorageDataConnector, csv_asset._data_connector
+    )
+    test_connection_error_message = f"""No file in bucket "{csv_asset.datasource.bucket_or_name}" with prefix "{data_connector._prefix}" matched regular expressions pattern "{regex.pattern}" using delimiter "{data_connector._delimiter}" for DataAsset "{csv_asset.name}"."""
     return regex, test_connection_error_message
 
 
@@ -208,10 +210,10 @@ def test_add_csv_asset_to_datasource(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
-    assert asset.name == "csv_asset"  # type: ignore[attr-defined]
-    assert asset.batching_regex.match("random string") is None  # type: ignore[attr-defined]
-    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None  # type: ignore[attr-defined]
-    m1 = asset.batching_regex.match("alex_20200819_1300.csv")  # type: ignore[attr-defined]
+    assert asset.name == "csv_asset"
+    assert asset.batching_regex.match("random string") is None
+    assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
+    m1 = asset.batching_regex.match("alex_20200819_1300.csv")
     assert m1 is not None
 
 
@@ -229,7 +231,7 @@ def test_construct_csv_asset_directly(
     mock_list_keys.return_value = object_keys
     asset = CSVAsset(
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
+        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",  # type: ignore[arg-type]
     )
     assert asset.name == "csv_asset"
     assert asset.batching_regex.match("random string") is None
@@ -257,7 +259,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()  # type: ignore[attr-defined]
+    options = asset.batch_request_options_template()
     assert options == {
         "path": None,
         "batch_request_param_1": None,
@@ -285,7 +287,7 @@ def test_csv_asset_with_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()  # type: ignore[attr-defined]
+    options = asset.batch_request_options_template()
     assert options == {"path": None, "name": None, "timestamp": None, "price": None}
 
 
@@ -308,7 +310,7 @@ def test_csv_asset_with_some_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()  # type: ignore[attr-defined]
+    options = asset.batch_request_options_template()
     assert options == {
         "path": None,
         "name": None,
@@ -338,7 +340,7 @@ def test_csv_asset_with_non_string_regex_named_parameters(
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
-        asset.build_batch_request(  # type: ignore[attr-defined]
+        asset.build_batch_request(
             {"name": "alex", "timestamp": "1234567890", "price": 1300}
         )
 
@@ -370,14 +372,14 @@ def test_get_batch_list_from_fully_specified_batch_request(
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
 
-    request = asset.build_batch_request(  # type: ignore[attr-defined]
+    request = asset.build_batch_request(
         {"name": "alex", "timestamp": "20200819", "price": "1300"}
     )
-    batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
+    batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
     assert batch.batch_request.datasource_name == spark_gcs_datasource.name
-    assert batch.batch_request.data_asset_name == asset.name  # type: ignore[attr-defined]
+    assert batch.batch_request.data_asset_name == asset.name
     assert batch.batch_request.options == {
         "path": "alex_20200819_1300.csv",
         "name": "alex",
@@ -395,8 +397,8 @@ def test_get_batch_list_from_fully_specified_batch_request(
         == "spark_gcs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
     )
 
-    request = asset.build_batch_request({"name": "alex"})  # type: ignore[attr-defined]
-    batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
+    request = asset.build_batch_request({"name": "alex"})
+    batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 2
 
 

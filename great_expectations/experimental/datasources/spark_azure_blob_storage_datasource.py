@@ -123,7 +123,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         name_starts_with: str = "",
         delimiter: str = "/",
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> CSVAsset:  # type: ignore[valid-type]
+    ) -> CSVAsset:
         """Adds a CSV DataAsst to the present "SparkAzureBlobStorageDatasource" object.
 
         Args:

@@ -130,7 +130,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         delimiter: str = "/",
         max_results: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-    ) -> CSVAsset:  # type: ignore[valid-type]
+    ) -> CSVAsset:
         """Adds a CSV DataAsst to the present "SparkGoogleCloudStorageDatasource" object.
 
         Args:
