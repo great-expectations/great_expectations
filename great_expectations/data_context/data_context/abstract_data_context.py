@@ -153,7 +153,9 @@ if TYPE_CHECKING:
         CheckpointStore,
         EvaluationParameterStore,
     )
-    from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.data_context.store.datasource_store import (
+        DatasourceStore,
+    )
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
@@ -1968,20 +1970,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must either pass in an existing checkpoint or individual constructor arguments (but not both)"
             )
 
-        if checkpoint:
-            config = checkpoint.config
-
-            # If attempting to override an existing value, ensure that the id persists
-            if id and not config.ge_cloud_id:
-                config.ge_cloud_id = id
-
-            config_dict = config.to_dict()
-            checkpoint = Checkpoint.construct_from_config_args(
-                data_context=self,
-                checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
-                **config_dict,
-            )
-        else:
+        if not checkpoint:
             assert (
                 name
             ), "Guaranteed to have a non-null name if constructing Checkpoint with individual args"
@@ -4668,11 +4657,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
-        # If attempting to override an existing value, ensure that the id persists
-        name = config.name
-        if name in self._cached_datasources and not config.id:
-            config.id = self._cached_datasources[name].id
-
         # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
         if save_changes:
@@ -4684,17 +4668,16 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 substituted_config = self._perform_substitutions_on_datasource_config(
                     config
                 )
-
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
-                self._cached_datasources[name] = datasource
+                self._cached_datasources[config.name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 if save_changes:
                     self._datasource_store.delete(config)
                 raise e
 
-        self.config.datasources[name] = config  # type: ignore[index,assignment]
+        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
 
         return datasource
 
