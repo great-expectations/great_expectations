@@ -649,6 +649,62 @@ class PandasDatasource(_PandasDatasource):
         )
         return self._get_validator(asset=asset)
 
+    def add_sql_query_asset(
+        self, name: str, sql: str, con: str, **kwargs
+    ) -> SQLQueryAsset:  # type: ignore[valid-type]
+        asset = SQLQueryAsset(
+            name=name,
+            sql=sql,
+            con=con,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_sql_query(
+        self,
+        sql: str,
+        con: str,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: SQLQueryAsset = self.add_sql_query_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            sql=sql,
+            con=con,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    def add_sql_table_asset(
+        self, name: str, table_name: str, con: str, **kwargs
+    ) -> SQLTableAsset:  # type: ignore[valid-type]
+        asset = SQLTableAsset(
+            name=name,
+            table_name=table_name,
+            con=con,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_sql_table(
+        self,
+        table_name: str,
+        con: str,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: SQLTableAsset = self.add_sql_table_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            table_name=table_name,
+            con=con,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
     add_clipboard_asset.__signature__ = _merge_signatures(add_clipboard_asset, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
@@ -682,4 +738,10 @@ class PandasDatasource(_PandasDatasource):
     )
     add_sql_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_sql_asset, SQLAsset, exclude={"type"}
+    )
+    add_sql_query_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_sql_query_asset, SQLQueryAsset, exclude={"type"}
+    )
+    add_sql_table_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_sql_table_asset, SQLTableAsset, exclude={"type"}
     )
