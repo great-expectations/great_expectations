@@ -110,7 +110,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_keys: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
         """Adds a CSV DataAsst to the present "PandasS3Datasource" object.
 
@@ -163,7 +163,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_keys: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
         """Adds an Excel DataAsst to the present "PandasS3Datasource" object.
 
@@ -216,7 +216,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_keys: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
         """Adds a JSON DataAsst to the present "PandasS3Datasource" object.
 
@@ -269,7 +269,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_keys: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
         """Adds a Parquet DataAsst to the present "PandasS3Datasource" object.
 
