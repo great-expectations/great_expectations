@@ -712,6 +712,106 @@ class CloudDataContext(SerializableDataContext):
             checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
 
+    def _add_or_update_checkpoint(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        site_names: str | list[str] | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | list[str] | None = None,
+        expectation_suite_id: str | None = None,
+        default_validation_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
+    ) -> Checkpoint:
+        existing_id = self._determine_existing_id_from_checkpoint_name(
+            name=name,
+            checkpoint=checkpoint,
+        )
+
+        # If a checkpoint with the input name already exists, make sure our args are updated
+        # such that downstream logic knows to update the persisted value.
+        if existing_id and not id:
+            id = existing_id
+
+        # Since Checkpoint attrs are read-only, update config with id and pass that downstream
+        if checkpoint:
+            config = checkpoint.config
+            if id and not config.ge_cloud_id:
+                config.ge_cloud_id = id
+
+            config_dict = config.to_dict()
+
+            # config_dict contains outdated "ge_cloud" refs so remove them before ** unpacking
+            id = config_dict.pop("ge_cloud_id")
+            expectation_suite_id = config_dict.pop("expectation_suite_ge_cloud_id")
+
+            return super()._add_or_update_checkpoint(
+                id=id, expectation_suite_id=expectation_suite_id, **config_dict
+            )
+
+        return super()._add_or_update_checkpoint(
+            name=name,
+            id=id,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+            expectation_suite_id=expectation_suite_id,
+            default_validation_id=default_validation_id,
+        )
+
+    def _determine_existing_id_from_checkpoint_name(
+        self,
+        name: str | None,
+        checkpoint: Checkpoint | None,
+    ) -> str | None:
+        """
+        Checks to see if an Checkpoint with the given name is already persisted by Cloud.
+
+        If so, we want to return the persisted id to ensure that our `add_or_update` call
+        updates that existing object. Failing to do so will result in a namespace collision.
+
+        Example:
+            ```
+            context.add_or_update_checkpoint(name="my_checkpoint", ...) # 'my_checkpoint' already exists
+            # We should grab the id associated with 'my_checkpoint' so we PUT instead of POST
+            ```
+        """
+        if checkpoint and not name:
+            name = checkpoint.name
+
+        checkpoint_keys = cast(List[GXCloudIdentifier], self.list_checkpoints() or [])
+        for key in checkpoint_keys:
+            if key.resource_name == name:
+                return key.cloud_id
+
+        return None
+
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
 

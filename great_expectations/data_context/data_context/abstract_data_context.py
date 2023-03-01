@@ -1909,6 +1909,55 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new Checkpoint or an updated once (depending on whether or not it existed before this method call).
         """
+        return self._add_or_update_checkpoint(
+            name=name,
+            id=id,
+            config_version=config_version,
+            template_name=template_name,
+            module_name=module_name,
+            class_name=class_name,
+            run_name_template=run_name_template,
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            action_list=action_list,
+            evaluation_parameters=evaluation_parameters,
+            runtime_configuration=runtime_configuration,
+            validations=validations,
+            profilers=profilers,
+            site_names=site_names,
+            slack_webhook=slack_webhook,
+            notify_on=notify_on,
+            notify_with=notify_with,
+            expectation_suite_id=expectation_suite_id,
+            default_validation_id=default_validation_id,
+            checkpoint=checkpoint,
+        )
+
+    def _add_or_update_checkpoint(
+        self,
+        name: str | None = None,
+        id: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
+        # the following four arguments are used by SimpleCheckpoint
+        site_names: str | list[str] | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | list[str] | None = None,
+        expectation_suite_id: str | None = None,
+        default_validation_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
+    ) -> Checkpoint:
         checkpoint = self._resolve_add_checkpoint_args(
             name=name,
             id=id,
