@@ -737,12 +737,16 @@ class CloudDataContext(SerializableDataContext):
         meta: dict | None = None,
         expectation_suite: ExpectationSuite | None = None,
     ) -> ExpectationSuite:
-        # If attempting to override an existing value, ensure that the id persists
-        id = self._determine_id_for_add_or_update_expectation_suite(
+        existing_id = self._determine_existing_id_from_expectation_suite_name(
             expectation_suite_name=expectation_suite_name,
-            id=id,
             expectation_suite=expectation_suite,
         )
+        if existing_id:
+            if expectation_suite_name and not id:
+                id = existing_id
+            elif expectation_suite and not expectation_suite.ge_cloud_id:
+                expectation_suite.ge_cloud_id = existing_id
+
         return super().add_or_update_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             id=id,
@@ -753,6 +757,24 @@ class CloudDataContext(SerializableDataContext):
             meta=meta,
             expectation_suite=expectation_suite,
         )
+
+    def _determine_existing_id_from_expectation_suite_name(
+        self,
+        expectation_suite_name: str | None,
+        expectation_suite: ExpectationSuite | None,
+    ) -> str | None:
+        if expectation_suite and not expectation_suite_name:
+            expectation_suite_name = expectation_suite.expectation_suite_name
+
+        suite_keys = self.list_expectation_suites() or []
+        for key in suite_keys:
+            if (
+                isinstance(key, GXCloudIdentifier)
+                and key.resource_name == expectation_suite_name
+            ):
+                return key.cloud_id
+
+        return None
 
     def _determine_id_for_add_or_update_expectation_suite(
         self,
