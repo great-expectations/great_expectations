@@ -351,27 +351,27 @@ class TestDynamicPandasAssets:
         [
             param("read_clipboard", {}),
             param("read_csv", {"filepath_or_buffer": "csv_path"}),
-            # param("read_excel", ()),
-            # param("read_feather", ()),
+            param("read_excel", {"io": "csv_path"}),
+            # param("read_feather", {}),
             # param(
-            #     "read_fwf", (), marks=pytest.mark.xfail(reason="unhandled type annotation")
+            #     "read_fwf", {}, marks=pytest.mark.xfail(reason="unhandled type annotation")
             # ),
-            # param("read_gbq", ()),
-            # param("read_hdf", ()),
-            # param("read_html", ()),
-            # param("read_json", ()),
-            # param("read_orc", ()),
-            # param("read_parquet", ()),
-            # param("read_pickle", ()),
-            # param("read_sas", ()),
-            # param("read_spss", ()),
-            # param("read_sql", ()),
-            # param("read_sql_query", ()),
-            # param("read_sql_table", ()),
-            # param("read_stata", ()),
-            # param("read_table", ()),
+            # param("read_gbq", {}),
+            # param("read_hdf", {}),
+            # param("read_html", {}),
+            # param("read_json", {}),
+            # param("read_orc", {}),
+            # param("read_parquet", {}),
+            # param("read_pickle", {}),
+            # param("read_sas", {}),
+            # param("read_spss", {}),
+            # param("read_sql", {}),
+            # param("read_sql_query", {}),
+            # param("read_sql_table", {}),
+            # param("read_stata", {}),
+            # param("read_table", {}),
             # param(
-            #     "read_xml", (),
+            #     "read_xml", {},
             #     marks=pytest.mark.skipif(
             #         PANDAS_VERSION < 1.3,
             #         reason=f"read_xml does not exist on {PANDAS_VERSION} ",
@@ -381,6 +381,7 @@ class TestDynamicPandasAssets:
     )
     def test_pandas_datasource_positional_arguments(
         self,
+        mocker,
         empty_data_context: AbstractDataContext,
         read_method_name: str,
         positional_args: dict[str, Any],
@@ -411,6 +412,9 @@ class TestDynamicPandasAssets:
 
         read_method: Callable = getattr(
             empty_data_context.sources.pandas_default, read_method_name
+        )
+        mocker.patch(
+            "great_expectations.data_context.data_context.abstract_data_context.AbstractDataContext.get_validator"
         )
         _ = read_method(*positional_args.values())
         # read_* returns a validator, but we just want to inspect the asset

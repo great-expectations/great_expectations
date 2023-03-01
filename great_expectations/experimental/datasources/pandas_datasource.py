@@ -307,8 +307,8 @@ class PandasDatasource(_PandasDatasource):
         batch_request: BatchRequest = asset.build_batch_request()
         return self._data_context.get_validator(batch_request=batch_request)
 
-    def add_clipboard_asset(self, name: str, **kwargs) -> ClipboardAsset:
-        asset = ClipboardAsset(
+    def add_clipboard_asset(self, name: str, **kwargs) -> ClipboardAsset:  # type: ignore[valid-type]
+        asset = ClipboardAsset(  # type: ignore[valid-type]
             name=name,
             **kwargs,
         )
@@ -321,10 +321,10 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_csv_asset(
-        self, filepath_or_buffer: pydantic.FilePath, name: str, **kwargs
-    ) -> CSVAsset:
+        self, filepath_or_buffer: str, name: str, **kwargs
+    ) -> CSVAsset:  # type: ignore[valid-type]
         kwargs["filepath_or_buffer"] = filepath_or_buffer
-        asset = CSVAsset(
+        asset = CSVAsset(  # type: ignore[valid-type]
             name=name,
             **kwargs,
         )
@@ -332,7 +332,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_csv(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: str,
         name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -340,6 +340,31 @@ class PandasDatasource(_PandasDatasource):
             name = DEFAULT_PANDAS_DATA_ASSET_NAME
         asset: CSVAsset = self.add_csv_asset(
             filepath_or_buffer=filepath_or_buffer,
+            name=name,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    def add_excel_asset(
+        self, io: str, name: str, **kwargs
+    ) -> ExcelAsset:  # type: ignore[valid-type]
+        kwargs["io"] = io
+        asset = ExcelAsset(  # type: ignore[valid-type]
+            name=name,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_excel(
+        self,
+        io: str,
+        name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not name:
+            name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: CSVAsset = self.add_excel_asset(
+            io=io,
             name=name,
             **kwargs,
         )
