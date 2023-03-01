@@ -7,17 +7,17 @@ import functools
 import operator
 from typing import Optional
 
-from great_expectations.core.expectation_configuration import \
-    ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (PandasExecutionEngine,
-                                                 SparkDFExecutionEngine,
-                                                 SqlAlchemyExecutionEngine)
-from great_expectations.expectations.expectation import \
-    MulticolumnMapExpectation
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
+from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.map_metric_provider import (
-    MulticolumnMapMetricProvider, multicolumn_condition_partial)
+    MulticolumnMapMetricProvider,
+    multicolumn_condition_partial,
+)
 
 
 # This class defines a Metric to support your Expectation.
@@ -42,7 +42,6 @@ class MulticolumnValuesSumValuesToBeBetweenMaxAndMin(MulticolumnMapMetricProvide
     # This method implements the core logic for the PandasExecutionEngine
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column_list, min_value, max_value, **kwargs):
-        columns_to_sum = column_list.columns
         sum_of_columns = column_list.sum(axis=1)
         return (sum_of_columns >= min_value) & (sum_of_columns <= max_value)
 
@@ -67,12 +66,12 @@ class MulticolumnValuesSumValuesToBeBetweenMaxAndMin(MulticolumnMapMetricProvide
 # This class defines the Expectation itself
 class ExpectMulticolumnSumValuesToBeBetween(MulticolumnMapExpectation):
     """Expect a sum of values over the columns to be between max and min values
-    
+
     min_value <= SUM(col_a, cob_b, cob_c, ...) <= max_value
 
     Args:
     column_list (list of str): \
-        A list of 2 or more integer columns 
+        A list of 2 or more integer columns
     min_value (int): \
         A value that the sum of values over the column must be equal to or more than the given value
     max_value (int): \
