@@ -4659,7 +4659,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         name = config.name
         if not config.id and name in self._cached_datasources:
             existing_datasource = self._cached_datasources[name]
-            config.id = existing_datasource.id
+            if isinstance(existing_datasource, BaseDatasource):
+                config.id = existing_datasource.id
 
         # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
