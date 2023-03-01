@@ -1701,7 +1701,7 @@ class PublicAPIReport:
         seen = set()
         no_duplicates = []
         for s in strings:
-            if not s in seen:
+            if s not in seen:
                 no_duplicates.append(s)
                 seen.add(s)
 
