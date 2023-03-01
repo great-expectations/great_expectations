@@ -46,8 +46,10 @@ _MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 
 
 class _ConfigsTuple(NamedTuple):
+    # the full great_expectations.yml config with config values substituted
     substituted: Dict[str, Any]
-    raw: Dict[str, Any]
+    # only the `xdatasources` portion of the config with no config substitutions
+    xdatasources_raw: Dict[str, Any]
 
 
 class GxConfig(ExperimentalBaseModel):
@@ -56,7 +58,7 @@ class GxConfig(ExperimentalBaseModel):
     xdatasources: Dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
 
     # private non-field attributes
-    _raw_config: Dict[str, Any] = PrivateAttr(default_factory=dict)
+    _xdatasources_raw_config: Dict[str, Any] = PrivateAttr(default_factory=dict)
 
     @property
     def datasources(self) -> Dict[str, Datasource]:
@@ -125,11 +127,11 @@ class GxConfig(ExperimentalBaseModel):
         we use a new `config_version` instead of `xdatasources` key.
         """
         config: dict[str, Any]
-        raw_config: dict[str, Any] | None = None
+        xdatasources_raw_config: dict[str, Any] | None = None
         if _config_provider:
             config_tuple = cls._load_yaml_with_config_substitutions(f, _config_provider)
             config = config_tuple.substituted
-            raw_config = config_tuple.raw
+            xdatasources_raw_config = config_tuple.xdatasources_raw
         else:
             config = yaml.load(f)
 
@@ -152,8 +154,8 @@ class GxConfig(ExperimentalBaseModel):
                     )
                     raise
         instance = cls(**config)
-        if raw_config:
-            instance._raw_config = raw_config
+        if xdatasources_raw_config:
+            instance._xdatasources_raw_config = xdatasources_raw_config
         return instance
 
     @classmethod
@@ -162,8 +164,9 @@ class GxConfig(ExperimentalBaseModel):
         f: Union[pathlib.Path, str],
         _config_provider: _ConfigurationProvider,
     ) -> _ConfigsTuple:
-        raw_config = yaml.load(f)
+        raw_config: dict = yaml.load(f)
         logger.debug(f"Substituting config with {_config_provider.__class__.__name__}")
         return _ConfigsTuple(
-            _config_provider.substitute_config(raw_config), raw=raw_config
+            _config_provider.substitute_config(raw_config),
+            xdatasources_raw=raw_config.get("xdatasources", {}),
         )
