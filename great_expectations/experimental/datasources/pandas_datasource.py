@@ -362,7 +362,7 @@ class PandasDatasource(_PandasDatasource):
         if not name:
             name = DEFAULT_PANDAS_DATA_ASSET_NAME
         kwargs["io"] = io
-        asset: CSVAsset = self.add_excel_asset(  # type: ignore[valid-type]
+        asset: ExcelAsset = self.add_excel_asset(  # type: ignore[valid-type]
             name=name,
             **kwargs,
         )
@@ -386,7 +386,31 @@ class PandasDatasource(_PandasDatasource):
         if not name:
             name = DEFAULT_PANDAS_DATA_ASSET_NAME
         kwargs["path"] = path
-        asset: CSVAsset = self.add_feather_asset(  # type: ignore[valid-type]
+        asset: FeatherAsset = self.add_feather_asset(  # type: ignore[valid-type]
+            name=name,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    def add_gbq_asset(
+        self, name: str, **kwargs
+    ) -> GBQAsset:  # type: ignore[valid-type]
+        asset = GBQAsset(
+            name=name,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_gbq(
+        self,
+        query: str,
+        name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not name:
+            name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        kwargs["query"] = query
+        asset: GBQAsset = self.add_gbq_asset(  # type: ignore[valid-type]
             name=name,
             **kwargs,
         )

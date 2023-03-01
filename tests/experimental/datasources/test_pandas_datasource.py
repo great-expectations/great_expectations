@@ -304,7 +304,7 @@ class TestDynamicPandasAssets:
                 {},
                 marks=pytest.mark.xfail(reason="unhandled type annotation"),
             ),
-            # param("read_gbq", {}),
+            param("read_gbq", {"query": "SELECT * FROM my_table"}),
             # param("read_hdf", {}),
             # param("read_html", {}),
             # param("read_json", {}),
