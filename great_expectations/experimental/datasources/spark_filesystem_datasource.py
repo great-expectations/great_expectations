@@ -58,10 +58,10 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         infer_schema: bool = False,
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> CSVAsset:
-        """Adds a csv asset to this Spark datasource
+        """Adds a CSV DataAsst to the present "SparkFilesystemDatasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the CSV asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             header: boolean (default False) indicating whether or not first line of CSV file is header line
