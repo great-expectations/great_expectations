@@ -421,6 +421,56 @@ class PandasDatasource(_PandasDatasource):
         )
         return self._get_validator(asset=asset)
 
+    def add_hdf_asset(
+        self, name: str, path_or_buf: str, **kwargs
+    ) -> HDFAsset:  # type: ignore[valid-type]
+        asset = HDFAsset(
+            name=name,
+            path_or_buf=path_or_buf,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_hdf(
+        self,
+        path_or_buf: str,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: HDFAsset = self.add_hdf_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            path_or_buf=path_or_buf,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    def add_html_asset(
+        self, name: str, io: str, **kwargs
+    ) -> HTMLAsset:  # type: ignore[valid-type]
+        asset = HTMLAsset(
+            name=name,
+            io=io,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_html(
+        self,
+        io: str,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: HTMLAsset = self.add_html_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            io=io,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
     add_clipboard_asset.__signature__ = _merge_signatures(add_clipboard_asset, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
@@ -428,3 +478,9 @@ class PandasDatasource(_PandasDatasource):
     add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_feather_asset.__signature__ = _merge_signatures(add_feather_asset, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_gbq_asset.__signature__ = _merge_signatures(add_gbq_asset, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_hdf_asset.__signature__ = _merge_signatures(
+        add_hdf_asset, HDFAsset, exclude={"type"}
+    )  # type: ignore[attr-defined]
+    add_html_asset.__signature__ = _merge_signatures(
+        add_html_asset, HTMLAsset, exclude={"type"}
+    )  # type: ignore[attr-defined]
