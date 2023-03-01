@@ -1775,7 +1775,7 @@ def main():
     # decorator and any relevant "new" or "deprecated" public api decorators.
     # If the actual is lower than the threshold, please reduce the threshold.
     PUBLIC_API_MISSING_THRESHOLD = 58
-    if not len(printable_definitions) == PUBLIC_API_MISSING_THRESHOLD:
+    if len(printable_definitions) != PUBLIC_API_MISSING_THRESHOLD:
         error_msg_prefix = f"There are {len(printable_definitions)} items missing from the public API, we currently allow {PUBLIC_API_MISSING_THRESHOLD}."
         if len(printable_definitions) > PUBLIC_API_MISSING_THRESHOLD:
             logger.error(f"{error_msg_prefix} Please add to the public API.")
