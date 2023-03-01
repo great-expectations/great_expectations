@@ -320,13 +320,14 @@ class TestDynamicPandasAssets:
             param("read_sql_table", {"table_name": "my_table", "con": "sqlite://"}),
             param("read_stata", {"filepath_or_buffer": "valid_file_path"}),
             param("read_table", {"filepath_or_buffer": "valid_file_path"}),
-            # param(
-            #     "read_xml", {},
-            #     marks=pytest.mark.skipif(
-            #         PANDAS_VERSION < 1.3,
-            #         reason=f"read_xml does not exist on {PANDAS_VERSION} ",
-            #     ),
-            # ),
+            param(
+                "read_xml",
+                {"path_or_buffer": "valid_file_path"},
+                marks=pytest.mark.skipif(
+                    PANDAS_VERSION < 1.3,
+                    reason=f"read_xml does not exist on {PANDAS_VERSION} ",
+                ),
+            ),
         ],
     )
     def test_positional_arguments(

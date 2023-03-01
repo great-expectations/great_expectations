@@ -755,6 +755,31 @@ class PandasDatasource(_PandasDatasource):
         )
         return self._get_validator(asset=asset)
 
+    def add_xml_asset(
+        self, name: str, path_or_buffer: pydantic.FilePath, **kwargs
+    ) -> XMLAsset:  # type: ignore[valid-type]
+        asset = XMLAsset(
+            name=name,
+            path_or_buffer=path_or_buffer,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_xml(
+        self,
+        path_or_buffer: pydantic.FilePath,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: XMLAsset = self.add_xml_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            path_or_buffer=path_or_buffer,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
     add_clipboard_asset.__signature__ = _merge_signatures(add_clipboard_asset, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
@@ -800,4 +825,7 @@ class PandasDatasource(_PandasDatasource):
     )
     add_table_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_table_asset, TableAsset, exclude={"type"}
+    )
+    add_xml_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_xml_asset, XMLAsset, exclude={"type"}
     )
