@@ -716,7 +716,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     )
 
     assert (
-        subbed_datasources["my_pandas_ds_w_cfg_subs"].base_directory
+        subbed_datasources["my_pandas_ds_w_cfg_subs"].base_directory  # type: ignore[attr-defined]
         == pathlib.Path(__file__).parent
     )
 
@@ -724,7 +724,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     context.sources.add_sqlite("my_sqlite", connection_string="sqlite://")
 
     # add a new asset to an existing data
-    pandas_ds_w_cfg_sub: PandasFilesystemDatasource = context.get_datasource(
+    pandas_ds_w_cfg_sub: PandasFilesystemDatasource = context.get_datasource(  # type: ignore[assignment]
         "my_pandas_ds_w_cfg_subs"
     )
     pandas_ds_w_cfg_sub.add_csv_asset("new_asset")

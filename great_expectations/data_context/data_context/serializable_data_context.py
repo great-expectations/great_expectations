@@ -109,7 +109,7 @@ class SerializableDataContext(AbstractDataContext):
                     # TODO: cleanup
                     updated_xdatasources = deep_update(
                         zep_json_dict["xdatasources"],
-                        self.zep_config._xdatasources_raw_config,
+                        self.zep_config._xdatasources_raw_config,  # type: ignore[arg-type]
                     )
                     zep_json_dict["xdatasources"] = updated_xdatasources
                     # print(
