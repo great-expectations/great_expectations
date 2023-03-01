@@ -752,15 +752,14 @@ class CloudDataContext(SerializableDataContext):
             if id and not config.ge_cloud_id:
                 config.ge_cloud_id = id
 
+            # config_dict contains outdated "ge_cloud" refs so rename them before ** unpacking
             config_dict = config.to_dict()
-
-            # config_dict contains outdated "ge_cloud" refs so remove them before ** unpacking
-            id = config_dict.pop("ge_cloud_id")
-            expectation_suite_id = config_dict.pop("expectation_suite_ge_cloud_id")
-
-            return super()._add_or_update_checkpoint(
-                id=id, expectation_suite_id=expectation_suite_id, **config_dict
+            config_dict["id"] = config_dict.pop("ge_cloud_id")
+            config_dict["expectation_suite_id"] = config_dict.pop(
+                "expectation_suite_ge_cloud_id"
             )
+
+            return super()._add_or_update_checkpoint(**config_dict)
 
         return super()._add_or_update_checkpoint(
             name=name,
