@@ -165,7 +165,7 @@ class TestDynamicPandasAssets:
         with pytest.raises(pydantic.ValidationError) as exc_info:
             method(
                 f"{asset_class.__name__}_add_asset_test",
-                regex="great_expectations",
+                "path/to/my/file.extension",
                 _invalid_key="foobar",
             )
         # importantly check that the method creates (or attempts to create) the intended asset
@@ -308,7 +308,7 @@ class TestDynamicPandasAssets:
             param("read_hdf", {"path_or_buf": "valid_file_path"}),
             param("read_html", {"io": "valid_file_path"}),
             param("read_json", {"path_or_buf": "valid_file_path"}),
-            # param("read_orc", {}),
+            param("read_orc", {"path": "valid_file_path"}),
             # param("read_parquet", {}),
             # param("read_pickle", {}),
             # param("read_sas", {}),
