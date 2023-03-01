@@ -80,6 +80,9 @@ class BaseCheckpoint(ConfigPeer):
     """
     BaseCheckpoint class is initialized from CheckpointConfig typed object and contains all functionality
     in the form of interface methods (which can be overwritten by subclasses) and their reference implementation.
+
+    While not technically categorized as abstract class, "BaseCheckpoint" serves as parent class; it must never be
+    instantiated directly (only its descendants, such as "Checkpoint" and "SimpleCheckpoint", should be instantiated).
     """
 
     def __init__(
@@ -280,6 +283,7 @@ class BaseCheckpoint(ConfigPeer):
                     f"{CLOUD_APP_DEFAULT_BASE_URL}?validationResultId={key.cloud_id}"
                 )
                 break
+
         return CheckpointResult(
             validation_result_url=validation_result_url,
             run_id=run_id,
