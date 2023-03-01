@@ -1,10 +1,13 @@
 import copy
+import random
+import string
 from typing import Callable, Optional, Tuple
 from unittest import mock
 
 import pandas as pd
 import pytest
 
+import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -588,3 +591,30 @@ def test_list_checkpoints(
             resource_name=checkpoint_name_2,
         ),
     ]
+
+
+@pytest.mark.e2e
+@pytest.mark.cloud
+def test_add_or_update_checkpoint_workflow():
+    context = gx.get_context(cloud_mode=True)
+
+    CHECKPOINT_NAME = "cicd_checkpoint"
+
+    # Select a valid Checkpoint already persisted in Cloud
+    id = None
+    checkpoint_keys = context.list_checkpoints()
+    for key in checkpoint_keys:
+        if key.resource_name == CHECKPOINT_NAME:
+            id = key.cloud_id
+            break
+
+    assert id, f"Could not find a checkpoint named '{CHECKPOINT_NAME}'"
+    checkpoint = context.get_checkpoint(id=id)
+
+    # Attempt to "overwrite" that value
+    # Should attempt to PUT due to the existing object on the backend
+    checkpoint = context.add_or_update_checkpoint(checkpoint=checkpoint)
+
+    assert (
+        checkpoint.ge_cloud_id == id
+    ), "The same ID should persist when saving the same checkpoint"
