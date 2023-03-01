@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from typing import Any, Dict, Iterator, List, cast
 from unittest import mock
@@ -135,6 +136,10 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:  # type: ig
     storage is None, reason='Could not import "storage" from google.cloud'
 )
 def test_construct_pandas_gcs_datasource_without_gcs_options():
+    google_cred_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    if not google_cred_file:
+        pytest.skip('No "GOOGLE_APPLICATION_CREDENTIALS" environment variable found.')
+
     pandas_gcs_datasource = PandasGoogleCloudStorageDatasource(
         name="pandas_gcs_datasource",
         bucket_or_name="test_bucket",
