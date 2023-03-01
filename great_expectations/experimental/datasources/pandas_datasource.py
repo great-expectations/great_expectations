@@ -31,6 +31,7 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
     _DataAssetT,
 )
+from great_expectations.experimental.datasources.signatures import _merge_signatures
 from great_expectations.experimental.datasources.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
@@ -419,3 +420,11 @@ class PandasDatasource(_PandasDatasource):
             **kwargs,
         )
         return self._get_validator(asset=asset)
+
+    # attr-defined issue
+    # https://github.com/python/mypy/issues/12472
+    add_clipboard_asset.__signature__ = _merge_signatures(add_clipboard_asset, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_feather_asset.__signature__ = _merge_signatures(add_feather_asset, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_gbq_asset.__signature__ = _merge_signatures(add_gbq_asset, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
