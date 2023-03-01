@@ -110,16 +110,16 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_keys: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
         """Adds a CSV DataAsst to the present "PandasS3Datasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the CSV asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            prefix (str): S3 object name prefix
-            delimiter (str): S3 object name delimiter
-            max_keys (int): S3 max_keys (default is 1000)
+            prefix: S3 object name prefix
+            delimiter: S3 object name delimiter
+            max_keys: S3 max_keys (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
@@ -163,16 +163,16 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_keys: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
         """Adds an Excel DataAsst to the present "PandasS3Datasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the Excel asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            prefix (str): S3 object name prefix
-            delimiter (str): S3 object name delimiter
-            max_keys (int): S3 object name max_keys (default is 1000)
+            prefix: S3 object name prefix
+            delimiter: S3 object name delimiter
+            max_keys: S3 object name max_keys (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
@@ -216,16 +216,16 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_keys: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
         """Adds a JSON DataAsst to the present "PandasS3Datasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the JSON asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            prefix (str): S3 object name prefix
-            delimiter (str): S3 object name delimiter
-            max_keys (int): S3 object name max_keys (default is 1000)
+            prefix: S3 object name prefix
+            delimiter: S3 object name delimiter
+            max_keys: S3 object name max_keys (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
@@ -269,16 +269,16 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_keys: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
         """Adds a Parquet DataAsst to the present "PandasS3Datasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the Parquet asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            prefix (str): S3 object name prefix
-            delimiter (str): S3 object name delimiter
-            max_keys (int): S3 object name max_keys (default is 1000)
+            prefix: S3 object name prefix
+            delimiter: S3 object name delimiter
+            max_keys: S3 object name max_keys (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """

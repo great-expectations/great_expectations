@@ -112,7 +112,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         """Adds a CSV DataAsst to the present "SparkS3Datasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the CSV asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically

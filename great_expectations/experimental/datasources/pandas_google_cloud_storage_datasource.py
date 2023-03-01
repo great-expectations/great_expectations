@@ -51,7 +51,7 @@ except ImportError:
     service_account = None
 
 
-class PandasGoogleCloudStorageError(PandasDatasourceError):
+class PandasGoogleCloudStorageDatasourceError(PandasDatasourceError):
     pass
 
 
@@ -96,11 +96,11 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
                     )
                 except Exception as e:
                     # Failure to create "gcs_client" is most likely due invalid "gcs_options" dictionary.
-                    raise PandasGoogleCloudStorageError(
+                    raise PandasGoogleCloudStorageDatasourceError(
                         f'Due to exception: "{str(e)}", "gcs_client" could not be created.'
                     ) from e
             else:
-                raise PandasGoogleCloudStorageError(
+                raise PandasGoogleCloudStorageDatasourceError(
                     'Unable to create "PandasGoogleCloudStorageDatasource" due to missing google dependency.'
                 )
 
@@ -134,12 +134,12 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_results: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
         """Adds a CSV DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the CSV asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
@@ -187,12 +187,12 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_results: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
         """Adds an Excel DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the Excel asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
@@ -240,12 +240,12 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_results: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
         """Adds a JSON DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the JSON asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
@@ -293,12 +293,12 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         delimiter: str = "/",
         max_results: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
-        **kwargs,  # TODO: update signature to have specific keys & types
+        **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
         """Adds a Parquet DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the Parquet asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
