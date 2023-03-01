@@ -572,6 +572,11 @@ def test_add_or_update_expectation_suite_adds_new_obj(
         f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
         return_value=False,
     ), mock.patch(
+        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.list_keys",
+        return_value=[],
+    ), mock.patch(
+        f"{CloudDataContext.__module__}.{CloudDataContext.__name__}.get_expectation_suite",
+    ), mock.patch(
         f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.add",
     ) as mock_add:
         context.add_or_update_expectation_suite(expectation_suite=suite)
@@ -594,6 +599,11 @@ def test_add_or_update_expectation_suite_updates_existing_obj(
     with mock.patch(
         f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
         return_value=True,
+    ), mock.patch(
+        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.list_keys",
+        return_value=[],
+    ), mock.patch(
+        f"{CloudDataContext.__module__}.{CloudDataContext.__name__}.get_expectation_suite",
     ), mock.patch(
         f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.update",
     ) as mock_update:
