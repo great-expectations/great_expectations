@@ -158,7 +158,7 @@ stages:
       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
       steps:
         - script: |
-            python scripts/check_no_line_number_snippets.py
+            python ci/checks/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
     - job: public_api_report
