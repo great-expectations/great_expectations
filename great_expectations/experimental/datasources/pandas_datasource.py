@@ -317,7 +317,7 @@ class PandasDatasource(_PandasDatasource):
     def read_clipboard(self, name: Optional[str] = None, **kwargs) -> Validator:
         if not name:
             name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        asset: ClipboardAsset = self.add_clipboard_asset(name=name, **kwargs)
+        asset: ClipboardAsset = self.add_clipboard_asset(name=name, **kwargs)  # type: ignore[valid-type]
         return self._get_validator(asset=asset)
 
     def add_csv_asset(
@@ -338,7 +338,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator:
         if not name:
             name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        asset: CSVAsset = self.add_csv_asset(
+        asset: CSVAsset = self.add_csv_asset(  # type: ignore[valid-type]
             filepath_or_buffer=filepath_or_buffer,
             name=name,
             **kwargs,
@@ -363,7 +363,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator:
         if not name:
             name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        asset: CSVAsset = self.add_excel_asset(
+        asset: CSVAsset = self.add_excel_asset(  # type: ignore[valid-type]
             io=io,
             name=name,
             **kwargs,

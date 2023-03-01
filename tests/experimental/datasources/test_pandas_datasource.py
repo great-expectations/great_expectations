@@ -418,7 +418,7 @@ class TestDynamicPandasAssets:
         )
         _ = read_method(*positional_args.values())
         # read_* returns a validator, but we just want to inspect the asset
-        asset: _PandasDataAsset = empty_data_context.sources.pandas_default.assets[
+        asset = empty_data_context.sources.pandas_default.assets[
             DEFAULT_PANDAS_DATA_ASSET_NAME
         ]
         for positional_arg_name, positional_arg in positional_args.items():
