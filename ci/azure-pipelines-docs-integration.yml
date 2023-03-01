@@ -85,6 +85,13 @@ stages:
             python scripts/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
+    - job: public_api_report
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      steps:
+        - script: |
+            python scripts/public_api_report.py
+          name: PublicAPIReport
+
   - stage: docusaurus_tests
     dependsOn: scope_check
     pool:

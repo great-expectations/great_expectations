@@ -51,6 +51,7 @@ import glob
 import logging
 import operator
 import pathlib
+import sys
 from dataclasses import dataclass
 from typing import List, Optional, Set, Union, cast
 
@@ -1765,6 +1766,22 @@ def main():
     printable_definitions = public_api_report.generate_printable_definitions()
     for printable_definition in printable_definitions:
         logger.info(printable_definition)
+
+    num_missing_msg = f"There are {len(printable_definitions)} items referenced in documentation that are not marked with the @public_api decorator and thus not rendered as part of our public API documentation."
+    logger.info(num_missing_msg)
+    # The PUBLIC_API_MISSING_THRESHOLD should be reduced and kept at 0. Please do
+    # not increase this threshold, but instead add to the public API by decorating
+    # any methods or classes you are adding to documentation with the @public_api
+    # decorator and any relevant "new" or "deprecated" public api decorators.
+    # If the actual is lower than the threshold, please reduce the threshold.
+    PUBLIC_API_MISSING_THRESHOLD = 58
+    if len(printable_definitions) != PUBLIC_API_MISSING_THRESHOLD:
+        error_msg_prefix = f"There are {len(printable_definitions)} items missing from the public API, we currently allow {PUBLIC_API_MISSING_THRESHOLD}."
+        if len(printable_definitions) > PUBLIC_API_MISSING_THRESHOLD:
+            logger.error(f"{error_msg_prefix} Please add to the public API.")
+        else:
+            logger.error(f"{error_msg_prefix} Please reduce the threshold.")
+        sys.exit(1)
 
     public_api_report.write_printable_definitions_to_file(
         filepath=_repo_root() / "public_api_report.txt",
