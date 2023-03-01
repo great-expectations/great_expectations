@@ -324,9 +324,9 @@ class PandasDatasource(_PandasDatasource):
     def add_csv_asset(
         self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
     ) -> CSVAsset:  # type: ignore[valid-type]
-        kwargs["filepath_or_buffer"] = filepath_or_buffer
         asset = CSVAsset(
             name=name,
+            filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -349,9 +349,9 @@ class PandasDatasource(_PandasDatasource):
     def add_excel_asset(
         self, name: str, io: str, **kwargs
     ) -> ExcelAsset:  # type: ignore[valid-type]
-        kwargs["io"] = io
         asset = ExcelAsset(
             name=name,
+            io=io,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -374,9 +374,9 @@ class PandasDatasource(_PandasDatasource):
     def add_feather_asset(
         self, name: str, path: pydantic.FilePath, **kwargs
     ) -> FeatherAsset:  # type: ignore[valid-type]
-        kwargs["path"] = path
         asset = FeatherAsset(
             name=name,
+            path=path,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -399,9 +399,9 @@ class PandasDatasource(_PandasDatasource):
     def add_gbq_asset(
         self, name: str, query: str, **kwargs
     ) -> GBQAsset:  # type: ignore[valid-type]
-        kwargs["query"] = query
         asset = GBQAsset(
             name=name,
+            query=query,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -424,9 +424,9 @@ class PandasDatasource(_PandasDatasource):
     def add_hdf_asset(
         self, name: str, path_or_buf: str, **kwargs
     ) -> HDFAsset:  # type: ignore[valid-type]
-        kwargs["path_or_buf"] = path_or_buf
         asset = HDFAsset(
             name=name,
+            path_or_buf=path_or_buf,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -449,9 +449,9 @@ class PandasDatasource(_PandasDatasource):
     def add_html_asset(
         self, name: str, io: str, **kwargs
     ) -> HTMLAsset:  # type: ignore[valid-type]
-        kwargs["io"] = io
         asset = HTMLAsset(
             name=name,
+            io=io,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -474,9 +474,9 @@ class PandasDatasource(_PandasDatasource):
     def add_json_asset(
         self, name: str, path_or_buf: str, **kwargs
     ) -> JSONAsset:  # type: ignore[valid-type]
-        kwargs["path_or_buf"] = path_or_buf
         asset = JSONAsset(
             name=name,
+            path_or_buf=path_or_buf,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -499,9 +499,9 @@ class PandasDatasource(_PandasDatasource):
     def add_orc_asset(
         self, name: str, path: str, **kwargs
     ) -> ORCAsset:  # type: ignore[valid-type]
-        kwargs["path"] = path
         asset = ORCAsset(
             name=name,
+            path=path,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -517,6 +517,56 @@ class PandasDatasource(_PandasDatasource):
         asset: ORCAsset = self.add_orc_asset(  # type: ignore[valid-type]
             name=asset_name,
             path=path,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    def add_parquet_asset(
+        self, name: str, path: str, **kwargs
+    ) -> ParquetAsset:  # type: ignore[valid-type]
+        asset = ParquetAsset(
+            name=name,
+            path=path,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_parquet(
+        self,
+        path: str,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: ParquetAsset = self.add_parquet_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            path=path,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    def add_pickle_asset(
+        self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
+    ) -> PickleAsset:  # type: ignore[valid-type]
+        asset = PickleAsset(
+            name=name,
+            filepath_or_buffer=filepath_or_buffer,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_pickle(
+        self,
+        filepath_or_buffer: pydantic.FilePath,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: PickleAsset = self.add_pickle_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self._get_validator(asset=asset)
@@ -539,4 +589,10 @@ class PandasDatasource(_PandasDatasource):
     )
     add_orc_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_orc_asset, ORCAsset, exclude={"type"}
+    )
+    add_parquet_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_parquet_asset, ParquetAsset, exclude={"type"}
+    )
+    add_pickle_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_pickle_asset, PickleAsset, exclude={"type"}
     )
