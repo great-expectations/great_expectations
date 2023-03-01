@@ -745,7 +745,7 @@ class CloudDataContext(SerializableDataContext):
         # If a suite with the input name already exists, make sure our args are updated
         # such that downstream logic knows to update the persisted value.
         if existing_id:
-            if expectation_suite_name and not id:
+            if not id:
                 id = existing_id
             if expectation_suite and not expectation_suite.ge_cloud_id:
                 expectation_suite.ge_cloud_id = existing_id

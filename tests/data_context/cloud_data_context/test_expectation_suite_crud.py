@@ -1,8 +1,12 @@
+import random
+import string
 from typing import Callable, NamedTuple
 from unittest import mock
 
 import pytest
 
+import great_expectations as gx
+from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
@@ -596,3 +600,44 @@ def test_add_or_update_expectation_suite_updates_existing_obj(
         context.add_or_update_expectation_suite(expectation_suite=suite)
 
     mock_update.assert_called_once()
+
+
+@pytest.mark.e2e
+@pytest.mark.cloud
+def test_add_or_update_expectation_suite_workflow():
+    context = gx.get_context(cloud_mode=True)
+    suite_name = f"OSSTestSuite_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
+
+    # User creates an empty suite
+    suite = context.add_expectation_suite(suite_name)
+    persisted_id = suite.ge_cloud_id
+    assert (
+        persisted_id is not None
+    ), "An ID should be set upon initial storage of a suite in Cloud"
+
+    # User adds expectations and persists changes with `add_or_update`
+    suite.add_expectation(
+        ExpectationConfiguration(
+            expectation_type="expect_table_row_count_to_equal", kwargs={"value": 10}
+        )
+    )
+    suite = context.add_or_update_expectation_suite(expectation_suite=suite)
+    persisted_expectation_id = suite.expectations[0].ge_cloud_id
+    assert (
+        suite.ge_cloud_id == persisted_id
+    ), "The same ID should persist when saving the same suite"
+    assert (
+        persisted_expectation_id is not None
+    ), "Nested expectations should receive IDs upon initial storage"
+
+    # User overwrites existing suite with an empty one (by simply passing in the same name)
+    suite = context.add_or_update_expectation_suite(suite_name)
+    assert (
+        suite.ge_cloud_id == persisted_id
+    ), "The same ID should persist when saving the same suite"
+    assert (
+        suite.expectations == []
+    ), "Existing expectations should be overwritten due to the user calling `add_or_update` with an empty suite"
+
+    # Teardown
+    context.delete_expectation_suite(id=persisted_id)
