@@ -143,7 +143,6 @@ class TestMetaDatasource:
 
             assert param_name in ds_factory_method_sig.parameters
             print("✅")
-        assert False
 
     def test__new__updates_asset_type_lookup(
         self, context_sources_cleanup: _SourceFactories
