@@ -266,6 +266,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._config_variables = self._load_config_variables()
         self._variables = self._init_variables()
 
+        # config providers must be provisioned before loading zep_config
         self.zep_config = self._load_zep_config()
 
         # Init plugin support
@@ -5424,7 +5425,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         logger.info(
             f"{self.__class__.__name__} has not implemented `_load_zep_config()` returning empty `GxConfig`"
         )
-        return GxConfig(xdatasources={}, _config_provider=self.config_provider)
+        return GxConfig(xdatasources={})
 
     def _attach_zep_config_datasources(self, config: GxConfig):
         """Called at end of __init__"""
