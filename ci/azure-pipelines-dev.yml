@@ -161,6 +161,12 @@ stages:
             python scripts/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
+    - job: public_api_report
+      steps:
+        - script: |
+            python scripts/public_api_report.py
+          name: PublicAPIReport
+
   - stage: import_ge
     dependsOn: scope_check
     pool:
