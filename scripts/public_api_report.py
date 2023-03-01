@@ -12,30 +12,35 @@ DocsExampleParser.get_names_from_usage_in_docs_examples()
     that are GX related (by checking the import location).
 2. AST walk through docs examples to find all method calls (currently we only
     retrieve the names, not the location of the method definition). These are
-    not filtered to be only GX related, we filter in step 4.
+    not filtered to be only GX related, we filter in step 6.
+3. Scan all code examples for class names used in yaml strings.
 
 CodeParser.get_all_class_method_and_function_definitions()
 
-3. AST walk through full GX codebase to find all classes and method names from
+4. AST walk through full GX codebase to find all classes and method names from
     their definitions, and capture the definition file location.
 
 PublicAPIChecker
-4. Get list of classes & methods that are marked `public_api`.
+5. Get list of classes & methods that are marked `public_api`.
+
+parse_docs_contents_for_class_names()
+
+Scan docs content for class names used in yaml strings.
 
 CodeReferenceFilter
 
-5. Filter list of classes & methods from docs examples to only those found in
+6. Filter list of classes & methods from docs examples to only those found in
     the GX codebase (e.g. filter out print() or other python or 3rd party
     classes/methods).
-6. Use this filtered list against the list of class and method definitions in
+7. Use this filtered list against the list of class and method definitions in
     the GX codebase to generate the full list with definition locations in the
     GX codebase.
-7. Filter out private methods and classes.
-8. Filter or include based on Include and Exclude directives (include overrides).
-9. Filter out methods that are not marked @public_api
+8. Filter out private methods and classes.
+9. Filter or include based on Include and Exclude directives (include overrides).
+10. Filter out methods that are not marked @public_api
 
 PublicAPIReport
-10. Generate report based on list of Definitions.
+11. Generate report based on list of Definitions.
 
 
 Typical usage example:
