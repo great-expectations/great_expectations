@@ -9,7 +9,6 @@ from typing_extensions import Literal
 
 from great_expectations.experimental.datasources import _PandasFilePathDatasource
 from great_expectations.experimental.datasources.data_asset.data_connector import (
-    DataConnector,
     FilesystemDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import (
@@ -56,6 +55,43 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
+    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
+        """Builds "FilesystemDataConnector", which links this Datasource and its DataAsset members to local filesystem.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this DataConnector instance
+            kwargs: Extra keyword arguments allow specification of arguments used by "FilesystemDataConnector"
+        """
+        self._data_connector = FilesystemDataConnector(
+            datasource_name=self.name,
+            data_asset_name=data_asset_name,
+            base_directory=self.base_directory,
+            data_context_root_directory=self.data_context_root_directory,
+            **kwargs,
+        )
+
+    def _build_test_connection_error_message(
+        self, data_asset_name: str, **kwargs
+    ) -> None:
+        """Builds helpful error message for Datasource and its DataAsset members when connecting to local filesystem.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this error message
+            kwargs: Extra keyword arguments allow specification of arguments used by this error message's template
+        """
+        test_connection_error_message_template: str = 'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex}" and/or glob_directive "{glob_directive}" for DataAsset "{data_asset_name}".'
+        self._test_connection_error_message = (
+            test_connection_error_message_template.format(
+                **(
+                    {
+                        "base_directory": self.base_directory.resolve(),
+                        "data_asset_name": data_asset_name,
+                    }
+                    | kwargs
+                )
+            )
+        )
+
     def add_csv_asset(
         self,
         name: str,
@@ -68,7 +104,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the CSV asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches CSV filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
@@ -87,20 +123,17 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        data_connector: DataConnector = FilesystemDataConnector(
-            datasource_name=self.name,
+        self._build_data_connector(
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            base_directory=self.base_directory,
             glob_directive=glob_directive,
-            data_context_root_directory=self.data_context_root_directory,
         )
-        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{batching_regex_pattern.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        self._build_test_connection_error_message(
+            data_asset_name=name,
+            batching_regex=batching_regex_pattern,
+            glob_directive=glob_directive,
         )
+        return self.add_asset(asset=asset)
 
     def add_excel_asset(
         self,
@@ -114,7 +147,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the Excel asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches Excel filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
@@ -133,20 +166,17 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        data_connector: DataConnector = FilesystemDataConnector(
-            datasource_name=self.name,
+        self._build_data_connector(
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            base_directory=self.base_directory,
             glob_directive=glob_directive,
-            data_context_root_directory=self.data_context_root_directory,
         )
-        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{batching_regex_pattern.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        self._build_test_connection_error_message(
+            data_asset_name=name,
+            batching_regex=batching_regex_pattern,
+            glob_directive=glob_directive,
         )
+        return self.add_asset(asset=asset)
 
     def add_json_asset(
         self,
@@ -160,7 +190,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the JSON asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches JSON filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
@@ -179,20 +209,17 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        data_connector: DataConnector = FilesystemDataConnector(
-            datasource_name=self.name,
+        self._build_data_connector(
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            base_directory=self.base_directory,
             glob_directive=glob_directive,
-            data_context_root_directory=self.data_context_root_directory,
         )
-        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{batching_regex_pattern.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        self._build_test_connection_error_message(
+            data_asset_name=name,
+            batching_regex=batching_regex_pattern,
+            glob_directive=glob_directive,
         )
+        return self.add_asset(asset=asset)
 
     def add_parquet_asset(
         self,
@@ -206,7 +233,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the Parquet asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches Parquet filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
@@ -225,20 +252,17 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        data_connector: DataConnector = FilesystemDataConnector(
-            datasource_name=self.name,
+        self._build_data_connector(
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            base_directory=self.base_directory,
             glob_directive=glob_directive,
-            data_context_root_directory=self.data_context_root_directory,
         )
-        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{batching_regex_pattern.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        self._build_test_connection_error_message(
+            data_asset_name=name,
+            batching_regex=batching_regex_pattern,
+            glob_directive=glob_directive,
         )
+        return self.add_asset(asset=asset)
 
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472

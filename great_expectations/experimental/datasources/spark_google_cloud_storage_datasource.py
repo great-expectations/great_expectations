@@ -10,7 +10,6 @@ from typing_extensions import Literal
 from great_expectations.core.util import GCSUrl
 from great_expectations.experimental.datasources import _SparkFilePathDatasource
 from great_expectations.experimental.datasources.data_asset.data_connector import (
-    DataConnector,
     GoogleCloudStorageDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
@@ -121,6 +120,43 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
+    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
+        """Builds "GoogleCloudStorageDataConnector", which links this Datasource and its DataAsset members to Google Cloud Storage.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this DataConnector instance
+            kwargs: Extra keyword arguments allow specification of arguments used by "GoogleCloudStorageDataConnector"
+        """
+        self._data_connector = GoogleCloudStorageDataConnector(
+            datasource_name=self.name,
+            data_asset_name=data_asset_name,
+            gcs_client=self._get_gcs_client(),
+            bucket_or_name=self.bucket_or_name,
+            **kwargs,
+        )
+
+    def _build_test_connection_error_message(
+        self, data_asset_name: str, **kwargs
+    ) -> None:
+        """Builds helpful error message for Datasource and its DataAsset members when connecting to AWS Google Cloud Storage
+
+        Args:
+            data_asset_name: The name of the DataAsset using this error message
+            kwargs: Extra keyword arguments allow specification of arguments used by this error message's template
+        """
+        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        self._test_connection_error_message = (
+            test_connection_error_message_template.format(
+                **(
+                    {
+                        "bucket_or_name": self.bucket_or_name,
+                        "data_asset_name": data_asset_name,
+                    }
+                    | kwargs
+                )
+            )
+        )
+
     def add_csv_asset(
         self,
         name: str,
@@ -153,20 +189,19 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             order_by=order_by_sorters,
         )
 
-        data_connector: DataConnector = GoogleCloudStorageDataConnector(
-            datasource_name=self.name,
+        self._build_data_connector(
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            gcs_client=self._gcs_client,
-            bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
             file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        self._build_test_connection_error_message(
+            data_asset_name=name,
+            batching_regex=batching_regex_pattern,
+            prefix=prefix,
+            delimiter=delimiter,
+            max_results=max_results,
         )
+        return self.add_asset(asset=asset)

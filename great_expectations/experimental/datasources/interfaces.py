@@ -368,6 +368,8 @@ class Datasource(
     # private attrs
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
+    _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
+    _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -439,24 +441,17 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(
-        self,
-        asset: _DataAssetT,
-        data_connector: Optional[DataConnector] = None,
-        test_connection_error_message: Optional[str] = None,
-    ) -> _DataAssetT:
+    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
             asset: The DataAsset to be added to this datasource.
-            data_connector: Optional reference to "DataConnector" object for connecting Datasource and DataAsset to data
-            test_connection_error_message: Optional message for reporting connection test errors informatively
         """
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
-        asset._data_connector = data_connector
-        asset._test_connection_error_message = test_connection_error_message
+        asset._data_connector = self._data_connector
+        asset._test_connection_error_message = self._test_connection_error_message
 
         asset.test_connection()
 
@@ -531,6 +526,30 @@ class Datasource(
         raise NotImplementedError(
             """One needs to implement "test_connection" on a Datasource subclass."""
         )
+
+    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
+        """Any Datasource subclass that utilizes DataConnector should overwrite this method.
+
+        Specific implementations instantiate appropriate DataConnector class and set "self._data_connector" to it.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this DataConnector instance
+            kwargs: Extra keyword arguments allow specification of arguments used by particular DataConnector subclasses
+        """
+        pass
+
+    def _build_test_connection_error_message(
+        self, data_asset_name: str, **kwargs
+    ) -> None:
+        """Any Datasource subclass can overwrite this method.
+
+        Specific implementations create appropriate error message and set "self._test_connection_error_message" to it.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this DataConnector instance
+            kwargs: Extra keyword arguments allow specification of arguments used by particular subclass' error message
+        """
+        pass
 
     # End Abstract Methods
 
