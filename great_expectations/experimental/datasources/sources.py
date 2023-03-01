@@ -282,6 +282,7 @@ class _SourceFactories:
                 return datasource
 
             wrapped.__doc__ = ds_constructor.__doc__
+            wrapped.__signature__ = ds_constructor.__signature__
             return wrapped
         except KeyError:
             raise AttributeError(f"No factory {attr_name} in {self.factories}")
