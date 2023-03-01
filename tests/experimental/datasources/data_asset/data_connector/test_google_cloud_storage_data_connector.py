@@ -14,14 +14,21 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
 from great_expectations.experimental.datasources.interfaces import BatchRequest
 
 if TYPE_CHECKING:
-    from google.cloud.storage.client import Client as GCSClient
-
     from great_expectations.experimental.datasources.data_asset.data_connector import (
         DataConnector,
     )
 
 
 logger = logging.getLogger(__name__)
+
+
+try:
+    from google.cloud.storage.client import Client as GCSClient
+except ImportError:
+    GCSClient = None
+    logger.debug(
+        "Unable to load GoogleCloudStorage connection object; install optional Google dependency for support"
+    )
 
 
 class MockGCSClient:

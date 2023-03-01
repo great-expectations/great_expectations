@@ -368,8 +368,6 @@ class Datasource(
     # private attrs
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
-    _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
-    _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -450,8 +448,6 @@ class Datasource(
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
-        asset._data_connector = self._data_connector
-        asset._test_connection_error_message = self._test_connection_error_message
 
         asset.test_connection()
 

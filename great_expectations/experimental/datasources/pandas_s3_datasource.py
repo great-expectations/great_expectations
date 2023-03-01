@@ -136,7 +136,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = S3DataConnector.build_data_connector(
+        asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             client=self._get_s3_client(),
@@ -147,7 +147,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             S3DataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
@@ -194,7 +194,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = S3DataConnector.build_data_connector(
+        asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             client=self._get_s3_client(),
@@ -205,7 +205,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             S3DataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
@@ -252,7 +252,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = S3DataConnector.build_data_connector(
+        asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             client=self._get_s3_client(),
@@ -263,7 +263,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             S3DataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
@@ -310,7 +310,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = S3DataConnector.build_data_connector(
+        asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             client=self._get_s3_client(),
@@ -321,7 +321,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             S3DataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,

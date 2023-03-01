@@ -86,7 +86,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = FilesystemDataConnector.build_data_connector(
+        asset._data_connector = FilesystemDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
@@ -94,7 +94,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             FilesystemDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
@@ -135,7 +135,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = FilesystemDataConnector.build_data_connector(
+        asset._data_connector = FilesystemDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
@@ -143,7 +143,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             FilesystemDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
@@ -184,7 +184,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = FilesystemDataConnector.build_data_connector(
+        asset._data_connector = FilesystemDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
@@ -192,7 +192,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             FilesystemDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
@@ -233,7 +233,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = FilesystemDataConnector.build_data_connector(
+        asset._data_connector = FilesystemDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
@@ -241,7 +241,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             FilesystemDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,

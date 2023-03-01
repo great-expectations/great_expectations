@@ -114,13 +114,13 @@ class FilesystemDataConnector(FilePathDataConnector):
         """
         test_connection_error_message_template: str = 'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex}" and/or glob_directive "{glob_directive}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
-            **(
-                {  # type: ignore[operator]
+            **{
+                **{  # type: ignore[operator]
                     "base_directory": kwargs.pop("base_directory"),
                     "data_asset_name": data_asset_name,
-                }
-                | kwargs
-            )
+                },
+                **kwargs,
+            }
         )
 
     # Interface Method

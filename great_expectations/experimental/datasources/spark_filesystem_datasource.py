@@ -82,7 +82,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             order_by=order_by_sorters,
         )
 
-        self._data_connector = FilesystemDataConnector.build_data_connector(
+        asset._data_connector = FilesystemDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
@@ -90,7 +90,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             FilesystemDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,

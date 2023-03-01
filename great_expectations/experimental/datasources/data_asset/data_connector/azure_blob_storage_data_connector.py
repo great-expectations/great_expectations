@@ -112,13 +112,13 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         """
         test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
-            **(
-                {  # type: ignore[operator]
+            **{
+                **{  # type: ignore[operator]
                     "account_name": kwargs.pop("account_name"),
                     "data_asset_name": data_asset_name,
-                }
-                | kwargs
-            )
+                },
+                **kwargs,
+            }
         )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:

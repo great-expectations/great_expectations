@@ -113,13 +113,13 @@ class S3DataConnector(FilePathDataConnector):
         """
         test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
-            **(
-                {  # type: ignore[operator]
+            **{
+                **{
                     "bucket": kwargs.pop("bucket"),
                     "data_asset_name": data_asset_name,
-                }
-                | kwargs
-            )
+                },
+                **kwargs,
+            }
         )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:

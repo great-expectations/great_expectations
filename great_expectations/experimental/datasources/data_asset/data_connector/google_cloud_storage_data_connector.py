@@ -112,13 +112,13 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         """
         test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
-            **(
-                {  # type: ignore[operator]
+            **{
+                **{  # type: ignore[operator]
                     "bucket_or_name": kwargs.pop("bucket_or_name"),
                     "data_asset_name": data_asset_name,
-                }
-                | kwargs
-            )
+                },
+                **kwargs,
+            }
         )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:

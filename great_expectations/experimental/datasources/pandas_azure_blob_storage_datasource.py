@@ -154,7 +154,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = AzureBlobStorageDataConnector.build_data_connector(
+        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             client=self._get_azure_client(),
@@ -165,7 +165,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             delimiter=delimiter,
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             AzureBlobStorageDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
@@ -212,7 +212,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = AzureBlobStorageDataConnector.build_data_connector(
+        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             client=self._get_azure_client(),
@@ -223,7 +223,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             delimiter=delimiter,
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             AzureBlobStorageDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
@@ -270,7 +270,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = AzureBlobStorageDataConnector.build_data_connector(
+        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             client=self._get_azure_client(),
@@ -281,7 +281,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             delimiter=delimiter,
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             AzureBlobStorageDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
@@ -328,7 +328,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        self._data_connector = AzureBlobStorageDataConnector.build_data_connector(
+        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             client=self._get_azure_client(),
@@ -339,7 +339,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             delimiter=delimiter,
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
         )
-        self._test_connection_error_message = (
+        asset._test_connection_error_message = (
             AzureBlobStorageDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
