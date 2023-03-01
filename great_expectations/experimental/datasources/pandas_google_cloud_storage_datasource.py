@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 import pydantic
 from typing_extensions import Literal
 
-from great_expectations.core.util import S3Url
+from great_expectations.core.util import GCSUrl
 from great_expectations.experimental.datasources import _PandasFilePathDatasource
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     DataConnector,
-    S3DataConnector,
+    GoogleCloudStorageDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.pandas_datasource import (
@@ -26,7 +26,10 @@ from great_expectations.experimental.datasources.pandas_file_path_datasource imp
 from great_expectations.experimental.datasources.signatures import _merge_signatures
 
 if TYPE_CHECKING:
-    from botocore.client import BaseClient
+    from google.cloud.storage.client import Client as GoogleCloudStorageClient
+    from google.oauth2.service_account import (
+        Credentials as GoogleServiceAccountCredentials,
+    )
 
     from great_expectations.experimental.datasources.interfaces import (
         BatchSorter,
@@ -37,66 +40,87 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-BOTO3_IMPORTED = False
+GCS_IMPORTED = False
 try:
-    import boto3
+    from google.cloud import storage
+    from google.oauth2 import service_account
 
-    BOTO3_IMPORTED = True
+    GCS_IMPORTED = True
 except ImportError:
-    boto3 = None
+    storage = None
+    service_account = None
 
 
-class PandasS3DatasourceError(PandasDatasourceError):
+class PandasGoogleCloudStorageDatasourceError(PandasDatasourceError):
     pass
 
 
-class PandasS3Datasource(_PandasFilePathDatasource):
+class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     # instance attributes
-    type: Literal["pandas_s3"] = "pandas_s3"
+    type: Literal["pandas_gcs"] = "pandas_gcs"
 
-    # S3 specific attributes
-    bucket: str
-    boto3_options: Dict[str, Any] = {}
+    # Google Cloud Storage specific attributes
+    bucket_or_name: str
+    gcs_options: Dict[str, Any] = {}
 
-    _s3_client: Union[BaseClient, None] = pydantic.PrivateAttr(default=None)
+    _gcs_client: Union[GoogleCloudStorageClient, None] = pydantic.PrivateAttr(
+        default=None
+    )
 
-    def _get_s3_client(self) -> BaseClient:
-        s3_client: Union[BaseClient, None] = self._s3_client
-        if not s3_client:
-            # Validate that "boto3" libarary was successfully imported and attempt to create "s3_client" handle.
-            if BOTO3_IMPORTED:
+    def _get_gcs_client(self) -> GoogleCloudStorageClient:
+        gcs_client: Union[GoogleCloudStorageClient, None] = self._gcs_client
+        if not gcs_client:
+            # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.
+            if GCS_IMPORTED:
                 try:
-                    s3_client = boto3.client("s3", **self.boto3_options)
+                    credentials: Union[
+                        GoogleServiceAccountCredentials, None
+                    ] = None  # If configured with gcloud CLI / env vars
+                    if "filename" in self.gcs_options:
+                        filename: str = self.gcs_options.pop("filename")
+                        credentials = (
+                            service_account.Credentials.from_service_account_file(
+                                filename=filename
+                            )
+                        )
+                    elif "info" in self.gcs_options:
+                        info: Any = self.gcs_options.pop("info")
+                        credentials = (
+                            service_account.Credentials.from_service_account_info(
+                                info=info
+                            )
+                        )
+
+                    gcs_client = storage.Client(
+                        credentials=credentials, **self.gcs_options
+                    )
                 except Exception as e:
-                    # Failure to create "s3_client" is most likely due invalid "boto3_options" dictionary.
-                    raise PandasS3DatasourceError(
-                        f'Due to exception: "{str(e)}", "s3_client" could not be created.'
+                    # Failure to create "gcs_client" is most likely due invalid "gcs_options" dictionary.
+                    raise PandasGoogleCloudStorageDatasourceError(
+                        f'Due to exception: "{str(e)}", "gcs_client" could not be created.'
                     ) from e
             else:
-                raise PandasS3DatasourceError(
-                    'Unable to create "PandasS3Datasource" due to missing boto3 dependency.'
+                raise PandasGoogleCloudStorageDatasourceError(
+                    'Unable to create "PandasGoogleCloudStorageDatasource" due to missing google dependency.'
                 )
 
-            self._s3_client = s3_client
+            self._gcs_client = gcs_client
 
-        return s3_client
+        return gcs_client
 
     def test_connection(self, test_assets: bool = True) -> None:
-        """Test the connection for the PandasS3Datasource.
+        """Test the connection for the PandasGoogleCloudStorageDatasource.
 
         Args:
-            test_assets: If assets have been passed to the PandasS3Datasource, whether to test them as well.
+            test_assets: If assets have been passed to the PandasGoogleCloudStorageDatasource, whether to test them as well.
 
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        try:
-            _ = self._get_s3_client()
-        except Exception as e:
+        if self._gcs_client is None:
             raise TestConnectionError(
-                "Attempt to connect to datasource failed with the following error message: "
-                f"{str(e)}"
-            ) from e
+                "Unable to load google.cloud.storage.client (it is required for PandasGoogleCloudStorageDatasource)."
+            )
 
         if self.assets and test_assets:
             for asset in self.assets.values():
@@ -108,18 +132,18 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         batching_regex: Union[re.Pattern, str],
         prefix: str = "",
         delimiter: str = "/",
-        max_keys: int = 1000,
+        max_results: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
-        """Adds a CSV DataAsst to the present "PandasS3Datasource" object.
+        """Adds a CSV DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
             name: The name of the CSV asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            prefix: S3 object name prefix
-            delimiter: S3 object name delimiter
-            max_keys: S3 max_keys (default is 1000)
+            prefix (str): Google Cloud Storage object name prefix
+            delimiter (str): Google Cloud Storage object name delimiter
+            max_results (int): Google Cloud Storage max_results (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
@@ -137,18 +161,18 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        data_connector: DataConnector = S3DataConnector(
+        data_connector: DataConnector = GoogleCloudStorageDataConnector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            s3_client=self._get_s3_client(),
-            bucket=self.bucket,
+            gcs_client=self._gcs_client,
+            bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
-            max_keys=max_keys,
-            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
+            max_results=max_results,
+            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file in bucket "{self.bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
@@ -161,18 +185,18 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         batching_regex: Union[str, re.Pattern],
         prefix: str = "",
         delimiter: str = "/",
-        max_keys: int = 1000,
+        max_results: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
-        """Adds an Excel DataAsst to the present "PandasS3Datasource" object.
+        """Adds an Excel DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
             name: The name of the Excel asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            prefix: S3 object name prefix
-            delimiter: S3 object name delimiter
-            max_keys: S3 object name max_keys (default is 1000)
+            prefix (str): Google Cloud Storage object name prefix
+            delimiter (str): Google Cloud Storage object name delimiter
+            max_results (int): Google Cloud Storage max_results (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
@@ -190,18 +214,18 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        data_connector: DataConnector = S3DataConnector(
+        data_connector: DataConnector = GoogleCloudStorageDataConnector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            s3_client=self._get_s3_client(),
-            bucket=self.bucket,
+            gcs_client=self._gcs_client,
+            bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
-            max_keys=max_keys,
-            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
+            max_results=max_results,
+            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file in bucket "{self.bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
@@ -214,18 +238,18 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         batching_regex: Union[str, re.Pattern],
         prefix: str = "",
         delimiter: str = "/",
-        max_keys: int = 1000,
+        max_results: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
-        """Adds a JSON DataAsst to the present "PandasS3Datasource" object.
+        """Adds a JSON DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
             name: The name of the JSON asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            prefix: S3 object name prefix
-            delimiter: S3 object name delimiter
-            max_keys: S3 object name max_keys (default is 1000)
+            prefix (str): Google Cloud Storage object name prefix
+            delimiter (str): Google Cloud Storage object name delimiter
+            max_results (int): Google Cloud Storage max_results (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
@@ -243,18 +267,18 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        data_connector: DataConnector = S3DataConnector(
+        data_connector: DataConnector = GoogleCloudStorageDataConnector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            s3_client=self._get_s3_client(),
-            bucket=self.bucket,
+            gcs_client=self._gcs_client,
+            bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
-            max_keys=max_keys,
-            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
+            max_results=max_results,
+            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file in bucket "{self.bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
@@ -267,18 +291,18 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         batching_regex: Union[str, re.Pattern],
         prefix: str = "",
         delimiter: str = "/",
-        max_keys: int = 1000,
+        max_results: int = 1000,
         order_by: Optional[BatchSortersDefinition] = None,
         **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
-        """Adds a Parquet DataAsst to the present "PandasS3Datasource" object.
+        """Adds a Parquet DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
             name: The name of the Parquet asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            prefix: S3 object name prefix
-            delimiter: S3 object name delimiter
-            max_keys: S3 object name max_keys (default is 1000)
+            prefix (str): Google Cloud Storage object name prefix
+            delimiter (str): Google Cloud Storage object name delimiter
+            max_results (int): Google Cloud Storage max_results (default is 1000)
             order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
@@ -296,18 +320,18 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        data_connector: DataConnector = S3DataConnector(
+        data_connector: DataConnector = GoogleCloudStorageDataConnector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
-            s3_client=self._get_s3_client(),
-            bucket=self.bucket,
+            gcs_client=self._gcs_client,
+            bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
-            max_keys=max_keys,
-            file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
+            max_results=max_results,
+            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
+        test_connection_error_message: str = f"""No file in bucket "{self.bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
         return self.add_asset(
             asset=asset,
             data_connector=data_connector,
