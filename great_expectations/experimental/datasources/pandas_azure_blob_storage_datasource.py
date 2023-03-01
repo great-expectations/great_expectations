@@ -37,12 +37,13 @@ logger = logging.getLogger(__name__)
 
 ABS_IMPORTED = False
 try:
-    from azure.storage.blob import BlobServiceClient, ContainerClient
+    from azure.storage.blob import (
+        BlobServiceClient,
+    )
 
     ABS_IMPORTED = True
 except ImportError:
-    BlobServiceClient = None
-    ContainerClient = None
+    pass
 
 
 class PandasAzureBlobStorageDatasourceError(PandasDatasourceError):
