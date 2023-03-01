@@ -6,6 +6,7 @@ import pathlib
 import re
 from pprint import pformat as pf
 from typing import Callable, Dict, List
+from ruamel.yaml import YAML
 
 import pydantic
 import pytest
@@ -32,6 +33,7 @@ try:
 except ImportError:
     from pprint import pprint as pp
 
+yaml = YAML(typ="safe")
 LOGGER = logging.getLogger(__file__)
 p = pytest.param
 
@@ -637,7 +639,7 @@ def file_dc_config_file_with_substitutions(
     return config_file
 
 
-def test_zep_config_substitution_on_dc_init(
+def test_config_substitution_on_dc_init(
     inject_config_env_vars, file_dc_config_file_with_substitutions: pathlib.Path
 ):
     from great_expectations import get_context
@@ -653,3 +655,32 @@ def test_zep_config_substitution_on_dc_init(
     assert subbed_ds.get_asset("my_csv_asset").sep == ","
 
     assert subbed_ds.base_directory == pathlib.Path(__file__).parent
+
+
+def test_config_substitution_retains_original_value_on_save(
+    inject_config_env_vars, file_dc_config_file_with_substitutions: pathlib.Path
+):
+    original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
+        "xdatasources"
+    ]["my_pandas_ds_w_cfg_subs"]
+
+    from great_expectations import get_context
+
+    context = get_context(
+        context_root_dir=file_dc_config_file_with_substitutions.parent
+    )
+
+    print(context.zep_config)
+
+    # TODO: improve the fixtures or do all the setup in the test
+    subbed_ds = context.zep_config.datasources["my_pandas_ds_w_cfg_subs"]
+    assert subbed_ds.get_asset("my_csv_asset").sep == ","
+
+    assert subbed_ds.base_directory == pathlib.Path(__file__).parent
+
+    context._save_project_config()
+
+    round_tripped = yaml.load(file_dc_config_file_with_substitutions.read_text())[
+        "xdatasources"
+    ]["my_pandas_ds_w_cfg_subs"]
+    assert round_tripped == original
