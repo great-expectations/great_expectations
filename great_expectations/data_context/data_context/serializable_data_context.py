@@ -102,6 +102,9 @@ class SerializableDataContext(AbstractDataContext):
                     )
                     zep_json_dict: dict[str, JSONValues] = self.zep_config._json_dict()
                     self.config._commented_map.update(
+                        # re-combine the original raw config to preserve the original config ${FOO} place holders
+                        # NOTE: this could cause issues depending on what values have config
+                        # TODO: Only update fields that had config placeholders
                         {**zep_json_dict, **self.zep_config._raw_config}
                     )
 
