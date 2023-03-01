@@ -153,9 +153,7 @@ if TYPE_CHECKING:
         CheckpointStore,
         EvaluationParameterStore,
     )
-    from great_expectations.data_context.store.datasource_store import (
-        DatasourceStore,
-    )
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
@@ -2975,6 +2973,28 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             A new ExpectationSuite or an updated once (depending on whether or not it existed before this method call).
         """
+        return self._add_or_update_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            id=id,
+            expectations=expectations,
+            evaluation_parameters=evaluation_parameters,
+            data_asset_type=data_asset_type,
+            execution_engine_type=execution_engine_type,
+            meta=meta,
+            expectation_suite=expectation_suite,
+        )
+
+    def _add_or_update_expectation_suite(
+        self,
+        expectation_suite_name: str | None = None,
+        id: str | None = None,
+        expectations: list[dict | ExpectationConfiguration] | None = None,
+        evaluation_parameters: dict | None = None,
+        data_asset_type: str | None = None,
+        execution_engine_type: Type[ExecutionEngine] | None = None,
+        meta: dict | None = None,
+        expectation_suite: ExpectationSuite | None = None,
+    ) -> ExpectationSuite:
         return self._add_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             id=id,

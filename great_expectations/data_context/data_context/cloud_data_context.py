@@ -726,7 +726,7 @@ class CloudDataContext(SerializableDataContext):
             ge_cloud_mode=True,
         )
 
-    def add_or_update_expectation_suite(
+    def _add_or_update_expectation_suite(
         self,
         expectation_suite_name: str | None = None,
         id: str | None = None,
@@ -750,7 +750,7 @@ class CloudDataContext(SerializableDataContext):
             if expectation_suite and not expectation_suite.ge_cloud_id:
                 expectation_suite.ge_cloud_id = existing_id
 
-        return super().add_or_update_expectation_suite(
+        return super()._add_or_update_expectation_suite(
             expectation_suite_name=expectation_suite_name,
             id=id,
             expectations=expectations,
