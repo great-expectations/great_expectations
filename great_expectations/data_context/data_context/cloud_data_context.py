@@ -780,7 +780,7 @@ class CloudDataContext(SerializableDataContext):
         if expectation_suite and not expectation_suite_name:
             expectation_suite_name = expectation_suite.expectation_suite_name
 
-        suite_keys = self.list_expectation_suites() or []
+        suite_keys = cast(List[GXCloudIdentifier], self.list_expectation_suites() or [])
         for key in suite_keys:
             if (
                 isinstance(key, GXCloudIdentifier)
