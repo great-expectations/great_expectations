@@ -571,6 +571,56 @@ class PandasDatasource(_PandasDatasource):
         )
         return self._get_validator(asset=asset)
 
+    def add_sas_asset(
+        self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
+    ) -> SASAsset:  # type: ignore[valid-type]
+        asset = SASAsset(
+            name=name,
+            filepath_or_buffer=filepath_or_buffer,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_sas(
+        self,
+        filepath_or_buffer: pydantic.FilePath,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: SASAsset = self.add_sas_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            filepath_or_buffer=filepath_or_buffer,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
+    def add_spss_asset(
+        self, name: str, path: str, **kwargs
+    ) -> SPSSAsset:  # type: ignore[valid-type]
+        asset = SPSSAsset(
+            name=name,
+            path=path,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_spss(
+        self,
+        path: str,
+        asset_name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: SPSSAsset = self.add_parquet_asset(  # type: ignore[valid-type]
+            name=asset_name,
+            path=path,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)
+
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
     add_clipboard_asset.__signature__ = _merge_signatures(add_clipboard_asset, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
@@ -595,4 +645,10 @@ class PandasDatasource(_PandasDatasource):
     )
     add_pickle_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_pickle_asset, PickleAsset, exclude={"type"}
+    )
+    add_sas_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_sas_asset, SASAsset, exclude={"type"}
+    )
+    add_spss_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        add_spss_asset, SPSSAsset, exclude={"type"}
     )
