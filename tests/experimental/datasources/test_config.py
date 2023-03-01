@@ -698,10 +698,6 @@ def test_config_substitution_retains_original_value_on_save(
 def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     inject_config_env_vars, file_dc_config_file_with_substitutions: pathlib.Path
 ):
-    original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
-        "xdatasources"
-    ]
-
     from great_expectations import get_context
 
     context = get_context(
