@@ -367,3 +367,27 @@ class PandasDatasource(_PandasDatasource):
             **kwargs,
         )
         return self._get_validator(asset=asset)
+
+    def add_feather_asset(
+        self, name: str, **kwargs
+    ) -> FeatherAsset:  # type: ignore[valid-type]
+        asset = FeatherAsset(
+            name=name,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_feather(
+        self,
+        path: pydantic.FilePath,
+        name: Optional[str] = None,
+        **kwargs,
+    ) -> Validator:
+        if not name:
+            name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        kwargs["path"] = path
+        asset: CSVAsset = self.add_feather_asset(  # type: ignore[valid-type]
+            name=name,
+            **kwargs,
+        )
+        return self._get_validator(asset=asset)

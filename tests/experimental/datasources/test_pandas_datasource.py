@@ -298,10 +298,12 @@ class TestDynamicPandasAssets:
             param("read_clipboard", {}),
             param("read_csv", {"filepath_or_buffer": "valid_file_path"}),
             param("read_excel", {"io": "valid_file_path"}),
-            # param("read_feather", {}),
-            # param(
-            #     "read_fwf", {}, marks=pytest.mark.xfail(reason="unhandled type annotation")
-            # ),
+            param("read_feather", {"path": "valid_file_path"}),
+            param(
+                "read_fwf",
+                {},
+                marks=pytest.mark.xfail(reason="unhandled type annotation"),
+            ),
             # param("read_gbq", {}),
             # param("read_hdf", {}),
             # param("read_html", {}),
