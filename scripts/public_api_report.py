@@ -1749,7 +1749,7 @@ class PublicAPIReport:
         seen = set()
         no_duplicates = []
         for s in strings:
-            if not s in seen:
+            if s not in seen:
                 no_duplicates.append(s)
                 seen.add(s)
 
@@ -1777,9 +1777,9 @@ def _default_code_absolute_paths() -> Set[pathlib.Path]:
 def _default_docs_absolute_paths() -> Set[pathlib.Path]:
     """All Great Expectations modules related to the main library."""
     base_directory = _repo_root() / "docs"
-    md_paths = glob.glob(f"{base_directory}/**/*.md", recursive=True)
-    mdx_paths = glob.glob(f"{base_directory}/**/*.mdx", recursive=True)
-    paths = md_paths + mdx_paths
+    paths = []
+    for extension in ("md", "mdx", "yml", "yaml"):
+        paths.extend(glob.glob(f"{base_directory}/**/*.{extension}", recursive=True))
     return {pathlib.Path(p) for p in paths}
 
 
