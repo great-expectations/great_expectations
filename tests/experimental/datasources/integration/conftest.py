@@ -33,7 +33,7 @@ def default_pandas_data(
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
     pandas_ds = context.sources.pandas_default
-    pandas_ds.read_csv(  # type: ignore[attr-defined]
+    pandas_ds.read_csv(
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
     )
     asset = pandas_ds.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
