@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # If you need to add or remove from the repo root please change NUM_ITEMS_SHOULD_BE
+
 # Please take care to only add files or directories to the repo root unless they are
 # required to be in the repo root, otherwise please find a more appropriate location.
 
