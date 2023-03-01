@@ -5,11 +5,11 @@
 # Please take care to only add files or directories to the repo root unless they are
 # required to be in the repo root, otherwise please find a more appropriate location.
 
-NUM_ITEMS_SHOULD_BE=29
-NUM_ITEMS=$(ls -l | wc -l)
+NUM_ITEMS_SHOULD_BE=47
+NUM_ITEMS=$(ls -la | wc -l)
 
 echo "Items found in repo root:"
-ls -l
+ls -la
 
 if [ $NUM_ITEMS -ne $NUM_ITEMS_SHOULD_BE ];
 then
