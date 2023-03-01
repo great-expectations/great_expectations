@@ -391,33 +391,32 @@ def test_default_pandas_datasource_get_and_set(
         filepath_or_buffer=valid_file_path,
     )
     assert isinstance(validator, Validator)
-    expected_csv_data_asset_name_1 = DEFAULT_PANDAS_DATA_ASSET_NAME
-    csv_data_asset_1 = pandas_datasource.assets[expected_csv_data_asset_name_1]
+    csv_data_asset_1 = pandas_datasource.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
     assert isinstance(csv_data_asset_1, _PandasDataAsset)
-    assert csv_data_asset_1.name == expected_csv_data_asset_name_1
+    assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
     assert len(pandas_datasource.assets) == 1
 
     # ensure we get the same datasource when we call pandas_default again
     pandas_datasource = empty_data_context.sources.pandas_default
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
     assert len(pandas_datasource.assets) == 1
-    assert pandas_datasource.assets[expected_csv_data_asset_name_1]
+    assert pandas_datasource.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
 
     # ensure we overwrite the ephemeral data asset if no name is passed
     validator = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
     assert isinstance(validator, Validator)
-    assert csv_data_asset_1.name == expected_csv_data_asset_name_1
+    assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
     assert len(pandas_datasource.assets) == 1
 
     # ensure we get an additional named asset when one is passed
-    expected_csv_data_asset_name_2 = "my_csv_asset"
+    expected_csv_data_asset_name = "my_csv_asset"
     validator = pandas_datasource.read_csv(
-        asset_name=expected_csv_data_asset_name_2,
+        asset_name=expected_csv_data_asset_name,
         filepath_or_buffer=valid_file_path,
     )
     assert isinstance(validator, Validator)
-    csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name_2]
-    assert csv_data_asset_2.name == expected_csv_data_asset_name_2
+    csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name]
+    assert csv_data_asset_2.name == expected_csv_data_asset_name
     assert len(pandas_datasource.assets) == 2
 
 
