@@ -75,7 +75,7 @@ stages:
       steps:
       - script: |
           yarn install
-          python scripts/validate_docs_snippets.py
+          python ci/checks/validate_docs_snippets.py
         name: DocsSnippetChecker
 
     - job: line_number_snippet_checker
