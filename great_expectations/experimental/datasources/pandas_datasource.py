@@ -321,10 +321,11 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_csv_asset(
-        self, name: str, **kwargs
+        self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
     ) -> CSVAsset:  # type: ignore[valid-type]
         asset = CSVAsset(
             name=name,
+            filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -332,23 +333,24 @@ class PandasDatasource(_PandasDatasource):
     def read_csv(
         self,
         filepath_or_buffer: pydantic.FilePath,
-        name: Optional[str] = None,
+        asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not name:
-            name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        kwargs["filepath_or_buffer"] = filepath_or_buffer
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         asset: CSVAsset = self.add_csv_asset(  # type: ignore[valid-type]
-            name=name,
+            name=asset_name,
+            filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_excel_asset(
-        self, name: str, **kwargs
+        self, name: str, io: str, **kwargs
     ) -> ExcelAsset:  # type: ignore[valid-type]
         asset = ExcelAsset(
             name=name,
+            io=io,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -356,23 +358,24 @@ class PandasDatasource(_PandasDatasource):
     def read_excel(
         self,
         io: str,
-        name: Optional[str] = None,
+        asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not name:
-            name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        kwargs["io"] = io
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         asset: ExcelAsset = self.add_excel_asset(  # type: ignore[valid-type]
-            name=name,
+            name=asset_name,
+            io=io,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_feather_asset(
-        self, name: str, **kwargs
+        self, name: str, path: pydantic.FilePath, **kwargs
     ) -> FeatherAsset:  # type: ignore[valid-type]
         asset = FeatherAsset(
             name=name,
+            path=path,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -380,23 +383,24 @@ class PandasDatasource(_PandasDatasource):
     def read_feather(
         self,
         path: pydantic.FilePath,
-        name: Optional[str] = None,
+        asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not name:
-            name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        kwargs["path"] = path
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         asset: FeatherAsset = self.add_feather_asset(  # type: ignore[valid-type]
-            name=name,
+            name=asset_name,
+            path=path,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_gbq_asset(
-        self, name: str, **kwargs
+        self, name: str, query: str, **kwargs
     ) -> GBQAsset:  # type: ignore[valid-type]
         asset = GBQAsset(
             name=name,
+            query=query,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -404,14 +408,14 @@ class PandasDatasource(_PandasDatasource):
     def read_gbq(
         self,
         query: str,
-        name: Optional[str] = None,
+        asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
-        if not name:
-            name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        kwargs["query"] = query
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         asset: GBQAsset = self.add_gbq_asset(  # type: ignore[valid-type]
-            name=name,
+            name=asset_name,
+            query=query,
             **kwargs,
         )
         return self._get_validator(asset=asset)
