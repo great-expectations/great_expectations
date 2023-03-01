@@ -56,7 +56,7 @@ class GxConfig(ExperimentalBaseModel):
     xdatasources: Dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
 
     # private non-field attributes
-    _raw_config: Union[Dict[str, Any], None] = PrivateAttr(default=None)
+    _raw_config: Dict[str, Any] = PrivateAttr(default_factory=dict)
 
     @property
     def datasources(self) -> Dict[str, Datasource]:
