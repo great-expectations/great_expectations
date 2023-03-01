@@ -14,10 +14,11 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
 from great_expectations.experimental.datasources.interfaces import BatchRequest
 
 if TYPE_CHECKING:
+    from google.cloud.storage.client import Client as GCSClient
+
     from great_expectations.experimental.datasources.data_asset.data_connector import (
         DataConnector,
     )
-    from google.cloud.storage.client import Client as GCSClient
 
 
 logger = logging.getLogger(__name__)
