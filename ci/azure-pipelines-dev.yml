@@ -143,7 +143,7 @@ stages:
 
     - job: check_repo_root_size
       steps:
-        - script: ./scripts/check_repo_root_size.sh
+        - script: ./ci/checks/check_repo_root_size.sh
           name: CheckRepoRootSize
 
     - job: docs_snippet_checker

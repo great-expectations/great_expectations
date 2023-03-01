@@ -122,7 +122,7 @@ stages:
     - job: check_repo_root_size
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
-        - script: ./scripts/check_repo_root_size.sh
+        - script: ./ci/checks/check_repo_root_size.sh
           name: CheckRepoRootSize
 
     - job: public_api_report
