@@ -83,7 +83,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         batch_list: List[Batch] = []
 
         batch_spec = PandasBatchSpec(
-            reader_method=self._get_reader_method().replace("pandas_", ""),
+            reader_method=self._get_reader_method(),
             reader_options=self.dict(
                 exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                 exclude_unset=True,
@@ -198,18 +198,17 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
     blacklist=_PANDAS_READER_METHOD_UNSUPPORTED_LIST,
     use_docstring_from_method=True,
     skip_first_param=False,
-    type_prefix="pandas",
 )
 
 
 try:
     # variables only needed for type-hinting
-    PandasCSVAsset = _PANDAS_ASSET_MODELS["pandas_csv"]
-    PandasExcelAsset = _PANDAS_ASSET_MODELS["pandas_excel"]
-    PandasJSONAsset = _PANDAS_ASSET_MODELS["pandas_json"]
-    PandasORCAsset = _PANDAS_ASSET_MODELS["pandas_orc"]
-    PandasParquetAsset = _PANDAS_ASSET_MODELS["pandas_parquet"]
-    PandasTableAsset = _PANDAS_ASSET_MODELS["pandas_table"]
+    PandasCSVAsset = _PANDAS_ASSET_MODELS["csv"]
+    PandasExcelAsset = _PANDAS_ASSET_MODELS["excel"]
+    PandasJSONAsset = _PANDAS_ASSET_MODELS["json"]
+    PandasORCAsset = _PANDAS_ASSET_MODELS["orc"]
+    PandasParquetAsset = _PANDAS_ASSET_MODELS["parquet"]
+    PandasTableAsset = _PANDAS_ASSET_MODELS["table"]
 except KeyError as key_err:
     logger.info(f"zep - {key_err} asset model could not be generated")
     PandasCSVAsset = _PandasDataAsset
@@ -261,9 +260,11 @@ class PandasDatasource(_PandasDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = list(_PANDAS_ASSET_MODELS.values())
 
+    # private attributes
+    _data_context = pydantic.PrivateAttr()
+
     # instance attributes
     type: Literal["pandas"] = "pandas"
-    name: str
     assets: Dict[
         str,
         _PandasDataAsset,

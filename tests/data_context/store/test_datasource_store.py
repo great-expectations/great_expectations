@@ -345,7 +345,7 @@ def test_datasource_store_delete(
     initial_keys = datasource_store_with_single_datasource.list_keys()
     assert len(initial_keys) == 1
 
-    datasource_name = initial_keys[0][0]
+    datasource_name = initial_keys[0].resource_name
     datasource_config.name = datasource_name
 
     datasource_store_with_single_datasource.delete(
