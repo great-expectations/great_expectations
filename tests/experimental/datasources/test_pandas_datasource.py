@@ -163,11 +163,18 @@ class TestDynamicPandasAssets:
         method = getattr(ds, method_name)
 
         with pytest.raises(pydantic.ValidationError) as exc_info:
-            method(
-                f"{asset_class.__name__}_add_asset_test",
-                "path/to/my/file.extension",
-                _invalid_key="foobar",
-            )
+            positional_arg_string = "foo"
+            positional_args = []
+            while len(positional_args) < 3:
+                try:
+                    method(
+                        f"{asset_class.__name__}_add_asset_test",
+                        *positional_args,
+                        _invalid_key="bar",
+                    )
+                    break
+                except TypeError:
+                    positional_args.append(positional_arg_string)
         # importantly check that the method creates (or attempts to create) the intended asset
         assert exc_info.value.model == asset_class
 
@@ -301,7 +308,7 @@ class TestDynamicPandasAssets:
             param("read_feather", {"path": "valid_file_path"}),
             param(
                 "read_fwf",
-                {},
+                {"filepath_or_buffer": "valid_file_path"},
                 marks=pytest.mark.xfail(reason="unhandled type annotation"),
             ),
             param("read_gbq", {"query": "SELECT * FROM my_table"}),
