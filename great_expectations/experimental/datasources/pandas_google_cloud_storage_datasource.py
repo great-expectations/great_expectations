@@ -42,13 +42,12 @@ logger = logging.getLogger(__name__)
 
 GCS_IMPORTED = False
 try:
-    from google.cloud import storage
-    from google.oauth2 import service_account
+    from google.cloud import storage  # noqa: disable=E0602
+    from google.oauth2 import service_account  # noqa: disable=E0602
 
     GCS_IMPORTED = True
 except ImportError:
-    storage = None
-    service_account = None
+    pass
 
 
 class PandasGoogleCloudStorageDatasourceError(PandasDatasourceError):
