@@ -316,6 +316,18 @@ def test_filesystem_data_asset_batching_regex(
             {"datetime": "2019-02-23"},
             id="converted_datetime",
         ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_multi_column_values",
+            {"column_names": ["passenger_count", "payment_type"]},
+            ["passenger_count", "payment_type"],
+            23,
+            {"passenger_count": 1, "payment_type": 1},
+            1,
+            {"passenger_count": 1, "payment_type": 1},
+            id="multi_column_values",
+        ),
     ],
 )
 def test_column_splitter(

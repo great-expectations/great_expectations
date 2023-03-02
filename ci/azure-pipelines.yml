@@ -116,8 +116,21 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
         - script: |
-            python scripts/check_no_line_number_snippets.py
+            python ci/checks/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
+
+    - job: check_repo_root_size
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+        - script: ./ci/checks/check_repo_root_size.sh
+          name: CheckRepoRootSize
+
+    - job: public_api_report
+      condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+      steps:
+        - script: |
+            python scripts/public_api_report.py
+          name: PublicAPIReport
 
   - stage: docker_tests
     dependsOn: [lint, custom_checks]
@@ -417,16 +430,16 @@ stages:
           matrix:
             Python37:
               python.version: '3.7'
-              min_constraints: 'azure/constraints-test/py37-min-install.txt'
+              min_constraints: 'ci/constraints-test/py37-min-install.txt'
             Python38:
               python.version: '3.8'
-              min_constraints: 'azure/constraints-test/py38-min-install.txt'
+              min_constraints: 'ci/constraints-test/py38-min-install.txt'
             Python39:
               python.version: '3.9'
-              min_constraints: 'azure/constraints-test/py39-min-install.txt'
+              min_constraints: 'ci/constraints-test/py39-min-install.txt'
             Python310:
               python.version: '3.10'
-              min_constraints: 'azure/constraints-test/py310-min-install.txt'
+              min_constraints: 'ci/constraints-test/py310-min-install.txt'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:

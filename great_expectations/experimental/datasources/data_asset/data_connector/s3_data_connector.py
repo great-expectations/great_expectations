@@ -27,7 +27,9 @@ class S3DataConnector(FilePathDataConnector):
 
 
     Args:
-        datasource_name (str): required name for datasource
+        datasource_name: The name of the Datasource associated with this DataConnector instance
+        data_asset_name: The name of the DataAsset using this DataConnector instance
+        s3_client: Reference to instantiated AWS S3 client handle
         bucket (str): bucket for S3
         batching_regex: A regex pattern for partitioning data references
         prefix (str): S3 prefix
@@ -57,6 +59,7 @@ class S3DataConnector(FilePathDataConnector):
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
         self._s3_client: BaseClient = s3_client
+
         self._bucket: str = bucket
         self._prefix: str = sanitize_prefix_for_s3(prefix)
         self._delimiter: str = delimiter
@@ -71,6 +74,91 @@ class S3DataConnector(FilePathDataConnector):
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
+        )
+
+    @classmethod
+    def build_data_connector(
+        cls,
+        datasource_name: str,
+        data_asset_name: str,
+        batching_regex: re.Pattern,
+        s3_client: BaseClient,
+        bucket: str,
+        prefix: str = "",
+        delimiter: str = "/",
+        max_keys: int = 1000,
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # sorters: Optional[list] = None,
+        # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Optional[Callable] = None,
+    ) -> S3DataConnector:
+        """Builds "S3DataConnector", which links named DataAsset to AWS S3.
+
+        Args:
+            datasource_name: The name of the Datasource associated with this "S3DataConnector" instance
+            data_asset_name: The name of the DataAsset using this "S3DataConnector" instance
+            batching_regex: A regex pattern for partitioning data references
+            s3_client: S3 Client reference handle
+            bucket: bucket for S3
+            prefix: S3 prefix
+            delimiter: S3 delimiter
+            max_keys: S3 max_keys (default is 1000)
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # sorters: optional list of sorters for sorting data_references
+            file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
+            # TODO: <Alex>ALEX</Alex>
+
+        Returns:
+            Instantiated "S3DataConnector" object
+        """
+        return S3DataConnector(
+            datasource_name=datasource_name,
+            data_asset_name=data_asset_name,
+            batching_regex=batching_regex,
+            s3_client=s3_client,
+            bucket=bucket,
+            prefix=prefix,
+            delimiter=delimiter,
+            max_keys=max_keys,
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # sorters=sorters,
+            # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn=file_path_template_map_fn,
+        )
+
+    @classmethod
+    def build_test_connection_error_message(
+        cls,
+        data_asset_name: str,
+        batching_regex: re.Pattern,
+        bucket: str,
+        prefix: str = "",
+        delimiter: str = "/",
+    ) -> str:
+        """Builds helpful error message for reporting issues when linking named DataAsset to Microsoft Azure Blob Storage.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this "AzureBlobStorageDataConnector" instance
+            batching_regex: A regex pattern for partitioning data references
+            bucket: bucket for S3
+            prefix: S3 prefix
+            delimiter: S3 delimiter
+
+        Returns:
+            Customized error message
+        """
+        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        return test_connection_error_message_template.format(
+            **{
+                "data_asset_name": data_asset_name,
+                "batching_regex": batching_regex.pattern,
+                "bucket": bucket,
+                "prefix": prefix,
+                "delimiter": delimiter,
+            }
         )
 
     def build_batch_spec(self, batch_definition: BatchDefinition) -> S3BatchSpec:
@@ -96,15 +184,14 @@ class S3DataConnector(FilePathDataConnector):
             "Delimiter": self._delimiter,
             "MaxKeys": self._max_keys,
         }
-        path_list: List[str] = [
-            key
-            for key in list_s3_keys(
+        path_list: List[str] = list(
+            list_s3_keys(
                 s3=self._s3_client,
                 query_options=query_options,
                 iterator_dict={},
                 recursive=False,
             )
-        ]
+        )
         return path_list
 
     # Interface Method

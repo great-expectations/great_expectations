@@ -9,7 +9,6 @@ from typing_extensions import Literal
 
 from great_expectations.experimental.datasources import _SparkFilePathDatasource
 from great_expectations.experimental.datasources.data_asset.data_connector import (
-    DataConnector,
     FilesystemDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import (
@@ -58,10 +57,10 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         infer_schema: bool = False,
         order_by: Optional[BatchSortersDefinition] = None,
     ) -> CSVAsset:
-        """Adds a csv asset to this Spark datasource
+        """Adds a CSV DataAsst to the present "SparkFilesystemDatasource" object.
 
         Args:
-            name: The name of the csv asset
+            name: The name of the CSV asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
             header: boolean (default False) indicating whether or not first line of CSV file is header line
@@ -74,7 +73,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
@@ -82,8 +80,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             inferSchema=infer_schema,
             order_by=order_by_sorters,
         )
-
-        data_connector: DataConnector = FilesystemDataConnector(
+        asset._data_connector = FilesystemDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
@@ -91,9 +88,12 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        test_connection_error_message: str = f"""No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{batching_regex_pattern.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        asset._test_connection_error_message = (
+            FilesystemDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                glob_directive=glob_directive,
+                base_directory=self.base_directory,
+            )
         )
+        return self.add_asset(asset=asset)
