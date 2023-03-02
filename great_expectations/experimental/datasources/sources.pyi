@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, ClassVar, List, NamedTuple, Type, Union
 
 from _typeshed import Incomplete
@@ -28,7 +30,23 @@ from great_expectations.experimental.datasources.type_lookup import (
 from great_expectations.validator.validator import Validator as Validator
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources import SqliteDatasource
+    import pathlib
+
+    from pydantic.networks import PostgresDsn
+
+    from great_expectations.experimental.datasources import (
+        PandasAzureBlobStorageDatasource,
+        PandasFilesystemDatasource,
+        PandasGoogleCloudStorageDatasource,
+        PandasS3Datasource,
+        PostgresDatasource,
+        SparkAzureBlobStorageDatasource,
+        SparkFilesystemDatasource,
+        SparkGoogleCloudStorageDatasource,
+        SparkS3Datasource,
+        SQLDatasource,
+        SqliteDatasource,
+    )
     from great_expectations.experimental.datasources.sqlite_datasource import SqliteDsn
 
 SourceFactoryFn: Incomplete
@@ -56,6 +74,51 @@ class _SourceFactories:
     def factories(self) -> List[str]: ...
     def __getattr__(self, attr_name: str): ...
     def __dir__(self) -> List[str]: ...
+    def add_pandas(self, name: str) -> PandasDatasource: ...
+    def add_pandas_abs(
+        self, name: str, *, azure_options: dict[str, Any] | None = None
+    ) -> PandasAzureBlobStorageDatasource: ...
+    def add_pandas_filesystem(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path,
+        data_context_root_directory: pathlib.Path | None = None,
+    ) -> PandasFilesystemDatasource: ...
+    def add_pandas_gcs(
+        self,
+        name: str,
+        *,
+        bucket_or_name: str,
+        gcs_options: dict[str, Any] | None = None,
+    ) -> PandasGoogleCloudStorageDatasource: ...
+    def add_pandas_s3(
+        self, name: str, *, bucket: str, boto3_options: dict[str, Any] | None = None
+    ) -> PandasS3Datasource: ...
+    def add_postgres(
+        self, name: str, *, connection_string: PostgresDsn
+    ) -> PostgresDatasource: ...
+    def add_spark_abs(
+        self, name: str, *, azure_options: dict[str, Any] | None = None
+    ) -> SparkAzureBlobStorageDatasource: ...
+    def add_spark_filesystem(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path,
+        data_context_root_directory: pathlib.Path | None = None,
+    ) -> SparkFilesystemDatasource: ...
+    def add_spark_gcs(
+        self,
+        name: str,
+        *,
+        bucket_or_name: str,
+        gcs_options: dict[str, Any] | None = None,
+    ) -> SparkGoogleCloudStorageDatasource: ...
+    def add_spark_s3(
+        self, name: str, *, bucket: str, boto3_options: dict[str, Any] | None = None
+    ) -> SparkS3Datasource: ...
+    def add_sql(self, name: str, *, connection_string: str) -> SQLDatasource: ...
     def add_sqlite(
         self, name: str, *, connection_string: SqliteDsn
     ) -> SqliteDatasource: ...
