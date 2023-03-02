@@ -72,13 +72,17 @@ class RunIdentifier(DataContextKey):
     def to_tuple(self):
         return (
             self._run_name or "__none__",
-            self._run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
+            self._run_time.astimezone(tz=datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            ),
         )
 
     def to_fixed_length_tuple(self):
         return (
             self._run_name or "__none__",
-            self._run_time.strftime("%Y%m%dT%H%M%S.%fZ"),
+            self._run_time.astimezone(tz=datetime.timezone.utc).strftime(
+                "%Y%m%dT%H%M%S.%fZ"
+            ),
         )
 
     def __repr__(self):
