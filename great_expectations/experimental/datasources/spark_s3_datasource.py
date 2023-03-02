@@ -112,7 +112,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
 
         Args:
             name: The name of the CSV asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches CSV filenames that is used to label the batches
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             prefix: S3 prefix
@@ -133,11 +133,10 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             inferSchema=infer_schema,
             order_by=order_by_sorters,
         )
-
         asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_s3_client(),
+            s3_client=self._get_s3_client(),
             batching_regex=batching_regex_pattern,
             bucket=self.bucket,
             prefix=prefix,
@@ -152,7 +151,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 bucket=self.bucket,
                 prefix=prefix,
                 delimiter=delimiter,
-                max_keys=max_keys,
             )
         )
         return self.add_asset(asset=asset)

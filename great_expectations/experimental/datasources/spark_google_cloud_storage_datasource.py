@@ -153,7 +153,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_gcs_client(),
+            gcs_client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
             bucket_or_name=self.bucket_or_name,
             prefix=prefix,
@@ -168,7 +168,6 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                 bucket_or_name=self.bucket_or_name,
                 prefix=prefix,
                 delimiter=delimiter,
-                max_results=max_results,
             )
         )
         return self.add_asset(asset=asset)

@@ -128,18 +128,16 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
-
         asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_s3_client(),
+            s3_client=self._get_s3_client(),
             batching_regex=batching_regex_pattern,
             bucket=self.bucket,
             prefix=prefix,
@@ -154,7 +152,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 bucket=self.bucket,
                 prefix=prefix,
                 delimiter=delimiter,
-                max_keys=max_keys,
             )
         )
         return self.add_asset(asset=asset)
@@ -186,18 +183,16 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = ExcelAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
-
         asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_s3_client(),
+            s3_client=self._get_s3_client(),
             batching_regex=batching_regex_pattern,
             bucket=self.bucket,
             prefix=prefix,
@@ -212,7 +207,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 bucket=self.bucket,
                 prefix=prefix,
                 delimiter=delimiter,
-                max_keys=max_keys,
             )
         )
         return self.add_asset(asset=asset)
@@ -244,18 +238,16 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = JSONAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
-
         asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_s3_client(),
+            s3_client=self._get_s3_client(),
             batching_regex=batching_regex_pattern,
             bucket=self.bucket,
             prefix=prefix,
@@ -270,7 +262,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 bucket=self.bucket,
                 prefix=prefix,
                 delimiter=delimiter,
-                max_keys=max_keys,
             )
         )
         return self.add_asset(asset=asset)
@@ -311,7 +302,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_s3_client(),
+            s3_client=self._get_s3_client(),
             batching_regex=batching_regex_pattern,
             bucket=self.bucket,
             prefix=prefix,
@@ -326,7 +317,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 bucket=self.bucket,
                 prefix=prefix,
                 delimiter=delimiter,
-                max_keys=max_keys,
             )
         )
         return self.add_asset(asset=asset)

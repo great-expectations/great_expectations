@@ -148,7 +148,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_azure_client(),
+            azure_client=self._get_azure_client(),
             batching_regex=batching_regex_pattern,
             account_name=self._account_name,
             container=container,

@@ -162,7 +162,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_gcs_client(),
+            gcs_client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
             bucket_or_name=self.bucket_or_name,
             prefix=prefix,
@@ -177,7 +177,6 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
                 bucket_or_name=self.bucket_or_name,
                 prefix=prefix,
                 delimiter=delimiter,
-                max_results=max_results,
             )
         )
         return self.add_asset(asset=asset)
@@ -209,19 +208,18 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = ExcelAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
-
         asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_gcs_client(),
+            gcs_client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
+            bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
@@ -231,25 +229,10 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             GoogleCloudStorageDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
+                bucket_or_name=self.bucket_or_name,
                 prefix=prefix,
                 delimiter=delimiter,
-                max_results=max_results,
             )
-        )
-        self._build_data_connector(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_results=max_results,
-            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
-        )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_results=max_results,
         )
         return self.add_asset(asset=asset)
 
@@ -280,19 +263,18 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = JSONAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
-
         asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_gcs_client(),
+            gcs_client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
+            bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
@@ -302,25 +284,10 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             GoogleCloudStorageDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
+                bucket_or_name=self.bucket_or_name,
                 prefix=prefix,
                 delimiter=delimiter,
-                max_results=max_results,
             )
-        )
-        self._build_data_connector(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_results=max_results,
-            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
-        )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_results=max_results,
         )
         return self.add_asset(asset=asset)
 
@@ -360,8 +327,9 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            client=self._get_gcs_client(),
+            gcs_client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
+            bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
@@ -371,25 +339,10 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             GoogleCloudStorageDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
+                bucket_or_name=self.bucket_or_name,
                 prefix=prefix,
                 delimiter=delimiter,
-                max_results=max_results,
             )
-        )
-        self._build_data_connector(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_results=max_results,
-            file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
-        )
-        self._build_test_connection_error_message(
-            data_asset_name=name,
-            batching_regex=batching_regex_pattern,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_results=max_results,
         )
         return self.add_asset(asset=asset)
 
