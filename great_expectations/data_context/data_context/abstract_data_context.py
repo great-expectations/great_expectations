@@ -153,9 +153,7 @@ if TYPE_CHECKING:
         CheckpointStore,
         EvaluationParameterStore,
     )
-    from great_expectations.data_context.store.datasource_store import (
-        DatasourceStore,
-    )
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
@@ -4657,6 +4655,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
+        # If attempting to override an existing value, ensure that the id persists
+        name = config.name
+        if not config.id and name in self._cached_datasources:
+            existing_datasource = self._cached_datasources[name]
+            if isinstance(existing_datasource, BaseDatasource):
+                config.id = existing_datasource.id
+
         # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
         if save_changes:
@@ -4668,16 +4673,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 substituted_config = self._perform_substitutions_on_datasource_config(
                     config
                 )
+
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
-                self._cached_datasources[config.name] = datasource
+                self._cached_datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 if save_changes:
                     self._datasource_store.delete(config)
                 raise e
 
-        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
+        self.config.datasources[name] = config  # type: ignore[index,assignment]
 
         return datasource
 
