@@ -203,9 +203,12 @@ class _FilePathDataAsset(DataAsset):
                 batch_spec=batch_spec
             )
 
-            batch_request.options.update(batch_definition.batch_identifiers)
+            fully_specified_batch_request = copy.deepcopy(batch_request)
+            fully_specified_batch_request.options.update(
+                batch_definition.batch_identifiers
+            )
 
-            batch_metadata = copy.deepcopy(batch_request.options)
+            batch_metadata = copy.deepcopy(fully_specified_batch_request.options)
             # TODO: <Alex>ALEX</Alex>
             # batch_metadata.update(batch_spec)
             # TODO: <Alex>ALEX</Alex>
@@ -218,7 +221,7 @@ class _FilePathDataAsset(DataAsset):
             batch = Batch(
                 datasource=self.datasource,
                 data_asset=self,
-                batch_request=batch_request,
+                batch_request=fully_specified_batch_request,
                 data=batch_data,
                 metadata=batch_metadata,
                 legacy_batch_markers=batch_markers,

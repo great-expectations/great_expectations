@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import logging
 import pathlib
 import re
@@ -378,3 +379,23 @@ def test_test_connection_failures(
         spark_filesystem_datasource.test_connection()
 
     assert str(e.value) == str(test_connection_error)
+
+
+@pytest.mark.unit
+def test_get_batch_list_from_batch_request_does_not_modify_input_batch_request(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+):
+    asset = spark_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        header=True,
+        infer_schema=True,
+    )
+    request = asset.build_batch_request({"year": "2018"})
+    request_before_call = copy.deepcopy(request)
+    batches = asset.get_batch_list_from_batch_request(request)
+    # We assert the request before the call to get_batch_list_from_batch_request is equal to the request after the
+    # call. This test exists because this call was modifying the request.
+    assert request == request_before_call
+    # We get all 12 batches, one for each month of 2018.
+    assert len(batches) == 12
