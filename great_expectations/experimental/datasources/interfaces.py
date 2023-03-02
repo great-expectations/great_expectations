@@ -24,11 +24,21 @@ from typing import (
 import pandas as pd
 import pydantic
 from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
-from pydantic import dataclasses as pydantic_dc
+
+# TODO: <Alex>ALEX</Alex>
+# from pydantic import dataclasses as pydantic_dc
+# TODO: <Alex>ALEX</Alex>
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.experimental.datasources.constants import _FIELDS_ALWAYS_SET
+
+# TODO: <Alex>ALEX</Alex>
+from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
+    Sorter as BatchSorter,
+)
+
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
@@ -80,13 +90,20 @@ class BatchRequest:
     options: BatchRequestOptions
 
 
-@pydantic_dc.dataclass(frozen=True)
-class BatchSorter:
-    key: str
-    reverse: bool = False
+# TODO: <Alex>ALEX</Alex>
+# @pydantic_dc.dataclass(frozen=True)
+# class BatchSorter:
+#     key: str
+#     reverse: bool = False
+# TODO: <Alex>ALEX</Alex>
 
 
-BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str, dict]]
+# TODO: <Alex>ALEX</Alex>
+# BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str, dict]]
+# TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
+BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str]]
+# TODO: <Alex>ALEX</Alex>
 
 
 def _is_batch_sorter_list(
