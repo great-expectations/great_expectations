@@ -12,30 +12,35 @@ DocsExampleParser.get_names_from_usage_in_docs_examples()
     that are GX related (by checking the import location).
 2. AST walk through docs examples to find all method calls (currently we only
     retrieve the names, not the location of the method definition). These are
-    not filtered to be only GX related, we filter in step 4.
+    not filtered to be only GX related, we filter in step 6.
+3. Scan all code examples for class names used in yaml strings.
 
 CodeParser.get_all_class_method_and_function_definitions()
 
-3. AST walk through full GX codebase to find all classes and method names from
+4. AST walk through full GX codebase to find all classes and method names from
     their definitions, and capture the definition file location.
 
 PublicAPIChecker
-4. Get list of classes & methods that are marked `public_api`.
+5. Get list of classes & methods that are marked `public_api`.
+
+parse_docs_contents_for_class_names()
+
+Scan docs content for class names used in yaml strings.
 
 CodeReferenceFilter
 
-5. Filter list of classes & methods from docs examples to only those found in
+6. Filter list of classes & methods from docs examples to only those found in
     the GX codebase (e.g. filter out print() or other python or 3rd party
     classes/methods).
-6. Use this filtered list against the list of class and method definitions in
+7. Use this filtered list against the list of class and method definitions in
     the GX codebase to generate the full list with definition locations in the
     GX codebase.
-7. Filter out private methods and classes.
-8. Filter or include based on Include and Exclude directives (include overrides).
-9. Filter out methods that are not marked @public_api
+8. Filter out private methods and classes.
+9. Filter or include based on Include and Exclude directives (include overrides).
+10. Filter out methods that are not marked @public_api
 
 PublicAPIReport
-10. Generate report based on list of Definitions.
+11. Generate report based on list of Definitions.
 
 
 Typical usage example:
@@ -51,6 +56,7 @@ import glob
 import logging
 import operator
 import pathlib
+import re
 import sys
 from dataclasses import dataclass
 from typing import List, Optional, Set, Union, cast
@@ -164,7 +170,11 @@ class DocsExampleParser:
         import_names = self._get_non_private_gx_import_names(imports=gx_imports)
         logger.debug(f"import_names: {import_names}")
 
-        return function_names | import_names
+        pattern = re.compile(r"class_name: (\w+)")
+        matches = re.finditer(pattern, file_contents.contents)
+        yaml_names = {m.group(1) for m in matches}
+
+        return function_names | import_names | yaml_names
 
     def _list_all_gx_imports(
         self, tree: ast.AST
@@ -373,6 +383,36 @@ class CodeParser:
                 function_definitions.append(node)
 
         return function_definitions
+
+
+def parse_docs_contents_for_class_names(file_contents: Set[FileContents]) -> Set[str]:
+    """Parse contents of documentation for class names.
+
+    Parses based on class names used in yaml examples e.g. Datasource and
+    SqlAlchemyExecutionEngine in the below example:
+
+    name: my_datasource_name
+    class_name: Datasource
+    execution_engine:
+      class_name: SqlAlchemyExecutionEngine
+
+    Args:
+        file_contents: Contents from .md and .mdx files that may contain yaml examples.
+
+    Returns:
+        Unique class names used in documentation files.
+    """
+
+    all_usages = set()
+    pattern = re.compile(r"class_name: (\w+)")
+
+    for single_file_contents in file_contents:
+
+        matches = re.finditer(pattern, single_file_contents.contents)
+        yaml_names = {m.group(1) for m in matches}
+        all_usages |= yaml_names
+
+    return all_usages
 
 
 def get_shortest_dotted_path(
@@ -1431,6 +1471,13 @@ class CodeReferenceFilter:
             name="get_available_data_asset_names",
             filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="Fluent-style read_csv is not referenced in the docs yet, but due to string matching it is being flagged.",
+            name="read_csv",
+            filepath=pathlib.Path(
+                "great_expectations/experimental/datasources/pandas_datasource.py"
+            ),
+        ),
     ]
 
     def __init__(
@@ -1439,6 +1486,7 @@ class CodeReferenceFilter:
         docs_example_parser: DocsExampleParser,
         code_parser: CodeParser,
         public_api_checker: PublicAPIChecker,
+        references_from_docs_content: set[str] | None = None,
         excludes: Union[List[IncludeExcludeDefinition], None] = None,
         includes: Union[List[IncludeExcludeDefinition], None] = None,
     ) -> None:
@@ -1460,6 +1508,11 @@ class CodeReferenceFilter:
         self.docs_example_parser = docs_example_parser
         self.code_parser = code_parser
         self.public_api_checker = public_api_checker
+
+        if not references_from_docs_content:
+            self.references_from_docs_content = set()
+        else:
+            self.references_from_docs_content = references_from_docs_content
 
         if not excludes:
             self.excludes = self.DEFAULT_EXCLUDES
@@ -1484,11 +1537,13 @@ class CodeReferenceFilter:
         Returns:
             Definitions that pass all filters.
         """
-        usages_in_docs_examples: Set[str] = self._docs_examples_usages()
+        usages_in_docs_examples_and_docs_content: Set[str] = (
+            self._docs_examples_usages() | self.references_from_docs_content
+        )
         gx_definitions_used_in_docs_examples: Set[
             Definition
         ] = self._filter_gx_definitions_from_docs_examples(
-            gx_usages_in_docs_examples=usages_in_docs_examples
+            gx_usages_in_docs_examples=usages_in_docs_examples_and_docs_content
         )
         non_private_definitions: Set[Definition] = self._filter_private_entities(
             definitions=gx_definitions_used_in_docs_examples
@@ -1701,7 +1756,7 @@ class PublicAPIReport:
         seen = set()
         no_duplicates = []
         for s in strings:
-            if not s in seen:
+            if s not in seen:
                 no_duplicates.append(s)
                 seen.add(s)
 
@@ -1726,6 +1781,15 @@ def _default_code_absolute_paths() -> Set[pathlib.Path]:
     return {pathlib.Path(p) for p in paths}
 
 
+def _default_docs_absolute_paths() -> Set[pathlib.Path]:
+    """All Great Expectations modules related to the main library."""
+    base_directory = _repo_root() / "docs"
+    paths = []
+    for extension in ("md", "mdx", "yml", "yaml"):
+        paths.extend(glob.glob(f"{base_directory}/**/*.{extension}", recursive=True))
+    return {pathlib.Path(p) for p in paths}
+
+
 def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
     with open(filepath) as f:
         file_contents: str = f.read()
@@ -1744,6 +1808,10 @@ def main():
         _default_code_absolute_paths()
     )
 
+    references_from_docs_content = parse_docs_contents_for_class_names(
+        FileContents.create_from_local_files(_default_docs_absolute_paths())
+    )
+
     docs_example_parser = DocsExampleParser(file_contents=docs_example_file_contents)
 
     code_parser = CodeParser(file_contents=code_file_contents)
@@ -1755,6 +1823,7 @@ def main():
         docs_example_parser=docs_example_parser,
         code_parser=code_parser,
         public_api_checker=public_api_checker,
+        references_from_docs_content=references_from_docs_content,
     )
 
     filtered_definitions = code_reference_filter.filter_definitions()
@@ -1774,7 +1843,7 @@ def main():
     # any methods or classes you are adding to documentation with the @public_api
     # decorator and any relevant "new" or "deprecated" public api decorators.
     # If the actual is lower than the threshold, please reduce the threshold.
-    PUBLIC_API_MISSING_THRESHOLD = 58
+    PUBLIC_API_MISSING_THRESHOLD = 86
     if len(printable_definitions) != PUBLIC_API_MISSING_THRESHOLD:
         error_msg_prefix = f"There are {len(printable_definitions)} items missing from the public API, we currently allow {PUBLIC_API_MISSING_THRESHOLD}."
         if len(printable_definitions) > PUBLIC_API_MISSING_THRESHOLD:
