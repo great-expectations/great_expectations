@@ -142,7 +142,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """
-        test_connection_error_message_template: str = 'No file in bucket "{bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        test_connection_error_message_template: str = 'No file at base_directory path "{self.base_directory.resolve()}" matched regular expressions pattern "{batching_regex_pattern.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}".'
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
