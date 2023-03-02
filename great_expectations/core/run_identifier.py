@@ -55,8 +55,9 @@ class RunIdentifier(DataContextKey):
 
         run_time = run_time or datetime.datetime.now(tz=datetime.timezone.utc)
         if not run_time.tzinfo:
-            # this takes the given time and just adds timezone (no conversion)
-            run_time = run_time.replace(tzinfo=datetime.timezone.utc)
+            # This will change the timzeone to UTC, and convert the time based
+            # on assuming that the current time is in local.
+            run_time = run_time.astimezone(tz=datetime.timezone.utc)
 
         self._run_time = run_time
 
