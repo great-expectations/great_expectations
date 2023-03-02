@@ -36,6 +36,7 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
 )
+from great_expectations.validator.validator import Validator
 
 yaml = YAMLHandler()
 
@@ -1448,6 +1449,61 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
 
     assert "checkpoint_name" in validation_result.meta
     assert validation_result.meta["checkpoint_name"] == checkpoint_name
+
+
+# TODO: <Alex>ALEX</Alex>
+@pytest.mark.slow  # 1.15s
+def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_specified(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    batch_request_as_dict: dict = {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    context.add_expectation_suite("my_expectation_suite")
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="my_expectation_suite",
+    )
+    with pytest.raises(
+        gx_exceptions.DataContextError,
+        match=r'Checkpoint "my_checkpoint" cannot contain both validator and a batch_request.',
+    ):
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=context,
+            config_version=1,
+            run_name_template="%Y-%M-foo-bar-template",
+            expectation_suite_name="my_expectation_suite",
+            batch_request=batch_request,
+            validator=validator,
+            action_list=[
+                {
+                    "name": "store_validation_result",
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {
+                        "class_name": "StoreEvaluationParametersAction",
+                    },
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
+                },
+            ],
+        )
+
+
+# TODO: <Alex>ALEX</Alex>
 
 
 @pytest.mark.slow  # 1.15s

@@ -104,6 +104,8 @@ class BaseCheckpoint(ConfigPeer):
 
         self._checkpoint_config = checkpoint_config
 
+        self._validator: Optional[Validator] = None
+
     # TODO: Add eval param processing using new TBD parser syntax and updated EvaluationParameterParser and
     #  parse_evaluation_parameters function (e.g. datetime substitution or specifying relative datetimes like "most
     #  recent"). Currently, environment variable substitution is the only processing applied to evaluation parameters,
@@ -404,7 +406,7 @@ class BaseCheckpoint(ConfigPeer):
                     self._data_context._determine_if_expectation_validation_result_include_rendered_content()
                 )
 
-            validator: Validator = self.data_context.get_validator(
+            validator: Validator = self._validator or self.data_context.get_validator(
                 batch_request=batch_request,
                 expectation_suite_name=expectation_suite_name
                 if not self._using_cloud_context
@@ -700,12 +702,12 @@ class Checkpoint(BaseCheckpoint):
     ) -> None:
         if not bool(batch_request) ^ bool(validator):
             raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{self.name}" cannot contain both validator and a batch_request.'
+                f'Checkpoint "{name}" cannot contain both validator and a batch_request.'
             )
 
         if validator and batch_request_in_validations(validations=validations):
             raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{self.name}" cannot contain both validator and a batch_request in validations.'
+                f'Checkpoint "{name}" cannot contain both validator and a batch_request in validations.'
             )
 
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
@@ -745,6 +747,8 @@ constructor arguments.
             checkpoint_config=checkpoint_config,
             data_context=data_context,
         )
+
+        self._validator = validator
 
     def run_with_runtime_args(
         self,
@@ -1280,6 +1284,7 @@ class SimpleCheckpoint(Checkpoint):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1324,6 +1329,7 @@ class SimpleCheckpoint(Checkpoint):
             run_name_template=checkpoint_config.run_name_template,
             expectation_suite_name=checkpoint_config.expectation_suite_name,
             batch_request=batch_request,
+            validator=validator,
             action_list=checkpoint_config.action_list,
             evaluation_parameters=checkpoint_config.evaluation_parameters,
             runtime_configuration=checkpoint_config.runtime_configuration,
