@@ -37,6 +37,12 @@ from great_expectations.experimental.datasources.sources import (
 )
 
 if TYPE_CHECKING:
+    import os
+    import sqlite3
+
+    import pandas as pd
+    import sqlalchemy
+
     from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.experimental.datasources.interfaces import (
         BatchRequestOptions,
@@ -347,7 +353,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_excel_asset(
-        self, name: str, io: str, **kwargs
+        self, name: str, io: str | bytes | os.PathLike, **kwargs
     ) -> ExcelAsset:  # type: ignore[valid-type]
         asset = ExcelAsset(
             name=name,
@@ -358,7 +364,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_excel(
         self,
-        io: str,
+        io: str | bytes | os.PathLike,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -422,7 +428,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_hdf_asset(
-        self, name: str, path_or_buf: str, **kwargs
+        self, name: str, path_or_buf: str | os.PathLike | pd.HDFStore, **kwargs
     ) -> HDFAsset:  # type: ignore[valid-type]
         asset = HDFAsset(
             name=name,
@@ -433,7 +439,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_hdf(
         self,
-        path_or_buf: str,
+        path_or_buf: str | os.PathLike | pd.HDFStore,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -447,7 +453,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_html_asset(
-        self, name: str, io: str, **kwargs
+        self, name: str, io: str | os.PathLike, **kwargs
     ) -> HTMLAsset:  # type: ignore[valid-type]
         asset = HTMLAsset(
             name=name,
@@ -458,7 +464,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_html(
         self,
-        io: str,
+        io: str | os.PathLiker,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -472,7 +478,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_json_asset(
-        self, name: str, path_or_buf: str, **kwargs
+        self, name: str, path_or_buf: pydantic.Json | pydantic.FilePath, **kwargs
     ) -> JSONAsset:  # type: ignore[valid-type]
         asset = JSONAsset(
             name=name,
@@ -483,7 +489,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_json(
         self,
-        path_or_buf: str,
+        path_or_buf: pydantic.Json | pydantic.FilePath,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -497,7 +503,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_orc_asset(
-        self, name: str, path: str, **kwargs
+        self, name: str, path: pydantic.FilePath, **kwargs
     ) -> ORCAsset:  # type: ignore[valid-type]
         asset = ORCAsset(
             name=name,
@@ -508,7 +514,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_orc(
         self,
-        path: str,
+        path: pydantic.FilePath,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -522,7 +528,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_parquet_asset(
-        self, name: str, path: str, **kwargs
+        self, name: str, path: pydantic.FilePath, **kwargs
     ) -> ParquetAsset:  # type: ignore[valid-type]
         asset = ParquetAsset(
             name=name,
@@ -533,7 +539,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_parquet(
         self,
-        path: str,
+        path: pydantic.FilePath,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -597,7 +603,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_spss_asset(
-        self, name: str, path: str, **kwargs
+        self, name: str, path: pydantic.FilePath, **kwargs
     ) -> SPSSAsset:  # type: ignore[valid-type]
         asset = SPSSAsset(
             name=name,
@@ -608,7 +614,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_spss(
         self,
-        path: str,
+        path: pydantic.FilePath,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -622,7 +628,11 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_sql_asset(
-        self, name: str, sql: str, con: str, **kwargs
+        self,
+        name: str,
+        sql: str | sqlalchemy.select | sqlalchemy.text,
+        con: str | sqlalchemy.engine.Engine | sqlite3.Connection,
+        **kwargs,
     ) -> SQLAsset:  # type: ignore[valid-type]
         asset = SQLAsset(
             name=name,
@@ -634,8 +644,8 @@ class PandasDatasource(_PandasDatasource):
 
     def read_sql(
         self,
-        sql: str,
-        con: str,
+        sql: str | sqlalchemy.select | sqlalchemy.text,
+        con: str | sqlalchemy.engine.Engine | sqlite3.Connection,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -650,7 +660,11 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_sql_query_asset(
-        self, name: str, sql: str, con: str, **kwargs
+        self,
+        name: str,
+        sql: str | sqlalchemy.select | sqlalchemy.text,
+        con: str | sqlalchemy.engine.Engine | sqlite3.Connection,
+        **kwargs,
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
         asset = SQLQueryAsset(
             name=name,
@@ -662,8 +676,8 @@ class PandasDatasource(_PandasDatasource):
 
     def read_sql_query(
         self,
-        sql: str,
-        con: str,
+        sql: str | sqlalchemy.select | sqlalchemy.text,
+        con: str | sqlalchemy.engine.Engine | sqlite3.Connection,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -678,7 +692,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_sql_table_asset(
-        self, name: str, table_name: str, con: str, **kwargs
+        self, name: str, table_name: str, con: str | sqlalchemy.engine.Engine, **kwargs
     ) -> SQLTableAsset:  # type: ignore[valid-type]
         asset = SQLTableAsset(
             name=name,
@@ -691,7 +705,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql_table(
         self,
         table_name: str,
-        con: str,
+        con: str | sqlalchemy.engine.Engine,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:

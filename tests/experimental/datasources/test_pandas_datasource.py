@@ -342,7 +342,7 @@ class TestDynamicPandasAssets:
         mocker,
         empty_data_context: AbstractDataContext,
         read_method_name: str,
-        positional_args: dict[str, Any],
+        positional_args: dict[str, str | pathlib.Path],
         request,
     ):
         if "valid_file_path" in positional_args.values():
