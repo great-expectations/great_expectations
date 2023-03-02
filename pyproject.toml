@@ -242,7 +242,6 @@ ignore = [
     "TCH004", # runtime-import-in-type-checking-block
 ]
 extend-exclude = [
-    "scripts/*",
     "docs/*",
     "build/*",
     "assets/*",
