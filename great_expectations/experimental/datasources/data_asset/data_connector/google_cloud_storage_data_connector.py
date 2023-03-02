@@ -16,9 +16,6 @@ if TYPE_CHECKING:
     from google.cloud.storage.client import Client as GCSClient
 
     from great_expectations.core.batch import BatchDefinition
-    from great_expectations.experimental.datasources.data_asset.data_connector.data_connector import (
-        _ClientT,
-    )
 
 
 logger = logging.getLogger(__name__)
@@ -83,41 +80,83 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         cls,
         datasource_name: str,
         data_asset_name: str,
-        client: Optional[_ClientT] = None,
-        **kwargs,
+        batching_regex: re.Pattern,
+        gcs_client: GCSClient,
+        bucket_or_name: str,
+        prefix: str = "",
+        delimiter: str = "/",
+        max_results: Optional[int] = None,
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # sorters: Optional[list] = None,
+        # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Optional[Callable] = None,
     ) -> GoogleCloudStorageDataConnector:
         """Builds "GoogleCloudStorageDataConnector", which links named DataAsset to Google Cloud Storage.
 
         Args:
             datasource_name: The name of the Datasource associated with this "GoogleCloudStorageDataConnector" instance
             data_asset_name: The name of the DataAsset using this "GoogleCloudStorageDataConnector" instance
-            client: Google Cloud Storage Client reference handle
-            kwargs: Extra keyword arguments allow specification of arguments used by given "GoogleCloudStorageDataConnector" constructor
+            batching_regex: A regex pattern for partitioning data references
+            gcs_client: Reference to instantiated Google Cloud Storage client handle
+            bucket_or_name: bucket name for Google Cloud Storage
+            prefix: GCS prefix
+            delimiter: GCS delimiter
+            max_results: max blob filepaths to return
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # sorters: optional list of sorters for sorting data_references
+            file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
+            # TODO: <Alex>ALEX</Alex>
+
+        Returns:
+            Instantiated "GoogleCloudStorageDataConnector" object
         """
         return GoogleCloudStorageDataConnector(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            gcs_client=client,
-            bucket_or_name=kwargs.pop("bucket_or_name"),
-            **kwargs,
+            batching_regex=batching_regex,
+            gcs_client=gcs_client,
+            bucket_or_name=bucket_or_name,
+            prefix=prefix,
+            delimiter=delimiter,
+            max_results=max_results,
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # sorters=sorters,
+            # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn=file_path_template_map_fn,
         )
 
     @classmethod
-    def build_test_connection_error_message(cls, data_asset_name: str, **kwargs) -> str:
+    def build_test_connection_error_message(
+        cls,
+        data_asset_name: str,
+        batching_regex: re.Pattern,
+        bucket_or_name: str,
+        prefix: str = "",
+        delimiter: str = "/",
+    ) -> str:
         """Builds helpful error message for reporting issues when linking named DataAsset to Google Cloud Storage.
 
         Args:
             data_asset_name: The name of the DataAsset using this "GoogleCloudStorageDataConnector" instance
-            kwargs: Extra keyword arguments allow specification of arguments used by given "GoogleCloudStorageDataConnector" constructor
+            batching_regex: A regex pattern for partitioning data references
+            bucket_or_name: bucket name for Google Cloud Storage
+            prefix: GCS prefix
+            delimiter: GCS delimiter
+
+        Returns:
+            Customized error message
         """
         test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
         return test_connection_error_message_template.format(
             **{
-                **{
-                    "bucket_or_name": kwargs.pop("bucket_or_name"),
-                    "data_asset_name": data_asset_name,
-                },
-                **kwargs,
+                "data_asset_name": data_asset_name,
+                "batching_regex": batching_regex,
+                "bucket_or_name": bucket_or_name,
+                "prefix": prefix,
+                "delimiter": delimiter,
             }
         )
 
