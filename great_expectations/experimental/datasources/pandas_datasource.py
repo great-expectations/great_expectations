@@ -797,49 +797,96 @@ class PandasDatasource(_PandasDatasource):
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
     add_clipboard_asset.__signature__ = _merge_signatures(add_clipboard_asset, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
+    read_clipboard.__signature__ = _merge_signatures(read_clipboard, ClipboardAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset, exclude={"type"})  # type: ignore[attr-defined]
+    read_csv.__signature__ = _merge_signatures(read_csv, CSVAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
+    read_excel.__signature__ = _merge_signatures(read_excel, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_feather_asset.__signature__ = _merge_signatures(add_feather_asset, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
+    read_feather.__signature__ = _merge_signatures(read_feather, FeatherAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_gbq_asset.__signature__ = _merge_signatures(add_gbq_asset, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
+    read_gbq.__signature__ = _merge_signatures(read_gbq, GBQAsset, exclude={"type"})  # type: ignore[attr-defined]
     add_hdf_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_hdf_asset, HDFAsset, exclude={"type"}
+    )
+    read_hdf.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_hdf, HDFAsset, exclude={"type"}
     )
     add_html_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_html_asset, HTMLAsset, exclude={"type"}
     )
+    read_html.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_html, HTMLAsset, exclude={"type"}
+    )
     add_json_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_json_asset, JSONAsset, exclude={"type"}
+    )
+    read_json.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_json, JSONAsset, exclude={"type"}
     )
     add_orc_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_orc_asset, ORCAsset, exclude={"type"}
     )
+    read_orc.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_orc, ORCAsset, exclude={"type"}
+    )
     add_parquet_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_parquet_asset, ParquetAsset, exclude={"type"}
+    )
+    read_parquet.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_parquet, ParquetAsset, exclude={"type"}
     )
     add_pickle_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_pickle_asset, PickleAsset, exclude={"type"}
     )
+    read_pickle.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_pickle, PickleAsset, exclude={"type"}
+    )
     add_sas_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_sas_asset, SASAsset, exclude={"type"}
+    )
+    read_sas.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_sas, SASAsset, exclude={"type"}
     )
     add_spss_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_spss_asset, SPSSAsset, exclude={"type"}
     )
+    read_spss.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_spss, SPSSAsset, exclude={"type"}
+    )
     add_sql_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_sql_asset, SQLAsset, exclude={"type"}
+    )
+    read_sql.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_sql, SQLAsset, exclude={"type"}
     )
     add_sql_query_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_sql_query_asset, SQLQueryAsset, exclude={"type"}
     )
+    read_sql_query.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_sql_query, SQLQueryAsset, exclude={"type"}
+    )
     add_sql_table_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_sql_table_asset, SQLTableAsset, exclude={"type"}
+    )
+    read_sql_table.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_sql_table, SQLTableAsset, exclude={"type"}
     )
     add_stata_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_stata_asset, StataAsset, exclude={"type"}
     )
+    read_stata.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_stata, StataAsset, exclude={"type"}
+    )
     add_table_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_table_asset, TableAsset, exclude={"type"}
     )
+    read_table.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_table, TableAsset, exclude={"type"}
+    )
     add_xml_asset.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
         add_xml_asset, XMLAsset, exclude={"type"}
+    )
+    read_xml.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+        read_xml, XMLAsset, exclude={"type"}
     )
