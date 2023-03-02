@@ -446,7 +446,7 @@ def batch_request_in_validations(
     validations: Optional[List[dict]] = None,
 ) -> bool:
     if validations is not None:
-        for idx, val in enumerate(validations):
+        for val in validations:
             if val.get("batch_request") is not None:
                 return True
 
@@ -457,7 +457,7 @@ def batch_request_in_validations_contains_batch_data(
     validations: Optional[List[dict]] = None,
 ) -> bool:
     if validations is not None:
-        for idx, val in enumerate(validations):
+        for val in validations:
             if (
                 val.get("batch_request") is not None
                 and isinstance(val.get("batch_request"), (dict, DictDot))

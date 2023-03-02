@@ -6,7 +6,6 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations import DataContext
 from great_expectations.checkpoint import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.checkpoint import (
     Checkpoint,
@@ -17,6 +16,7 @@ from great_expectations.checkpoint.checkpoint import (
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
+from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
@@ -75,7 +75,7 @@ def slack_notification_action(webhook):
 def context_with_data_source_and_empty_suite(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     datasources = context.list_datasources()
     assert datasources[0]["class_name"] == "Datasource"
     assert "my_special_data_connector" in datasources[0]["data_connectors"].keys()
@@ -869,7 +869,7 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_chec
     webhook,
     one_validation,
 ):
-    context: DataContext = context_with_data_source_and_empty_suite
+    context: FileDataContext = context_with_data_source_and_empty_suite
     checkpoint_config = SimpleCheckpointConfigurator(
         "foo", context_with_data_source_and_empty_suite, slack_webhook=webhook
     ).build()
@@ -952,7 +952,7 @@ def test_simple_checkpoint_defaults_run_multiple_validations_with_persisted_chec
     simple_checkpoint_defaults,
     two_validations,
 ):
-    context: DataContext = context_with_data_source_and_empty_suite
+    context: FileDataContext = context_with_data_source_and_empty_suite
     context.add_expectation_suite("two")
     assert len(context.list_expectation_suites()) == 2
 
@@ -982,7 +982,7 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
     store_eval_parameter_action,
     update_data_docs_action,
 ):
-    context: DataContext = context_with_data_source_and_empty_suite
+    context: FileDataContext = context_with_data_source_and_empty_suite
     runtime_batch_request = RuntimeBatchRequest(
         datasource_name="my_datasource",
         data_connector_name="my_runtime_data_connector",
@@ -1024,7 +1024,7 @@ def test_simple_checkpoint_with_runtime_batch_request_and_runtime_data_connector
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_batch_data_in_validations_pandas(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -1079,7 +1079,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_batch_data_in_validations_spark(
     data_context_with_datasource_spark_engine, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = spark_session.createDataFrame(pandas_df)
 
@@ -1135,7 +1135,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_query_in_validations(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -1192,7 +1192,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_runtime_batch_request_query_in_validations(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -1265,7 +1265,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_validations(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -1309,7 +1309,7 @@ def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_v
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_top_level_batch_request(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -1366,7 +1366,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_pandas(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -1422,7 +1422,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     data_context_with_datasource_spark_engine,
     spark_session,
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = spark_session.createDataFrame(pandas_df)
 
@@ -1479,7 +1479,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -1543,7 +1543,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -1608,7 +1608,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_checkpoint_run(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -1664,7 +1664,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_pandas(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -1719,7 +1719,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_spark(
     data_context_with_datasource_spark_engine, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = spark_session.createDataFrame(pandas_df)
 
@@ -1775,7 +1775,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_query_in_checkpoint_run(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -1831,7 +1831,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_checkpoint_run_pandas(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -1886,7 +1886,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_checkpoint_run_spark(
     data_context_with_datasource_spark_engine, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = spark_session.createDataFrame(pandas_df)
 
@@ -1943,7 +1943,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_checkpoint_run_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -2006,7 +2006,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -2071,7 +2071,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_checkpoint_run_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -2134,7 +2134,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_checkpoint_run_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -2198,7 +2198,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_context_run_checkpoint(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -2258,7 +2258,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_pandas(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -2317,7 +2317,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_spark(
     data_context_with_datasource_spark_engine, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = spark_session.createDataFrame(pandas_df)
 
@@ -2377,7 +2377,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_query_in_context_run_checkpoint(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -2437,7 +2437,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_pandas(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -2496,7 +2496,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_spark(
     data_context_with_datasource_spark_engine, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = spark_session.createDataFrame(pandas_df)
 
@@ -2557,7 +2557,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_context_run_checkpoint_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -2624,7 +2624,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -2693,7 +2693,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_context_run_checkpoint_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -2760,7 +2760,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_context_run_checkpoint_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -2828,7 +2828,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 def test_simple_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_data(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -2882,7 +2882,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_printable_validation_resu
 def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_contradictory_batch_request_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -2971,7 +2971,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -3065,7 +3065,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -3173,7 +3173,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -3266,7 +3266,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -3372,7 +3372,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_correct_validation_result
 def test_simple_checkpoint_does_not_pass_dataframes_via_batch_request_into_checkpoint_store(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -3429,7 +3429,7 @@ def test_simple_checkpoint_does_not_pass_dataframes_via_batch_request_into_check
 def test_simple_checkpoint_does_not_pass_dataframes_via_validations_into_checkpoint_store(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -3489,7 +3489,7 @@ def test_simple_checkpoint_result_validations_include_rendered_content(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
 
     batch_request: dict = {
         "datasource_name": "my_datasource",
