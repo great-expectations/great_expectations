@@ -1471,6 +1471,13 @@ class CodeReferenceFilter:
             name="get_available_data_asset_names",
             filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="Fluent-style read_csv is not referenced in the docs yet, but due to string matching it is being flagged.",
+            name="read_csv",
+            filepath=pathlib.Path(
+                "great_expectations/experimental/datasources/pandas_datasource.py"
+            ),
+        ),
     ]
 
     def __init__(
