@@ -10,6 +10,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
+    batch_request_in_validations,
     batch_request_in_validations_contains_batch_data,
     get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
@@ -377,10 +378,9 @@ class BaseCheckpoint(ConfigPeer):
         validation_dict: Optional[dict] = None,
     ) -> None:
         if validation_dict is None:
-            validation_dict = {}
-            validation_dict["id"] = substituted_runtime_config.get(
-                "default_validation_id"
-            )
+            validation_dict = {
+                "id": substituted_runtime_config.get("default_validation_id")
+            }
 
         try:
             substituted_validation_dict: dict = get_substituted_validation_dict(
@@ -686,6 +686,7 @@ class Checkpoint(BaseCheckpoint):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -697,6 +698,16 @@ class Checkpoint(BaseCheckpoint):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> None:
+        if not bool(batch_request) ^ bool(validator):
+            raise gx_exceptions.CheckpointError(
+                f'Checkpoint "{self.name}" cannot contain both validator and a batch_request.'
+            )
+
+        if validator and batch_request_in_validations(validations=validations):
+            raise gx_exceptions.CheckpointError(
+                f'Checkpoint "{self.name}" cannot contain both validator and a batch_request in validations.'
+            )
+
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
         if batch_request_contains_batch_data(batch_request=batch_request):
             raise ValueError(

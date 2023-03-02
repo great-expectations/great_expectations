@@ -443,6 +443,17 @@ def get_updated_action_list(
     return list(base_action_list_dict.values())
 
 
+def batch_request_in_validations(
+    validations: Optional[List[dict]] = None,
+) -> bool:
+    if validations is not None:
+        for idx, val in enumerate(validations):
+            if val.get("batch_request") is not None:
+                return True
+
+    return False
+
+
 def batch_request_in_validations_contains_batch_data(
     validations: Optional[List[dict]] = None,
 ) -> bool:
