@@ -14,6 +14,7 @@ from typing import (
     Optional,
     Set,
     Type,
+    Union,
 )
 
 import pydantic
@@ -393,7 +394,9 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
 class PandasDatasource(_PandasDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = list(_PANDAS_ASSET_MODELS.values())
+    asset_types: ClassVar[List[Type[DataAsset]]] = list(
+        _PANDAS_ASSET_MODELS.values()
+    ).extend([DataFrameAsset])
 
     # private attributes
     _data_context = pydantic.PrivateAttr()
@@ -402,7 +405,7 @@ class PandasDatasource(_PandasDatasource):
     type: Literal["pandas"] = "pandas"
     assets: Dict[
         str,
-        _PandasDataAsset,
+        Union[_PandasDataAsset, DataFrameAsset],
     ] = {}
 
     def test_connection(self, test_assets: bool = True) -> None:
