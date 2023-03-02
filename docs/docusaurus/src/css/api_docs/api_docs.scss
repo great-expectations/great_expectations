@@ -4,13 +4,10 @@
  * We apply that class to generated API docs during the build process.
  */
 
-// SOMETHIGN IN THIS FILE
 .sphinx-api-doc {
 
     @import "pygments.scss";
-    // this had to be modified
     @import "basic-modified.scss";
-    // this had to be modified
     @import "pydata-sphinx-theme-modified.scss";
 
     // Mirror `code` selector for `cite` for inline code snippets in docstrings using backticks: ``
