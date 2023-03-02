@@ -464,7 +464,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_html(
         self,
-        io: str | os.PathLiker,
+        io: str | os.PathLike,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
