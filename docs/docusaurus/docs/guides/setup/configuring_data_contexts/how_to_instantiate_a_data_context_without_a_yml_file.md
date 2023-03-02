@@ -2,7 +2,7 @@
 title: How to instantiate a Data Context without a yml file
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
-import TechnicalTag from '/docs/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you instantiate a <TechnicalTag tag="data_context" text="Data Context" /> without a yml file, aka configure a Data Context in code. If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.) you may wish to configure your Data Context in code, within your notebook or workflow tool (e.g. Airflow DAG node).
 
