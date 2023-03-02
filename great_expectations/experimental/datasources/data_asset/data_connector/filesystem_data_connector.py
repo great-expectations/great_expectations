@@ -142,11 +142,11 @@ class FilesystemDataConnector(FilePathDataConnector):
         Returns:
             Customized error message
         """
-        test_connection_error_message_template: str = 'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex_pattern.pattern}" and/or glob_directive "{glob_directive}" for DataAsset "{name}".'
+        test_connection_error_message_template: str = 'No file at base_directory path "{base_directory}" matched regular expressions pattern "{batching_regex}" and/or glob_directive "{glob_directive}" for DataAsset "{name}".'
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex,
+                "batching_regex": batching_regex.pattern,
                 "base_directory": base_directory.resolve(),
                 "glob_directive": glob_directive,
                 "data_context_root_directory": data_context_root_directory,
