@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, List, NamedTuple, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, NamedTuple, Type, Union
 
 from _typeshed import Incomplete
 from typing_extensions import Final
@@ -27,6 +27,10 @@ from great_expectations.experimental.datasources.type_lookup import (
 )
 from great_expectations.validator.validator import Validator as Validator
 
+if TYPE_CHECKING:
+    from great_expectations.experimental.datasources import SqliteDatasource
+    from great_expectations.experimental.datasources.sqlite_datasource import SqliteDsn
+
 SourceFactoryFn: Incomplete
 logger: Incomplete
 DEFAULT_PANDAS_DATASOURCE_NAME: Final[str]
@@ -52,3 +56,6 @@ class _SourceFactories:
     def factories(self) -> List[str]: ...
     def __getattr__(self, attr_name: str): ...
     def __dir__(self) -> List[str]: ...
+    def add_sqlite(
+        self, name: str, *, connection_string: SqliteDsn
+    ) -> SqliteDatasource: ...
