@@ -11,7 +11,6 @@ from great_expectations.core.util import AzureUrl
 from great_expectations.experimental.datasources import _SparkFilePathDatasource
 from great_expectations.experimental.datasources.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
-    DataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
 from great_expectations.experimental.datasources.spark_datasource import (
@@ -34,7 +33,7 @@ logger = logging.getLogger(__name__)
 ABS_IMPORTED = False
 try:
     from azure.storage.blob import (
-        BlobServiceClient,
+        BlobServiceClient,  # noqa: disable=E0602
     )
 
     ABS_IMPORTED = True
@@ -141,27 +140,30 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
         )
-
-        data_connector: DataConnector = AzureBlobStorageDataConnector(
+        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
+            azure_client=self._get_azure_client(),
             batching_regex=batching_regex_pattern,
-            azure_client=self._azure_client,
             account_name=self._account_name,
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file belonging to account "{self._account_name}" in container "{container}" with prefix "{name_starts_with}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        asset._test_connection_error_message = (
+            AzureBlobStorageDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                account_name=self._account_name,
+                container=container,
+                name_starts_with=name_starts_with,
+                delimiter=delimiter,
+            )
         )
+        return self.add_asset(asset=asset)

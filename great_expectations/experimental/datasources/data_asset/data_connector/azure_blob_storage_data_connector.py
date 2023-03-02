@@ -75,6 +75,94 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
+    @classmethod
+    def build_data_connector(
+        cls,
+        datasource_name: str,
+        data_asset_name: str,
+        batching_regex: re.Pattern,
+        azure_client: BlobServiceClient,
+        account_name: str,
+        container: str,
+        name_starts_with: str = "",
+        delimiter: str = "/",
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # sorters: Optional[list] = None,
+        # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Optional[Callable] = None,
+    ) -> AzureBlobStorageDataConnector:
+        """Builds "AzureBlobStorageDataConnector", which links named DataAsset to Microsoft Azure Blob Storage.
+
+        Args:
+            datasource_name: The name of the Datasource associated with this "AzureBlobStorageDataConnector" instance
+            data_asset_name: The name of the DataAsset using this "AzureBlobStorageDataConnector" instance
+            batching_regex: A regex pattern for partitioning data references
+            azure_client: Reference to instantiated Microsoft Azure Blob Storage client handle
+            account_name: account name for Microsoft Azure Blob Storage
+            container: container name for Microsoft Azure Blob Storage
+            name_starts_with: Microsoft Azure Blob Storage prefix
+            delimiter: Microsoft Azure Blob Storage delimiter
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # sorters: optional list of sorters for sorting data_references
+            file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
+            # TODO: <Alex>ALEX</Alex>
+
+        Returns:
+            Instantiated "AzureBlobStorageDataConnector" object
+        """
+        return AzureBlobStorageDataConnector(
+            datasource_name=datasource_name,
+            data_asset_name=data_asset_name,
+            batching_regex=batching_regex,
+            azure_client=azure_client,
+            account_name=account_name,
+            container=container,
+            name_starts_with=name_starts_with,
+            delimiter=delimiter,
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # sorters=sorters,
+            # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn=file_path_template_map_fn,
+        )
+
+    @classmethod
+    def build_test_connection_error_message(
+        cls,
+        data_asset_name: str,
+        batching_regex: re.Pattern,
+        account_name: str,
+        container: str,
+        name_starts_with: str = "",
+        delimiter: str = "/",
+    ) -> str:
+        """Builds helpful error message for reporting issues when linking named DataAsset to Microsoft Azure Blob Storage.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this "AzureBlobStorageDataConnector" instance
+            batching_regex: A regex pattern for partitioning data references
+            account_name: account name for Microsoft Azure Blob Storage
+            container: container name for Microsoft Azure Blob Storage
+            name_starts_with: Microsoft Azure Blob Storage prefix
+            delimiter: Microsoft Azure Blob Storage delimiter
+
+        Returns:
+            Customized error message
+        """
+        test_connection_error_message_template: str = 'No file belonging to account "{account_name}" in container "{container}" with prefix "{name_starts_with}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        return test_connection_error_message_template.format(
+            **{
+                "data_asset_name": data_asset_name,
+                "batching_regex": batching_regex.pattern,
+                "account_name": account_name,
+                "container": container,
+                "name_starts_with": name_starts_with,
+                "delimiter": delimiter,
+            }
+        )
+
     def build_batch_spec(self, batch_definition: BatchDefinition) -> AzureBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.
