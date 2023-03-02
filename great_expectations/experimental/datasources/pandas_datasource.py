@@ -20,7 +20,7 @@ import pydantic
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch_spec import PandasBatchSpec
+from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
 from great_expectations.experimental.datasources.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
@@ -80,7 +80,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
     def test_connection(self) -> None:
-        pass
+        ...
 
     def batch_request_options_template(
         self,
@@ -256,6 +256,104 @@ except KeyError as key_err:
     XMLAsset = _PandasDataAsset
 
 
+class DataFrameAsset(DataAsset):
+    dataframe: pd.DataFrame
+
+    def test_connection(self) -> None:
+        ...
+
+    def batch_request_options_template(
+        self,
+    ) -> BatchRequestOptions:
+        return {}
+
+    def get_batch_list_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> list[Batch]:
+        self._validate_batch_request(batch_request)
+        batch_list: List[Batch] = []
+
+        batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
+        execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
+        data, markers = execution_engine.get_batch_data_and_markers(
+            batch_spec=batch_spec
+        )
+
+        # batch_definition (along with batch_spec and markers) is only here to satisfy a
+        # legacy constraint when computing usage statistics in a validator. We hope to remove
+        # it in the future.
+        # imports are done inline to prevent a circular dependency with core/batch.py
+        from great_expectations.core import IDDict
+        from great_expectations.core.batch import BatchDefinition
+
+        batch_definition = BatchDefinition(
+            datasource_name=self.datasource.name,
+            data_connector_name="experimental",
+            data_asset_name=self.name,
+            batch_identifiers=IDDict(batch_request.options),
+            batch_spec_passthrough=None,
+        )
+
+        batch_metadata = copy.deepcopy(batch_request.options)
+
+        # Some pydantic annotations are postponed due to circular imports.
+        # Batch.update_forward_refs() will set the annotations before we
+        # instantiate the Batch class since we can import them in this scope.
+        Batch.update_forward_refs()
+        batch_list.append(
+            Batch(
+                datasource=self.datasource,
+                data_asset=self,
+                batch_request=batch_request,
+                data=data,
+                metadata=batch_metadata,
+                legacy_batch_markers=markers,
+                legacy_batch_spec=batch_spec,
+                legacy_batch_definition=batch_definition,
+            )
+        )
+        return batch_list
+
+    def build_batch_request(
+        self, options: Optional[BatchRequestOptions] = None
+    ) -> BatchRequest:
+        if options:
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(
+                "Data Assets associated with PandasDatasource can only contain a single batch,\n"
+                "therefore BatchRequest options cannot be supplied. BatchRequest options with keys:\n"
+                f"{actual_keys}\nwere passed.\n"
+            )
+
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options={},
+        )
+
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
+        if not (
+            batch_request.datasource_name == self.datasource.name
+            and batch_request.data_asset_name == self.name
+            and not batch_request.options
+        ):
+            expect_batch_request_form = BatchRequest(
+                datasource_name=self.datasource.name,
+                data_asset_name=self.name,
+                options={},
+            )
+            raise gx_exceptions.InvalidBatchRequestError(
+                "BatchRequest should have form:\n"
+                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
+                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+            )
+
+
 class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = []
@@ -313,6 +411,19 @@ class PandasDatasource(_PandasDatasource):
     def _get_validator(self, asset: _PandasDataAsset) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
         return self._data_context.get_validator(batch_request=batch_request)
+
+    def add_dataframe_asset(self, name: str, **kwargs) -> DataFrameAsset:
+        asset = DataFrameAsset(
+            name=name,
+            **kwargs,
+        )
+        return self.add_asset(asset=asset)
+
+    def read_dataframe(self, name: Optional[str] = None, **kwargs) -> Validator:
+        if not name:
+            name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: DataFrameAsset = self.add_dataframe_asset(name=name, **kwargs)
+        return self._get_validator(asset=asset)
 
     def add_clipboard_asset(self, name: str, **kwargs) -> ClipboardAsset:  # type: ignore[valid-type]
         asset = ClipboardAsset(
