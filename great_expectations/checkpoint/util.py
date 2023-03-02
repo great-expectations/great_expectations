@@ -225,7 +225,6 @@ def get_substituted_validation_dict(
         if validation_dict.get(attr) is not None:
             substituted_validation_dict[attr] = validation_dict[attr]
 
-    validate_validation_dict(substituted_validation_dict)
     return substituted_validation_dict
 
 
@@ -484,13 +483,17 @@ def get_validations_with_batch_request_as_dict(
     return validations
 
 
-def validate_validation_dict(validation_dict: dict) -> None:
-    if validation_dict.get("batch_request") is None:
+def validate_validation_dict(
+    validation_dict: dict, batch_request_required: bool = True
+) -> None:
+    if batch_request_required and validation_dict.get("batch_request") is None:
         raise gx_exceptions.CheckpointError("validation batch_request cannot be None")
+
     if not validation_dict.get("expectation_suite_name"):
         raise gx_exceptions.CheckpointError(
             "validation expectation_suite_name must be specified"
         )
+
     if not validation_dict.get("action_list"):
         raise gx_exceptions.CheckpointError("validation action_list cannot be empty")
 

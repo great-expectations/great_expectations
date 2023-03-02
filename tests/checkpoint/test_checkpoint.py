@@ -2,7 +2,7 @@ import logging
 import os
 import pickle
 import unittest
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 from unittest import mock
 
 import pandas as pd
@@ -41,6 +41,15 @@ from great_expectations.validator.validator import Validator
 yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture
+def batch_request_as_dict() -> Dict[str, str]:
+    return {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
 
 
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():
@@ -402,7 +411,7 @@ def test_basic_checkpoint_config_validation(
     context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
     with pytest.raises(
         gx_exceptions.DataContextError,
-        match=r'Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
+        match=r'Checkpoint "my_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
         result: CheckpointResult = context.run_checkpoint(
@@ -1151,7 +1160,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
 
     with pytest.raises(
         gx_exceptions.DataContextError,
-        match=r'Checkpoint "my_base_checkpoint" must contain either a batch_request or validations.',
+        match=r'Checkpoint "my_base_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
         result: CheckpointResult = data_context.run_checkpoint(
@@ -1451,17 +1460,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     assert validation_result.meta["checkpoint_name"] == checkpoint_name
 
 
-# TODO: <Alex>ALEX</Alex>
 @pytest.mark.slow  # 1.15s
-def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_specified(
+def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_specified_in_constructor(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    batch_request_as_dict,
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    batch_request_as_dict: dict = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "Titanic_1911",
-    }
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     context.add_expectation_suite("my_expectation_suite")
     validator: Validator = context.get_validator(
@@ -1469,8 +1473,8 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
         expectation_suite_name="my_expectation_suite",
     )
     with pytest.raises(
-        gx_exceptions.DataContextError,
-        match=r'Checkpoint "my_checkpoint" cannot contain both validator and a batch_request.',
+        gx_exceptions.CheckpointError,
+        match=r'Checkpoint "my_checkpoint" cannot be called with a validator and contain a batch_request and/or a batch_request in validations.',
     ):
         _ = Checkpoint(
             name="my_checkpoint",
@@ -1503,12 +1507,253 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
         )
 
 
-# TODO: <Alex>ALEX</Alex>
+@pytest.mark.slow  # 1.15s
+def test_newstyle_checkpoint_raises_error_if_batch_request_in_validations_and_validator_are_specified_in_constructor(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    batch_request_as_dict,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    context.add_expectation_suite("my_expectation_suite")
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="my_expectation_suite",
+    )
+    with pytest.raises(
+        gx_exceptions.CheckpointError,
+        match=r'Checkpoint "my_checkpoint" cannot be called with a validator and contain a batch_request and/or a batch_request in validations.',
+    ):
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=context,
+            config_version=1,
+            run_name_template="%Y-%M-foo-bar-template",
+            expectation_suite_name="my_expectation_suite",
+            validator=validator,
+            action_list=[
+                {
+                    "name": "store_validation_result",
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {
+                        "class_name": "StoreEvaluationParametersAction",
+                    },
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
+                },
+            ],
+            validations=[{"batch_request": batch_request}],
+        )
+
+
+@pytest.mark.slow  # 1.15s
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_constructor(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    batch_request_as_dict,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    context.add_expectation_suite("my_expectation_suite")
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="my_expectation_suite",
+    )
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        validator=validator,
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+    )
+
+    result = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.slow  # 1.15s
+def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_specified_in_run(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    batch_request_as_dict,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    context.add_expectation_suite("my_expectation_suite")
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="my_expectation_suite",
+    )
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=context,
+            config_version=1,
+            run_name_template="%Y-%M-foo-bar-template",
+            expectation_suite_name="my_expectation_suite",
+            validator=validator,
+            action_list=[
+                {
+                    "name": "store_validation_result",
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {
+                        "class_name": "StoreEvaluationParametersAction",
+                    },
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
+                },
+            ],
+        ).run(
+            validator=validator,
+        )
+
+    assert (
+        str(e.value)
+        == 'Checkpoint "my_checkpoint" has already been created with a validator and overriding it through run() is not allowed.'
+    )
+
+
+@pytest.mark.slow  # 1.15s
+def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_validations_and_validator_is_specified_in_run(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    batch_request_as_dict,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    context.add_expectation_suite("my_expectation_suite")
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="my_expectation_suite",
+    )
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=context,
+            config_version=1,
+            run_name_template="%Y-%M-foo-bar-template",
+            expectation_suite_name="my_expectation_suite",
+            action_list=[
+                {
+                    "name": "store_validation_result",
+                    "action": {
+                        "class_name": "StoreValidationResultAction",
+                    },
+                },
+                {
+                    "name": "store_evaluation_params",
+                    "action": {
+                        "class_name": "StoreEvaluationParametersAction",
+                    },
+                },
+                {
+                    "name": "update_data_docs",
+                    "action": {
+                        "class_name": "UpdateDataDocsAction",
+                    },
+                },
+            ],
+            validations=[{"batch_request": batch_request}],
+        ).run(
+            batch_request=batch_request_as_dict,
+            validator=validator,
+        )
+
+    assert (
+        str(e.value)
+        == 'Checkpoint "my_checkpoint" has already been created with a validator and overriding it by supplying batch_request and/or validations with a batch_request to run() is not allowed.'
+    )
+
+
+@pytest.mark.slow  # 1.15s
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_run(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    batch_request_as_dict,
+):
+    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    context.add_expectation_suite("my_expectation_suite")
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="my_expectation_suite",
+    )
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+    )
+
+    result = checkpoint.run(
+        validator=validator,
+    )
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
 
 
 @pytest.mark.slow  # 1.15s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    batch_request_as_dict,
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     # add checkpoint config
@@ -2348,7 +2593,7 @@ def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and
 
     with pytest.raises(
         gx_exceptions.CheckpointError,
-        match='Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
+        match='Checkpoint "my_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         checkpoint.run()
 

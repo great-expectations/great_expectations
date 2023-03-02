@@ -16,6 +16,7 @@ from great_expectations.checkpoint.util import (
     get_validations_with_batch_request_as_dict,
     substitute_runtime_config,
     substitute_template_config,
+    validate_validation_dict,
 )
 from great_expectations.core import RunIdentifier
 from great_expectations.core._docs_decorators import (
@@ -126,6 +127,7 @@ class BaseCheckpoint(ConfigPeer):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -147,6 +149,7 @@ class BaseCheckpoint(ConfigPeer):
                 variables and datetime-template syntax (e.g. "%Y-%M-staging-$MY_ENV_VAR").
             expectation_suite_name: Expectation suite associated with checkpoint.
             batch_request: Batch request describing the batch of data to validate.
+            validator: Validator objects, loaded with Batch data samples, can be supplied (in lieu of  "batch_request")
             action_list: A list of actions to perform after each batch is validated.
             evaluation_parameters: Evaluation parameters to use in generating this checkpoint.
             runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
@@ -167,8 +170,21 @@ class BaseCheckpoint(ConfigPeer):
         Returns:
             CheckpointResult
         """
+        if validator:
+            if self._validator:
+                raise gx_exceptions.CheckpointError(
+                    f'Checkpoint "{self.name}" has already been created with a validator and overriding it through run() is not allowed.'
+                )
+
+            if batch_request or batch_request_in_validations(validations=validations):
+                raise gx_exceptions.CheckpointError(
+                    f'Checkpoint "{self.name}" has already been created with a validator and overriding it by supplying batch_request and/or validations with a batch_request to run() is not allowed.'
+                )
+
+            self._validator = validator
+
         if (run_id and run_name) or (run_id and run_time):
-            gx_exceptions.InvalidCheckpointConfigError(
+            raise gx_exceptions.InvalidCheckpointConfigError(
                 "Please provide either a run_id or run_name and/or run_time"
             )
 
@@ -213,15 +229,15 @@ class BaseCheckpoint(ConfigPeer):
         batch_request = substituted_runtime_config.get("batch_request")
         validations = cast(list, substituted_runtime_config.get("validations") or [])
 
-        if len(validations) == 0 and not batch_request:
-            raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{self.name}" must contain either a batch_request or validations.'
-            )
-
         if run_name is None and run_name_template is not None:
             run_name = run_time.strftime(run_name_template)
 
         run_id = run_id or RunIdentifier(run_name=run_name, run_time=run_time)
+
+        if len(validations) == 0 and not (batch_request or self._validator):
+            raise gx_exceptions.CheckpointError(
+                f'Checkpoint "{self.name}" must be called with a validator or contain either a batch_request or validations.'
+            )
 
         # Ensure that validations dicts have the most specific id available
         # (default to Checkpoint's default_validation_id if no validations were passed in the signature)
@@ -389,6 +405,11 @@ class BaseCheckpoint(ConfigPeer):
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
             )
+            validate_validation_dict(
+                validation_dict=substituted_validation_dict,
+                batch_request_required=(not self._validator),
+            )
+
             batch_request: Union[
                 BatchRequest, RuntimeBatchRequest
             ] = substituted_validation_dict.get("batch_request")
@@ -700,14 +721,11 @@ class Checkpoint(BaseCheckpoint):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> None:
-        if not bool(batch_request) ^ bool(validator):
+        if validator and (
+            batch_request or batch_request_in_validations(validations=validations)
+        ):
             raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{name}" cannot contain both validator and a batch_request.'
-            )
-
-        if validator and batch_request_in_validations(validations=validations):
-            raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{name}" cannot contain both validator and a batch_request in validations.'
+                f'Checkpoint "{name}" cannot be called with a validator and contain a batch_request and/or a batch_request in validations.'
             )
 
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
@@ -1351,6 +1369,7 @@ class SimpleCheckpoint(Checkpoint):
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -1377,6 +1396,7 @@ class SimpleCheckpoint(Checkpoint):
                 variables and datetime-template syntax (e.g. "%Y-%M-staging-$MY_ENV_VAR").
             expectation_suite_name: Expectation suite associated with checkpoint.
             batch_request: Batch request describing the batch of data to validate.
+            validator: Validator objects, loaded with Batch data samples, can be supplied (in lieu of  "batch_request")
             action_list: A list of actions to perform after each batch is validated.
             evaluation_parameters: Evaluation parameters to use in generating this checkpoint.
             runtime_configuration: Runtime configuration to pass into the validator's runtime configuration
@@ -1417,6 +1437,7 @@ class SimpleCheckpoint(Checkpoint):
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
             batch_request=batch_request,
+            validator=validator,
             action_list=new_baseline_config.action_list
             if new_baseline_config
             else action_list,

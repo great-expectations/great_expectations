@@ -1,5 +1,6 @@
+import copy
 import os
-from typing import Union
+from typing import Dict, List, Union
 
 import pandas as pd
 import pytest
@@ -84,24 +85,44 @@ def context_with_data_source_and_empty_suite(
 
 
 @pytest.fixture
-def simple_checkpoint_defaults(context_with_data_source_and_empty_suite):
+def simple_checkpoint_defaults(
+    context_with_data_source_and_empty_suite,
+) -> SimpleCheckpoint:
     return SimpleCheckpoint(
         name="foo", data_context=context_with_data_source_and_empty_suite
     )
 
 
 @pytest.fixture
-def two_validations(one_validation):
+def batch_request_as_dict() -> Dict[str, str]:
+    return {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_special_data_connector",
+        "data_asset_name": "users",
+    }
+
+
+@pytest.fixture
+def one_validation(
+    batch_request_as_dict: Dict[str, str]
+) -> Dict[str, Union[str, Dict[str, str]]]:
+    return {
+        "batch_request": batch_request_as_dict,
+        "expectation_suite_name": "one",
+    }
+
+
+@pytest.fixture
+def two_validations(
+    one_validation: Dict[str, Union[str, Dict[str, str]]]
+) -> List[Dict[str, Union[str, Dict[str, str]]]]:
+    second_validation: Dict[str, Union[str, Dict[str, str]]] = copy.deepcopy(
+        one_validation
+    )
+    second_validation["expectation_suite_name"] = "two"
     return [
         one_validation,
-        {
-            "batch_request": {
-                "datasource_name": "my_datasource",
-                "data_connector_name": "my_special_data_connector",
-                "data_asset_name": "users",
-            },
-            "expectation_suite_name": "two",
-        },
+        second_validation,
     ]
 
 
@@ -454,7 +475,7 @@ def test_simple_checkpoint_defaults_run_and_no_run_params_raises_checkpoint_erro
         # noinspection PyUnusedLocal
         result: CheckpointResult = simple_checkpoint_defaults.run()
     assert (
-        'Checkpoint "foo" must contain either a batch_request or validations.'
+        'Checkpoint "foo" must be called with a validator or contain either a batch_request or validations.'
         in str(cpe.value)
     )
 
@@ -870,18 +891,6 @@ def test_simple_checkpoint_defaults_run_and_basic_run_params_with_persisted_chec
     assert result.success
 
 
-@pytest.fixture
-def one_validation():
-    return {
-        "batch_request": {
-            "datasource_name": "my_datasource",
-            "data_connector_name": "my_special_data_connector",
-            "data_asset_name": "users",
-        },
-        "expectation_suite_name": "one",
-    }
-
-
 @pytest.mark.slow  # 1.12s
 def test_simple_checkpoint_defaults_run_with_top_level_batch_request_and_suite(
     context_with_data_source_and_empty_suite, simple_checkpoint_defaults
@@ -1292,7 +1301,7 @@ def test_simple_checkpoint_raise_error_when_run_when_missing_batch_request_and_v
 
     with pytest.raises(
         gx_exceptions.CheckpointError,
-        match='Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
+        match='Checkpoint "my_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         checkpoint.run()
 
