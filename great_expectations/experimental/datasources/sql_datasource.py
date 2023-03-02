@@ -4,6 +4,7 @@ import copy
 import dataclasses
 from pprint import pformat as pf
 from typing import (
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Dict,
@@ -37,14 +38,13 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
     TestConnectionError,
 )
+from great_expectations.util import maybe_import_module
 
-SQLALCHEMY_IMPORTED = False
-try:
-    import sqlalchemy
+sqlalchemy = maybe_import_module("sqlalchemy")
 
-    SQLALCHEMY_IMPORTED = True
-except ImportError:
-    pass
+if TYPE_CHECKING:
+    # sqlalchemy is a hard requirement for type checking
+    import sqlalchemy  # noqa: TCH004
 
 
 class SQLDatasourceError(Exception):
@@ -840,23 +840,17 @@ class SQLDatasource(Datasource):
 
     def get_engine(self) -> sqlalchemy.engine.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
-            # validate that SQL Alchemy was successfully imported and attempt to create an engine
-            if SQLALCHEMY_IMPORTED:
-                try:
-                    self._engine = sqlalchemy.create_engine(self.connection_string)
-                except Exception as e:
-                    # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
-                    # one possible case is a missing plugin (e.g. psycopg2)
-                    raise SQLDatasourceError(
-                        "Unable to create a SQLAlchemy engine from "
-                        f"connection_string: {self.connection_string} due to the "
-                        f"following exception: {str(e)}"
-                    ) from e
-                self._cached_connection_string = self.connection_string
-            else:
+            try:
+                self._engine = sqlalchemy.create_engine(self.connection_string)
+            except Exception as e:
+                # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
+                # one possible case is a missing plugin (e.g. psycopg2)
                 raise SQLDatasourceError(
-                    "Unable to create SQLDatasource due to missing sqlalchemy dependency."
-                )
+                    "Unable to create a SQLAlchemy engine from "
+                    f"connection_string: {self.connection_string} due to the "
+                    f"following exception: {str(e)}"
+                ) from e
+            self._cached_connection_string = self.connection_string
         return self._engine
 
     def test_connection(self, test_assets: bool = True) -> None:
