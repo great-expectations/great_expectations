@@ -40,13 +40,6 @@ from great_expectations.core import (
     IDDict,
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
-from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestCase,
-    ExpectationTestDataCases,
-)
-from great_expectations.core.expectation_diagnostics.supporting_types import (
-    ExpectationExecutionEngineDiagnostics,
-)
 from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
@@ -79,6 +72,13 @@ from great_expectations.util import (
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
+    from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
+        ExpectationTestCase,
+        ExpectationTestDataCases,
+    )
+    from great_expectations.core.expectation_diagnostics.supporting_types import (
+        ExpectationExecutionEngineDiagnostics,
+    )
     from great_expectations.data_context import AbstractDataContext
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -106,14 +106,14 @@ try:
     from pyspark.sql import SparkSession
     from pyspark.sql.types import StructType
 except ImportError:
-    SparkDataFrame = type(None)
-    SparkSession = None
-    StructType = None
+    SparkDataFrame = type(None)  # type: ignore[assignment,misc]
+    SparkSession = None  # type: ignore[assignment,misc]
+    StructType = None  # type: ignore[assignment,misc]
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
 except ImportError:
-    spark_DataFrame = type(None)
+    spark_DataFrame = type(None)  # type: ignore[assignment,misc]
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -3049,7 +3049,7 @@ def check_json_test_result(  # noqa: C901 - 52
                     elif try_allclose:
                         assert np.allclose(
                             result["result"]["observed_value"],
-                            value,
+                            value,  # type: ignore[arg-type]
                             rtol=RTOL,
                             atol=ATOL,
                         ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {value}"
@@ -3064,10 +3064,12 @@ def check_json_test_result(  # noqa: C901 - 52
                 assert result["result"]["observed_value"] in value
 
             elif key == "unexpected_index_list":
-                if pk_column and result["result"].get("unexpected_index_list"):
+                unexpected_list = result["result"].get("unexpected_index_list")
+                if pk_column and unexpected_list:
+                    # Note that consistent ordering of unexpected_list is not a guarantee by ID/PK
                     assert (
-                        result["result"].get("unexpected_index_list") == value
-                    ), f"{result['result'].get('unexpected_index_list')} != {value}"
+                        sorted(unexpected_list, key=lambda d: d["pk_index"]) == value
+                    ), f"{unexpected_list} != {value}"
 
             elif key == "unexpected_list":
                 try:

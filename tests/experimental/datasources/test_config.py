@@ -1,3 +1,4 @@
+import copy
 import functools
 import json
 import pathlib
@@ -11,10 +12,13 @@ import pytest
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
 from great_expectations.experimental.datasources.interfaces import Datasource
-from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.experimental.datasources.sources import (
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+    DEFAULT_PANDAS_DATASOURCE_NAME,
+    _SourceFactories,
+)
 from great_expectations.experimental.datasources.sql_datasource import (
-    ColumnSplitter,
-    SqlYearMonthSplitter,
+    ColumnSplitterYearAndMonth,
     TableAsset,
 )
 
@@ -26,12 +30,15 @@ except ImportError:
 p = pytest.param
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR = pathlib.Path(__file__).parent
+CSV_PATH = EXPERIMENTAL_DATASOURCE_TEST_DIR.joinpath(
+    pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
+)
 
 PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
-PG_COMPLEX_CONFIG_DICT = {
+COMPLEX_CONFIG_DICT = {
     "xdatasources": {
         "my_pg_ds": {
             "connection_string": "postgresql://userName:@hostname/dbName",
@@ -47,8 +54,6 @@ PG_COMPLEX_CONFIG_DICT = {
                     "column_splitter": {
                         "column_name": "my_column",
                         "method_name": "split_on_year_and_month",
-                        "name": "y_m_splitter",
-                        "param_names": ["year", "month"],
                     },
                     "name": "with_splitter",
                     "table_name": "another_table",
@@ -71,30 +76,29 @@ PG_COMPLEX_CONFIG_DICT = {
                 },
             },
         },
-        "my_pandas_ds": {
-            "type": "pandas",
-            "name": "my_pandas_ds",
+        "my_pandas_filesystem_ds": {
+            "type": "pandas_filesystem",
+            "name": "my_pandas_filesystem_ds",
+            "base_directory": __file__,
             "assets": {
                 "my_csv_asset": {
                     "name": "my_csv_asset",
                     "type": "csv",
-                    "base_directory": __file__,
-                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
                 "my_json_asset": {
                     "name": "my_json_asset",
                     "type": "json",
-                    "base_directory": __file__,
-                    "regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
                     "orient": "records",
                 },
             },
         },
     }
 }
-PG_COMPLEX_CONFIG_JSON = json.dumps(PG_COMPLEX_CONFIG_DICT)
+COMPLEX_CONFIG_JSON = json.dumps(COMPLEX_CONFIG_DICT)
 
 SIMPLE_DS_DICT = {
     "xdatasources": {
@@ -139,6 +143,33 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
     },
 }
 
+DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
+    "xdatasources": {
+        DEFAULT_PANDAS_DATASOURCE_NAME: {
+            "type": "pandas",
+            "name": DEFAULT_PANDAS_DATASOURCE_NAME,
+            "assets": {
+                DEFAULT_PANDAS_DATA_ASSET_NAME: {
+                    "name": DEFAULT_PANDAS_DATA_ASSET_NAME,
+                    "type": "csv",
+                    "filepath_or_buffer": CSV_PATH
+                    / "yellow_tripdata_sample_2018-04.csv",
+                    "sep": "|",
+                    "names": ["col1", "col2"],
+                },
+                "my_csv_asset": {
+                    "name": "my_csv_asset",
+                    "type": "csv",
+                    "filepath_or_buffer": CSV_PATH
+                    / "yellow_tripdata_sample_2018-04.csv",
+                    "sep": "|",
+                    "names": ["col1", "col2"],
+                },
+            },
+        },
+    }
+}
+
 
 @pytest.mark.parametrize(
     "asset_dict", [{"type": "json", "orient": "records"}, {"type": "csv", "sep": "|"}]
@@ -152,7 +183,7 @@ class TestExcludeUnsetAssetFields:
     """
 
     def test_from_datasource(self, asset_dict: dict):
-        ds_mapping = {"csv": "pandas", "json": "pandas"}
+        ds_mapping = {"csv": "pandas_filesystem", "json": "pandas_filesystem"}
 
         ds_type_: str = ds_mapping[asset_dict["type"]]
         ds_class = _SourceFactories.type_lookup[ds_type_]
@@ -161,12 +192,17 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "base_directory": pathlib.Path(__file__),
-                "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+                "batching_regex": re.compile(
+                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+                ),
             }
         )
         asset_name = asset_dict["name"]
-        ds_dict = {"name": "my_ds", "assets": {asset_name: asset_dict}}
+        ds_dict = {
+            "name": "my_ds",
+            "base_directory": pathlib.Path(__file__),
+            "assets": {asset_name: asset_dict},
+        }
         datasource: Datasource = ds_class.parse_obj(ds_dict)
         assert asset_dict == datasource.dict()["assets"][asset_name]
 
@@ -178,14 +214,16 @@ class TestExcludeUnsetAssetFields:
         asset_dict.update(
             {
                 "name": "my_asset",
-                "base_directory": pathlib.Path(__file__),
-                "regex": re.compile(r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"),
+                "batching_regex": re.compile(
+                    r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
+                ),
             }
         )
         asset_name = asset_dict["name"]
         ds_dict = {
             "name": "my_ds",
-            "type": "pandas",
+            "type": "pandas_filesystem",
+            "base_directory": pathlib.Path(__file__),
             "assets": {asset_name: asset_dict},
         }
         gx_config = GxConfig.parse_obj({"xdatasources": {"my_ds": ds_dict}})
@@ -207,8 +245,8 @@ class TestExcludeUnsetAssetFields:
             id="zep + old style config",
         ),
         p(GxConfig.parse_raw, json.dumps(SIMPLE_DS_DICT), id="simple pg json"),
-        p(GxConfig.parse_obj, PG_COMPLEX_CONFIG_DICT, id="pg complex dict"),
-        p(GxConfig.parse_raw, PG_COMPLEX_CONFIG_JSON, id="pg complex json"),
+        p(GxConfig.parse_obj, COMPLEX_CONFIG_DICT, id="complex dict"),
+        p(GxConfig.parse_raw, COMPLEX_CONFIG_JSON, id="complex json"),
         p(GxConfig.parse_yaml, PG_CONFIG_YAML_FILE, id="pg_config.yaml file"),
         p(GxConfig.parse_yaml, PG_CONFIG_YAML_STR, id="pg_config yaml string"),
     ],
@@ -289,30 +327,8 @@ def test_catch_bad_top_level_config(
                 "column_splitter",
                 "method_name",
             ),
-            "unexpected value; permitted: 'split_on_year_and_month'",
+            "unexpected value; permitted:",
             id="unknown splitter method",
-        ),
-        p(
-            {
-                "name": "bad splitter param",
-                "type": "table",
-                "table_name": "pool",
-                "column_splitter": {
-                    "method_name": "split_on_year_and_month",
-                    "column_name": "foo",
-                    "param_names": ["year", "month", "INVALID"],
-                },
-            },
-            (
-                "xdatasources",
-                "assets",
-                "bad splitter param",
-                "column_splitter",
-                "param_names",
-                2,
-            ),
-            "unexpected value; permitted: 'year', 'month'",
-            id="invalid splitter param_name",
         ),
     ],
 )
@@ -344,7 +360,7 @@ def test_catch_bad_asset_configs(
         if expected_error_loc == all_errors[0]["loc"]:
             test_msg = error["msg"]
             break
-    assert expected_msg == test_msg
+    assert test_msg.startswith(expected_msg)
 
 
 @pytest.mark.unit
@@ -355,9 +371,8 @@ def test_catch_bad_asset_configs(
             {
                 "column_name": "flavor",
                 "method_name": "NOT_VALID",
-                "param_names": ["cherry", "strawberry"],
             },
-            "value_error",
+            "value_error.const",
             "unexpected value; permitted:",
         )
     ],
@@ -368,9 +383,8 @@ def test_general_column_splitter_errors(
     expected_error_type: str,
     expected_msg: str,
 ):
-
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        ColumnSplitter(**bad_column_kwargs)
+        ColumnSplitterYearAndMonth(**bad_column_kwargs)
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -383,7 +397,7 @@ def test_general_column_splitter_errors(
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_dict_gx_config() -> GxConfig:
-    gx_config = GxConfig.parse_obj(PG_COMPLEX_CONFIG_DICT)
+    gx_config = GxConfig.parse_obj(COMPLEX_CONFIG_DICT)
     assert gx_config
     return gx_config
 
@@ -391,7 +405,7 @@ def from_dict_gx_config() -> GxConfig:
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
 def from_json_gx_config() -> GxConfig:
-    gx_config = GxConfig.parse_raw(PG_COMPLEX_CONFIG_JSON)
+    gx_config = GxConfig.parse_raw(COMPLEX_CONFIG_JSON)
     assert gx_config
     return gx_config
 
@@ -469,7 +483,7 @@ def test_splitters_deserialization(
     table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
-    assert isinstance(table_asset.column_splitter, SqlYearMonthSplitter)
+    assert isinstance(table_asset.column_splitter, ColumnSplitterYearAndMonth)
     assert table_asset.column_splitter.method_name == "split_on_year_and_month"
 
 
@@ -494,7 +508,7 @@ def test_custom_sorter_serialization(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = PG_COMPLEX_CONFIG_DICT["xdatasources"][  # type: ignore[index]
+    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT["xdatasources"][  # type: ignore[index]
         "my_pg_ds"
     ][
         "assets"
@@ -509,3 +523,47 @@ def test_custom_sorter_serialization(
 
     for sorter_str in expected_sorter_strings:
         assert sorter_str in dumped, f"`{sorter_str}` not found in dumped json"
+
+
+def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
+    # the default data asset should be dropped, but one named asset should remain
+    from_dict_default_pandas_config = GxConfig.parse_obj(
+        DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
+    )
+    assert (
+        DEFAULT_PANDAS_DATA_ASSET_NAME
+        not in from_dict_default_pandas_config.xdatasources[
+            DEFAULT_PANDAS_DATASOURCE_NAME
+        ].assets
+    )
+
+    dumped: dict = from_dict_default_pandas_config.dict()
+    print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
+
+    datasource_without_default_pandas_data_asset_config_dict = copy.deepcopy(
+        DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
+    )
+    datasource_without_default_pandas_data_asset_config_dict["xdatasources"][
+        DEFAULT_PANDAS_DATASOURCE_NAME
+    ]["assets"].pop(DEFAULT_PANDAS_DATA_ASSET_NAME)
+    assert datasource_without_default_pandas_data_asset_config_dict == dumped
+
+    re_loaded: GxConfig = GxConfig.parse_obj(dumped)
+    pp(re_loaded)
+    assert re_loaded
+
+    assert from_dict_default_pandas_config == re_loaded
+
+    # removing just the named asset results in nothing being serialized
+    # since all we are left with is the default datasource and default data asset
+    only_default_pandas_datasource_and_data_asset_config_dict = copy.deepcopy(
+        DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
+    )
+    only_default_pandas_datasource_and_data_asset_config_dict["xdatasources"][
+        DEFAULT_PANDAS_DATASOURCE_NAME
+    ]["assets"].pop("my_csv_asset")
+
+    from_dict_only_default_pandas_config = GxConfig.parse_obj(
+        only_default_pandas_datasource_and_data_asset_config_dict
+    )
+    assert from_dict_only_default_pandas_config.xdatasources == {}

@@ -9,7 +9,9 @@ from typing import TYPE_CHECKING, Set, Type
 
 import pydantic
 
+from great_expectations.experimental.datasources.signatures import _merge_signatures
 from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import Datasource
@@ -36,9 +38,9 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
 
         cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
 
-        if cls_name == "Datasource":
+        if cls_name == "Datasource" or cls_name.startswith("_"):
             # NOTE: the above check is brittle and must be kept in-line with the Datasource.__name__
-            logger.debug("1c. Skip factory registration of base `Datasource`")
+            logger.debug(f"1c. Skip factory registration of base `{cls_name}`")
             return cls
 
         logger.debug(f"  {cls_name} __dict__ ->\n{pf(cls.__dict__, depth=3)}")
@@ -47,7 +49,6 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
         logger.debug(f"Datasources: {len(meta_cls.__cls_set)}")
 
         def _datasource_factory(name: str, **kwargs) -> Datasource:
-            # TODO: update signature to match Datasource __init__ (ex update __signature__)
             logger.debug(f"5. Adding '{name}' {cls_name}")
             datasource = cls(name=name, **kwargs)
             datasource.test_connection()
@@ -61,6 +62,13 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
             logger.warning(
                 f"Datasource `{cls_name}` should not be defined as part of __main__ this may cause typing lookup collisions"
             )
+        # instantiate new TypeLookup to prevent child classes conflicts with parent class asset types
+        cls._type_lookup = TypeLookup()
         _SourceFactories.register_types_and_ds_factory(cls, _datasource_factory)
 
+        # attr-defined issue
+        # https://github.com/python/mypy/issues/12472
+        _datasource_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+            _datasource_factory, cls, exclude={"type", "assets"}, return_type=cls
+        )
         return cls

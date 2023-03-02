@@ -36,10 +36,17 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.data_context import BaseDataContext, CloudDataContext
+from great_expectations.data_context import (
+    AbstractDataContext,
+    BaseDataContext,
+    CloudDataContext,
+)
 from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
     GXCloudRESTResource,
+)
+from great_expectations.data_context.data_context.ephemeral_data_context import (
+    EphemeralDataContext,
 )
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -54,6 +61,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     GXCloudConfig,
+    InMemoryStoreBackendDefaults,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -98,6 +106,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
+    import pyspark.sql
     from pyspark.sql import SparkSession
 
 yaml = YAML()
@@ -7108,7 +7117,7 @@ data_connectors:
 
 
 @pytest.fixture
-def in_memory_runtime_context():
+def in_memory_runtime_context() -> AbstractDataContext:
     return build_in_memory_runtime_context()
 
 
@@ -7288,7 +7297,7 @@ def pandas_column_pairs_dataframe_for_unexpected_rows_and_index():
 
 
 @pytest.fixture
-def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index():
+def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7303,7 +7312,7 @@ def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index():
 @pytest.fixture
 def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+) -> pyspark.sql.dataframe.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7333,7 +7342,7 @@ def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+) -> pyspark.sql.dataframe.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7350,7 +7359,7 @@ def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> "pyspark.sql.dataframe.DataFrame":  # noqa: F821
+) -> pyspark.sql.dataframe.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7369,3 +7378,11 @@ def spark_dataframe_for_unexpected_rows_with_index(
         data=df,
     )
     return test_df
+
+
+@pytest.fixture
+def ephemeral_context_with_defaults() -> EphemeralDataContext:
+    project_config = DataContextConfig(
+        store_backend_defaults=InMemoryStoreBackendDefaults(init_temp_docs_sites=True)
+    )
+    return EphemeralDataContext(project_config=project_config)

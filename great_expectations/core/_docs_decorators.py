@@ -13,7 +13,7 @@ WHITELISTED_TAG = "--Public API--"
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def public_api(func) -> Callable:
+def public_api(func: F) -> F:
     """Add the public API tag for processing by the auto documentation generator.
 
     Used as a decorator:

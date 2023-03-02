@@ -44,7 +44,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
 
@@ -81,7 +81,9 @@ from great_expectations.util import (
     import_library_module,
     import_make_url,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 logger = logging.getLogger(__name__)
 
@@ -200,8 +202,15 @@ except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
 
+try:
+    import trino.sqlalchemy.datatype as trinotypes
+    import trino.sqlalchemy.dialect
+except ImportError:
+    trino = None
+    trinotypes = None
+
 if TYPE_CHECKING:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TCH004
     from sqlalchemy.engine import Engine as SaEngine
 
 
@@ -244,6 +253,19 @@ def _get_dialect_type_module(dialect):
             and teradatatypes is not None
         ):
             return teradatatypes
+    except (TypeError, AttributeError):
+        pass
+
+    # Trino types module
+    try:
+        if (
+            isinstance(
+                dialect,
+                trino.sqlalchemy.dialect.TrinoDialect,
+            )
+            and trinotypes is not None
+        ):
+            return trinotypes
     except (TypeError, AttributeError):
         pass
 
@@ -375,6 +397,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.dialect_module = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
             )
+        elif self.dialect_name == GXSqlDialect.TRINO:
+            # WARNING: Trino Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="trino.sqlalchemy.dialect"
+            )
         else:
             self.dialect_module = None
 
@@ -477,7 +504,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self.engine.dialect.name.lower()
 
-    def _build_engine(self, credentials: dict, **kwargs) -> "sa.engine.Engine":
+    def _build_engine(self, credentials: dict, **kwargs) -> sa.engine.Engine:
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -511,7 +538,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str,
         credentials: dict,
-    ) -> Tuple["sa.engine.url.URL", dict]:
+    ) -> Tuple[sa.engine.url.URL, dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -1123,14 +1150,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return self.engine.execute(split_query).fetchall()
 
     def get_data_for_batch_identifiers(
-        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
+        self, selectable: Selectable, splitter_method_name: str, splitter_kwargs: dict
     ) -> List[dict]:
         """Build data used to construct batch identifiers for the input table using the provided splitter config.
 
         Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
 
         Args:
-            table_name: Table to split.
+            selectable: Selectable to split.
             splitter_method_name: Desired splitter method to use.
             splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
 
@@ -1139,7 +1166,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self._data_splitter.get_data_for_batch_identifiers(
             execution_engine=self,
-            table_name=table_name,
+            selectable=selectable,
             splitter_method_name=splitter_method_name,
             splitter_kwargs=splitter_kwargs,
         )

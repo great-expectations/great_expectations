@@ -53,7 +53,7 @@ class JsonSchemaProfiler(Profiler):
         super().__init__(configuration)
 
     @public_api
-    def validate(self, schema: dict) -> bool:
+    def validate(self, schema: dict) -> bool:  # type: ignore[override]
         """
         Check if `schema` can be profiled.
 

@@ -21,7 +21,7 @@ from marshmallow import Schema, ValidationError, fields, post_dump, post_load
 from pyparsing import ParseResults
 from typing_extensions import TypedDict
 
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import new_argument, public_api
 from great_expectations.core.evaluation_parameters import (
     _deduplicate_evaluation_parameter_dependencies,
@@ -1572,9 +1572,20 @@ class ExpectationConfigurationSchema(Schema):
                 data.pop(key)
         return data
 
+    def _convert_uuids_to_str(self, data):
+        """
+        Utilize UUID for data validation but convert to string before usage in business logic
+        """
+        attr = "ge_cloud_id"
+        uuid_val = data.get(attr)
+        if uuid_val:
+            data[attr] = str(uuid_val)
+        return data
+
     # noinspection PyUnusedLocal
     @post_load
     def make_expectation_configuration(self, data: dict, **kwargs):
+        data = self._convert_uuids_to_str(data=data)
         return ExpectationConfiguration(**data)
 
 

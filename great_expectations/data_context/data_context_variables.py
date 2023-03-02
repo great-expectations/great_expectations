@@ -7,26 +7,28 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
-from great_expectations.core.config_provider import _ConfigurationProvider
-from great_expectations.core.data_context_key import DataContextKey
-from great_expectations.data_context.types.base import (
-    AnonymizedUsageStatisticsConfig,
-    ConcurrencyConfig,
-    DataContextConfig,
-    IncludeRenderedContentConfig,
-    NotebookConfig,
-    ProgressBarsConfig,
-)
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     GXCloudIdentifier,
 )
 
 if TYPE_CHECKING:
+    from great_expectations.core.config_provider import (
+        _ConfigurationProvider,
+    )
+    from great_expectations.core.data_context_key import DataContextKey
     from great_expectations.data_context.data_context.file_data_context import (
         FileDataContext,
     )
     from great_expectations.data_context.store import DataContextStore
+    from great_expectations.data_context.types.base import (
+        AnonymizedUsageStatisticsConfig,
+        ConcurrencyConfig,
+        DataContextConfig,
+        IncludeRenderedContentConfig,
+        NotebookConfig,
+        ProgressBarsConfig,
+    )
     from great_expectations.experimental.datasources.interfaces import (
         Datasource as XDatasource,
     )
@@ -330,17 +332,23 @@ class FileDataContextVariables(DataContextVariables):
         from great_expectations.data_context.store.data_context_store import (
             DataContextStore,
         )
+        from great_expectations.data_context.store.inline_store_backend import (
+            InlineStoreBackend,
+        )
 
-        store_backend: dict = {
-            "class_name": "InlineStoreBackend",
-            "resource_type": DataContextVariableSchema.ALL_VARIABLES,
-            "data_context": self.data_context,
-        }
+        # Chetan - 20230222 - `instantiate_class_from_config` used in the Store constructor
+        # causes a runtime error with InlineStoreBackend due to attempting to deepcopy a DataContext.
+        #
+        # This should be resolved by moving the specific logic required from the context to a class
+        # and injecting that object instead of the entire context.
+        store_backend = InlineStoreBackend(
+            data_context=self.data_context,
+            resource_type=DataContextVariableSchema.ALL_VARIABLES,
+        )
         store = DataContextStore(
             store_name="file_data_context_store",
-            store_backend=store_backend,
-            runtime_environment=None,
         )
+        store._store_backend = store_backend
         return store
 
     def save_config(self) -> Any:

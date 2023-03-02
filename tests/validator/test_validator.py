@@ -2,7 +2,6 @@ import os
 import shutil
 from typing import Any, Dict, List, Set, Tuple, Union
 from unittest import mock
-from uuid import UUID
 
 import pandas as pd
 import pytest
@@ -257,7 +256,7 @@ def multi_batch_taxi_validator(
 ) -> Validator:
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     multi_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -292,7 +291,7 @@ def multi_batch_taxi_validator_ge_cloud_mode(
                     "result_format": "BASIC",
                 },
                 meta={"notes": "This is an expectation."},
-                ge_cloud_id=UUID("0faf94a9-f53a-41fb-8e94-32f218d4a774"),
+                ge_cloud_id="0faf94a9-f53a-41fb-8e94-32f218d4a774",
             )
         ],
         data_context=context,
@@ -407,7 +406,7 @@ def test_validator_with_bad_batchrequest(
 ):
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     multi_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -570,7 +569,7 @@ def test_validator_load_additional_batch_to_validator(
 ):
     context = yellow_trip_pandas_data_context
 
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     jan_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -618,7 +617,7 @@ def test_instantiate_validator_with_a_list_of_batch_requests(
     yellow_trip_pandas_data_context,
 ):
     context = yellow_trip_pandas_data_context
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     jan_batch_request: BatchRequest = BatchRequest(
         datasource_name="taxi_pandas",
@@ -950,7 +949,7 @@ def test_validator_include_rendered_content(
         data_connector_name="monthly",
         data_asset_name="my_reports",
     )
-    suite: ExpectationSuite = context.create_expectation_suite("validating_taxi_data")
+    suite: ExpectationSuite = context.add_expectation_suite("validating_taxi_data")
 
     column: str = "fare_amount"
     partition_object: Dict[str, List[float]] = {

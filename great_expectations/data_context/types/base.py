@@ -6,6 +6,7 @@ import enum
 import itertools
 import json
 import logging
+import tempfile
 import uuid
 import warnings
 from typing import (
@@ -22,7 +23,6 @@ from typing import (
     TypeVar,
     Union,
 )
-from uuid import UUID
 
 from marshmallow import (
     INCLUDE,
@@ -41,7 +41,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
@@ -54,7 +54,7 @@ from great_expectations.util import deep_filter_properties_iterable
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None
+    StructType = None  # type: ignore[assignment,misc]
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
@@ -150,7 +150,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile: Union[str, "TextIOWrapper"]) -> None:
+    def to_yaml(self, outfile: Union[str, TextIOWrapper]) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
@@ -1775,6 +1775,8 @@ will appear repeatedly until your configuration is updated.)
 
 class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VERSION = CURRENT_GX_CONFIG_VERSION
+    UNCOMMITTED = "uncommitted"
+
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     EXPECTATIONS_BASE_DIRECTORY = "expectations"
     DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
@@ -1783,12 +1785,19 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
     VALIDATIONS_BASE_DIRECTORY = "validations"
     DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
-        f"uncommitted/{VALIDATIONS_BASE_DIRECTORY}/"
+        f"{UNCOMMITTED}/{VALIDATIONS_BASE_DIRECTORY}/"
     )
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
     DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         "evaluation_parameters/"
     )
+    DATA_DOCS_BASE_DIRECTORY = "data_docs"
+    DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME = (
+        f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
+    )
+
+    # Datasource
+    DEFAULT_DATASOURCE_STORE_NAME = "datasource_store"
 
     # Checkpoints
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
@@ -1803,7 +1812,7 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{PROFILERS_BASE_DIRECTORY}/"
 
     DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
-    DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
+    DEFAULT_CONFIG_VARIABLES_FILEPATH = f"{UNCOMMITTED}/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
     DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
     DEFAULT_VALIDATION_OPERATORS = {
@@ -1866,7 +1875,7 @@ class DataContextConfigDefaults(enum.Enum):
             "show_how_to_buttons": True,
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/local_site/",
+                "base_directory": f"{DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME}/local_site/",
             },
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
@@ -2080,6 +2089,7 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
 
     def __init__(
         self,
+        init_temp_docs_sites: bool = False,
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -2113,7 +2123,15 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
         }
-        self.data_docs_sites = {}
+        if init_temp_docs_sites:
+            temp_dir = tempfile.TemporaryDirectory()
+            path = temp_dir.name
+            logger.info(f"Created temporary directory '{path}' for ephemeral docs site")
+            self.data_docs_sites[  # type: ignore[index]
+                DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value
+            ]["store_backend"]["base_directory"] = path
+        else:
+            self.data_docs_sites = {}
 
 
 class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
@@ -2796,13 +2814,13 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
-        ge_cloud_id: Optional[Union[UUID, str]] = None,
+        ge_cloud_id: Optional[str] = None,
         # the following four args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[Union[UUID, str]] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> None:
         self._name = name
         self._config_version = config_version
@@ -2862,19 +2880,19 @@ class CheckpointConfig(BaseYamlConfig):
         self._batches = value  # type: ignore[has-type]
 
     @property
-    def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
+    def ge_cloud_id(self) -> Optional[str]:
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
-    def ge_cloud_id(self, value: Union[UUID, str]) -> None:
+    def ge_cloud_id(self, value: str) -> None:
         self._ge_cloud_id = value
 
     @property
-    def expectation_suite_ge_cloud_id(self) -> Optional[Union[UUID, str]]:
+    def expectation_suite_ge_cloud_id(self) -> Optional[str]:
         return self._expectation_suite_ge_cloud_id
 
     @expectation_suite_ge_cloud_id.setter
-    def expectation_suite_ge_cloud_id(self, value: Union[UUID, str]) -> None:
+    def expectation_suite_ge_cloud_id(self, value: str) -> None:
         self._expectation_suite_ge_cloud_id = value
 
     @property
@@ -3088,7 +3106,7 @@ class CheckpointConfig(BaseYamlConfig):
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     @staticmethod
     def resolve_config_using_acceptable_arguments(
-        checkpoint: "Checkpoint",  # noqa: F821
+        checkpoint: Checkpoint,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,

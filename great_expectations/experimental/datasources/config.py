@@ -12,8 +12,14 @@ from typing_extensions import Final
 from great_expectations.experimental.datasources.experimental_base_model import (
     ExperimentalBaseModel,
 )
-from great_expectations.experimental.datasources.interfaces import Datasource
-from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.experimental.datasources.interfaces import (
+    Datasource,  # noqa: TCH001
+)
+from great_expectations.experimental.datasources.sources import (
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+    DEFAULT_PANDAS_DATASOURCE_NAME,
+    _SourceFactories,
+)
 
 if TYPE_CHECKING:
     from pydantic.error_wrappers import ErrorDict as PydanticErrorDict
@@ -67,17 +73,27 @@ class GxConfig(ExperimentalBaseModel):
                 ) from type_lookup_err
 
             datasource = ds_type(**config)
-            loaded_datasources[datasource.name] = datasource
 
-            # TODO: move this to a different 'validator' method
-            # attach the datasource to the nested assets, avoiding recursion errors
-            for asset in datasource.assets.values():
-                asset._datasource = datasource
+            # the ephemeral asset should never be serialized
+            if DEFAULT_PANDAS_DATA_ASSET_NAME in datasource.assets:
+                datasource.assets.pop(DEFAULT_PANDAS_DATA_ASSET_NAME)
+
+            # if the default pandas datasource has no assets, it should not be serialized
+            if (
+                datasource.name != DEFAULT_PANDAS_DATASOURCE_NAME
+                or len(datasource.assets) > 0
+            ):
+                loaded_datasources[datasource.name] = datasource
+
+                # TODO: move this to a different 'validator' method
+                # attach the datasource to the nested assets, avoiding recursion errors
+                for asset in datasource.assets.values():
+                    asset._datasource = datasource
 
         logger.info(f"Loaded 'datasources' ->\n{repr(loaded_datasources)}")
 
         if v and not loaded_datasources:
-            raise ValueError(f"Of {len(v)} entries, no 'datasources' could be loaded")
+            logger.info(f"Of {len(v)} entries, no 'datasources' could be loaded")
         return loaded_datasources
 
     @classmethod

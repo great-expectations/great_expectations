@@ -19,11 +19,11 @@ from typing import (
     Union,
 )
 
-from marshmallow import Schema, ValidationError, fields, pre_dump
+from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 import great_expectations as gx
 from great_expectations import __version__ as ge_version
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,
@@ -457,7 +457,7 @@ class ExpectationSuite(SerializableDictDot):
         match_indexes = []
         for idx, expectation in enumerate(self.expectations):
             if ge_cloud_id is not None:
-                if str(expectation.ge_cloud_id) == str(ge_cloud_id):
+                if expectation.ge_cloud_id == ge_cloud_id:
                     match_indexes.append(idx)
             else:
                 if expectation.isEquivalentTo(
@@ -725,7 +725,7 @@ class ExpectationSuite(SerializableDictDot):
         """Upsert specified ExpectationConfiguration into this ExpectationSuite.
 
         Args:
-            expectation_configuration: The ExpectationConfiguration to add or update
+            expectation_configuration: The ExpectationConfiguration to add or update.
             send_usage_event: Whether to send a usage_statistics event. When called through ExpectationSuite class'
                 public add_expectation() method, this is set to `True`.
             match_type: The criteria used to determine whether the Suite already has an ExpectationConfiguration
@@ -1102,6 +1102,17 @@ class ExpectationSuiteSchema(Schema):
             data[key] = convert_to_json_serializable(data[key])
 
         data = self.clean_empty(data)
+        return data
+
+    @post_load
+    def _convert_uuids_to_str(self, data, **kwargs):
+        """
+        Utilize UUID for data validation but convert to string before usage in business logic
+        """
+        attr = "ge_cloud_id"
+        uuid_val = data.get(attr)
+        if uuid_val:
+            data[attr] = str(uuid_val)
         return data
 
 

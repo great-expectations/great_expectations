@@ -1,29 +1,52 @@
+from __future__ import annotations
+
 import json
+import pathlib
 import sys
-from typing import Type
+from pprint import pformat as pf
+from typing import Any, Generator, Type
 
 import pandas
-import pydantic
 import pytest
 
 from great_expectations.experimental.datasources import (
     _PANDAS_SCHEMA_VERSION,  # this is the version we run in the standard test pipeline. Update as needed
     _SCHEMAS_DIR,
+    DataAsset,
+    Datasource,
 )
-from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.experimental.datasources.sources import (
+    _iter_all_registered_types,
+)
 
 PANDAS_VERSION: str = pandas.__version__
 
 
+def _models_and_schema_dirs() -> Generator[
+    tuple[Type[Datasource | DataAsset], pathlib.Path, str], None, None
+]:
+    datasource: Type[Datasource] = Datasource
+    ds_type_name: str = ""
+
+    for name, model in _iter_all_registered_types():
+        if issubclass(model, Datasource):
+            datasource = model
+            ds_type_name = name
+            schema_dir = _SCHEMAS_DIR
+        else:
+            schema_dir = _SCHEMAS_DIR / datasource.__name__
+
+        yield model, schema_dir, f"{ds_type_name}:{model.__name__}"
+
+
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "zep_ds_or_asset_model",
-    [
-        _SourceFactories.type_lookup[x]
-        for x in _SourceFactories.type_lookup.type_names()
-    ],
+    ["zep_ds_or_asset_model", "schema_dir"],
+    [pytest.param(t[0], t[1], id=t[2]) for t in _models_and_schema_dirs()],
 )
-def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
+def test_vcs_schemas_match(
+    zep_ds_or_asset_model: Type[Datasource | DataAsset], schema_dir: pathlib.Path
+):
     """
     Test that json schemas for each DataSource and DataAsset match the current schema
     under version control.
@@ -38,27 +61,70 @@ def test_vcs_schemas_match(zep_ds_or_asset_model: Type[pydantic.BaseModel]):
     Note: if the installed version of pandas doesn't match the one used in the standard
     test pipeline, the test will be marked a `xfail` because the schemas will not match.
     """
+
+    def _sort_required_lists(schema_as_dict: dict) -> None:
+        """Sometimes "required" lists come unsorted, causing misleading assertion failures; this corrects the issue.
+
+        Args:
+            schema_as_dict: source dictionary (will be modified "in-situ")
+
+        """
+        key: str
+        value: Any
+        for key, value in schema_as_dict.items():
+            if key == "required":
+                schema_as_dict[key] = sorted(value)
+
+            if isinstance(value, dict):
+                _sort_required_lists(schema_as_dict=value)
+
     if _PANDAS_SCHEMA_VERSION != PANDAS_VERSION:
         pytest.xfail(reason=f"schema generated with pandas {_PANDAS_SCHEMA_VERSION}")
 
     print(f"python version: {sys.version.split()[0]}")
     print(f"pandas version: {PANDAS_VERSION}\n")
 
-    schema_path = _SCHEMAS_DIR.joinpath(f"{zep_ds_or_asset_model.__name__}.json")
-    print(schema_path.relative_to(schema_path.cwd()))
+    schema_path = schema_dir.joinpath(f"{zep_ds_or_asset_model.__name__}.json")
 
     # TODO: remove this logic and make this fail once all json schemas are working
     if schema_path.name in (
-        "SqliteDatasource.json",
         "SqliteTableAsset.json",
         "SqliteQueryAsset.json",
         "SASAsset.json",
-        "PandasDatasource.json",
+        "PandasSASAsset.json",
     ):
         pytest.xfail(f"{schema_path.name} does not exist")
 
     json_str = schema_path.read_text().rstrip()
 
+    schema_as_dict = json.loads(json_str)
+    _sort_required_lists(schema_as_dict=schema_as_dict)
+    zep_ds_or_asset_model_as_dict = zep_ds_or_asset_model.schema()
+    _sort_required_lists(schema_as_dict=zep_ds_or_asset_model_as_dict)
+
     assert (
-        json.loads(json_str) == zep_ds_or_asset_model.schema()
+        schema_as_dict == zep_ds_or_asset_model_as_dict
     ), "Schemas are out of sync. Run `invoke schema --sync`. Also check your pandas version."
+
+
+@pytest.mark.skipif(
+    _PANDAS_SCHEMA_VERSION != PANDAS_VERSION,
+    reason=f"schemas generated with pandas {_PANDAS_SCHEMA_VERSION}",
+)
+def test_no_orphaned_schemas():
+    """Ensure that there are no schemas that have no corresponding type."""
+    print(f"python version: {sys.version.split()[0]}")
+    print(f"pandas version: {PANDAS_VERSION}\n")
+
+    # NOTE: this is a very low fidelity check
+    all_schemas: set[str] = {t[1].__name__ for t in _iter_all_registered_types()}
+
+    orphans: list[pathlib.Path] = []
+
+    for schema in _SCHEMAS_DIR.glob("**/*.json"):
+        if schema.stem not in all_schemas:
+            orphans.append(schema)
+
+    assert (
+        not orphans
+    ), f"The following schemas appear to be orphaned and should be removed. Run `invoke schema --sync --clean`\n{pf(orphans)}"

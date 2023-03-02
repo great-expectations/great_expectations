@@ -1,12 +1,19 @@
 from __future__ import annotations
 
+import pathlib
+
 import pytest
 
 from great_expectations.data_context import AbstractDataContext
+from great_expectations.experimental.datasources import (
+    PandasFilesystemDatasource,
+    SparkFilesystemDatasource,
+)
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,
+    TestConnectionError,
 )
 from tests.experimental.datasources.integration.conftest import sqlite_datasource
 from tests.experimental.datasources.integration.integration_test_utils import (
@@ -90,6 +97,7 @@ def test_batch_head(
     )
 
 
+@pytest.mark.integration
 def test_sql_query_data_asset(empty_data_context):
     context = empty_data_context
     datasource = sqlite_datasource(context, "yellow_tripdata.db")
@@ -99,11 +107,11 @@ def test_sql_query_data_asset(empty_data_context):
             name="query_asset",
             query=f"   SELECT * from yellow_tripdata_sample_2019_02 WHERE passenger_count = {passenger_count_value}",
         )
-        .add_year_and_month_splitter(column_name="pickup_datetime")
+        .add_splitter_year_and_month(column_name="pickup_datetime")
         .add_sorters(["year"])
     )
     validator = context.get_validator(
-        batch_request=asset.get_batch_request({"year": 2019})
+        batch_request=asset.build_batch_request({"year": 2019})
     )
     result = validator.expect_column_distinct_values_to_equal_set(
         column="passenger_count",
@@ -111,3 +119,243 @@ def test_sql_query_data_asset(empty_data_context):
         result_format={"result_format": "BOOLEAN_ONLY"},
     )
     assert result.success
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    ["base_directory", "batching_regex", "raises_test_connection_error"],
+    [
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path(
+                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+                )
+            ),
+            r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            False,
+            id="good filename",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path(
+                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+                )
+            ),
+            r"bad_yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            True,
+            id="bad filename",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path("..", "..", "..", "test_sets")
+            ),
+            r"taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            False,
+            id="good path",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path("..", "..", "..", "test_sets")
+            ),
+            r"bad_taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+            True,
+            id="bad path",
+        ),
+        pytest.param(
+            pathlib.Path(__file__).parent.joinpath(
+                pathlib.Path(
+                    "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+                )
+            ),
+            None,
+            False,
+            id="default regex",
+        ),
+    ],
+)
+def test_filesystem_data_asset_batching_regex(
+    filesystem_datasource: PandasFilesystemDatasource | SparkFilesystemDatasource,
+    base_directory: pathlib.Path,
+    batching_regex: str | None,
+    raises_test_connection_error: bool,
+):
+    filesystem_datasource.base_directory = base_directory
+    if raises_test_connection_error:
+        with pytest.raises(TestConnectionError):
+            filesystem_datasource.add_csv_asset(
+                name="csv_asset", batching_regex=batching_regex
+            )
+    else:
+        filesystem_datasource.add_csv_asset(
+            name="csv_asset", batching_regex=batching_regex
+        )
+
+
+@pytest.mark.integration
+@pytest.mark.parametrize(
+    [
+        "database",
+        "table_name",
+        "splitter_name",
+        "splitter_kwargs",
+        "sorter_args",
+        "all_batches_cnt",
+        "specified_batch_request",
+        "specified_batch_cnt",
+        "last_specified_batch_metadata",
+    ],
+    [
+        pytest.param(
+            "yellow_tripdata_sample_2020_all_months_combined.db",
+            "yellow_tripdata_sample_2020",
+            "add_splitter_year",
+            {"column_name": "pickup_datetime"},
+            ["year"],
+            1,
+            {"year": 2020},
+            1,
+            {"year": 2020},
+            id="year",
+        ),
+        pytest.param(
+            "yellow_tripdata_sample_2020_all_months_combined.db",
+            "yellow_tripdata_sample_2020",
+            "add_splitter_year_and_month",
+            {"column_name": "pickup_datetime"},
+            ["year", "month"],
+            12,
+            {"year": 2020, "month": 6},
+            1,
+            {"year": 2020, "month": 6},
+            id="year_and_month",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_year_and_month_and_day",
+            {"column_name": "pickup_datetime"},
+            ["year", "month", "day"],
+            28,
+            {"year": 2019, "month": 2, "day": 10},
+            1,
+            {"year": 2019, "month": 2, "day": 10},
+            id="year_and_month_and_day",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_datetime_part",
+            {
+                "column_name": "pickup_datetime",
+                "datetime_parts": ["year", "month", "day"],
+            },
+            ["year", "month", "day"],
+            28,
+            {"year": 2019, "month": 2},
+            28,
+            {"year": 2019, "month": 2, "day": 28},
+            id="datetime_part",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_column_value",
+            {"column_name": "passenger_count"},
+            ["passenger_count"],
+            7,
+            {"passenger_count": 3},
+            1,
+            {"passenger_count": 3},
+            id="column_value",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_divided_integer",
+            {"column_name": "passenger_count", "divisor": 3},
+            ["quotient"],
+            3,
+            {"quotient": 2},
+            1,
+            {"quotient": 2},
+            id="divisor",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_mod_integer",
+            {"column_name": "passenger_count", "mod": 3},
+            ["remainder"],
+            3,
+            {"remainder": 2},
+            1,
+            {"remainder": 2},
+            id="mod_integer",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_hashed_column",
+            {"column_name": "passenger_count", "hash_digits": 3},
+            ["hash"],
+            7,
+            {"hash": "af3"},
+            1,
+            {"hash": "af3"},
+            id="hash",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_converted_datetime",
+            {"column_name": "pickup_datetime", "date_format_string": "%Y-%m-%d"},
+            ["datetime"],
+            28,
+            {"datetime": "2019-02-23"},
+            1,
+            {"datetime": "2019-02-23"},
+            id="converted_datetime",
+        ),
+        pytest.param(
+            "yellow_tripdata.db",
+            "yellow_tripdata_sample_2019_02",
+            "add_splitter_multi_column_values",
+            {"column_names": ["passenger_count", "payment_type"]},
+            ["passenger_count", "payment_type"],
+            23,
+            {"passenger_count": 1, "payment_type": 1},
+            1,
+            {"passenger_count": 1, "payment_type": 1},
+            id="multi_column_values",
+        ),
+    ],
+)
+def test_column_splitter(
+    empty_data_context,
+    database,
+    table_name,
+    splitter_name,
+    splitter_kwargs,
+    sorter_args,
+    all_batches_cnt,
+    specified_batch_request,
+    specified_batch_cnt,
+    last_specified_batch_metadata,
+):
+    context = empty_data_context
+    datasource = sqlite_datasource(context, database)
+    asset = datasource.add_table_asset(
+        name="table_asset",
+        table_name=table_name,
+    )
+    getattr(asset, splitter_name)(**splitter_kwargs)
+    asset.add_sorters(sorter_args)
+    # Test getting all batches
+    all_batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+    assert len(all_batches) == all_batches_cnt
+    # Test getting specified batches
+    specified_batches = asset.get_batch_list_from_batch_request(
+        asset.build_batch_request(specified_batch_request)
+    )
+    assert len(specified_batches) == specified_batch_cnt
+    assert specified_batches[-1].metadata == last_specified_batch_metadata

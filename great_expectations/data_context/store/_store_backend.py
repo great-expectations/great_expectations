@@ -99,10 +99,10 @@ class StoreBackend(metaclass=ABCMeta):
                     value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}\n",
                 )
                 return store_id
-        except Exception:
+        except Exception as e:
             if not suppress_warning:
                 logger.warning(
-                    f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}"
+                    f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}. Exception was: \n {e}"
                 )
             return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
 
@@ -129,6 +129,32 @@ class StoreBackend(metaclass=ABCMeta):
         except ValueError as e:
             logger.debug(str(e))
             raise StoreBackendError("ValueError while calling _set on store backend.")
+
+    def add(self, key, value, **kwargs):
+        """
+        Essentially `set` but validates that a given key-value pair does not already exist.
+        """
+        if self.has_key(key):
+            raise StoreBackendError(f"Store already has the following key: {key}.")
+        return self.set(key=key, value=value, **kwargs)
+
+    def update(self, key, value, **kwargs):
+        """
+        Essentially `set` but validates that a given key-value pair does already exist.
+        """
+        if not self.has_key(key):
+            raise StoreBackendError(
+                f"Store does not have a value associated the following key: {key}."
+            )
+        return self.set(key=key, value=value, **kwargs)
+
+    def add_or_update(self, key, value, **kwargs):
+        """
+        Conditionally calls `add` or `update` based on the presence of the given key.
+        """
+        if self.has_key(key):
+            return self.update(key=key, value=value, **kwargs)
+        return self.add(key=key, value=value, **kwargs)
 
     def move(self, source_key, dest_key, **kwargs):
         self._validate_key(source_key)

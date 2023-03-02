@@ -17,14 +17,19 @@ from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     BatchSpec,
     GCSBatchSpec,
+    PandasBatchSpec,
     PathBatchSpec,
     RuntimeDataBatchSpec,
     S3BatchSpec,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import (
+    MetricDomainTypes,  # noqa: TCH001
+)
 from great_expectations.core.util import AzureUrl, GCSUrl, S3Url, sniff_s3_compression
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import SplitDomainKwargs
+from great_expectations.execution_engine.execution_engine import (
+    SplitDomainKwargs,  # noqa: TCH001
+)
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.split_and_sample.pandas_data_sampler import (
     PandasDataSampler,
@@ -333,6 +338,12 @@ Bucket: {error}"""
             path = batch_spec.path
             reader_fn = self._get_reader_fn(reader_method, path)
             df = reader_fn(path, **reader_options)
+
+        elif isinstance(batch_spec, PandasBatchSpec):
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options
+            reader_fn = self._get_reader_fn(reader_method)
+            df = reader_fn(**reader_options)
 
         else:
             raise gx_exceptions.BatchSpecError(

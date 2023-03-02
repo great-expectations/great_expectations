@@ -1,25 +1,67 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Callable, ClassVar, Dict, List, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    Generator,
+    List,
+    NamedTuple,
+    Type,
+    Union,
+)
 
+from typing_extensions import Final
+
+from great_expectations.experimental.datasources.signatures import _merge_signatures
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
+    import pydantic
+
     from great_expectations.data_context import AbstractDataContext as GXDataContext
+    from great_expectations.datasource import BaseDatasource, LegacyDatasource
     from great_expectations.experimental.context import DataContext
+    from great_expectations.experimental.datasources import PandasDatasource
     from great_expectations.experimental.datasources.interfaces import (
         DataAsset,
         Datasource,
     )
+    from great_expectations.validator.validator import Validator
 
 SourceFactoryFn = Callable[..., "Datasource"]
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_PANDAS_DATASOURCE_NAME: Final[str] = "default_pandas_datasource"
+
+DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str] = "#ephemeral_pandas_asset"
+
+
+class DefaultPandasDatasourceError(Exception):
+    pass
+
 
 class TypeRegistrationError(TypeError):
     pass
+
+
+class _FieldDetails(NamedTuple):
+    default_value: Any
+    type_annotation: Type
+
+
+def _get_field_details(
+    model: Type[pydantic.BaseModel], field_name: str
+) -> _FieldDetails:
+    """Get the default value of the requested field and its type annotation."""
+    return _FieldDetails(
+        default_value=model.__fields__[field_name].default,
+        type_annotation=model.__fields__[field_name].type_,
+    )
 
 
 class _SourceFactories:
@@ -56,32 +98,31 @@ class _SourceFactories:
         Example
         -------
 
-        An `.add_pandas()` pandas factory method will be added to `context.sources`.
+        An `.add_pandas_filesystem()` pandas_filesystem factory method will be added to `context.sources`.
 
-        >>> class PandasDatasource(Datasource):
-        >>>     type: str = 'pandas'
+        >>> class PandasFilesystemDatasource(_PandasDatasource):
+        >>>     type: str = 'pandas_filesystem'
         >>>     asset_types = [FileAsset]
         >>>     execution_engine: PandasExecutionEngine
         """
 
         # TODO: check that the name is a valid python identifier (and maybe that it is snake_case?)
-        ds_type_name = ds_type.__fields__["type"].default
+        ds_type_name = _get_field_details(ds_type, "type").default_value
         if not ds_type_name:
             raise TypeRegistrationError(
                 f"`{ds_type.__name__}` is missing a `type` attribute with an assigned string value"
             )
 
         # rollback type registrations if exception occurs
-        with cls.type_lookup.transaction() as type_lookup:
+        with cls.type_lookup.transaction() as ds_type_lookup, ds_type._type_lookup.transaction() as asset_type_lookup:
 
-            # TODO: We should namespace the asset type to the datasource so different datasources can reuse asset types.
-            cls._register_assets(ds_type, asset_type_lookup=type_lookup)
+            cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
             cls._register_datasource_and_factory_method(
                 ds_type,
                 factory_fn=factory_fn,
                 ds_type_name=ds_type_name,
-                datasource_type_lookup=type_lookup,
+                datasource_type_lookup=ds_type_lookup,
             )
 
     @classmethod
@@ -114,7 +155,6 @@ class _SourceFactories:
 
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
-
         asset_types: List[Type[DataAsset]] = ds_type.asset_types
 
         if not asset_types:
@@ -129,19 +169,103 @@ class _SourceFactories:
                 )
                 continue
             try:
-                asset_type_name = t.__fields__["type"].default
+                asset_type_name = _get_field_details(t, "type").default_value
                 if asset_type_name is None:
                     raise TypeError(
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
                 logger.debug(
-                    f"2b. Registering `DataAsset` `{t.__name__}` as {asset_type_name}"
+                    f"2b. Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"
                 )
                 asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
                 raise TypeRegistrationError(
                     f"No `type` field found for `{ds_type.__name__}.asset_types` -> `{t.__name__}` unable to register asset type",
                 ) from bad_field_exc
+
+            cls._bind_asset_factory_method_if_not_present(ds_type, t, asset_type_name)
+
+    @classmethod
+    def _bind_asset_factory_method_if_not_present(
+        cls,
+        ds_type: Type[Datasource],
+        asset_type: Type[DataAsset],
+        asset_type_name: str,
+    ):
+        add_asset_factory_method_name = f"add_{asset_type_name}_asset"
+        asset_factory_defined: bool = add_asset_factory_method_name in ds_type.__dict__
+
+        if not asset_factory_defined:
+            logger.debug(
+                f"No `{add_asset_factory_method_name}()` method found for `{ds_type.__name__}` generating the method..."
+            )
+
+            def _add_asset_factory(
+                self: Datasource, name: str, **kwargs
+            ) -> pydantic.BaseModel:
+                asset = asset_type(name=name, **kwargs)
+                return self.add_asset(asset)
+
+            # attr-defined issue
+            # https://github.com/python/mypy/issues/12472
+            _add_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+                _add_asset_factory, asset_type, exclude={"type"}
+            )
+            setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
+
+            def _read_asset_factory(
+                self: Datasource, asset_name: str | None = None, **kwargs
+            ) -> Validator:
+                name = asset_name or DEFAULT_PANDAS_DATA_ASSET_NAME
+                asset = asset_type(name=name, **kwargs)
+                self.add_asset(asset)
+                batch_request = asset.build_batch_request()
+                return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[attr-defined]
+
+            _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
+                _read_asset_factory, asset_type, exclude={"type"}
+            )
+            read_asset_factory_method_name = f"read_{asset_type_name}"
+            setattr(ds_type, read_asset_factory_method_name, _read_asset_factory)
+
+        else:
+            logger.debug(
+                f"`{add_asset_factory_method_name}()` already defined `{ds_type.__name__}`"
+            )
+
+    @property
+    def pandas_default(self) -> PandasDatasource:
+        from great_expectations.experimental.datasources import PandasDatasource
+
+        datasources: dict[
+            str, LegacyDatasource | BaseDatasource | Datasource
+        ] = self._data_context.datasources  # type: ignore[union-attr]  # typing information is being lost in DataContext factory
+
+        # if a legacy datasource with this name already exists, we try a different name
+        existing_datasource: LegacyDatasource | BaseDatasource | Datasource | None = (
+            datasources.get(DEFAULT_PANDAS_DATASOURCE_NAME)
+        )
+
+        # if a legacy datasource exists for all possible_default_datasource_names, raise an error
+        if existing_datasource and not isinstance(
+            existing_datasource, PandasDatasource
+        ):
+            raise DefaultPandasDatasourceError(
+                f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
+                "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."
+            )
+
+        pandas_datasource = (
+            existing_datasource
+            or self._data_context.sources.add_pandas(
+                name=DEFAULT_PANDAS_DATASOURCE_NAME
+            )
+        )
+        # there is no situation in which this isn't true
+        # return type information must be missing for factory method add_pandas
+        assert isinstance(pandas_datasource, PandasDatasource)
+        pandas_datasource._data_context = self._data_context
+        return pandas_datasource
 
     @property
     def factories(self) -> List[str]:
@@ -158,6 +282,8 @@ class _SourceFactories:
                 return datasource
 
             wrapped.__doc__ = ds_constructor.__doc__
+            # attr-defined issue https://github.com/python/mypy/issues/12472
+            wrapped.__signature__ = ds_constructor.__signature__  # type: ignore[attr-defined]
             return wrapped
         except KeyError:
             raise AttributeError(f"No factory {attr_name} in {self.factories}")
@@ -165,3 +291,19 @@ class _SourceFactories:
     def __dir__(self) -> List[str]:
         """Preserves autocompletion for dynamic attributes."""
         return [*self.factories, *super().__dir__()]
+
+
+def _iter_all_registered_types() -> Generator[
+    tuple[str, Type[Datasource] | Type[DataAsset]], None, None
+]:
+    """
+    Iterate through all registered Datasource and DataAsset types.
+    Returns tuples of the registered type name and the actual type/class.
+    """
+    for ds_name in _SourceFactories.type_lookup.type_names():
+        ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_name]
+        yield ds_name, ds_type
+
+        for asset_name in ds_type._type_lookup.type_names():
+            asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
+            yield asset_name, asset_type

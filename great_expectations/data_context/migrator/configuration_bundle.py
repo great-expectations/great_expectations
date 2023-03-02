@@ -14,7 +14,9 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResultSchema,
 )
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.data_context.data_context_variables import DataContextVariables
+from great_expectations.data_context.data_context_variables import (
+    DataContextVariables,  # noqa: TCH001
+)
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointConfigSchema,
@@ -103,7 +105,7 @@ class ConfigurationBundle:
         # to all Data Contexts.
         datasource_configs: List[DatasourceConfig] = []
         for datasource_name in datasource_names:
-            datasource_config = self._context._datasource_store.retrieve_by_name(  # type: ignore[attr-defined]
+            datasource_config = self._context._datasource_store.retrieve_by_name(
                 datasource_name=datasource_name
             )
             datasource_config.name = datasource_name

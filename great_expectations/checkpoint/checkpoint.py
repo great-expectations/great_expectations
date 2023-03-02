@@ -4,8 +4,7 @@ import copy
 import datetime
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
-from uuid import UUID
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
@@ -33,8 +32,8 @@ from great_expectations.core.batch import (
 )
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
 from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
-    ExpectationSuiteValidationResultMeta,
+    ExpectationSuiteValidationResult,  # noqa: TCH001
+    ExpectationSuiteValidationResultMeta,  # noqa: TCH001
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
@@ -55,17 +54,26 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
+    load_class,
 )
 from great_expectations.validation_operators import ActionListValidationOperator
 from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,
+    ValidationOperatorResult,  # noqa: TCH001
 )
-from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.validator.validator import Validator
+
 
 logger = logging.getLogger(__name__)
+
+
+def _get_validator_class() -> Type[Validator]:
+    """Using this function helps work around circular import dependncies."""
+    module_name = "great_expectations.validator.validator"
+    class_name = "Validator"
+    return load_class(class_name=class_name, module_name=module_name)
 
 
 class BaseCheckpoint(ConfigPeer):
@@ -259,7 +267,7 @@ class BaseCheckpoint(ConfigPeer):
                     validation_result = run_result.get("validation_result")
                     if validation_result:
                         meta = validation_result.meta
-                        id = str(self.ge_cloud_id) if self.ge_cloud_id else None
+                        id = self.ge_cloud_id
                         meta["checkpoint_id"] = id
 
                 checkpoint_run_results.update(run_results)
@@ -430,7 +438,7 @@ class BaseCheckpoint(ConfigPeer):
             if self._using_cloud_context:
                 checkpoint_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.CHECKPOINT,
-                    cloud_id=str(self.ge_cloud_id),
+                    cloud_id=self.ge_cloud_id,
                 )
 
             operator_run_kwargs = {}
@@ -574,7 +582,7 @@ is run), with each validation having its own defined "action_list" attribute.
             return []
 
     @property
-    def ge_cloud_id(self) -> Optional[UUID]:
+    def ge_cloud_id(self) -> Optional[str]:
         try:
             return self.config.ge_cloud_id
         except AttributeError:
@@ -681,8 +689,8 @@ class Checkpoint(BaseCheckpoint):
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[UUID] = None,
-        expectation_suite_ge_cloud_id: Optional[UUID] = None,
+        ge_cloud_id: Optional[str] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> None:
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
@@ -1073,7 +1081,7 @@ class LegacyCheckpoint(Checkpoint):
             )
 
         for batch in assets_to_validate:
-            if not isinstance(batch, (tuple, DataAsset, Validator)):
+            if not isinstance(batch, (tuple, DataAsset, _get_validator_class())):
                 raise gx_exceptions.DataContextError(
                     "Batches are required to be of type DataAsset or Validator"
                 )
@@ -1262,7 +1270,7 @@ class SimpleCheckpoint(Checkpoint):
         runtime_configuration: Optional[dict] = None,
         validations: Optional[List[dict]] = None,
         profilers: Optional[List[dict]] = None,
-        ge_cloud_id: Optional[UUID] = None,
+        ge_cloud_id: Optional[str] = None,
         # the following four arguments are used by SimpleCheckpointConfigurator
         site_names: Union[str, List[str]] = "all",
         slack_webhook: Optional[str] = None,

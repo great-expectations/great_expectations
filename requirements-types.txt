@@ -1,2 +1,3 @@
 --requirement requirements.txt
 --requirement reqs/requirements-dev-contrib.txt
+--requirement reqs/requirements-dev-spark.txt

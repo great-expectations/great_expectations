@@ -12,8 +12,8 @@ from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SqlAlchemyExecutionEngine,
+    PandasExecutionEngine,  # noqa: TCH001
+    SqlAlchemyExecutionEngine,  # noqa: TCH001
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -216,7 +216,9 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
     try:
         # Trino
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+        if hasattr(dialect, "TrinoDialect") or isinstance(
+            dialect, trino.sqlalchemy.dialect.TrinoDialect
+        ):
             if positive:
                 return sa.func.regexp_like(column, literal(regex))
             else:
@@ -821,7 +823,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901 - 28
 
     try:
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect) or hasattr(
+            dialect, "TrinoDialect"
+        ):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass
@@ -1087,7 +1091,7 @@ def sql_statement_with_post_compile_to_string(
         String representation of select_statement
 
     """
-    sqlalchemy_connection: "sa.engine.base.Connection" = engine.engine
+    sqlalchemy_connection: sa.engine.base.Connection = engine.engine
     compiled = select_statement.compile(
         sqlalchemy_connection,
         compile_kwargs={"render_postcompile": True},

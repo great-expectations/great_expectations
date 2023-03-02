@@ -1,6 +1,6 @@
 ---
 title: Examples for configuring primary key (PK) values in Validation results.
-author: @Shinnnyshinshin
+author: Shinnnyshinshin
 date: 20220118
 ---
 ## Overview

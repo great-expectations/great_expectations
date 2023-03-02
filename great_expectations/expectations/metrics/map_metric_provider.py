@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
@@ -40,7 +40,7 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
-from great_expectations.expectations.metrics import MetaMetricProvider
+from great_expectations.expectations.metrics import MetaMetricProvider  # noqa: TCH001
 from great_expectations.expectations.metrics.import_manager import F, quoted_name, sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
@@ -2510,7 +2510,6 @@ def _sqlalchemy_map_condition_query(
     ) = metrics.get("unexpected_condition")
 
     result_format: dict = metric_value_kwargs["result_format"]
-
     # We will not return map_condition_query if return_unexpected_index_query = False
     return_unexpected_index_query: bool = result_format.get(
         "return_unexpected_index_query"
@@ -2542,14 +2541,15 @@ def _sqlalchemy_map_condition_query(
     unexpected_index_column_names: List[str] = result_format.get(
         "unexpected_index_column_names"
     )
-    for column_name in unexpected_index_column_names:
-        if column_name not in all_table_columns:
-            raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
-                message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '
-                f"Please check your configuration and try again."
-            )
+    if unexpected_index_column_names:
+        for column_name in unexpected_index_column_names:
+            if column_name not in all_table_columns:
+                raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+                    message=f'Error: The unexpected_index_column: "{column_name}" in does not exist in SQL Table. '
+                    f"Please check your configuration and try again."
+                )
 
-        column_selector.append(sa.column(column_name))
+            column_selector.append(sa.column(column_name))
 
     for column_name in domain_column_name_list:
         column_selector.append(sa.column(column_name))
@@ -2583,7 +2583,7 @@ def _sqlalchemy_map_condition_index(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]] | None:
     """
     Returns indices of the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -2596,6 +2596,10 @@ def _sqlalchemy_map_condition_index(
         compute_domain_kwargs,
         accessor_domain_kwargs,
     ) = metrics.get("unexpected_condition")
+
+    result_format = metric_value_kwargs["result_format"]
+    if "unexpected_index_column_names" not in result_format:
+        return None
 
     domain_column_name_list: List[str] = list()
     # column map expectations
@@ -2616,8 +2620,6 @@ def _sqlalchemy_map_condition_index(
         domain_column_name_list = column_list
 
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
-    result_format: dict = metric_value_kwargs["result_format"]
-
     all_table_columns: List[str] = metrics.get("table.columns")
 
     unexpected_index_column_names: Optional[List[str]] = result_format.get(
@@ -2865,6 +2867,10 @@ def _spark_map_condition_index(
     ) = metrics.get("unexpected_condition", (None, None, None))
 
     if unexpected_condition is None:
+        return None
+
+    result_format = metric_value_kwargs["result_format"]
+    if "unexpected_index_column_names" not in result_format:
         return None
 
     domain_column_name_list: List[str] = list()

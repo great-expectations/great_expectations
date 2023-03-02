@@ -525,7 +525,7 @@ def test_add_checkpoint(
 
     store.add_checkpoint(checkpoint=checkpoint)
 
-    mock_backend.set.assert_called_once_with(
+    mock_backend.add.assert_called_once_with(
         (checkpoint_name,),
         "name: my_checkpoint\nconfig_version:\nmodule_name: great_expectations.checkpoint\nclass_name: LegacyCheckpoint\n",
     )

@@ -77,8 +77,6 @@ from great_expectations.exceptions import (
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import (
@@ -122,7 +120,7 @@ from great_expectations.self_check.util import (
     generate_expectation_tests,
 )
 from great_expectations.util import camel_to_snake, is_parseable_date
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import ValidationDependencies, Validator
 
@@ -2765,64 +2763,33 @@ class ColumnMapExpectation(TableExpectation, ABC):
         if result_format_str in ["BASIC"]:
             return validation_dependencies
 
-        # only for SUMMARY and COMPLETE
-        if isinstance(execution_engine, PandasExecutionEngine):
-            metric_kwargs = get_metric_kwargs(
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-            metric_kwargs = get_metric_kwargs(
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-        if isinstance(
-            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
-        ):
-            if "unexpected_index_column_names" in validation_dependencies.result_format:
-                metric_kwargs = get_metric_kwargs(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    configuration=configuration,
-                    runtime_configuration=runtime_configuration,
-                )
-                validation_dependencies.set_metric_configuration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    metric_configuration=MetricConfiguration(
-                        metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                    ),
-                )
-                metric_kwargs = get_metric_kwargs(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    configuration=configuration,
-                    runtime_configuration=runtime_configuration,
-                )
-                validation_dependencies.set_metric_configuration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    metric_configuration=MetricConfiguration(
-                        metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                    ),
-                )
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
+
         return validation_dependencies
 
     def _validate(
@@ -3341,8 +3308,13 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
-        if self.map_metric == "compound_columns.unique":
+
+        # ID/PK currently doesn't work for ExpectCompoundColumnsToBeUnique in SQL
+        if self.map_metric == "compound_columns.unique" and isinstance(
+            execution_engine, SqlAlchemyExecutionEngine
+        ):
             return validation_dependencies
+
         metric_kwargs = get_metric_kwargs(
             metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
             configuration=configuration,

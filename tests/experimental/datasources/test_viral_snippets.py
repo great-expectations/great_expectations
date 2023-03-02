@@ -12,6 +12,7 @@ pytestmark = [pytest.mark.integration]
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.experimental.datasources.interfaces import Datasource
 
 logger = logging.getLogger(__file__)
 
@@ -47,8 +48,6 @@ def zep_config_dict(db_file) -> dict:
                         "column_splitter": {
                             "column_name": "pickup_datetime",
                             "method_name": "split_on_year_and_month",
-                            "name": "y_m_splitter",
-                            "param_names": ["year", "month"],
                         },
                         "order_by": [
                             {"key": "year"},
@@ -143,10 +142,10 @@ def test_serialize_zep_config(zep_file_context: FileDataContext):
 
 
 def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
-    batch_request = (
-        zep_file_context.get_datasource("my_sql_ds")
-        .get_asset("my_asset")
-        .get_batch_request({"year": 2019, "month": 1})
+    datasource = zep_file_context.get_datasource("my_sql_ds")
+    assert isinstance(datasource, Datasource)
+    batch_request = datasource.get_asset("my_asset").build_batch_request(
+        {"year": 2019, "month": 1}
     )
 
     validator = zep_file_context.get_validator(batch_request=batch_request)
