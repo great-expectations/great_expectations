@@ -282,6 +282,8 @@ class _SourceFactories:
                 return datasource
 
             wrapped.__doc__ = ds_constructor.__doc__
+            # attr-defined issue https://github.com/python/mypy/issues/12472
+            wrapped.__signature__ = ds_constructor.__signature__  # type: ignore[attr-defined]
             return wrapped
         except KeyError:
             raise AttributeError(f"No factory {attr_name} in {self.factories}")
