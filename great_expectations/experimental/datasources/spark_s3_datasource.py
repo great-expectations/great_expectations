@@ -10,7 +10,6 @@ from typing_extensions import Literal
 from great_expectations.core.util import S3Url
 from great_expectations.experimental.datasources import _SparkFilePathDatasource
 from great_expectations.experimental.datasources.data_asset.data_connector import (
-    DataConnector,
     S3DataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
@@ -113,7 +112,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
 
         Args:
             name: The name of the CSV asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches CSV filenames that is used to label the batches
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             prefix: S3 prefix
@@ -127,7 +126,6 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
@@ -135,21 +133,24 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             inferSchema=infer_schema,
             order_by=order_by_sorters,
         )
-
-        data_connector: DataConnector = S3DataConnector(
+        asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            batching_regex=batching_regex_pattern,
             s3_client=self._get_s3_client(),
+            batching_regex=batching_regex_pattern,
             bucket=self.bucket,
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        asset._test_connection_error_message = (
+            S3DataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket=self.bucket,
+                prefix=prefix,
+                delimiter=delimiter,
+            )
         )
+        return self.add_asset(asset=asset)
