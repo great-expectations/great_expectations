@@ -153,7 +153,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex,
+                "batching_regex": batching_regex.pattern,
                 "bucket_or_name": bucket_or_name,
                 "prefix": prefix,
                 "delimiter": delimiter,

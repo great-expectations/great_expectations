@@ -155,7 +155,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex,
+                "batching_regex": batching_regex.pattern,
                 "account_name": account_name,
                 "container": container,
                 "name_starts_with": name_starts_with,

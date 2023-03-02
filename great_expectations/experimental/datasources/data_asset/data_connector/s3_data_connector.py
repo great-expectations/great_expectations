@@ -154,7 +154,7 @@ class S3DataConnector(FilePathDataConnector):
         return test_connection_error_message_template.format(
             **{
                 "data_asset_name": data_asset_name,
-                "batching_regex": batching_regex,
+                "batching_regex": batching_regex.pattern,
                 "bucket": bucket,
                 "prefix": prefix,
                 "delimiter": delimiter,
