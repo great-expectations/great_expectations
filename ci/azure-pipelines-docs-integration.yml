@@ -56,7 +56,7 @@ stages:
                 tests/integration/fixtures/**
                 tests/test_sets/**
 
-          - bash: ./scripts/check_for_docs_deps_changes.sh
+          - bash: ./ci/checks/check_for_docs_deps_changes.sh
             name: CheckDocsDependenciesChanges
 
   - stage: custom_checks
@@ -75,14 +75,14 @@ stages:
       steps:
       - script: |
           yarn install
-          python scripts/validate_docs_snippets.py
+          python ci/checks/validate_docs_snippets.py
         name: DocsSnippetChecker
 
     - job: line_number_snippet_checker
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
       steps:
         - script: |
-            python scripts/check_no_line_number_snippets.py
+            python ci/checks/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
     - job: public_api_report
