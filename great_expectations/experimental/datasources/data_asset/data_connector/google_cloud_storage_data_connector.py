@@ -75,6 +75,91 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             file_path_template_map_fn=file_path_template_map_fn,
         )
 
+    @classmethod
+    def build_data_connector(
+        cls,
+        datasource_name: str,
+        data_asset_name: str,
+        batching_regex: re.Pattern,
+        gcs_client: GCSClient,
+        bucket_or_name: str,
+        prefix: str = "",
+        delimiter: str = "/",
+        max_results: Optional[int] = None,
+        # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        # sorters: Optional[list] = None,
+        # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Optional[Callable] = None,
+    ) -> GoogleCloudStorageDataConnector:
+        """Builds "GoogleCloudStorageDataConnector", which links named DataAsset to Google Cloud Storage.
+
+        Args:
+            datasource_name: The name of the Datasource associated with this "GoogleCloudStorageDataConnector" instance
+            data_asset_name: The name of the DataAsset using this "GoogleCloudStorageDataConnector" instance
+            batching_regex: A regex pattern for partitioning data references
+            gcs_client: Reference to instantiated Google Cloud Storage client handle
+            bucket_or_name: bucket name for Google Cloud Storage
+            prefix: GCS prefix
+            delimiter: GCS delimiter
+            max_results: max blob filepaths to return
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # sorters: optional list of sorters for sorting data_references
+            file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
+            # TODO: <Alex>ALEX</Alex>
+
+        Returns:
+            Instantiated "GoogleCloudStorageDataConnector" object
+        """
+        return GoogleCloudStorageDataConnector(
+            datasource_name=datasource_name,
+            data_asset_name=data_asset_name,
+            batching_regex=batching_regex,
+            gcs_client=gcs_client,
+            bucket_or_name=bucket_or_name,
+            prefix=prefix,
+            delimiter=delimiter,
+            max_results=max_results,
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # sorters=sorters,
+            # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn=file_path_template_map_fn,
+        )
+
+    @classmethod
+    def build_test_connection_error_message(
+        cls,
+        data_asset_name: str,
+        batching_regex: re.Pattern,
+        bucket_or_name: str,
+        prefix: str = "",
+        delimiter: str = "/",
+    ) -> str:
+        """Builds helpful error message for reporting issues when linking named DataAsset to Google Cloud Storage.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this "GoogleCloudStorageDataConnector" instance
+            batching_regex: A regex pattern for partitioning data references
+            bucket_or_name: bucket name for Google Cloud Storage
+            prefix: GCS prefix
+            delimiter: GCS delimiter
+
+        Returns:
+            Customized error message
+        """
+        test_connection_error_message_template: str = 'No file in bucket "{bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex}" using delimiter "{delimiter}" for DataAsset "{data_asset_name}".'
+        return test_connection_error_message_template.format(
+            **{
+                "data_asset_name": data_asset_name,
+                "batching_regex": batching_regex.pattern,
+                "bucket_or_name": bucket_or_name,
+                "prefix": prefix,
+                "delimiter": delimiter,
+            }
+        )
+
     def build_batch_spec(self, batch_definition: BatchDefinition) -> GCSBatchSpec:
         """
         Build BatchSpec from batch_definition by calling DataConnector's build_batch_spec function.

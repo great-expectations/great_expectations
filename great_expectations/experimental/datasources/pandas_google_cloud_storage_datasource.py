@@ -10,7 +10,6 @@ from typing_extensions import Literal
 from great_expectations.core.util import GCSUrl
 from great_expectations.experimental.datasources import _PandasFilePathDatasource
 from great_expectations.experimental.datasources.data_asset.data_connector import (
-    DataConnector,
     GoogleCloudStorageDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
@@ -139,7 +138,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the CSV asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches CSV filenames that is used to label the batches
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
@@ -160,23 +159,27 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        data_connector: DataConnector = GoogleCloudStorageDataConnector(
+        asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
+            gcs_client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
-            gcs_client=self._gcs_client,
             bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
             file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        asset._test_connection_error_message = (
+            GoogleCloudStorageDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket_or_name=self.bucket_or_name,
+                prefix=prefix,
+                delimiter=delimiter,
+            )
         )
+        return self.add_asset(asset=asset)
 
     def add_excel_asset(
         self,
@@ -192,7 +195,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the Excel asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches Excel filenames that is used to label the batches
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
@@ -205,31 +208,33 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = ExcelAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
-
-        data_connector: DataConnector = GoogleCloudStorageDataConnector(
+        asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
+            gcs_client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
-            gcs_client=self._gcs_client,
             bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
             file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        asset._test_connection_error_message = (
+            GoogleCloudStorageDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket_or_name=self.bucket_or_name,
+                prefix=prefix,
+                delimiter=delimiter,
+            )
         )
+        return self.add_asset(asset=asset)
 
     def add_json_asset(
         self,
@@ -245,7 +250,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the JSON asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches JSON filenames that is used to label the batches
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
@@ -258,31 +263,33 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = JSONAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
-
-        data_connector: DataConnector = GoogleCloudStorageDataConnector(
+        asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
+            gcs_client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
-            gcs_client=self._gcs_client,
             bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
             file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        asset._test_connection_error_message = (
+            GoogleCloudStorageDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket_or_name=self.bucket_or_name,
+                prefix=prefix,
+                delimiter=delimiter,
+            )
         )
+        return self.add_asset(asset=asset)
 
     def add_parquet_asset(
         self,
@@ -298,7 +305,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
 
         Args:
             name: The name of the Parquet asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            batching_regex: regex pattern that matches Parquet filenames that is used to label the batches
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
@@ -311,31 +318,33 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = ParquetAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
-
-        data_connector: DataConnector = GoogleCloudStorageDataConnector(
+        asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
+            gcs_client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
-            gcs_client=self._gcs_client,
             bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
             file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        asset._test_connection_error_message = (
+            GoogleCloudStorageDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket_or_name=self.bucket_or_name,
+                prefix=prefix,
+                delimiter=delimiter,
+            )
         )
+        return self.add_asset(asset=asset)
 
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472

@@ -10,7 +10,6 @@ from typing_extensions import Literal
 from great_expectations.core.util import GCSUrl
 from great_expectations.experimental.datasources import _SparkFilePathDatasource
 from great_expectations.experimental.datasources.data_asset.data_connector import (
-    DataConnector,
     GoogleCloudStorageDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import TestConnectionError
@@ -146,27 +145,29 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
             order_by=order_by
         )
-
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
         )
-
-        data_connector: DataConnector = GoogleCloudStorageDataConnector(
+        asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
+            gcs_client=self._get_gcs_client(),
             batching_regex=batching_regex_pattern,
-            gcs_client=self._gcs_client,
             bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
             file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        test_connection_error_message: str = f"""No file in bucket "{self.bucket_or_name}" with prefix "{prefix}" matched regular expressions pattern "{batching_regex_pattern.pattern}" using delimiter "{delimiter}" for DataAsset "{name}"."""
-        return self.add_asset(
-            asset=asset,
-            data_connector=data_connector,
-            test_connection_error_message=test_connection_error_message,
+        asset._test_connection_error_message = (
+            GoogleCloudStorageDataConnector.build_test_connection_error_message(
+                data_asset_name=name,
+                batching_regex=batching_regex_pattern,
+                bucket_or_name=self.bucket_or_name,
+                prefix=prefix,
+                delimiter=delimiter,
+            )
         )
+        return self.add_asset(asset=asset)
