@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import logging
 import pathlib
 import re
@@ -17,8 +18,10 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchSortersDefinition,
     TestConnectionError,
 )
+from great_expectations.experimental.datasources.spark_file_path_datasource import (
+    CSVAsset,
+)
 from great_expectations.experimental.datasources.spark_filesystem_datasource import (
-    CSVSparkAsset,
     SparkFilesystemDatasource,
 )
 
@@ -96,7 +99,7 @@ def test_add_csv_asset_with_batching_regex_to_datasource(
 @pytest.mark.unit
 def test_construct_csv_asset_directly():
     # noinspection PyTypeChecker
-    asset = CSVSparkAsset(
+    asset = CSVAsset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",  # Ignoring IDE warning (type declarations are consistent).
     )
@@ -332,7 +335,7 @@ def bad_batching_regex_config(
         r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
     )
     test_connection_error = TestConnectionError(
-        f"""No file at base_directory path "{csv_path.resolve()}" matched regular expressions pattern "{batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_spark_asset"."""
+        f"""No file at base_directory path "{csv_path.resolve()}" matched regular expressions pattern "{batching_regex.pattern}" and/or glob_directive "**/*" for DataAsset "csv_asset"."""
     )
     return batching_regex, test_connection_error
 
@@ -344,7 +347,7 @@ def datasource_test_connection_error_messages(
     request,
 ) -> tuple[SparkFilesystemDatasource, TestConnectionError]:
     batching_regex, test_connection_error = request.param(csv_path=csv_path)
-    csv_asset = CSVSparkAsset(
+    csv_asset = CSVAsset(
         name="csv_asset",
         batching_regex=batching_regex,
     )
@@ -376,3 +379,23 @@ def test_test_connection_failures(
         spark_filesystem_datasource.test_connection()
 
     assert str(e.value) == str(test_connection_error)
+
+
+@pytest.mark.unit
+def test_get_batch_list_from_batch_request_does_not_modify_input_batch_request(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+):
+    asset = spark_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        header=True,
+        infer_schema=True,
+    )
+    request = asset.build_batch_request({"year": "2018"})
+    request_before_call = copy.deepcopy(request)
+    batches = asset.get_batch_list_from_batch_request(request)
+    # We assert the request before the call to get_batch_list_from_batch_request is equal to the request after the
+    # call. This test exists because this call was modifying the request.
+    assert request == request_before_call
+    # We get all 12 batches, one for each month of 2018.
+    assert len(batches) == 12

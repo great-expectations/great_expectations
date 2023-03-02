@@ -57,6 +57,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
 
 logger = logging.getLogger(__name__)
 
@@ -367,7 +368,7 @@ class CloudDataContext(SerializableDataContext):
             conf_file_option=conf_file_option,
         )
 
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
@@ -375,8 +376,9 @@ class CloudDataContext(SerializableDataContext):
             GXCloudStoreBackend,
         )
 
-        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
+        # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
+        store_name = DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME.value
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
@@ -391,7 +393,7 @@ class CloudDataContext(SerializableDataContext):
             runtime_environment=runtime_environment,
             serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
         )
-        self._datasource_store = datasource_store
+        return datasource_store
 
     def list_expectation_suite_names(self) -> List[str]:
         """
@@ -591,11 +593,7 @@ class CloudDataContext(SerializableDataContext):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        id = (
-            str(expectation_suite.ge_cloud_id)
-            if expectation_suite.ge_cloud_id
-            else None
-        )
+        id = expectation_suite.ge_cloud_id
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             cloud_id=id,
@@ -636,16 +634,6 @@ class CloudDataContext(SerializableDataContext):
                 f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True."
             )
-
-    @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        """
-        return self._context_root_directory
 
     def add_checkpoint(
         self,
@@ -788,7 +776,7 @@ class CloudDataContext(SerializableDataContext):
     ) -> ExpectationSuite:
         cloud_id: str | None
         if expectation_suite.ge_cloud_id:
-            cloud_id = str(expectation_suite.ge_cloud_id)
+            cloud_id = expectation_suite.ge_cloud_id
         else:
             cloud_id = None
 

@@ -1,4 +1,5 @@
 import copy
+import inspect
 from pprint import pformat as pf
 from typing import ClassVar, List, Optional, Type
 
@@ -109,11 +110,43 @@ class TestMetaDatasource:
             ds_factory_method_final
         ), f"{MetaDatasource.__name__}.__new__ failed to add `{expected_method_name}()` method"
 
+    def test_registered_sources_factory_method_has_correct_signature(
+        self, context_sources_cleanup: _SourceFactories
+    ):
+        expected_method_name = "add_my_test"
+
+        class MyTestDatasource(Datasource):
+            asset_types: ClassVar[List[Type[DataAsset]]] = []
+            type: str = "my_test"
+            extra_field: str
+
+            @property
+            def execution_engine_type(self) -> Type[ExecutionEngine]:
+                return DummyExecutionEngine
+
+        ds_factory_method = getattr(context_sources_cleanup, expected_method_name)
+
+        ds_factory_method_sig = inspect.signature(ds_factory_method)
+        my_ds_init_method_sig = inspect.signature(MyTestDatasource)
+        print(f"{MyTestDatasource.__name__}.__init__()\n  {my_ds_init_method_sig}\n")
+        print(f"{expected_method_name}()\n  {ds_factory_method_sig}\n")
+
+        for i, param_name in enumerate(my_ds_init_method_sig.parameters):
+            print(f"{i} {param_name} ", end="")
+
+            if param_name in ["type", "assets"]:
+                assert (
+                    param_name not in ds_factory_method_sig.parameters
+                ), f"{param_name} should not be part of the `add_<DATASOURCE_TYPE>` method"
+                print("⏩")
+                continue
+
+            assert param_name in ds_factory_method_sig.parameters
+            print("✅")
+
     def test__new__updates_asset_type_lookup(
         self, context_sources_cleanup: _SourceFactories
     ):
-        type_lookup = context_sources_cleanup.type_lookup
-
         class FooAsset(DummyDataAsset):
             type: str = "foo"
 
@@ -128,11 +161,13 @@ class TestMetaDatasource:
             def execution_engine_type(self) -> Type[ExecutionEngine]:
                 return DummyExecutionEngine
 
-        print(f" type_lookup ->\n{pf(type_lookup)}\n")
+        print(f" type_lookup ->\n{pf(FooBarDatasource._type_lookup)}\n")
         asset_types = FooBarDatasource.asset_types
         assert asset_types, "No asset types have been declared"
 
-        registered_type_names = [type_lookup.get(t) for t in asset_types]
+        registered_type_names = [
+            FooBarDatasource._type_lookup.get(t) for t in asset_types
+        ]
         for type_, name in zip(asset_types, registered_type_names):
             print(f"`{type_.__name__}` registered as '{name}'")
             assert name, f"{type.__name__} could not be retrieved"

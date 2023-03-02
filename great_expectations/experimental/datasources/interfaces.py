@@ -33,7 +33,6 @@ from great_expectations.experimental.datasources.experimental_base_model import 
     ExperimentalBaseModel,
 )
 from great_expectations.experimental.datasources.metadatasource import MetaDatasource
-from great_expectations.experimental.datasources.sources import _SourceFactories
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
@@ -49,13 +48,14 @@ if TYPE_CHECKING:
     from great_expectations.experimental.datasources.data_asset.data_connector import (
         DataConnector,
     )
+    from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
 try:
     import pyspark
     from pyspark.sql import Row as pyspark_sql_Row
 except ImportError:
-    pyspark = None
-    pyspark_sql_Row = None
+    pyspark = None  # type: ignore[assignment]
+    pyspark_sql_Row = None  # type: ignore[assignment,misc]
     logger.debug("No spark sql dataframe module available.")
 
 
@@ -345,10 +345,17 @@ class Datasource(
         "glob_directive",  # filesystem argument
         "data_context_root_directory",  # filesystem argument
         "bucket",  # s3 argument
-        "prefix",  # s3 argument
-        "delimiter",  # s3 argument
+        "boto3_options",  # s3 argument
+        "prefix",  # s3 argument and gcs argument
+        "delimiter",  # s3 argument and gcs argument
         "max_keys",  # s3 argument
+        "bucket_or_name",  # gcs argument
+        "gcs_options",  # gcs argument
+        "max_results",  # gcs argument
     }
+    _type_lookup: ClassVar[  # This attribute is set in `MetaDatasource.__new__`
+        TypeLookup
+    ]
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
     execution_engine_override: ClassVar[Optional[Type[_ExecutionEngineT]]] = None  # type: ignore[misc]  # ClassVar cannot contain type variables
@@ -375,7 +382,7 @@ class Datasource(
         """
         logger.info(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
         asset_type_name: str = data_asset.type
-        asset_type: Type[_DataAssetT] = _SourceFactories.type_lookup[asset_type_name]
+        asset_type: Type[_DataAssetT] = cls._type_lookup[asset_type_name]
 
         if asset_type is type(data_asset):
             # asset is already the intended type
@@ -432,24 +439,15 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(
-        self,
-        asset: _DataAssetT,
-        data_connector: Optional[DataConnector] = None,
-        test_connection_error_message: Optional[str] = None,
-    ) -> _DataAssetT:
+    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
             asset: The DataAsset to be added to this datasource.
-            data_connector: Optional reference to "DataConnector" object for connecting Datasource and DataAsset to data
-            test_connection_error_message: Optional message for reporting connection test errors informatively
         """
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
-        asset._data_connector = data_connector
-        asset._test_connection_error_message = test_connection_error_message
 
         asset.test_connection()
 
@@ -524,6 +522,30 @@ class Datasource(
         raise NotImplementedError(
             """One needs to implement "test_connection" on a Datasource subclass."""
         )
+
+    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
+        """Any Datasource subclass that utilizes DataConnector should overwrite this method.
+
+        Specific implementations instantiate appropriate DataConnector class and set "self._data_connector" to it.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this DataConnector instance
+            kwargs: Extra keyword arguments allow specification of arguments used by particular DataConnector subclasses
+        """
+        pass
+
+    def _build_test_connection_error_message(
+        self, data_asset_name: str, **kwargs
+    ) -> None:
+        """Any Datasource subclass can overwrite this method.
+
+        Specific implementations create appropriate error message and set "self._test_connection_error_message" to it.
+
+        Args:
+            data_asset_name: The name of the DataAsset using this DataConnector instance
+            kwargs: Extra keyword arguments allow specification of arguments used by particular subclass' error message
+        """
+        pass
 
     # End Abstract Methods
 

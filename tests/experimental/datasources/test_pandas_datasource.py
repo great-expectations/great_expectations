@@ -4,7 +4,7 @@ import inspect
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any, Callable, Type
 
 import pydantic
 import pytest
@@ -14,15 +14,18 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.experimental.datasources import PandasDatasource
 from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
 from great_expectations.experimental.datasources.pandas_datasource import (
-    PandasCSVAsset,
-    PandasTableAsset,
+    CSVAsset,
+    TableAsset,
     _PandasDataAsset,
 )
 from great_expectations.experimental.datasources.sources import (
-    DEFAULT_PANDAS_DATASOURCE_NAMES,
+    DEFAULT_PANDAS_DATA_ASSET_NAME,
+    DEFAULT_PANDAS_DATASOURCE_NAME,
     DefaultPandasDatasourceError,
     _get_field_details,
 )
+from great_expectations.util import camel_to_snake
+from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -54,6 +57,11 @@ def csv_path() -> pathlib.Path:
         pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
     )
     return abs_csv_path
+
+
+@pytest.fixture
+def valid_file_path(csv_path: pathlib.Path) -> pathlib.Path:
+    return csv_path / "yellow_tripdata_sample_2018-03.csv"
 
 
 class SpyInterrupt(RuntimeError):
@@ -130,11 +138,13 @@ class TestDynamicPandasAssets:
         assert type_name
 
         asset_class_names: set[str] = {
-            t.__name__.lower()[6:-5] for t in PandasDatasource.asset_types
+            camel_to_snake(t.__name__).split("_asset")[0]
+            for t in PandasDatasource.asset_types
         }
         print(asset_class_names)
 
-        assert type_name.replace("_", "") in asset_class_names
+        assert type_name in PandasDatasource._type_lookup
+        assert type_name in asset_class_names
 
     @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
     def test_add_asset_method_exists_and_is_functional(
@@ -153,11 +163,18 @@ class TestDynamicPandasAssets:
         method = getattr(ds, method_name)
 
         with pytest.raises(pydantic.ValidationError) as exc_info:
-            method(
-                f"{asset_class.__name__}_add_asset_test",
-                regex="great_expectations",
-                _invalid_key="foobar",
-            )
+            positional_arg_string = "foo"
+            positional_args: list[str] = []
+            while len(positional_args) < 3:
+                try:
+                    method(
+                        f"{asset_class.__name__}_add_asset_test",
+                        *positional_args,
+                        _invalid_key="bar",
+                    )
+                    break
+                except TypeError:
+                    positional_args.append(positional_arg_string)
         # importantly check that the method creates (or attempts to create) the intended asset
         assert exc_info.value.model == asset_class
 
@@ -215,9 +232,9 @@ class TestDynamicPandasAssets:
     @pytest.mark.parametrize(
         ["asset_model", "extra_kwargs"],
         [
-            (PandasCSVAsset, {"sep": "|", "names": ["col1", "col2", "col3"]}),
+            (CSVAsset, {"sep": "|", "names": ["col1", "col2", "col3"]}),
             (
-                PandasTableAsset,
+                TableAsset,
                 {
                     "sep": "|",
                     "names": ["col1", "col2", "col3", "col4"],
@@ -267,7 +284,7 @@ class TestDynamicPandasAssets:
             empty_data_context.sources.add_pandas(
                 "my_pandas",
             )
-            .add_pandas_csv_asset(
+            .add_csv_asset(
                 "my_csv",
                 **extra_kwargs,
             )
@@ -282,67 +299,139 @@ class TestDynamicPandasAssets:
 
         assert captured_kwargs[-1] == extra_kwargs
 
-    def test_default_pandas_datasource_get_and_set(
-        self, empty_data_context: AbstractDataContext, csv_path: pathlib.Path
+    @pytest.mark.parametrize(
+        "read_method_name,positional_args",
+        [
+            param("read_clipboard", {}),
+            param("read_csv", {"filepath_or_buffer": "valid_file_path"}),
+            param("read_excel", {"io": "valid_file_path"}),
+            param("read_feather", {"path": "valid_file_path"}),
+            param(
+                "read_fwf",
+                {"filepath_or_buffer": "valid_file_path"},
+                marks=pytest.mark.xfail(reason="unhandled type annotation"),
+            ),
+            param("read_gbq", {"query": "SELECT * FROM my_table"}),
+            param("read_hdf", {"path_or_buf": "valid_file_path"}),
+            param("read_html", {"io": "valid_file_path"}),
+            param("read_json", {"path_or_buf": "valid_file_path"}),
+            param("read_orc", {"path": "valid_file_path"}),
+            param("read_parquet", {"path": "valid_file_path"}),
+            param("read_pickle", {"filepath_or_buffer": "valid_file_path"}),
+            param("read_sas", {"filepath_or_buffer": "valid_file_path"}),
+            param("read_spss", {"path": "valid_file_path"}),
+            param("read_sql", {"sql": "SELECT * FROM my_table", "con": "sqlite://"}),
+            param(
+                "read_sql_query", {"sql": "SELECT * FROM my_table", "con": "sqlite://"}
+            ),
+            param("read_sql_table", {"table_name": "my_table", "con": "sqlite://"}),
+            param("read_stata", {"filepath_or_buffer": "valid_file_path"}),
+            param("read_table", {"filepath_or_buffer": "valid_file_path"}),
+            param(
+                "read_xml",
+                {"path_or_buffer": "valid_file_path"},
+                marks=pytest.mark.skipif(
+                    PANDAS_VERSION < 1.3,
+                    reason=f"read_xml does not exist on {PANDAS_VERSION} ",
+                ),
+            ),
+        ],
+    )
+    def test_positional_arguments(
+        self,
+        mocker,
+        empty_data_context: AbstractDataContext,
+        read_method_name: str,
+        positional_args: dict[str, str | pathlib.Path],
+        request,
     ):
-        pandas_datasource = empty_data_context.sources.pandas_default
-        assert isinstance(pandas_datasource, PandasDatasource)
-        assert pandas_datasource.name == "default_pandas_datasource"
-        assert len(pandas_datasource.assets) == 0
+        if "valid_file_path" in positional_args.values():
+            positional_args = {
+                positional_arg_name: request.getfixturevalue("valid_file_path")
+                for positional_arg_name, positional_arg in positional_args.items()
+                if positional_arg == "valid_file_path"
+            }
 
-        # TODO: Update the following 3 lines after registry namespace change to:
-        #       - pandas_csv_asset_X -> csv_asset_X
-        #       - read_pandas_csv -> read_csv
-        expected_csv_data_asset_name_1 = "pandas_csv_asset_1"
-        expected_csv_data_asset_name_2 = "pandas_csv_asset_2"
-        csv_data_asset_1 = pandas_datasource.read_pandas_csv(  # type: ignore[attr-defined]
-            filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-04.csv",
-        )
-        assert isinstance(csv_data_asset_1, _PandasDataAsset)
-        assert csv_data_asset_1.name == expected_csv_data_asset_name_1
-        assert len(pandas_datasource.assets) == 1
-
-        # ensure we get the same datasource when we call pandas_default again
-        pandas_datasource = empty_data_context.sources.pandas_default
-        assert pandas_datasource.name == "default_pandas_datasource"
-        assert len(pandas_datasource.assets) == 1
-        assert pandas_datasource.assets[expected_csv_data_asset_name_1]
-
-        csv_data_asset_2 = pandas_datasource.read_pandas_csv(  # type: ignore[attr-defined]
-            filepath_or_buffer=csv_path / "yellow_tripdata_sample_2018-03.csv"
-        )
-        assert csv_data_asset_2.name == expected_csv_data_asset_name_2
-        assert len(pandas_datasource.assets) == 2
-
-    def test_default_pandas_datasource_name_conflict(
-        self, empty_data_context: AbstractDataContext
-    ):
-        (
-            default_pandas_datasource_name_1,
-            default_pandas_datasource_name_2,
-        ) = DEFAULT_PANDAS_DATASOURCE_NAMES
-
-        # These add_datasource calls will create legacy PandasDatasources
-        empty_data_context.add_datasource(
-            name=default_pandas_datasource_name_1, class_name="PandasDatasource"
-        )
-        empty_data_context.add_datasource(
-            name=default_pandas_datasource_name_2, class_name="PandasDatasource"
+        add_method_name = "add_" + read_method_name.split("read_")[1] + "_asset"
+        add_method: Callable = getattr(
+            empty_data_context.sources.pandas_default, add_method_name
         )
 
-        # both datasource names are taken by legacy datasources
-        with pytest.raises(DefaultPandasDatasourceError):
-            pandas_datasource = empty_data_context.sources.pandas_default
+        asset: _PandasDataAsset = add_method(
+            "my_asset",
+            *positional_args.values(),
+        )
+        for positional_arg_name, positional_arg in positional_args.items():
+            assert getattr(asset, positional_arg_name) == positional_arg
 
-        # only datasource name 1 is taken by legacy datasources
-        empty_data_context.datasources.pop(default_pandas_datasource_name_2)
-        pandas_datasource = empty_data_context.sources.pandas_default
-        assert isinstance(pandas_datasource, PandasDatasource)
-        assert pandas_datasource.name == default_pandas_datasource_name_2
+        read_method: Callable = getattr(
+            empty_data_context.sources.pandas_default, read_method_name
+        )
+        mocker.patch(
+            "great_expectations.data_context.data_context.abstract_data_context.AbstractDataContext.get_validator"
+        )
+        _ = read_method(*positional_args.values())
+        # read_* returns a validator, but we just want to inspect the asset
+        asset = empty_data_context.sources.pandas_default.assets[
+            DEFAULT_PANDAS_DATA_ASSET_NAME
+        ]
+        for positional_arg_name, positional_arg in positional_args.items():
+            assert getattr(asset, positional_arg_name) == positional_arg
 
-        # both datasource names are available
-        empty_data_context.datasources.pop(default_pandas_datasource_name_1)
-        empty_data_context.datasources.pop(default_pandas_datasource_name_2)
+
+def test_default_pandas_datasource_get_and_set(
+    empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
+):
+    pandas_datasource = empty_data_context.sources.pandas_default
+    assert isinstance(pandas_datasource, PandasDatasource)
+    assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
+    assert len(pandas_datasource.assets) == 0
+
+    validator = pandas_datasource.read_csv(
+        filepath_or_buffer=valid_file_path,
+    )
+    assert isinstance(validator, Validator)
+    csv_data_asset_1 = pandas_datasource.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    assert isinstance(csv_data_asset_1, _PandasDataAsset)
+    assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
+    assert len(pandas_datasource.assets) == 1
+
+    # ensure we get the same datasource when we call pandas_default again
+    pandas_datasource = empty_data_context.sources.pandas_default
+    assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
+    assert len(pandas_datasource.assets) == 1
+    assert pandas_datasource.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
+
+    # ensure we overwrite the ephemeral data asset if no name is passed
+    validator = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
+    assert isinstance(validator, Validator)
+    assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
+    assert len(pandas_datasource.assets) == 1
+
+    # ensure we get an additional named asset when one is passed
+    expected_csv_data_asset_name = "my_csv_asset"
+    validator = pandas_datasource.read_csv(
+        asset_name=expected_csv_data_asset_name,
+        filepath_or_buffer=valid_file_path,
+    )
+    assert isinstance(validator, Validator)
+    csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name]
+    assert csv_data_asset_2.name == expected_csv_data_asset_name
+    assert len(pandas_datasource.assets) == 2
+
+
+def test_default_pandas_datasource_name_conflict(
+    empty_data_context: AbstractDataContext,
+):
+    # the datasource name is taken by legacy
+    empty_data_context.add_datasource(
+        name=DEFAULT_PANDAS_DATASOURCE_NAME, class_name="PandasDatasource"
+    )
+    with pytest.raises(DefaultPandasDatasourceError):
         pandas_datasource = empty_data_context.sources.pandas_default
-        assert isinstance(pandas_datasource, PandasDatasource)
-        assert pandas_datasource.name == default_pandas_datasource_name_1
+
+    # the datasource name is available
+    empty_data_context.datasources.pop(DEFAULT_PANDAS_DATASOURCE_NAME)
+    pandas_datasource = empty_data_context.sources.pandas_default
+    assert isinstance(pandas_datasource, PandasDatasource)
+    assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
