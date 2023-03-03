@@ -1480,7 +1480,8 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
     common_action_list,
 ):
     class DummyDataContext:
-        pass
+        def __init__(self) -> None:
+            self._usage_statistics_handler = None
 
     context = cast(AbstractDataContext, DummyDataContext)
 
@@ -1512,7 +1513,8 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_in_validations_and_va
     common_action_list,
 ):
     class DummyDataContext:
-        pass
+        def __init__(self) -> None:
+            self._usage_statistics_handler = None
 
     context = cast(AbstractDataContext, DummyDataContext)
 
@@ -1574,7 +1576,8 @@ def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_
     common_action_list,
 ):
     class DummyDataContext:
-        pass
+        def __init__(self) -> None:
+            self._usage_statistics_handler = None
 
     context = cast(AbstractDataContext, DummyDataContext)
 
@@ -1608,7 +1611,8 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_valid
     common_action_list,
 ):
     class DummyDataContext:
-        pass
+        def __init__(self) -> None:
+            self._usage_statistics_handler = None
 
     context = cast(AbstractDataContext, DummyDataContext)
 
