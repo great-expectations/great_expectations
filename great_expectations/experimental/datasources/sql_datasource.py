@@ -34,6 +34,7 @@ from great_expectations.experimental.datasources.interfaces import (
     BatchRequestOptions,
     DataAsset,
     Datasource,
+    Sorter,
     SortersDefinition,
     TestConnectionError,
 )
@@ -46,10 +47,6 @@ except ImportError:
 
 if TYPE_CHECKING:
     import sqlalchemy as sa
-
-    from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
-        Sorter,
-    )
 
 
 class SQLDatasourceError(Exception):

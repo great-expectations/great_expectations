@@ -27,10 +27,8 @@ from great_expectations.experimental.datasources.signatures import _merge_signat
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
-    from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
-        Sorter,
-    )
     from great_expectations.experimental.datasources.interfaces import (
+        Sorter,
         SortersDefinition,
     )
 

@@ -30,10 +30,8 @@ if TYPE_CHECKING:
         Credentials as GoogleServiceAccountCredentials,
     )
 
-    from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
-        Sorter,
-    )
     from great_expectations.experimental.datasources.interfaces import (
+        Sorter,
         SortersDefinition,
     )
 

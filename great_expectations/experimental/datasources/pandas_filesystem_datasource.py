@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import TYPE_CHECKING, Optional, Union
+from typing import Optional, Union
 
 from typing_extensions import Literal
 
@@ -12,6 +12,7 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
     FilesystemDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import (
+    Sorter,
     SortersDefinition,
     TestConnectionError,
 )
@@ -22,11 +23,6 @@ from great_expectations.experimental.datasources.pandas_file_path_datasource imp
     ParquetAsset,
 )
 from great_expectations.experimental.datasources.signatures import _merge_signatures
-
-if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
-        Sorter,
-    )
 
 logger = logging.getLogger(__name__)
 

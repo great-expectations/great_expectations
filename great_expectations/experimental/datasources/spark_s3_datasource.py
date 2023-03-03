@@ -23,10 +23,8 @@ from great_expectations.experimental.datasources.spark_file_path_datasource impo
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
-    from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
-        Sorter,
-    )
     from great_expectations.experimental.datasources.interfaces import (
+        Sorter,
         SortersDefinition,
     )
 

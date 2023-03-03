@@ -25,10 +25,8 @@ from great_expectations.experimental.datasources.pandas_file_path_datasource imp
 from great_expectations.experimental.datasources.signatures import _merge_signatures
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
-        Sorter,
-    )
     from great_expectations.experimental.datasources.interfaces import (
+        Sorter,
         SortersDefinition,
     )
 
