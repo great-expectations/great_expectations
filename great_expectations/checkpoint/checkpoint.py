@@ -10,8 +10,8 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
-    batch_request_in_validations,
-    batch_request_in_validations_contains_batch_data,
+    does_batch_request_in_validations_contain_batch_data,
+    does_validation_have_batch_request,
     get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
     substitute_runtime_config,
@@ -176,7 +176,9 @@ class BaseCheckpoint(ConfigPeer):
                     f'Checkpoint "{self.name}" has already been created with a validator and overriding it through run() is not allowed.'
                 )
 
-            if batch_request or batch_request_in_validations(validations=validations):
+            if batch_request or does_validation_have_batch_request(
+                validations=validations
+            ):
                 raise gx_exceptions.CheckpointError(
                     f'Checkpoint "{self.name}" has already been created with a validator and overriding it by supplying batch_request and/or validations with a batch_request to run() is not allowed.'
                 )
@@ -722,7 +724,7 @@ class Checkpoint(BaseCheckpoint):
         default_validation_id: Optional[str] = None,
     ) -> None:
         if validator and (
-            batch_request or batch_request_in_validations(validations=validations)
+            batch_request or does_validation_have_batch_request(validations=validations)
         ):
             raise gx_exceptions.CheckpointError(
                 f'Checkpoint "{name}" cannot be called with a validator and contain a batch_request and/or a batch_request in validations.'
@@ -736,7 +738,9 @@ constructor arguments.
 """
             )
 
-        if batch_request_in_validations_contains_batch_data(validations=validations):
+        if does_batch_request_in_validations_contain_batch_data(
+            validations=validations
+        ):
             raise ValueError(
                 """Error: batch_data found in batch_request -- only primitive types are allowed as Checkpoint \
 constructor arguments.
@@ -886,7 +890,9 @@ constructor arguments.
                 f'batch_data found in batch_request cannot be saved to CheckpointStore "{checkpoint_store_name}"'
             )
 
-        if batch_request_in_validations_contains_batch_data(validations=validations):
+        if does_batch_request_in_validations_contain_batch_data(
+            validations=validations
+        ):
             raise gx_exceptions.InvalidConfigError(
                 f'batch_data found in validations cannot be saved to CheckpointStore "{checkpoint_store_name}"'
             )
