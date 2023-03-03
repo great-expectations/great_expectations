@@ -409,17 +409,21 @@ class PandasDatasource(_PandasDatasource):
         batch_request: BatchRequest = asset.build_batch_request()
         return self._data_context.get_validator(batch_request=batch_request)
 
-    def add_dataframe_asset(self, name: str, **kwargs) -> DataFrameAsset:
+    def add_dataframe_asset(self, name: str, dataframe: pd.DataFrame) -> DataFrameAsset:
         asset = DataFrameAsset(
             name=name,
-            **kwargs,
+            dataframe=dataframe,
         )
         return self.add_asset(asset=asset)
 
-    def read_dataframe(self, name: Optional[str] = None, **kwargs) -> Validator:
-        if not name:
-            name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        asset: DataFrameAsset = self.add_dataframe_asset(name=name, **kwargs)
+    def read_dataframe(
+        self, dataframe: pd.DataFrame, asset_name: Optional[str] = None
+    ) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: DataFrameAsset = self.add_dataframe_asset(
+            name=asset_name, dataframe=dataframe
+        )
         return self._get_validator(asset=asset)
 
     def add_clipboard_asset(self, name: str, **kwargs) -> ClipboardAsset:  # type: ignore[valid-type]
@@ -429,10 +433,10 @@ class PandasDatasource(_PandasDatasource):
         )
         return self.add_asset(asset=asset)
 
-    def read_clipboard(self, name: Optional[str] = None, **kwargs) -> Validator:
-        if not name:
-            name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        asset: ClipboardAsset = self.add_clipboard_asset(name=name, **kwargs)  # type: ignore[valid-type]
+    def read_clipboard(self, asset_name: Optional[str] = None, **kwargs) -> Validator:
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        asset: ClipboardAsset = self.add_clipboard_asset(name=asset_name, **kwargs)  # type: ignore[valid-type]
         return self._get_validator(asset=asset)
 
     def add_csv_asset(
