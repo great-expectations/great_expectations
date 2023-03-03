@@ -17,6 +17,7 @@ from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
     TableAsset,
     _PandasDataAsset,
+    _DYNAMIC_ASSET_TYPES,
 )
 from great_expectations.experimental.datasources.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
@@ -146,7 +147,7 @@ class TestDynamicPandasAssets:
         assert type_name in PandasDatasource._type_lookup
         assert type_name in asset_class_names
 
-    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    @pytest.mark.parametrize("asset_class", _DYNAMIC_ASSET_TYPES)
     def test_add_asset_method_exists_and_is_functional(
         self, asset_class: Type[_PandasDataAsset]
     ):
@@ -178,7 +179,7 @@ class TestDynamicPandasAssets:
         # importantly check that the method creates (or attempts to create) the intended asset
         assert exc_info.value.model == asset_class
 
-    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    @pytest.mark.parametrize("asset_class", _DYNAMIC_ASSET_TYPES)
     def test_add_asset_method_signature(self, asset_class: Type[_PandasDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
