@@ -16,6 +16,7 @@ from great_expectations.experimental.datasources import PandasDatasource
 from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
 from great_expectations.experimental.datasources.pandas_datasource import (
     CSVAsset,
+    DataFrameAsset,
     TableAsset,
     _PandasDataAsset,
     _DYNAMIC_ASSET_TYPES,
@@ -447,3 +448,23 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext):
 
     validator = empty_data_context.sources.pandas_default.read_dataframe(dataframe=df)
     assert isinstance(validator, Validator)
+    assert isinstance(
+        empty_data_context.sources.pandas_default.assets[
+            DEFAULT_PANDAS_DATA_ASSET_NAME
+        ],
+        DataFrameAsset,
+    )
+
+    dataframe_asset_name = "my_dataframe_asset"
+    dataframe_asset = empty_data_context.sources.pandas_default.add_dataframe_asset(
+        name=dataframe_asset_name, dataframe=df
+    )
+    assert isinstance(dataframe_asset, DataFrameAsset)
+    assert dataframe_asset.name == "my_dataframe_asset"
+    assert len(empty_data_context.sources.pandas_default.assets) == 2
+    assert all(
+        [
+            asset.dataframe.equals(df)
+            for asset in empty_data_context.sources.pandas_default.assets.values()
+        ]
+    )
