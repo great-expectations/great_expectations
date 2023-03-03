@@ -25,6 +25,8 @@ from typing import (
     cast,
 )
 
+from packaging import version
+
 from great_expectations._version import get_versions  # isort:skip
 
 
@@ -89,6 +91,12 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+
+    if version.Version(sa.__version__) >= version.Version("2.0.0"):
+        warnings.warn(
+            "SQLAlchemy v2.0.0 or later is not yet currently supported by Great Expectations.",
+            UserWarning,
+        )
 
     make_url = import_make_url()
 except ImportError:
