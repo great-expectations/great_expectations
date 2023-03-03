@@ -211,6 +211,9 @@ class _SourceFactories:
             )
             setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
 
+            # add the public api decorator
+            public_api(getattr(ds_type, add_asset_factory_method_name))
+
             def _read_asset_factory(
                 self: Datasource, asset_name: str | None = None, **kwargs
             ) -> Validator:
