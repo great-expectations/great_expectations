@@ -19,7 +19,7 @@ yarn install
 
 ## Local Development
 
-For the fastest iterative dev loop, start a local server and open up the compiled site in a browser window. Most changes are reflected live without needing server restarts. Run this and all commands in this folder.
+For the fastest iterative dev loop, start a local server and open up the compiled site in a browser window. Most changes are reflected live without needing server restarts. Run this and all commands in the `/docs/docusaurus/` folder.
 
 ```console
 yarn start
