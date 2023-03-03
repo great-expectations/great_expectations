@@ -11,7 +11,7 @@ https://docusaurus.io/docs/installation#requirements
 
 ## Installation
 
-From the repo root run:
+From this folder (docs/docusaurus) run:
 
 ```console
 yarn install
@@ -19,7 +19,7 @@ yarn install
 
 ## Local Development
 
-For the fastest iterative dev loop, start a local server and open up the compiled site in a browser window. Most changes are reflected live without needing server restarts.
+For the fastest iterative dev loop, start a local server and open up the compiled site in a browser window. Most changes are reflected live without needing server restarts. Run this and all commands in the `/docs/docusaurus/` folder.
 
 ```console
 yarn start
@@ -53,13 +53,13 @@ If you are using GitHub pages for hosting, this command is a convenient way to b
 
 The following are a few details about other files Docusaurus uses that you may wish to be familiar with.
 
-- `../sidebars.js`: JavaScript that specifies the sidebar/navigation used in docs pages
-- `../src`: non-docs pages live here
-- `../static`: static assets used in docs pages (such as CSS) live here
-- `../docusaurus.config.js`: the configuration file for Docusaurus
-- `../babel.config.js`: Babel config file used when building
-- `../package.json`: dependencies and scripts
-- `../yarn.lock`: dependency lock file that ensures reproducibility
+- `sidebars.js`: JavaScript that specifies the sidebar/navigation used in docs pages
+- `src`: non-docs pages live here
+- `static`: static assets used in docs pages (such as CSS) live here
+- `docusaurus.config.js`: the configuration file for Docusaurus
+- `babel.config.js`: Babel config file used when building
+- `package.json`: dependencies and scripts
+- `yarn.lock`: dependency lock file that ensures reproducibility
 
 sitemap.xml is not in the repo since it is built and uploaded by a netlify plugin during the documentation build process. 
 
