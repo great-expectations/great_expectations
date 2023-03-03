@@ -55,20 +55,11 @@ _FILE_PATH_ASSET_MODELS = _generate_pandas_data_asset_models(
     skip_first_param=True,
 )
 
-try:
-    # variables only needed for type-hinting
-    CSVAsset = _FILE_PATH_ASSET_MODELS["csv"]
-    ExcelAsset = _FILE_PATH_ASSET_MODELS["excel"]
-    JSONAsset = _FILE_PATH_ASSET_MODELS["json"]
-    ORCAsset = _FILE_PATH_ASSET_MODELS["orc"]
-    ParquetAsset = _FILE_PATH_ASSET_MODELS["parquet"]
-except KeyError as key_err:
-    logger.info(f"zep - {key_err} asset model could not be generated")
-    CSVAsset = _FilePathDataAsset
-    ExcelAsset = _FilePathDataAsset
-    JSONAsset = _FilePathDataAsset
-    ORCAsset = _FilePathDataAsset
-    ParquetAsset = _FilePathDataAsset
+CSVAsset = _FILE_PATH_ASSET_MODELS.get("csv", _FilePathDataAsset)
+ExcelAsset = _FILE_PATH_ASSET_MODELS.get("excel", _FilePathDataAsset)
+JSONAsset = _FILE_PATH_ASSET_MODELS.get("json", _FilePathDataAsset)
+ORCAsset = _FILE_PATH_ASSET_MODELS.get("orc", _FilePathDataAsset)
+ParquetAsset = _FILE_PATH_ASSET_MODELS.get("parquet", _FilePathDataAsset)
 
 
 class _PandasFilePathDatasource(_PandasDatasource):
