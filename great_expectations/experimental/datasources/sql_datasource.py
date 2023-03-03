@@ -4,6 +4,7 @@ import copy
 import dataclasses
 from pprint import pformat as pf
 from typing import (
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Dict,
@@ -43,6 +44,9 @@ try:
     import sqlalchemy
 except ImportError:
     sqlalchemy = NotImported("sqlalchemy not found, please install.")
+
+if TYPE_CHECKING:
+    import sqlalchemy as sa
 
 
 class SQLDatasourceError(Exception):
@@ -823,7 +827,8 @@ class SQLDatasource(Datasource):
 
     # private attrs
     _cached_connection_string: str = pydantic.PrivateAttr("")
-    _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
+    _engine: Union[sa.engine.Engine, None] = pydantic.PrivateAttr(None)
+
     # These are instance var because ClassVars can't contain Type variables. See
     # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
     _TableAsset: Type[TableAsset] = pydantic.PrivateAttr(TableAsset)
