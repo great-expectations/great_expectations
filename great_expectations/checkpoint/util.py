@@ -442,17 +442,6 @@ def get_updated_action_list(
     return list(base_action_list_dict.values())
 
 
-def does_validation_have_batch_request(
-    validations: Optional[List[dict]] = None,
-) -> bool:
-    if validations is not None:
-        for val in validations:
-            if val.get("batch_request") is not None:
-                return True
-
-    return False
-
-
 def does_batch_request_in_validations_contain_batch_data(
     validations: Optional[List[dict]] = None,
 ) -> bool:

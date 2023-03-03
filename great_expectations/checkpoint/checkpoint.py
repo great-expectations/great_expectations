@@ -11,7 +11,6 @@ from great_expectations.checkpoint.configurator import SimpleCheckpointConfigura
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.checkpoint.util import (
     does_batch_request_in_validations_contain_batch_data,
-    does_validation_have_batch_request,
     get_substituted_validation_dict,
     get_validations_with_batch_request_as_dict,
     substitute_runtime_config,
@@ -78,6 +77,17 @@ def _get_validator_class() -> Type[Validator]:
     return load_class(class_name=class_name, module_name=module_name)
 
 
+def _does_validation_contain_batch_request(
+    validations: Optional[List[dict]] = None,
+) -> bool:
+    if validations is not None:
+        for val in validations:
+            if val.get("batch_request") is not None:
+                return True
+
+    return False
+
+
 class BaseCheckpoint(ConfigPeer):
     """
     BaseCheckpoint class is initialized from CheckpointConfig typed object and contains all functionality
@@ -92,13 +102,6 @@ class BaseCheckpoint(ConfigPeer):
         checkpoint_config: CheckpointConfig,
         data_context: AbstractDataContext,
     ) -> None:
-        from great_expectations.data_context.data_context.abstract_data_context import (
-            AbstractDataContext,
-        )
-
-        if not isinstance(data_context, AbstractDataContext):
-            raise TypeError("A Checkpoint requires a valid DataContext")
-
         self._usage_statistics_handler = data_context._usage_statistics_handler
 
         self._data_context = data_context
@@ -176,7 +179,7 @@ class BaseCheckpoint(ConfigPeer):
                     f'Checkpoint "{self.name}" has already been created with a validator and overriding it through run() is not allowed.'
                 )
 
-            if batch_request or does_validation_have_batch_request(
+            if batch_request or _does_validation_contain_batch_request(
                 validations=validations
             ):
                 raise gx_exceptions.CheckpointError(
@@ -724,7 +727,8 @@ class Checkpoint(BaseCheckpoint):
         default_validation_id: Optional[str] = None,
     ) -> None:
         if validator and (
-            batch_request or does_validation_have_batch_request(validations=validations)
+            batch_request
+            or _does_validation_contain_batch_request(validations=validations)
         ):
             raise gx_exceptions.CheckpointError(
                 f'Checkpoint "{name}" cannot be called with a validator and contain a batch_request and/or a batch_request in validations.'
