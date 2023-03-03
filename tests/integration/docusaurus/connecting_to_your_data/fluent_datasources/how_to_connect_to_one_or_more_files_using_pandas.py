@@ -1,0 +1,35 @@
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py get_context">
+import great_expectations as gx
+
+context = gx.get_context()
+# </snippet>
+
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py define_args">
+datasource_name = "my_new_datasource"
+path_to_csv_files = "<INSERT_PATH_TO_FILES_HERE>"
+# </snippet>
+
+
+path_to_csv_files = "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
+
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py create_datasource">
+datasource = context.sources.add_pandas_filesystem(
+    name=datasource_name, base_directory=path_to_csv_files
+)
+# </snippet>
+
+assert datasource_name in context.datasources
+
+# Python
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py add_asset">
+asset_name = "my_csv_asset"
+filename_as_regex = "yellow_tripdata_2019-01/.csv"
+datasource.add_csv_asset(name=asset_name, batching_regex=filename_as_regex)
+
+print(datasource)
+# </snippet>
+
+assert asset_name in datasource.assets
