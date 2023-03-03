@@ -42,7 +42,7 @@ from great_expectations.util import NotImported
 try:
     import sqlalchemy
 except ImportError:
-    sqlalchemy = NotImported("sqlalchemy not found, please install.")  # type: ignore[assignment]
+    sqlalchemy = NotImported("sqlalchemy not found, please install.")
 
 
 class SQLDatasourceError(Exception):
