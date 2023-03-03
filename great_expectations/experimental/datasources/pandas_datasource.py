@@ -17,6 +17,7 @@ from typing import (
     Union,
 )
 
+import pandas as pd
 import pydantic
 from typing_extensions import Literal
 
@@ -41,7 +42,6 @@ if TYPE_CHECKING:
     import os
     import sqlite3
 
-    import pandas as pd
     import sqlalchemy
 
     from great_expectations.execution_engine import PandasExecutionEngine

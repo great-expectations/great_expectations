@@ -6,6 +6,7 @@ import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
+import pandas as pd
 import pydantic
 import pytest
 from pytest import MonkeyPatch, param
@@ -434,3 +435,15 @@ def test_default_pandas_datasource_name_conflict(
     pandas_datasource = empty_data_context.sources.pandas_default
     assert isinstance(pandas_datasource, PandasDatasource)
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
+
+
+def test_dataframe_asset(empty_data_context: AbstractDataContext):
+    df = pd.DataFrame(
+        data={
+            "foo": [1, 2, 3],
+            "bar": [4, 5, 6],
+        }
+    )
+
+    validator = empty_data_context.sources.pandas_default.read_dataframe(dataframe=df)
+    assert isinstance(validator, Validator)
