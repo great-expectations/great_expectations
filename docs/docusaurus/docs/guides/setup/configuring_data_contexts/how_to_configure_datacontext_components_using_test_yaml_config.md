@@ -2,7 +2,7 @@
 title: How to configure DataContext components using test_yaml_config
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
-import TechnicalTag from '/docs/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 ``test_yaml_config`` is a convenience method for configuring the moving parts of a Great Expectations deployment. It allows you to quickly test out configs for <TechnicalTag relative="../../../" tag="datasource" text="Datasources" /> and <TechnicalTag relative="../../../" tag="store" text="Stores" />. For many deployments of Great Expectations, these components (plus <TechnicalTag relative="../../../" tag="expectation" text="Expectations" />) are the only ones you'll need.
 
