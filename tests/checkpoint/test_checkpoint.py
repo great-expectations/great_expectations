@@ -21,11 +21,12 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import FileDataContext
+from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
     checkpointConfigSchema,
+    DataContextConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -37,6 +38,7 @@ from great_expectations.util import (
     filter_properties_dict,
 )
 from great_expectations.validator.validator import Validator
+
 
 yaml = YAMLHandler()
 
@@ -1475,10 +1477,31 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
 
 @pytest.mark.unit
 def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_specified_in_constructor(
-    in_memory_runtime_context,
     batch_request_as_dict,
     common_action_list,
 ):
+    class DummyAbstractDataContext(AbstractDataContext):
+        def __init__(self, runtime_environment: Optional[dict] = None) -> None:
+            self._project_config = DataContextConfig(config_variables_file_path=None)
+            super().__init__(runtime_environment=runtime_environment)
+
+        with mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext.root_directory",
+            return_value="",
+        ) as root_directory, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_project_config"
+        ) as _init_project_config, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_variables"
+        ) as _init_variables, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_datasource_store"
+        ) as _init_datasource_store:
+            pass
+
+        def _construct_data_context_id(self) -> str:
+            return "my_context_id"
+
+    context: AbstractDataContext = DummyAbstractDataContext()
+
     class DummyValidator:
         pass
 
@@ -1491,7 +1514,7 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
     ):
         _ = Checkpoint(
             name="my_checkpoint",
-            data_context=in_memory_runtime_context,
+            data_context=context,
             config_version=1,
             run_name_template="%Y-%M-foo-bar-template",
             expectation_suite_name="my_expectation_suite",
@@ -1503,10 +1526,31 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
 
 @pytest.mark.unit
 def test_newstyle_checkpoint_raises_error_if_batch_request_in_validations_and_validator_are_specified_in_constructor(
-    in_memory_runtime_context,
     batch_request_as_dict,
     common_action_list,
 ):
+    class DummyAbstractDataContext(AbstractDataContext):
+        def __init__(self, runtime_environment: Optional[dict] = None) -> None:
+            self._project_config = DataContextConfig(config_variables_file_path=None)
+            super().__init__(runtime_environment=runtime_environment)
+
+        with mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext.root_directory",
+            return_value="",
+        ) as root_directory, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_project_config"
+        ) as _init_project_config, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_variables"
+        ) as _init_variables, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_datasource_store"
+        ) as _init_datasource_store:
+            pass
+
+        def _construct_data_context_id(self) -> str:
+            return "my_context_id"
+
+    context: AbstractDataContext = DummyAbstractDataContext()
+
     class DummyValidator:
         pass
 
@@ -1519,7 +1563,7 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_in_validations_and_va
     ):
         _ = Checkpoint(
             name="my_checkpoint",
-            data_context=in_memory_runtime_context,
+            data_context=context,
             config_version=1,
             run_name_template="%Y-%M-foo-bar-template",
             expectation_suite_name="my_expectation_suite",
@@ -1560,21 +1604,41 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.unit
-def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_specified_in_run(
-    in_memory_runtime_context,
+def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_and_validator_are_specified_in_run(
     batch_request_as_dict,
     common_action_list,
 ):
+    class DummyAbstractDataContext(AbstractDataContext):
+        def __init__(self, runtime_environment: Optional[dict] = None) -> None:
+            self._project_config = DataContextConfig(config_variables_file_path=None)
+            super().__init__(runtime_environment=runtime_environment)
+
+        with mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext.root_directory",
+            return_value="",
+        ) as root_directory, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_project_config"
+        ) as _init_project_config, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_variables"
+        ) as _init_variables, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_datasource_store"
+        ) as _init_datasource_store:
+            pass
+
+        def _construct_data_context_id(self) -> str:
+            return "my_context_id"
+
+    context: AbstractDataContext = DummyAbstractDataContext()
+
     class DummyValidator:
         pass
 
     validator = cast(Validator, DummyValidator)
 
-    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     with pytest.raises(gx_exceptions.CheckpointError) as e:
         _ = Checkpoint(
             name="my_checkpoint",
-            data_context=in_memory_runtime_context,
+            data_context=context,
             config_version=1,
             run_name_template="%Y-%M-foo-bar-template",
             expectation_suite_name="my_expectation_suite",
@@ -1592,10 +1656,31 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
 
 @pytest.mark.unit
 def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_validations_and_validator_is_specified_in_run(
-    in_memory_runtime_context,
     batch_request_as_dict,
     common_action_list,
 ):
+    class DummyAbstractDataContext(AbstractDataContext):
+        def __init__(self, runtime_environment: Optional[dict] = None) -> None:
+            self._project_config = DataContextConfig(config_variables_file_path=None)
+            super().__init__(runtime_environment=runtime_environment)
+
+        with mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext.root_directory",
+            return_value="",
+        ) as root_directory, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_project_config"
+        ) as _init_project_config, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_variables"
+        ) as _init_variables, mock.patch(
+            "great_expectations.data_context.data_context.AbstractDataContext._init_datasource_store"
+        ) as _init_datasource_store:
+            pass
+
+        def _construct_data_context_id(self) -> str:
+            return "my_context_id"
+
+    context: AbstractDataContext = DummyAbstractDataContext()
+
     class DummyValidator:
         pass
 
@@ -1605,7 +1690,7 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_valid
     with pytest.raises(gx_exceptions.CheckpointError) as e:
         _ = Checkpoint(
             name="my_checkpoint",
-            data_context=in_memory_runtime_context,
+            data_context=context,
             config_version=1,
             run_name_template="%Y-%M-foo-bar-template",
             expectation_suite_name="my_expectation_suite",
