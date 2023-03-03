@@ -2154,7 +2154,7 @@ def numpy_quantile(
     return quantile
 
 
-class NotImport:
+class NotImported:
     def __init__(self, message: str):
         self.__dict__["gx_error_message"] = message
 
@@ -2169,20 +2169,3 @@ class NotImport:
 
     def __str__(self) -> str:
         return self.__dict__["gx_error_message"]
-
-
-def maybe_import_module(module_name: str) -> Union[ModuleType, NotImport]:
-    try:
-        module = importlib.import_module(module_name)
-    except ModuleNotFoundError:
-        module = NotImport(f"{module_name} is not available, please install.")
-    return module
-
-
-def maybe_import_attr(module_name: str, attr: str) -> Any:
-    module = maybe_import_module(module_name)
-    if isinstance(module, NotImport):
-        return NotImport(
-            f"{attr} is not available because {module_name} is not installed. Please install."
-        )
-    return getattr(module, attr)

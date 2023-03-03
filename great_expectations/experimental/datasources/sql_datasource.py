@@ -4,7 +4,6 @@ import copy
 import dataclasses
 from pprint import pformat as pf
 from typing import (
-    TYPE_CHECKING,
     Any,
     ClassVar,
     Dict,
@@ -38,13 +37,12 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
     TestConnectionError,
 )
-from great_expectations.util import maybe_import_module
+from great_expectations.util import NotImported
 
-sqlalchemy = maybe_import_module("sqlalchemy")
-
-if TYPE_CHECKING:
-    # sqlalchemy is a hard requirement for type checking
-    import sqlalchemy  # noqa: TCH004
+try:
+    import sqlalchemy
+except ImportError:
+    sqlalchemy = NotImported("sqlalchemy not found, please install.")  # type: ignore[assignment]
 
 
 class SQLDatasourceError(Exception):
@@ -789,9 +787,7 @@ class TableAsset(_SQLAsset):
 
         This can be used in a from clause for a query against this data.
         """
-        import sqlalchemy as sa
-
-        return sa.text(self.table_name)
+        return sqlalchemy.text(self.table_name)
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
