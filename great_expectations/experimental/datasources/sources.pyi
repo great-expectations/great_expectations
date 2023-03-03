@@ -1,6 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, List, NamedTuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Generator,
+    List,
+    NamedTuple,
+    Type,
+    Union,
+)
 
 from _typeshed import Incomplete
 from typing_extensions import Final
@@ -122,3 +131,7 @@ class _SourceFactories:
     def add_sqlite(
         self, name: str, *, connection_string: SqliteDsn
     ) -> SqliteDatasource: ...
+
+def _iter_all_registered_types() -> Generator[
+    tuple[str, Type[Datasource] | Type[DataAsset]], None, None
+]: ...
