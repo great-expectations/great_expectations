@@ -8,7 +8,7 @@ from ruamel.yaml.comments import CommentedMap
 from typing_extensions import TypedDict
 
 from great_expectations.checkpoint.util import (
-    batch_request_in_validations_contains_batch_data,
+    does_batch_request_in_validations_contain_batch_data,
     get_validations_with_batch_request_as_dict,
 )
 from great_expectations.core.batch import (
@@ -153,7 +153,9 @@ class SimpleCheckpointConfigurator:
 
         # DataFrames shouldn't be saved to CheckpointStore
         validations = config_kwargs.get("validations")
-        if batch_request_in_validations_contains_batch_data(validations=validations):
+        if does_batch_request_in_validations_contain_batch_data(
+            validations=validations
+        ):
             config_kwargs.pop("validations", [])
         else:
             config_kwargs["validations"] = get_validations_with_batch_request_as_dict(

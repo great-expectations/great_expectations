@@ -2,7 +2,7 @@ import logging
 import os
 import pickle
 import unittest
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union, cast
 from unittest import mock
 
 import pandas as pd
@@ -21,7 +21,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.data_context.data_context import DataContext
+from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -36,10 +36,44 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
     filter_properties_dict,
 )
+from great_expectations.validator.validator import Validator
 
 yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture
+def batch_request_as_dict() -> Dict[str, str]:
+    return {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
+
+
+@pytest.fixture
+def common_action_list() -> List[dict]:
+    return [
+        {
+            "name": "store_validation_result",
+            "action": {
+                "class_name": "StoreValidationResultAction",
+            },
+        },
+        {
+            "name": "store_evaluation_params",
+            "action": {
+                "class_name": "StoreEvaluationParametersAction",
+            },
+        },
+        {
+            "name": "update_data_docs",
+            "action": {
+                "class_name": "UpdateDataDocsAction",
+            },
+        },
+    ]
 
 
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():
@@ -72,7 +106,7 @@ def test_basic_checkpoint_config_validation(
     caplog,
     capsys,
 ):
-    context: DataContext = empty_data_context_stats_enabled
+    context: FileDataContext = empty_data_context_stats_enabled
     yaml_config_erroneous: str
     config_erroneous: CommentedMap
     checkpoint_config: Union[CheckpointConfig, dict]
@@ -401,7 +435,7 @@ def test_basic_checkpoint_config_validation(
     context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
     with pytest.raises(
         gx_exceptions.DataContextError,
-        match=r'Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
+        match=r'Checkpoint "my_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
         result: CheckpointResult = context.run_checkpoint(
@@ -413,6 +447,7 @@ def test_basic_checkpoint_config_validation(
     assert len(context.list_checkpoints()) == 0
 
 
+@pytest.mark.integration
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -427,7 +462,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
 
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     yaml_config: str = """
     name: my_fancy_checkpoint
@@ -561,6 +596,7 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
     assert len(data_context.list_checkpoints()) == 0
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.74s
 def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -572,7 +608,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
 
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     yaml_config: str = """
     name: my_fancy_checkpoint
@@ -692,6 +728,7 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
     assert len(data_context.list_checkpoints()) == 0
 
 
+@pytest.mark.integration
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -701,7 +738,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
 ):
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     yaml_config: str = """
     name: airflow_checkpoint
@@ -918,6 +955,7 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
     assert len(data_context.list_checkpoints()) == 0
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.75s
 def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -927,7 +965,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
     checkpoint: Checkpoint
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     yaml_config: str = """
     name: airflow_users_node_3
@@ -1061,6 +1099,7 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     assert len(data_context.list_checkpoints()) == 0
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 3.10s
 def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
@@ -1075,7 +1114,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     expected_checkpoint_config: dict
     result: CheckpointResult
 
-    data_context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    data_context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     yaml_config = """
     name: my_base_checkpoint
@@ -1150,7 +1189,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
 
     with pytest.raises(
         gx_exceptions.DataContextError,
-        match=r'Checkpoint "my_base_checkpoint" must contain either a batch_request or validations.',
+        match=r'Checkpoint "my_base_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
         result: CheckpointResult = data_context.run_checkpoint(
@@ -1276,6 +1315,7 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     assert len(data_context.list_checkpoints()) == 0
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.05s
 def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     filesystem_csv_data_context_with_validation_operators,
@@ -1334,37 +1374,20 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     )
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.25s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
         name="my_checkpoint",
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
         validations=[
             {
                 "batch_request": {
@@ -1399,7 +1422,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_checkpoint_name_in_meta_when_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     checkpoint_name: str = "test_checkpoint_name"
     # add checkpoint config
     checkpoint_config = CheckpointConfig(
@@ -1450,11 +1473,194 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     assert validation_result.meta["checkpoint_name"] == checkpoint_name
 
 
+@pytest.mark.unit
+def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_specified_in_constructor(
+    in_memory_runtime_context,
+    batch_request_as_dict,
+    common_action_list,
+):
+    class DummyValidator:
+        pass
+
+    validator = cast(Validator, DummyValidator)
+
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    with pytest.raises(
+        gx_exceptions.CheckpointError,
+        match=r'Checkpoint "my_checkpoint" cannot be called with a validator and contain a batch_request and/or a batch_request in validations.',
+    ):
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=in_memory_runtime_context,
+            config_version=1,
+            run_name_template="%Y-%M-foo-bar-template",
+            expectation_suite_name="my_expectation_suite",
+            batch_request=batch_request,
+            validator=validator,
+            action_list=common_action_list,
+        )
+
+
+@pytest.mark.unit
+def test_newstyle_checkpoint_raises_error_if_batch_request_in_validations_and_validator_are_specified_in_constructor(
+    in_memory_runtime_context,
+    batch_request_as_dict,
+    common_action_list,
+):
+    class DummyValidator:
+        pass
+
+    validator = cast(Validator, DummyValidator)
+
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    with pytest.raises(
+        gx_exceptions.CheckpointError,
+        match=r'Checkpoint "my_checkpoint" cannot be called with a validator and contain a batch_request and/or a batch_request in validations.',
+    ):
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=in_memory_runtime_context,
+            config_version=1,
+            run_name_template="%Y-%M-foo-bar-template",
+            expectation_suite_name="my_expectation_suite",
+            validator=validator,
+            action_list=common_action_list,
+            validations=[{"batch_request": batch_request}],
+        )
+
+
+@pytest.mark.integration
+@pytest.mark.slow  # 1.15s
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_constructor(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    batch_request_as_dict,
+    common_action_list,
+):
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    context.add_expectation_suite("my_expectation_suite")
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="my_expectation_suite",
+    )
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        validator=validator,
+        action_list=common_action_list,
+    )
+
+    result = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.unit
+def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_specified_in_run(
+    in_memory_runtime_context,
+    batch_request_as_dict,
+    common_action_list,
+):
+    class DummyValidator:
+        pass
+
+    validator = cast(Validator, DummyValidator)
+
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=in_memory_runtime_context,
+            config_version=1,
+            run_name_template="%Y-%M-foo-bar-template",
+            expectation_suite_name="my_expectation_suite",
+            validator=validator,
+            action_list=common_action_list,
+        ).run(
+            validator=validator,
+        )
+
+    assert (
+        str(e.value)
+        == 'Checkpoint "my_checkpoint" has already been created with a validator and overriding it through run() is not allowed.'
+    )
+
+
+@pytest.mark.unit
+def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_validations_and_validator_is_specified_in_run(
+    in_memory_runtime_context,
+    batch_request_as_dict,
+    common_action_list,
+):
+    class DummyValidator:
+        pass
+
+    validator = cast(Validator, DummyValidator)
+
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
+        _ = Checkpoint(
+            name="my_checkpoint",
+            data_context=in_memory_runtime_context,
+            config_version=1,
+            run_name_template="%Y-%M-foo-bar-template",
+            expectation_suite_name="my_expectation_suite",
+            action_list=common_action_list,
+            validations=[{"batch_request": batch_request}],
+        ).run(
+            batch_request=batch_request_as_dict,
+            validator=validator,
+        )
+
+    assert (
+        str(e.value)
+        == 'Checkpoint "my_checkpoint" has already been created with a validator and overriding it by supplying batch_request and/or validations with a batch_request to run() is not allowed.'
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.slow  # 1.15s
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_run(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    batch_request_as_dict,
+    common_action_list,
+):
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
+    context.add_expectation_suite("my_expectation_suite")
+    validator: Validator = context.get_validator(
+        batch_request=batch_request,
+        expectation_suite_name="my_expectation_suite",
+    )
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=common_action_list,
+    )
+
+    result = checkpoint.run(
+        validator=validator,
+    )
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
 @pytest.mark.slow  # 1.15s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    batch_request_as_dict,
+    common_action_list,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     # add checkpoint config
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -1467,26 +1673,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
         validations=[{"batch_request": batch_request}],
     )
     with pytest.raises(
@@ -1503,10 +1690,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_pandasdf(
     data_context_with_datasource_pandas_engine,
+    common_action_list,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # RuntimeBatchRequest with a DataFrame
@@ -1525,26 +1714,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
     with pytest.raises(
         gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
@@ -1560,10 +1730,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_sparkdf(
-    data_context_with_datasource_spark_engine, spark_session
+    data_context_with_datasource_spark_engine, common_action_list, spark_session
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = spark_session.createDataFrame(pandas_df)
 
@@ -1583,26 +1754,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
     with pytest.raises(
         gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
@@ -1619,6 +1771,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
@@ -1626,9 +1779,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_pandasdf(
     mock_emit,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -1657,26 +1811,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
     with pytest.raises(
         gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
@@ -2037,11 +2172,13 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert num_data_asset_validate_events == 2
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_object_multi_validation_sparkdf(
     data_context_with_datasource_spark_engine,
+    common_action_list,
     spark_session,
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df_1 = spark_session.createDataFrame(pandas_df)
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [5, 6], "col2": [7, 8]})
@@ -2075,26 +2212,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
     with pytest.raises(
         gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
@@ -2122,11 +2240,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 @pytest.mark.slow  # 1.08s
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_query_in_validations(
-    data_context_with_datasource_sqlalchemy_engine, sa
+    data_context_with_datasource_sqlalchemy_engine, common_action_list, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -2151,26 +2270,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
         validations=[{"batch_request": runtime_batch_request}],
     )
 
@@ -2180,10 +2280,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_runtime_batch_request_query_in_validations(
-    data_context_with_datasource_sqlalchemy_engine, sa
+    data_context_with_datasource_sqlalchemy_engine, common_action_list, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -2221,26 +2322,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
         validations=[
             {"batch_request": batch_request_1},
             {"batch_request": batch_request_2},
@@ -2253,10 +2335,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and_validations(
-    data_context_with_datasource_sqlalchemy_engine, sa
+    data_context_with_datasource_sqlalchemy_engine, common_action_list, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -2268,39 +2351,21 @@ def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     with pytest.raises(
         gx_exceptions.CheckpointError,
-        match='Checkpoint "my_checkpoint" must contain either a batch_request or validations.',
+        match='Checkpoint "my_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         checkpoint.run()
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_top_level_batch_request(
-    data_context_with_datasource_sqlalchemy_engine, sa
+    data_context_with_datasource_sqlalchemy_engine, common_action_list, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -2325,26 +2390,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
         batch_request=runtime_batch_request,
     )
 
@@ -2354,10 +2400,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_pandas(
-    data_context_with_datasource_pandas_engine,
+    data_context_with_datasource_pandas_engine, common_action_list
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -2381,26 +2428,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(batch_request=runtime_batch_request)
@@ -2409,11 +2437,13 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_top_level_batch_request_spark(
     data_context_with_datasource_spark_engine,
+    common_action_list,
     spark_session,
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = spark_session.createDataFrame(pandas_df)
 
@@ -2438,26 +2468,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(batch_request=runtime_batch_request)
@@ -2467,10 +2478,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.slow  # 1.09s
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -2502,26 +2515,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
         batch_request=runtime_batch_request,
     )
 
@@ -2531,10 +2525,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_top_level_batch_request_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -2567,26 +2563,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
         batch_request=runtime_batch_request,
     )
 
@@ -2596,8 +2573,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_config_substitution_simple(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
+    common_action_list,
     monkeypatch,
 ):
     monkeypatch.setenv("GE_ENVIRONMENT", "my_ge_environment")
@@ -2605,7 +2584,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
     simplified_checkpoint_config = CheckpointConfig(
         name="my_simplified_checkpoint",
@@ -2647,26 +2626,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
             config_version=1.0,
             run_name_template="%Y-%M-foo-bar-template-test",
             expectation_suite_name="users.delivery",
-            action_list=[
-                {
-                    "name": "store_validation_result",
-                    "action": {
-                        "class_name": "StoreValidationResultAction",
-                    },
-                },
-                {
-                    "name": "store_evaluation_params",
-                    "action": {
-                        "class_name": "StoreEvaluationParametersAction",
-                    },
-                },
-                {
-                    "name": "update_data_docs",
-                    "action": {
-                        "class_name": "UpdateDataDocsAction",
-                    },
-                },
-            ],
+            action_list=common_action_list,
             evaluation_parameters={
                 "environment": "my_ge_environment",
                 "tolerance": 1.0e-2,
@@ -2871,6 +2831,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
     )
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_config_substitution_nested(
     titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates,
     monkeypatch,
@@ -2880,7 +2841,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
     monkeypatch.setenv("MY_PARAM", "1")
     monkeypatch.setenv("OLD_PARAM", "2")
 
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates
 
     nested_checkpoint_config = CheckpointConfig(
         name="my_nested_checkpoint",
@@ -3170,10 +3131,11 @@ def test_newstyle_checkpoint_config_substitution_nested(
     )
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_checkpoint_run(
-    data_context_with_datasource_sqlalchemy_engine, sa
+    data_context_with_datasource_sqlalchemy_engine, common_action_list, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -3198,26 +3160,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(batch_request=runtime_batch_request)
@@ -3226,10 +3169,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_pandas(
     data_context_with_datasource_pandas_engine,
+    common_action_list,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -3253,26 +3198,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(batch_request=runtime_batch_request)
@@ -3281,10 +3207,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_checkpoint_run_spark(
     data_context_with_datasource_spark_engine,
+    common_action_list,
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = get_or_create_spark_application().createDataFrame(pandas_df)
 
@@ -3309,26 +3237,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(batch_request=runtime_batch_request)
@@ -3337,10 +3246,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_query_in_checkpoint_run(
-    data_context_with_datasource_sqlalchemy_engine, sa
+    data_context_with_datasource_sqlalchemy_engine, common_action_list, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -3365,26 +3275,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
@@ -3393,10 +3284,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_checkpoint_run_pandas(
     data_context_with_datasource_pandas_engine,
+    common_action_list,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -3420,26 +3313,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
@@ -3448,10 +3322,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_checkpoint_run_spark(
     data_context_with_datasource_spark_engine,
+    common_action_list,
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = get_or_create_spark_application().createDataFrame(pandas_df)
 
@@ -3476,26 +3352,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
@@ -3505,10 +3362,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.slow  # 1.11s
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -3540,26 +3399,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(batch_request=runtime_batch_request)
@@ -3568,10 +3408,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -3604,26 +3446,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(batch_request=runtime_batch_request)
@@ -3632,10 +3455,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -3667,26 +3492,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
@@ -3695,10 +3501,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_checkpoint_run_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -3731,26 +3539,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(validations=[{"batch_request": runtime_batch_request}])
@@ -3759,10 +3548,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_query_in_context_run_checkpoint(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -3819,10 +3609,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_pandas(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -3878,10 +3669,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_batch_data_in_context_run_checkpoint_spark(
     data_context_with_datasource_spark_engine,
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = get_or_create_spark_application().createDataFrame(pandas_df)
 
@@ -3938,10 +3730,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_query_in_context_run_checkpoint(
     data_context_with_datasource_sqlalchemy_engine, sa
 ):
-    context: DataContext = data_context_with_datasource_sqlalchemy_engine
+    context: FileDataContext = data_context_with_datasource_sqlalchemy_engine
 
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
@@ -3999,10 +3792,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_pandas(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -4059,10 +3853,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_data_in_context_run_checkpoint_spark(
     data_context_with_datasource_spark_engine,
 ):
-    context: DataContext = data_context_with_datasource_spark_engine
+    context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     test_df = get_or_create_spark_application().createDataFrame(pandas_df)
 
@@ -4121,10 +3916,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.slow  # 1.18s
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -4188,10 +3984,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -4256,10 +4053,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_pandas(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -4324,10 +4122,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_path_in_context_run_checkpoint_spark(
     titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
@@ -4393,10 +4192,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     assert result["success"]
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_data(
     data_context_with_datasource_pandas_engine,
+    common_action_list,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -4420,26 +4221,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
-            {
-                "name": "store_evaluation_params",
-                "action": {
-                    "class_name": "StoreEvaluationParametersAction",
-                },
-            },
-            {
-                "name": "update_data_docs",
-                "action": {
-                    "class_name": "UpdateDataDocsAction",
-                },
-            },
-        ],
+        action_list=common_action_list,
     )
 
     result = checkpoint.run(batch_request=runtime_batch_request)
@@ -4447,10 +4229,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
     assert type(repr(result)) == str
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_error_contradictory_batch_request_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     data_path: str = os.path.join(
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
@@ -4533,11 +4316,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
 
 
 @pytest.mark.slow  # 1.75s
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -4625,11 +4409,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 
 @pytest.mark.slow  # 2.35s
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -4731,11 +4516,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 
 @pytest.mark.slow  # 1.91s
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     batch_request: dict = {
@@ -4824,11 +4610,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 
 @pytest.mark.slow  # 2.46s
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # add checkpoint config
@@ -4932,10 +4719,11 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_does_not_pass_dataframes_via_batch_request_into_checkpoint_store(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -4989,10 +4777,11 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_batch_request_into_che
         context.add_checkpoint(**checkpoint_config)
 
 
+@pytest.mark.integration
 def test_newstyle_checkpoint_does_not_pass_dataframes_via_validations_into_checkpoint_store(
     data_context_with_datasource_pandas_engine,
 ):
-    context: DataContext = data_context_with_datasource_pandas_engine
+    context: FileDataContext = data_context_with_datasource_pandas_engine
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     # create expectation suite
@@ -5047,11 +4836,12 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_validations_into_check
 
 
 @pytest.mark.slow  # 1.19s
+@pytest.mark.integration
 def test_newstyle_checkpoint_result_can_be_pickled(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
 
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -5098,11 +4888,12 @@ def test_newstyle_checkpoint_result_can_be_pickled(
 
 @pytest.mark.integration
 @pytest.mark.slow  # 1.19s
+@pytest.mark.integration
 def test_newstyle_checkpoint_result_validations_include_rendered_content(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
 
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -5168,7 +4959,7 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     sa,
 ):
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
 
     batch_request: dict = {
         "datasource_name": "my_datasource",
@@ -5346,10 +5137,10 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
 def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_result_meta(
     checkpoint_config: CheckpointConfig,
     expected_validation_id: str,
-    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation: DataContext,
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation: FileDataContext,
     sa,
 ) -> None:
-    context: DataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
 
     checkpoint_config_dict: dict = checkpointConfigSchema.dump(checkpoint_config)
     context.add_checkpoint(**checkpoint_config_dict)
