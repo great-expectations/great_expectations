@@ -1,3 +1,10 @@
+"""
+To run this code as a local test, use the following console command:
+```
+pytest -v --docs-tests -m integration -k "how_to_connect_to_one_or_more_files_using_pandas" tests/integration/test_script_runner.py
+```
+"""
+
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py get_context">
 import great_expectations as gx
@@ -11,7 +18,7 @@ datasource_name = "my_new_datasource"
 path_to_csv_files = "<INSERT_PATH_TO_FILES_HERE>"
 # </snippet>
 
-
+# TODO: create an abs path here
 path_to_csv_files = "./data/single_directory_one_data_asset/yellow_tripdata_2019-01.csv"
 
 # Python
