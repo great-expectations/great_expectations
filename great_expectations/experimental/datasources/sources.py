@@ -16,6 +16,7 @@ from typing import (
 
 from typing_extensions import Final
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.experimental.datasources.signatures import _merge_signatures
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
 
@@ -212,6 +213,9 @@ class _SourceFactories:
                 _add_asset_factory, asset_type, exclude={"type"}
             )
             setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
+
+            # add the public api decorator
+            public_api(getattr(ds_type, add_asset_factory_method_name))
 
             def _read_asset_factory(
                 self: Datasource, asset_name: str | None = None, **kwargs
