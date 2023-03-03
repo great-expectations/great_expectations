@@ -4,6 +4,7 @@ import copy
 import dataclasses
 from pprint import pformat as pf
 from typing import (
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Dict,
@@ -37,14 +38,15 @@ from great_expectations.experimental.datasources.interfaces import (
     Datasource,
     TestConnectionError,
 )
+from great_expectations.util import NotImported
 
-SQLALCHEMY_IMPORTED = False
 try:
     import sqlalchemy
-
-    SQLALCHEMY_IMPORTED = True
 except ImportError:
-    pass
+    sqlalchemy = NotImported("sqlalchemy not found, please install.")
+
+if TYPE_CHECKING:
+    import sqlalchemy as sa
 
 
 class SQLDatasourceError(Exception):
@@ -789,9 +791,7 @@ class TableAsset(_SQLAsset):
 
         This can be used in a from clause for a query against this data.
         """
-        import sqlalchemy as sa
-
-        return sa.text(self.table_name)
+        return sqlalchemy.text(self.table_name)
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
@@ -827,7 +827,8 @@ class SQLDatasource(Datasource):
 
     # private attrs
     _cached_connection_string: str = pydantic.PrivateAttr("")
-    _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
+    _engine: Union[sa.engine.Engine, None] = pydantic.PrivateAttr(None)
+
     # These are instance var because ClassVars can't contain Type variables. See
     # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
     _TableAsset: Type[TableAsset] = pydantic.PrivateAttr(TableAsset)
@@ -840,23 +841,17 @@ class SQLDatasource(Datasource):
 
     def get_engine(self) -> sqlalchemy.engine.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
-            # validate that SQL Alchemy was successfully imported and attempt to create an engine
-            if SQLALCHEMY_IMPORTED:
-                try:
-                    self._engine = sqlalchemy.create_engine(self.connection_string)
-                except Exception as e:
-                    # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
-                    # one possible case is a missing plugin (e.g. psycopg2)
-                    raise SQLDatasourceError(
-                        "Unable to create a SQLAlchemy engine from "
-                        f"connection_string: {self.connection_string} due to the "
-                        f"following exception: {str(e)}"
-                    ) from e
-                self._cached_connection_string = self.connection_string
-            else:
+            try:
+                self._engine = sqlalchemy.create_engine(self.connection_string)
+            except Exception as e:
+                # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
+                # one possible case is a missing plugin (e.g. psycopg2)
                 raise SQLDatasourceError(
-                    "Unable to create SQLDatasource due to missing sqlalchemy dependency."
-                )
+                    "Unable to create a SQLAlchemy engine from "
+                    f"connection_string: {self.connection_string} due to the "
+                    f"following exception: {str(e)}"
+                ) from e
+            self._cached_connection_string = self.connection_string
         return self._engine
 
     def test_connection(self, test_assets: bool = True) -> None:

@@ -2,7 +2,7 @@
 title: 'Review and next steps'
 ---
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
-import TechnicalTag from '/docs/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <UniversalMap setup='active' connect='active' create='active' validate='active'/> 
 
