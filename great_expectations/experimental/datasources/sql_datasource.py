@@ -823,12 +823,7 @@ class SQLDatasource(Datasource):
 
     # private attrs
     _cached_connection_string: str = pydantic.PrivateAttr("")
-    # The sqlalchemy is in quotes (hence the # noqa) here because otherwise pydantic
-    # will try to resolve this annotation at gx import time which will cause the
-    # process die if sqlalchemy is not installed.
-    _engine: Union[
-        "sqlalchemy.engine.Engine", None  # noqa: UP037
-    ] = pydantic.PrivateAttr(None)
+    _engine: Union[sqlalchemy.engine.Engine, None] = pydantic.PrivateAttr(None)
     # These are instance var because ClassVars can't contain Type variables. See
     # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
     _TableAsset: Type[TableAsset] = pydantic.PrivateAttr(TableAsset)
