@@ -244,7 +244,7 @@ class DataFrameAsset(DataAsset):
 
     class Config:
         """
-        Need to allow arbitrary types to enable pd.DataFrame isinstance validation.
+        Allowing arbitrary types to enable pd.DataFrame isinstance validation.
         """
 
         arbitrary_types_allowed = True
