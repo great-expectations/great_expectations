@@ -240,7 +240,7 @@ XMLAsset = _PANDAS_ASSET_MODELS.get(
 class DataFrameAsset(DataAsset):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: pd.DataFrame = pydantic.Field(..., exclude=True)
+    _dataframe: pd.DataFrame = pydantic.Field(..., alias="dataframe")
 
     class Config:
         """
