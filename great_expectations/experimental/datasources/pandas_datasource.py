@@ -214,9 +214,6 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
 )
 
 
-_dynamic_asset_types = list(_PANDAS_ASSET_MODELS.values())
-
-
 try:
     ClipboardAsset = _PANDAS_ASSET_MODELS["clipboard"]
     CSVAsset = _PANDAS_ASSET_MODELS["csv"]
@@ -261,8 +258,16 @@ except KeyError as key_err:
 
 
 class DataFrameAsset(DataAsset):
+    # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: pd.DataFrame
+    dataframe: pd.DataFrame = pydantic.Field(..., exclude=True)
+
+    class Config:
+        """
+        Need to allow arbitrary types to enable pd.DataFrame isinstance validation.
+        """
+
+        arbitrary_types_allowed = True
 
     def test_connection(self) -> None:
         ...
@@ -396,11 +401,16 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     # End Abstract Methods
 
 
+_DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
+
+_CONCRETE_ASSET_TYPES = [DataFrameAsset]
+
+
 class PandasDatasource(_PandasDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = _dynamic_asset_types + [
-        DataFrameAsset
-    ]
+    asset_types: ClassVar[List[Type[DataAsset]]] = (
+        _DYNAMIC_ASSET_TYPES + _CONCRETE_ASSET_TYPES
+    )
 
     # private attributes
     _data_context = pydantic.PrivateAttr()
