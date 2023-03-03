@@ -78,7 +78,7 @@ def common_action_list() -> List[dict]:
 
 
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():
-    with pytest.raises(TypeError):
+    with pytest.raises(AttributeError):
         Checkpoint(name="my_checkpoint", data_context="foo", config_version=1)
 
 
@@ -1483,12 +1483,12 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
         def __init__(self) -> None:
             self._usage_statistics_handler = None
 
-    context = cast(AbstractDataContext, DummyDataContext)
+    context = cast(AbstractDataContext, DummyDataContext())
 
     class DummyValidator:
         pass
 
-    validator = cast(Validator, DummyValidator)
+    validator = cast(Validator, DummyValidator())
 
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     with pytest.raises(
@@ -1516,12 +1516,12 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_in_validations_and_va
         def __init__(self) -> None:
             self._usage_statistics_handler = None
 
-    context = cast(AbstractDataContext, DummyDataContext)
+    context = cast(AbstractDataContext, DummyDataContext())
 
     class DummyValidator:
         pass
 
-    validator = cast(Validator, DummyValidator)
+    validator = cast(Validator, DummyValidator())
 
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     with pytest.raises(
@@ -1579,12 +1579,12 @@ def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_
         def __init__(self) -> None:
             self._usage_statistics_handler = None
 
-    context = cast(AbstractDataContext, DummyDataContext)
+    context = cast(AbstractDataContext, DummyDataContext())
 
     class DummyValidator:
         pass
 
-    validator = cast(Validator, DummyValidator)
+    validator = cast(Validator, DummyValidator())
 
     with pytest.raises(gx_exceptions.CheckpointError) as e:
         _ = Checkpoint(
@@ -1614,12 +1614,12 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_valid
         def __init__(self) -> None:
             self._usage_statistics_handler = None
 
-    context = cast(AbstractDataContext, DummyDataContext)
+    context = cast(AbstractDataContext, DummyDataContext())
 
     class DummyValidator:
         pass
 
-    validator = cast(Validator, DummyValidator)
+    validator = cast(Validator, DummyValidator())
 
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     with pytest.raises(gx_exceptions.CheckpointError) as e:
