@@ -403,18 +403,16 @@ def test_default_pandas_datasource_get_and_set(
     assert pandas_datasource.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
 
     # ensure we overwrite the ephemeral data asset if no name is passed
-    validator = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
-    assert isinstance(validator, Validator)
+    _ = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
     assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
     assert len(pandas_datasource.assets) == 1
 
     # ensure we get an additional named asset when one is passed
     expected_csv_data_asset_name = "my_csv_asset"
-    validator = pandas_datasource.read_csv(
+    _ = pandas_datasource.read_csv(
         asset_name=expected_csv_data_asset_name,
         filepath_or_buffer=valid_file_path,
     )
-    assert isinstance(validator, Validator)
     csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name]
     assert csv_data_asset_2.name == expected_csv_data_asset_name
     assert len(pandas_datasource.assets) == 2

@@ -214,6 +214,9 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
 )
 
 
+_dynamic_asset_types = list(_PANDAS_ASSET_MODELS.values())
+
+
 try:
     ClipboardAsset = _PANDAS_ASSET_MODELS["clipboard"]
     CSVAsset = _PANDAS_ASSET_MODELS["csv"]
@@ -258,6 +261,7 @@ except KeyError as key_err:
 
 
 class DataFrameAsset(DataAsset):
+    type: Literal["dataframe"] = "dataframe"
     dataframe: pd.DataFrame
 
     def test_connection(self) -> None:
@@ -394,9 +398,9 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
 class PandasDatasource(_PandasDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = list(
-        _PANDAS_ASSET_MODELS.values()
-    ).extend([DataFrameAsset])
+    asset_types: ClassVar[List[Type[DataAsset]]] = _dynamic_asset_types + [
+        DataFrameAsset
+    ]
 
     # private attributes
     _data_context = pydantic.PrivateAttr()
