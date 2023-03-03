@@ -26,7 +26,6 @@ from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
     checkpointConfigSchema,
-    DataContextConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -1480,27 +1479,10 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
     batch_request_as_dict,
     common_action_list,
 ):
-    class DummyAbstractDataContext(AbstractDataContext):
-        def __init__(self, runtime_environment: Optional[dict] = None) -> None:
-            self._project_config = DataContextConfig(config_variables_file_path=None)
-            super().__init__(runtime_environment=runtime_environment)
+    class DummyDataContext:
+        pass
 
-        with mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext.root_directory",
-            return_value="",
-        ) as root_directory, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_project_config"
-        ) as _init_project_config, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_variables"
-        ) as _init_variables, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_datasource_store"
-        ) as _init_datasource_store:
-            pass
-
-        def _construct_data_context_id(self) -> str:
-            return "my_context_id"
-
-    context: AbstractDataContext = DummyAbstractDataContext()
+    context = cast(AbstractDataContext, DummyDataContext)
 
     class DummyValidator:
         pass
@@ -1529,27 +1511,10 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_in_validations_and_va
     batch_request_as_dict,
     common_action_list,
 ):
-    class DummyAbstractDataContext(AbstractDataContext):
-        def __init__(self, runtime_environment: Optional[dict] = None) -> None:
-            self._project_config = DataContextConfig(config_variables_file_path=None)
-            super().__init__(runtime_environment=runtime_environment)
+    class DummyDataContext:
+        pass
 
-        with mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext.root_directory",
-            return_value="",
-        ) as root_directory, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_project_config"
-        ) as _init_project_config, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_variables"
-        ) as _init_variables, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_datasource_store"
-        ) as _init_datasource_store:
-            pass
-
-        def _construct_data_context_id(self) -> str:
-            return "my_context_id"
-
-    context: AbstractDataContext = DummyAbstractDataContext()
+    context = cast(AbstractDataContext, DummyDataContext)
 
     class DummyValidator:
         pass
@@ -1608,27 +1573,10 @@ def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_
     batch_request_as_dict,
     common_action_list,
 ):
-    class DummyAbstractDataContext(AbstractDataContext):
-        def __init__(self, runtime_environment: Optional[dict] = None) -> None:
-            self._project_config = DataContextConfig(config_variables_file_path=None)
-            super().__init__(runtime_environment=runtime_environment)
+    class DummyDataContext:
+        pass
 
-        with mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext.root_directory",
-            return_value="",
-        ) as root_directory, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_project_config"
-        ) as _init_project_config, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_variables"
-        ) as _init_variables, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_datasource_store"
-        ) as _init_datasource_store:
-            pass
-
-        def _construct_data_context_id(self) -> str:
-            return "my_context_id"
-
-    context: AbstractDataContext = DummyAbstractDataContext()
+    context = cast(AbstractDataContext, DummyDataContext)
 
     class DummyValidator:
         pass
@@ -1659,27 +1607,10 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_valid
     batch_request_as_dict,
     common_action_list,
 ):
-    class DummyAbstractDataContext(AbstractDataContext):
-        def __init__(self, runtime_environment: Optional[dict] = None) -> None:
-            self._project_config = DataContextConfig(config_variables_file_path=None)
-            super().__init__(runtime_environment=runtime_environment)
+    class DummyDataContext:
+        pass
 
-        with mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext.root_directory",
-            return_value="",
-        ) as root_directory, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_project_config"
-        ) as _init_project_config, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_variables"
-        ) as _init_variables, mock.patch(
-            "great_expectations.data_context.data_context.AbstractDataContext._init_datasource_store"
-        ) as _init_datasource_store:
-            pass
-
-        def _construct_data_context_id(self) -> str:
-            return "my_context_id"
-
-    context: AbstractDataContext = DummyAbstractDataContext()
+    context = cast(AbstractDataContext, DummyDataContext)
 
     class DummyValidator:
         pass
