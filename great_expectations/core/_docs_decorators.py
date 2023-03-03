@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
+
+from typing_extensions import Final
 
 try:
     import docstring_parser
@@ -12,8 +16,11 @@ WHITELISTED_TAG = "--Public API--"
 
 F = TypeVar("F", bound=Callable[..., Any])
 
+# get_public_definitions() also checks this global
+_DYNAMICALLY_DEFINED: Final[dict[str, Callable]] = {}
 
-def public_api(func: F) -> F:
+
+def public_api(func: F, is_dynamic: bool = False) -> F:
     """Add the public API tag for processing by the auto documentation generator.
 
     Used as a decorator:
@@ -28,6 +35,11 @@ def public_api(func: F) -> F:
     existing_docstring = func.__doc__ if func.__doc__ else ""
 
     func.__doc__ = WHITELISTED_TAG + existing_docstring
+
+    if is_dynamic:
+        # what other details do we need?
+        # module path, class etc.
+        _DYNAMICALLY_DEFINED[func.__name__] = func
 
     return func
 
