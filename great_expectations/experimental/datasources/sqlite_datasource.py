@@ -20,8 +20,8 @@ from great_expectations.experimental.datasources.sql_datasource import (
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import (
         BatchRequestOptions,
-        BatchSortersDefinition,
         DataAsset,
+        SortersDefinition,
     )
 
 # This module serves as an example of how to extend _SQLAssets for specific backends. The steps are:
@@ -176,7 +176,7 @@ class SqliteDatasource(SQLDatasource):
         name: str,
         table_name: str,
         schema_name: Optional[str] = None,
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
     ) -> SqliteTableAsset:
         return cast(
             SqliteTableAsset,
@@ -187,7 +187,7 @@ class SqliteDatasource(SQLDatasource):
         self,
         name: str,
         query: str,
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
     ) -> SqliteQueryAsset:
         return cast(SqliteQueryAsset, super().add_query_asset(name, query, order_by))
 

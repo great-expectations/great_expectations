@@ -3,8 +3,12 @@ import logging
 from typing import Any, List, Union, ValuesView
 
 # TODO: <Alex>ALEX</Alex>
-from pydantic import dataclasses as pydantic_dc
+import pydantic
 
+# TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
+# from pydantic import dataclasses as pydantic_dc
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
 
 # TODO: <Alex>ALEX</Alex>
@@ -18,7 +22,10 @@ logger = logging.getLogger(__name__)
 # class Sorter(BatchSorter):
 # TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
-@pydantic_dc.dataclass(frozen=True)
+# TODO: <Alex>ALEX</Alex>
+# class Sorter(pydantic.BaseModel):
+# TODO: <Alex>ALEX</Alex>
+@pydantic.dataclasses.dataclass(frozen=False)
 # TODO: <Alex>ALEX</Alex>
 class Sorter:
     # TODO: <Alex>ALEX</Alex>

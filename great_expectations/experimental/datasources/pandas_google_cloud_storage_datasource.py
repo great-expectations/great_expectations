@@ -30,9 +30,11 @@ if TYPE_CHECKING:
         Credentials as GoogleServiceAccountCredentials,
     )
 
+    from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
+        Sorter,
+    )
     from great_expectations.experimental.datasources.interfaces import (
-        BatchSorter,
-        BatchSortersDefinition,
+        SortersDefinition,
     )
 
 
@@ -131,7 +133,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         prefix: str = "",
         delimiter: str = "/",
         max_results: int = 1000,
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
         """Adds a CSV DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
@@ -142,15 +144,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
         )
-        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
-            order_by=order_by
-        )
+        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
 
         asset = CSVAsset(
             name=name,
@@ -188,7 +188,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         prefix: str = "",
         delimiter: str = "/",
         max_results: int = 1000,
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
         """Adds an Excel DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
@@ -199,15 +199,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
         )
-        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
-            order_by=order_by
-        )
+        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = ExcelAsset(
             name=name,
             batching_regex=batching_regex_pattern,
@@ -243,7 +241,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         prefix: str = "",
         delimiter: str = "/",
         max_results: int = 1000,
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
         """Adds a JSON DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
@@ -254,15 +252,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
         )
-        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
-            order_by=order_by
-        )
+        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = JSONAsset(
             name=name,
             batching_regex=batching_regex_pattern,
@@ -298,7 +294,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         prefix: str = "",
         delimiter: str = "/",
         max_results: int = 1000,
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
         """Adds a Parquet DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
@@ -309,15 +305,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
         )
-        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
-            order_by=order_by
-        )
+        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = ParquetAsset(
             name=name,
             batching_regex=batching_regex_pattern,

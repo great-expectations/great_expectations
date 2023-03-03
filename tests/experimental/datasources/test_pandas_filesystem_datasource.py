@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.experimental.datasources.interfaces import (
-        BatchSortersDefinition,
+        SortersDefinition,
     )
 
 logger = logging.getLogger(__file__)
@@ -504,7 +504,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
 )
 def test_pandas_sorter(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
-    order_by: BatchSortersDefinition,
+    order_by: SortersDefinition,
 ):
     # Verify test directory has files we expect
     years = ["2018", "2019", "2020"]

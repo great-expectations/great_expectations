@@ -11,10 +11,12 @@ from typing_extensions import TypeAlias
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
+    Sorter,
+)
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
-    BatchSorter,
     TestConnectionError,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
@@ -680,8 +682,8 @@ def test_sort_batch_list_by_unknown_key(create_source: CreateSourceFixture):
 def test_table_asset_sorter_parsing(order_by: list):
     """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""
     expected_sorters = [
-        BatchSorter(key="year"),
-        BatchSorter(key="month", reverse=True),
+        Sorter(key="year"),
+        Sorter(key="month", reverse=True),
     ]
 
     table_asset = TableAsset(

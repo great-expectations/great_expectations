@@ -23,7 +23,7 @@ from great_expectations.experimental.datasources.sql_datasource import (
 )
 
 try:
-    from devtools import debug as pp
+    from devtools import debug as pp  # noqa: disable=E0602
 except ImportError:
     from pprint import pprint as pp
 
@@ -499,9 +499,7 @@ def test_yaml_config_round_trip_ordering(
     assert PG_CONFIG_YAML_STR == dumped
 
 
-@pytest.mark.xfail(
-    reason="Custom BatchSorter serialization logic needs to be implemented"
-)
+@pytest.mark.xfail(reason="Custom Sorter serialization logic needs to be implemented")
 def test_custom_sorter_serialization(
     inject_engine_lookup_double, from_json_gx_config: GxConfig
 ):

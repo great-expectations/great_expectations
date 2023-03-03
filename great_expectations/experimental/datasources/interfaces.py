@@ -34,8 +34,14 @@ from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.experimental.datasources.constants import _FIELDS_ALWAYS_SET
 
 # TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
+#     Sorter as BatchSorter,
+# )
+# TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.experimental.datasources.data_asset.data_connector.sorter import (
-    Sorter as BatchSorter,
+    Sorter,
 )
 
 # TODO: <Alex>ALEX</Alex>
@@ -102,26 +108,26 @@ class BatchRequest:
 # BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str, dict]]
 # TODO: <Alex>ALEX</Alex>
 # TODO: <Alex>ALEX</Alex>
-BatchSortersDefinition: TypeAlias = List[Union[BatchSorter, str]]
+SortersDefinition: TypeAlias = List[Union[Sorter, str, dict]]
 # TODO: <Alex>ALEX</Alex>
 
 
-def _is_batch_sorter_list(
-    sorters: BatchSortersDefinition,
-) -> TypeGuard[list[BatchSorter]]:
-    if len(sorters) == 0 or isinstance(sorters[0], BatchSorter):
+def _is_sorter_list(
+    sorters: SortersDefinition,
+) -> TypeGuard[list[Sorter]]:
+    if len(sorters) == 0 or isinstance(sorters[0], Sorter):
         return True
     return False
 
 
-def _is_str_sorter_list(sorters: BatchSortersDefinition) -> TypeGuard[list[str]]:
+def _is_str_sorter_list(sorters: SortersDefinition) -> TypeGuard[list[str]]:
     if len(sorters) > 0 and isinstance(sorters[0], str):
         return True
     return False
 
 
-def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> list[BatchSorter]:
-    if _is_batch_sorter_list(sorters):
+def _sorter_from_list(sorters: SortersDefinition) -> list[Sorter]:
+    if _is_sorter_list(sorters):
         return sorters
 
     # mypy doesn't successfully type-narrow sorters to a list[str] here, so we use
@@ -129,19 +135,16 @@ def _batch_sorter_from_list(sorters: BatchSortersDefinition) -> list[BatchSorter
     sring_valued_sorter: str
     if _is_str_sorter_list(sorters):
         return [
-            _batch_sorter_from_str(sring_valued_sorter)
-            for sring_valued_sorter in sorters
+            _sorter_from_str(sring_valued_sorter) for sring_valued_sorter in sorters
         ]
 
     # This should never be reached because of static typing but is necessary because
     # mypy doesn't know of the if conditions must evaluate to True.
-    raise ValueError(
-        f"sorters is a not a BatchSortersDefinition but is a {type(sorters)}"
-    )
+    raise ValueError(f"sorters is a not a SortersDefinition but is a {type(sorters)}")
 
 
-def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
-    """Convert a list of strings to BatchSorters
+def _sorter_from_str(sort_key: str) -> Sorter:
+    """Convert a list of strings to Sorter objects
 
     Args:
         sort_key: A batch metadata key which will be used to sort batches on a data asset.
@@ -149,12 +152,12 @@ def _batch_sorter_from_str(sort_key: str) -> BatchSorter:
                   sorting.  If not specified, defaults to increasing order.
     """
     if sort_key[0] == "-":
-        return BatchSorter(key=sort_key[1:], reverse=True)
+        return Sorter(key=sort_key[1:], reverse=True)
 
     if sort_key[0] == "+":
-        return BatchSorter(key=sort_key[1:], reverse=False)
+        return Sorter(key=sort_key[1:], reverse=False)
 
-    return BatchSorter(key=sort_key, reverse=False)
+    return Sorter(key=sort_key, reverse=False)
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
@@ -171,7 +174,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
     name: str
     type: str
 
-    order_by: List[BatchSorter] = Field(default_factory=list)
+    order_by: List[Sorter] = Field(default_factory=list)
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
@@ -247,11 +250,11 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
     def _parse_order_by_sorters(
-        cls, order_by: Optional[List[Union[BatchSorter, str, dict]]] = None
-    ) -> List[BatchSorter]:
+        cls, order_by: Optional[List[Union[Sorter, str, dict]]] = None
+    ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
-    def add_sorters(self: _DataAssetT, sorters: BatchSortersDefinition) -> _DataAssetT:
+    def add_sorters(self: _DataAssetT, sorters: SortersDefinition) -> _DataAssetT:
         """Associates a sorter to this DataAsset
 
         The passed in sorters will replace any previously associated sorters.
@@ -262,19 +265,19 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         sort the batches in descending, as opposed to ascending, order.
 
         Args:
-            sorters: A list of either BatchSorter objects or strings. The strings
-              are a shorthand for BatchSorter objects and are parsed as follows:
+            sorters: A list of either Sorter objects or strings. The strings
+              are a shorthand for Sorter objects and are parsed as follows:
               r'[+-]?.*'
-              An optional prefix of '+' or '-' sets BatchSorter.reverse to
+              An optional prefix of '+' or '-' sets Sorter.reverse to
               'False' or 'True' respectively. It is 'False' if no prefix is present.
-              The rest of the string gets assigned to the BatchSorter.key.
+              The rest of the string gets assigned to the Sorter.key.
               For example:
               ["key1", "-key2", "key3"]
               is equivalent to:
               [
-                  BatchSorter(key="key1", reverse=False),
-                  BatchSorter(key="key2", reverse=True),
-                  BatchSorter(key="key3", reverse=False),
+                  Sorter(key="key1", reverse=False),
+                  Sorter(key="key2", reverse=True),
+                  Sorter(key="key3", reverse=False),
               ]
 
         Returns:
@@ -282,7 +285,7 @@ class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
         """
         # NOTE: (kilo59) we could use pydantic `validate_assignment` for this
         # https://docs.pydantic.dev/usage/model_config/#options
-        self.order_by = _batch_sorter_from_list(sorters)
+        self.order_by = _sorter_from_list(sorters)
         return self
 
     def sort_batches(self, batch_list: List[Batch]) -> None:
@@ -478,9 +481,9 @@ class Datasource(
 
     @staticmethod
     def parse_order_by_sorters(
-        order_by: Optional[List[Union[BatchSorter, str, dict]]] = None
-    ) -> List[BatchSorter]:
-        order_by_sorters: list[BatchSorter] = []
+        order_by: Optional[List[Union[Sorter, str, dict]]] = None
+    ) -> List[Sorter]:
+        order_by_sorters: list[Sorter] = []
         if order_by:
             for idx, sorter in enumerate(order_by):
                 if isinstance(sorter, str):
@@ -488,14 +491,14 @@ class Datasource(
                         raise ValueError(
                             '"order_by" list cannot contain an empty string'
                         )
-                    order_by_sorters.append(_batch_sorter_from_str(sorter))
+                    order_by_sorters.append(_sorter_from_str(sorter))
                 elif isinstance(sorter, dict):
                     key: Optional[Any] = sorter.get("key")
                     reverse: Optional[Any] = sorter.get("reverse")
                     if key and reverse:
-                        order_by_sorters.append(BatchSorter(key=key, reverse=reverse))
+                        order_by_sorters.append(Sorter(key=key, reverse=reverse))
                     elif key:
-                        order_by_sorters.append(BatchSorter(key=key))
+                        order_by_sorters.append(Sorter(key=key))
                     else:
                         raise ValueError(
                             '"order_by" list dict must have a key named "key"'
