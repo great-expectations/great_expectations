@@ -210,7 +210,7 @@ class TestDynamicPandasAssets:
             assert param_name in add_asset_method_sig.parameters
             print("✅")
 
-    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    @pytest.mark.parametrize("asset_class", _DYNAMIC_ASSET_TYPES)
     def test_minimal_validation(self, asset_class: Type[_PandasDataAsset]):
         """
         These parametrized tests ensures that every `PandasDatasource` asset model does some minimal

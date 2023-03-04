@@ -107,8 +107,7 @@
             },
             "required": [
                 "name"
-            ],
-            "additionalProperties": false
+            ]
         }
     }
 }
