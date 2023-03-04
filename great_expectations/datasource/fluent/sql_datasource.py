@@ -20,8 +20,8 @@ from typing_extensions import Literal, Protocol, Self
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.datasource.fluent.experimental_base_model import (
-    ExperimentalBaseModel,
+from great_expectations.datasource.fluent.fluent_base_model import (
+    FluentBaseModel,
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
@@ -140,7 +140,7 @@ def _splitter_and_sql_asset_to_batch_identifier_data(
     )
 
 
-class _ColumnSplitterDatetime(ExperimentalBaseModel):
+class _ColumnSplitterDatetime(FluentBaseModel):
     column_name: str
     method_name: str
 
@@ -237,7 +237,7 @@ class ColumnSplitterDatetimePart(_ColumnSplitterDatetime):
         return v
 
 
-class _ColumnSplitterOneColumnOneParam(ExperimentalBaseModel):
+class _ColumnSplitterOneColumnOneParam(FluentBaseModel):
     column_name: str
     method_name: str
 
@@ -339,7 +339,7 @@ class ColumnSplitterColumnValue(_ColumnSplitterOneColumnOneParam):
         )
 
 
-class ColumnSplitterMultiColumnValue(ExperimentalBaseModel):
+class ColumnSplitterMultiColumnValue(FluentBaseModel):
     column_names: List[str]
     method_name: Literal[
         "split_on_multi_column_values"

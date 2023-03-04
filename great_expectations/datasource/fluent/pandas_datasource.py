@@ -115,7 +115,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
         batch_definition = BatchDefinition(
             datasource_name=self.datasource.name,
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name=self.name,
             batch_identifiers=IDDict(batch_request.options),
             batch_spec_passthrough=None,

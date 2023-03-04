@@ -35,10 +35,10 @@ yaml.default_flow_style = False
 
 # TODO (kilo59): replace this with `typing_extensions.Self` once mypy supports it
 # Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
-_Self = TypeVar("_Self", bound="ExperimentalBaseModel")
+_Self = TypeVar("_Self", bound="FluentBaseModel")
 
 
-class ExperimentalBaseModel(pydantic.BaseModel):
+class FluentBaseModel(pydantic.BaseModel):
     """
     Base model for most ZEP pydantic models.
 

@@ -29,8 +29,8 @@ from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
-from great_expectations.datasource.fluent.experimental_base_model import (
-    ExperimentalBaseModel,
+from great_expectations.datasource.fluent.fluent_base_model import (
+    FluentBaseModel,
 )
 from great_expectations.datasource.fluent.metadatasource import MetaDatasource
 from great_expectations.validator.metrics_calculator import MetricsCalculator
@@ -38,8 +38,8 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    # TODO: When the Batch class is moved out of the experimental directory, we should try to import the annotations
-    #       from core.batch so we no longer need to call Batch.update_forward_refs() before instantiation.
+    # TODO: We should try to import the annotations from core.batch so we no longer need to call
+    #  Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import (
         BatchData,
         BatchDefinition,
@@ -141,7 +141,7 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 _DatasourceT = TypeVar("_DatasourceT")
 
 
-class DataAsset(ExperimentalBaseModel, Generic[_DatasourceT]):
+class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # To subclass a DataAsset one must define `type` as a Class literal explicitly on the sublass
     # as well as implementing the methods in the `Abstract Methods` section below.
     # Some examples:
@@ -325,7 +325,7 @@ _ExecutionEngineT = TypeVar("_ExecutionEngineT")
 
 
 class Datasource(
-    ExperimentalBaseModel,
+    FluentBaseModel,
     Generic[_DataAssetT, _ExecutionEngineT],
     metaclass=MetaDatasource,
 ):
@@ -569,7 +569,7 @@ class HeadData:
         return self.data.__repr__()
 
 
-class Batch(ExperimentalBaseModel):
+class Batch(FluentBaseModel):
     """This represents a batch of data.
 
     This is usually not the data itself but a hook to the data on an external datastore such as

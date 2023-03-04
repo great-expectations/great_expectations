@@ -353,7 +353,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         return [
             BatchDefinition(
                 datasource_name=self._datasource_name,
-                data_connector_name="experimental",
+                data_connector_name="fluent",
                 data_asset_name=self._data_asset_name,
                 batch_identifiers=IDDict(batch_identifiers),
             )

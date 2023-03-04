@@ -9,8 +9,8 @@ from typing import TYPE_CHECKING, Dict, List, Type, Union
 from pydantic import Extra, Field, ValidationError, validator
 from typing_extensions import Final
 
-from great_expectations.datasource.fluent.experimental_base_model import (
-    ExperimentalBaseModel,
+from great_expectations.datasource.fluent.fluent_base_model import (
+    FluentBaseModel,
 )
 from great_expectations.datasource.fluent.interfaces import (
     Datasource,  # noqa: TCH001
@@ -39,8 +39,8 @@ _MISSING_FLUENT_DATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 ]
 
 
-class GxConfig(ExperimentalBaseModel):
-    """Represents the full new-style/experimental configuration file."""
+class GxConfig(FluentBaseModel):
+    """Represents the full fluent configuration file."""
 
     fluent_datasources: Dict[str, Datasource] = Field(
         ..., description=_ZEP_STYLE_DESCRIPTION
