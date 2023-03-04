@@ -12,6 +12,7 @@ from typing import (
     List,
     MutableMapping,
     Optional,
+    Sequence,
     Set,
     Type,
 )
@@ -303,7 +304,7 @@ class DataFrameAsset(_PandasDataAsset):
 
 class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = []
+    asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
 
     # instance attributes
     assets: MutableMapping[
@@ -340,14 +341,12 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
 _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 
-_CONCRETE_ASSET_TYPES = [DataFrameAsset]
-
 
 class PandasDatasource(_PandasDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = (
-        _DYNAMIC_ASSET_TYPES + _CONCRETE_ASSET_TYPES
-    )
+    asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
+        DataFrameAsset
+    ]
 
     # private attributes
     _data_context = pydantic.PrivateAttr()

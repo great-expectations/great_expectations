@@ -15,6 +15,7 @@ from typing import (
     List,
     MutableMapping,
     Optional,
+    Sequence,
     Set,
     Type,
     TypeVar,
@@ -334,7 +335,7 @@ class Datasource(
     # data context method `data_context.sources.add_my_datasource` method.
 
     # class attrs
-    asset_types: ClassVar[List[Type[DataAsset]]] = []
+    asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
     _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
