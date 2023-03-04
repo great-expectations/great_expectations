@@ -14,7 +14,6 @@ from typing import (
     Optional,
     Set,
     Type,
-    Union,
 )
 
 import pandas as pd
@@ -260,7 +259,7 @@ class DataFrameAsset(_PandasDataAsset):
         self._validate_batch_request(batch_request)
         batch_list: List[Batch] = []
 
-        batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
+        batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)  # type: ignore[attr-defined]  # unaware of alias
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
         data, markers = execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
@@ -355,10 +354,7 @@ class PandasDatasource(_PandasDatasource):
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
-    assets: Dict[
-        str,
-        Union[_PandasDataAsset, DataFrameAsset],
-    ] = {}
+    assets: Dict[str, _PandasDataAsset] = {}
 
     def test_connection(self, test_assets: bool = True) -> None:
         ...
