@@ -15,6 +15,7 @@ from typing import (
     Sequence,
     Set,
     Type,
+    TypeVar,
 )
 
 import pandas as pd
@@ -51,6 +52,9 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
+
+
+PandasDataFrame = TypeVar("pandas.core.frame.DataFrame")
 
 
 class PandasDatasourceError(Exception):
@@ -240,14 +244,10 @@ XMLAsset = _PANDAS_ASSET_MODELS.get(
 class DataFrameAsset(_PandasDataAsset):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    _dataframe: pd.DataFrame = pydantic.Field(..., alias="dataframe")
+    dataframe: PandasDataFrame = pydantic.Field(..., exclude=True, repr=False)
 
     class Config:
-        """
-        Allowing arbitrary types to enable pd.DataFrame isinstance validation.
-        """
-
-        arbitrary_types_allowed = True
+        extra = pydantic.Extra.forbid
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(

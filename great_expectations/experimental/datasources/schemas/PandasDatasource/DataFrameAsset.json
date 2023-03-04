@@ -21,11 +21,16 @@
             "items": {
                 "$ref": "#/definitions/BatchSorter"
             }
+        },
+        "dataframe": {
+            "title": "Dataframe"
         }
     },
     "required": [
-        "name"
+        "name",
+        "dataframe"
     ],
+    "additionalProperties": false,
     "definitions": {
         "BatchSorter": {
             "title": "BatchSorter",
