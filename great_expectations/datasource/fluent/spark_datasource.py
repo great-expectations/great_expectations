@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Type
 
-from great_expectations.experimental.datasources.interfaces import Datasource
+from great_expectations.datasource.fluent.interfaces import Datasource
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import SparkDFExecutionEngine

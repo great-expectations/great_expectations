@@ -9,12 +9,12 @@ from typing import TYPE_CHECKING, Set, Type
 
 import pydantic
 
-from great_expectations.experimental.datasources.signatures import _merge_signatures
-from great_expectations.experimental.datasources.sources import _SourceFactories
-from great_expectations.experimental.datasources.type_lookup import TypeLookup
+from great_expectations.datasource.fluent.signatures import _merge_signatures
+from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.interfaces import Datasource
+    from great_expectations.datasource.fluent.interfaces import Datasource
 
 
 logger = logging.getLogger(__name__)

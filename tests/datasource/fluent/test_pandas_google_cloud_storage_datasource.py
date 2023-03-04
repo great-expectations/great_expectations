@@ -11,18 +11,18 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.core.util import GCSUrl
-from great_expectations.experimental.datasources import (
+from great_expectations.datasource.fluent import (
     PandasGoogleCloudStorageDatasource,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
-from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
-from great_expectations.experimental.datasources.file_path_data_asset import (
+from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.experimental.datasources.interfaces import TestConnectionError
-from great_expectations.experimental.datasources.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
 
@@ -103,7 +103,7 @@ def object_keys() -> List[str]:
 
 @pytest.fixture
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 def csv_asset(
     mock_list_keys,
@@ -155,7 +155,7 @@ def test_construct_pandas_gcs_datasource_without_gcs_options():
     storage is None, reason='Could not import "storage" from google.cloud'
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.oauth2.service_account.Credentials.from_service_account_file")
 @mock.patch("google.cloud.storage.Client")
@@ -179,7 +179,7 @@ def test_construct_pandas_gcs_datasource_with_filename_in_gcs_options(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.oauth2.service_account.Credentials.from_service_account_info")
 @mock.patch("google.cloud.storage.Client")
@@ -203,7 +203,7 @@ def test_construct_pandas_gcs_datasource_with_info_in_gcs_options(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
 def test_add_csv_asset_to_datasource(
@@ -229,7 +229,7 @@ def test_add_csv_asset_to_datasource(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
 def test_construct_csv_asset_directly(
@@ -252,7 +252,7 @@ def test_construct_csv_asset_directly(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
 def test_csv_asset_with_regex_unnamed_parameters(
@@ -280,7 +280,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
 def test_csv_asset_with_regex_named_parameters(
@@ -303,7 +303,7 @@ def test_csv_asset_with_regex_named_parameters(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
 def test_csv_asset_with_some_regex_named_parameters(
@@ -331,7 +331,7 @@ def test_csv_asset_with_some_regex_named_parameters(
     storage is None, reason='Could not import "storage" from google.cloud'
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
 def test_csv_asset_with_non_string_regex_named_parameters(

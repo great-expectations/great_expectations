@@ -11,14 +11,14 @@ import pydantic
 import pytest
 
 from great_expectations.data_context import FileDataContext
-from great_expectations.experimental.datasources.config import GxConfig
-from great_expectations.experimental.datasources.interfaces import Datasource
-from great_expectations.experimental.datasources.sources import (
+from great_expectations.datasource.fluent.config import GxConfig
+from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
     _SourceFactories,
 )
-from great_expectations.experimental.datasources.sql_datasource import (
+from great_expectations.datasource.fluent.sql_datasource import (
     ColumnSplitterYearAndMonth,
     TableAsset,
 )

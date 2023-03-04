@@ -34,7 +34,7 @@ from pydantic import Field, FilePath
 # from pydantic.typing import resolve_annotations
 from typing_extensions import Final, Literal, TypeAlias
 
-from great_expectations.experimental.datasources.interfaces import (
+from great_expectations.datasource.fluent.interfaces import (
     DataAsset,  # noqa: TCH001
 )
 

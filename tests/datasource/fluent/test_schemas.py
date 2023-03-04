@@ -9,13 +9,13 @@ from typing import Any, Generator, Type
 import pandas
 import pytest
 
-from great_expectations.experimental.datasources import (
+from great_expectations.datasource.fluent import (
     _PANDAS_SCHEMA_VERSION,  # this is the version we run in the standard test pipeline. Update as needed
     _SCHEMAS_DIR,
     DataAsset,
     Datasource,
 )
-from great_expectations.experimental.datasources.sources import (
+from great_expectations.datasource.fluent.sources import (
     _iter_all_registered_types,
 )
 

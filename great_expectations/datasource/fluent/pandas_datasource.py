@@ -21,18 +21,18 @@ from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import PandasBatchSpec
-from great_expectations.experimental.datasources.dynamic_pandas import (
+from great_expectations.datasource.fluent.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
-from great_expectations.experimental.datasources.interfaces import (
+from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchRequest,
     DataAsset,
     Datasource,
     _DataAssetT,
 )
-from great_expectations.experimental.datasources.signatures import _merge_signatures
-from great_expectations.experimental.datasources.sources import (
+from great_expectations.datasource.fluent.signatures import _merge_signatures
+from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
 
@@ -43,10 +43,10 @@ if TYPE_CHECKING:
     import pandas as pd
     import sqlalchemy
 
-    from great_expectations.execution_engine import PandasExecutionEngine
-    from great_expectations.experimental.datasources.interfaces import (
+    from great_expectations.datasource.fluent.interfaces import (
         BatchRequestOptions,
     )
+    from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)

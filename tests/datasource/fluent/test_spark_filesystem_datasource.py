@@ -11,17 +11,17 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.experimental.datasources.interfaces import (
+from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition,
     TestConnectionError,
 )
-from great_expectations.experimental.datasources.spark_file_path_datasource import (
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
 )
-from great_expectations.experimental.datasources.spark_filesystem_datasource import (
+from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
 )
 

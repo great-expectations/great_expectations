@@ -11,22 +11,20 @@ from typing import (
     List,
     NamedTuple,
     Type,
-    Union,
 )
 
 from typing_extensions import Final, TypeAlias
 
-from great_expectations.experimental.datasources.signatures import _merge_signatures
-from great_expectations.experimental.datasources.type_lookup import TypeLookup
+from great_expectations.datasource.fluent.signatures import _merge_signatures
+from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 if TYPE_CHECKING:
     import pydantic
 
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource import BaseDatasource, LegacyDatasource
-    from great_expectations.experimental.context import DataContext
-    from great_expectations.experimental.datasources import PandasDatasource
-    from great_expectations.experimental.datasources.interfaces import (
+    from great_expectations.datasource.fluent import PandasDatasource
+    from great_expectations.datasource.fluent.interfaces import (
         DataAsset,
         Datasource,
     )
@@ -76,9 +74,9 @@ class _SourceFactories:
     type_lookup: ClassVar = TypeLookup()
     __source_factories: ClassVar[Dict[str, SourceFactoryFn]] = {}
 
-    _data_context: Union[DataContext, GXDataContext]
+    _data_context: GXDataContext
 
-    def __init__(self, data_context: Union[DataContext, GXDataContext]):
+    def __init__(self, data_context: GXDataContext):
         self._data_context = data_context
 
     @classmethod
@@ -235,7 +233,7 @@ class _SourceFactories:
 
     @property
     def pandas_default(self) -> PandasDatasource:
-        from great_expectations.experimental.datasources import PandasDatasource
+        from great_expectations.datasource.fluent import PandasDatasource
 
         datasources: dict[
             str, LegacyDatasource | BaseDatasource | Datasource

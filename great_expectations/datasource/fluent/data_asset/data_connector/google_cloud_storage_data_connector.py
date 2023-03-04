@@ -8,7 +8,7 @@ from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
     list_gcs_keys,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilePathDataConnector,
 )
 

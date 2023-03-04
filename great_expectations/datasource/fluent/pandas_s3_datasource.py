@@ -8,26 +8,25 @@ import pydantic
 from typing_extensions import Literal
 
 from great_expectations.core.util import S3Url
-from great_expectations.experimental.datasources import _PandasFilePathDatasource
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
-from great_expectations.experimental.datasources.interfaces import TestConnectionError
-from great_expectations.experimental.datasources.pandas_datasource import (
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasourceError,
 )
-from great_expectations.experimental.datasources.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
     ExcelAsset,
     JSONAsset,
     ParquetAsset,
 )
-from great_expectations.experimental.datasources.signatures import _merge_signatures
+from great_expectations.datasource.fluent.signatures import _merge_signatures
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
-
-    from great_expectations.experimental.datasources.interfaces import (
+    from great_expectations.datasource.fluent.interfaces import (
         Sorter,
         SortersDefinition,
     )

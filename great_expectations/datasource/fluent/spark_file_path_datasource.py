@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Type
 
 from typing_extensions import Literal
 
-from great_expectations.experimental.datasources import _SparkDatasource
-from great_expectations.experimental.datasources.file_path_data_asset import (
+from great_expectations.datasource.fluent import _SparkDatasource
+from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.interfaces import DataAsset
+    from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
 logger = logging.getLogger(__name__)

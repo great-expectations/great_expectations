@@ -28,11 +28,11 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
-from great_expectations.experimental.datasources.constants import _FIELDS_ALWAYS_SET
-from great_expectations.experimental.datasources.experimental_base_model import (
+from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
+from great_expectations.datasource.fluent.experimental_base_model import (
     ExperimentalBaseModel,
 )
-from great_expectations.experimental.datasources.metadatasource import MetaDatasource
+from great_expectations.datasource.fluent.metadatasource import MetaDatasource
 from great_expectations.validator.metrics_calculator import MetricsCalculator
 
 logger = logging.getLogger(__name__)
@@ -45,10 +45,10 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
-    from great_expectations.experimental.datasources.data_asset.data_connector import (
+    from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
-    from great_expectations.experimental.datasources.type_lookup import TypeLookup
+    from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 try:
     import pyspark

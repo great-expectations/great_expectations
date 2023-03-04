@@ -20,15 +20,10 @@ from typing_extensions import Literal, Protocol, Self
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
-from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
-    SqlAlchemyDataSplitter,
-)
-from great_expectations.experimental.datasources.experimental_base_model import (
+from great_expectations.datasource.fluent.experimental_base_model import (
     ExperimentalBaseModel,
 )
-from great_expectations.experimental.datasources.interfaces import (
+from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchRequest,
     BatchRequestOptions,
@@ -37,6 +32,11 @@ from great_expectations.experimental.datasources.interfaces import (
     Sorter,
     SortersDefinition,
     TestConnectionError,
+)
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
+from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
+    SqlAlchemyDataSplitter,
 )
 from great_expectations.util import NotImported
 

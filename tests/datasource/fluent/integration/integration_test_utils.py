@@ -10,8 +10,8 @@ from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.experimental.datasources import PandasDatasource
-from great_expectations.experimental.datasources.interfaces import (
+from great_expectations.datasource.fluent import PandasDatasource
+from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,
@@ -30,7 +30,7 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 from tests.expectations.test_util import get_table_columns_metric
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.interfaces import Batch
+    from great_expectations.datasource.fluent.interfaces import Batch
 
 
 logger = logging.getLogger(__name__)

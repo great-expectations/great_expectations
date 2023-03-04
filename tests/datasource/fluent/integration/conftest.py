@@ -6,17 +6,17 @@ import pathlib
 import pytest
 
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.experimental.datasources import (
+from great_expectations.datasource.fluent import (
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
     SqliteDatasource,
 )
-from great_expectations.experimental.datasources.interfaces import (
+from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,
 )
-from great_expectations.experimental.datasources.sources import (
+from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
 

@@ -11,16 +11,16 @@ from moto import mock_s3
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import S3Url
-from great_expectations.experimental.datasources import PandasS3Datasource
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent import PandasS3Datasource
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
-from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
-from great_expectations.experimental.datasources.file_path_data_asset import (
+from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.experimental.datasources.interfaces import TestConnectionError
-from great_expectations.experimental.datasources.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
 

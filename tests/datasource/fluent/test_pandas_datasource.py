@@ -11,14 +11,14 @@ import pytest
 from pytest import MonkeyPatch, param
 
 import great_expectations.execution_engine.pandas_execution_engine
-from great_expectations.experimental.datasources import PandasDatasource
-from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
-from great_expectations.experimental.datasources.pandas_datasource import (
+from great_expectations.datasource.fluent import PandasDatasource
+from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations.datasource.fluent.pandas_datasource import (
     CSVAsset,
     TableAsset,
     _PandasDataAsset,
 )
-from great_expectations.experimental.datasources.sources import (
+from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
     DefaultPandasDatasourceError,

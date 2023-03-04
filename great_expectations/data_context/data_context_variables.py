@@ -29,8 +29,8 @@ if TYPE_CHECKING:
         NotebookConfig,
         ProgressBarsConfig,
     )
-    from great_expectations.experimental.datasources.interfaces import (
-        Datasource as XDatasource,
+    from great_expectations.datasource.fluent.interfaces import (
+        Datasource as FluentDatasource,
     )
 
 logger = logging.getLogger(__file__)
@@ -372,28 +372,30 @@ class FileDataContextVariables(DataContextVariables):
         NOTE: This could be generalized into a stand-alone context manager function,
         but it would need to take in the data_context containing the zep objects.
         """
-        config_xdatasources_stash: Dict[
-            str, XDatasource
+        config_fluent_datasources_stash: Dict[
+            str, FluentDatasource
         ] = self.data_context._synchronize_zep_datasources()
         try:
-            if config_xdatasources_stash:
+            if config_fluent_datasources_stash:
                 logger.info(
-                    f"Stashing `XDatasource` during {type(self).__name__}.save_config() - {len(config_xdatasources_stash)} stashed"
+                    f"Stashing `FluentDatasource` during {type(self).__name__}.save_config() - {len(config_fluent_datasources_stash)} stashed"
                 )
-                for xdatasource_name in config_xdatasources_stash.keys():
-                    self.data_context.datasources.pop(xdatasource_name)
+                for fluent_datasource_name in config_fluent_datasources_stash.keys():
+                    self.data_context.datasources.pop(fluent_datasource_name)
                 # this would be `deep_copy'ed in `instantiate_class_from_config` too
-                self.data_context.zep_config.xdatasources = {}
+                self.data_context.zep_config.fluent_datasources = {}
             yield
         except Exception:
             raise
         finally:
-            if config_xdatasources_stash:
+            if config_fluent_datasources_stash:
                 logger.info(
-                    f"Replacing {len(config_xdatasources_stash)} stashed `XDatasource`s"
+                    f"Replacing {len(config_fluent_datasources_stash)} stashed `FluentDatasource`s"
                 )
-                self.data_context.datasources.update(config_xdatasources_stash)
-                self.data_context.zep_config.xdatasources = config_xdatasources_stash
+                self.data_context.datasources.update(config_fluent_datasources_stash)
+                self.data_context.zep_config.fluent_datasources = (
+                    config_fluent_datasources_stash
+                )
 
 
 @dataclass(repr=False)

@@ -20,13 +20,13 @@ from typing import (
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector.regex_parser import (
+from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
-from great_expectations.experimental.datasources.interfaces import (
+from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchRequest,
     BatchRequestOptions,
@@ -38,12 +38,12 @@ from great_expectations.experimental.datasources.interfaces import (
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
+    from great_expectations.datasource.fluent.data_asset.data_connector import (
+        DataConnector,
+    )
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
-    )
-    from great_expectations.experimental.datasources.data_asset.data_connector import (
-        DataConnector,
     )
 
 logger = logging.getLogger(__name__)

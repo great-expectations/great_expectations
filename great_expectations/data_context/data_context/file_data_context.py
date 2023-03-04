@@ -23,7 +23,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.datasource_serializer import (
     YAMLReadyDictDatasourceConfigSerializer,
 )
-from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.datasource.fluent.config import GxConfig
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -167,4 +167,4 @@ class FileDataContext(SerializableDataContext):
             if path_to_zep_yaml.exists():
                 return GxConfig.parse_yaml(path_to_zep_yaml, _allow_empty=True)
             logger.info(f"no zep config at {path_to_zep_yaml.absolute()}")
-        return GxConfig(xdatasources={})
+        return GxConfig(fluent_datasources={})

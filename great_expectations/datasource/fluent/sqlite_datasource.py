@@ -5,20 +5,20 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Uni
 import pydantic
 from typing_extensions import Literal, Self
 
-from great_expectations.experimental.datasources.sql_datasource import (
+from great_expectations.datasource.fluent.sql_datasource import (
     ColumnSplitter,
     SQLDatasource,
     _ColumnSplitterOneColumnOneParam,
 )
-from great_expectations.experimental.datasources.sql_datasource import (
+from great_expectations.datasource.fluent.sql_datasource import (
     QueryAsset as SqlQueryAsset,
 )
-from great_expectations.experimental.datasources.sql_datasource import (
+from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset as SqlTableAsset,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.interfaces import (
+    from great_expectations.datasource.fluent.interfaces import (
         BatchRequestOptions,
         DataAsset,
         SortersDefinition,

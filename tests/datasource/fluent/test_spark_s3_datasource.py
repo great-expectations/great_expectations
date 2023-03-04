@@ -11,15 +11,15 @@ from moto import mock_s3
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import S3Url
-from great_expectations.experimental.datasources import SparkS3Datasource
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent import SparkS3Datasource
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
-from great_expectations.experimental.datasources.file_path_data_asset import (
+from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.experimental.datasources.interfaces import TestConnectionError
-from great_expectations.experimental.datasources.spark_s3_datasource import CSVAsset
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.spark_s3_datasource import CSVAsset
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient

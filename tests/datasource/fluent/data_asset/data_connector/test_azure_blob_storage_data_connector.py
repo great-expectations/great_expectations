@@ -8,13 +8,13 @@ import pytest
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import AzureUrl
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
-from great_expectations.experimental.datasources.interfaces import BatchRequest
+from great_expectations.datasource.fluent.interfaces import BatchRequest
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.data_asset.data_connector import (
+    from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
 
@@ -44,7 +44,7 @@ class MockBlobServiceClient:
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_basic_instantiation(mock_list_keys):
     mock_list_keys.return_value = [
@@ -86,7 +86,7 @@ def test_basic_instantiation(mock_list_keys):
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
     mock_list_keys.return_value = [
@@ -122,7 +122,7 @@ def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_return_all_batch_definitions_unsorted(mock_list_keys):
     mock_list_keys.return_value = [
@@ -312,7 +312,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 # TODO: <Alex>ALEX-UNCOMMENT_WHEN_SORTERS_ARE_INCLUDED_AND_TEST_SORTED_BATCH_DEFINITION_LIST</Alex>
 # @pytest.mark.integration
 # @mock.patch(
-#     "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+#     "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 # )
 # def test_return_all_batch_definitions_sorted(
 #     mock_list_keys,
@@ -455,7 +455,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_return_only_unique_batch_definitions(mock_list_keys):
     mock_list_keys.return_value = [
@@ -536,7 +536,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_alpha(mock_list_keys):
     mock_list_keys.return_value = [
@@ -593,7 +593,7 @@ def test_alpha(mock_list_keys):
 
 @pytest.mark.integration
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def test_foxtrot(mock_list_keys):
     mock_list_keys.return_value = []

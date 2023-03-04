@@ -9,13 +9,13 @@ from typing import TYPE_CHECKING, Dict, List, Type, Union
 from pydantic import Extra, Field, ValidationError, validator
 from typing_extensions import Final
 
-from great_expectations.experimental.datasources.experimental_base_model import (
+from great_expectations.datasource.fluent.experimental_base_model import (
     ExperimentalBaseModel,
 )
-from great_expectations.experimental.datasources.interfaces import (
+from great_expectations.datasource.fluent.interfaces import (
     Datasource,  # noqa: TCH001
 )
-from great_expectations.experimental.datasources.sources import (
+from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
     _SourceFactories,
@@ -28,11 +28,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-_ZEP_STYLE_DESCRIPTION: Final[str] = "ZEP Experimental Datasources"
+_ZEP_STYLE_DESCRIPTION: Final[str] = "Fluent Datasources"
 
-_MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
+_MISSING_FLUENT_DATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
     {
-        "loc": ("xdatasources",),
+        "loc": ("fluent_datasources",),
         "msg": "field required",
         "type": "value_error.missing",
     }
@@ -42,16 +42,18 @@ _MISSING_XDATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 class GxConfig(ExperimentalBaseModel):
     """Represents the full new-style/experimental configuration file."""
 
-    xdatasources: Dict[str, Datasource] = Field(..., description=_ZEP_STYLE_DESCRIPTION)
+    fluent_datasources: Dict[str, Datasource] = Field(
+        ..., description=_ZEP_STYLE_DESCRIPTION
+    )
 
     @property
     def datasources(self) -> Dict[str, Datasource]:
-        return self.xdatasources
+        return self.fluent_datasources
 
     class Config:
         extra = Extra.ignore  # ignore any old style config keys
 
-    @validator("xdatasources", pre=True)
+    @validator("fluent_datasources", pre=True)
     @classmethod
     def _load_datasource_subtype(cls, v: Dict[str, dict]):
         logger.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
@@ -101,11 +103,11 @@ class GxConfig(ExperimentalBaseModel):
         cls: Type[GxConfig], f: Union[pathlib.Path, str], _allow_empty: bool = False
     ) -> GxConfig:
         """
-        Overriding base method to allow an empty/missing `xdatasources` field.
+        Overriding base method to allow an empty/missing `fluent_datasources` field.
         Other validation errors will still result in an error.
 
         TODO (kilo59) 122822: remove this as soon as it's no longer needed. Such as when
-        we use a new `config_version` instead of `xdatasources` key.
+        we use a new `config_version` instead of `fluent_datasources` key.
         """
         if _allow_empty:
             try:
@@ -115,11 +117,11 @@ class GxConfig(ExperimentalBaseModel):
                 logger.info(
                     f"{cls.__name__}.parse_yaml() failed with errors - {errors_list}"
                 )
-                if errors_list == _MISSING_XDATASOURCES_ERRORS:
+                if errors_list == _MISSING_FLUENT_DATASOURCES_ERRORS:
                     logger.info(
-                        f"{cls.__name__}.parse_yaml() returning empty `xdatasources`"
+                        f"{cls.__name__}.parse_yaml() returning empty `fluent_datasources`"
                     )
-                    return cls(xdatasources={})
+                    return cls(fluent_datasources={})
                 else:
                     logger.warning(
                         "`_allow_empty` does not prevent unrelated validation errors"

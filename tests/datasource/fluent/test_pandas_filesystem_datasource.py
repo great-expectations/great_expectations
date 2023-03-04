@@ -14,23 +14,23 @@ from pytest import MonkeyPatch, param
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
-from great_expectations.experimental.datasources import PandasFilesystemDatasource
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent import PandasFilesystemDatasource
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
-from great_expectations.experimental.datasources.interfaces import TestConnectionError
-from great_expectations.experimental.datasources.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
     JSONAsset,
     _FilePathDataAsset,
 )
-from great_expectations.experimental.datasources.sources import _get_field_details
+from great_expectations.datasource.fluent.sources import _get_field_details
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.experimental.datasources.interfaces import (
+    from great_expectations.datasource.fluent.interfaces import (
         SortersDefinition,
     )
 

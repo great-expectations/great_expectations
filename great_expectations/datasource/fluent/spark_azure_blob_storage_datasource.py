@@ -8,20 +8,20 @@ import pydantic
 from typing_extensions import Literal
 
 from great_expectations.core.util import AzureUrl
-from great_expectations.experimental.datasources import _SparkFilePathDatasource
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
-from great_expectations.experimental.datasources.interfaces import TestConnectionError
-from great_expectations.experimental.datasources.spark_datasource import (
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
-from great_expectations.experimental.datasources.spark_file_path_datasource import (
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.interfaces import (
+    from great_expectations.datasource.fluent.interfaces import (
         Sorter,
         SortersDefinition,
     )

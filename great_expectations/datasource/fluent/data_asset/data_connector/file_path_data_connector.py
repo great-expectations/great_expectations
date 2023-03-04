@@ -15,21 +15,21 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     DataConnector,
 )
-from great_expectations.experimental.datasources.data_asset.data_connector.regex_parser import (
+from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
 
 # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
 # TODO: <Alex>ALEX</Alex>
-# from great_expectations.experimental.data_asset.data_connector.sorter import Sorter
+# from great_expectations.datasource.fluent.data_asset.data_connector.sorter import Sorter
 # TODO: <Alex>ALEX</Alex>
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition
-    from great_expectations.experimental.datasources.interfaces import BatchRequest
+    from great_expectations.datasource.fluent.interfaces import BatchRequest
 
 
 logger = logging.getLogger(__name__)

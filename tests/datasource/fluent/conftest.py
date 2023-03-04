@@ -16,8 +16,8 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.experimental.datasources.interfaces import Datasource
-from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.sources import _SourceFactories
 
 logger = logging.getLogger(__name__)
 

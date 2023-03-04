@@ -20,7 +20,7 @@ from typing import (
 import pydantic
 from ruamel.yaml import YAML
 
-from great_expectations.experimental.datasources.constants import _FIELDS_ALWAYS_SET
+from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
 
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]

@@ -11,16 +11,16 @@ from typing_extensions import TypeAlias
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.experimental.datasources.interfaces import (
+from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     Sorter,
     TestConnectionError,
 )
-from great_expectations.experimental.datasources.postgres_datasource import (
+from great_expectations.datasource.fluent.postgres_datasource import (
     PostgresDatasource,
 )
-from great_expectations.experimental.datasources.sql_datasource import (
+from great_expectations.datasource.fluent.sql_datasource import (
     ColumnSplitter,
     ColumnSplitterYearAndMonth,
     TableAsset,

@@ -10,19 +10,19 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.core.util import AzureUrl
-from great_expectations.experimental.datasources import PandasAzureBlobStorageDatasource
-from great_expectations.experimental.datasources.data_asset.data_connector import (
+from great_expectations.datasource.fluent import PandasAzureBlobStorageDatasource
+from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
-from great_expectations.experimental.datasources.dynamic_pandas import PANDAS_VERSION
-from great_expectations.experimental.datasources.file_path_data_asset import (
+from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
+from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.experimental.datasources.interfaces import TestConnectionError
-from great_expectations.experimental.datasources.pandas_azure_blob_storage_datasource import (
+from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.pandas_azure_blob_storage_datasource import (
     PandasAzureBlobStorageDatasourceError,
 )
-from great_expectations.experimental.datasources.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
 
@@ -107,7 +107,7 @@ def object_keys() -> List[str]:
 
 @pytest.fixture
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 def csv_asset(
     mock_list_keys,
@@ -234,7 +234,7 @@ def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_add_csv_asset_to_datasource(
@@ -262,7 +262,7 @@ def test_add_csv_asset_to_datasource(
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_construct_csv_asset_directly(
@@ -286,7 +286,7 @@ def test_construct_csv_asset_directly(
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_regex_unnamed_parameters(
@@ -316,7 +316,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_regex_named_parameters(
@@ -341,7 +341,7 @@ def test_csv_asset_with_regex_named_parameters(
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_some_regex_named_parameters(
@@ -371,7 +371,7 @@ def test_csv_asset_with_some_regex_named_parameters(
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
-    "great_expectations.experimental.datasources.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
+    "great_expectations.datasource.fluent.data_asset.data_connector.azure_blob_storage_data_connector.list_azure_keys"
 )
 @mock.patch("azure.storage.blob.BlobServiceClient")
 def test_csv_asset_with_non_string_regex_named_parameters(

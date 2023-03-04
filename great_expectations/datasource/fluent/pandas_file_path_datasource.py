@@ -9,18 +9,18 @@ from typing import (
     Type,
 )
 
-from great_expectations.experimental.datasources.dynamic_pandas import (
+from great_expectations.datasource.fluent.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
-from great_expectations.experimental.datasources.file_path_data_asset import (
+from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.experimental.datasources.pandas_datasource import (
+from great_expectations.datasource.fluent.pandas_datasource import (
     _PandasDatasource,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.interfaces import DataAsset
+    from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
 logger = logging.getLogger(__name__)

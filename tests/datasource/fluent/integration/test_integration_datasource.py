@@ -5,11 +5,11 @@ import pathlib
 import pytest
 
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.experimental.datasources import (
+from great_expectations.datasource.fluent import (
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
 )
-from great_expectations.experimental.datasources.interfaces import (
+from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,

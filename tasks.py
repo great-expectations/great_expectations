@@ -486,11 +486,11 @@ def type_schema(
     """
     import pandas
 
-    from great_expectations.experimental.datasources import (
+    from great_expectations.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
         Datasource,
     )
-    from great_expectations.experimental.datasources.sources import (
+    from great_expectations.datasource.fluent.sources import (
         _iter_all_registered_types,
     )
 

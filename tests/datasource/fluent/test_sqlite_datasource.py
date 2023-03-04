@@ -7,8 +7,8 @@ from typing import Any, Callable, Generator
 import pytest
 from pydantic import ValidationError
 
-from great_expectations.experimental.datasources import SqliteDatasource
-from great_expectations.experimental.datasources.sqlite_datasource import SqliteDsn
+from great_expectations.datasource.fluent import SqliteDatasource
+from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 from tests.experimental.datasources.conftest import sqlachemy_execution_engine_mock_cls
 
 
