@@ -526,6 +526,7 @@ class SphinxInvokeDocsBuilder:
 .. automodule:: {dotted_path_prefix}
    :members:
    :inherited-members:
+   :noindex:
 
 ```
 """
