@@ -3142,6 +3142,7 @@ class CheckpointConfig(BaseYamlConfig):
         from great_expectations.checkpoint.util import (
             get_substituted_validation_dict,
             get_validations_with_batch_request_as_dict,
+            validate_validation_dict,
         )
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
@@ -3173,7 +3174,7 @@ class CheckpointConfig(BaseYamlConfig):
         batch_request = substituted_runtime_config.get("batch_request")
         if len(validations) == 0 and not batch_request:
             raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{checkpoint.name}" must contain either a batch_request or validations.'
+                f'Checkpoint "{checkpoint.name}" configuration must contain either a batch_request or validations.'
             )
 
         if run_name is None and run_name_template is not None:
@@ -3188,6 +3189,10 @@ class CheckpointConfig(BaseYamlConfig):
             substituted_validation_dict: dict = get_substituted_validation_dict(
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
+            )
+            validate_validation_dict(
+                validation_dict=substituted_validation_dict,
+                batch_request_required=False,
             )
             validation_batch_request: BatchRequestBase = substituted_validation_dict.get(  # type: ignore[assignment]
                 "batch_request"
