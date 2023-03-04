@@ -54,6 +54,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+# this allows us to include dataframe in the json schema
 PandasDataFrame = TypeVar("pandas.core.frame.DataFrame")
 
 
