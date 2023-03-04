@@ -293,15 +293,22 @@ def _sort_batches_with_none_metadata_values(
         if a.metadata[key] is not None and b.metadata[key] is not None:
             if a.metadata[key] < b.metadata[key]:
                 return -1
-            elif a.metadata[key] > b.metadata[key]:
+
+            if a.metadata[key] > b.metadata[key]:
                 return 1
-            else:
-                return 0
-        elif a.metadata[key] is None and b.metadata[key] is None:
+
             return 0
-        elif a.metadata[key] is None:  # b.metadata[key] is not None
+
+        if a.metadata[key] is None and b.metadata[key] is None:
+            return 0
+
+        if a.metadata[key] is None:  # b.metadata[key] is not None
             return -1
-        # b.metadata[key] is None, a.metadata[key] is not None
+
+        if a.metadata[key] is not None:  # b.metadata[key] is None
+            return 1
+
+        # This line should never be reached.
         return 0
 
     return _compare_function
