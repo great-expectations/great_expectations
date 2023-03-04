@@ -17,7 +17,6 @@ from typing_extensions import Final, TypeAlias
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,  # noqa: TCH001
 )
-from great_expectations.experimental.context import DataContext as DataContext
 
 if TYPE_CHECKING:
     import pathlib
@@ -26,7 +25,7 @@ if TYPE_CHECKING:
     import pydantic
     from pydantic.networks import PostgresDsn
 
-    from great_expectations.experimental.datasources import (
+    from great_expectations.datasource.fluent import (
         PandasAzureBlobStorageDatasource,
         PandasDatasource,
         PandasFilesystemDatasource,
@@ -40,11 +39,11 @@ if TYPE_CHECKING:
         SQLDatasource,
         SqliteDatasource,
     )
-    from great_expectations.experimental.datasources.interfaces import (
+    from great_expectations.datasource.fluent.interfaces import (
         DataAsset,
         Datasource,
     )
-    from great_expectations.experimental.datasources.sqlite_datasource import SqliteDsn
+    from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 
 SourceFactoryFn: TypeAlias = Callable[..., "Datasource"]
 logger: Logger
@@ -64,7 +63,7 @@ def _get_field_details(
 
 class _SourceFactories:
     type_lookup: ClassVar
-    def __init__(self, data_context: Union[DataContext, GXDataContext]) -> None: ...
+    def __init__(self, data_context: GXDataContext) -> None: ...
     @classmethod
     def register_types_and_ds_factory(
         cls, ds_type: Type[Datasource], factory_fn: SourceFactoryFn
