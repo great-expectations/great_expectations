@@ -41,6 +41,7 @@ from great_expectations.validator.validator import Validator as Validator
 if TYPE_CHECKING:
     import pathlib
 
+    import pydantic
     from pydantic.networks import PostgresDsn
 
     from great_expectations.experimental.datasources import (
@@ -69,6 +70,10 @@ class TypeRegistrationError(TypeError): ...
 class _FieldDetails(NamedTuple):
     default_value: Any
     type_annotation: Type
+
+def _get_field_details(
+    model: Type[pydantic.BaseModel], field_name: str
+) -> _FieldDetails: ...
 
 class _SourceFactories:
     type_lookup: ClassVar
