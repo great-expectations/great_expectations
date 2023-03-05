@@ -105,7 +105,7 @@ class _SourceFactories:
         self, name: str, *, bucket: str, boto3_options: dict[str, Any] | None = None
     ) -> PandasS3Datasource: ...
     def add_postgres(
-        self, name: str, *, connection_string: PostgresDsn
+        self, name: str, *, connection_string: PostgresDsn | str
     ) -> PostgresDatasource: ...
     def add_spark_abs(
         self, name: str, *, azure_options: dict[str, Any] | None = None
@@ -129,7 +129,7 @@ class _SourceFactories:
     ) -> SparkS3Datasource: ...
     def add_sql(self, name: str, *, connection_string: str) -> SQLDatasource: ...
     def add_sqlite(
-        self, name: str, *, connection_string: SqliteDsn
+        self, name: str, *, connection_string: SqliteDsn | str
     ) -> SqliteDatasource: ...
 
 def _iter_all_registered_types() -> Generator[
