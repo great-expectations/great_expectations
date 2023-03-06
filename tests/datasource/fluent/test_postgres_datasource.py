@@ -25,7 +25,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
     ColumnSplitterYearAndMonth,
     TableAsset,
 )
-from tests.experimental.datasources.conftest import (
+from tests.datasource.fluent.conftest import (
     Dialect,
     MockSaEngine,
     MockSaInspector,
@@ -119,11 +119,11 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
         inspect = mocker.patch("sqlalchemy.inspect")
         inspect.return_value = MockSaInspector()
         get_column_names = mocker.patch(
-            "tests.experimental.datasources.conftest.MockSaInspector.get_columns"
+            "tests.datasource.fluent.conftest.MockSaInspector.get_columns"
         )
         get_column_names.return_value = [{"name": "my_col"}]
         has_table = mocker.patch(
-            "tests.experimental.datasources.conftest.MockSaInspector.has_table"
+            "tests.datasource.fluent.conftest.MockSaInspector.has_table"
         )
         has_table.return_value = True
 
@@ -859,15 +859,15 @@ def test_test_connection_failures(
 
     create_engine = mocker.patch("sqlalchemy.create_engine")
     create_engine.return_value = MockSaEngine(dialect=Dialect("postgresql"))
-    mocker.patch("tests.experimental.datasources.conftest.MockSaEngine.connect")
+    mocker.patch("tests.datasource.fluent.conftest.MockSaEngine.connect")
     inspect = mocker.patch("sqlalchemy.inspect")
     inspect.return_value = MockSaInspector()
     get_schema_names = mocker.patch(
-        "tests.experimental.datasources.conftest.MockSaInspector.get_schema_names"
+        "tests.datasource.fluent.conftest.MockSaInspector.get_schema_names"
     )
     get_schema_names.return_value = ["good_schema"]
     has_table = mocker.patch(
-        "tests.experimental.datasources.conftest.MockSaInspector.has_table"
+        "tests.datasource.fluent.conftest.MockSaInspector.has_table"
     )
     has_table.return_value = False
 

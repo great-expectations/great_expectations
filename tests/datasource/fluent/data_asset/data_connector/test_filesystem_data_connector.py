@@ -143,7 +143,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
     expected: List[BatchDefinition] = [
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {
@@ -156,7 +156,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {
@@ -169,7 +169,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {
@@ -182,7 +182,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {
@@ -195,7 +195,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {
@@ -208,7 +208,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {
@@ -221,7 +221,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {
@@ -234,7 +234,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {
@@ -247,7 +247,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {
@@ -260,7 +260,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {
@@ -342,7 +342,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #     expected: List[BatchDefinition] = [
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
-#             data_connector_name="experimental",
+#             data_connector_name="fluent",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "abe", "timestamp": "20200809", "price": "1040"}
@@ -350,7 +350,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #         ),
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
-#             data_connector_name="experimental",
+#             data_connector_name="fluent",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "alex", "timestamp": "20200819", "price": "1300"}
@@ -358,7 +358,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #         ),
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
-#             data_connector_name="experimental",
+#             data_connector_name="fluent",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "alex", "timestamp": "20200809", "price": "1000"}
@@ -366,7 +366,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #         ),
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
-#             data_connector_name="experimental",
+#             data_connector_name="fluent",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "eugene", "timestamp": "20201129", "price": "1900"}
@@ -374,7 +374,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #         ),
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
-#             data_connector_name="experimental",
+#             data_connector_name="fluent",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "eugene", "timestamp": "20200809", "price": "1500"}
@@ -382,7 +382,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #         ),
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
-#             data_connector_name="experimental",
+#             data_connector_name="fluent",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "james", "timestamp": "20200811", "price": "1009"}
@@ -390,7 +390,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #         ),
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
-#             data_connector_name="experimental",
+#             data_connector_name="fluent",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "james", "timestamp": "20200810", "price": "1003"}
@@ -398,7 +398,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #         ),
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
-#             data_connector_name="experimental",
+#             data_connector_name="fluent",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "james", "timestamp": "20200713", "price": "1567"}
@@ -406,7 +406,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #         ),
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
-#             data_connector_name="experimental",
+#             data_connector_name="fluent",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "will", "timestamp": "20200810", "price": "1001"}
@@ -414,7 +414,7 @@ def test_return_all_batch_definitions_unsorted(tmp_path_factory):
 #         ),
 #         BatchDefinition(
 #             datasource_name="my_file_path_datasource",
-#             data_connector_name="experimental",
+#             data_connector_name="fluent",
 #             data_asset_name="my_filesystem_data_asset",
 #             batch_identifiers=IDDict(
 #                 {"name": "will", "timestamp": "20200809", "price": "1002"}
@@ -515,7 +515,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
     expected: List[BatchDefinition] = [
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {"path": "A/file_1.csv", "directory": "A", "filename": "file_1.csv"}
@@ -523,7 +523,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {"path": "A/file_2.csv", "directory": "A", "filename": "file_2.csv"}
@@ -531,7 +531,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {"path": "A/file_3.csv", "directory": "A", "filename": "file_3.csv"}
@@ -539,7 +539,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {"path": "B/file_1.csv", "directory": "B", "filename": "file_1.csv"}
@@ -547,7 +547,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
-            data_connector_name="experimental",
+            data_connector_name="fluent",
             data_asset_name="my_filesystem_data_asset",
             batch_identifiers=IDDict(
                 {"path": "B/file_2.csv", "directory": "B", "filename": "file_2.csv"}
@@ -847,7 +847,7 @@ def test_relative_base_directory_path(tmp_path_factory):
 #             instantiate_class_from_config(
 #                 config=my_data_connector_yaml,
 #                 runtime_environment={
-#                     "name": "experimental",
+#                     "name": "fluent",
 #                     "execution_engine": PandasExecutionEngine(),
 #                 },
 #                 config_defaults={

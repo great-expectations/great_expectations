@@ -7,7 +7,6 @@ from typing import List, Type
 import pytest
 
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.experimental.context import get_context
 from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     BatchRequestOptions,
@@ -36,8 +35,7 @@ logger = logging.getLogger(__name__)
 # Fake DataContext for testing
 class DataContext:
     """
-    NOTE: this is just a scaffold for exploring and iterating on our experimental datasource prototype
-    this will be formalized and tested prior to release.
+    This is just a scaffold for exploring and iterating on our fluent datasources.
 
     Use `great_expectations.get_context()` for a real DataContext.
     """

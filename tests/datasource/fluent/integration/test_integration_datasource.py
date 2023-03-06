@@ -15,8 +15,8 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
     TestConnectionError,
 )
-from tests.experimental.datasources.integration.conftest import sqlite_datasource
-from tests.experimental.datasources.integration.integration_test_utils import (
+from tests.datasource.fluent.integration.conftest import sqlite_datasource
+from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
     run_checkpoint_and_data_doc,
     run_data_assistant_and_checkpoint,
