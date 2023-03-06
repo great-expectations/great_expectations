@@ -29,6 +29,8 @@ logger = logging.getLogger(__name__)
 
 @public_api
 class PandasFilesystemDatasource(_PandasFilePathDatasource):
+    """Pandas based Datasource for local filesystem based data assets."""
+
     # instance attributes
     type: Literal["pandas_filesystem"] = "pandas_filesystem"
 
