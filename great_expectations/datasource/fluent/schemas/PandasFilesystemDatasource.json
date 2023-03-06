@@ -1,6 +1,6 @@
 {
     "title": "PandasFilesystemDatasource",
-    "description": "--Public API--Pandas based Datasource for local filesystem data assets.",
+    "description": "--Public API--Pandas based Datasource for local filesystem based data assets.",
     "type": "object",
     "properties": {
         "type": {
