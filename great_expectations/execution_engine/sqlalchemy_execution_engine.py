@@ -25,8 +25,6 @@ from typing import (
     cast,
 )
 
-from packaging import version
-
 from great_expectations._version import get_versions  # isort:skip
 
 
@@ -46,6 +44,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
+from great_expectations.optional_imports import sqlalchemy_version_check
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
@@ -92,11 +91,7 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy as sa
 
-    if version.Version(sa.__version__) >= version.Version("2.0.0"):
-        warnings.warn(
-            "SQLAlchemy v2.0.0 or later is not yet currently supported by Great Expectations.",
-            UserWarning,
-        )
+    sqlalchemy_version_check(sa.__version__)
 
     make_url = import_make_url()
 except ImportError:

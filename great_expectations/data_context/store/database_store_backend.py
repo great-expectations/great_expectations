@@ -1,13 +1,11 @@
 import logging
 import uuid
-import warnings
 from pathlib import Path
 from typing import Dict, Tuple
 
-from packaging import version
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.optional_imports import sqlalchemy_version_check
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,
@@ -17,11 +15,8 @@ from great_expectations.util import (
 try:
     import sqlalchemy as sa
 
-    if version.Version(sa.__version__) >= version.Version("2.0.0"):
-        warnings.warn(
-            "SQLAlchemy v2.0.0 or later is not yet supported by Great Expectations.",
-            UserWarning,
-        )
+    sqlalchemy_version_check(sa.__version__)
+
     from sqlalchemy import Column, MetaData, String, Table, and_, column, select
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
