@@ -19,7 +19,7 @@ try:
 
     if version.Version(sa.__version__) >= version.Version("2.0.0"):
         warnings.warn(
-            "SQLAlchemy v2.0.0 or later is not yet currently supported by Great Expectations.",
+            "SQLAlchemy v2.0.0 or later is not yet supported by Great Expectations.",
             UserWarning,
         )
     from sqlalchemy import Column, MetaData, String, Table, and_, column, select
